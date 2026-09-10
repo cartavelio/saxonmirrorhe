@@ -89,8 +89,7 @@ namespace Saxon.Hej.style {
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             select = typeCheck("select", select);
             try {
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:copy/select", 0);
-                role.setErrorCode("XTTE3180");
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:copy/select", 0, "XTTE3180");
                 select = getConfiguration().getTypeChecker(false).staticTypeCheck(select, Saxon.Hej.value.SequenceType.OPTIONAL_ITEM, role, makeExpressionVisitor());
             } catch (Saxon.Hej.trans.XPathException err) {
                 compileError(err);

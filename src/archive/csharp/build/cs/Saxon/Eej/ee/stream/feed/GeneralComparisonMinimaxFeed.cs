@@ -3,27 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.stream.feed {
     public class GeneralComparisonMinimaxFeed : Saxon.Eej.ee.stream.feed.AtomicItemFeed {
+        private Saxon.Eej.ee.stream.watch.WatchManager watchManager;
         private Saxon.Hej.expr.sort.AtomicComparer comparer;
-        private readonly Saxon.Hej.lib.StringCollator collator;
-        internal Saxon.Hej.type.BuiltInAtomicType matchType;
         private System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> unstreamedValues;
         private Saxon.Hej.value.NumericValue minUnstreamedNumeric;
         private Saxon.Hej.value.NumericValue maxUnstreamedNumeric;
         private int @operator;
         private bool done = false;
+        private bool closed = false;
         private readonly Saxon.Hej.expr.Expression pullOperand;
-        private readonly int implicitTimezone;
         private System.Predicate<int> predicate;
-        public GeneralComparisonMinimaxFeed(Saxon.Hej.expr.Expression expr, int pushedArg, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expr, result, context) {
+        public GeneralComparisonMinimaxFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression expr, int pushedArg, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expr, result, context) {
+            this.watchManager = watchManager;
             Saxon.Hej.expr.GeneralComparison gc = (Saxon.Hej.expr.GeneralComparison)(getExpression());
             comparer = gc.getAtomicComparer();
-            collator = gc.getAtomicComparer().getCollator();
             @operator = gc.getSingletonOperator();
             if ((pushedArg == 1)) {
                 @operator = Saxon.Hej.expr.parser.Token.inverse(@operator);
             }
             pullOperand = ((pushedArg == 0) ? gc.getRhsExpression() : gc.getLhsExpression());
-            implicitTimezone = context.getImplicitTimezone();
             predicate = makeTest(@operator);
         }
         private static System.Predicate<int> makeTest(int @operator) {
@@ -132,12 +130,17 @@ namespace Saxon.Eej.ee.stream.feed {
             Saxon.Hej.@event.Outputter @out = getNextOutputter();
             done = true;
             @out.append(Saxon.Hej.value.BooleanValue.get(result));
-            @out.close();
-            getTerminator().terminate();
+            if (watchManager.allowsEarlyExit()) {
+                closed = true;
+                @out.close();
+                getTerminator().terminate();
+            }
         }
         public override void close() {
             if (!(done)) {
                 getNextOutputter().append(Saxon.Hej.value.BooleanValue.FALSE);
+            }
+            if (!(closed)) {
                 base.close();
                 minUnstreamedNumeric = null;
                 maxUnstreamedNumeric = null;

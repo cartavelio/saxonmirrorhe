@@ -4,11 +4,36 @@ using System.Linq;
 namespace Saxon.Hej.pattern {
     #pragma warning disable 659
     public sealed class GeneralNodePattern : Saxon.Hej.pattern.Pattern {
-        private Saxon.Hej.expr.Expression equivalentExpr = null;
-        private Saxon.Hej.pattern.NodeTest itemType = null;
+        private Saxon.Hej.expr.Expression equivalentExpr;
+        private readonly Saxon.Hej.pattern.NodeTest itemType;
+        private Saxon.Hej.expr.Expression topNodeEquivalent = null;
         public GeneralNodePattern(Saxon.Hej.expr.Expression expr, Saxon.Hej.pattern.NodeTest itemType)  {
             equivalentExpr = expr;
             this.itemType = itemType;
+        }
+        public void makeTopNodeEquivalent() {
+            if ((equivalentExpr is Saxon.Hej.expr.SlashExpression)) {
+                Saxon.Hej.expr.Expression head = ((Saxon.Hej.expr.SlashExpression)(equivalentExpr)).getFirstStep();
+                if ((Saxon.Hej.expr.parser.ExpressionTool.getAxisNavigation(head) == Saxon.Hej.om.AxisInfo.CHILD)) {
+                    Saxon.Hej.expr.SlashExpression copy = (Saxon.Hej.expr.SlashExpression)(equivalentExpr.copy(new Saxon.Hej.expr.parser.RebindingMap()));
+                    Saxon.Hej.expr.Expression copyHead = copy.getFirstStep();
+                    while (true) {
+                        if ((copyHead is Saxon.Hej.expr.FilterExpression)) {
+                            copyHead = ((Saxon.Hej.expr.FilterExpression)(copyHead)).getBase();
+                        } else {
+                            if ((copyHead is Saxon.Hej.expr.SingleItemFilter)) {
+                                copyHead = ((Saxon.Hej.expr.SingleItemFilter)(copyHead)).getBaseExpression();
+                            } else {
+                                break ;
+                            }
+                        }
+                    }
+                    if ((copyHead is Saxon.Hej.expr.AxisExpression)) {
+                        ((Saxon.Hej.expr.AxisExpression)(copyHead)).setAxis(Saxon.Hej.om.AxisInfo.SELF);
+                        topNodeEquivalent = copy;
+                    }
+                }
+            }
         }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
             return new Saxon.Hej.expr.Operand(this, equivalentExpr, Saxon.Hej.expr.OperandRole.SAME_FOCUS_ACTION);
@@ -17,8 +42,9 @@ namespace Saxon.Hej.pattern {
             return false;
         }
         public override Saxon.Hej.pattern.Pattern typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
-            Saxon.Hej.expr.parser.ContextItemStaticInfo cit = visitor.getConfiguration().getDefaultContextItemStaticInfo();
+            Saxon.Hej.expr.parser.ContextItemStaticInfo cit = new Saxon.Hej.expr.parser.ContextItemStaticInfo(Saxon.Hej.pattern.AnyNodeTest.getInstance(), false);
             equivalentExpr = equivalentExpr.typeCheck(visitor, cit);
+            makeTopNodeEquivalent();
             return this;
         }
         public override Saxon.Hej.pattern.Pattern optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
@@ -54,14 +80,19 @@ namespace Saxon.Hej.pattern {
                 return false;
             }
             Saxon.Hej.tree.iter.AxisIterator anc = ((Saxon.Hej.om.NodeInfo)(item)).iterateAxis(Saxon.Hej.om.AxisInfo.ANCESTOR_OR_SELF);
+            Saxon.Hej.om.NodeInfo top = (Saxon.Hej.om.NodeInfo)(item);
             while (true) {
                 Saxon.Hej.om.NodeInfo a = ((/*1430*/Saxon.Hej.om.NodeInfo)anc.next());
                 if ((a == null)) {
+                    if (((topNodeEquivalent != null) && Saxon.Hej.type.UType.CHILD_NODE_KINDS.matches(top))) {
+                        return isSelected(((Saxon.Hej.om.NodeInfo)(item)), top, topNodeEquivalent, context);
+                    }
                     return false;
                 }
                 if (matchesBeneathAnchor((Saxon.Hej.om.NodeInfo)(item), a, context)) {
                     return true;
                 }
+                top = a;
             }
         }
         public override bool matchesBeneathAnchor(Saxon.Hej.om.NodeInfo node, Saxon.Hej.om.NodeInfo anchor, Saxon.Hej.expr.XPathContext context) {
@@ -80,11 +111,14 @@ namespace Saxon.Hej.pattern {
                     }
                 }
             }
+            return isSelected(node, anchor, equivalentExpr, context);
+        }
+        private bool isSelected(Saxon.Hej.om.NodeInfo node, Saxon.Hej.om.NodeInfo anchor, Saxon.Hej.expr.Expression selector, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
             Saxon.Hej.tree.iter.ManualIterator iter = new Saxon.Hej.tree.iter.ManualIterator(anchor);
             c2.setCurrentIterator(iter);
             try {
-                Saxon.Hej.om.SequenceIterator nsv = equivalentExpr.iterate(c2);
+                Saxon.Hej.om.SequenceIterator nsv = selector.iterate(c2);
                 while (true) {
                     Saxon.Hej.om.NodeInfo n = (Saxon.Hej.om.NodeInfo)(nsv.next());
                     if ((n == null)) {
@@ -128,6 +162,7 @@ namespace Saxon.Hej.pattern {
             Saxon.Hej.pattern.GeneralNodePattern n = new Saxon.Hej.pattern.GeneralNodePattern(equivalentExpr.copy(rebindings), itemType);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, n);
             n.setOriginalText(getOriginalText());
+            n.topNodeEquivalent = ((topNodeEquivalent == null) ? null : topNodeEquivalent.copy(rebindings));
             return n;
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter presenter) {

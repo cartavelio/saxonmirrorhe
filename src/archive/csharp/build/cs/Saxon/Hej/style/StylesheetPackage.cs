@@ -20,7 +20,7 @@ namespace Saxon.Hej.style {
         private Saxon.Hej.om.StructuredQName defaultMode;
         private bool declaredModes;
         protected internal System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,Saxon.Ejava.util.Properties> namedOutputProperties = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, Saxon.Ejava.util.Properties>(4);
-        protected internal System.Collections.Generic.ISet<string> schemaIndex = new System.Collections.Generic.HashSet<string>(10);
+        protected internal System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> schemaIndex = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>(10);
         private Saxon.Hej.functions.FunctionLibraryList functionLibrary;
         private Saxon.Hej.query.XQueryFunctionLibrary queryFunctions;
         private Saxon.Hej.functions.ExecutableFunctionLibrary overriding;
@@ -133,7 +133,7 @@ namespace Saxon.Hej.style {
         public Saxon.Ejava.util.Properties getNamedOutputProperties(Saxon.Hej.om.StructuredQName name) {
             return Saxon.Impl.Helpers.MapUtils.Get(namedOutputProperties, name);
         }
-        public System.Collections.Generic.ISet<string> getSchemaNamespaces() {
+        public System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getSchemaNamespaces() {
             return schemaIndex;
         }
         public void setContextItemRequirements(Saxon.Hej.expr.instruct.GlobalContextRequirement requirement) {
@@ -183,9 +183,6 @@ namespace Saxon.Hej.style {
                 int slot = slotManager.allocateSlotNumber(var.getVariableQName());
                 var.setPackageData(this);
                 var.setBinderySlotNumber(slot);
-                if ((c.getVisibility() != Saxon.Hej.trans.Visibility.HIDDEN)) {
-                    addGlobalVariable(var);
-                }
             }
         }
         public void addComponent(Saxon.Hej.expr.Component component) {
@@ -397,10 +394,9 @@ namespace Saxon.Hej.style {
         }
         public void createFunctionLibrary() {
             Saxon.Hej.functions.FunctionLibraryList functionLibrary = new Saxon.Hej.functions.FunctionLibraryList();
-            bool includeHOF = !((("HE".Equals(getTargetEdition()) || "JS".Equals(getTargetEdition()))));
-            functionLibrary.addFunctionLibrary((includeHOF ? config.getXSLT30FunctionSet() : new Saxon.Hej.Configuration().getXSLT30FunctionSet()));
+            functionLibrary.addFunctionLibrary(config.getXSLTFunctionSet(hostLanguageVersion));
             functionLibrary.addFunctionLibrary(new Saxon.Hej.style.StylesheetFunctionLibrary(this, true));
-            functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
+            functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(hostLanguageVersion));
             functionLibrary.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(config));
             if ("JS".Equals(getTargetEdition())) {
                 addIxslFunctionLibrary(functionLibrary);
@@ -409,6 +405,7 @@ namespace Saxon.Hej.style {
             functionLibrary.addFunctionLibrary(queryFunctions);
             functionLibrary.addFunctionLibrary(config.getIntegratedFunctionLibrary());
             config.addExtensionBinders(functionLibrary);
+            functionLibrary.addFunctionLibrary(Saxon.Hej.style.XSLOriginalLibrary.getInstance());
             functionLibrary.addFunctionLibrary(new Saxon.Hej.style.StylesheetFunctionLibrary(this, false));
             this.functionLibrary = functionLibrary;
         }

@@ -30,7 +30,7 @@ namespace Saxon.Hej.tree.wrapper {
             if (docWrapper.containsPreserveSpace()) {
                 Saxon.Hej.om.NodeInfo p = actualParent;
                 while ((p.getNodeKind() == Saxon.Hej.type.Type.ELEMENT)) {
-                    string val = p.getAttributeValue(Saxon.Hej.lib.NamespaceConstant.XML, "space");
+                    string val = p.getAttributeValue(Saxon.Hej.om.NamespaceUri.XML, "space");
                     if ((val != null)) {
                         if ("preserve".Equals(val)) {
                             return true;
@@ -189,9 +189,6 @@ namespace Saxon.Hej.tree.wrapper {
             }
             public void close() {
                 @base.close();
-            }
-            public void discharge() {
-                @base.discharge();
             }
         
         }

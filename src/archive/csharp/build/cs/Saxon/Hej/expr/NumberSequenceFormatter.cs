@@ -111,115 +111,7 @@ namespace Saxon.Hej.expr {
             return EVALUATE_METHOD;
         }
         public override Saxon.Hej.value.StringValue evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            System.Collections.Generic.IList<System.Object> vec = new System.Collections.Generic.List<System.Object>(4);
-            Saxon.Hej.lib.ConversionRules rules = context.getConfiguration().getConversionRules();
-            string startAv = startAtOp.getChildExpression().evaluateAsString(context).ToString();
-            System.Collections.Generic.IList<int> startValues = parseStartAtValue(startAv);
-            Saxon.Hej.om.SequenceIterator iter = valueOp.getChildExpression().iterate(context);
-            Saxon.Hej.value.AtomicValue val;
-            int pos = 0;
-            while (((val = (Saxon.Hej.value.AtomicValue)(iter.next())) != null)) {
-                if ((backwardsCompatible && !(vec.Count==0))) {
-                    break ;
-                }
-                int startValue = ((startValues.Count>pos) ? startValues[pos] : startValues[(startValues.Count-1)]);
-                pos++;
-                try {
-                    Saxon.Hej.value.NumericValue num;
-                    if ((val is Saxon.Hej.value.NumericValue)) {
-                        num = (Saxon.Hej.value.NumericValue)(val);
-                    } else {
-                        num = Saxon.Hej.functions.Number_1.convert(val, context.getConfiguration());
-                    }
-                    if (num.isNaN()) {
-                        throw new Saxon.Hej.trans.XPathException("NaN");
-                    }
-                    num = num.round(0);
-                    if ((num.compareTo(Saxon.Hej.value.Int64Value.MAX_LONG)>0)) {
-                        System.Numerics.BigInteger bi = ((Saxon.Hej.value.BigIntegerValue)(Saxon.Hej.type.Converter.convert(num, Saxon.Hej.type.BuiltInAtomicType.INTEGER, rules).asAtomic())).asBigInteger();
-                        if ((startValue != 1)) {
-                            bi = System.Numerics.BigInteger.Add(bi, Saxon.Impl.Helpers.BigIntegerUtils.ValueOf((startValue-1)));
-                        }
-                        vec.Add(bi);
-                    } else {
-                        if ((num.compareTo(Saxon.Hej.value.Int64Value.ZERO)<0)) {
-                            throw new Saxon.Hej.trans.XPathException("The numbers to be formatted must not be negative");
-                        }
-                        long i = ((Saxon.Hej.value.NumericValue)(Saxon.Hej.type.Converter.convert(num, Saxon.Hej.type.BuiltInAtomicType.INTEGER, rules).asAtomic())).longValue();
-                        i += (startValue-1);
-                        vec.Add(i);
-                    }
-                } catch (Saxon.Hej.trans.XPathException err) {
-                    if (backwardsCompatible) {
-                        vec.Add("NaN");
-                    } else {
-                        vec.Add(val.getUnicodeStringValue());
-                        Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(("Cannot convert supplied value to an integer. "+err.Message));
-                        e.setErrorCode("XTDE0980");
-                        e.setLocation(getLocation());
-                        e.setXPathContext(context);
-                        throw e;
-                    }
-                }
-            }
-            if ((backwardsCompatible && vec.Count==0)) {
-                vec.Add("NaN");
-            }
-            int gpsize = 0;
-            string gpseparator = "";
-            string letterVal;
-            string ordinalVal = null;
-            if ((groupSizeOp != null)) {
-                string g = groupSizeOp.getChildExpression().evaluateAsString(context).ToString();
-                try {
-                    gpsize = Saxon.Impl.Helpers.Utils.ParseInt(g);
-                } catch (Saxon.Ejava.lang.NumberFormatException err) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("grouping-size must be numeric");
-                    e.setXPathContext(context);
-                    e.setErrorCode("XTDE0030");
-                    e.setLocation(getLocation());
-                    throw e;
-                }
-            }
-            if ((groupSeparatorOp != null)) {
-                gpseparator = groupSeparatorOp.getChildExpression().evaluateAsString(context).ToString();
-            }
-            if ((ordinalOp != null)) {
-                ordinalVal = ordinalOp.getChildExpression().evaluateAsString(context).ToString();
-            }
-            Saxon.Hej.lib.Numberer numb = numberer;
-            if ((numb == null)) {
-                if ((langOp == null)) {
-                    numb = context.getConfiguration().makeNumberer(null, null);
-                } else {
-                    string language = langOp.getChildExpression().evaluateAsString(context).ToString();
-                    Saxon.Hej.type.ValidationFailure vf = Saxon.Hej.type.StringConverter.StringToLanguage.INSTANCE.validate(Saxon.Hej.str.StringView.tidy(language));
-                    if ((vf != null)) {
-                        throw new Saxon.Hej.trans.XPathException("The lang attribute of xsl:number must be a valid language code", "XTDE0030");
-                    }
-                    numb = context.getConfiguration().makeNumberer(language, null);
-                }
-            }
-            if ((letterValueOp == null)) {
-                letterVal = "";
-            } else {
-                letterVal = letterValueOp.getChildExpression().evaluateAsString(context).ToString();
-                if (!((("alphabetic".Equals(letterVal) || "traditional".Equals(letterVal))))) {
-                    Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("letter-value must be \"traditional\" or \"alphabetic\"");
-                    e.setXPathContext(context);
-                    e.setErrorCode("XTDE0030");
-                    e.setLocation(getLocation());
-                    throw e;
-                }
-            }
-            Saxon.Hej.expr.number.NumberFormatter nf;
-            if ((formatter == null)) {
-                nf = new Saxon.Hej.expr.number.NumberFormatter();
-                nf.prepare(formatOp.getChildExpression().evaluateAsString(context).ToString());
-            } else {
-                nf = formatter;
-            }
-            Saxon.Hej.str.UnicodeString s = nf.format(vec, gpsize, gpseparator, letterVal, ordinalVal, numb);
+            Saxon.Hej.str.UnicodeString s = /*Delegate.eval()*/makeElaborator().elaborateForUnicodeString(true)(context);
             return new Saxon.Hej.value.StringValue(s);
         }
         public System.Collections.Generic.IList<int> parseStartAtValue(string value) {
@@ -282,6 +174,135 @@ namespace Saxon.Hej.expr {
                 groupSizeOp.getChildExpression().export(@out);
             }
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.NumberSequenceFormatter.NumberSequenceFormatterElaborator();
+        }
+        private class NumberSequenceFormatterElaborator : Saxon.Hej.expr.elab.StringElaborator {
+            public override Saxon.Hej.expr.elab.UnicodeStringEvaluator elaborateForUnicodeString(bool zeroLengthWhenAbsent) {
+                Saxon.Hej.expr.NumberSequenceFormatter expr = (Saxon.Hej.expr.NumberSequenceFormatter)(getExpression());
+                Saxon.Hej.expr.elab.StringEvaluator startAtEvaluator = expr.startAtOp.getChildExpression().makeElaborator().elaborateForString(true);
+                Saxon.Hej.expr.elab.PullEvaluator valueEvaluator = expr.valueOp.getChildExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.StringEvaluator groupSizeEvaluator = ((expr.groupSizeOp == null) ? null : expr.groupSizeOp.getChildExpression().makeElaborator().elaborateForString(true));
+                Saxon.Hej.expr.elab.StringEvaluator groupSeparatorEvaluator = ((expr.groupSeparatorOp == null) ? null : expr.groupSeparatorOp.getChildExpression().makeElaborator().elaborateForString(true));
+                Saxon.Hej.expr.elab.StringEvaluator langEvaluator = ((expr.langOp == null) ? null : expr.langOp.getChildExpression().makeElaborator().elaborateForString(true));
+                Saxon.Hej.expr.elab.StringEvaluator ordinalEvaluator = ((expr.ordinalOp == null) ? null : expr.ordinalOp.getChildExpression().makeElaborator().elaborateForString(true));
+                Saxon.Hej.expr.elab.StringEvaluator letterValueEvaluator = ((expr.letterValueOp == null) ? null : expr.letterValueOp.getChildExpression().makeElaborator().elaborateForString(true));
+                Saxon.Hej.expr.elab.StringEvaluator formatEvaluator = ((expr.formatter != null) ? null : expr.formatOp.getChildExpression().makeElaborator().elaborateForString(true));
+                return context => {
+                    System.Collections.Generic.IList<System.Object> vec = new System.Collections.Generic.List<System.Object>(4);
+                    Saxon.Hej.lib.ConversionRules rules = context.getConfiguration().getConversionRules();
+                    string startAv = /*Delegate.eval()*/startAtEvaluator(context);
+                    System.Collections.Generic.IList<int> startValues = expr.parseStartAtValue(startAv);
+                    Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/valueEvaluator(context);
+                    Saxon.Hej.value.AtomicValue val;
+                    int pos = 0;
+                    while (((val = (Saxon.Hej.value.AtomicValue)(iter.next())) != null)) {
+                        if ((expr.backwardsCompatible && !(vec.Count==0))) {
+                            break ;
+                        }
+                        int startValue = ((startValues.Count>pos) ? startValues[pos] : startValues[(startValues.Count-1)]);
+                        pos++;
+                        try {
+                            Saxon.Hej.value.NumericValue num;
+                            if ((val is Saxon.Hej.value.NumericValue)) {
+                                num = (Saxon.Hej.value.NumericValue)(val);
+                            } else {
+                                num = Saxon.Hej.functions.Number_1.convert(val, context.getConfiguration());
+                            }
+                            if (num.isNaN()) {
+                                throw new Saxon.Hej.trans.XPathException("NaN");
+                            }
+                            num = num.round(0);
+                            if ((num.compareTo(Saxon.Hej.value.Int64Value.MAX_LONG)>0)) {
+                                System.Numerics.BigInteger bi = ((Saxon.Hej.value.BigIntegerValue)(Saxon.Hej.type.Converter.convert(num, Saxon.Hej.type.BuiltInAtomicType.INTEGER, rules).asAtomic())).asBigInteger();
+                                if ((startValue != 1)) {
+                                    bi = System.Numerics.BigInteger.Add(bi, Saxon.Impl.Helpers.BigIntegerUtils.ValueOf((startValue-1)));
+                                }
+                                vec.Add(bi);
+                            } else {
+                                if ((num.compareTo(Saxon.Hej.value.Int64Value.ZERO)<0)) {
+                                    throw new Saxon.Hej.trans.XPathException("The numbers to be formatted must not be negative");
+                                }
+                                long i = ((Saxon.Hej.value.NumericValue)(Saxon.Hej.type.Converter.convert(num, Saxon.Hej.type.BuiltInAtomicType.INTEGER, rules).asAtomic())).longValue();
+                                i += (startValue-1);
+                                vec.Add(i);
+                            }
+                        } catch (Saxon.Hej.trans.XPathException err) {
+                            if (expr.backwardsCompatible) {
+                                vec.Add("NaN");
+                            } else {
+                                vec.Add(val.getUnicodeStringValue());
+                                Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(("Cannot convert supplied value to an integer. "+err.Message));
+                                e.setErrorCode("XTDE0980");
+                                e.setLocation(expr.getLocation());
+                                e.setXPathContext(context);
+                                throw e;
+                            }
+                        }
+                    }
+                    if ((expr.backwardsCompatible && vec.Count==0)) {
+                        vec.Add("NaN");
+                    }
+                    int gpsize = 0;
+                    string gpseparator = "";
+                    string letterVal;
+                    string ordinalVal = null;
+                    if ((groupSizeEvaluator != null)) {
+                        string g = /*Delegate.eval()*/groupSizeEvaluator(context);
+                        try {
+                            gpsize = Saxon.Impl.Helpers.Utils.ParseInt(g);
+                        } catch (Saxon.Ejava.lang.NumberFormatException err) {
+                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("grouping-size must be numeric");
+                            e.setXPathContext(context);
+                            e.setErrorCode("XTDE0030");
+                            e.setLocation(expr.getLocation());
+                            throw e;
+                        }
+                    }
+                    if ((groupSeparatorEvaluator != null)) {
+                        gpseparator = /*Delegate.eval()*/groupSeparatorEvaluator(context);
+                    }
+                    if ((ordinalEvaluator != null)) {
+                        ordinalVal = /*Delegate.eval()*/ordinalEvaluator(context);
+                    }
+                    Saxon.Hej.lib.Numberer numb = expr.numberer;
+                    if ((numb == null)) {
+                        if ((langEvaluator == null)) {
+                            numb = context.getConfiguration().makeNumberer(null, null);
+                        } else {
+                            string language = /*Delegate.eval()*/langEvaluator(context);
+                            Saxon.Hej.type.ValidationFailure vf = Saxon.Hej.type.StringConverter.StringToLanguage.INSTANCE.validate(Saxon.Hej.str.StringView.tidy(language));
+                            if ((vf != null)) {
+                                throw new Saxon.Hej.trans.XPathException("The lang attribute of xsl:number must be a valid language code", "XTDE0030");
+                            }
+                            numb = context.getConfiguration().makeNumberer(language, null);
+                        }
+                    }
+                    if ((letterValueEvaluator == null)) {
+                        letterVal = "";
+                    } else {
+                        letterVal = /*Delegate.eval()*/letterValueEvaluator(context).ToString();
+                        if (!((("alphabetic".Equals(letterVal) || "traditional".Equals(letterVal))))) {
+                            Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException("letter-value must be \"traditional\" or \"alphabetic\"");
+                            e.setXPathContext(context);
+                            e.setErrorCode("XTDE0030");
+                            e.setLocation(expr.getLocation());
+                            throw e;
+                        }
+                    }
+                    Saxon.Hej.expr.number.NumberFormatter nf;
+                    if ((expr.formatter == null)) {
+                        nf = new Saxon.Hej.expr.number.NumberFormatter();
+                        System.Diagnostics.Debug.Assert((formatEvaluator != null));
+                        nf.prepare(/*Delegate.eval()*/formatEvaluator(context));
+                    } else {
+                        nf = expr.formatter;
+                    }
+                    return nf.format(vec, gpsize, gpseparator, letterVal, ordinalVal, numb);
+                } ;
+            }
+        
         }
     
     }

@@ -15,9 +15,5 @@ namespace Saxon.Hej.expr {
         public virtual void close() {
         }
 
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
-        }
-
     }
 }

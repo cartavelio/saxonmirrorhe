@@ -13,8 +13,12 @@ using Saxon.Callbacks;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text;
 using Org.XmlResolver.Features;
+using Saxon.Hej.om;
 using Saxon.Hej.trans;
+using Saxon.Hej.type;
+using Type = System.Type;
 
 
 namespace Saxon.Impl.Helpers {
@@ -23,6 +27,8 @@ namespace Saxon.Impl.Helpers {
         private string resourceLocation;
         
         public DotNetPlatform() {
+            // Allow access to all known encodings
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             // Establish the prefix to use for loading resources. There must be a better way, but this works.
             System.Reflection.Assembly ass = System.Reflection.Assembly.GetExecutingAssembly();
             var resourceNames = ass.GetManifestResourceNames();
@@ -100,8 +106,6 @@ namespace Saxon.Impl.Helpers {
             return false;
         }
 
-
-
         public Saxon.Hej.lib.StringCollator makeCollation(Saxon.Hej.Configuration config,
                     Saxon.Ejava.util.Properties props, string uri) {
             return DotNetCollationFactory.makeCollation(config, uri, props);
@@ -160,7 +164,7 @@ namespace Saxon.Impl.Helpers {
             }
         }
 
-        public Saxon.Hej.type.ExternalObjectType getExternalObjectType(Saxon.Hej.Configuration config, string uri,
+        public Saxon.Hej.type.ExternalObjectType getExternalObjectType(Saxon.Hej.Configuration config, NamespaceUri uri,
                     string localName) {
             // if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.DOT_NET_TYPE))
             //     return new DotNetExternalObjectType(System.Type.GetType(localName), config);
@@ -224,6 +228,17 @@ namespace Saxon.Impl.Helpers {
                 //Console.Error.WriteLine("First attempt at " + filename + " worked");
                 return firstAttempt;
             }
+
+            if (OperatingSystem.IsWindows() && filename.Contains("/")) {
+                // On Windows, if the filename contains a "/", it won't find the file.
+                // the filename has to use "\" as the separator.
+                string bsfilename = filename.Replace("/", "\\");
+                firstAttempt = ass.GetManifestResourceStream(resourceLocation + bsfilename);
+                if (firstAttempt != null) {
+                    //Console.Error.WriteLine("First attempt at " + filename + " worked");
+                    return firstAttempt;
+                }
+            }
             
             // The second attempt is needed if the embedded resources have a logical name containing a "." rather than a "/"
             // for the directory separator. This happens with embedded resources added to the project automatically by Rider:
@@ -258,7 +273,7 @@ namespace Saxon.Impl.Helpers {
                 //         new TracingXmlResolver(new Uri(source.getSystemId(), UriKind.RelativeOrAbsolute));
                 // }
             
-                XmlReader xmlReader = null;
+                XmlReader xmlReader;
                 if (inputStream != null) {
                     xmlReader = XmlReader.Create(inputStream, settings,source.getSystemId());
                 }
@@ -310,10 +325,6 @@ namespace Saxon.Impl.Helpers {
 
         public TracingXmlResolver(Uri baseURI) {
             this.baseUri = baseURI;
-        }
-        public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn) {
-            //Console.Error.WriteLine("GetEntity " + absoluteUri);
-            return base.GetEntity(absoluteUri, role, ofObjectToReturn);
         }
 
         public override Uri ResolveUri(Uri baseUri, string relativeUri) {

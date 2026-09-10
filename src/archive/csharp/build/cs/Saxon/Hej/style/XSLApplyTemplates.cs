@@ -57,7 +57,7 @@ namespace Saxon.Hej.style {
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
             if (useCurrentMode) {
                 if ((((/*1430*/Saxon.Hej.om.NodeInfo)iterateAxis(Saxon.Hej.om.AxisInfo.ANCESTOR, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, Saxon.Hej.om.StandardNames.XSL_TEMPLATE, getNamePool())).next()) == null)) {
-                    issueWarning("Specifying mode=\"#current\" when not inside an xsl:template serves no useful purpose", this);
+                    issueWarning("Specifying mode=\"#current\" when not inside an xsl:template serves no useful purpose", Saxon.Hej.trans.SaxonErrorCode.SXWN9023);
                 }
             } else {
                 Saxon.Hej.style.PrincipalStylesheetModule psm = getPrincipalStylesheetModule();
@@ -98,8 +98,7 @@ namespace Saxon.Hej.style {
             }
             if ((select == null)) {
                 Saxon.Hej.expr.Expression here = new Saxon.Hej.expr.ContextItemExpression();
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.CONTEXT_ITEM, "", 0);
-                role.setErrorCode("XTTE0510");
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.CONTEXT_ITEM, "", 0, "XTTE0510");
                 here = new Saxon.Hej.expr.ItemChecker(here, Saxon.Hej.pattern.AnyNodeTest.getInstance(), role);
                 select = new Saxon.Hej.expr.SimpleStepExpression(here, new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, null));
                 select.setLocation(allocateLocation());

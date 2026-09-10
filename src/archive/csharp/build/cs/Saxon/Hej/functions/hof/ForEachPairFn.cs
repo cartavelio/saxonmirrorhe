@@ -12,9 +12,9 @@ namespace Saxon.Hej.functions.hof {
             }
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            return Saxon.Hej.om.SequenceTool.toLazySequence(evalMapPairs((Saxon.Hej.om.Function)(arguments[2].head()), arguments[0].iterate(), arguments[1].iterate(), context));
+            return Saxon.Hej.om.SequenceTool.toLazySequence(evalMapPairs((Saxon.Hej.om.FunctionItem)(arguments[2].head()), arguments[0].iterate(), arguments[1].iterate(), context));
         }
-        private Saxon.Hej.om.SequenceIterator evalMapPairs(Saxon.Hej.om.Function function, Saxon.Hej.om.SequenceIterator seq0, Saxon.Hej.om.SequenceIterator seq1, Saxon.Hej.expr.XPathContext context) {
+        private Saxon.Hej.om.SequenceIterator evalMapPairs(Saxon.Hej.om.FunctionItem function, Saxon.Hej.om.SequenceIterator seq0, Saxon.Hej.om.SequenceIterator seq1, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.functions.hof.ForEachPairFn.PairedSequenceIterator pairs = new Saxon.Hej.functions.hof.ForEachPairFn.PairedSequenceIterator(seq0, seq1);
             return Saxon.Hej.expr.MappingIterator.map(pairs, item => {
                 Saxon.Hej.om.Sequence[] pair = ((Saxon.Hej.value.ObjectValue<Saxon.Hej.om.Sequence[]>)(item)).getObject();
@@ -47,10 +47,6 @@ namespace Saxon.Hej.functions.hof {
             public void close() {
                 seq0.close();
                 seq1.close();
-            }
-            public void discharge() {
-                seq0.discharge();
-                seq1.discharge();
             }
         
         }

@@ -60,17 +60,6 @@ namespace Saxon.Hej.s9api {
             }
             return Saxon.Api.XdmValue.Wrap(oval);
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            context.setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver));
-        }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            Saxon.Hej.lib.JJ_ResourceResolver rr = context.getResourceResolver();
-            if ((rr is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(rr)).getWrappedURIResolver();
-            } else {
-                return null;
-            }
-        }
         public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
             context.setResourceResolver(resolver);
         }
@@ -82,6 +71,12 @@ namespace Saxon.Hej.s9api {
         }
         public Saxon.Hej.lib.UnparsedTextURIResolver getUnparsedTextURIResolver() {
             return context.getUnparsedTextURIResolver();
+        }
+        public void setErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {
+            context.setErrorReporter(reporter);
+        }
+        public Saxon.Hej.lib.ErrorReporter getErrorReporter() {
+            return context.getErrorReporter();
         }
         public void setTraceListener(Saxon.Hej.lib.TraceListener listener) {
             context.setTraceListener(listener);
@@ -143,9 +138,9 @@ namespace Saxon.Hej.s9api {
                 config.getLogger().info(("Processing streamed input "+systemId));
             }
             try {
-                Saxon.Hej.serialize.SerializationProperties @params = expression.getExecutable().getPrimarySerializationProperties();
-                Saxon.Hej.@event.Receiver receiver = destination.getReceiver(config.makePipelineConfiguration(), @params);
+                Saxon.Hej.@event.Receiver receiver = getDestinationReceiver(destination);
                 expression.runStreamed(context, source, receiver, null);
+                destination.closeAndNotify();
             } catch (Saxon.Ejavax.xml.transform.TransformerException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
@@ -212,6 +207,7 @@ namespace Saxon.Hej.s9api {
                 throw new Saxon.Api.SaxonApiException(e);
             }
             sourceTreeBuilder = controller.makeBuilder();
+            sourceTreeBuilder.setDurability(Saxon.Hej.om.Durability.LASTING);
             if ((sourceTreeBuilder is Saxon.Hej.tree.tiny.TinyBuilder)) {
                 ((Saxon.Hej.tree.tiny.TinyBuilder)(sourceTreeBuilder)).setStatistics(context.getConfiguration().getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
             }
@@ -236,7 +232,7 @@ namespace Saxon.Hej.s9api {
             return updatedDocuments.GetEnumerator();
         }
         public Saxon.Api.XdmValue callFunction(Saxon.Api.QName function, params Saxon.Api.XdmValue[]  arguments) {
-            Saxon.Hej.expr.instruct.UserFunction fn = expression.getMainModule().getUserDefinedFunction(function.Uri, function.LocalName, arguments.Length);
+            Saxon.Hej.expr.instruct.UserFunction fn = expression.getMainModule().getUserDefinedFunction(function.NamespaceUri, function.LocalName, arguments.Length);
             if ((fn == null)) {
                 throw new Saxon.Api.SaxonApiException((((("No function with name "+function.EQName)+" and arity ")+arguments.Length)+" has been declared in the query"));
             }
@@ -253,7 +249,8 @@ namespace Saxon.Hej.s9api {
                     Saxon.Hej.value.SequenceType type = fn.getParameterDefinitions()[i].getRequiredType();
                     Saxon.Hej.om.GroundedValue gVal = ((Saxon.Hej.om.GroundedValue)arguments[i].Unwrap());
                     if (!(type.matches(gVal, th))) {
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, function.GetStructuredQName().getDisplayName(), i);
+                        int pos = i;
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, function.GetStructuredQName().getDisplayName(), pos);
                         gVal = th.applyFunctionConversionRules(gVal, type, role, Saxon.Hej.expr.parser.Loc.NONE);
                     }
                     vr[i] = gVal;

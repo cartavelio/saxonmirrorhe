@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.type {
     public interface SchemaType : Saxon.Hej.type.SchemaComponent {
         string getName();
-        string getTargetNamespace();
+        Saxon.Hej.om.NamespaceUri getTargetNamespace();
         int getFingerprint();
         string getDisplayName();
         Saxon.Hej.om.StructuredQName getStructuredQName();

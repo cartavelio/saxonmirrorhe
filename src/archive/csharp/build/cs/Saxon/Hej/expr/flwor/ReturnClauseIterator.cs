@@ -4,12 +4,12 @@ using System.Linq;
 namespace Saxon.Hej.expr.flwor {
     public class ReturnClauseIterator : Saxon.Hej.om.SequenceIterator {
         private readonly Saxon.Hej.expr.flwor.TuplePull @base;
-        private readonly Saxon.Hej.expr.Expression action;
+        private readonly Saxon.Hej.expr.elab.PullEvaluator action;
         private readonly Saxon.Hej.expr.XPathContext context;
         private Saxon.Hej.om.SequenceIterator results = null;
-        public ReturnClauseIterator(Saxon.Hej.expr.flwor.TuplePull @base, Saxon.Hej.expr.flwor.FLWORExpression flwor, Saxon.Hej.expr.XPathContext context)  {
+        public ReturnClauseIterator(Saxon.Hej.expr.flwor.TuplePull @base, Saxon.Hej.expr.elab.PullEvaluator returnAction, Saxon.Hej.expr.XPathContext context)  {
             this.@base = @base;
-            this.action = flwor.getReturnClause();
+            this.action = returnAction;
             this.context = context;
         }
         public Saxon.Hej.om.Item next() {
@@ -25,7 +25,7 @@ namespace Saxon.Hej.expr.flwor {
                         }
                     }
                     if (@base.nextTuple(context)) {
-                        results = action.iterate(context);
+                        results = /*Delegate.iterate()*/action(context);
                         nextItem = results.next();
                         if ((nextItem == null)) {
                             results = null;
@@ -47,11 +47,6 @@ namespace Saxon.Hej.expr.flwor {
                 results.close();
             }
             @base.close();
-        }
-        public void discharge() {
-            if ((results != null)) {
-                results.discharge();
-            }
         }
     
     }

@@ -69,10 +69,10 @@ namespace Saxon.Impl.Helpers {
             
             foreach (NamespaceBinding ns in namespaces) {
                 if ((ns.getPrefix().Length == 0)) {
-                    writer.WriteAttributeString("", "xmlns", null, ns.getURI());
+                    writer.WriteAttributeString("", "xmlns", null, ns.getNamespaceUri().ToString());
                 }
                 else {
-                    writer.WriteAttributeString("xmlns", ns.getPrefix(), null, ns.getURI());
+                    writer.WriteAttributeString("xmlns", ns.getPrefix(), null, ns.getNamespaceUri().ToString());
                 }
             }
             

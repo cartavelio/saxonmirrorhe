@@ -27,6 +27,7 @@ namespace Saxon.Eej {
             options.addRecognizedOption("dtd", Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION, "Validate using DTD");
             options.setPermittedValues("dtd", new string[]{"on", "off", "recover"}, "on");
             options.addRecognizedOption("export", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Schema output file in SCM format");
+            options.addRecognizedOption("init", Saxon.Hej.trans.CommandLineOptions.TYPE_CLASSNAME, "User-supplied code to initialize the Saxon configuration");
             options.addRecognizedOption("limits", Saxon.Hej.trans.CommandLineOptions.TYPE_INTEGER_PAIR, "Limits for correct processing of minOccurs and maxOccurs");
             options.addRecognizedOption("opt", (Saxon.Hej.trans.CommandLineOptions.TYPE_INTEGER|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Use optimization level 0..10");
             options.addRecognizedOption("report", (Saxon.Hej.trans.CommandLineOptions.TYPE_CLASSNAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Report XML file name for validation error reporting");
@@ -109,7 +110,11 @@ namespace Saxon.Eej {
                 }
                 value = options.getOptionValue("s");
                 if ((value != null)) {
-                    Saxon.Ejava.util.StringTokenizer tokenizer = new Saxon.Ejava.util.StringTokenizer(value, System.IO.Path.PathSeparator.ToString());
+                    string delim = System.IO.Path.PathSeparator.ToString();
+                    if ((useURLs || Saxon.Hej.trans.CommandLineOptions.isImplicitURI(value))) {
+                        delim = " \t\n\r\f";
+                    }
+                    Saxon.Ejava.util.StringTokenizer tokenizer = new Saxon.Ejava.util.StringTokenizer(value, delim);
                     while (tokenizer.hasMoreTokens()) {
                         sourceFileNames.Add(tokenizer.nextToken());
                     }
@@ -160,8 +165,8 @@ namespace Saxon.Eej {
                         request.baseUri = cwd.ToString();
                         request.uri = new System.Uri(cwd, schemaFileName).ToString();
                         request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSD_NATURE;
-                        request.purpose = "schema validation";
-                        schemaSource = request.resolve(config.getResourceResolver());
+                        request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.VALIDATION_PURPOSE;
+                        schemaSource = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     } else {
                         if (schemaFileName.Equals("-")) {
                             schemaSource = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In);
@@ -201,7 +206,7 @@ namespace Saxon.Eej {
                     validator.setDocumentElementName(Saxon.Api.QName.FromClarkName(topLevelElementName));
                 }
                 if (options.definesParameterValues()) {
-                    options.setParams(processor, (name, val) => validator.setParameter(name, val));
+                    options.setParams(processor, validator.setParameter /* instance method reference */);
                 }
                 Saxon.Hej.s9api.Serializer statsSerializer = null;
                 value = options.getOptionValue("stats");
@@ -306,7 +311,16 @@ namespace Saxon.Eej {
         internal  /* REPLACING protected internal */ void applyLocalOptions(Saxon.Hej.trans.CommandLineOptions options, Saxon.Hej.Configuration config) {
         }
         protected internal int quit(string message, int code) {
-            config.getLogger().info(message);
+            if (((config != null) && (config.getLogger() != null))) {
+                config.getLogger().warning(message);
+            } else {
+                System.Console.Error.WriteLine(message);
+            }
+            if (allowExit) {
+                Saxon.Ejava.lang.System.exit(code);
+            } else {
+                throw new System.Exception(message);
+            }
             return code;
         }
         public static Saxon.Ejavax.xml.transform.Source loadDocument(string sourceFileName, bool useURLs, Saxon.Hej.Configuration config) {
@@ -318,8 +332,8 @@ namespace Saxon.Eej {
                 request.baseUri = cwd.ToString();
                 request.uri = new System.Uri(cwd, sourceFileName).ToString();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-                request.purpose = "source document";
-                sourceInput = request.resolve(config.getResourceResolver());
+                request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
+                sourceInput = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
             } else {
                 if (sourceFileName.Equals("-")) {
                     sourceInput = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In);

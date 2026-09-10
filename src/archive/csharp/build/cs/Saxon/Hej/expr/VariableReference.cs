@@ -205,6 +205,9 @@ namespace Saxon.Hej.expr {
             }
             return (p&~(Saxon.Hej.expr.StaticProperty.ALL_NODES_NEWLY_CREATED));
         }
+        public override bool supportsLazyEvaluation() {
+            return false;
+        }
         public override bool Equals(System.Object other) {
             return (((other is Saxon.Hej.expr.VariableReference) && (binding == ((Saxon.Hej.expr.VariableReference)(other)).binding)) && (binding != null));
         }
@@ -262,12 +265,10 @@ namespace Saxon.Hej.expr {
                 err.maybeSetLocation(getLocation());
                 throw;
             } catch (Saxon.Ejava.lang.NullPointerException err) {
-                System.Console.Error.WriteLine(err);
                 string msg = (((("Internal error: no value for variable $"+getDisplayName())+" at line ")+getLocation().getLineNumber())+(((getLocation().getSystemId() == null) ? "" : (" of "+getLocation().getSystemId()))));
                 new Saxon.Hej.lib.StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
                 throw new Saxon.Ejava.lang.AssertionError(msg);
             } catch (Saxon.Ejava.lang.AssertionError err) {
-                System.Console.Error.WriteLine(err);
                 string msg = (((((err.Message+". Variable reference $")+getDisplayName())+" at line ")+getLocation().getLineNumber())+(((getLocation().getSystemId() == null) ? "" : (" of "+getLocation().getSystemId()))));
                 new Saxon.Hej.lib.StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
                 throw new Saxon.Ejava.lang.AssertionError(msg);
@@ -321,7 +322,7 @@ namespace Saxon.Hej.expr {
         public string getEQName() {
             if ((binding != null)) {
                 Saxon.Hej.om.StructuredQName q = binding.getVariableQName();
-                if (q.hasURI("")) {
+                if (q.hasURI(Saxon.Hej.om.NamespaceUri.NULL)) {
                     return q.getLocalPart();
                 } else {
                     return q.getEQName();

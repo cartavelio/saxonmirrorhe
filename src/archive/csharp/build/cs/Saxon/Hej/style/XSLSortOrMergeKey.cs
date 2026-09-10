@@ -57,7 +57,7 @@ namespace Saxon.Hej.style {
             collationName = typeCheck("collation", collationName);
             if ((select != null)) {
                 try {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, (getDisplayName()+"//select"), 0);
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, (getDisplayName()+"//select"), 0);
                     select = getConfiguration().getTypeChecker(false).staticTypeCheck(select, Saxon.Hej.value.SequenceType.ATOMIC_SEQUENCE, role, makeExpressionVisitor());
                 } catch (Saxon.Hej.trans.XPathException err) {
                     compileError(err);

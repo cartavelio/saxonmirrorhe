@@ -46,10 +46,13 @@ namespace Saxon.Hej.expr {
         private static readonly int[] tokens = new int[]{Saxon.Hej.expr.parser.Token.PLUS, Saxon.Hej.expr.parser.Token.MINUS, Saxon.Hej.expr.parser.Token.MULT, Saxon.Hej.expr.parser.Token.DIV, Saxon.Hej.expr.parser.Token.MOD, Saxon.Hej.expr.parser.Token.IDIV};
         public string code() {
             string name = this.GetType().Name;
-            return System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(System.Text.RegularExpressions.Regex.Replace(name, "Any", "a"), "Double", "d"), "Float", "f"), "Decimal", "c"), "Integer", "i"), "Numeric", "n"), "DateTime", "t"), "Duration", "u"), "Plus", "+"), "Minus", "-"), "Times", "*"), "Div", "/"), "Idiv", "~"), "Mod", "%");
+            return name.Replace("Any", "a").Replace("Double", "d").Replace("Float", "f").Replace("Decimal", "c").Replace("Integer", "i").Replace("Numeric", "n").Replace("DateTime", "t").Replace("Duration", "u").Replace("Plus", "+").Replace("Minus", "-").Replace("Times", "*").Replace("Div", "/").Replace("Idiv", "~").Replace("Mod", "%");
         }
         public readonly static Saxon.Hej.expr.Calculator[] ANY_ANY = {new Saxon.Hej.expr.Calculator.AnyPlusAny(), new Saxon.Hej.expr.Calculator.AnyMinusAny(), new Saxon.Hej.expr.Calculator.AnyTimesAny(), new Saxon.Hej.expr.Calculator.AnyDivAny(), new Saxon.Hej.expr.Calculator.AnyModAny(), new Saxon.Hej.expr.Calculator.AnyIdivAny()};
         public readonly static Saxon.Hej.expr.Calculator[] DOUBLE_DOUBLE = {new Saxon.Hej.expr.Calculator.DoublePlusDouble(), new Saxon.Hej.expr.Calculator.DoubleMinusDouble(), new Saxon.Hej.expr.Calculator.DoubleTimesDouble(), new Saxon.Hej.expr.Calculator.DoubleDivDouble(), new Saxon.Hej.expr.Calculator.DoubleModDouble(), new Saxon.Hej.expr.Calculator.DoubleIdivDouble()};
+        public interface DoubleOpDouble {
+        
+        }
         public readonly static Saxon.Hej.expr.Calculator[] DOUBLE_FLOAT = DOUBLE_DOUBLE;
         public readonly static Saxon.Hej.expr.Calculator[] DOUBLE_DECIMAL = DOUBLE_DOUBLE;
         public readonly static Saxon.Hej.expr.Calculator[] DOUBLE_INTEGER = DOUBLE_DOUBLE;
@@ -249,7 +252,7 @@ namespace Saxon.Hej.expr {
             }
         
         }
-        public class DoublePlusDouble : Saxon.Hej.expr.Calculator {
+        public class DoublePlusDouble : Saxon.Hej.expr.Calculator, Saxon.Hej.expr.Calculator.DoubleOpDouble {
             public override Saxon.Hej.value.AtomicValue compute(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b, Saxon.Hej.expr.XPathContext c) {
                 return new Saxon.Hej.value.DoubleValue((((Saxon.Hej.value.NumericValue)(a)).getDoubleValue()+((Saxon.Hej.value.NumericValue)(b)).getDoubleValue()));
             }
@@ -258,7 +261,7 @@ namespace Saxon.Hej.expr {
             }
         
         }
-        public class DoubleMinusDouble : Saxon.Hej.expr.Calculator {
+        public class DoubleMinusDouble : Saxon.Hej.expr.Calculator, Saxon.Hej.expr.Calculator.DoubleOpDouble {
             public override Saxon.Hej.value.AtomicValue compute(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b, Saxon.Hej.expr.XPathContext c) {
                 return new Saxon.Hej.value.DoubleValue((((Saxon.Hej.value.NumericValue)(a)).getDoubleValue()-((Saxon.Hej.value.NumericValue)(b)).getDoubleValue()));
             }
@@ -267,7 +270,7 @@ namespace Saxon.Hej.expr {
             }
         
         }
-        public class DoubleTimesDouble : Saxon.Hej.expr.Calculator {
+        public class DoubleTimesDouble : Saxon.Hej.expr.Calculator, Saxon.Hej.expr.Calculator.DoubleOpDouble {
             public override Saxon.Hej.value.AtomicValue compute(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b, Saxon.Hej.expr.XPathContext c) {
                 return new Saxon.Hej.value.DoubleValue((((Saxon.Hej.value.NumericValue)(a)).getDoubleValue()*((Saxon.Hej.value.NumericValue)(b)).getDoubleValue()));
             }
@@ -276,7 +279,7 @@ namespace Saxon.Hej.expr {
             }
         
         }
-        public class DoubleDivDouble : Saxon.Hej.expr.Calculator {
+        public class DoubleDivDouble : Saxon.Hej.expr.Calculator, Saxon.Hej.expr.Calculator.DoubleOpDouble {
             public override Saxon.Hej.value.AtomicValue compute(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b, Saxon.Hej.expr.XPathContext c) {
                 return new Saxon.Hej.value.DoubleValue((((Saxon.Hej.value.NumericValue)(a)).getDoubleValue()/((Saxon.Hej.value.NumericValue)(b)).getDoubleValue()));
             }
@@ -285,7 +288,7 @@ namespace Saxon.Hej.expr {
             }
         
         }
-        public class DoubleModDouble : Saxon.Hej.expr.Calculator {
+        public class DoubleModDouble : Saxon.Hej.expr.Calculator, Saxon.Hej.expr.Calculator.DoubleOpDouble {
             public override Saxon.Hej.value.AtomicValue compute(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b, Saxon.Hej.expr.XPathContext c) {
                 return new Saxon.Hej.value.DoubleValue((((Saxon.Hej.value.NumericValue)(a)).getDoubleValue()%((Saxon.Hej.value.NumericValue)(b)).getDoubleValue()));
             }
@@ -294,7 +297,7 @@ namespace Saxon.Hej.expr {
             }
         
         }
-        private class DoubleIdivDouble : Saxon.Hej.expr.Calculator {
+        private class DoubleIdivDouble : Saxon.Hej.expr.Calculator, Saxon.Hej.expr.Calculator.DoubleOpDouble {
             public override Saxon.Hej.value.AtomicValue compute(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b, Saxon.Hej.expr.XPathContext c) {
                 double A = ((Saxon.Hej.value.NumericValue)(a)).getDoubleValue();
                 double B = ((Saxon.Hej.value.NumericValue)(b)).getDoubleValue();
@@ -442,7 +445,7 @@ namespace Saxon.Hej.expr {
             return new Saxon.Hej.value.BigDecimalValue(result);
         }
         private static Singulink.Numerics.BigDecimal internalDecimalDivide(Singulink.Numerics.BigDecimal A, Singulink.Numerics.BigDecimal B) {
-            return A/B;
+            return Singulink.Numerics.BigDecimal.Divide(A, B, 18, Singulink.Numerics.RoundingMode.MidpointToZero);
         }
         public class DecimalModDecimal : Saxon.Hej.expr.Calculator {
             public override Saxon.Hej.value.AtomicValue compute(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b, Saxon.Hej.expr.XPathContext c) {

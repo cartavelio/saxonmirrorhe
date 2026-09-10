@@ -9,7 +9,6 @@ namespace Saxon.Hej {
         private System.Collections.Generic.IDictionary<Saxon.Hej.trans.SymbolicName,Saxon.Hej.expr.Component> componentIndex;
         private readonly Saxon.Hej.om.StructuredQName defaultInitialTemplate;
         private readonly Saxon.Hej.om.StructuredQName defaultInitialMode;
-        private readonly string messageReceiverClassName;
         private readonly Saxon.Hej.expr.instruct.GlobalParameterSet compileTimeParams;
         public PreparedStylesheet(Saxon.Hej.style.Compilation compilation) : base (compilation.getConfiguration()) {
             Saxon.Hej.trans.CompilerInfo compilerInfo = compilation.getCompilerInfo();
@@ -151,8 +150,8 @@ namespace Saxon.Hej {
         }
         public void explain(Saxon.Hej.trace.ExpressionPresenter presenter) {
             presenter.startElement("stylesheet");
-            presenter.@namespace("fn", Saxon.Hej.lib.NamespaceConstant.FN);
-            presenter.@namespace("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA);
+            presenter.@namespace("fn", Saxon.Hej.om.NamespaceUri.FN);
+            presenter.@namespace("xs", Saxon.Hej.om.NamespaceUri.SCHEMA);
             explainGlobalVariables(presenter);
             ruleManager.explainTemplateRules(presenter);
             explainNamedTemplates(presenter);

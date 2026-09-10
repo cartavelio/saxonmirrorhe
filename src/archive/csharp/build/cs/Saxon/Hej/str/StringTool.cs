@@ -15,12 +15,16 @@ namespace Saxon.Hej.str {
         }
         public static int[] expand(Saxon.Hej.str.UnicodeString s) {
             int[] array = new int[s.length32()];
-            Saxon.Hej.z.IntIterator iter = s.codePoints();
-            int i = 0;
-            while (iter.hasNext()) {
-                array[i++] = iter.next();
-            }
+            s.copy32bit(array, 0);
             return array;
+        }
+        public static bool containsSurrogates(string str) {
+            for (int i = 0; (i<str.Length); i++) {
+                if (Saxon.Hej.serialize.charcode.UTF16CharacterSet.isSurrogate(str[i])) {
+                    return true;
+                }
+            }
+            return false;
         }
         public static Saxon.Hej.str.UnicodeString fromCodePoints(int[] codes, int used) {
             Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
@@ -30,12 +34,26 @@ namespace Saxon.Hej.str {
             return sb.toUnicodeString();
         }
         public static Saxon.Hej.str.UnicodeString fromCharSequence(string chars) {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
-            Saxon.Hej.z.IntIterator iter = codePoints(chars);
-            while (iter.hasNext()) {
-                sb.append(iter.next());
+            int uLength = Saxon.Hej.str.StringTool.getStringLength(chars);
+            if ((uLength == chars.Length)) {
+                return new Saxon.Hej.str.BMPString(chars.ToString());
+            } else {
+                byte[] triples = new byte[(uLength*3)];
+                for (int i = 0, j = 0; (i<chars.Length); i++) {
+                    char c = chars[i];
+                    if (Saxon.Hej.serialize.charcode.UTF16CharacterSet.isSurrogate(c)) {
+                        int cp = Saxon.Hej.serialize.charcode.UTF16CharacterSet.combinePair(c, chars[++i]);
+                        triples[j++] = (byte)(((((cp>>16))&unchecked((int)0xff))));
+                        triples[j++] = (byte)(((((cp>>8))&unchecked((int)0xff))));
+                        triples[j++] = (byte)(((cp&unchecked((int)0xff))));
+                    } else {
+                        triples[j++] = 0;
+                        triples[j++] = (byte)(((((c>>8))&unchecked((int)0xff))));
+                        triples[j++] = (byte)(((c&unchecked((int)0xff))));
+                    }
+                }
+                return new Saxon.Hej.str.Twine24(triples);
             }
-            return sb.toUnicodeString();
         }
         public static Saxon.Hej.str.UnicodeString fromLatin1(string str) {
             byte[] bytes = new byte[str.Length];
@@ -45,7 +63,7 @@ namespace Saxon.Hej.str {
             return new Saxon.Hej.str.Twine8(bytes);
         }
         public static Saxon.Hej.z.IntIterator codePoints(string value) {
-            return new Inner_IntIterator_26(value);
+            return new Inner_IntIterator_47(value);
         }
         public static string diagnosticDisplay(string s) {
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(s.Length);
@@ -91,12 +109,6 @@ namespace Saxon.Hej.str {
             }
             return -(1L);
         }
-        public static int requireInt(long value) {
-            if ((value>System.Int32.MaxValue)) {
-                throw new Saxon.Ejava.lang.UnsupportedOperationException("String exceeds 2^31 characters");
-            }
-            return (int)(value);
-        }
         public static Saxon.Hej.str.UnicodeString compress(char[] @in, int offset, int len, bool compressWS) {
             if ((len == 0)) {
                 return Saxon.Hej.str.EmptyUnicodeString.getInstance();
@@ -105,18 +117,26 @@ namespace Saxon.Hej.str {
             int end = (offset+len);
             bool allWhite = compressWS;
             int surrogates = 0;
-            for (int i = offset; (i<end); i++) {
-                int c = @in[i];
-                max |= c;
-                if ((allWhite && !(Saxon.Hej.value.Whitespace.isWhite(c)))) {
-                    allWhite = false;
+            int k = offset;
+            if (compressWS) {
+                while ((k<end)) {
+                    int c = @in[k];
+                    if (!(Saxon.Hej.value.Whitespace.isWhite(c))) {
+                        allWhite = false;
+                        break ;
+                    }
+                    k++;
                 }
+                if (allWhite) {
+                    return Saxon.Hej.str.CompressedWhitespace.compressWS(@in, offset, end);
+                }
+            }
+            while ((k<end)) {
+                int c = @in[k++];
+                max |= c;
                 if (Saxon.Hej.serialize.charcode.UTF16CharacterSet.isSurrogate(c)) {
                     surrogates++;
                 }
-            }
-            if (allWhite) {
-                return Saxon.Hej.str.CompressedWhitespace.compressWS(@in, offset, end);
             }
             if ((max<256)) {
                 byte[] array = new byte[len];
@@ -170,8 +190,8 @@ namespace Saxon.Hej.str {
             }
         }
     
-        private class Inner_IntIterator_26 : Saxon.Hej.z.IntIterator {
-            public Inner_IntIterator_26(string value) {
+        private class Inner_IntIterator_47 : Saxon.Hej.z.IntIterator {
+            public Inner_IntIterator_47(string value) {
                 this.value = value;
                 i = 0;
             }
@@ -191,9 +211,7 @@ namespace Saxon.Hej.str {
                         }
                         return Saxon.Hej.serialize.charcode.UTF16CharacterSet.combinePair((char)(/*localvar*/c), (char)(/*localvar*/d));
                     } catch (System.IndexOutOfRangeException e) {
-                        System.Console.Error.WriteLine("Invalid surrogate at end of string");
-                        System.Console.Error.WriteLine(/*exception*/e);
-                        throw;
+                        throw new Saxon.Ejava.lang.IllegalStateException("Invalid surrogate at end of string");
                     }
                 } else {
                     return /*localvar*/c;

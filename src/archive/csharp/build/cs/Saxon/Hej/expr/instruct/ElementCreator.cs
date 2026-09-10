@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.instruct {
     public abstract class ElementCreator : Saxon.Hej.expr.instruct.ParentNodeConstructor {
+        public abstract class ElementCreationDetails {
+            public abstract Saxon.Hej.om.NodeName getNodeName(Saxon.Hej.expr.XPathContext context);
+            public abstract string getSystemId(Saxon.Hej.expr.XPathContext context);
+            public abstract void processContent(Saxon.Hej.@event.Outputter @out, Saxon.Hej.expr.XPathContext context);
+        
+        }
         internal bool bequeathNamespacesToChildren = true;
         internal bool inheritNamespacesFromParent = true;
         public ElementCreator()  {
@@ -94,10 +100,10 @@ namespace Saxon.Hej.expr.instruct {
                                             throw de;
                                         } else {
                                             if ((((foundChild || foundPossibleChild)) && (possibleNodeKinds == Saxon.Hej.type.UType.ATTRIBUTE))) {
-                                                env.issueWarning("Creating an attribute here will fail if previous instructions create any children", component.getLocation());
+                                                env.issueWarning("Creating an attribute here will fail if previous instructions create any children", Saxon.Hej.trans.SaxonErrorCode.SXWN9030, component.getLocation());
                                             } else {
                                                 if ((((foundChild || foundPossibleChild)) && (possibleNodeKinds == Saxon.Hej.type.UType.NAMESPACE))) {
-                                                    env.issueWarning("Creating a namespace node here will fail if previous instructions create any children", component.getLocation());
+                                                    env.issueWarning("Creating a namespace node here will fail if previous instructions create any children", Saxon.Hej.trans.SaxonErrorCode.SXWN9030, component.getLocation());
                                                 }
                                             }
                                         }
@@ -109,55 +115,9 @@ namespace Saxon.Hej.expr.instruct {
                 }
             }
         }
-        public abstract Saxon.Hej.om.NodeName getElementName(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.NodeInfo copiedNode);
-        public abstract string getNewBaseURI(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.NodeInfo copiedNode);
-        public abstract void outputNamespaceNodes(Saxon.Hej.@event.Outputter receiver, Saxon.Hej.om.NodeName nodeName, Saxon.Hej.om.NodeInfo copiedNode);
+        public abstract void outputNamespaceNodes(Saxon.Hej.@event.Outputter receiver, Saxon.Hej.om.NodeName nodeName, Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails details);
         public override int getImplementationMethod() {
             return Saxon.Hej.expr.Expression.PROCESS_METHOD;
-        }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            return processLeavingTail(output, context, null);
-        }
-        public Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter @out, Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.NodeInfo copiedNode) {
-            try {
-                Saxon.Hej.om.NodeName elemName = getElementName(context, copiedNode);
-                Saxon.Hej.type.SchemaType typeCode;
-                if ((getValidationAction() == Saxon.Hej.lib.Validation.PRESERVE)) {
-                    typeCode = Saxon.Hej.type.AnyType.getInstance();
-                } else {
-                    typeCode = Saxon.Hej.type.Untyped.getInstance();
-                }
-                Saxon.Hej.@event.Receiver elemOut = @out;
-                if (!(preservingTypes)) {
-                    Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(getValidationOptions());
-                    options.setTopLevelElement(elemName.getStructuredQName());
-                    context.getConfiguration().prepareValidationReporting(context, options);
-                    Saxon.Hej.@event.Receiver validator = context.getConfiguration().getElementValidator(elemOut, options, getLocation());
-                    if ((validator != elemOut)) {
-                        @out = new Saxon.Hej.@event.ComplexContentOutputter(validator);
-                    }
-                }
-                if ((@out.getSystemId() == null)) {
-                    @out.setSystemId(getNewBaseURI(context, copiedNode));
-                }
-                int properties = Saxon.Hej.@event.ReceiverOption.NONE;
-                if (!(bequeathNamespacesToChildren)) {
-                    properties |= Saxon.Hej.@event.ReceiverOption.DISINHERIT_NAMESPACES;
-                }
-                if (!(inheritNamespacesFromParent)) {
-                    properties |= Saxon.Hej.@event.ReceiverOption.REFUSE_NAMESPACES;
-                }
-                properties |= Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES;
-                @out.startElement(elemName, typeCode, getLocation(), properties);
-                outputNamespaceNodes(@out, elemName, copiedNode);
-                getContentExpression().process(@out, context);
-                @out.endElement();
-                return null;
-            } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw;
-            }
         }
         internal void exportValidationAndType(Saxon.Hej.trace.ExpressionPresenter @out) {
             if (((getValidationAction() != Saxon.Hej.lib.Validation.SKIP) && (getValidationAction() != Saxon.Hej.lib.Validation.BY_TYPE))) {
@@ -183,6 +143,9 @@ namespace Saxon.Hej.expr.instruct {
         public void setInheritanceFlags(string flags) {
             inheritNamespacesFromParent = !(flags.Contains("P"));
             bequeathNamespacesToChildren = !(flags.Contains("C"));
+        }
+        public virtual Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails makeElementCreationDetails() {
+            throw new Saxon.Ejava.lang.UnsupportedOperationException();
         }
         public override string getStreamerName() {
             return "ElementCreator";

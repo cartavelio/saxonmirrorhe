@@ -71,6 +71,43 @@ namespace Saxon.Hej.expr {
             System.Collections.Generic.ISet<Saxon.Hej.expr.Expression> pre = new System.Collections.Generic.HashSet<Saxon.Hej.expr.Expression>();
             return pre;
         }
+        public override string getExpressionName() {
+            return "gVarRef";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.GlobalVariableReference.GlobalVariableReferenceElaborator();
+        }
+        public class GlobalVariableReferenceElaborator : Saxon.Hej.expr.elab.PullElaborator, Saxon.Hej.expr.elab.SequenceEvaluator {
+            public Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.XPathContext context) {
+                Saxon.Hej.expr.GlobalVariableReference varRef = (Saxon.Hej.expr.GlobalVariableReference)(getExpression());
+                return varRef.evaluateVariable(context);
+            }
+            public override Saxon.Hej.expr.elab.SequenceEvaluator eagerly() {
+                return this;
+            }
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+                return this;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.GlobalVariableReference varRef = (Saxon.Hej.expr.GlobalVariableReference)(getExpression());
+                return context => varRef.evaluateVariable(context).iterate();
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.GlobalVariableReference varRef = (Saxon.Hej.expr.GlobalVariableReference)(getExpression());
+                return (@out, context) => {
+                    Saxon.Hej.om.SequenceIterator value = varRef.evaluateVariable(context).iterate();
+                    for (Saxon.Hej.om.Item it; ((it = value.next()) != null); ) {
+                        @out.append(it);
+                    }
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.GlobalVariableReference varRef = (Saxon.Hej.expr.GlobalVariableReference)(getExpression());
+                return context => varRef.evaluateVariable(context).head();
+            }
+        
+        }
     
     }
 }

@@ -7,7 +7,7 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.om.StructuredQName qName;
             try {
                 if (((lexicalName.IndexOf(':')<0) && !(lexicalName.StartsWith("Q{")))) {
-                    string defaultNS = getRetainedStaticContext().getURIForPrefix("", true);
+                    Saxon.Hej.om.NamespaceUri defaultNS = getRetainedStaticContext().getURIForPrefix("", true);
                     qName = new Saxon.Hej.om.StructuredQName("", defaultNS, lexicalName);
                 } else {
                     qName = Saxon.Hej.om.StructuredQName.fromLexicalQName(lexicalName, false, true, getRetainedStaticContext());
@@ -16,8 +16,8 @@ namespace Saxon.Hej.functions {
                 e.setErrorCode("XTDE1428");
                 throw;
             }
-            string uri = qName.getURI();
-            if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.JAVA_TYPE)) {
+            Saxon.Hej.om.NamespaceUri uri = qName.getNamespaceUri();
+            if (uri.Equals(Saxon.Hej.om.NamespaceUri.JAVA_TYPE)) {
                 try {
                     string className = Saxon.Hej.type.JavaExternalObjectType.localNameToClassName(qName.getLocalPart());
                     config.getClass(className, false);

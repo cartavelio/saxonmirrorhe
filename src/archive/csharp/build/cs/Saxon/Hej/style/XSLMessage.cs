@@ -35,7 +35,7 @@ namespace Saxon.Hej.style {
                     errorCode = makeAttributeValueTemplate(errorCodeAtt, att);
                     break ;
                   default:
-                    if ((attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON) && attName.getLocalPart().Equals("time"))) {
+                    if ((attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON) && attName.getLocalPart().Equals("time"))) {
                         isExtensionAttributeAllowed(attName.getDisplayName());
                         bool timed = processBooleanAttribute("saxon:time", value);
                         if (timed) {

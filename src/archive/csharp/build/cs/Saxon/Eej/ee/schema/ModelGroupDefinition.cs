@@ -21,8 +21,8 @@ namespace Saxon.Eej.ee.schema {
         public string getName() {
             return modelGroupName.getLocalPart();
         }
-        public string getTargetNamespace() {
-            return modelGroupName.getURI();
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return modelGroupName.getNamespaceUri();
         }
         public override bool isEmptiable() {
             foreach (Saxon.Eej.ee.schema.Particle p in getParticles()) {
@@ -90,8 +90,8 @@ namespace Saxon.Eej.ee.schema {
             serializer.startElement("modelGroupDefinition");
             serializer.emitAttribute("id", id);
             serializer.emitAttribute("name", getName());
-            if (((getTargetNamespace() != null) && !(getTargetNamespace().Length==0))) {
-                serializer.emitAttribute("targetNamespace", getTargetNamespace());
+            if (((getTargetNamespace() != null) && !(getTargetNamespace().isEmpty()))) {
+                serializer.emitAttribute("targetNamespace", getTargetNamespace().ToString());
             }
             foreach (Saxon.Eej.ee.schema.Particle p in getParticles()) {
                 p.serializeParticle(serializer);
@@ -101,9 +101,9 @@ namespace Saxon.Eej.ee.schema {
         public override string getCompositorName() {
             return "modelGroupDefinition";
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.ModelGroupDefinition thisDefinition = this;
-            Saxon.Hej.om.Function modelGroupFunction = base.getComponentAsFunction();
+            Saxon.Hej.om.FunctionItem modelGroupFunction = base.getComponentAsFunction();
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
                 switch (key) {
@@ -114,7 +114,7 @@ namespace Saxon.Eej.ee.schema {
                   case "name":
                     return new Saxon.Hej.value.StringValue(getName(), Saxon.Hej.type.BuiltInAtomicType.NCNAME);
                   case "target namespace":
-                    return new Saxon.Hej.value.AnyURIValue(getTargetNamespace());
+                    return new Saxon.Hej.value.AnyURIValue(getTargetNamespace().toUnicodeString());
                   case "model group":
                     return modelGroupFunction;
                   default:

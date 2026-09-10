@@ -20,7 +20,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"base", "id"};
             allowAttributes(atts, allowed);
             processId();
-            string @base = atts.getValue("", "base");
+            string @base = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "base");
             if ((@base != null)) {
                 int baseFingerprint;
                 try {

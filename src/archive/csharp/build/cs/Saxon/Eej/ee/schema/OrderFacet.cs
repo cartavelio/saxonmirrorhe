@@ -60,7 +60,7 @@ namespace Saxon.Eej.ee.schema {
             }
             return true;
         }
-        public override Saxon.Hej.om.Function getFacetAsFunctionItem() {
+        public override Saxon.Hej.om.FunctionItem getFacetAsFunctionItem() {
             Saxon.Eej.ee.schema.OrderFacet facet = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

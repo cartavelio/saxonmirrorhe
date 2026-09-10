@@ -36,13 +36,11 @@ namespace Saxon.Hej.functions {
                     } else {
                         if (exp.isCallOn(typeof(Saxon.Hej.functions.Count))) {
                             Saxon.Hej.expr.Expression exists = Saxon.Hej.functions.SystemFunction.makeCall("exists", exp.getRetainedStaticContext(), ((Saxon.Hej.expr.SystemFunctionCall)(exp)).getArg(0));
-                            System.Diagnostics.Debug.Assert((exists != null));
                             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, exists);
                             return exists.optimize(visitor, contextItemType);
                         } else {
                             if ((exp.getItemType() is Saxon.Hej.pattern.NodeTest)) {
                                 Saxon.Hej.expr.Expression exists = Saxon.Hej.functions.SystemFunction.makeCall("exists", exp.getRetainedStaticContext(), exp);
-                                System.Diagnostics.Debug.Assert((exists != null));
                                 Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, exists);
                                 return exists.optimize(visitor, contextItemType);
                             } else {
@@ -65,6 +63,17 @@ namespace Saxon.Hej.functions {
         }
         public override string getStreamerName() {
             return "BooleanFn";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.BooleanFn.BooleanFnElaborator();
+        }
+        public class BooleanFnElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.Expression arg = fnc.getArg(0);
+                return arg.makeElaborator().elaborateForBoolean();
+            }
+        
         }
     
         private class Inner_SystemFunctionCall_32 : Saxon.Hej.expr.SystemFunctionCall {

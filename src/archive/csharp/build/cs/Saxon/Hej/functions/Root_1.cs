@@ -24,6 +24,20 @@ namespace Saxon.Hej.functions {
         public override string getCompilerName() {
             return "RootFunctionCompiler";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.Root_1.RootFnElaborator();
+        }
+        public class RootFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForItem();
+                return context => {
+                    Saxon.Hej.om.NodeInfo focus = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/arg0Eval(context));
+                    return ((focus == null) ? null : focus.getRoot());
+                } ;
+            }
+        
+        }
     
     }
 }

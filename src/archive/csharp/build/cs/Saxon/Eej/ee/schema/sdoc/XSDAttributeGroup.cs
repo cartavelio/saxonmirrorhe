@@ -16,7 +16,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 string[] allowed = {"id", "name"};
                 allowAttributes(atts, allowed);
                 requireAttribute(atts, "name");
-                string qname = atts.getValue("", "name");
+                string qname = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                 if ((qname == null)) {
                     return ;
                 }
@@ -35,7 +35,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 string[] allowed = {"id", "ref"};
                 allowAttributes(atts, allowed);
                 requireAttribute(atts, "ref");
-                string @ref = atts.getValue("", "ref");
+                string @ref = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
                 if ((@ref == null)) {
                     return ;
                 }
@@ -95,7 +95,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                         if (((attributeGroupDecl != null) && (attributeUse != null))) {
                             attributeUse.setContainingAttributeGroupDecl(attributeGroupDecl);
                             if (attributeUse.isProhibited()) {
-                                compiler.warning("Specifying use='prohibited' within an attribute group has no effect", this);
+                                compiler.warning("Specifying use='prohibited' within an attribute group has no effect", Saxon.Hej.trans.SaxonErrorCode.SXSD1015, this);
                             } else {
                                 attributeGroupDecl.addAttributeUse(attributeUse);
                             }
@@ -153,7 +153,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     if ((f != null)) {
                         error((("Redefined attribute group "+Saxon.Hej.trans.Err.wrap(name.getDisplayName()))+" contains more than one reference to itself"));
                     }
-                    string uri = getXSDSchema().getTargetNamespace();
+                    Saxon.Hej.om.NamespaceUri uri = getXSDSchema().getTargetNamespace();
                     string localName = @ref.getTargetComponentName().getLocalPart();
                     string newLocalName = ((localName+'_')+@ref.GetHashCode());
                     Saxon.Hej.om.StructuredQName newNameCode = new Saxon.Hej.om.StructuredQName("", uri, newLocalName);
@@ -173,7 +173,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         private void checkImmediateRedefinition(Saxon.Eej.ee.schema.AttributeGroupDecl f, Saxon.Eej.ee.schema.SchemaCompiler compiler) {
             if (!(((Saxon.Eej.ee.schema.sdoc.XSDRedefine)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getExternalSchemaDocumentURI().Equals(f.getSchemaDocumentURI()))) {
-                compiler.warning((("The redefined attribute group was found, but not in the schema document referenced by "+"the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD ")+"specification. However, Saxon does not currently enforce this rule."), this);
+                compiler.warning((("The redefined attribute group was found, but not in the schema document referenced by "+"the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD ")+"specification. However, Saxon does not currently enforce this rule."), Saxon.Hej.trans.SaxonErrorCode.SXSD1016, this);
             }
         }
     

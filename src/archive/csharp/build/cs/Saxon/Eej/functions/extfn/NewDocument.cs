@@ -11,7 +11,7 @@ namespace Saxon.Eej.functions.extfn {
             cco.setHostLanguage(Saxon.Api.HostLanguage.XSLT);
             cco.open();
             cco.startDocument(0);
-            Saxon.Hej.om.SequenceTool.supply(arguments[0].iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(it => cco.append(it) /* converted from instance method reference */));
+            Saxon.Hej.om.SequenceTool.supply(arguments[0].iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(/* Unresolved method reference */cco.append));
             cco.endDocument();
             cco.close();
             return builder.getCurrentRoot();

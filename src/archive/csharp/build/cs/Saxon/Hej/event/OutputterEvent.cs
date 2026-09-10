@@ -59,9 +59,9 @@ namespace Saxon.Hej.@event {
         }
         public class Namespace : Saxon.Hej.@event.OutputterEvent {
             internal string prefix;
-            internal string uri;
+            internal Saxon.Hej.om.NamespaceUri uri;
             internal int properties;
-            public Namespace(string prefix, string uri, int properties)  {
+            public Namespace(string prefix, Saxon.Hej.om.NamespaceUri uri, int properties)  {
                 this.prefix = prefix;
                 this.uri = uri;
                 this.properties = properties;

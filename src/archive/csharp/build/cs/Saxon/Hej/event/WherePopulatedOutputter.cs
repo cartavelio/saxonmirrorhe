@@ -50,7 +50,7 @@ namespace Saxon.Hej.@event {
                 base.startElement(elemName, type, attributes, namespaces, location, properties);
             }
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             if ((level == 1)) {
                 pendingNamespaces = pendingNamespaces.put(prefix, namespaceUri);
             } else {
@@ -167,7 +167,7 @@ namespace Saxon.Hej.@event {
                             attribute(Saxon.Hej.om.NameOfNode.makeName(node), (Saxon.Hej.type.SimpleType)(node.getSchemaType()), node.getStringValue(), Saxon.Hej.expr.parser.Loc.NONE, 0);
                             return ;
                           case Saxon.Hej.type.Type.NAMESPACE:
-                            @namespace(node.getLocalPart(), node.getStringValue(), 0);
+                            @namespace(node.getLocalPart(), Saxon.Hej.om.NamespaceUri.of(node.getStringValue()), 0);
                             return ;
                           default:
                             break ;
@@ -204,7 +204,7 @@ namespace Saxon.Hej.@event {
                             attribute(Saxon.Hej.om.NameOfNode.makeName(node), (Saxon.Hej.type.SimpleType)(node.getSchemaType()), node.getStringValue(), locationId, 0);
                             return ;
                           case Saxon.Hej.type.Type.NAMESPACE:
-                            @namespace(node.getLocalPart(), node.getStringValue(), 0);
+                            @namespace(node.getLocalPart(), Saxon.Hej.om.NamespaceUri.of(node.getStringValue()), 0);
                             return ;
                           default:
                             break ;

@@ -12,7 +12,7 @@ namespace Saxon.Hej.regex {
             try {
                 pattern = Saxon.Ejava.util.regex.Pattern.compile(this.javaRegex, flagBits);
             } catch (Saxon.Ejava.util.regex.PatternSyntaxException e) {
-                throw new Saxon.Hej.trans.XPathException("Incorrect syntax for Java regular expression", e);
+                throw new Saxon.Hej.trans.XPathException(("Incorrect syntax for native regular expression: "+e.Message), "FORX0002");
             }
         }
         public string getJavaRegularExpression() {
@@ -111,6 +111,9 @@ namespace Saxon.Hej.regex {
                 flags += 'c';
             }
             return flags;
+        }
+        public bool isPlatformNative() {
+            return true;
         }
     
     }

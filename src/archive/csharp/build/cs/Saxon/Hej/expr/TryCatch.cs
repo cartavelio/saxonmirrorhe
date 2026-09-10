@@ -93,128 +93,13 @@ namespace Saxon.Hej.expr {
             return t2;
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext c) {
-            Saxon.Hej.expr.XPathContext c1 = c.newMinorContext();
-            try {
-                try {
-                    return Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1).head();
-                } catch (Saxon.Hej.trans.UncheckedXPathException e) {
-                    throw e.getXPathException();
-                }
-            } catch (Saxon.Hej.trans.XPathException err) {
-                if (err.isGlobalError()) {
-                    err.setIsGlobalError(false);
-                } else {
-                    Saxon.Hej.om.StructuredQName code = err.getErrorCodeQName();
-                    if ((code == null)) {
-                        code = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "XXXX9999");
-                    }
-                    foreach (Saxon.Hej.expr.TryCatch.CatchClause clause in catchClauses) {
-                        if (clause.nameTest.matches(code)) {
-                            Saxon.Hej.expr.Expression caught = clause.catchOp.getChildExpression();
-                            Saxon.Hej.expr.XPathContextMajor c2 = c.newContext();
-                            c2.setCurrentException(err);
-                            return caught.evaluateItem(c2);
-                        }
-                    }
-                }
-                err.setHasBeenReported(false);
-                throw;
-            }
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(c);
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext c) {
-            Saxon.Hej.expr.XPathContextMajor c1 = c.newContext();
-            c1.createThreadManager();
-            c1.setErrorReporter(new Saxon.Hej.expr.TryCatch.FilteringErrorReporter(c.getErrorReporter(), catchClauses));
-            try {
-                Saxon.Hej.om.Sequence v = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(tryOp.getChildExpression(), c1);
-                c1.waitForChildThreads();
-                Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
-                if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
-                    ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(c);
-                }
-                return v.iterate();
-            } catch (Saxon.Hej.trans.XPathException err) {
-                if (err.isGlobalError()) {
-                    err.setIsGlobalError(false);
-                } else {
-                    Saxon.Hej.om.StructuredQName code = err.getErrorCodeQName();
-                    if ((code == null)) {
-                        code = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "XXXX9999");
-                    }
-                    foreach (Saxon.Hej.expr.TryCatch.CatchClause clause in catchClauses) {
-                        if (clause.nameTest.matches(code)) {
-                            Saxon.Hej.expr.Expression caught = clause.catchOp.getChildExpression();
-                            Saxon.Hej.expr.XPathContextMajor c2 = c.newContext();
-                            c2.setCurrentException(err);
-                            Saxon.Hej.om.Sequence v = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(caught, c2);
-                            Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c2.getTailCallInfo();
-                            if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
-                                ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(c);
-                            }
-                            return v.iterate();
-                        }
-                    }
-                }
-                err.setHasBeenReported(false);
-                throw;
-            }
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(c);
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
-            Saxon.Hej.expr.XPathContextMajor c1 = context.newContext();
-            c1.createThreadManager();
-            c1.setErrorReporter(new Saxon.Hej.expr.TryCatch.FilteringErrorReporter(context.getErrorReporter(), catchClauses));
-            Saxon.Hej.@event.Outputter o2;
-            if (rollbackOutput) {
-                o2 = new Saxon.Hej.@event.OutputterEventBuffer();
-                o2.setPipelineConfiguration(pipe);
-            } else {
-                o2 = new Saxon.Hej.@event.EventMonitor(output);
-                o2.setPipelineConfiguration(pipe);
-            }
-            try {
-                tryOp.getChildExpression().process(o2, c1);
-                c1.waitForChildThreads();
-                Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
-                if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
-                    ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(context);
-                }
-                if (rollbackOutput) {
-                    ((Saxon.Hej.@event.OutputterEventBuffer)(o2)).replay(output);
-                }
-            } catch (Saxon.Hej.trans.XPathException err) {
-                if (err.isGlobalError()) {
-                    err.setIsGlobalError(false);
-                } else {
-                    Saxon.Hej.om.StructuredQName code = err.getErrorCodeQName();
-                    if ((code == null)) {
-                        code = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "XXXX9999");
-                    }
-                    foreach (Saxon.Hej.expr.TryCatch.CatchClause clause in catchClauses) {
-                        if (clause.nameTest.matches(code)) {
-                            if (((o2 is Saxon.Hej.@event.EventMonitor) && ((Saxon.Hej.@event.EventMonitor)(o2)).hasBeenWrittenTo())) {
-                                string message = (err.Message+". The error could not be caught, because rollback-output=no was specified, and output was already written to the result tree");
-                                Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException(message, "XTDE3530");
-                                xe.setLocation(err.getLocator());
-                                xe.setXPathContext(context);
-                                throw xe;
-                            }
-                            Saxon.Hej.expr.Expression caught = clause.catchOp.getChildExpression();
-                            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-                            c2.setCurrentException(err);
-                            Saxon.Hej.om.Sequence v = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(caught, c2);
-                            Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c2.getTailCallInfo();
-                            if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
-                                ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(context);
-                            }
-                            Saxon.Hej.om.SequenceTool.supply(((Saxon.Hej.om.GroundedValue)(v)).iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => output.append(item))));
-                            return ;
-                        }
-                    }
-                }
-                err.setHasBeenReported(false);
-                throw;
-            }
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         public override string getExpressionName() {
             return "tryCatch";
@@ -233,10 +118,163 @@ namespace Saxon.Hej.expr {
             }
             @out.endElement();
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.TryCatch.TryCatchElaborator();
+        }
         public class CatchClause {
             public int slotNumber = -1;
             public Saxon.Hej.expr.Operand catchOp;
             public Saxon.Hej.pattern.QNameTest nameTest;
+        
+        }
+        private class TryCatchElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.TryCatch expr = (Saxon.Hej.expr.TryCatch)(getExpression());
+                Saxon.Hej.expr.elab.PushEvaluator tryPush = expr.getTryExpr().makeElaborator().elaborateForPush();
+                return (output, context) => {
+                    Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
+                    Saxon.Hej.expr.XPathContextMajor c1 = context.newContext();
+                    c1.createThreadManager();
+                    c1.setErrorReporter(new Saxon.Hej.expr.TryCatch.FilteringErrorReporter(context.getErrorReporter(), expr.catchClauses));
+                    Saxon.Hej.@event.Outputter o2;
+                    if (expr.rollbackOutput) {
+                        o2 = new Saxon.Hej.@event.OutputterEventBuffer();
+                        o2.setPipelineConfiguration(pipe);
+                    } else {
+                        o2 = new Saxon.Hej.@event.EventMonitor(output);
+                        o2.setPipelineConfiguration(pipe);
+                    }
+                    try {
+                        try {
+                            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/tryPush(o2, c1);
+                            Saxon.Hej.expr.Expression.dispatchTailCall(tc);
+                            c1.waitForChildThreads();
+                            Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
+                            if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
+                                ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(context);
+                            }
+                            if (expr.rollbackOutput) {
+                                System.Diagnostics.Debug.Assert((o2 is Saxon.Hej.@event.OutputterEventBuffer));
+                                ((Saxon.Hej.@event.OutputterEventBuffer)(o2)).replay(output);
+                            }
+                        } catch (Saxon.Hej.trans.UncheckedXPathException ue) {
+                            throw ue.getXPathException();
+                        }
+                    } catch (Saxon.Hej.trans.XPathException err) {
+                        if (err.isGlobalError()) {
+                            err.setIsGlobalError(false);
+                        } else {
+                            Saxon.Hej.om.StructuredQName code = err.getErrorCodeQName();
+                            if ((code == null)) {
+                                code = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "XXXX9999");
+                            }
+                            foreach (Saxon.Hej.expr.TryCatch.CatchClause clause in expr.catchClauses) {
+                                if (clause.nameTest.matches(code)) {
+                                    if (((o2 is Saxon.Hej.@event.EventMonitor) && ((Saxon.Hej.@event.EventMonitor)(o2)).hasBeenWrittenTo())) {
+                                        string message = (err.Message+". The error could not be caught, because rollback-output=no was specified, and output was already written to the result tree");
+                                        Saxon.Hej.trans.XPathException xe = new Saxon.Hej.trans.XPathException(message, "XTDE3530");
+                                        xe.setLocation(err.getLocator());
+                                        xe.setXPathContext(context);
+                                        throw xe;
+                                    }
+                                    Saxon.Hej.expr.Expression caught = clause.catchOp.getChildExpression();
+                                    Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                                    c2.setCurrentException(err);
+                                    Saxon.Hej.om.GroundedValue v = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(caught, c2);
+                                    Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c2.getTailCallInfo();
+                                    if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
+                                        ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(context);
+                                    }
+                                    Saxon.Hej.om.SequenceTool.supply(v.iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => output.append(item))));
+                                    return null;
+                                }
+                            }
+                        }
+                        err.setHasBeenReported(false);
+                        throw;
+                    }
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.TryCatch expr = (Saxon.Hej.expr.TryCatch)(getExpression());
+                Saxon.Hej.expr.elab.SequenceEvaluator tryEval = expr.getTryExpr().makeElaborator().eagerly();
+                return context => {
+                    Saxon.Hej.expr.XPathContextMajor c1 = context.newContext();
+                    c1.createThreadManager();
+                    c1.setErrorReporter(new Saxon.Hej.expr.TryCatch.FilteringErrorReporter(context.getErrorReporter(), expr.catchClauses));
+                    try {
+                        try {
+                            Saxon.Hej.om.Sequence v = tryEval.evaluate(c1);
+                            c1.waitForChildThreads();
+                            Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c1.getTailCallInfo();
+                            if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
+                                ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(context);
+                            }
+                            return v.iterate();
+                        } catch (Saxon.Hej.trans.UncheckedXPathException ue) {
+                            throw ue.getXPathException();
+                        }
+                    } catch (Saxon.Hej.trans.XPathException err) {
+                        if (err.isGlobalError()) {
+                            err.setIsGlobalError(false);
+                        } else {
+                            Saxon.Hej.om.StructuredQName code = err.getErrorCodeQName();
+                            if ((code == null)) {
+                                code = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "XXXX9999");
+                            }
+                            foreach (Saxon.Hej.expr.TryCatch.CatchClause clause in expr.catchClauses) {
+                                if (clause.nameTest.matches(code)) {
+                                    Saxon.Hej.expr.Expression caught = clause.catchOp.getChildExpression();
+                                    Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                                    c2.setCurrentException(err);
+                                    Saxon.Hej.om.Sequence v = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(caught, c2);
+                                    Saxon.Hej.expr.TailCallLoop.TailCallInfo tci = c2.getTailCallInfo();
+                                    if ((tci is Saxon.Hej.expr.instruct.BreakInstr)) {
+                                        ((Saxon.Hej.expr.instruct.BreakInstr)(tci)).markContext(context);
+                                    }
+                                    return v.iterate();
+                                }
+                            }
+                        }
+                        err.setHasBeenReported(false);
+                        throw;
+                    }
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.TryCatch expr = (Saxon.Hej.expr.TryCatch)(getExpression());
+                Saxon.Hej.expr.elab.SequenceEvaluator tryEval = expr.getTryExpr().makeElaborator().eagerly();
+                return context => {
+                    Saxon.Hej.expr.XPathContext c1 = context.newMinorContext();
+                    try {
+                        try {
+                            return tryEval.evaluate(c1).head();
+                        } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                            throw e.getXPathException();
+                        }
+                    } catch (Saxon.Hej.trans.XPathException err) {
+                        if (err.isGlobalError()) {
+                            err.setIsGlobalError(false);
+                        } else {
+                            Saxon.Hej.om.StructuredQName code = err.getErrorCodeQName();
+                            if ((code == null)) {
+                                code = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "XXXX9999");
+                            }
+                            foreach (Saxon.Hej.expr.TryCatch.CatchClause clause in expr.catchClauses) {
+                                if (clause.nameTest.matches(code)) {
+                                    Saxon.Hej.expr.Expression caught = clause.catchOp.getChildExpression();
+                                    Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                                    c2.setCurrentException(err);
+                                    return caught.evaluateItem(c2);
+                                }
+                            }
+                        }
+                        err.setHasBeenReported(false);
+                        throw;
+                    }
+                } ;
+            }
         
         }
         private class FilteringErrorReporter : Saxon.Hej.lib.ErrorReporter {

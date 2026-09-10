@@ -19,7 +19,7 @@ namespace Saxon.Hej.style {
         public void parse() {
             bool disable = false;
             Saxon.Hej.om.NodeInfo parent = ((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent());
-            if (((parent is Saxon.Hej.style.XSLText) && Saxon.Hej.style.StyleElement.isYes(Saxon.Hej.value.Whitespace.trim(parent.getAttributeValue("", "disable-output-escaping"))))) {
+            if (((parent is Saxon.Hej.style.XSLText) && Saxon.Hej.style.StyleElement.isYes(Saxon.Hej.value.Whitespace.trim(parent.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "disable-output-escaping"))))) {
                 disable = true;
             }
             try {

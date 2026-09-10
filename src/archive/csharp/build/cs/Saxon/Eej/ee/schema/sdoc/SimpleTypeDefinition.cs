@@ -242,12 +242,12 @@ namespace Saxon.Eej.ee.schema.sdoc {
                             }
                         }
                     }
-                    if ((((@base != null) && (@base.getFingerprint() == Saxon.Hej.om.StandardNames.XS_ANY_SIMPLE_TYPE)) && !(getTypeName().hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA)))) {
+                    if ((((@base != null) && (@base.getFingerprint() == Saxon.Hej.om.StandardNames.XS_ANY_SIMPLE_TYPE)) && !(getTypeName().hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)))) {
                         compiler.error("A simple type cannot be derived by restricting xs:anySimpleType", this);
                         setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                         setBaseTypeReference(new Saxon.Eej.ee.schema.TypeReference(Saxon.Hej.type.BuiltInAtomicType.STRING.getFingerprint(), getConfiguration(), this));
                     }
-                    if ((((@base != null) && (@base.getFingerprint() == Saxon.Hej.om.StandardNames.XS_ANY_ATOMIC_TYPE)) && !(getTypeName().hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA)))) {
+                    if ((((@base != null) && (@base.getFingerprint() == Saxon.Hej.om.StandardNames.XS_ANY_ATOMIC_TYPE)) && !(getTypeName().hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)))) {
                         compiler.error("A simple type cannot be derived by restricting xs:anyAtomicType", this);
                         setFixupStatus(/*explicit enum*/ Saxon.Hej.type.SchemaValidationStatus.INVALID);
                         setBaseTypeReference(new Saxon.Eej.ee.schema.TypeReference(Saxon.Hej.type.BuiltInAtomicType.STRING.getFingerprint(), getConfiguration(), this));

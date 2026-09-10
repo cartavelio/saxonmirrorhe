@@ -61,8 +61,7 @@ namespace Saxon.Hej.functions {
                             }
                         }
                         if (!(ok)) {
-                            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.OPTION, nominalKey, 0);
-                            role.setErrorCode("XPTY0004");
+                            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.OPTION, nominalKey, 0, "XPTY0004");
                             actual = th.applyFunctionConversionRules(actual, required, role, Saxon.Hej.expr.parser.Loc.NONE);
                         }
                     }

@@ -11,7 +11,7 @@ namespace Saxon.Hej.functions {
         public virtual void addFunction(Saxon.Hej.expr.instruct.UserFunction fn) {
             Saxon.Impl.Helpers.MapUtils.Put(functions, fn.getSymbolicName(), fn);
         }
-        public virtual Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
+        public virtual Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] staticArgs, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.expr.instruct.UserFunction fn = Saxon.Impl.Helpers.MapUtils.Get(functions, functionName);
             if ((fn == null)) {
                 return null;
@@ -23,7 +23,7 @@ namespace Saxon.Hej.functions {
             fc.setStaticType(fn.getResultType());
             return fc;
         }
-        public virtual Saxon.Hej.om.Function getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
+        public virtual Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
             Saxon.Hej.expr.instruct.UserFunction fn = Saxon.Impl.Helpers.MapUtils.Get(functions, functionName);
             if (((fn != null) && fn.isUpdating())) {
                 throw new Saxon.Hej.trans.XPathException("Cannot bind a function item to an updating function");

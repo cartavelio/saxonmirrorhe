@@ -10,7 +10,7 @@ namespace Saxon.Hej.expr.flwor {
             this.forClause = forClause;
         }
         public override void processTuple(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.SequenceIterator iter = forClause.getSequence().iterate(context);
+            Saxon.Hej.om.SequenceIterator iter = forClause.getIterator(context);
             int pos = 0;
             Saxon.Hej.om.Item next;
             while (((next = iter.next()) != null)) {

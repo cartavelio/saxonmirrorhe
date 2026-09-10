@@ -55,7 +55,12 @@ namespace Saxon.Hej.s9api {
             if ((initialSource is Saxon.Hej.om.NodeInfo)) {
                 return (Saxon.Api.XdmNode)(Saxon.Api.XdmValue.Wrap((Saxon.Hej.om.NodeInfo)(initialSource)));
             } else {
-                return null;
+                if ((initialSource is Saxon.Hej.om.NodeSource)) {
+                    Saxon.Hej.om.NodeInfo n = ((Saxon.Hej.om.NodeSource)(initialSource)).getNode();
+                    return (Saxon.Api.XdmNode)(Saxon.Api.XdmValue.Wrap(n));
+                } else {
+                    return null;
+                }
             }
         }
         public void setParameter(Saxon.Api.QName name, Saxon.Api.XdmValue value) { lock(this) {

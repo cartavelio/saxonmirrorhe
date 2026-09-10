@@ -12,6 +12,7 @@ namespace Saxon.Hej.om {
         bool hasFingerprint();
         int getFingerprint();
         string getLocalPart();
+        Saxon.Hej.om.NamespaceUri getNamespaceUri();
         string getURI();
         string getDisplayName();
         string getPrefix();
@@ -22,6 +23,7 @@ namespace Saxon.Hej.om {
         Saxon.Hej.om.NodeInfo getParent();
         Saxon.Hej.tree.iter.AxisIterator iterateAxis(int axisNumber);
         Saxon.Hej.tree.iter.AxisIterator iterateAxis(int axisNumber, Saxon.Hej.pattern.NodePredicate predicate);
+        string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local);
         string getAttributeValue(string uri, string local);
         Saxon.Hej.om.NodeInfo getRoot();
         bool hasChildNodes();

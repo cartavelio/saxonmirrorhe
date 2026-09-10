@@ -1,16 +1,23 @@
 using System;
 using System.Impl.Helpers;
 using System.IO;
+using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 using Saxon.Callbacks;
 using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
+using Saxon.Hej.@event;
+using Saxon.Hej.expr.parser;
 using Saxon.Hej.lib;
+using Saxon.Hej.om;
 using Saxon.Hej.pull;
+using Saxon.Hej.serialize;
 using Saxon.Hej.trans;
 using Saxon.Impl.Dom;
+using Saxon.Impl.XDoc;
 
 namespace Saxon.Api {
     /// <summary>
@@ -114,9 +121,29 @@ namespace Saxon.Api {
         /// to an input document and whether type annotations in a supplied document are retained. If no schemaValidator
         /// is supplied, then schema validation does not take place.
         /// </summary>
-        /// <remarks>If validation is requested using this mechanism, and the document is not valid,
+        /// <remarks>
+        /// <para>If validation is requested using this mechanism, and the document is not valid,
         /// then no exception is raised; it is for the application to handle any invalidity reports
         /// from the SchemaValidator.
+        /// </para>
+        /// <para>The supplied <code>SchemaValidator</code> is not actually used directly when a document is built
+        ///  (the {@link SchemaValidator#validate(Source)}
+        ///  method is never called). Rather, some of the properties of the <code>SchemaValidator</code> are used to control
+        ///  how schema validation is performed by the <code>DocumentBuilder</code>. The particular properties
+        ///  that take effect include:</para>
+        ///  <list>
+        ///  <item>The validation mode (strict or lax)</item>
+        ///  <item>The required top-level element declaration (see {@link SchemaValidator#setDocumentElementName(QName)}</item>
+        ///  <item>The required type of the top-level element (see {@link SchemaValidator#setDocumentElementTypeName(QName)}</item>
+        ///  <item>The option {@link SchemaValidator#isUseXsiSchemaLocation()}</item>
+        ///  <item>The option {@link SchemaValidator#isExpandAttributeDefaults()}</item>
+        ///  <item>Validation parameters set using {@link SchemaValidator#setParameter}</item>
+        ///  <item>The {@link net.sf.saxon.lib.InvalidityHandler}</item>
+        ///  </list>
+        ///  <p>Properties that currently do NOT have any effect include:</p>
+        ///  <list>
+        ///  <item>The option {@link SchemaValidator#isCollectStatistics()}</item>
+        ///  </list>
         /// </remarks>
         public SchemaValidator SchemaValidator {
             get => schemaValidator;
@@ -448,13 +475,41 @@ namespace Saxon.Api {
                 documentBaseUri = this.BaseUri.ToString();
             }
             source.setSystemId(documentBaseUri);
-            ParseOptions options = new ParseOptions(config.getParseOptions());
+            ParseOptions options = config.getParseOptions();
 
             source = augmentSource(source, options);
             XdmNode doc = s9Builder.build(source);
             return doc;
         }
 
+        /// <summary>
+        /// Load an Linq document or element node, supplied as an <c>XContainer</c>, into a Saxon <c>XdmNode</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The returned document will contain only the subtree rooted at the supplied node.
+        /// </para>
+        /// <para>
+        /// This method copies the Linq tree to create a Saxon tree. See the <c>Wrap</c> method for
+        /// an alternative that creates a wrapper around the Linq tree, allowing it to be modified in situ.
+        /// </para>
+        /// </remarks>
+        /// <param name="source">The Link document or element node to be copied to form a Saxon tree</param>
+        /// <returns>An <c>XdmNode</c>, the document or element node corresponding to the supplied
+        /// Linq node. If the supplied source was an XDocument node, the result will be an XDM document node;
+        /// if it was an XElement node, it will be an XDM element node forming the outermost element of
+        /// a tree whose root is an XDM document node.
+        /// </returns>
+        public XdmNode Build(XContainer source) {
+            XdmNode doc = Build(source.CreateReader());
+            if (source is XElement) {
+                return doc.Select(Steps.Child("*")).First();
+            }
+            else {
+                return doc;
+            }
+        }
+        
         /// <summary>
         /// Load an XML DOM document, supplied as an <c>XmlNode</c>, into a Saxon <c>XdmNode</c>.
         /// </summary>
@@ -518,6 +573,50 @@ namespace Saxon.Api {
             DomNodeWrapper wrappedNode = tree.wrap(node);
             return new XdmNode(wrappedNode);
         }
+        
+        /// <summary>
+        /// Wrap a Linq document node, supplied as an <c>System.Linq.XDocument</c>, as a Saxon <c>XdmNode</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method must be applied at the level of the Document Node. Unlike the
+        /// <c>Build</c> method, the original tree is not copied. This saves memory and
+        /// time, but it also means that it is not possible to perform operations such as
+        /// whitespace stripping and schema validation.
+        /// </para>
+        /// </remarks>
+        /// <param name="doc">The Linq document node to be wrapped</param>
+        /// <returns>An <c>XdmNode</c>, the Saxon document node at the root of the tree of the resulting
+        /// in-memory document.
+        /// </returns>
+        public XdmNode Wrap(XDocument doc) {
+            string baseu = (baseUri == null ? null : baseUri.ToString());
+            XDocumentTree tree = new XDocumentTree(doc, baseu, config);
+            return (XdmNode) XdmValue.Wrap(tree.getRootNode());
+        }
+        
+        /// <summary>
+        /// Wrap a Linq element node, as a Saxon <c>XdmNode</c>.
+        /// </summary>
+        /// <param name="docWrapper">The wrapper of the containing XDocument node</param>
+        /// <param name="node">The Linq element node containing the node to be wrapped</param>
+        /// <returns>An <c>XdmNode</c>, wrapping the supplied Linq element node
+        /// </returns>
+        public XdmNode Wrap(XdmNode docWrapper, XNode node) {
+            if (!(docWrapper.Implementation is XNodeWrapper && docWrapper.NodeKind == XdmNodeKind.Document)) {
+                throw new IllegalArgumentException("First argument is not a wrapped XDocument node");
+            }
+
+            XNodeWrapper doc = ((XNodeWrapper) docWrapper.Implementation);
+            if (node.Document != doc.getUnderlyingNode()) {
+                throw new IllegalArgumentException(
+                    "The node supplied in the second argument does not belong to the document supplied in the first argument");
+            }
+            XDocumentTree tree = (XDocumentTree)doc.getTreeInfo();
+            XNodeWrapper wrappedNode = tree.wrap(node);
+            return new XdmNode(wrappedNode);
+        }
+        
     }
 }
 

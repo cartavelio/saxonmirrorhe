@@ -5,14 +5,14 @@ namespace Saxon.Hej.functions.hof {
     public class FoldLeftFn : Saxon.Hej.functions.FoldingFunction {
         public override Saxon.Hej.functions.Fold getFold(Saxon.Hej.expr.XPathContext context, params Saxon.Hej.om.Sequence[]  arguments) {
             Saxon.Hej.om.Sequence arg0 = arguments[0];
-            return new Saxon.Hej.functions.hof.FoldLeftFn.FoldLeftFold(context, arg0.materialize(), (Saxon.Hej.om.Function)(arguments[1].head()));
+            return new Saxon.Hej.functions.hof.FoldLeftFn.FoldLeftFold(context, arg0.materialize(), (Saxon.Hej.om.FunctionItem)(arguments[1].head()));
         }
         public class FoldLeftFold : Saxon.Hej.functions.Fold {
             private readonly Saxon.Hej.expr.XPathContext context;
-            private readonly Saxon.Hej.om.Function function;
+            private readonly Saxon.Hej.om.FunctionItem function;
             private Saxon.Hej.om.Sequence data;
             private int counter;
-            public FoldLeftFold(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.GroundedValue zero, Saxon.Hej.om.Function function)  {
+            public FoldLeftFold(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.GroundedValue zero, Saxon.Hej.om.FunctionItem function)  {
                 this.context = context;
                 this.function = function;
                 this.data = zero;

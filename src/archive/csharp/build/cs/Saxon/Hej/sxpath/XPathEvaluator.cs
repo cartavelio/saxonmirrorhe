@@ -24,8 +24,8 @@ namespace Saxon.Hej.sxpath {
             exec.setHostLanguage(Saxon.Api.HostLanguage.XPATH);
             Saxon.Hej.functions.FunctionLibrary userlib = exec.getFunctionLibrary();
             Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
-            lib.addFunctionLibrary(config.getXPath31FunctionSet());
-            lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
+            lib.addFunctionLibrary(Saxon.Hej.functions.registry.XPath31FunctionSet.getInstance());
+            lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
             lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(config));
             lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
             config.addExtensionBinders(lib);

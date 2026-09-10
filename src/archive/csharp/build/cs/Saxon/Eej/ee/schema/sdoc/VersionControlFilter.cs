@@ -28,7 +28,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 bool doneAttributes = false;
                 foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                     Saxon.Hej.om.NodeName attName = att.getNodeName();
-                    if (attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA_VERSIONING)) {
+                    if (attName.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA_VERSIONING)) {
                         string localName = attName.getLocalPart();
                         try {
                             switch (localName) {
@@ -93,7 +93,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                                 }
                                 break ;
                               default:
-                                compiler.warning(("Unrecognized attribute name "+attName), location);
+                                compiler.warning(("Unrecognized attribute name "+attName), Saxon.Hej.trans.SaxonErrorCode.SXSD1014, location);
                                 break ;
                             }
                             if (doneAttributes) {
@@ -118,7 +118,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 depthOfHole++;
             }
         }
-        private static readonly Saxon.Hej.om.FingerprintedQName XS_SCHEMA = new Saxon.Hej.om.FingerprintedQName("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, "schema", (Saxon.Hej.om.StandardNames.XS_SCHEMA&Saxon.Hej.om.NamePool.FP_MASK));
+        private static readonly Saxon.Hej.om.FingerprintedQName XS_SCHEMA = new Saxon.Hej.om.FingerprintedQName("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, "schema", (Saxon.Hej.om.StandardNames.XS_SCHEMA&Saxon.Hej.om.NamePool.FP_MASK));
         public override void endElement() {
             if ((depthOfHole>0)) {
                 depthOfHole--;
@@ -156,10 +156,10 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         private bool isKnownFacetName(Saxon.Hej.om.StructuredQName name) {
             string localName = name.getLocalPart();
-            return (((name.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA) && /*134*/Saxon.Eej.ee.schema.Facet.isFacetName(localName, (isXSD11 ? Saxon.Hej.Configuration.XSD11 : Saxon.Hej.Configuration.XSD10)))) || ((name.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON) && localName.Equals("preprocess"))));
+            return (((name.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA) && /*134*/Saxon.Eej.ee.schema.Facet.isFacetName(localName, (isXSD11 ? Saxon.Hej.Configuration.XSD11 : Saxon.Hej.Configuration.XSD10)))) || ((name.hasURI(Saxon.Hej.om.NamespaceUri.SAXON) && localName.Equals("preprocess"))));
         }
         private bool isAutomaticallyKnownTypeName(Saxon.Hej.om.StructuredQName name) {
-            int fp = Saxon.Hej.om.StandardNames.getFingerprint(name.getURI(), name.getLocalPart());
+            int fp = Saxon.Hej.om.StandardNames.getFingerprint(name.getNamespaceUri(), name.getLocalPart());
             return (((fp != -1) && (Saxon.Hej.type.BuiltInType.getSchemaType(fp) != null)) && ((isXSD11 || (fp != Saxon.Hej.om.StandardNames.XS_ERROR))));
         }
     

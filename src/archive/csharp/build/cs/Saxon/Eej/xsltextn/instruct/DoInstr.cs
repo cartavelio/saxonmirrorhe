@@ -24,14 +24,40 @@ namespace Saxon.Eej.xsltextn.instruct {
         public override int getInstructionNameCode() {
             return Saxon.Hej.om.StandardNames.SAXON_DO;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(getActionExpr().iterate(context));
-            return null;
-        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("do", this);
             getActionExpr().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.xsltextn.instruct.DoInstr.DoInstructionElaborator();
+        }
+        public class DoInstructionElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Eej.xsltextn.instruct.DoInstr expr = (Saxon.Eej.xsltextn.instruct.DoInstr)(getExpression());
+                Saxon.Hej.expr.elab.SequenceEvaluator puller = expr.getActionExpr().makeElaborator().eagerly();
+                return (output, context) => {
+                    puller.evaluate(context);
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Eej.xsltextn.instruct.DoInstr expr = (Saxon.Eej.xsltextn.instruct.DoInstr)(getExpression());
+                Saxon.Hej.expr.elab.SequenceEvaluator puller = expr.getActionExpr().makeElaborator().eagerly();
+                return context => {
+                    puller.evaluate(context);
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Eej.xsltextn.instruct.DoInstr expr = (Saxon.Eej.xsltextn.instruct.DoInstr)(getExpression());
+                Saxon.Hej.expr.elab.SequenceEvaluator puller = expr.getActionExpr().makeElaborator().eagerly();
+                return context => {
+                    puller.evaluate(context);
+                    return null;
+                } ;
+            }
+        
         }
     
     }

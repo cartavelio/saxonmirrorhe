@@ -6,8 +6,8 @@ namespace Saxon.Hej.lib {
         void setCountry(string country);
         string getCountry();
         System.Globalization.CultureInfo defaultedLocale();
-        string format(long number, Saxon.Hej.str.UnicodeString picture, int groupSize, string groupSeparator, string letterValue, string ordinal);
-        string format(long number, Saxon.Hej.str.UnicodeString picture, Saxon.Hej.expr.number.NumericGroupFormatter numGrpFormatter, string letterValue, string ordinal);
+        string format(long number, Saxon.Hej.str.UnicodeString picture, int groupSize, string groupSeparator, string letterValue, string cardinal, string ordinal);
+        string format(long number, Saxon.Hej.str.UnicodeString picture, Saxon.Hej.expr.number.NumericGroupFormatter numGrpFormatter, string letterValue, string cardinal, string ordinal);
         string monthName(int month, int minWidth, int maxWidth);
         string dayName(int day, int minWidth, int maxWidth);
         string halfDayName(int minutes, int minWidth, int maxWidth);

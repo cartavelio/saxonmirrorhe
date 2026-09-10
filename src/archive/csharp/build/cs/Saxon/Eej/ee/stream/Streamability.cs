@@ -270,27 +270,15 @@ namespace Saxon.Eej.ee.stream {
             if ((postureAndSweep != null)) {
                 return postureAndSweep.getPosture();
             } else {
-                if (isCompiledExpression(exp)) {
-                    return getPosture(exp.getInterpretedExpression());
-                } else {
-                    throw new Saxon.Ejava.lang.IllegalStateException("getPosture() called when streamability has not yet been computed");
-                }
+                throw new Saxon.Ejava.lang.IllegalStateException("getPosture() called when streamability has not yet been computed");
             }
-        }
-        private static bool isCompiledExpression(Saxon.Hej.expr.Expression exp) {
-            bool result = false;
-            return result;
         }
         public static Saxon.Eej.ee.stream.Sweep getSweep(Saxon.Hej.expr.Expression exp) {
             Saxon.Eej.ee.stream.PostureAndSweep postureAndSweep = getPostureAndSweepIfKnown(exp);
             if ((postureAndSweep != null)) {
                 return postureAndSweep.getSweep();
             } else {
-                if (isCompiledExpression(exp)) {
-                    return getSweep(exp.getInterpretedExpression());
-                } else {
-                    throw new Saxon.Ejava.lang.IllegalStateException((exp.GetType().Name+".getSweep() called when streamability has not yet been computed"));
-                }
+                throw new Saxon.Ejava.lang.IllegalStateException((exp.GetType().Name+".getSweep() called when streamability has not yet been computed"));
             }
         }
         public static Saxon.Eej.ee.stream.PostureAndSweep getPostureAndSweepIfKnown(Saxon.Hej.expr.Expression exp) {

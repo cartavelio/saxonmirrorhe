@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.ma.map {
     public class MapFunctionSet : Saxon.Hej.functions.registry.BuiltInFunctionSet {
-        public static Saxon.Hej.ma.map.MapFunctionSet THE_INSTANCE = new Saxon.Hej.ma.map.MapFunctionSet();
-        public MapFunctionSet()  {
-            init();
+        private readonly static Saxon.Hej.ma.map.MapFunctionSet instance31 = new Saxon.Hej.ma.map.MapFunctionSet(31);
+        private readonly static Saxon.Hej.ma.map.MapFunctionSet instance40 = new Saxon.Hej.ma.map.MapFunctionSet(40);
+        private MapFunctionSet(int version)  {
+            init(version);
         }
-        public static Saxon.Hej.ma.map.MapFunctionSet getInstance() {
-            return THE_INSTANCE;
+        public static Saxon.Hej.ma.map.MapFunctionSet getInstance(int version) {
+            return ((version>=40) ? instance40 : instance31);
         }
-        private void init() {
-            register("merge", 1, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapMerge), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (STAR|INS), null);
+        private void init(int version) {
+            register("merge", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapMerge(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (STAR|INS), null));
             Saxon.Hej.type.SpecificFunctionType ON_DUPLICATES_CALLBACK_TYPE = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
             Saxon.Hej.value.SequenceType oneOnDuplicatesFunction = Saxon.Hej.value.SequenceType.makeSequenceType(ON_DUPLICATES_CALLBACK_TYPE, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
             Saxon.Hej.functions.OptionsParameter mergeOptionDetails = new Saxon.Hej.functions.OptionsParameter();
@@ -21,24 +22,40 @@ namespace Saxon.Hej.ma.map {
             mergeOptionDetails.addAllowedOption(Saxon.Hej.ma.map.MapFunctionSet.MapMerge.keyTypeKey, Saxon.Hej.value.SequenceType.SINGLE_STRING, Saxon.Hej.value.StringValue.bmp("anyAtomicType"));
             mergeOptionDetails.addAllowedOption(Saxon.Hej.ma.map.MapFunctionSet.MapMerge.finalKey, Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN, Saxon.Hej.value.BooleanValue.FALSE);
             mergeOptionDetails.addAllowedOption(Saxon.Hej.ma.map.MapFunctionSet.MapMerge.onDuplicatesKey, oneOnDuplicatesFunction, null);
-            register("merge", 2, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapMerge), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, null).arg(1, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, null).setOptionDetails(mergeOptionDetails);
-            register("entry", 2, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapEntry), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|NAV), null);
-            register("find", 2, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapFind), Saxon.Hej.ma.arrays.ArrayItemType.getInstance(), ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null);
-            register("get", 2, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapGet), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null);
-            Saxon.Hej.type.SpecificFunctionType indexArg = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ITEM}, Saxon.Hej.value.SequenceType.SINGLE_ATOMIC);
-            register("index", 2, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapIndex), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, indexArg, ONE, null);
-            register("put", 3, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapPut), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|NAV), null);
-            register("contains", 2, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapContains), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null);
-            register("remove", 2, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapRemove), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (STAR|ABS), null);
-            register("keys", 1, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapKeys), Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null);
-            register("size", 1, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapSize), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null);
+            register("merge", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapMerge(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, null).arg(1, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, null).setOptionDetails(mergeOptionDetails));
+            register("put", 3, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapPut(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|NAV), null));
+            register("contains", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapContains(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null));
+            register("remove", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapRemove(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (STAR|ABS), null));
+            register("keys", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapKeys(), Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null));
+            register("size", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapSize(), Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null));
+            register("entry", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapEntry(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|NAV), null));
+            register("find", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapFind(), Saxon.Hej.ma.arrays.ArrayItemType.getInstance(), ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), (STAR|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null));
             Saxon.Hej.type.ItemType actionType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ATOMIC, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
-            register("for-each", 2, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapForEach), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, actionType, (ONE|INS), null);
-            register("entries", 1, typeof(Saxon.Hej.ma.map.MapFunctionSet.MapEntries), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null);
-            register("untyped-contains", 2, typeof(Saxon.Hej.ma.map.MapUntypedContains), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null);
+            register("for-each", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapForEach(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, actionType, (ONE|INS), null));
+            register("get", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapGet(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null));
+            if ((version>=40)) {
+                Saxon.Hej.type.SpecificFunctionType mapBuildKeyArg = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ITEM}, Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC);
+                Saxon.Hej.type.SpecificFunctionType mapBuildValueArg = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ITEM}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
+                register("index", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapBuild(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, mapBuildKeyArg, ONE, null));
+                Saxon.Hej.expr.Expression identityFunction;
+                try {
+                    identityFunction = new Saxon.Hej.functions.hof.FunctionLiteral(/*134*/Saxon.Eej.functions.registry.XPath40FunctionSet.getInstance().makeFunction("identity", 1));
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    throw new Saxon.Ejava.lang.AssertionError(e);
+                }
+                Saxon.Hej.type.FunctionItemType opFnType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
+                Saxon.Hej.expr.Callable concatCallable = new Saxon.Hej.expr.CallableDelegate((cxt, args) => Saxon.Hej.value.SequenceExtent.from(new Saxon.Hej.functions.InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
+                Saxon.Hej.functions.CallableFunction concatSeq = new Saxon.Hej.functions.CallableFunction(2, concatCallable, opFnType);
+                register("build", 1, 4, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapBuild(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, 0).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(1, mapBuildKeyArg, ONE, null, identityFunction).arg(2, mapBuildValueArg, ONE, null, identityFunction).arg(3, opFnType, ONE, null, new Saxon.Hej.functions.hof.FunctionLiteral(concatSeq)));
+                register("key-value-pairs", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapKeyValuePairs(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null));
+                register("entries", 1, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapEntries(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null));
+                register("untyped-contains", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapUntypedContains(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, (ONE|ABS), null));
+                Saxon.Hej.type.SpecificFunctionType FILTER_TYPE = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.SINGLE_ATOMIC, Saxon.Hej.value.SequenceType.ANY_SEQUENCE}, Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
+                register("filter", 2, e => e.populate(() => new Saxon.Hej.ma.map.MapFunctionSet.MapFilter(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, STAR, 0).arg(0, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, (ONE|INS), null).arg(1, FILTER_TYPE, (ONE|INS), null));
+            }
         }
-        public override string getNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.MAP_FUNCTIONS;
+        public override Saxon.Hej.om.NamespaceUri getNamespace() {
+            return Saxon.Hej.om.NamespaceUri.MAP_FUNCTIONS;
         }
         public override string getConventionalPrefix() {
             return "map";
@@ -48,6 +65,21 @@ namespace Saxon.Hej.ma.map {
                 Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(arguments[0].head());
                 Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(arguments[1].head());
                 return Saxon.Hej.value.BooleanValue.get((map.get(key) != null));
+            }
+        
+        }
+        public class MapFilter : Saxon.Hej.functions.SystemFunction {
+            public override Saxon.Hej.ma.map.MapItem call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(arguments[0].head());
+                Saxon.Hej.om.FunctionItem fn = (Saxon.Hej.om.FunctionItem)(arguments[1].head());
+                Saxon.Hej.ma.map.MapItem result = new Saxon.Impl.DataModel.ImmMap();
+                foreach (Saxon.Hej.ma.map.KeyValuePair pair in map.keyValuePairs()) {
+                    Saxon.Hej.value.BooleanValue match = (Saxon.Hej.value.BooleanValue)(dynamicCall(fn, context, new Saxon.Hej.om.Sequence[]{pair.key, pair.value}).head());
+                    if (match.getBooleanValue()) {
+                        result = result.addEntry(pair.key, pair.value);
+                    }
+                }
+                return result;
             }
         
         }
@@ -115,7 +147,7 @@ namespace Saxon.Hej.ma.map {
             }
             public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
                 if (((pendingWarning != null) && !(pendingWarning.Equals("DONE")))) {
-                    visitor.issueWarning(pendingWarning, arguments[0].getLocation());
+                    visitor.issueWarning(pendingWarning, Saxon.Hej.trans.SaxonErrorCode.SXWN9038, arguments[0].getLocation());
                     pendingWarning = "DONE";
                 }
                 return null;
@@ -170,7 +202,10 @@ namespace Saxon.Hej.ma.map {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
                 System.Diagnostics.Debug.Assert((key != null));
-                Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(arguments[1].iterate());
+                if ((arguments[1] is Saxon.Hej.om.Item)) {
+                    return new Saxon.Hej.ma.map.SingleEntryMap(key, (Saxon.Hej.om.Item)(arguments[1]));
+                }
+                Saxon.Hej.om.GroundedValue value = arguments[1].materialize();
                 return new Saxon.Hej.ma.map.SingleEntryMap(key, value);
             }
             public override Saxon.Hej.type.ItemType getResultItemType(Saxon.Hej.expr.Expression[] args) {
@@ -191,13 +226,13 @@ namespace Saxon.Hej.ma.map {
         public class MapForEach : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(arguments[0].head());
-                Saxon.Hej.om.Function fn = (Saxon.Hej.om.Function)(arguments[1].head());
+                Saxon.Hej.om.FunctionItem fn = (Saxon.Hej.om.FunctionItem)(arguments[1].head());
                 Saxon.Hej.ma.zeno.ZenoSequence results = new Saxon.Hej.ma.zeno.ZenoSequence();
                 foreach (Saxon.Hej.ma.map.KeyValuePair pair in map.keyValuePairs()) {
                     Saxon.Hej.om.Sequence seq = dynamicCall(fn, context, new Saxon.Hej.om.Sequence[]{pair.key, pair.value});
                     Saxon.Hej.om.GroundedValue val = seq.materialize();
                     if ((val.getLength()>0)) {
-                        results.appendSequence(val);
+                        results = results.appendSequence(val);
                     }
                 }
                 return results;
@@ -209,26 +244,44 @@ namespace Saxon.Hej.ma.map {
                 Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(arguments[0].head());
                 Saxon.Hej.ma.zeno.ZenoSequence results = new Saxon.Hej.ma.zeno.ZenoSequence();
                 foreach (Saxon.Hej.ma.map.KeyValuePair pair in map.keyValuePairs()) {
-                    Saxon.Hej.ma.map.DictionaryMap kvp = new Saxon.Hej.ma.map.DictionaryMap(2);
-                    kvp.initialPut("key", pair.key);
-                    kvp.initialPut("value", pair.value);
-                    results.appendSequence(kvp);
+                    Saxon.Hej.ma.map.SingleEntryMap entry = new Saxon.Hej.ma.map.SingleEntryMap(pair.key, pair.value);
+                    results = results.append(entry);
                 }
                 return results;
             }
         
         }
-        public class MapIndex : Saxon.Hej.functions.SystemFunction {
+        public class MapKeyValuePairs : Saxon.Hej.functions.SystemFunction {
+            public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+                Saxon.Hej.ma.map.MapItem map = (Saxon.Hej.ma.map.MapItem)(arguments[0].head());
+                Saxon.Hej.ma.zeno.ZenoSequence results = new Saxon.Hej.ma.zeno.ZenoSequence();
+                foreach (Saxon.Hej.ma.map.KeyValuePair pair in map.keyValuePairs()) {
+                    Saxon.Hej.ma.map.DictionaryMap kvp = new Saxon.Hej.ma.map.DictionaryMap(2);
+                    kvp.initialPut("key", pair.key);
+                    kvp.initialPut("value", pair.value);
+                    results = results.appendSequence(kvp);
+                }
+                return results;
+            }
+        
+        }
+        public class MapBuild : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
                 Saxon.Impl.DataModel.ImmMap map = new Saxon.Impl.DataModel.ImmMap();
-                Saxon.Hej.om.Function function = (Saxon.Hej.om.Function)(arguments[1]);
+                Saxon.Hej.om.FunctionItem keyFunction = (Saxon.Hej.om.FunctionItem)(arguments[1].head());
+                Saxon.Hej.om.FunctionItem valueFunction = (Saxon.Hej.om.FunctionItem)(arguments[2].head());
+                Saxon.Hej.om.FunctionItem combineFunction = (Saxon.Hej.om.FunctionItem)(arguments[3].head());
                 Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
-                Saxon.Hej.om.Item item;
-                Saxon.Hej.om.Sequence[] args = new Saxon.Hej.om.Sequence[1];
-                while (((item = iter.next()) != null)) {
-                    args[0] = item;
-                    Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(dynamicCall(function, context, args));
-                    map.initialPut(key, item);
+                for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                    Saxon.Hej.value.AtomicValue key = (Saxon.Hej.value.AtomicValue)(dynamicCall(keyFunction, context, item).head());
+                    if ((key != null)) {
+                        Saxon.Hej.om.GroundedValue value = dynamicCall(valueFunction, context, item).materialize();
+                        Saxon.Hej.om.GroundedValue existing = map.get(key);
+                        if ((existing != null)) {
+                            value = dynamicCall(combineFunction, context, existing, value).materialize();
+                        }
+                        map.initialPut(key, value);
+                    }
                 }
                 return map;
             }
@@ -249,7 +302,7 @@ namespace Saxon.Hej.ma.map {
             public readonly static string errorCodeKey = (("Q{"+Saxon.Hej.lib.NamespaceConstant.SAXON)+"}duplicates-error-code");
             private string duplicates = "use-first";
             private string duplicatesErrorCode = "FOJS0003";
-            private Saxon.Hej.om.Function onDuplicates = null;
+            private Saxon.Hej.om.FunctionItem onDuplicates = null;
             private bool allStringKeys = false;
             private bool treatAsFinal = false;
             public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
@@ -258,13 +311,13 @@ namespace Saxon.Hej.ma.map {
                     System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> values = getDetails().optionDetails.processSuppliedOptions(options, visitor.getStaticContext().makeEarlyEvaluationContext());
                     string duplicates = ((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, "duplicates"))).getStringValue();
                     string duplicatesErrorCode = ((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, errorCodeKey))).getStringValue();
-                    Saxon.Hej.om.Function onDuplicates = (Saxon.Hej.om.Function)(Saxon.Impl.Helpers.MapUtils.Get(values, onDuplicatesKey));
+                    Saxon.Hej.om.FunctionItem onDuplicates = (Saxon.Hej.om.FunctionItem)(Saxon.Impl.Helpers.MapUtils.Get(values, onDuplicatesKey));
                     if ((onDuplicates != null)) {
                         duplicates = "use-callback";
                     }
                     bool isFinal = ((Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(values, finalKey))).getBooleanValue();
                     string keyType = ((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, keyTypeKey))).getStringValue();
-                    Saxon.Hej.ma.map.MapFunctionSet.MapMerge mm2 = (Saxon.Hej.ma.map.MapFunctionSet.MapMerge)(Saxon.Hej.ma.map.MapFunctionSet.getInstance().makeFunction("merge", 1));
+                    Saxon.Hej.ma.map.MapFunctionSet.MapMerge mm2 = (Saxon.Hej.ma.map.MapFunctionSet.MapMerge)(instance31.makeFunction("merge", 1));
                     mm2.duplicates = duplicates;
                     mm2.duplicatesErrorCode = duplicatesErrorCode;
                     mm2.onDuplicates = onDuplicates;
@@ -310,7 +363,7 @@ namespace Saxon.Hej.ma.map {
                 string duplicatesErrorCode = this.duplicatesErrorCode;
                 bool allStringKeys = this.allStringKeys;
                 bool treatAsFinal = this.treatAsFinal;
-                Saxon.Hej.om.Function onDuplicates = this.onDuplicates;
+                Saxon.Hej.om.FunctionItem onDuplicates = this.onDuplicates;
                 if ((arguments.Length>1)) {
                     Saxon.Hej.ma.map.MapItem options = (Saxon.Hej.ma.map.MapItem)(arguments[1].head());
                     System.Collections.Generic.IDictionary<string,Saxon.Hej.om.Sequence> values = getDetails().optionDetails.processSuppliedOptions(options, context);
@@ -318,7 +371,7 @@ namespace Saxon.Hej.ma.map {
                     duplicatesErrorCode = ((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, errorCodeKey))).getStringValue();
                     treatAsFinal = ((Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(values, finalKey))).getBooleanValue();
                     allStringKeys = "string".Equals(((Saxon.Hej.value.StringValue)(Saxon.Impl.Helpers.MapUtils.Get(values, keyTypeKey))).getStringValue());
-                    onDuplicates = (Saxon.Hej.om.Function)(Saxon.Impl.Helpers.MapUtils.Get(values, onDuplicatesKey));
+                    onDuplicates = (Saxon.Hej.om.FunctionItem)(Saxon.Impl.Helpers.MapUtils.Get(values, onDuplicatesKey));
                     if ((onDuplicates != null)) {
                         duplicates = "use-callback";
                     }
@@ -373,66 +426,69 @@ namespace Saxon.Hej.ma.map {
                     }
                 } else {
                     Saxon.Hej.om.SequenceIterator iter = arguments[0].iterate();
-                    Saxon.Hej.ma.map.MapItem baseMap = (Saxon.Hej.ma.map.MapItem)(iter.next());
-                    if ((baseMap == null)) {
-                        return new Saxon.Impl.DataModel.ImmMap();
-                    } else {
-                        Saxon.Hej.ma.map.MapItem next;
-                        while (((next = (Saxon.Hej.ma.map.MapItem)(iter.next())) != null)) {
-                            bool inverse = (next.size()>baseMap.size());
-                            Saxon.Hej.ma.map.MapItem larger = (inverse ? next : baseMap);
-                            Saxon.Hej.ma.map.MapItem smaller = (inverse ? baseMap : next);
-                            string dup = (inverse ? invertDuplicates(duplicates) : duplicates);
-                            foreach (Saxon.Hej.ma.map.KeyValuePair pair in smaller.keyValuePairs()) {
-                                Saxon.Hej.om.Sequence existing = larger.get(pair.key);
-                                if ((existing != null)) {
-                                    switch (dup) {
-                                      case "use-first":
-                                      case "unspecified":
-                                      case "use-any":
-                                        break ;
-                                      case "use-last":
-                                        larger = larger.addEntry(pair.key, pair.value);
-                                        break ;
-                                      case "combine":
-                                        {
-                                            Saxon.Hej.functions.InsertBefore.InsertIterator combinedIter = new Saxon.Hej.functions.InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
-                                            Saxon.Hej.om.GroundedValue combinedValue = Saxon.Hej.om.SequenceTool.toGroundedValue(combinedIter);
-                                            larger = larger.addEntry(pair.key, combinedValue);
-                                            break ;
-                                        }
-                                      case "combine-reverse":
-                                        {
-                                            Saxon.Hej.functions.InsertBefore.InsertIterator combinedIter = new Saxon.Hej.functions.InsertBefore.InsertIterator(existing.iterate(), pair.value.iterate(), 1);
-                                            Saxon.Hej.om.GroundedValue combinedValue = Saxon.Hej.om.SequenceTool.toGroundedValue(combinedIter);
-                                            larger = larger.addEntry(pair.key, combinedValue);
-                                            break ;
-                                        }
-                                      case "use-callback":
-                                        System.Diagnostics.Debug.Assert((onDuplicates != null));
-                                        Saxon.Hej.om.Sequence[] args;
-                                        if (inverse) {
-                                            args = ((onDuplicates.getArity() == 2) ? new Saxon.Hej.om.Sequence[]{pair.value, existing} : new Saxon.Hej.om.Sequence[]{pair.value, existing, pair.key});
-                                        } else {
-                                            args = ((onDuplicates.getArity() == 2) ? new Saxon.Hej.om.Sequence[]{existing, pair.value} : new Saxon.Hej.om.Sequence[]{existing, pair.value, pair.key});
-                                        }
-                                        Saxon.Hej.om.Sequence combined = onDuplicates.call(context, args);
-                                        larger = larger.addEntry(pair.key, combined.materialize());
-                                        break ;
-                                      default:
-                                        throw new Saxon.Hej.trans.XPathException(("Duplicate key in constructed map: "+Saxon.Hej.trans.Err.wrap(pair.key.getStringValue())), duplicatesErrorCode);
-                                    }
-                                } else {
-                                    larger = larger.addEntry(pair.key, pair.value);
-                                }
-                            }
-                            baseMap = larger;
-                        }
-                        return baseMap;
-                    }
+                    return mergeMaps(iter, context, duplicates, duplicatesErrorCode, onDuplicates);
                 }
             }
-            private string invertDuplicates(string duplicates) {
+            public static Saxon.Hej.ma.map.MapItem mergeMaps(Saxon.Hej.om.SequenceIterator iter, Saxon.Hej.expr.XPathContext context, string duplicates, string duplicatesErrorCode, Saxon.Hej.om.FunctionItem onDuplicates) {
+                Saxon.Hej.ma.map.MapItem baseMap = (Saxon.Hej.ma.map.MapItem)(iter.next());
+                if ((baseMap == null)) {
+                    return new Saxon.Impl.DataModel.ImmMap();
+                } else {
+                    Saxon.Hej.ma.map.MapItem next;
+                    while (((next = (Saxon.Hej.ma.map.MapItem)(iter.next())) != null)) {
+                        bool inverse = (next.size()>baseMap.size());
+                        Saxon.Hej.ma.map.MapItem larger = (inverse ? next : baseMap);
+                        Saxon.Hej.ma.map.MapItem smaller = (inverse ? baseMap : next);
+                        string dup = (inverse ? invertDuplicates(duplicates) : duplicates);
+                        foreach (Saxon.Hej.ma.map.KeyValuePair pair in smaller.keyValuePairs()) {
+                            Saxon.Hej.om.Sequence existing = larger.get(pair.key);
+                            if ((existing != null)) {
+                                switch (dup) {
+                                  case "use-first":
+                                  case "unspecified":
+                                  case "use-any":
+                                    break ;
+                                  case "use-last":
+                                    larger = larger.addEntry(pair.key, pair.value);
+                                    break ;
+                                  case "combine":
+                                    {
+                                        Saxon.Hej.functions.InsertBefore.InsertIterator combinedIter = new Saxon.Hej.functions.InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
+                                        Saxon.Hej.om.GroundedValue combinedValue = Saxon.Hej.om.SequenceTool.toGroundedValue(combinedIter);
+                                        larger = larger.addEntry(pair.key, combinedValue);
+                                        break ;
+                                    }
+                                  case "combine-reverse":
+                                    {
+                                        Saxon.Hej.functions.InsertBefore.InsertIterator combinedIter = new Saxon.Hej.functions.InsertBefore.InsertIterator(existing.iterate(), pair.value.iterate(), 1);
+                                        Saxon.Hej.om.GroundedValue combinedValue = Saxon.Hej.om.SequenceTool.toGroundedValue(combinedIter);
+                                        larger = larger.addEntry(pair.key, combinedValue);
+                                        break ;
+                                    }
+                                  case "use-callback":
+                                    System.Diagnostics.Debug.Assert((onDuplicates != null));
+                                    Saxon.Hej.om.Sequence[] args;
+                                    if (inverse) {
+                                        args = ((onDuplicates.getArity() == 2) ? new Saxon.Hej.om.Sequence[]{pair.value, existing} : new Saxon.Hej.om.Sequence[]{pair.value, existing, pair.key});
+                                    } else {
+                                        args = ((onDuplicates.getArity() == 2) ? new Saxon.Hej.om.Sequence[]{existing, pair.value} : new Saxon.Hej.om.Sequence[]{existing, pair.value, pair.key});
+                                    }
+                                    Saxon.Hej.om.Sequence combined = onDuplicates.call(context, args);
+                                    larger = larger.addEntry(pair.key, combined.materialize());
+                                    break ;
+                                  default:
+                                    throw new Saxon.Hej.trans.XPathException(("Duplicate key in constructed map: "+Saxon.Hej.trans.Err.wrap(pair.key.getStringValue())), duplicatesErrorCode);
+                                }
+                            } else {
+                                larger = larger.addEntry(pair.key, pair.value);
+                            }
+                        }
+                        baseMap = larger;
+                    }
+                    return baseMap;
+                }
+            }
+            private static string invertDuplicates(string duplicates) {
                 switch (duplicates) {
                   case "use-first":
                   case "unspecified":

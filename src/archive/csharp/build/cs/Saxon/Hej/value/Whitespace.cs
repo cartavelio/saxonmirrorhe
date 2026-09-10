@@ -22,7 +22,7 @@ namespace Saxon.Hej.value {
               case PRESERVE:
                 return value;
               case REPLACE:
-                Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+                Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(value.length32());
                 Saxon.Hej.z.IntIterator iter = value.codePoints();
                 while (iter.hasNext()) {
                     int c = iter.next();
@@ -51,7 +51,15 @@ namespace Saxon.Hej.value {
         }
         public static Saxon.Hej.str.UnicodeString removeLeadingWhitespace(Saxon.Hej.str.UnicodeString value) {
             long start = trimmedStart(value);
-            return ((start<0) ? Saxon.Hej.str.EmptyUnicodeString.getInstance() : value.substring(start));
+            if ((start == 0)) {
+                return value;
+            } else {
+                if ((start<0)) {
+                    return Saxon.Hej.str.EmptyUnicodeString.getInstance();
+                } else {
+                    return value.substring(start);
+                }
+            }
         }
         public static bool containsWhitespace(Saxon.Hej.z.IntIterator codePoints) {
             while (codePoints.hasNext()) {
@@ -66,13 +74,7 @@ namespace Saxon.Hej.value {
             if ((content is Saxon.Hej.str.WhitespaceString)) {
                 return true;
             }
-            Saxon.Hej.z.IntIterator iter = content.codePoints();
-            while (iter.hasNext()) {
-                if (!(isWhite(iter.next()))) {
-                    return false;
-                }
-            }
-            return true;
+            return (content.indexWhere(ch => !(isWhite(ch)), 0)<0);
         }
         private static readonly bool[] C0WHITE = {false, false, false, false, false, false, false, false, false, true, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true};
         private enum TokenCategory {
@@ -117,7 +119,7 @@ namespace Saxon.Hej.value {
             return ((c<=32) && C0WHITE[c]);
         }
         public static Saxon.Hej.str.UnicodeString normalizeWhitespace(Saxon.Hej.str.UnicodeString input) {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(input.length32());
             Saxon.Hej.z.IntIterator iter = input.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();
@@ -139,7 +141,7 @@ namespace Saxon.Hej.value {
                 return @in;
             }
             long len = trimmedEnd(@in);
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(@in.length32());
             bool inWhitespace = true;
             for (long i = 0; (i<len); i++) {
                 int c = @in.codePointAt(i);
@@ -224,7 +226,7 @@ namespace Saxon.Hej.value {
             return @in.Substring(firstNonWhite, (lastNonWhite+1) - firstNonWhite);
         }
         public static Saxon.Hej.str.UnicodeString collapse(Saxon.Hej.str.UnicodeString @in) {
-            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder(@in.length32());
             tokenize(@in.codePoints(), (s, e, cat) => {
                 Saxon.Hej.value.Whitespace.TokenCategory category = cat;
                 switch (category) {
@@ -258,7 +260,7 @@ namespace Saxon.Hej.value {
             return builder.ToString();
         }
         public static Saxon.Hej.str.UnicodeString normalize(Saxon.Hej.str.UnicodeString @in) {
-            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder(@in.length32());
             tokenize(@in.codePoints(), (s, e, cat) => {
                 Saxon.Hej.value.Whitespace.TokenCategory category = cat;
                 switch (category) {
@@ -325,10 +327,6 @@ namespace Saxon.Hej.value {
         
             /* Expanding default method close from interface SequenceIterator */
             public virtual void close() {
-            }
-
-            /* Expanding default method discharge from interface SequenceIterator */
-            public virtual void discharge() {
             }
 
         }

@@ -15,7 +15,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 string[] allowed = {"fixed", "id", "value"};
                 allowAttributes(atts, allowed);
             }
-            string value = atts.getValue("", "value");
+            string value = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "value");
             if ((value == null)) {
                 if (getLocalPart().Equals("distinct")) {
                     value = "true";
@@ -30,12 +30,12 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 error(err.Message);
                 return ;
             }
-            string message = atts.getValue(Saxon.Hej.lib.NamespaceConstant.SAXON, "message");
+            string message = atts.getValue(Saxon.Hej.om.NamespaceUri.SAXON, "message");
             if ((message != null)) {
                 facet.setMessage(message);
             }
             if ((facet is Saxon.Eej.ee.schema.PatternFacet)) {
-                string flags = atts.getValue(Saxon.Hej.lib.NamespaceConstant.SAXON, "flags");
+                string flags = atts.getValue(Saxon.Hej.om.NamespaceUri.SAXON, "flags");
                 if ((flags != null)) {
                     ((Saxon.Eej.ee.schema.PatternFacet)(facet)).setFlags(flags);
                 }
@@ -49,7 +49,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     warning(s);
                 }
             }
-            string fixedAtt = atts.getValue("", "fixed");
+            string fixedAtt = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "fixed");
             bool @fixed = false;
             if ((fixedAtt != null)) {
                 @fixed = parseBooleanAttribute("fixed", fixedAtt);

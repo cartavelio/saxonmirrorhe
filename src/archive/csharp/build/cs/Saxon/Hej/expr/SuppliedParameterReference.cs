@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr {
     public class SuppliedParameterReference : Saxon.Hej.expr.Expression {
-        internal int slotNumber;
-        internal Saxon.Hej.value.SequenceType type;
+        private readonly int slotNumber;
+        private Saxon.Hej.value.SequenceType type;
         public SuppliedParameterReference(int slot)  {
             slotNumber = slot;
         }
@@ -37,6 +37,9 @@ namespace Saxon.Hej.expr {
                 return Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE;
             }
         }
+        public override bool supportsLazyEvaluation() {
+            return false;
+        }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.SuppliedParameterReference exp = new Saxon.Hej.expr.SuppliedParameterReference(slotNumber);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, exp);
@@ -68,10 +71,49 @@ namespace Saxon.Hej.expr {
         public override void export(Saxon.Hej.trace.ExpressionPresenter destination) {
             destination.startElement("supplied", this);
             destination.emitAttribute("slot", (slotNumber+""));
+            if ((type != null)) {
+                destination.emitAttribute("sType", Saxon.Hej.type.AlphaCode.fromSequenceType(type));
+            }
             destination.endElement();
         }
         public override string ToString() {
             return (("suppliedParam("+slotNumber)+")");
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.SuppliedParameterReference.SuppliedParameterReferenceElaborator();
+        }
+        public class SuppliedParameterReferenceElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.SequenceEvaluator eagerly() {
+                Saxon.Hej.expr.SuppliedParameterReference varRef = (Saxon.Hej.expr.SuppliedParameterReference)(getExpression());
+                int slot = varRef.getSlotNumber();
+                return new Saxon.Hej.expr.elab.LocalVariableEvaluator(slot);
+            }
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+                return eagerly();
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.SuppliedParameterReference varRef = (Saxon.Hej.expr.SuppliedParameterReference)(getExpression());
+                int slot = varRef.getSlotNumber();
+                return context => context.evaluateLocalVariable(slot).iterate();
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.SuppliedParameterReference varRef = (Saxon.Hej.expr.SuppliedParameterReference)(getExpression());
+                int slot = varRef.getSlotNumber();
+                return (@out, context) => {
+                    Saxon.Hej.om.SequenceIterator value = context.evaluateLocalVariable(slot).iterate();
+                    Saxon.Hej.om.Item it;
+                    while (((it = value.next()) != null)) {
+                        @out.append(it);
+                    }
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SuppliedParameterReference varRef = (Saxon.Hej.expr.SuppliedParameterReference)(getExpression());
+                int slot = varRef.getSlotNumber();
+                return context => context.evaluateLocalVariable(slot).head();
+            }
+        
         }
     
     }

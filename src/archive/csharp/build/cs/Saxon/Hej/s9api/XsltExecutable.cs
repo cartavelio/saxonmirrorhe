@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.s9api {
     internal class XsltExecutable {
-        internal Saxon.Hej.s9api.Processor processor;
-        internal Saxon.Hej.PreparedStylesheet preparedStylesheet;
+        private readonly Saxon.Hej.s9api.Processor processor;
+        private readonly Saxon.Hej.PreparedStylesheet preparedStylesheet;
         protected internal XsltExecutable(Saxon.Hej.s9api.Processor processor, Saxon.Hej.PreparedStylesheet preparedStylesheet)  {
             this.processor = processor;
             this.preparedStylesheet = preparedStylesheet;
@@ -43,8 +43,11 @@ namespace Saxon.Hej.s9api {
             Saxon.Hej.Configuration config = processor.getUnderlyingConfiguration();
             try {
                 Saxon.Hej.style.StylesheetPackage topLevelPackage = preparedStylesheet.getTopLevelPackage();
+                if (topLevelPackage.isJustInTimeCompilation()) {
+                    throw new Saxon.Api.SaxonApiException("Cannot export a stylesheet compiled with just-in-time compilation enabled");
+                }
                 Saxon.Hej.trace.ExpressionPresenter presenter = config.newExpressionExporter(target, destination, topLevelPackage);
-                presenter.setRelocatable(topLevelPackage.isRelocatable());
+                presenter.getOptions().relocatable = topLevelPackage.isRelocatable();
                 topLevelPackage.export(presenter);
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);

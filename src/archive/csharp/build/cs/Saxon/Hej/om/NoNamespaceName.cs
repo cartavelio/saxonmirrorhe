@@ -15,8 +15,8 @@ namespace Saxon.Hej.om {
         public string getPrefix() {
             return "";
         }
-        public string getURI() {
-            return "";
+        public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+            return Saxon.Hej.om.NamespaceUri.NULL;
         }
         public string getLocalPart() {
             return localName;
@@ -25,10 +25,10 @@ namespace Saxon.Hej.om {
             return localName;
         }
         public Saxon.Hej.om.StructuredQName getStructuredQName() {
-            return new Saxon.Hej.om.StructuredQName("", "", getLocalPart());
+            return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, getLocalPart());
         }
-        public bool hasURI(string ns) {
-            return ns.Length==0;
+        public bool hasURI(Saxon.Hej.om.NamespaceUri ns) {
+            return ns.isEmpty();
         }
         public Saxon.Hej.om.NamespaceBinding getNamespaceBinding() {
             return Saxon.Hej.om.NamespaceBinding.DEFAULT_UNDECLARATION;
@@ -41,16 +41,16 @@ namespace Saxon.Hej.om {
         }
         public int obtainFingerprint(Saxon.Hej.om.NamePool namePool) {
             if ((nameCode == -1)) {
-                return nameCode = namePool.allocateFingerprint("", localName);
+                return nameCode = namePool.allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, localName);
             } else {
                 return nameCode;
             }
         }
         public override int GetHashCode() {
-            return Saxon.Hej.om.StructuredQName.computeHashCode("", localName);
+            return Saxon.Hej.om.StructuredQName.computeHashCode(Saxon.Hej.om.NamespaceUri.NULL, localName);
         }
         public override bool Equals(System.Object obj) {
-            return (((obj is Saxon.Hej.om.NodeName) && ((Saxon.Hej.om.NodeName)(obj)).getLocalPart().Equals(localName)) && ((Saxon.Hej.om.NodeName)(obj)).hasURI(""));
+            return (((obj is Saxon.Hej.om.NodeName) && ((Saxon.Hej.om.NodeName)(obj)).getLocalPart().Equals(localName)) && ((Saxon.Hej.om.NodeName)(obj)).hasURI(Saxon.Hej.om.NamespaceUri.NULL));
         }
         public override string ToString() {
             return localName;
@@ -62,5 +62,10 @@ namespace Saxon.Hej.om {
             return (GetHashCode()^getPrefix().GetHashCode());
         }
     
+        /* Expanding default method getURI from interface NodeName */
+        public string getURI() {
+            return getNamespaceUri().ToString();
+        }
+
     }
 }

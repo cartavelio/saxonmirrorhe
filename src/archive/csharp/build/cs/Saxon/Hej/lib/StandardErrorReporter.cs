@@ -13,6 +13,7 @@ namespace Saxon.Hej.lib {
         protected internal Saxon.Hej.lib.Logger logger = new Saxon.Callbacks.StandardLogger();
         private Saxon.Hej.s9api.XmlProcessingError latestError;
         private bool outputErrorCodes = true;
+        private System.Collections.Generic.ISet<Saxon.Hej.om.StructuredQName> suppressedWarnings;
         public StandardErrorReporter()  {
         }
         public void setLogger(Saxon.Hej.lib.Logger logger) {
@@ -48,11 +49,26 @@ namespace Saxon.Hej.lib {
         public void setOutputErrorCodes(bool include) {
             this.outputErrorCodes = include;
         }
+        public void suppressWarning(string code) {
+            if ((suppressedWarnings == null)) {
+                suppressedWarnings = new System.Collections.Generic.HashSet<Saxon.Hej.om.StructuredQName>();
+            }
+            if (code.StartsWith("Q{")) {
+                suppressedWarnings.Add(Saxon.Hej.om.StructuredQName.fromEQName(code));
+            } else {
+                suppressedWarnings.Add(new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, code));
+            }
+        }
+        public bool isSuppressedWarning(Saxon.Hej.om.StructuredQName errorCode) {
+            return ((suppressedWarnings != null) && suppressedWarnings.Contains(errorCode));
+        }
         public void report(Saxon.Hej.s9api.XmlProcessingError processingError) {
             if ((processingError != latestError)) {
                 latestError = processingError;
                 if (processingError.isWarning()) {
-                    warning(processingError);
+                    if (((processingError.getErrorCode() == null) || !(isSuppressedWarning(processingError.getErrorCode().GetStructuredQName())))) {
+                        warning(processingError);
+                    }
                 } else {
                     error(processingError);
                 }
@@ -74,6 +90,9 @@ namespace Saxon.Hej.lib {
         }
         public bool isReportingWarnings() {
             return (warningCount<getMaximumNumberOfWarnings());
+        }
+        public int getNumberOfWarnings() {
+            return warningCount;
         }
         protected internal void error(Saxon.Hej.s9api.XmlProcessingError err) {
             if ((errorCount++>maximumNumberOfErrors)) {
@@ -121,6 +140,9 @@ namespace Saxon.Hej.lib {
                 }
             }
         }
+        public int getNumberOfErrors() {
+            return errorCount;
+        }
         public string constructMessage(Saxon.Hej.s9api.XmlProcessingError exception, string langText, string kind) {
             return ((constructFirstLine(exception, langText, kind)+"\n  ")+constructSecondLine(exception));
         }
@@ -135,7 +157,7 @@ namespace Saxon.Hej.lib {
                     int line = nestedLoc.getLocalLineNumber();
                     int column = nestedLoc.getColumnNumber();
                     string lineInfo = ((line<=0) ? "" : (("on line "+line)+' '));
-                    string columnInfo = ((column<0) ? "" : ((("at "+(((line<=0) ? "char " : "column ")))+column)+' '));
+                    string columnInfo = ((column<=0) ? "" : ((("at "+(((line<=0) ? "char " : "column ")))+column)+' '));
                     string nearBy = nestedLoc.getNearbyText();
                     Saxon.Hej.expr.Expression failingExpression = null;
                     string extraContext = formatExtraContext(failingExpression, nearBy);
@@ -197,7 +219,9 @@ namespace Saxon.Hej.lib {
                             appendStackTrace(e, sw);
                             sb.append('\n').append(sw);
                         } else {
-                            sb.append(". Caused by ").append(e.GetType().Name);
+                            if (!(message.Contains(e.Message))) {
+                                sb.append(". Caused by ").append(e.GetType().Name);
+                            }
                         }
                     }
                     string next = e.Message;
@@ -219,7 +243,7 @@ namespace Saxon.Hej.lib {
             if (outputErrorCodes) {
                 Saxon.Api.QName qCode = err.getErrorCode();
                 if ((qCode != null)) {
-                    if (qCode.Uri.Equals(Saxon.Hej.lib.NamespaceConstant.ERR)) {
+                    if (qCode.NamespaceUri.Equals(Saxon.Hej.om.NamespaceUri.ERR)) {
                         return (qCode.LocalName+" ");
                     } else {
                         return (qCode.ToString()+" ");

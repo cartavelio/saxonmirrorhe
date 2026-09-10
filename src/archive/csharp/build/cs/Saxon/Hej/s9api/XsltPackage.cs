@@ -47,7 +47,7 @@ namespace Saxon.Hej.s9api {
             try {
                 Saxon.Hej.Query.createFileIfNecessary(file);
                 Saxon.Hej.trace.ExpressionPresenter presenter = getProcessor().getUnderlyingConfiguration().newExpressionExporter(target, new System.IO.FileStream(file.getPath(), System.IO.FileMode.Create), stylesheetPackage);
-                presenter.setRelocatable(stylesheetPackage.isRelocatable());
+                presenter.getOptions().relocatable = stylesheetPackage.isRelocatable();
                 stylesheetPackage.export(presenter);
             } catch (Exception e) when (e is Saxon.Hej.trans.XPathException || e is System.IO.IOException) {
                 throw new Saxon.Api.SaxonApiException(e);

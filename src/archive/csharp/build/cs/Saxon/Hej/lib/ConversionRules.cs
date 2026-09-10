@@ -37,7 +37,7 @@ namespace Saxon.Hej.lib {
         public void setNotationSet(Saxon.Hej.om.NotationSet notations) {
             this.notationSet = notations;
         }
-        public bool isDeclaredNotation(string uri, string local) {
+        public bool isDeclaredNotation(Saxon.Hej.om.NamespaceUri uri, string local) {
             if ((notationSet == null)) {
                 return true;
             } else {

@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.xsltextn.style {
-    public class Saxon6ElementFactory : Saxon.Eej.xsltextn.ExtensionElementFactory {
-        public System.Type getExtensionClass(string localname) {
-            if (localname.Equals("output")) {
-                return typeof(Saxon.Hej.style.XSLResultDocument);
+    public abstract class Saxon6ElementFactory {
+        public readonly static Saxon.Eej.xsltextn.ExtensionElementCreator FACTORY = (localName => {
+            if (localName.Equals("output")) {
+                return new Saxon.Hej.style.XSLResultDocument();
             }
             return null;
-        }
+        } );
     
     }
 }

@@ -24,6 +24,9 @@ namespace Saxon.Eej.ee.update {
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
             throw new Saxon.Ejava.lang.UnsupportedOperationException("Cannot evaluate an updating expression");
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            throw new Saxon.Ejava.lang.UnsupportedOperationException("Cannot evaluate an updating expression");
+        }
     
     }
 }

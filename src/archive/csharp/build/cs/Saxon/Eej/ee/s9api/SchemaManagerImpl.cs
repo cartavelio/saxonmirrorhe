@@ -36,8 +36,19 @@ namespace Saxon.Eej.ee.s9api {
         }
         public override void load(Saxon.Ejavax.xml.transform.Source source) {
             try {
+                if ((source is Saxon.Ejavax.xml.transform.stream.StreamSource)) {
+                    if ((((((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getInputStream() == null) && (((Saxon.Ejavax.xml.transform.stream.StreamSource)(source)).getReader() == null)) && (source.getSystemId() != null))) {
+                        Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
+                        request.uri = source.getSystemId();
+                        request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSD_NATURE;
+                        Saxon.Ejavax.xml.transform.Source s2 = processor.getUnderlyingConfiguration().getResourceResolver().resolve(request);
+                        if ((s2 != null)) {
+                            source = s2;
+                        }
+                    }
+                }
                 processor.getUnderlyingConfiguration().addSchemaSource(source, errorReporter);
-            } catch (Saxon.Hej.type.SchemaException e) {
+            } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }

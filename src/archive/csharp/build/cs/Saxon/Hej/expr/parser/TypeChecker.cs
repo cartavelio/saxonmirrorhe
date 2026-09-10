@@ -5,9 +5,9 @@ namespace Saxon.Hej.expr.parser {
     public class TypeChecker {
         public TypeChecker()  {
         }
-        public virtual Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.expr.Expression supplied, Saxon.Hej.value.SequenceType req, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
+        public virtual Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.expr.Expression supplied, Saxon.Hej.value.SequenceType req, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             if (supplied.implementsStaticTypeCheck()) {
-                return supplied.staticTypeCheck(req, false, role, visitor);
+                return supplied.staticTypeCheck(req, false, roleSupplier, visitor);
             }
             Saxon.Hej.expr.Expression exp = supplied;
             Saxon.Hej.expr.StaticContext env = visitor.getStaticContext();
@@ -58,6 +58,7 @@ namespace Saxon.Hej.expr.parser {
                                     }
                                 }
                             }
+                            Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((((("An atomic value is required for the "+role.getMessage())+", but the supplied type is ")+shortItemType)+", which cannot be atomized"), "FOTY0013", supplied.getLocation());
                             err.setIsTypeError(true);
                             err.setFailingExpression(supplied);
@@ -66,7 +67,7 @@ namespace Saxon.Hej.expr.parser {
                         if ((exp.getRetainedStaticContext() == null)) {
                             exp.setRetainedStaticContextLocally(env.makeRetainedStaticContext());
                         }
-                        Saxon.Hej.expr.Expression cexp = Saxon.Hej.expr.Atomizer.makeAtomizer(exp, role);
+                        Saxon.Hej.expr.Expression cexp = Saxon.Hej.expr.Atomizer.makeAtomizer(exp, roleSupplier);
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                         exp = cexp;
                         cexp = exp.simplify();
@@ -78,12 +79,13 @@ namespace Saxon.Hej.expr.parser {
                     }
                     if ((suppliedItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC) && !(((reqItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC) || reqItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC)))))) {
                         if (((Saxon.Hej.type.PlainType)(reqItemType)).isNamespaceSensitive()) {
+                            Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("An untyped atomic value cannot be converted to a QName or NOTATION as required for the "+role.getMessage()), "XPTY0117", supplied.getLocation());
                             err.setIsTypeError(true);
                             throw err;
                         }
                         Saxon.Hej.expr.UntypedSequenceConverter cexp = Saxon.Hej.expr.UntypedSequenceConverter.makeUntypedSequenceConverter(config, exp, (Saxon.Hej.type.PlainType)(reqItemType));
-                        cexp.setRoleDiagnostic(role);
+                        cexp.setRoleDiagnostic(roleSupplier);
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                         try {
                             if ((exp is Saxon.Hej.expr.Literal)) {
@@ -95,7 +97,7 @@ namespace Saxon.Hej.expr.parser {
                         } catch (Saxon.Hej.trans.XPathException err) {
                             err.maybeSetLocation(exp.getLocation());
                             err.setFailingExpression(supplied);
-                            err.setErrorCode(role.getErrorCode());
+                            err.setErrorCode(roleSupplier().getErrorCode());
                             err.setIsStaticError(true);
                             throw;
                         }
@@ -108,7 +110,7 @@ namespace Saxon.Hej.expr.parser {
                             conversion = Saxon.Hej.expr.UntypedSequenceConverter.makeUntypedSequenceRejector(config, exp, (Saxon.Hej.type.PlainType)(reqItemType));
                         } else {
                             Saxon.Hej.expr.UntypedSequenceConverter usc = Saxon.Hej.expr.UntypedSequenceConverter.makeUntypedSequenceConverter(config, exp, (Saxon.Hej.type.PlainType)(reqItemType));
-                            usc.setRoleDiagnostic(role);
+                            usc.setRoleDiagnostic(roleSupplier);
                             conversion = usc;
                         }
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, conversion);
@@ -131,7 +133,7 @@ namespace Saxon.Hej.expr.parser {
                         if (((rt == Saxon.Hej.om.StandardNames.XS_DOUBLE) && (th.relationship(suppliedItemType, Saxon.Hej.type.NumericType.getInstance()) != /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT))) {
                             Saxon.Hej.expr.Expression cexp = makePromoterToDouble(exp);
                             if ((cexp is Saxon.Hej.expr.AtomicSequenceConverter)) {
-                                ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(role);
+                                ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(roleSupplier);
                             }
                             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                             exp = cexp;
@@ -148,7 +150,7 @@ namespace Saxon.Hej.expr.parser {
                             if ((((rt == Saxon.Hej.om.StandardNames.XS_FLOAT) && (th.relationship(suppliedItemType, Saxon.Hej.type.NumericType.getInstance()) != /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) && !(th.isSubType(suppliedItemType, Saxon.Hej.type.BuiltInAtomicType.DOUBLE)))) {
                                 Saxon.Hej.expr.Expression cexp = makePromoterToFloat(exp);
                                 if ((cexp is Saxon.Hej.expr.AtomicSequenceConverter)) {
-                                    ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(role);
+                                    ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(roleSupplier);
                                 }
                                 Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                                 exp = cexp;
@@ -168,7 +170,7 @@ namespace Saxon.Hej.expr.parser {
                             itemTypeOK = true;
                             Saxon.Hej.expr.Expression cexp = makePromoterToString(exp);
                             if ((cexp is Saxon.Hej.expr.AtomicSequenceConverter)) {
-                                ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(role);
+                                ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(roleSupplier);
                             }
                             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                             exp = cexp;
@@ -188,7 +190,7 @@ namespace Saxon.Hej.expr.parser {
                                 itemTypeOK = true;
                                 Saxon.Hej.expr.Expression cexp = makeDownCaster(exp, (Saxon.Hej.type.AtomicType)(reqItemType), config);
                                 if ((cexp is Saxon.Hej.expr.AtomicSequenceConverter)) {
-                                    ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(role);
+                                    ((Saxon.Hej.expr.AtomicSequenceConverter)(cexp)).setRoleDiagnostic(roleSupplier);
                                 }
                                 Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                                 exp = cexp;
@@ -209,10 +211,10 @@ namespace Saxon.Hej.expr.parser {
                         Saxon.Hej.type.Affinity r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
                         if ((r != /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) {
                             if (!(((suppliedItemType is Saxon.Hej.type.FunctionItemType)))) {
-                                exp = new Saxon.Hej.expr.ItemChecker(exp, th.getGenericFunctionItemType(), role);
+                                exp = new Saxon.Hej.expr.ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
                                 suppliedItemType = th.getGenericFunctionItemType();
                             }
-                            exp = makeFunctionSequenceCoercer(exp, (Saxon.Hej.type.FunctionItemType)(reqItemType), visitor, role);
+                            exp = makeFunctionSequenceCoercer(exp, (Saxon.Hej.type.FunctionItemType)(reqItemType), roleSupplier);
                             itemTypeOK = true;
                         }
                     } else {
@@ -244,6 +246,7 @@ namespace Saxon.Hej.expr.parser {
                 return exp;
             }
             if (((suppliedCard == Saxon.Hej.expr.StaticProperty.EMPTY) && ((((reqCard&Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO)) == 0)))) {
+                Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+role.getMessage()), role.getErrorCode(), supplied.getLocation());
                 err.setIsTypeError(role.isTypeError());
                 err.setFailingExpression(supplied);
@@ -254,11 +257,12 @@ namespace Saxon.Hej.expr.parser {
                 relation = /*explicit enum*/ Saxon.Hej.type.Affinity.SAME_TYPE;
             }
             if ((relation == /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) {
+                Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                 if ((Saxon.Hej.value.Cardinality.allowsZero(suppliedCard) && Saxon.Hej.value.Cardinality.allowsZero(reqCard))) {
                     if ((suppliedCard != Saxon.Hej.expr.StaticProperty.EMPTY)) {
                         string msg = role.composeErrorMessage(reqItemType, supplied, th);
                         msg += ". The expression can succeed only if the supplied value is an empty sequence.";
-                        visitor.issueWarning(msg, supplied.getLocation());
+                        visitor.issueWarning(msg, Saxon.Hej.trans.SaxonErrorCode.SXWN9026, supplied.getLocation());
                     }
                 } else {
                     string msg = role.composeErrorMessage(reqItemType, supplied, th);
@@ -273,23 +277,25 @@ namespace Saxon.Hej.expr.parser {
                     if (req.matches(((Saxon.Hej.expr.Literal)(exp)).getGroundedValue(), th)) {
                         return exp;
                     }
+                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                     string msg = role.composeErrorMessage(reqItemType, supplied, th);
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, role.getErrorCode(), supplied.getLocation());
                     err.setIsTypeError(role.isTypeError());
                     throw err;
                 } else {
-                    Saxon.Hej.expr.Expression cexp = new Saxon.Hej.expr.ItemChecker(exp, reqItemType, role);
+                    Saxon.Hej.expr.Expression cexp = new Saxon.Hej.expr.ItemChecker(exp, reqItemType, roleSupplier);
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                     exp = cexp;
                 }
             }
             if (!(cardOK)) {
                 if ((exp is Saxon.Hej.expr.Literal)) {
+                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("Required cardinality of "+role.getMessage())+" is ")+Saxon.Hej.value.Cardinality.describe(reqCard))+"; supplied value has cardinality ")+Saxon.Hej.value.Cardinality.describe(suppliedCard)), role.getErrorCode(), supplied.getLocation());
                     err.setIsTypeError(role.isTypeError());
                     throw err;
                 } else {
-                    Saxon.Hej.expr.Expression cexp = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(exp, reqCard, role);
+                    Saxon.Hej.expr.Expression cexp = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(exp, reqCard, roleSupplier);
                     Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(exp, cexp);
                     exp = cexp;
                 }
@@ -305,13 +311,13 @@ namespace Saxon.Hej.expr.parser {
         public virtual Saxon.Hej.expr.Expression processValueOf(Saxon.Hej.expr.Expression select, Saxon.Hej.Configuration config) {
             return select;
         }
-        private static Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Hej.type.FunctionItemType reqItemType, Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.RoleDiagnostic role) {
+        private static Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Hej.type.FunctionItemType reqItemType, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
             return reqItemType.makeFunctionSequenceCoercer(exp, role);
         }
         private Saxon.Hej.expr.Expression makeDownCaster(Saxon.Hej.expr.Expression exp, Saxon.Hej.type.AtomicType reqItemType, Saxon.Hej.Configuration config) {
             return Saxon.Hej.expr.AtomicSequenceConverter.makeDownCaster(exp, reqItemType, config);
         }
-        public static Saxon.Hej.expr.Expression strictTypeCheck(Saxon.Hej.expr.Expression supplied, Saxon.Hej.value.SequenceType req, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.expr.StaticContext env) {
+        public static Saxon.Hej.expr.Expression strictTypeCheck(Saxon.Hej.expr.Expression supplied, Saxon.Hej.value.SequenceType req, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.expr.StaticContext env) {
             Saxon.Hej.expr.Expression exp = supplied;
             Saxon.Hej.type.TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
             Saxon.Hej.type.ItemType reqItemType = req.getPrimaryType();
@@ -349,6 +355,7 @@ namespace Saxon.Hej.expr.parser {
                 suppliedItemType = exp.getItemType();
             }
             if (((suppliedCard == Saxon.Hej.expr.StaticProperty.EMPTY) && ((((reqCard&Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO)) == 0)))) {
+                Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+role.getMessage()), role.getErrorCode(), supplied.getLocation());
                 err.setIsTypeError(role.isTypeError());
                 throw err;
@@ -357,10 +364,12 @@ namespace Saxon.Hej.expr.parser {
             if ((relation == /*explicit enum*/ Saxon.Hej.type.Affinity.DISJOINT)) {
                 if ((Saxon.Hej.value.Cardinality.allowsZero(suppliedCard) && Saxon.Hej.value.Cardinality.allowsZero(reqCard))) {
                     if ((suppliedCard != Saxon.Hej.expr.StaticProperty.EMPTY)) {
+                        Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                         string msg = (((((((("Required item type of "+role.getMessage())+" is ")+reqItemType)+"; supplied value (")+supplied.toShortString())+") has item type ")+suppliedItemType)+". The expression can succeed only if the supplied value is an empty sequence.");
-                        env.issueWarning(msg, supplied.getLocation());
+                        env.issueWarning(msg, Saxon.Hej.trans.SaxonErrorCode.SXWN9026, supplied.getLocation());
                     }
                 } else {
+                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                     string msg = role.composeErrorMessage(reqItemType, supplied, th);
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, role.getErrorCode(), supplied.getLocation());
                     err.setIsTypeError(role.isTypeError());
@@ -368,17 +377,18 @@ namespace Saxon.Hej.expr.parser {
                 }
             }
             if (!((((relation == /*explicit enum*/ Saxon.Hej.type.Affinity.SAME_TYPE) || (relation == /*explicit enum*/ Saxon.Hej.type.Affinity.SUBSUMED_BY))))) {
-                Saxon.Hej.expr.Expression cexp = new Saxon.Hej.expr.ItemChecker(exp, reqItemType, role);
+                Saxon.Hej.expr.Expression cexp = new Saxon.Hej.expr.ItemChecker(exp, reqItemType, roleSupplier);
                 cexp.adoptChildExpression(exp);
                 exp = cexp;
             }
             if (!(cardOK)) {
                 if ((exp is Saxon.Hej.expr.Literal)) {
+                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((("Required cardinality of "+role.getMessage())+" is ")+Saxon.Hej.value.Cardinality.describe(reqCard))+"; supplied value has cardinality ")+Saxon.Hej.value.Cardinality.describe(suppliedCard)), role.getErrorCode(), supplied.getLocation());
                     err.setIsTypeError(role.isTypeError());
                     throw err;
                 } else {
-                    Saxon.Hej.expr.Expression cexp = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(exp, reqCard, role);
+                    Saxon.Hej.expr.Expression cexp = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(exp, reqCard, roleSupplier);
                     cexp.adoptChildExpression(exp);
                     exp = cexp;
                 }
@@ -389,8 +399,7 @@ namespace Saxon.Hej.expr.parser {
             Saxon.Hej.type.ItemType reqItemType = requiredType.getPrimaryType();
             Saxon.Hej.om.SequenceIterator iter = val.iterate();
             int count = 0;
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 count++;
                 if (!(reqItemType.matches(item, context.getConfiguration().getTypeHierarchy()))) {
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Required type is "+reqItemType)+"; supplied value has type ")+Saxon.Hej.type.UType.getUType(val.materialize())));

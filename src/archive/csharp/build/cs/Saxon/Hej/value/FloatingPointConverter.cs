@@ -318,7 +318,7 @@ namespace Saxon.Hej.value {
             appendInt(sb, H);
         }
         public static Saxon.Hej.str.UnicodeString convertDouble(double d, bool forceExponential) {
-            Saxon.Hej.str.UnicodeBuilder s = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder s = new Saxon.Hej.str.UnicodeBuilder(32);
             if ((d == System.Double.NegativeInfinity)) {
                 s.appendLatin(NEGATIVE_INFINITY);
             } else {

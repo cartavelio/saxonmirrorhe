@@ -99,7 +99,7 @@ namespace Saxon.Eej.ee.schema {
                 }
                 if ((target == null)) {
                     if (compiler.isAllowDanglingReferences()) {
-                        compiler.warning((("Unknown attribute group "+qName.getEQName())+" (substituting an empty attribute group)"), this);
+                        compiler.warning((("Unknown attribute group "+qName.getEQName())+" (substituting an empty attribute group)"), Saxon.Hej.trans.SaxonErrorCode.SXSD1000, this);
                         dangling = true;
                         target = new Saxon.Eej.ee.schema.AttributeGroupDecl(compiler.getConfiguration());
                         target.addAttributeGroupReference(this);
@@ -118,7 +118,7 @@ namespace Saxon.Eej.ee.schema {
         }
         public override void elaborate(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             throw new Saxon.Ejava.lang.UnsupportedOperationException();
         }
     

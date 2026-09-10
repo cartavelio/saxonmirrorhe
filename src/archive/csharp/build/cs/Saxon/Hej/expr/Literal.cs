@@ -39,7 +39,7 @@ namespace Saxon.Hej.expr {
                 if ((value is Saxon.Hej.value.AtomicValue)) {
                     return ((Saxon.Hej.value.AtomicValue)(value)).getUType();
                 } else {
-                    if ((value is Saxon.Hej.om.Function)) {
+                    if ((value is Saxon.Hej.om.FunctionItem)) {
                         return Saxon.Hej.type.UType.FUNCTION;
                     } else {
                         return base.getStaticUType(contextItemType);
@@ -72,6 +72,9 @@ namespace Saxon.Hej.expr {
                 return (Saxon.Hej.expr.StaticProperty.SPECIAL_PROPERTY_MASK&~(Saxon.Hej.expr.StaticProperty.HAS_SIDE_EFFECTS));
             }
             return Saxon.Hej.expr.StaticProperty.NO_NODES_NEWLY_CREATED;
+        }
+        public override bool supportsLazyEvaluation() {
+            return false;
         }
         public override Saxon.Hej.value.IntegerValue[] getIntegerBounds() {
             if ((value is Saxon.Hej.value.IntegerValue)) {
@@ -133,12 +136,6 @@ namespace Saxon.Hej.expr {
         }
         public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
             return value.effectiveBooleanValue();
-        }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            if ((value.getLength() == 0)) {
-            } else {
-                base.evaluatePendingUpdates(context, pul);
-            }
         }
         public override bool Equals(System.Object obj) {
             if (!(((obj is Saxon.Hej.expr.Literal)))) {
@@ -218,7 +215,7 @@ namespace Saxon.Hej.expr {
                             @out.startElement("node");
                             int nodeKind = ((Saxon.Hej.om.NodeInfo)(value)).getNodeKind();
                             @out.emitAttribute("kind", (nodeKind+""));
-                            if (((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions())).explaining) {
+                            if (@out.getOptions().explaining) {
                                 string name = ((Saxon.Hej.om.NodeInfo)(value)).getDisplayName();
                                 if (!(name.Length==0)) {
                                     @out.emitAttribute("name", name);
@@ -250,8 +247,8 @@ namespace Saxon.Hej.expr {
                                     if (!(name.getPrefix().Length==0)) {
                                         @out.emitAttribute("prefix", name.getPrefix());
                                     }
-                                    if (!(name.getURI().Length==0)) {
-                                        @out.emitAttribute("ns", name.getURI());
+                                    if (!(name.hasURI(Saxon.Hej.om.NamespaceUri.NULL))) {
+                                        @out.emitAttribute("ns", name.getNamespaceUri().ToString());
                                     }
                                     @out.emitAttribute("content", ((Saxon.Hej.om.NodeInfo)(value)).getStringValue());
                                     break ;
@@ -271,16 +268,16 @@ namespace Saxon.Hej.expr {
                                 }
                                 @out.endElement();
                             } else {
-                                if ((value is Saxon.Hej.om.Function)) {
-                                    ((Saxon.Hej.om.Function)(value)).export(@out);
+                                if ((value is Saxon.Hej.om.FunctionItem)) {
+                                    ((Saxon.Hej.om.FunctionItem)(value)).export(@out);
                                 } else {
                                     if ((value is Saxon.Hej.value.AnyExternalObject)) {
-                                        if (((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions())).explaining) {
+                                        if (@out.getOptions().explaining) {
                                             @out.startElement("externalObject");
                                             @out.emitAttribute("class", ((Saxon.Hej.value.AnyExternalObject)(value)).getWrappedObject().GetType().Name);
                                             @out.endElement();
                                         } else {
-                                            throw new Saxon.Hej.trans.XPathException("Cannot export a stylesheet containing literal values bound to external Java objects");
+                                            throw new Saxon.Hej.trans.XPathException("Cannot export a stylesheet containing literal values bound to external Java objects", Saxon.Hej.trans.SaxonErrorCode.SXST0070);
                                         }
                                     } else {
                                         @out.startElement("literal");
@@ -301,7 +298,7 @@ namespace Saxon.Hej.expr {
             return "literal";
         }
         public static void exportAtomicValue(Saxon.Hej.value.AtomicValue value, Saxon.Hej.trace.ExpressionPresenter @out) {
-            if ("JS".Equals(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions())).target)) {
+            if ("JS".Equals(@out.getOptions().target)) {
                 value.checkValidInJavascript();
             }
             Saxon.Hej.type.AtomicType type = value.getItemType();
@@ -333,7 +330,7 @@ namespace Saxon.Hej.expr {
                                 if ((value is Saxon.Hej.value.QualifiedNameValue)) {
                                     @out.startElement("qName");
                                     @out.emitAttribute("pre", ((Saxon.Hej.value.QualifiedNameValue)(value)).getPrefix());
-                                    @out.emitAttribute("uri", ((Saxon.Hej.value.QualifiedNameValue)(value)).getNamespaceURI());
+                                    @out.emitAttribute("uri", ((Saxon.Hej.value.QualifiedNameValue)(value)).getNamespaceURI().ToString());
                                     @out.emitAttribute("loc", ((Saxon.Hej.value.QualifiedNameValue)(value)).getLocalName());
                                     if (!(type.Equals(Saxon.Hej.type.BuiltInAtomicType.QNAME))) {
                                         @out.emitAttribute("type", type.getEQName());
@@ -392,6 +389,13 @@ namespace Saxon.Hej.expr {
             }
             return false;
         }
+        public static bool isConstantZero(Saxon.Hej.expr.Expression exp) {
+            if ((exp is Saxon.Hej.expr.Literal)) {
+                Saxon.Hej.om.GroundedValue v = ((Saxon.Hej.expr.Literal)(exp)).getGroundedValue();
+                return ((v is Saxon.Hej.value.Int64Value) && (((Saxon.Hej.value.Int64Value)(v)).longValue() == 0));
+            }
+            return false;
+        }
         public override bool isSubtreeExpression() {
             return true;
         }
@@ -403,8 +407,8 @@ namespace Saxon.Hej.expr {
             if ((value is Saxon.Hej.value.StringValue)) {
                 return new Saxon.Hej.expr.StringLiteral((Saxon.Hej.value.StringValue)(value));
             } else {
-                if (((value is Saxon.Hej.om.Function) && !((((value is Saxon.Hej.ma.map.MapItem) || (value is Saxon.Hej.ma.arrays.ArrayItem)))))) {
-                    return new Saxon.Hej.functions.hof.FunctionLiteral((Saxon.Hej.om.Function)(value));
+                if (((value is Saxon.Hej.om.FunctionItem) && !((((value is Saxon.Hej.ma.map.MapItem) || (value is Saxon.Hej.ma.arrays.ArrayItem)))))) {
+                    return new Saxon.Hej.functions.hof.FunctionLiteral((Saxon.Hej.om.FunctionItem)(value));
                 } else {
                     return new Saxon.Hej.expr.Literal(value);
                 }
@@ -417,6 +421,82 @@ namespace Saxon.Hej.expr {
         }
         public override string getStreamerName() {
             return "Literal";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.Literal.LiteralElaborator();
+        }
+        public class LiteralElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.SequenceEvaluator eagerly() {
+                Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getExpression())).getGroundedValue();
+                return new Saxon.Hej.expr.elab.LiteralEvaluator(value);
+            }
+            public override Saxon.Hej.expr.elab.SequenceEvaluator lazily(bool repeatable) {
+                return eagerly();
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getExpression())).getGroundedValue();
+                return context => value.iterate();
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.Literal expr = (Saxon.Hej.expr.Literal)(getExpression());
+                Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getExpression())).getGroundedValue();
+                if ((value is Saxon.Hej.om.Item)) {
+                    return (@out, context) => {
+                        @out.append((Saxon.Hej.om.Item)(value), expr.getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
+                        return null;
+                    } ;
+                } else {
+                    return (@out, context) => {
+                        foreach (Saxon.Hej.om.Item item in value.asIterable()) {
+                            @out.append(item, expr.getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES);
+                        }
+                        return null;
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getExpression())).getGroundedValue();
+                System.Diagnostics.Debug.Assert((value.getLength()<2));
+                Saxon.Hej.om.Item item = value.head();
+                return context => item;
+            }
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getExpression())).getGroundedValue();
+                try {
+                    bool ebv = value.effectiveBooleanValue();
+                    return context => ebv;
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                }
+            }
+            public override Saxon.Hej.expr.elab.UnicodeStringEvaluator elaborateForUnicodeString(bool zeroLengthWhenAbsent) {
+                Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getExpression())).getGroundedValue();
+                try {
+                    Saxon.Hej.str.UnicodeString str = value.getUnicodeStringValue();
+                    return context => str;
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                }
+            }
+            public override Saxon.Hej.expr.elab.StringEvaluator elaborateForString(bool zeroLengthWhenAbsent) {
+                Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getExpression())).getGroundedValue();
+                try {
+                    string str = value.getStringValue();
+                    return context => str;
+                } catch (Saxon.Hej.trans.XPathException e) {
+                    throw new Saxon.Hej.trans.UncheckedXPathException(e);
+                }
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Hej.om.GroundedValue value = ((Saxon.Hej.expr.Literal)(getExpression())).getGroundedValue();
+                if ((value.getLength() == 0)) {
+                    return (context, pul) => {
+                    } ;
+                } else {
+                    return base.elaborateForUpdate();
+                }
+            }
+        
         }
     
     }

@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.stream.feed {
     public class GeneralComparisonEqualityFeed : Saxon.Eej.ee.stream.feed.AtomicItemFeed {
+        private Saxon.Eej.ee.stream.watch.WatchManager watchManager;
         private readonly Saxon.Hej.lib.StringCollator collator;
         private Saxon.Hej.z.IntHashMap<System.Collections.Generic.ISet<Saxon.Hej.expr.sort.AtomicMatchKey>> lookupTable;
         private System.Collections.Generic.IList<Saxon.Hej.value.StringValue> untypedValues;
         private bool done = false;
         private readonly Saxon.Hej.expr.Expression pullOperand;
         private readonly int implicitTimezone;
-        public GeneralComparisonEqualityFeed(Saxon.Hej.expr.Expression expr, int pushedArg, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expr, result, context) {
+        private bool closed;
+        public GeneralComparisonEqualityFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression expr, int pushedArg, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expr, result, context) {
+            this.watchManager = watchManager;
             Saxon.Hej.expr.GeneralComparison gc = (Saxon.Hej.expr.GeneralComparison)(getExpression());
-            collator = gc.getAtomicComparer().getCollator();
+            collator = gc.getStringCollator();
             pullOperand = ((pushedArg == 0) ? gc.getRhsExpression() : gc.getLhsExpression());
             implicitTimezone = context.getImplicitTimezone();
         }
@@ -83,9 +86,12 @@ namespace Saxon.Eej.ee.stream.feed {
                         Saxon.Hej.@event.Outputter @out = getNextOutputter();
                         done = true;
                         @out.append(Saxon.Hej.value.BooleanValue.FALSE);
-                        @out.close();
                         lookupTable = null;
-                        getTerminator().terminate();
+                        if (watchManager.allowsEarlyExit()) {
+                            closed = true;
+                            @out.close();
+                            getTerminator().terminate();
+                        }
                     }
                 } else {
                     System.Collections.Generic.ISet<Saxon.Hej.expr.sort.AtomicMatchKey> typed = lookupTable.get(matchType.getFingerprint());
@@ -129,14 +135,19 @@ namespace Saxon.Eej.ee.stream.feed {
             if (lookup.Contains(k)) {
                 done = true;
                 @out.append(Saxon.Hej.value.BooleanValue.TRUE);
-                @out.close();
                 lookupTable = null;
-                getTerminator().terminate();
+                if (watchManager.allowsEarlyExit()) {
+                    closed = true;
+                    @out.close();
+                    getTerminator().terminate();
+                }
             }
         }
         public override void close() {
             if (!(done)) {
                 getNextOutputter().append(Saxon.Hej.value.BooleanValue.FALSE);
+            }
+            if (!(closed)) {
                 base.close();
                 lookupTable = null;
             }

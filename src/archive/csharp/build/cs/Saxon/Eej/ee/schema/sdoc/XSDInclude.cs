@@ -11,7 +11,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"id", "schemaLocation"};
             allowAttributes(atts, allowed);
             processId();
-            string schemaLocation = atts.getValue("", "schemaLocation");
+            string schemaLocation = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "schemaLocation");
             if ((schemaLocation == null)) {
                 missingAttribute("schemaLocation");
                 return ;
@@ -35,7 +35,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             if ((source == null)) {
                 warning(("Failed to locate included schema document "+schemaLocation));
-                includedSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), "");
+                includedSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), Saxon.Hej.om.NamespaceUri.NULL);
             } else {
                 if (compiler.isBeingRead(source.getSystemId())) {
                     warning((("Module "+source.getSystemId())+" includes itself recursively"));
@@ -57,7 +57,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             System.Exception cause = e.getException();
             if (isFileNotFoundException(cause)) {
                 warning((((((("Included schema document "+schemaLocation)+" cannot be located: ")+cause.GetType().Name)+" (")+cause.Message)+")"));
-                includedSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), "");
+                includedSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), Saxon.Hej.om.NamespaceUri.NULL);
             } else {
                 error(("Failed to process included schema document "+schemaLocation));
                 throw e;

@@ -31,6 +31,31 @@ namespace Saxon.Hej.expr {
         public override string getExpressionName() {
             return "lastOf";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.LastItemExpression.LastItemExprElaborator();
+        }
+        public class LastItemExprElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.LastItemExpression expr = (Saxon.Hej.expr.LastItemExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => getLast(/*Delegate.iterate()*/baseEval(context));
+            }
+        
+        }
+        public static Saxon.Hej.om.Item getLast(Saxon.Hej.om.SequenceIterator iter) {
+            if ((iter is Saxon.Hej.tree.iter.ReversibleIterator)) {
+                return ((Saxon.Hej.tree.iter.ReversibleIterator)(iter)).getReverseIterator().next();
+            } else {
+                Saxon.Hej.om.Item current = null;
+                while (true) {
+                    Saxon.Hej.om.Item item = iter.next();
+                    if ((item == null)) {
+                        return current;
+                    }
+                    current = item;
+                }
+            }
+        }
     
     }
 }

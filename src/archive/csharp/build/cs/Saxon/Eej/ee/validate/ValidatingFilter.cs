@@ -95,7 +95,7 @@ namespace Saxon.Eej.ee.validate {
                 if ((validationContext.getErrorCount() == 1)) {
                     message = "One validation error was reported: ";
                 } else {
-                    message = (new Saxon.Hej.expr.number.Numberer_en().toWords(validationContext.getErrorCount())+" validation errors were reported. First error: ");
+                    message = (new Saxon.Hej.expr.number.Numberer_en().toWords("", validationContext.getErrorCount())+" validation errors were reported. First error: ");
                 }
                 message += validationContext.getFirstFailure().getMessage();
                 Saxon.Hej.type.ValidationFailure err = new Saxon.Hej.type.ValidationFailure(message);

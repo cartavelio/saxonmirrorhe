@@ -26,7 +26,7 @@ namespace Saxon.Eej.ee.schema {
         }
         public int getTargetFingerprint() {
             if ((targetFingerprint == -1)) {
-                targetFingerprint = getConfiguration().getNamePool().allocateFingerprint(targetComponentName.getURI(), targetComponentName.getLocalPart());
+                targetFingerprint = getConfiguration().getNamePool().allocateFingerprint(targetComponentName.getNamespaceUri(), targetComponentName.getLocalPart());
             }
             return targetFingerprint;
         }

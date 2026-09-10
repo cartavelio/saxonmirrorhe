@@ -74,8 +74,8 @@ namespace Saxon.Hej.value {
         public string getPrefix() {
             return "";
         }
-        public string getURI() {
-            return "";
+        public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+            return Saxon.Hej.om.NamespaceUri.NULL;
         }
         public string getDisplayName() {
             return "";
@@ -101,7 +101,7 @@ namespace Saxon.Hej.value {
         public Saxon.Hej.om.AtomicSequence atomize() {
             return Saxon.Hej.value.StringValue.makeUntypedAtomic(text);
         }
-        public string getAttributeValue(string uri, string local) {
+        public string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local) {
             return null;
         }
         public Saxon.Hej.tree.iter.AxisIterator iterateAxis(int axisNumber) {
@@ -238,8 +238,8 @@ namespace Saxon.Hej.value {
             public string getPrefix() {
                 return "";
             }
-            public string getURI() {
-                return "";
+            public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+                return Saxon.Hej.om.NamespaceUri.NULL;
             }
             public string getDisplayName() {
                 return "";
@@ -250,7 +250,7 @@ namespace Saxon.Hej.value {
             public bool hasChildNodes() {
                 return false;
             }
-            public string getAttributeValue(string uri, string local) {
+            public string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local) {
                 return null;
             }
             public Saxon.Hej.s9api.Location saveLocation() {
@@ -374,12 +374,12 @@ namespace Saxon.Hej.value {
 
             /* Expanding default method concatenate from interface GroundedValue */
             public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-                Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-                chain.appendSequence(this);
-                foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                    chain.appendSequence(seq);
+                Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+                chain = chain.addAll(asIterable());
+                foreach (Saxon.Hej.om.GroundedValue val in others) {
+                    chain = chain.addAll(val.asIterable());
                 }
-                return chain;
+                return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
             }
 
             /* Expanding default method makeRepeatable from interface Sequence */
@@ -410,6 +410,16 @@ namespace Saxon.Hej.value {
             /* Expanding default method getColumnNumber from interface NodeInfo */
             public virtual int getColumnNumber() {
                 return -1;
+            }
+
+            /* Expanding default method getURI from interface NodeInfo */
+            public virtual string getURI() {
+                return getNamespaceUri().ToString();
+            }
+
+            /* Expanding default method getAttributeValue from interface NodeInfo */
+            public virtual string getAttributeValue(string uri, string local) {
+                return getAttributeValue((uri.Length==0 ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.of(uri)), local);
             }
 
             /* Expanding default method children from interface NodeInfo */
@@ -496,7 +506,7 @@ namespace Saxon.Hej.value {
 
             /* Expanding default method iterate from interface Item */
             public virtual Saxon.Hej.om.SequenceIterator iterate() {
-                return new Saxon.Hej.tree.iter.SingletonIterator(this);
+                return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
             }
 
         }
@@ -533,12 +543,12 @@ namespace Saxon.Hej.value {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */
@@ -569,6 +579,16 @@ namespace Saxon.Hej.value {
         /* Expanding default method getColumnNumber from interface NodeInfo */
         public int getColumnNumber() {
             return -1;
+        }
+
+        /* Expanding default method getURI from interface NodeInfo */
+        public string getURI() {
+            return getNamespaceUri().ToString();
+        }
+
+        /* Expanding default method getAttributeValue from interface NodeInfo */
+        public string getAttributeValue(string uri, string local) {
+            return getAttributeValue((uri.Length==0 ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.of(uri)), local);
         }
 
         /* Expanding default method children from interface NodeInfo */
@@ -655,7 +675,7 @@ namespace Saxon.Hej.value {
 
         /* Expanding default method iterate from interface Item */
         public Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
     }

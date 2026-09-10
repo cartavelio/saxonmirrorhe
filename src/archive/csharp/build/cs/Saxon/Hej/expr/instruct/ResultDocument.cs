@@ -39,8 +39,7 @@ namespace Saxon.Hej.expr.instruct {
             if ((validationOptions == null)) {
                 validationOptions = new Saxon.Hej.lib.ParseOptions();
             }
-            validationOptions.setSchemaValidationMode(Saxon.Hej.lib.Validation.BY_TYPE);
-            validationOptions.setTopLevelType(type);
+            validationOptions = validationOptions.withSchemaValidationMode(Saxon.Hej.lib.Validation.BY_TYPE).withTopLevelType(type);
         }
         public Saxon.Hej.type.SchemaType getSchemaType() {
             return ((validationOptions == null) ? null : validationOptions.getTopLevelType());
@@ -55,9 +54,7 @@ namespace Saxon.Hej.expr.instruct {
             bool preservingTypes = ((mode == Saxon.Hej.lib.Validation.PRESERVE) && (schemaType == null));
             if (!(preservingTypes)) {
                 if ((validationOptions == null)) {
-                    validationOptions = new Saxon.Hej.lib.ParseOptions();
-                    validationOptions.setSchemaValidationMode(mode);
-                    validationOptions.setTopLevelType(schemaType);
+                    validationOptions = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(mode).withTopLevelType(schemaType);
                 }
             }
         }
@@ -145,22 +142,19 @@ namespace Saxon.Hej.expr.instruct {
             result.setReturnable(false);
             return new Saxon.Hej.expr.parser.PathMap.PathMapNodeSet(pathMap.makeNewRoot(this));
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            process(getContentExpression(), context);
-            return null;
-        }
-        public void process(Saxon.Hej.expr.Expression content, Saxon.Hej.expr.XPathContext context) {
+        public void process(Saxon.Hej.expr.elab.PushEvaluator content, Saxon.Hej.expr.XPathContext context) {
             checkNotTemporaryOutputState(context);
             context.getConfiguration().processResultDocument(this, content, context);
         }
-        public void processInstruction(Saxon.Hej.expr.Expression content, Saxon.Hej.expr.XPathContext context) {
+        public void processInstruction(Saxon.Hej.expr.elab.PushEvaluator content, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.trans.XsltController controller = (Saxon.Hej.trans.XsltController)(context.getController());
             System.Diagnostics.Debug.Assert((controller != null));
             string savedOutputUri = context.getCurrentOutputUri();
             Saxon.Hej.@event.ComplexContentOutputter @out = processLeft(context);
             bool failed = false;
             try {
-                content.process(@out, context);
+                Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/content(@out, context);
+                dispatchTailCall(tc);
             } catch (Saxon.Hej.trans.XPathException err) {
                 failed = true;
                 err.maybeSetContext(context);
@@ -201,7 +195,8 @@ namespace Saxon.Hej.expr.instruct {
             Saxon.Hej.lib.ResultDocumentResolver resolver;
             string hrefValue = "";
             if ((getHref() != null)) {
-                hrefValue = Saxon.Hej.functions.IriToUri.iriToUri(getHref().evaluateAsString(context)).ToString();
+                Saxon.Hej.expr.elab.UnicodeStringEvaluator hrefEval = getHref().makeElaborator().elaborateForUnicodeString(true);
+                hrefValue = Saxon.Hej.functions.IriToUri.iriToUri(/*Delegate.eval()*/hrefEval(context)).ToString();
             }
             if ((hrefValue.Length==0 || hrefValue.Equals(controller.getBaseOutputURI()))) {
                 Saxon.Hej.serialize.PrincipalOutputGatekeeper gateKeeper = controller.getGatekeeper();
@@ -341,7 +336,7 @@ namespace Saxon.Hej.expr.instruct {
                         err.setXPathContext(context);
                         throw err;
                     }
-                    string uri = nsResolver.getURIForPrefix(parts[0], false);
+                    Saxon.Hej.om.NamespaceUri uri = nsResolver.getURIForPrefix(parts[0], false);
                     if ((uri == null)) {
                         Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The namespace prefix in the format name "+format)+" is undeclared"));
                         err.maybeSetLocation(getFormatExpression().getLocation());
@@ -363,7 +358,7 @@ namespace Saxon.Hej.expr.instruct {
             foreach (string key in localProperties.stringPropertyNames()) {
                 Saxon.Hej.om.StructuredQName qName = Saxon.Hej.om.StructuredQName.fromClarkName(key);
                 try {
-                    setSerializationProperty(computedLocalProps, qName.getURI(), qName.getLocalPart(), localProperties.getProperty(key), nsResolver, true, config);
+                    setSerializationProperty(computedLocalProps, qName.getNamespaceUri(), qName.getLocalPart(), localProperties.getProperty(key), nsResolver, true, config);
                 } catch (Saxon.Hej.trans.XPathException e) {
                     e.setErrorCode("XTDE0030");
                     e.maybeSetLocation(getLocation());
@@ -374,14 +369,14 @@ namespace Saxon.Hej.expr.instruct {
                 foreach (System.Collections.Generic.KeyValuePair<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.Operand> entry in serializationAttributes) {
                     string value = entry.Value.getChildExpression().evaluateAsString(context).ToString();
                     string lname = entry.Key.getLocalPart();
-                    string uri = entry.Key.getURI();
+                    Saxon.Hej.om.NamespaceUri uri = entry.Key.getNamespaceUri();
                     try {
                         setSerializationProperty(computedLocalProps, uri, lname, value, nsResolver, false, config);
                     } catch (Saxon.Hej.trans.XPathException e) {
                         e.setErrorCode("XTDE0030");
                         e.maybeSetLocation(getLocation());
                         e.maybeSetContext(context);
-                        if ((Saxon.Hej.lib.NamespaceConstant.SAXON.Equals(e.getErrorCodeNamespace()) && "SXWN".Equals(e.getErrorCodeLocalPart().Substring(0, 4 - 0)))) {
+                        if ((Saxon.Hej.om.NamespaceUri.SAXON.Equals(e.getErrorCodeNamespace()) && "SXWN".Equals(e.getErrorCodeLocalPart().Substring(0, 4 - 0)))) {
                             Saxon.Hej.trans.XmlProcessingException ee = new Saxon.Hej.trans.XmlProcessingException(e);
                             ee.setWarning(true);
                             controller.getErrorReporter().report(ee);
@@ -391,6 +386,7 @@ namespace Saxon.Hej.expr.instruct {
                     }
                 }
             }
+            computedLocalProps.setProperty(Saxon.Hej.lib.SaxonOutputKeys.STYLESHEET_VERSION, "30");
             return computedLocalProps;
         }
         public string getStaticSerializationProperty(Saxon.Hej.om.StructuredQName name) {
@@ -404,13 +400,13 @@ namespace Saxon.Hej.expr.instruct {
             }
             return globalProperties.getProperty(clarkName);
         }
-        public static void setSerializationProperty(Saxon.Ejava.util.Properties details, string uri, string lname, string value, Saxon.Hej.om.NamespaceResolver nsResolver, bool prevalidated, Saxon.Hej.Configuration config) {
+        public static void setSerializationProperty(Saxon.Ejava.util.Properties details, Saxon.Hej.om.NamespaceUri uri, string lname, string value, Saxon.Hej.om.NamespaceResolver nsResolver, bool prevalidated, Saxon.Hej.Configuration config) {
             Saxon.Hej.lib.SerializerFactory sf = config.getSerializerFactory();
             string clarkName = lname;
-            if (!(uri.Length==0)) {
+            if (!(uri.isEmpty())) {
                 clarkName = ((("{"+uri)+"}")+lname);
             }
-            if ((uri.Length==0 || Saxon.Hej.lib.NamespaceConstant.SAXON.Equals(uri))) {
+            if ((uri.isEmpty() || Saxon.Hej.om.NamespaceUri.SAXON.Equals(uri))) {
                 switch (clarkName) {
                   case "method":
                     value = Saxon.Hej.value.Whitespace.trim(value);
@@ -434,14 +430,14 @@ namespace Saxon.Hej.expr.instruct {
                                     throw err;
                                 } else {
                                     if ((nsResolver != null)) {
-                                        string muri = nsResolver.getURIForPrefix(prefix, false);
+                                        Saxon.Hej.om.NamespaceUri muri = nsResolver.getURIForPrefix(prefix, false);
                                         if ((muri == null)) {
                                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Namespace prefix '"+prefix)+"' has not been declared"));
                                             err.setErrorCode("SEPM0016");
                                             err.setIsStaticError(true);
                                             throw err;
                                         }
-                                        details.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.METHOD, ((('{'+muri)+'}')+parts[1]));
+                                        details.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.METHOD, ((('{'+muri.ToString())+'}')+parts[1]));
                                     } else {
                                         details.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.METHOD, value);
                                     }
@@ -495,7 +491,7 @@ namespace Saxon.Hej.expr.instruct {
                     break ;
                 }
             } else {
-                details.setProperty(((('{'+uri)+'}')+lname), value);
+                details.setProperty(((('{'+uri.ToString())+'}')+lname), value);
             }
         }
         private static void processListOfNodeNames(Saxon.Ejava.util.Properties details, string key, string value, Saxon.Hej.om.NamespaceResolver nsResolver, bool useDefaultNS, bool prevalidated, bool allowStar) {
@@ -556,7 +552,7 @@ namespace Saxon.Hej.expr.instruct {
         public static void processXslOutputElement(Saxon.Hej.om.NodeInfo element, Saxon.Ejava.util.Properties props, Saxon.Hej.expr.XPathContext c) {
             Saxon.Hej.om.NamespaceResolver resolver = element.getAllNamespaces();
             foreach (Saxon.Hej.om.AttributeInfo att in element.attributes()) {
-                string uri = att.getNodeName().getURI();
+                Saxon.Hej.om.NamespaceUri uri = att.getNodeName().getNamespaceUri();
                 string local = att.getNodeName().getLocalPart();
                 string val = Saxon.Hej.value.Whitespace.trim(att.getValue());
                 setSerializationProperty(props, uri, local, val, resolver, false, c.getConfiguration());
@@ -576,6 +572,21 @@ namespace Saxon.Hej.expr.instruct {
         }
         public Saxon.Hej.expr.Expression getContentExpression() {
             return contentOp.getChildExpression();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.ResultDocument.ResultDocumentElaborator();
+        }
+        private class ResultDocumentElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.ResultDocument expr = (Saxon.Hej.expr.instruct.ResultDocument)(getExpression());
+                Saxon.Hej.expr.elab.PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
+                return (output, context) => {
+                    expr.checkNotTemporaryOutputState(context);
+                    context.getConfiguration().processResultDocument(expr, contentPush, context);
+                    return null;
+                } ;
+            }
+        
         }
     
     }

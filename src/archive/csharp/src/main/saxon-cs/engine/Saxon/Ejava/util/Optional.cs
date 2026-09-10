@@ -23,6 +23,10 @@ namespace Saxon.Ejava.util {
             return _present;
         }
 
+        public bool isEmpty() {
+            return !_present;
+        }
+
         public static Optional<T> empty() {
             return new();
         }

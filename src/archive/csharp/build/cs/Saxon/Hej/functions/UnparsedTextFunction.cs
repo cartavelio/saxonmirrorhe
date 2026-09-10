@@ -130,7 +130,6 @@ namespace Saxon.Hej.functions {
                     }
                 }
                 int start = 0;
-                int len = actual;
                 if (first) {
                     if ((buffer[0] == '\ufeff')) {
                         start = 1;
@@ -144,7 +143,7 @@ namespace Saxon.Hej.functions {
                     if ((mask<=unchecked((int)0xffff))) {
                         output.accept(new Saxon.Hej.str.Twine16(buffer, start, actual));
                     } else {
-                        output.accept(Saxon.Hej.str.StringView.of(new string(buffer, start, len)));
+                        output.accept(Saxon.Hej.str.StringView.of(new string(buffer, start, actual)));
                     }
                 }
             }

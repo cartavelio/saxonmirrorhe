@@ -16,9 +16,9 @@ namespace Saxon.Eej.ee.update {
         protected internal Saxon.Hej.om.NodeName fixNodeName(Saxon.Hej.om.NodeName name) {
             if ((name is Saxon.Hej.om.NameOfNode)) {
                 if (name.hasFingerprint()) {
-                    return new Saxon.Hej.om.FingerprintedQName(name.getPrefix(), name.getURI(), name.getLocalPart(), name.getFingerprint());
+                    return new Saxon.Hej.om.FingerprintedQName(name.getPrefix(), name.getNamespaceUri(), name.getLocalPart(), name.getFingerprint());
                 } else {
-                    return new Saxon.Hej.om.FingerprintedQName(name.getPrefix(), name.getURI(), name.getLocalPart());
+                    return new Saxon.Hej.om.FingerprintedQName(name.getPrefix(), name.getNamespaceUri(), name.getLocalPart());
                 }
             } else {
                 return name;

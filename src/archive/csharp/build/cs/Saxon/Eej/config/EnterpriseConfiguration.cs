@@ -4,12 +4,11 @@ using System.Linq;
 namespace Saxon.Eej.config {
     public sealed class EnterpriseConfiguration : Saxon.Eej.config.ProfessionalConfiguration {
         private int licensedFeatures = 0;
-        private System.Collections.Generic.Dictionary<string,int> namespaceStatus = new System.Collections.Generic.Dictionary<string, int>();
+        private System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri,int> namespaceStatus = new System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri, int>();
         private int[] occurrenceLimits = {100, 250};
         private Saxon.Hej.lib.SchemaURIResolver schemaURIResolver = null;
         private readonly Saxon.Hej.lib.SchemaURIResolver standardSchemaResolver;
         private Saxon.Eej.ee.schema.PreparedSchema superSchema;
-        private string debugByteCodeDirectory = "Saxon-bytecode";
         private int resultDocumentThreadsLimit = Saxon.Ejava.lang.Runtime.getRuntime().availableProcessors();
         private int thresholdForCompilingTypes = 100;
         private int thresholdForInliningFunctions = 100;
@@ -21,8 +20,7 @@ namespace Saxon.Eej.config {
         public EnterpriseConfiguration() : base () {
             multithreadingFactory = new Saxon.Eej.ee.config.MultithreadingFactory(this);
             internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.ALLOW_MULTITHREADING, Saxon.Hej.lib.FeatureKeys.ALLOW_MULTITHREADING, true);
-            internalSetBooleanProperty(Saxon.Hej.lib.FeatureCode.GENERATE_BYTE_CODE, Saxon.Hej.lib.FeatureKeys.GENERATE_BYTE_CODE, true);
-            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_8(this));
+            setStaticQueryContextFactory(new Inner_StaticQueryContextFactory_5(this));
             optimizerOptions = Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION;
             defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
             standardSchemaResolver = new Saxon.Eej.ee.config.StandardSchemaResolver(this);
@@ -45,46 +43,14 @@ namespace Saxon.Eej.config {
             switch (code) {
               case Saxon.Hej.lib.FeatureCode.GENERATE_BYTE_CODE:
                 {
-                    if ((value is bool)) {
-                        internalSetBooleanProperty(code, name, value);
-                    } else {
-                        if (((("true".Equals(value) || "on".Equals(value)) || "yes".Equals(value)) || "1".Equals(value))) {
-                            internalSetBooleanProperty(code, name, true);
-                            byteCodeThreshold = 0;
-                        } else {
-                            if (((("false".Equals(value) || "off".Equals(value)) || "no".Equals(value)) || "0".Equals(value))) {
-                                internalSetBooleanProperty(code, name, false);
-                            } else {
-                                if ((value is int)) {
-                                    internalSetBooleanProperty(code, name, true);
-                                    byteCodeThreshold = (int)(value);
-                                } else {
-                                    internalSetBooleanProperty(code, name, true);
-                                    try {
-                                        byteCodeThreshold = Saxon.Impl.Helpers.Utils.ParseInt(value.ToString());
-                                    } catch (Saxon.Ejava.lang.NumberFormatException e) {
-                                        throw new Saxon.Ejava.lang.IllegalArgumentException((("Value of "+name)+" must be a boolean or an integer"));
-                                    }
-                                }
-                            }
-                        }
-                    }
                     break ;
                 }
               case Saxon.Hej.lib.FeatureCode.THRESHOLD_FOR_HOTSPOT_BYTE_CODE:
                 {
-                    int val = requireInteger(name, value);
-                    if ((val<=0)) {
-                        internalSetBooleanProperty(code, name, false);
-                    } else {
-                        internalSetBooleanProperty(code, name, true);
-                        byteCodeThreshold = val;
-                    }
                     break ;
                 }
               case Saxon.Hej.lib.FeatureCode.DEBUG_BYTE_CODE_DIR:
                 {
-                    debugByteCodeDirectory = value.ToString();
                     break ;
                 }
               case Saxon.Hej.lib.FeatureCode.OCCURRENCE_LIMITS:
@@ -167,7 +133,7 @@ namespace Saxon.Eej.config {
             }
             switch (code) {
               case Saxon.Hej.lib.FeatureCode.DEBUG_BYTE_CODE_DIR:
-                return debugByteCodeDirectory;
+                return "";
               case Saxon.Hej.lib.FeatureCode.OCCURRENCE_LIMITS:
                 return (((occurrenceLimits[0]+",")+occurrenceLimits[1]));
               case Saxon.Hej.lib.FeatureCode.THRESHOLD_FOR_COMPILING_TYPES:
@@ -241,11 +207,11 @@ namespace Saxon.Eej.config {
         public override Saxon.Hej.expr.accum.AccumulatorRegistry makeAccumulatorRegistry() {
             return new Saxon.Eej.ee.stream.AccumulatorRegistryEE();
         }
-        protected internal override Saxon.Hej.functions.registry.BuiltInFunctionSet makeVendorFunctionSet() {
+        public override Saxon.Hej.functions.registry.BuiltInFunctionSet getVendorFunctionSet() {
             if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION)) {
-                return new Saxon.Eej.ee.extfn.VendorFunctionSetEE(this);
+                return /*134*/Saxon.Eej.ee.extfn.VendorFunctionSetEE.getInstance();
             } else {
-                return null;
+                return base.getVendorFunctionSet();
             }
         }
         public override Saxon.Hej.expr.instruct.UserFunction newUserFunction(bool memoFunction, Saxon.Hej.trans.FunctionStreamability streamability) {
@@ -296,7 +262,7 @@ namespace Saxon.Eej.config {
             }
             return r;
         }
-        public override string readSchema(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, string schemaLocation, string expected) {
+        public override Saxon.Hej.om.NamespaceUri readSchema(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, string schemaLocation, Saxon.Hej.om.NamespaceUri expected) {
             lock (superSchema) {
                 int status = getNamespaceStatus(expected);
                 if (((status == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN) || (((status == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN) && getConfigurationProperty(Saxon.Hej.lib.Feature<bool>.MULTIPLE_SCHEMA_IMPORTS))))) {
@@ -304,7 +270,7 @@ namespace Saxon.Eej.config {
                     if ((pipe.getErrorReporter() != null)) {
                         schemaCompiler.setErrorReporter(pipe.getErrorReporter());
                     }
-                    string ns = schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
+                    Saxon.Hej.om.NamespaceUri ns = schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
                     schemaCompiler.makeAllAutomata();
                     schemaCompiler.checkAllAutomata();
                     return ns;
@@ -313,10 +279,10 @@ namespace Saxon.Eej.config {
                 }
             }
         }
-        public override void readMultipleSchemas(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, System.Collections.Generic.IList<string> schemaLocations, string expected) {
+        public override void readMultipleSchemas(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, System.Collections.Generic.IList<string> schemaLocations, Saxon.Hej.om.NamespaceUri expected) {
             newSchemaCompiler().readMultipleSchemas(pipe, baseURI, schemaLocations, expected);
         }
-        public override string readInlineSchema(Saxon.Hej.om.NodeInfo root, string expected, Saxon.Hej.lib.ErrorReporter errorReporter) {
+        public override Saxon.Hej.om.NamespaceUri readInlineSchema(Saxon.Hej.om.NodeInfo root, Saxon.Hej.om.NamespaceUri expected, Saxon.Hej.lib.ErrorReporter errorReporter) {
             return newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
         }
         public override void addSchemaSource(Saxon.Ejavax.xml.transform.Source schemaSource, Saxon.Hej.lib.ErrorReporter errorReporter) {
@@ -356,94 +322,95 @@ namespace Saxon.Eej.config {
                 return ;
             }
             if ((pschema is Saxon.Eej.ee.schema.SingleNamespaceSchema)) {
-                string targetNamespace = ((Saxon.Eej.ee.schema.SingleNamespaceSchema)(pschema)).getTargetNamespace();
+                Saxon.Hej.om.NamespaceUri targetNamespace = ((Saxon.Eej.ee.schema.SingleNamespaceSchema)(pschema)).getTargetNamespace();
                 setNamespaceStatus(targetNamespace, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN);
             } else {
-                foreach (string ns in pschema.getTargetNamespaces()) {
+                foreach (Saxon.Hej.om.NamespaceUri ns in pschema.getTargetNamespaces()) {
                     setNamespaceStatus(ns, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN);
                 }
             }
             pschema.copyTo(superSchema, newSchemaCompiler());
             superSchema.setLocalLicenseId(pschema.getLocalLicenseId());
         }}
-        public void addSurrogateSchema(string @namespace) { lock(this) {
+        public void addSurrogateSchema(Saxon.Hej.om.NamespaceUri @namespace) { lock(this) {
             checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
             setNamespaceStatus(@namespace, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION);
         }}
-        public override void addSchemaForBuiltInNamespace(string @namespace) {
+        public override void addSchemaForBuiltInNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
             if ((getNamespaceStatus(@namespace) != Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN)) {
                 return ;
             }
-            switch (@namespace) {
-              case Saxon.Hej.lib.NamespaceConstant.XML:
+            if ((@namespace == Saxon.Hej.om.NamespaceUri.XML)) {
                 addSchemaForXmlNamespace();
-                break ;
-              case Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE:
-                addSchemaForXsiNamespace();
-                break ;
-              case Saxon.Hej.lib.NamespaceConstant.FN:
-                System.IO.Stream @in = Saxon.Hej.Version.platform.locateResource("xpath-functions.scm", new System.Collections.Generic.List<string>());
-                if (isTiming()) {
-                    getLogger().info(("Loading schema from resources for: "+Saxon.Hej.lib.NamespaceConstant.FN));
+            } else {
+                if ((@namespace == Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE)) {
+                    addSchemaForXsiNamespace();
+                } else {
+                    if ((@namespace == Saxon.Hej.om.NamespaceUri.FN)) {
+                        System.IO.Stream @in = Saxon.Hej.Version.platform.locateResource("xpath-functions.scm", new System.Collections.Generic.List<string>());
+                        if (isTiming()) {
+                            getLogger().info(("Loading schema from resources for: "+Saxon.Hej.lib.NamespaceConstant.FN));
+                        }
+                        try {
+                            addSchemaSource(new Saxon.Ejavax.xml.transform.stream.StreamSource(@in), makeErrorReporter());
+                            @in.Close();
+                        } catch (Exception e) when (e is Saxon.Hej.type.SchemaException || e is System.IO.IOException) {
+                            throw new Saxon.Ejava.lang.IllegalStateException("Failed to load internal copy of xpath-functions.scm");
+                        }
+                    } else {
+                        throw new Saxon.Ejava.lang.IllegalArgumentException(@namespace.ToString());
+                    }
                 }
-                try {
-                    addSchemaSource(new Saxon.Ejavax.xml.transform.stream.StreamSource(@in), makeErrorReporter());
-                } catch (Saxon.Hej.type.SchemaException e) {
-                    throw new Saxon.Ejava.lang.IllegalStateException("Failed to load internal copy of xpath-functions.scm");
-                }
-                break ;
-              default:
-                throw new Saxon.Ejava.lang.IllegalArgumentException(@namespace);
             }
         }
         private void addSchemaForXmlNamespace() { lock(this) {
-            if ((getNamespaceStatus(Saxon.Hej.lib.NamespaceConstant.XML) == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN)) {
+            if ((getNamespaceStatus(Saxon.Hej.om.NamespaceUri.XML) == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN)) {
                 try {
                     addSchema(/*134*/Saxon.Eej.ee.schema.sdoc.XMLNamespaceSchema.buildSchema(this));
                 } catch (Saxon.Hej.type.SchemaException err) {
                     throw new Saxon.Ejava.lang.AssertionError(err);
                 }
-                setNamespaceStatus(Saxon.Hej.lib.NamespaceConstant.XML, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN);
+                setNamespaceStatus(Saxon.Hej.om.NamespaceUri.XML, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN);
             }
         }}
         private void addSchemaForXsiNamespace() { lock(this) {
-            if ((getNamespaceStatus(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE) == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN)) {
+            if ((getNamespaceStatus(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE) == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN)) {
                 try {
                     addSchema(/*134*/Saxon.Eej.ee.schema.sdoc.XSINamespaceSchema.buildSchema(this));
                 } catch (Saxon.Hej.type.SchemaException err) {
                     throw new Saxon.Ejava.lang.AssertionError(err);
                 }
-                setNamespaceStatus(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN);
+                setNamespaceStatus(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN);
             }
         }}
-        public int getNamespaceStatus(string @namespace) { lock(this) {
+        public int getNamespaceStatus(Saxon.Hej.om.NamespaceUri @namespace) { lock(this) {
             return Saxon.Impl.Helpers.MapUtils.GetOrDefault(namespaceStatus, @namespace, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN);
         }}
-        public void setNamespaceStatus(string @namespace, int status) { lock(this) {
+        public void setNamespaceStatus(Saxon.Hej.om.NamespaceUri @namespace, int status) { lock(this) {
             if ((status == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN)) {
                 namespaceStatus.Remove(@namespace);
             } else {
                 Saxon.Impl.Helpers.MapUtils.Put(namespaceStatus, @namespace, status);
             }
         }}
-        public override bool isSchemaAvailable(string targetNamespace) {
+        public override bool isSchemaAvailable(Saxon.Hej.om.NamespaceUri targetNamespace) {
             return (getNamespaceStatus(targetNamespace) != Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN);
         }
-        public void removeSchema(string @namespace) { lock(this) {
+        public void removeSchema(Saxon.Hej.om.NamespaceUri @namespace) { lock(this) {
             namespaceStatus.Remove(@namespace);
         }}
-        public override System.Collections.Generic.ISet<string> getImportedNamespaces() { lock(this) {
+        public override System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getImportedNamespaces() { lock(this) {
             return Saxon.Impl.Helpers.MapUtils.KeySet(namespaceStatus);
         }}
         public Saxon.Eej.ee.schema.PreparedSchema getSuperSchema() {
             return superSchema;
         }
-        public override void sealNamespace(string @namespace) {
-            if (!(@namespace.Equals(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS))) {
+        public override void sealNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
+            if (!(@namespace.Equals(Saxon.Hej.om.NamespaceUri.ANONYMOUS))) {
                 setNamespaceStatus(@namespace, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_SEALED);
             }
         }
-        public bool isSealedNamespace(string @namespace) {
+        public bool isSealedNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
             return (getNamespaceStatus(@namespace) == Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_SEALED);
         }
         public override System.Collections.Generic.ICollection<Saxon.Hej.expr.instruct.GlobalParam> getDeclaredSchemaParameters() {
@@ -462,7 +429,7 @@ namespace Saxon.Eej.config {
                 Saxon.Eej.ee.schema.PreparedSchema schema = loader.load(source);
                 addSchema(schema);
                 schema.copyTo(superSchema, newSchemaCompiler());
-                foreach (string ns in schema.getTargetNamespaces()) {
+                foreach (Saxon.Hej.om.NamespaceUri ns in schema.getTargetNamespaces()) {
                     setNamespaceStatus(ns, Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_KNOWN);
                 }
             } catch (Saxon.Hej.type.SchemaException e) {
@@ -475,7 +442,7 @@ namespace Saxon.Eej.config {
         }
         public override void clearSchemaCache() {
             superSchema = new Saxon.Eej.ee.schema.PreparedSchema(this);
-            namespaceStatus = new System.Collections.Generic.Dictionary<string, int>();
+            namespaceStatus = new System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri, int>();
         }
         public override Saxon.Hej.type.SchemaDeclaration getElementDeclaration(int fingerprint) {
             return superSchema.getElementDecl(fingerprint);
@@ -490,7 +457,7 @@ namespace Saxon.Eej.config {
             return superSchema.getAttributeDecl(attributeName);
         }
         public override Saxon.Hej.type.SchemaType getSchemaType(Saxon.Hej.om.StructuredQName name) {
-            if (name.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA)) {
+            if (name.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
                 Saxon.Hej.type.SchemaType t = Saxon.Hej.type.BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
                 if ((t != null)) {
                     return t;
@@ -512,12 +479,13 @@ namespace Saxon.Eej.config {
                 sep = "-";
                 fsb.append(at.getName());
             }
-            Saxon.Hej.om.StructuredQName name = new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, fsb.ToString());
-            uut.setTypeName(name, getNamePool().allocateFingerprint(name.getURI(), name.getLocalPart()));
+            string localName = fsb.ToString();
+            Saxon.Hej.om.StructuredQName name = new Saxon.Hej.om.StructuredQName("anon", Saxon.Hej.om.NamespaceUri.ANONYMOUS, localName);
+            uut.setTypeName(name, getNamePool().allocateFingerprint(Saxon.Hej.om.NamespaceUri.ANONYMOUS, localName));
             uut.setMemberTypeReferences(memberRefs);
             return uut;
         }
-        public override bool isDeclaredNotation(string uri, string local) {
+        public override bool isDeclaredNotation(Saxon.Hej.om.NamespaceUri uri, string local) {
             return (superSchema.getNotation(new Saxon.Hej.om.StructuredQName("", uri, local)) != null);
         }
         public override void checkTypeDerivationIsOK(Saxon.Hej.type.SchemaType derived, Saxon.Hej.type.SchemaType @base, int block) {
@@ -573,7 +541,7 @@ namespace Saxon.Eej.config {
                 val.setValidationContext(vc);
                 vc.setConstraintChecker(checker);
                 if ((topLevelElementName != null)) {
-                    val.setTopLevelElement(new Saxon.Hej.om.FingerprintedQName(topLevelElementName.getPrefix(), topLevelElementName.getURI(), topLevelElementName.getLocalPart()));
+                    val.setTopLevelElement(new Saxon.Hej.om.FingerprintedQName(topLevelElementName.getPrefix(), topLevelElementName.getNamespaceUri(), topLevelElementName.getLocalPart()));
                 }
                 Saxon.Api.HostLanguage hostLanguage = pipe.getHostLanguage();
                 if ((hostLanguage == Saxon.Api.HostLanguage.XSLT)) {
@@ -604,7 +572,7 @@ namespace Saxon.Eej.config {
                 pipe.setComponent("net.sf.saxon.event.PathMaintainer", pathMaintainer);
                 Saxon.Hej.@event.DocumentValidator dv = new Saxon.Hej.@event.DocumentValidator(pathMaintainer, ((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTTE1550" : "XQDY0061"));
                 Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier(true, systemId);
-                pipe.setCopyInformee((element) => copier.notifyElementNode(element));
+                pipe.setCopyInformee(copier.notifyElementNode /* instance method reference */);
                 vc.startValidation(systemId);
                 return dv;
             } else {
@@ -762,44 +730,38 @@ namespace Saxon.Eej.config {
         public override Saxon.Hej.@event.Receiver getAnnotationStripper(Saxon.Hej.@event.Receiver destination) {
             return new Saxon.Eej.ee.validate.SkipValidator(destination);
         }
-        public override Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating, int languageVersion) {
+        public override Saxon.Hej.expr.parser.XPathParser newExpressionParser(string language, bool updating) {
             if ((updating && !(isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY)))) {
                 throw new Saxon.Ejava.lang.IllegalArgumentException("XQuery Update requires a Saxon-EE license");
             }
             if ("XQ".Equals(language)) {
-                if (((((languageVersion == 40) || (languageVersion == 31)) || (languageVersion == 30)) || (languageVersion == 10))) {
-                    Saxon.Hej.query.XQueryParser parser = new Saxon.Hej.query.XQueryParser(System.Math.Max(languageVersion, 31));
-                    if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
-                        parser.setParserExtension(new Saxon.Eej.ee.update.XQueryParserExtensionEE(updating));
-                    } else {
-                        if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                            parser.setParserExtension(new Saxon.Eej.expr.XQueryParserExtensionPE());
-                        }
-                    }
-                    return parser;
+                Saxon.Hej.query.XQueryParser parser = new Saxon.Hej.query.XQueryParser();
+                if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY)) {
+                    parser.setParserExtension(new Saxon.Eej.ee.update.XQueryParserExtensionEE(updating));
                 } else {
-                    throw new Saxon.Ejava.lang.IllegalArgumentException(("Unknown XQuery version "+languageVersion));
+                    if (isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+                        parser.setParserExtension(new Saxon.Eej.expr.XQueryParserExtensionPE());
+                    }
                 }
+                return parser;
             } else {
-                Saxon.Hej.expr.parser.XPathParser parser = base.newExpressionParser(language, updating, languageVersion);
-                if ((languageVersion>=30)) {
-                    parser.setAccelerator(new Saxon.Eej.ee.optim.QuickXPathParser());
-                }
+                Saxon.Hej.expr.parser.XPathParser parser = base.newExpressionParser(language, updating);
+                parser.setAccelerator(new Saxon.Eej.ee.optim.QuickXPathParser());
                 return parser;
             }
         }
         public override Saxon.Hej.trace.ExpressionPresenter newExpressionExporter(string target, System.IO.Stream destination, Saxon.Hej.style.StylesheetPackage rootPackage) {
-            if (!(isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT))) {
-                throw new Saxon.Hej.trans.XPathException("Stylesheet export requires a Saxon-EE license");
-            }
+            checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT, "stylesheeet export", -1);
             Saxon.Hej.trace.ExpressionPresenter presenter = new Saxon.Hej.trace.ExpressionPresenter();
             Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = new Saxon.Hej.trace.ExpressionPresenter.ExportOptions();
             options.rootPackage = rootPackage;
             presenter.setOptions(options);
             switch (target) {
               case "JS":
+              case "JS2":
+              case "JS3":
                 options.target = "JS";
-                options.targetVersion = 2;
+                options.targetVersion = (target.Equals("JS3") ? 3 : 2);
                 Saxon.Hej.@event.PipelineConfiguration pipe = makePipelineConfiguration();
                 Saxon.Hej.serialize.JSONEmitter writer = new Saxon.Hej.serialize.JSONEmitter(pipe, new Saxon.Hej.serialize.UTF8Writer(destination), new Saxon.Ejava.util.Properties());
                 presenter.init(this, new Saxon.Eej.ee.trans.ExpressionPresenterToJson(writer, pipe), true);
@@ -837,11 +799,7 @@ namespace Saxon.Eej.config {
             return null;
         }
         public override System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> getFocusTrackerFactory(Saxon.Hej.expr.instruct.Executable exec, bool multithreaded) {
-            if ((multithreaded || (((getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_MULTITHREADING) && exec.createsSecondaryResult()) && isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT))))) {
-                return (iter) => new Saxon.Eej.ee.parallel.MultithreadedFocusTrackingIterator(iter);
-            } else {
-                return (iter) => new Saxon.Hej.om.FocusTrackingIterator(iter);
-            }
+            return /* ctor#1 */ (a) => new Saxon.Hej.om.FocusTrackingIterator(a);
         }
         public void setStreamabilityEnabled(bool enabled) {
             this.streamabilityEnabled = Saxon.Ejava.util.Optional<bool>.of(enabled);
@@ -920,6 +878,9 @@ namespace Saxon.Eej.config {
         public override Saxon.Hej.expr.parser.OptimizerOptions getOptimizerOptions() {
             return optimizerOptions.intersect(Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION);
         }
+        public override Saxon.Hej.expr.parser.OptimizerOptions getPermittedOptimizerOptions() {
+            return Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION;
+        }
         public override Saxon.Hej.expr.parser.Optimizer obtainOptimizer() {
             if (!(isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.SCHEMA_VALIDATION))) {
                 return base.obtainOptimizer();
@@ -937,12 +898,6 @@ namespace Saxon.Eej.config {
             Saxon.Hej.expr.parser.Optimizer optimizer = new Saxon.Eej.ee.optim.OptimizerEE(this);
             optimizer.setOptimizerOptions(options.intersect(Saxon.Hej.expr.parser.OptimizerOptions.FULL_EE_OPTIMIZATION));
             return optimizer;
-        }
-        public override bool isGenerateByteCode(Saxon.Api.HostLanguage hostLanguage) {
-            return (getBooleanProperty(Saxon.Hej.lib.Feature<bool>.GENERATE_BYTE_CODE) && isLicensedFeature(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT : Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY)));
-        }
-        public override bool isDeferredByteCode(Saxon.Api.HostLanguage hostLanguage) {
-            return ((byteCodeThreshold>0) && isLicensedFeature(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT : Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XQUERY)));
         }
         public override bool isJITEnabled() {
             return (optimizerOptions.isSet(Saxon.Hej.expr.parser.OptimizerOptions.JIT) && isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT));
@@ -1002,13 +957,6 @@ namespace Saxon.Eej.config {
             }
             return base.getMultithreadedItemMappingIterator(@base, action);
         }
-        public override Saxon.Hej.om.Sequence makeClosure(Saxon.Hej.expr.Expression expression, int @ref, Saxon.Hej.expr.XPathContext context) {
-            if ((@ref == Saxon.Hej.expr.FilterExpression.FILTERED)) {
-                return /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(expression.iterate(context));
-            } else {
-                return base.makeClosure(expression, @ref, context);
-            }
-        }
         public override Saxon.Hej.om.GroundedValue makeSequenceExtent(Saxon.Hej.expr.Expression expression, int @ref, Saxon.Hej.expr.XPathContext context) {
             if ((@ref == Saxon.Hej.expr.FilterExpression.FILTERED)) {
                 return /*134*/Saxon.Eej.ee.optim.SearchableValue.makeSearchableValue(expression.iterate(context));
@@ -1018,9 +966,9 @@ namespace Saxon.Eej.config {
         }
         public override void declareBuiltInExtensionElementNamespaces() {
             try {
-                setExtensionElementNamespace(Saxon.Hej.lib.NamespaceConstant.SAXON, new Saxon.Eej.ee.trans.SaxonElementFactoryEE());
-                setExtensionElementNamespace(Saxon.Hej.lib.NamespaceConstant.SAXON6, new Saxon.Eej.xsltextn.style.Saxon6ElementFactory());
-                setExtensionElementNamespace("http://saxonica.com/ns/interactiveXSLT", new Saxon.Eej.ee.extfn.js.IXSLElementFactory());
+                setExtensionElementCreator(Saxon.Hej.om.NamespaceUri.SAXON, Saxon.Eej.ee.trans.SaxonElementFactoryEE.FACTORY);
+                setExtensionElementCreator(Saxon.Hej.om.NamespaceUri.SAXON6, Saxon.Eej.xsltextn.style.Saxon6ElementFactory.FACTORY);
+                setExtensionElementCreator(Saxon.Hej.om.NamespaceUri.of("http://saxonica.com/ns/interactiveXSLT"), Saxon.Eej.ee.extfn.js.IXSLElementFactory.FACTORY);
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Ejava.lang.IllegalStateException(e.Message);
             }
@@ -1058,9 +1006,9 @@ namespace Saxon.Eej.config {
             return base.makeCompilerInfo();
         }
     
-        private class Inner_StaticQueryContextFactory_8 : Saxon.Hej.lib.StaticQueryContextFactory {
+        private class Inner_StaticQueryContextFactory_5 : Saxon.Hej.lib.StaticQueryContextFactory {
             private readonly EnterpriseConfiguration outerInstance;
-            public Inner_StaticQueryContextFactory_8(EnterpriseConfiguration outerInstance) {
+            public Inner_StaticQueryContextFactory_5(EnterpriseConfiguration outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.query.StaticQueryContext newStaticQueryContext(Saxon.Hej.Configuration config, bool copyFromDefault) {

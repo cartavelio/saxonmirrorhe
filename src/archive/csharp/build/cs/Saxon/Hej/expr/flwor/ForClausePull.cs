@@ -16,7 +16,7 @@ namespace Saxon.Hej.expr.flwor {
                     if (!(@base.nextTuple(context))) {
                         return false;
                     }
-                    currentIteration = new Saxon.Hej.om.FocusTrackingIterator(getIterator(context));
+                    currentIteration = Saxon.Hej.om.SequenceTool.focusTracker(forClause.getIterator(context));
                 }
                 Saxon.Hej.om.Item next = currentIteration.next();
                 if ((next != null)) {
@@ -29,9 +29,6 @@ namespace Saxon.Hej.expr.flwor {
                     currentIteration = null;
                 }
             }
-        }
-        protected internal virtual Saxon.Hej.om.SequenceIterator getIterator(Saxon.Hej.expr.XPathContext context) {
-            return forClause.getSequence().iterate(context);
         }
         protected internal virtual Saxon.Hej.om.GroundedValue variableValue(Saxon.Hej.om.Item item) {
             return item;

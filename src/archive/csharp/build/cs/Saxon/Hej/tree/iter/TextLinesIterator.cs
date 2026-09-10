@@ -3,25 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.tree.iter {
     public abstract class TextLinesIterator : Saxon.Hej.om.SequenceIterator {
+    // Injecting C# code
+        ~TextLinesIterator() { reader?.Close(); /* finalizer */ }
+    // End of injected C# code
         protected internal Saxon.Impl.Helpers.LineNumberReader reader;
         protected internal Saxon.Hej.z.IntPredicateProxy checker;
         internal Saxon.Hej.value.StringValue current = null;
         internal int position = 0;
         protected internal Saxon.Hej.s9api.Location location;
         protected internal System.Uri uri;
-        private Saxon.Hej.om.SequenceIterator dischargedIterator;
         protected internal TextLinesIterator()  {
         }
-        public TextLinesIterator(Saxon.Impl.Helpers.LineNumberReader reader, Saxon.Hej.s9api.Location location, System.Uri uri, Saxon.Hej.z.IntPredicateProxy checker)  {
-            this.reader = reader;
-            this.location = location;
-            this.uri = uri;
-            this.checker = checker;
-        }
-        public virtual Saxon.Hej.om.Item next() {
-            if ((dischargedIterator != null)) {
-                return (Saxon.Hej.value.StringValue)(dischargedIterator.next());
-            }
+        public Saxon.Hej.om.Item next() {
             if ((position<0)) {
                 close();
                 return null;
@@ -52,7 +45,7 @@ namespace Saxon.Hej.tree.iter {
                 throw new Saxon.Hej.trans.UncheckedXPathException(err);
             }
         }
-        protected internal virtual Saxon.Hej.trans.XPathException handleIOError(System.Uri uri, System.IO.IOException err) {
+        protected internal Saxon.Hej.trans.XPathException handleIOError(System.Uri uri, System.IO.IOException err) {
             return Saxon.Hej.functions.UnparsedTextFunction.handleIOError(uri, err);
         }
         public void close() {
@@ -60,10 +53,6 @@ namespace Saxon.Hej.tree.iter {
                 reader.Close();
             } catch (System.IO.IOException err) {
             }
-        }
-        public void discharge() {
-            dischargedIterator = Saxon.Hej.om.SequenceTool.toGroundedValue(this).iterate();
-            close();
         }
         private void checkLine(Saxon.Hej.z.IntPredicateProxy checker, string buffer) {
             for (int c = 0; (c<buffer.Length); ) {
@@ -79,6 +68,8 @@ namespace Saxon.Hej.tree.iter {
                     throw err;
                 }
             }
+        }
+        protected internal void arrangeCleanup(System.IO.TextReader reader, Saxon.Hej.expr.XPathContext context) {
         }
     
     }

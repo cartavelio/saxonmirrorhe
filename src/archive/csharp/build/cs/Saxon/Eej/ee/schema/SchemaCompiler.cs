@@ -79,7 +79,7 @@ namespace Saxon.Eej.ee.schema {
         public bool isAllowDanglingReferences() {
             return allowDanglingReferences;
         }
-        public Saxon.Eej.ee.schema.sdoc.XSDSchema getExistingSchemaDocument(string systemId, string targetNamespace) {
+        public Saxon.Eej.ee.schema.sdoc.XSDSchema getExistingSchemaDocument(string systemId, Saxon.Hej.om.NamespaceUri targetNamespace) {
             return Saxon.Impl.Helpers.MapUtils.Get(documentsAlreadyRead, ((systemId+"##")+targetNamespace));
         }
         public Saxon.Hej.@event.PipelineConfiguration getPipelineConfiguration() {
@@ -91,7 +91,7 @@ namespace Saxon.Eej.ee.schema {
         public Saxon.Hej.lib.SchemaURIResolver getSchemaURIResolver() {
             return schemaURIResolver;
         }
-        public string readSchema(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, string schemaLocation, string expected) {
+        public Saxon.Hej.om.NamespaceUri readSchema(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, string schemaLocation, Saxon.Hej.om.NamespaceUri expected) {
             Saxon.Ejavax.xml.transform.Source source = /*134*/Saxon.Eej.ee.schema.sdoc.SchemaReader.getSource(baseURI, schemaLocation, this, expected);
             if ((source == null)) {
                 throw new Saxon.Hej.type.SchemaException(("No schema could be loaded at location "+schemaLocation));
@@ -108,11 +108,11 @@ namespace Saxon.Eej.ee.schema {
                 return processSchemaDocument(schemadoc, schemaLocation, expected);
             }
         }
-        private string processSchemaDocument(Saxon.Eej.ee.schema.sdoc.SchemaDocument schemadoc, string schemaLocation, string expected) {
+        private Saxon.Hej.om.NamespaceUri processSchemaDocument(Saxon.Eej.ee.schema.sdoc.SchemaDocument schemadoc, string schemaLocation, Saxon.Hej.om.NamespaceUri expected) {
             if (schemadoc.isCompiledSchemaDocument()) {
                 return expected;
             }
-            string targetNamespace = schemadoc.getTargetNamespace();
+            Saxon.Hej.om.NamespaceUri targetNamespace = schemadoc.getTargetNamespace();
             if (((expected != null) && !(expected.Equals(targetNamespace)))) {
                 Saxon.Hej.type.SchemaException exception = new Saxon.Hej.type.SchemaException((((((("Schema "+(((schemaLocation == null) ? "" : (("at location "+schemaLocation)+" "))))+"has target namespace \"")+targetNamespace)+"\" but requested namespace was \"")+expected)+'\"'));
                 if ((schemaLocation == null)) {
@@ -137,7 +137,7 @@ namespace Saxon.Eej.ee.schema {
                 preparedSchema = /*134*/Saxon.Eej.ee.schema.PreparedSchema.merge(preparedSchema, ps);
             }
         }
-        public void readMultipleSchemas(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, System.Collections.Generic.IList<string> schemaLocations, string expected) {
+        public void readMultipleSchemas(Saxon.Hej.@event.PipelineConfiguration pipe, string baseURI, System.Collections.Generic.IList<string> schemaLocations, Saxon.Hej.om.NamespaceUri expected) {
             string[] locations = new string[schemaLocations.Count];
             int loc = 0;
             foreach (string schemaLocation in schemaLocations) {
@@ -168,7 +168,7 @@ namespace Saxon.Eej.ee.schema {
                     } else {
                         mergedSchema = /*134*/Saxon.Eej.ee.schema.PreparedSchema.merge(mergedSchema, ps);
                     }
-                    string targetNamespace = schemadoc.getTargetNamespace();
+                    Saxon.Hej.om.NamespaceUri targetNamespace = schemadoc.getTargetNamespace();
                     if (((expected != null) && !(expected.Equals(targetNamespace)))) {
                         throw new Saxon.Hej.type.SchemaException((((((("Schema at "+locations[i])+" has target namespace \"")+targetNamespace)+"\" but requested namespace was \"")+expected)+'\"'));
                     }
@@ -194,7 +194,7 @@ namespace Saxon.Eej.ee.schema {
             checkAllAutomata();
             preparedSchema = null;
         }
-        public string readInlineSchema(Saxon.Hej.om.NodeInfo root, string expected, Saxon.Hej.lib.ErrorReporter errorReporter) {
+        public Saxon.Hej.om.NamespaceUri readInlineSchema(Saxon.Hej.om.NodeInfo root, Saxon.Hej.om.NamespaceUri expected, Saxon.Hej.lib.ErrorReporter errorReporter) {
             Saxon.Hej.lib.ErrorReporter listener = ((errorReporter == null) ? getErrorReporter() : errorReporter);
             setErrorReporter(listener);
             Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
@@ -238,11 +238,11 @@ namespace Saxon.Eej.ee.schema {
             errorCount++;
             getErrorReporter().report(new Saxon.Hej.trans.XmlProcessingIncident(message, Saxon.Hej.trans.SaxonErrorCode.SXXP0006, locator));
         }
-        public void warning(string message, Saxon.Hej.s9api.Location locator) {
+        public void warning(string message, string errorCode, Saxon.Hej.s9api.Location locator) {
             if (((locator.getSystemId() != null) && locator.getSystemId().EndsWith("override.xsl"))) {
                 locator = new Saxon.Hej.expr.parser.Loc("schema_document_resulting_from_override_processing", -1, -1);
             }
-            Saxon.Hej.trans.XmlProcessingIncident exception = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(message, Saxon.Hej.trans.SaxonErrorCode.SXWN9000, locator).asWarning());
+            Saxon.Hej.trans.XmlProcessingIncident exception = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(message, errorCode, locator).asWarning());
             getErrorReporter().report(exception);
         }
         public void addPendingTypeCheck(Saxon.Eej.ee.schema.IdentityConstraintReference constraint, Saxon.Hej.type.SchemaType contextItemType) {
@@ -270,9 +270,9 @@ namespace Saxon.Eej.ee.schema {
                 chameleonTransformer = new Saxon.Eej.ee.schema.sdoc.SchemaDocumentTransformer(config, "chameleon.xsl");
             }
             System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.om.Sequence> @params = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName,Saxon.Hej.om.Sequence>();
-            Saxon.Impl.Helpers.MapUtils.Put(@params, new Saxon.Hej.om.StructuredQName("", "", "newTargetNamespace"), new Saxon.Hej.value.AnyURIValue((referrer.getXSDSchema().getTargetNamespace())));
+            Saxon.Impl.Helpers.MapUtils.Put(@params, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "newTargetNamespace"), new Saxon.Hej.value.AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
             Saxon.Hej.expr.instruct.GlobalParameterSet parameterSet = new Saxon.Hej.expr.instruct.GlobalParameterSet();
-            parameterSet.put(new Saxon.Hej.om.StructuredQName("", "", "newTargetNamespace"), new Saxon.Hej.value.AnyURIValue((referrer.getXSDSchema().getTargetNamespace())));
+            parameterSet.put(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "newTargetNamespace"), new Saxon.Hej.value.AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
             Saxon.Hej.om.TreeInfo doc = chameleonTransformer.transform(this, pipelineConfiguration, referrer, input, parameterSet);
             return new Saxon.Eej.ee.schema.sdoc.SchemaDocument(doc);
         }
@@ -281,7 +281,7 @@ namespace Saxon.Eej.ee.schema {
                 overrideTransformer = new Saxon.Eej.ee.schema.sdoc.SchemaDocumentTransformer(config, "override.xsl");
             }
             Saxon.Hej.expr.instruct.GlobalParameterSet @params = new Saxon.Hej.expr.instruct.GlobalParameterSet();
-            @params.put(new Saxon.Hej.om.StructuredQName("", "", "overrideElement"), referrer);
+            @params.put(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "overrideElement"), referrer);
             Saxon.Hej.om.TreeInfo doc = overrideTransformer.transform(this, pipelineConfiguration, referrer, input, @params);
             return new Saxon.Eej.ee.schema.sdoc.SchemaDocument(doc);
         }

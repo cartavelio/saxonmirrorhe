@@ -69,11 +69,11 @@ namespace Saxon.Eej.ee.schema {
         }
         public void startElement(string elementName) {
             if (inStartTag) {
-                cco.@namespace("", "", Saxon.Hej.@event.ReceiverOption.NONE);
+                cco.@namespace("", Saxon.Hej.om.NamespaceUri.NULL, Saxon.Hej.@event.ReceiverOption.NONE);
                 cco.startContent();
             }
             inStartTag = true;
-            Saxon.Hej.om.NodeName nc = new Saxon.Hej.om.FingerprintedQName("scm", Saxon.Hej.lib.NamespaceConstant.SCM, elementName);
+            Saxon.Hej.om.NodeName nc = new Saxon.Hej.om.FingerprintedQName("scm", Saxon.Hej.om.NamespaceUri.SCM, elementName);
             cco.startElement(nc, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
         }
         public void endElement() {
@@ -86,11 +86,11 @@ namespace Saxon.Eej.ee.schema {
         public void emitNamespaceContext(Saxon.Hej.om.NamespaceResolver resolver) {
             for (System.Collections.Generic.IEnumerator<string> iter = resolver.iteratePrefixes(); iter.MoveNext() /*UNSAFE CONVERSION*/; ) {
                 string prefix = iter.Current;
-                string uri = resolver.getURIForPrefix(prefix, false);
+                Saxon.Hej.om.NamespaceUri uri = resolver.getURIForPrefix(prefix, false);
                 namespaceMap = namespaceMap.put(prefix, uri);
             }
         }
-        public void declareNamespace(string prefix, string uri) {
+        public void declareNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
             namespaceMap = namespaceMap.put(prefix, uri);
         }
         public void emitAttribute(string attributeName, string value) {
@@ -105,7 +105,7 @@ namespace Saxon.Eej.ee.schema {
             }
             cco.attribute(nc, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC, value, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
         }
-        private static readonly Saxon.Hej.om.FingerprintedQName XML_BASE = new Saxon.Hej.om.FingerprintedQName("xml", Saxon.Hej.lib.NamespaceConstant.XML, "base", Saxon.Hej.om.StandardNames.XML_BASE);
+        private static readonly Saxon.Hej.om.FingerprintedQName XML_BASE = new Saxon.Hej.om.FingerprintedQName("xml", Saxon.Hej.om.NamespaceUri.XML, "base", Saxon.Hej.om.StandardNames.XML_BASE);
         public void setIsSerialized(Saxon.Eej.ee.schema.SerializableSchemaComponent component) {
             Saxon.Impl.Helpers.MapUtils.Put(serializedComponents, component, "");
         }
@@ -145,7 +145,7 @@ namespace Saxon.Eej.ee.schema {
                 emitAttribute("type", ("#"+type.getName()));
                 emitAttribute("value", atom.getUnicodeStringValue().ToString());
                 if ((atom is Saxon.Hej.value.QualifiedNameValue)) {
-                    emitAttribute("namespace", ((Saxon.Hej.value.QualifiedNameValue)(atom)).getNamespaceURI());
+                    emitAttribute("namespace", ((Saxon.Hej.value.QualifiedNameValue)(atom)).getNamespaceURI().ToString());
                 }
                 endElement();
             }

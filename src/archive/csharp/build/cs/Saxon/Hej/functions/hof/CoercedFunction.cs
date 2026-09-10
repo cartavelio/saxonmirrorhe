@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions.hof {
     public class CoercedFunction : Saxon.Hej.functions.AbstractFunction {
-        private Saxon.Hej.om.Function targetFunction;
+        private Saxon.Hej.om.FunctionItem targetFunction;
         private readonly Saxon.Hej.type.SpecificFunctionType requiredType;
-        public CoercedFunction(Saxon.Hej.om.Function targetFunction, Saxon.Hej.type.SpecificFunctionType requiredType)  {
+        public CoercedFunction(Saxon.Hej.om.FunctionItem targetFunction, Saxon.Hej.type.SpecificFunctionType requiredType)  {
             if ((targetFunction.getArity() != requiredType.getArity())) {
                 throw new Saxon.Hej.trans.XPathException(wrongArityMessage(targetFunction, requiredType.getArity()), "XPTY0004");
             }
@@ -15,7 +15,7 @@ namespace Saxon.Hej.functions.hof {
         public CoercedFunction(Saxon.Hej.type.SpecificFunctionType requiredType)  {
             this.requiredType = requiredType;
         }
-        public void setTargetFunction(Saxon.Hej.om.Function targetFunction) {
+        public void setTargetFunction(Saxon.Hej.om.FunctionItem targetFunction) {
             if ((targetFunction.getArity() != requiredType.getArity())) {
                 throw new Saxon.Hej.trans.XPathException(wrongArityMessage(targetFunction, requiredType.getArity()), "XPTY0004");
             }
@@ -51,7 +51,8 @@ namespace Saxon.Hej.functions.hof {
                 if (argTypes[i].matches(gVal, th)) {
                     targetArgs[i] = gVal;
                 } else {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, targetFunction.getDescription(), i);
+                    int pos = i;
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, targetFunction.getDescription(), pos);
                     targetArgs[i] = th.applyFunctionConversionRules(gVal, argTypes[i], role, Saxon.Hej.expr.parser.Loc.NONE);
                 }
             }
@@ -59,20 +60,11 @@ namespace Saxon.Hej.functions.hof {
             if (req.getResultType().matches(rawResult, th)) {
                 return rawResult;
             } else {
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, targetFunction.getDescription(), 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, targetFunction.getDescription(), 0);
                 return th.applyFunctionConversionRules(rawResult, req.getResultType(), role, Saxon.Hej.expr.parser.Loc.NONE);
             }
         }
-        public static Saxon.Hej.functions.hof.CoercedFunction coerce(Saxon.Hej.om.Function suppliedFunction, Saxon.Hej.type.SpecificFunctionType requiredType, Saxon.Hej.expr.parser.RoleDiagnostic role) {
-            int arity = requiredType.getArity();
-            if ((suppliedFunction.getArity() != arity)) {
-                string msg = role.composeErrorMessage(requiredType, suppliedFunction, null);
-                msg += (". "+wrongArityMessage(suppliedFunction, arity));
-                throw new Saxon.Hej.trans.XPathException(msg, "XPTY0004");
-            }
-            return new Saxon.Hej.functions.hof.CoercedFunction(suppliedFunction, requiredType);
-        }
-        private static string wrongArityMessage(Saxon.Hej.om.Function supplied, int expected) {
+        private static string wrongArityMessage(Saxon.Hej.om.FunctionItem supplied, int expected) {
             return ((((("The supplied function ("+supplied.getDescription())+") has ")+Saxon.Hej.expr.FunctionCall.pluralArguments(supplied.getArity()))+" - expected ")+expected);
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {

@@ -52,20 +52,12 @@ namespace Saxon.Hej.serialize {
             if ((!(mapsWhitespace) && (@in is Saxon.Hej.str.WhitespaceString))) {
                 return @in;
             }
-            bool move = false;
-            Saxon.Hej.z.IntIterator iter = @in.codePoints();
-            while (iter.hasNext()) {
-                int c = iter.next();
-                if (((c>=min) && (c<=max))) {
-                    move = true;
-                    break ;
-                }
-            }
+            bool move = (@in.indexWhere(c => (((c>=min) && (c<=max))), 0)>=0);
             if (!(move)) {
                 return @in;
             }
             Saxon.Hej.str.UnicodeBuilder buffer = new Saxon.Hej.str.UnicodeBuilder();
-            iter = @in.codePoints();
+            Saxon.Hej.z.IntIterator iter = @in.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();
                 if (((c>=min) && (c<=max))) {

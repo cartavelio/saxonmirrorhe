@@ -3,27 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.value {
     public class StringValue : Saxon.Hej.value.AtomicValue {
-        protected internal Saxon.Hej.str.UnicodeString content;
+        protected internal readonly Saxon.Hej.str.UnicodeString content;
         public static readonly Saxon.Hej.value.StringValue EMPTY_STRING = new Saxon.Hej.value.StringValue(Saxon.Hej.str.EmptyUnicodeString.getInstance());
         public static readonly Saxon.Hej.value.StringValue SINGLE_SPACE = new Saxon.Hej.value.StringValue(Saxon.Hej.str.StringConstants.SINGLE_SPACE);
         public static readonly Saxon.Hej.value.StringValue TRUE = new Saxon.Hej.value.StringValue(Saxon.Hej.str.StringConstants.TRUE);
         public static readonly Saxon.Hej.value.StringValue FALSE = new Saxon.Hej.value.StringValue(Saxon.Hej.str.StringConstants.FALSE);
         public static readonly Saxon.Hej.value.StringValue ZERO_LENGTH_UNTYPED = Saxon.Hej.value.StringValue.makeUntypedAtomic(Saxon.Hej.str.EmptyUnicodeString.getInstance());
-        protected internal StringValue()  {
+        protected internal StringValue() : base (Saxon.Hej.type.BuiltInAtomicType.STRING) {
             content = Saxon.Hej.str.EmptyUnicodeString.getInstance();
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.STRING;
+        }
+        protected internal StringValue(Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
+            content = Saxon.Hej.str.EmptyUnicodeString.getInstance();
         }
         public StringValue(Saxon.Hej.str.UnicodeString content) : this (content, Saxon.Hej.type.BuiltInAtomicType.STRING) {
         }
-        public StringValue(Saxon.Hej.str.UnicodeString content, Saxon.Hej.type.AtomicType type)  {
+        public StringValue(Saxon.Hej.str.UnicodeString content, Saxon.Hej.type.AtomicType type) : base (type) {
             this.content = content;
-            this.typeLabel = type;
         }
         public StringValue(string value) : this (value, Saxon.Hej.type.BuiltInAtomicType.STRING) {
         }
-        public StringValue(string value, Saxon.Hej.type.AtomicType typeLabel)  {
+        public StringValue(string value, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
             this.content = Saxon.Hej.str.StringView.of(value).tidy();
-            this.typeLabel = typeLabel;
         }
         public static Saxon.Hej.value.StringValue makeUntypedAtomic(Saxon.Hej.str.UnicodeString value) {
             return new Saxon.Hej.value.StringValue(value, Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC);
@@ -32,10 +32,7 @@ namespace Saxon.Hej.value {
             if ((typeLabel == this.typeLabel)) {
                 return this;
             } else {
-                Saxon.Hej.value.StringValue v = new Saxon.Hej.value.StringValue();
-                v.typeLabel = typeLabel;
-                v.content = content;
-                return v;
+                return new Saxon.Hej.value.StringValue(this.content, typeLabel);
             }
         }
         public static Saxon.Hej.value.StringValue bmp(string content) {
@@ -133,7 +130,7 @@ namespace Saxon.Hej.value {
             return s;
         }
         public override Saxon.Hej.expr.sort.XPathComparable getXPathComparable(Saxon.Hej.lib.StringCollator collator, int implicitTimezone) {
-            return new Inner_XPathComparable_60(this, collator);
+            return new Inner_XPathComparable_55(this, collator);
         }
         public override bool isIdentical(Saxon.Hej.value.AtomicValue v) {
             return ((((v is Saxon.Hej.value.StringValue) && (((this is Saxon.Hej.value.AnyURIValue) == (v is Saxon.Hej.value.AnyURIValue)))) && ((this.isUntypedAtomic() == v.isUntypedAtomic()))) && Equals(v));
@@ -167,10 +164,6 @@ namespace Saxon.Hej.value {
             public void close() {
             }
 
-            /* Expanding default method discharge from interface SequenceIterator */
-            public void discharge() {
-            }
-
         }
         public sealed class Builder : Saxon.Hej.str.UniStringConsumer {
             internal Saxon.Hej.str.UnicodeBuilder buffer = new Saxon.Hej.str.UnicodeBuilder();
@@ -192,9 +185,9 @@ namespace Saxon.Hej.value {
 
         }
     
-        private class Inner_XPathComparable_60 : Saxon.Hej.expr.sort.XPathComparable {
+        private class Inner_XPathComparable_55 : Saxon.Hej.expr.sort.XPathComparable {
             private readonly StringValue outerInstance;
-            public Inner_XPathComparable_60(StringValue outerInstance, Saxon.Hej.lib.StringCollator collator) {
+            public Inner_XPathComparable_55(StringValue outerInstance, Saxon.Hej.lib.StringCollator collator) {
                 this.outerInstance = outerInstance;
                 this.collator = collator;
             }

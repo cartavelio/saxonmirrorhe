@@ -29,9 +29,9 @@ namespace Saxon.Hej.expr.parser {
             visitor.setStaticContext(env);
             return visitor;
         }
-        public void issueWarning(string message, Saxon.Hej.s9api.Location locator) {
+        public void issueWarning(string message, string errorCode, Saxon.Hej.s9api.Location locator) {
             if (!(isSuppressWarnings())) {
-                staticContext.issueWarning(message, locator);
+                staticContext.issueWarning(message, errorCode, locator);
             }
         }
         public Saxon.Hej.expr.XPathContext makeDynamicContext() {

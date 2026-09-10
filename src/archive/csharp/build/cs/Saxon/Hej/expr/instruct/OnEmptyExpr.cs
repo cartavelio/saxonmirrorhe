@@ -35,7 +35,7 @@ namespace Saxon.Hej.expr.instruct {
             return "onEmpty";
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            getBaseExpression().process(output, context);
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
             return getBaseExpression().iterate(context);
@@ -47,6 +47,9 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override string getStreamerName() {
             return "OnEmpty";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.SequenceInstr.SequenceInstrElaborator();
         }
     
     }

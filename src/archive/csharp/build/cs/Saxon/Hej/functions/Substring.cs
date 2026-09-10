@@ -129,6 +129,39 @@ namespace Saxon.Hej.functions {
         public override string getCompilerName() {
             return "SubstringCompiler";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.Substring.SubstringFnElaborator();
+        }
+        public class SubstringFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForItem();
+                bool nullable = Saxon.Hej.value.Cardinality.allowsZero(fnc.getArg(0).getCardinality());
+                if ((fnc.getArity() == 2)) {
+                    return context => {
+                        Saxon.Hej.value.StringValue sv = (Saxon.Hej.value.StringValue)(/*Delegate.eval()*/arg0Eval(context));
+                        if ((nullable && (sv == null))) {
+                            return Saxon.Hej.value.StringValue.EMPTY_STRING;
+                        }
+                        Saxon.Hej.value.NumericValue start = (Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/arg1Eval(context));
+                        return substring(sv, start);
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.ItemEvaluator arg2Eval = fnc.getArg(2).makeElaborator().elaborateForItem();
+                    return context => {
+                        Saxon.Hej.value.StringValue sv = (Saxon.Hej.value.StringValue)(/*Delegate.eval()*/arg0Eval(context));
+                        if ((nullable && (sv == null))) {
+                            return Saxon.Hej.value.StringValue.EMPTY_STRING;
+                        }
+                        Saxon.Hej.value.NumericValue start = (Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/arg1Eval(context));
+                        Saxon.Hej.value.NumericValue len = (Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/arg2Eval(context));
+                        return substring(sv, start, len);
+                    } ;
+                }
+            }
+        
+        }
     
     }
 }

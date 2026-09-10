@@ -224,7 +224,7 @@ namespace Saxon.Eej.ee.validate {
                                             if (!(first)) {
                                                 fsb.append(", ");
                                             }
-                                            if (poss.getURI().Equals(nodeName.getURI())) {
+                                            if (poss.hasURI(nodeName.getNamespaceUri())) {
                                                 fsb.append(Saxon.Hej.trans.Err.wrap(poss.getLocalPart(), Saxon.Hej.trans.Err.ELEMENT));
                                             } else {
                                                 fsb.append(Saxon.Hej.trans.Err.wrap(poss.getEQName(), Saxon.Hej.trans.Err.ELEMENT));
@@ -241,13 +241,13 @@ namespace Saxon.Eej.ee.validate {
                     }
                     if (!(explained)) {
                         string foundLocal = nodeName.getLocalPart();
-                        string foundURI = nodeName.getURI();
+                        Saxon.Hej.om.NamespaceUri foundURI = nodeName.getNamespaceUri();
                         foreach (Saxon.Eej.ee.schema.fsa.Edge e in state.getEdges()) {
                             if ((e.getParticle() is Saxon.Eej.ee.schema.ElementParticle)) {
                                 string local = ((Saxon.Eej.ee.schema.ElementParticle)(e.getParticle())).getName();
                                 if (local.Equals(foundLocal)) {
-                                    string uri = ((Saxon.Eej.ee.schema.ElementParticle)(e.getParticle())).getNamespaceURI();
-                                    fsb.append("The element is in ").append(("".Equals(foundURI) ? "no namespace" : ("namespace "+foundURI))).append(" but it should be in ").append(("".Equals(uri) ? "no namespace" : ("namespace "+uri))).append(". ");
+                                    Saxon.Hej.om.NamespaceUri uri = ((Saxon.Eej.ee.schema.ElementParticle)(e.getParticle())).getNamespaceURI();
+                                    fsb.append("The element is in ").append((foundURI.isEmpty() ? "no namespace" : ("namespace "+foundURI))).append(" but it should be in ").append((uri.isEmpty() ? "no namespace" : ("namespace "+uri))).append(". ");
                                     explained = true;
                                     break ;
                                 }
@@ -269,8 +269,8 @@ namespace Saxon.Eej.ee.validate {
             if (!(explained)) {
                 System.Collections.Generic.ISet<string> specificTransitions = new System.Collections.Generic.HashSet<string>();
                 Saxon.Hej.om.StructuredQName expected = null;
-                System.Collections.Generic.ISet<string> specificURIs = new System.Collections.Generic.HashSet<string>();
-                string @namespace = null;
+                System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> specificURIs = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
+                Saxon.Hej.om.NamespaceUri @namespace = null;
                 foreach (Saxon.Eej.ee.schema.fsa.Edge e in state.getEdges()) {
                     if ((e.getParticle() is Saxon.Eej.ee.schema.ElementParticle)) {
                         expected = e.getParticle().getTargetComponentName();
@@ -305,13 +305,13 @@ namespace Saxon.Eej.ee.validate {
                             fsb.append("The following elements would be valid here");
                             if (uniform) {
                                 fsb.append(", all in ");
-                                fsb.append(("".Equals(@namespace) ? "no namespace" : ("namespace "+@namespace)));
+                                fsb.append((@namespace.isEmpty() ? "no namespace" : ("namespace "+@namespace)));
                             }
                             fsb.append(": ");
                             int i = 0;
                             foreach (string s in specificTransitions) {
                                 if ((i>=10)) {
-                                    fsb.append(((", and "+((specificTransitions.Count-10)))+" others"));
+                                    fsb.append(", and ").append((specificTransitions.Count-10)).append(" others");
                                     break ;
                                 }
                                 if ((i++>0)) {

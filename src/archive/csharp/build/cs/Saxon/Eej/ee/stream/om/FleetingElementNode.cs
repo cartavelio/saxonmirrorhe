@@ -65,10 +65,10 @@ namespace Saxon.Eej.ee.stream.om {
         public override Saxon.Hej.om.NamespaceMap getInScopeNamespaces() {
             return inScopeNamespaces;
         }
-        public override string getAttributeValue(string uri, string local) {
+        public override string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local) {
             return attributeMap.getValue(uri, local);
         }
-        public int getAttributeIndex(string uri, string local) {
+        public int getAttributeIndex(Saxon.Hej.om.NamespaceUri uri, string local) {
             int i = 0;
             foreach (Saxon.Hej.om.AttributeInfo att in attributeMap) {
                 Saxon.Hej.om.NodeName nn = att.getNodeName();

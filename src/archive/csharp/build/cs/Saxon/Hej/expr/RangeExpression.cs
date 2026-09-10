@@ -14,6 +14,9 @@ namespace Saxon.Hej.expr {
             }
             return new Saxon.Hej.expr.RangeExpression(((Saxon.Hej.expr.RangeExpression)(lhs)).getStartExpression(), rhs, ((Saxon.Hej.expr.RangeExpression)(lhs)).getEndExpression());
         }
+        public bool isDefaultedStep() {
+            return defaultedStep;
+        }
         public RangeExpression(Saxon.Hej.expr.Expression start, Saxon.Hej.expr.Expression end) : this (start, new Saxon.Hej.expr.Literal(Saxon.Hej.value.Int64Value.PLUS_ONE), end) {
             defaultedStep = true;
         }
@@ -40,11 +43,11 @@ namespace Saxon.Hej.expr {
             end.typeCheck(visitor, contextInfo);
             bool backCompat = visitor.getStaticContext().isInBackwardsCompatibleMode();
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(backCompat);
-            Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "to", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role0 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "to", 0);
             start.setChildExpression(tc.staticTypeCheck(getStartExpression(), Saxon.Hej.value.SequenceType.OPTIONAL_INTEGER, role0, visitor));
-            Saxon.Hej.expr.parser.RoleDiagnostic role1 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "by", 1);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role1 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "by", 1);
             step.setChildExpression(tc.staticTypeCheck(getStepExpression(), Saxon.Hej.value.SequenceType.OPTIONAL_INTEGER, role1, visitor));
-            Saxon.Hej.expr.parser.RoleDiagnostic role2 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "to", 1);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role2 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, "to", 1);
             end.setChildExpression(tc.staticTypeCheck(getEndExpression(), Saxon.Hej.value.SequenceType.OPTIONAL_INTEGER, role2, visitor));
             return makeConstantRange();
         }
@@ -166,6 +169,24 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.value.IntegerValue av2 = (Saxon.Hej.value.IntegerValue)(getStepExpression().evaluateItem(context));
             Saxon.Hej.value.IntegerValue av3 = (Saxon.Hej.value.IntegerValue)(getEndExpression().evaluateItem(context));
             return Saxon.Hej.expr.AscendingRangeIterator.makeRangeIterator(av1, av2, av3);
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.RangeExpression.RangeElaborator();
+        }
+        public class RangeElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.RangeExpression expr = (Saxon.Hej.expr.RangeExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator iv1 = expr.getStartExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator iv2 = expr.getStepExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator iv3 = expr.getEndExpression().makeElaborator().elaborateForItem();
+                return (context) => {
+                    Saxon.Hej.value.IntegerValue av1 = (Saxon.Hej.value.IntegerValue)(/*Delegate.eval()*/iv1(context));
+                    Saxon.Hej.value.IntegerValue av2 = (Saxon.Hej.value.IntegerValue)(/*Delegate.eval()*/iv2(context));
+                    Saxon.Hej.value.IntegerValue av3 = (Saxon.Hej.value.IntegerValue)(/*Delegate.eval()*/iv3(context));
+                    return Saxon.Hej.expr.AscendingRangeIterator.makeRangeIterator(av1, av2, av3);
+                } ;
+            }
+        
         }
     
     }

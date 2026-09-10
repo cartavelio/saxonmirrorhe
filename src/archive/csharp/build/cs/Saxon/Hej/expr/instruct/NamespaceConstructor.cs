@@ -28,7 +28,7 @@ namespace Saxon.Hej.expr.instruct {
         public override void localTypeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
             Saxon.Hej.expr.StaticContext env = visitor.getStaticContext();
             nameOp.typeCheck(visitor, contextItemType);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "namespace/name", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "namespace/name", 0);
             setNameExp(env.getConfiguration().getTypeChecker(false).staticTypeCheck(getNameExp(), Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC, role, visitor));
             adoptChildExpression(getNameExp());
             if ((getNameExp() is Saxon.Hej.expr.Literal)) {
@@ -56,6 +56,10 @@ namespace Saxon.Hej.expr.instruct {
                 throw dynamicError(getLocation(), err, context);
             }
             string prefix = Saxon.Hej.value.Whitespace.trim(value.getStringValue());
+            return checkPrefix(prefix, context);
+        }
+        public string checkPrefix(string prefix, Saxon.Hej.expr.XPathContext context) {
+            prefix = Saxon.Hej.value.Whitespace.trim(prefix);
             if (!(((prefix.Length==0 || Saxon.Hej.om.NameChecker.isValidNCName(prefix))))) {
                 string errorCode = (isXSLT() ? "XTDE0920" : "XQDY0074");
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Namespace prefix is invalid: "+prefix), errorCode, getLocation());
@@ -72,7 +76,7 @@ namespace Saxon.Hej.expr.instruct {
             string prefix = evaluatePrefix(context);
             string uri = value.ToString();
             checkPrefixAndUri(prefix, uri, context);
-            output.@namespace(prefix, uri, Saxon.Hej.@event.ReceiverOption.REJECT_DUPLICATES);
+            output.@namespace(prefix, Saxon.Hej.om.NamespaceUri.of(uri), Saxon.Hej.@event.ReceiverOption.REJECT_DUPLICATES);
         }
         public override Saxon.Hej.om.NodeInfo evaluateItem(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(base.evaluateItem(context));
@@ -117,6 +121,88 @@ namespace Saxon.Hej.expr.instruct {
             @out.setChildRole("select");
             getSelect().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.NamespaceConstructor.NamespaceConstructorElaborator();
+        }
+        private class NamespaceConstructorElaborator : Saxon.Hej.expr.elab.SimpleNodePushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.NamespaceConstructor expr = (Saxon.Hej.expr.instruct.NamespaceConstructor)(getExpression());
+                Saxon.Hej.s9api.Location loc = expr.getLocation();
+                string literalPrefix = ((expr.getNameExp() is Saxon.Hej.expr.StringLiteral) ? ((Saxon.Hej.expr.StringLiteral)(expr.getNameExp())).stringify() : null);
+                Saxon.Hej.om.NamespaceUri literalUri = ((expr.getSelect() is Saxon.Hej.expr.StringLiteral) ? Saxon.Hej.om.NamespaceUri.of(((Saxon.Hej.expr.StringLiteral)(expr.getSelect())).stringify()) : null);
+                if (((literalPrefix != null) && (literalUri != null))) {
+                    try {
+                        expr.checkPrefix(literalPrefix, getConfiguration().getConversionContext());
+                        expr.checkPrefixAndUri(literalPrefix, literalUri.ToString(), getConfiguration().getConversionContext());
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        return (output, context) => {
+                            throw e;
+                        } ;
+                    }
+                    return (output, context) => {
+                        output.@namespace(literalPrefix, literalUri, Saxon.Hej.@event.ReceiverOption.REJECT_DUPLICATES);
+                        return null;
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.StringEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForString(true);
+                    Saxon.Hej.expr.elab.StringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForString(true);
+                    return (output, context) => {
+                        string prefix = /*Delegate.eval()*/nameEval(context);
+                        string uri = /*Delegate.eval()*/contentEval(context);
+                        expr.checkPrefix(prefix, context);
+                        expr.checkPrefixAndUri(prefix, uri, context);
+                        try {
+                            output.@namespace(prefix, Saxon.Hej.om.NamespaceUri.of(uri), Saxon.Hej.@event.ReceiverOption.REJECT_DUPLICATES);
+                        } catch (Saxon.Hej.trans.XPathException err) {
+                            throw Saxon.Hej.expr.instruct.Instruction.dynamicError(loc, err, context);
+                        }
+                        return null;
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.instruct.NamespaceConstructor expr = (Saxon.Hej.expr.instruct.NamespaceConstructor)(getExpression());
+                Saxon.Hej.s9api.Location loc = expr.getLocation();
+                string literalPrefix = ((expr.getNameExp() is Saxon.Hej.expr.StringLiteral) ? ((Saxon.Hej.expr.StringLiteral)(expr.getNameExp())).stringify() : null);
+                Saxon.Hej.om.NamespaceUri literalUri = ((expr.getSelect() is Saxon.Hej.expr.StringLiteral) ? Saxon.Hej.om.NamespaceUri.of(((Saxon.Hej.expr.StringLiteral)(expr.getSelect())).stringify()) : null);
+                if (((literalPrefix != null) && (literalUri != null))) {
+                    try {
+                        expr.checkPrefix(literalPrefix, getConfiguration().getConversionContext());
+                        expr.checkPrefixAndUri(literalPrefix, literalUri.ToString(), getConfiguration().getConversionContext());
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        return (context) => {
+                            throw e;
+                        } ;
+                    }
+                    return (context) => {
+                        Saxon.Hej.tree.util.Orphan o = new Saxon.Hej.tree.util.Orphan(context.getConfiguration());
+                        o.setNodeKind(Saxon.Hej.type.Type.NAMESPACE);
+                        o.setStringValue(literalUri.toUnicodeString());
+                        if (!(literalPrefix.Length==0)) {
+                            o.setNodeName(new Saxon.Hej.om.NoNamespaceName(literalPrefix));
+                        }
+                        return o;
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.StringEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForString(true);
+                    Saxon.Hej.expr.elab.UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+                    return context => {
+                        string prefix = /*Delegate.eval()*/nameEval(context);
+                        Saxon.Hej.str.UnicodeString uri = /*Delegate.eval()*/contentEval(context);
+                        expr.checkPrefix(prefix, context);
+                        expr.checkPrefixAndUri(prefix, uri.ToString(), context);
+                        Saxon.Hej.tree.util.Orphan o = new Saxon.Hej.tree.util.Orphan(context.getConfiguration());
+                        o.setNodeKind(Saxon.Hej.type.Type.NAMESPACE);
+                        o.setStringValue(uri);
+                        if (!(prefix.Length==0)) {
+                            o.setNodeName(new Saxon.Hej.om.NoNamespaceName(prefix));
+                        }
+                        return o;
+                    } ;
+                }
+            }
+        
         }
     
     }

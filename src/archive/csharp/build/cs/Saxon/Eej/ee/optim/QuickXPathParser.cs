@@ -43,7 +43,7 @@ namespace Saxon.Eej.ee.optim {
 } );
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.AT, Saxon.Hej.expr.parser.Token.NAME), (values, env) => {
     Saxon.Hej.om.StructuredQName name = verifyQName(values[1], env);
-    return new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, name.getURI(), name.getLocalPart(), env.getConfiguration().getNamePool()));
+    return new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
 } );
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.AT, Saxon.Hej.expr.parser.Token.STAR), (values, env) => new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, Saxon.Hej.pattern.NodeKindTest.ATTRIBUTE));
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.NAME), (values, env) => {
@@ -51,7 +51,7 @@ namespace Saxon.Eej.ee.optim {
         return null;
     }
     Saxon.Hej.om.StructuredQName name = verifyElementQName(values[0], env);
-    return new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getURI(), name.getLocalPart(), env.getConfiguration().getNamePool()));
+    return new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
 } );
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.KEYWORD_CURLY, Saxon.Hej.expr.parser.Token.RCURLY), (values, env) => {
     string name = values[0];
@@ -68,22 +68,22 @@ namespace Saxon.Eej.ee.optim {
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.FUNCTION, Saxon.Hej.expr.parser.Token.RPAR), (values, env) => {
     Saxon.Hej.om.StructuredQName name = verifyFunctionQName(values[0], env);
     System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 0), new Saxon.Hej.expr.Expression[]{}, env, reasons);
+    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 0), new Saxon.Hej.expr.Expression[]{}, null, env, reasons);
 } );
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.FUNCTION, Saxon.Hej.expr.parser.Token.DOT, Saxon.Hej.expr.parser.Token.RPAR), (values, env) => {
     Saxon.Hej.om.StructuredQName name = verifyFunctionQName(values[0], env);
     System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
     Saxon.Hej.expr.Expression cie = new Saxon.Hej.expr.ContextItemExpression();
     cie.setLocation(env.getContainingLocation());
-    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 1), new Saxon.Hej.expr.Expression[]{cie}, env, reasons);
+    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 1), new Saxon.Hej.expr.Expression[]{cie}, null, env, reasons);
 } );
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.FUNCTION, Saxon.Hej.expr.parser.Token.NAME, Saxon.Hej.expr.parser.Token.RPAR), (values, env) => {
     Saxon.Hej.om.StructuredQName fnName = verifyFunctionQName(values[0], env);
     Saxon.Hej.om.StructuredQName elName = verifyElementQName(values[1], env);
     System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-    Saxon.Hej.expr.Expression child = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, elName.getURI(), elName.getLocalPart(), env.getConfiguration().getNamePool()));
+    Saxon.Hej.expr.Expression child = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, elName.getNamespaceUri(), elName.getLocalPart(), env.getConfiguration().getNamePool()));
     child.setLocation(env.getContainingLocation());
-    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(fnName, 1), new Saxon.Hej.expr.Expression[]{child}, env, reasons);
+    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(fnName, 1), new Saxon.Hej.expr.Expression[]{child}, null, env, reasons);
 } );
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.FUNCTION, Saxon.Hej.expr.parser.Token.DOLLAR, Saxon.Hej.expr.parser.Token.NAME, Saxon.Hej.expr.parser.Token.RPAR), (values, env) => {
     Saxon.Hej.om.StructuredQName varName = verifyQName(values[2], env);
@@ -91,32 +91,32 @@ namespace Saxon.Eej.ee.optim {
     varRef.setLocation(env.getContainingLocation());
     Saxon.Hej.om.StructuredQName name = verifyFunctionQName(values[0], env);
     System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 1), new Saxon.Hej.expr.Expression[]{varRef}, env, reasons);
+    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 1), new Saxon.Hej.expr.Expression[]{varRef}, null, env, reasons);
 } );
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.FUNCTION, Saxon.Hej.expr.parser.Token.AT, Saxon.Hej.expr.parser.Token.NAME, Saxon.Hej.expr.parser.Token.RPAR), (values, env) => {
     Saxon.Hej.om.StructuredQName attName = verifyQName(values[2], env);
-    Saxon.Hej.expr.AxisExpression arg = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, attName.getURI(), attName.getLocalPart(), env.getConfiguration().getNamePool()));
+    Saxon.Hej.expr.AxisExpression arg = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, attName.getNamespaceUri(), attName.getLocalPart(), env.getConfiguration().getNamePool()));
     arg.setLocation(env.getContainingLocation());
     Saxon.Hej.om.StructuredQName name = verifyFunctionQName(values[0], env);
     System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 1), new Saxon.Hej.expr.Expression[]{arg}, env, reasons);
+    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 1), new Saxon.Hej.expr.Expression[]{arg}, null, env, reasons);
 } );
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.FUNCTION, Saxon.Hej.expr.parser.Token.STRING_LITERAL, Saxon.Hej.expr.parser.Token.RPAR), (values, env) => {
     Saxon.Hej.expr.Expression arg = Saxon.Hej.expr.StringLiteral.makeLiteral(Saxon.Hej.value.StringValue.makeStringValue(values[1]));
     arg.setLocation(env.getContainingLocation());
     Saxon.Hej.om.StructuredQName name = verifyFunctionQName(values[0], env);
     System.Collections.Generic.IList<string> reasons = new System.Collections.Generic.List<string>();
-    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 1), new Saxon.Hej.expr.Expression[]{arg}, env, reasons);
+    return env.getFunctionLibrary().bind(new Saxon.Hej.trans.SymbolicName.F(name, 1), new Saxon.Hej.expr.Expression[]{arg}, null, env, reasons);
 } );
             Saxon.Impl.Helpers.MapUtils.Put(patterns, key(Saxon.Hej.expr.parser.Token.NAME, Saxon.Hej.expr.parser.Token.SLASH, Saxon.Hej.expr.parser.Token.NAME), (values, env) => {
     if ((env.getUnprefixedElementMatchingPolicy() != Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace)) {
         return null;
     }
     Saxon.Hej.om.StructuredQName first = verifyElementQName(values[0], env);
-    Saxon.Hej.expr.AxisExpression start = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, first.getURI(), first.getLocalPart(), env.getConfiguration().getNamePool()));
+    Saxon.Hej.expr.AxisExpression start = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, first.getNamespaceUri(), first.getLocalPart(), env.getConfiguration().getNamePool()));
     start.setLocation(env.getContainingLocation());
     Saxon.Hej.om.StructuredQName second = verifyElementQName(values[2], env);
-    Saxon.Hej.expr.AxisExpression step = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, second.getURI(), second.getLocalPart(), env.getConfiguration().getNamePool()));
+    Saxon.Hej.expr.AxisExpression step = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, second.getNamespaceUri(), second.getLocalPart(), env.getConfiguration().getNamePool()));
     step.setLocation(env.getContainingLocation());
     return new Saxon.Hej.expr.SlashExpression(start, step);
 } );
@@ -125,10 +125,10 @@ namespace Saxon.Eej.ee.optim {
         return null;
     }
     Saxon.Hej.om.StructuredQName first = verifyElementQName(values[0], env);
-    Saxon.Hej.expr.AxisExpression one = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, first.getURI(), first.getLocalPart(), env.getConfiguration().getNamePool()));
+    Saxon.Hej.expr.AxisExpression one = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, first.getNamespaceUri(), first.getLocalPart(), env.getConfiguration().getNamePool()));
     one.setLocation(env.getContainingLocation());
     Saxon.Hej.om.StructuredQName second = verifyElementQName(values[2], env);
-    Saxon.Hej.expr.AxisExpression two = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, second.getURI(), second.getLocalPart(), env.getConfiguration().getNamePool()));
+    Saxon.Hej.expr.AxisExpression two = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, second.getNamespaceUri(), second.getLocalPart(), env.getConfiguration().getNamePool()));
     two.setLocation(env.getContainingLocation());
     return new Saxon.Hej.expr.VennExpression(one, Saxon.Hej.expr.parser.Token.UNION, two);
 } );
@@ -137,10 +137,10 @@ namespace Saxon.Eej.ee.optim {
         return null;
     }
     Saxon.Hej.om.StructuredQName first = verifyElementQName(values[0], env);
-    Saxon.Hej.expr.AxisExpression start = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, first.getURI(), first.getLocalPart(), env.getConfiguration().getNamePool()));
+    Saxon.Hej.expr.AxisExpression start = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.CHILD, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, first.getNamespaceUri(), first.getLocalPart(), env.getConfiguration().getNamePool()));
     start.setLocation(env.getContainingLocation());
     Saxon.Hej.om.StructuredQName second = verifyQName(values[3], env);
-    Saxon.Hej.expr.AxisExpression step = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, second.getURI(), second.getLocalPart(), env.getConfiguration().getNamePool()));
+    Saxon.Hej.expr.AxisExpression step = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, second.getNamespaceUri(), second.getLocalPart(), env.getConfiguration().getNamePool()));
     step.setLocation(env.getContainingLocation());
     return new Saxon.Hej.expr.SlashExpression(start, step);
 } );
@@ -149,7 +149,7 @@ namespace Saxon.Eej.ee.optim {
     Saxon.Hej.expr.Expression varRef = env.bindVariable(first);
     varRef.setLocation(env.getContainingLocation());
     Saxon.Hej.om.StructuredQName second = verifyQName(values[4], env);
-    Saxon.Hej.expr.AxisExpression step = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, second.getURI(), second.getLocalPart(), env.getConfiguration().getNamePool()));
+    Saxon.Hej.expr.AxisExpression step = new Saxon.Hej.expr.AxisExpression(Saxon.Hej.om.AxisInfo.ATTRIBUTE, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, second.getNamespaceUri(), second.getLocalPart(), env.getConfiguration().getNamePool()));
     step.setLocation(env.getContainingLocation());
     return new Saxon.Hej.expr.SlashExpression(varRef, step);
 } );
@@ -236,7 +236,7 @@ namespace Saxon.Eej.ee.optim {
         return null;
     }
     Saxon.Hej.om.StructuredQName name = verifyElementQName(values[1], env);
-    return new Saxon.Hej.expr.AxisExpression(axis, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getURI(), name.getLocalPart(), env.getConfiguration().getNamePool()));
+    return new Saxon.Hej.expr.AxisExpression(axis, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), env.getConfiguration().getNamePool()));
 } );
         }
         private static readonly System.Collections.Generic.IDictionary<System.Int64,Saxon.Eej.ee.optim.QuickXPathParser.ExpressionMaker> patterns = new System.Collections.Generic.Dictionary<System.Int64, Saxon.Eej.ee.optim.QuickXPathParser.ExpressionMaker>();
@@ -294,7 +294,7 @@ namespace Saxon.Eej.ee.optim {
         }
         private delegate Saxon.Hej.expr.Expression ExpressionMaker (System.Collections.Generic.IList<string> tokens, Saxon.Hej.expr.StaticContext env);
         static Saxon.Hej.om.StructuredQName verifyQName(string name, Saxon.Hej.expr.StaticContext env) {
-            return new Saxon.Hej.om.QNameParser(env.getNamespaceResolver()).parse(name, "");
+            return new Saxon.Hej.om.QNameParser(env.getNamespaceResolver()).parse(name, Saxon.Hej.om.NamespaceUri.NULL);
         }
         static Saxon.Hej.om.StructuredQName verifyElementQName(string name, Saxon.Hej.expr.StaticContext env) {
             Saxon.Hej.om.QNameParser qNameParser = new Saxon.Hej.om.QNameParser(env.getNamespaceResolver());

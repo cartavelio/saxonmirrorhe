@@ -11,7 +11,7 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.value.SequenceType atomicType = Saxon.Hej.value.SequenceType.makeSequenceType(Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC, getCardinality());
             Saxon.Hej.Configuration config = visitor.getConfiguration();
             Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.TYPE_OP, "cast as", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.TYPE_OP, "cast as", 0);
             Saxon.Hej.type.ItemType sourceItemType;
             Saxon.Hej.expr.parser.TypeChecker tc = config.getTypeChecker(false);
             Saxon.Hej.expr.Expression operand = tc.staticTypeCheck(getBaseExpression(), atomicType, role, visitor);
@@ -196,7 +196,7 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.value.AtomicValue result = doCast((Saxon.Hej.value.AtomicValue)(arguments[0].head()), context);
             return Saxon.Hej.om.SequenceTool.itemOrEmpty(result);
         }
-        private Saxon.Hej.value.AtomicValue doCast(Saxon.Hej.value.AtomicValue value, Saxon.Hej.expr.XPathContext context) {
+        public Saxon.Hej.value.AtomicValue doCast(Saxon.Hej.value.AtomicValue value, Saxon.Hej.expr.XPathContext context) {
             if ((value == null)) {
                 if (allowsEmpty()) {
                     return null;
@@ -234,13 +234,7 @@ namespace Saxon.Hej.expr {
             return (Saxon.Hej.value.AtomicValue)(result);
         }
         public override Saxon.Hej.value.AtomicValue evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            try {
-                Saxon.Hej.value.AtomicValue value = (Saxon.Hej.value.AtomicValue)(getBaseExpression().evaluateItem(context));
-                return doCast(value, context);
-            } catch (System.InvalidCastException e) {
-                System.Console.Error.WriteLine(e);
-                throw;
-            }
+            return (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/makeElaborator().elaborateForItem()(context));
         }
         public override bool Equals(System.Object other) {
             return ((((other is Saxon.Hej.expr.CastExpression) && getBaseExpression().isEqual(((Saxon.Hej.expr.CastExpression)(other)).getBaseExpression())) && (getTargetType() == ((Saxon.Hej.expr.CastExpression)(other)).getTargetType())) && (allowsEmpty() == ((Saxon.Hej.expr.CastExpression)(other)).allowsEmpty()));
@@ -259,6 +253,21 @@ namespace Saxon.Hej.expr {
         }
         public override string getExpressionName() {
             return "cast";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.CastExpression.CastExprElaborator();
+        }
+        public class CastExprElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.CastExpression exp = (Saxon.Hej.expr.CastExpression)(getExpression());
+                Saxon.Hej.expr.Expression arg = exp.getBaseExpression();
+                Saxon.Hej.expr.elab.ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
+                return context => {
+                    Saxon.Hej.value.AtomicValue value = (Saxon.Hej.value.AtomicValue)(/*Delegate.eval()*/argEval(context));
+                    return exp.doCast(value, context);
+                } ;
+            }
+        
         }
     
     }

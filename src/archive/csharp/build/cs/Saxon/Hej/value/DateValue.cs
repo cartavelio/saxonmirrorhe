@@ -3,47 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.value {
     public class DateValue : Saxon.Hej.value.GDateValue, Saxon.Hej.expr.sort.XPathComparable {
-        private DateValue()  {
+        private DateValue(Saxon.Hej.value.GDateValue.MutableGDateValue m) : base (m) {
         }
-        public DateValue(int year, byte month, byte day)  {
-            this.hasNoYearZero = true;
-            this.year = year;
-            this.month = month;
-            this.day = day;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE;
+        public DateValue(int year, byte month, byte day) : this (new Saxon.Hej.value.GDateValue.MutableGDateValue(year, month, day, true, NO_TIMEZONE, Saxon.Hej.type.BuiltInAtomicType.DATE)) {
         }
-        public DateValue(int year, byte month, byte day, bool xsd10)  {
-            this.hasNoYearZero = xsd10;
-            this.year = year;
-            this.month = month;
-            this.day = day;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE;
+        public DateValue(int year, byte month, byte day, bool xsd10) : this (new Saxon.Hej.value.GDateValue.MutableGDateValue(year, month, day, xsd10, NO_TIMEZONE, Saxon.Hej.type.BuiltInAtomicType.DATE)) {
         }
-        public DateValue(int year, byte month, byte day, int tz, bool xsd10)  {
-            this.hasNoYearZero = xsd10;
-            this.year = year;
-            this.month = month;
-            this.day = day;
-            setTimezoneInMinutes(tz);
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE;
+        public DateValue(int year, byte month, byte day, int tz, bool xsd10) : this (new Saxon.Hej.value.GDateValue.MutableGDateValue(year, month, day, xsd10, tz, Saxon.Hej.type.BuiltInAtomicType.DATE)) {
         }
-        public DateValue(int year, byte month, byte day, int tz, Saxon.Hej.type.AtomicType type)  {
-            this.year = year;
-            this.month = month;
-            this.day = day;
-            setTimezoneInMinutes(tz);
-            typeLabel = type;
+        public DateValue(int year, byte month, byte day, int tz, Saxon.Hej.type.AtomicType type) : this (new Saxon.Hej.value.GDateValue.MutableGDateValue(year, month, day, false, tz, type)) {
         }
         public DateValue(Saxon.Hej.str.UnicodeString s) : this (s, Saxon.Hej.lib.ConversionRules.DEFAULT) {
         }
-        public DateValue(Saxon.Hej.str.UnicodeString s, Saxon.Hej.lib.ConversionRules rules)  {
-            setLexicalValue(this, s, rules.isAllowYearZero()).asAtomic();
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE;
+        public DateValue(Saxon.Hej.str.UnicodeString s, Saxon.Hej.lib.ConversionRules rules) : this (fromUnicodeString(s, rules)) {
+        }
+        private static Saxon.Hej.value.GDateValue.MutableGDateValue fromUnicodeString(Saxon.Hej.str.UnicodeString s, Saxon.Hej.lib.ConversionRules rules) {
+            Saxon.Hej.value.GDateValue.MutableGDateValue m = new Saxon.Hej.value.GDateValue.MutableGDateValue();
+            setLexicalValue(m, s, rules.isAllowYearZero());
+            if ((m.error == null)) {
+                return m;
+            } else {
+                throw m.error.makeException();
+            }
         }
         public static Saxon.Hej.type.ConversionResult makeDateValue(Saxon.Hej.str.UnicodeString @in, Saxon.Hej.lib.ConversionRules rules) {
-            Saxon.Hej.value.DateValue d = new Saxon.Hej.value.DateValue();
-            d.typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE;
-            return setLexicalValue(d, @in, rules.isAllowYearZero());
+            Saxon.Hej.value.GDateValue.MutableGDateValue g = new Saxon.Hej.value.GDateValue.MutableGDateValue();
+            g.typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE;
+            setLexicalValue(g, @in, rules.isAllowYearZero());
+            return ((g.error == null) ? new Saxon.Hej.value.DateValue(g) : g.error);
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {
             return Saxon.Hej.type.BuiltInAtomicType.DATE;
@@ -75,7 +62,7 @@ namespace Saxon.Hej.value {
             }
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             int yr = year;
             if ((year<=0)) {
                 yr = (-(yr)+((hasNoYearZero ? 1 : 0)));
@@ -107,9 +94,9 @@ namespace Saxon.Hej.value {
             return target.getUnicodeStringValue();
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.DateValue v = new Saxon.Hej.value.DateValue(year, month, day, getTimezoneInMinutes(), hasNoYearZero);
-            v.typeLabel = typeLabel;
-            return v;
+            Saxon.Hej.value.GDateValue.MutableGDateValue m = makeMutableCopy();
+            m.typeLabel = typeLabel;
+            return new Saxon.Hej.value.DateValue(m);
         }
         public override Saxon.Hej.value.DateValue adjustTimezone(int timezone) {
             Saxon.Hej.value.DateTimeValue dt = toDateTime().adjustTimezone(timezone);
@@ -123,15 +110,15 @@ namespace Saxon.Hej.value {
                 int days = (int)(System.Math.Floor(((double)(microseconds)/((((1000000L*60L)*60L)*24L)))));
                 bool partDay = (((microseconds%((((1000000L*60L)*60L)*24L))))>0);
                 int julian = getJulianDayNumber();
-                Saxon.Hej.value.DateValue d = dateFromJulianDayNumber((julian+((negative ? -(days) : days))));
+                Saxon.Hej.value.GDateValue.MutableGDateValue d = mutableDateFromJulianDayNumber((julian+((negative ? -(days) : days))));
                 if (partDay) {
                     if (negative) {
-                        d = yesterday(d.year, d.month, d.day);
+                        d = yesterday(d.year, d.month, d.day).makeMutableCopy();
                     }
                 }
-                d.setTimezoneInMinutes(getTimezoneInMinutes());
+                d.tzMinutes = getTimezoneInMinutes();
                 d.hasNoYearZero = this.hasNoYearZero;
-                return d;
+                return new Saxon.Hej.value.DateValue(d);
             } else {
                 if ((duration is Saxon.Hej.value.YearMonthDurationValue)) {
                     int months = ((Saxon.Hej.value.YearMonthDurationValue)(duration)).getLengthInMonths();
@@ -202,6 +189,9 @@ namespace Saxon.Hej.value {
             return getJulianDayNumber(year, month, day);
         }
         public static Saxon.Hej.value.DateValue dateFromJulianDayNumber(int julianDayNumber) {
+            return new Saxon.Hej.value.DateValue(mutableDateFromJulianDayNumber(julianDayNumber));
+        }
+        private static Saxon.Hej.value.GDateValue.MutableGDateValue mutableDateFromJulianDayNumber(int julianDayNumber) {
             if ((julianDayNumber>=0)) {
                 int L = ((julianDayNumber+68569)+1);
                 int n = (((4*L))/146097);
@@ -213,9 +203,9 @@ namespace Saxon.Hej.value {
                 L = (j/11);
                 int m = ((j+2)-((12*L)));
                 int y = (((100*((n-49)))+i)+L);
-                return new Saxon.Hej.value.DateValue(y, (byte)(m), (byte)(d), true);
+                return new Saxon.Hej.value.GDateValue.MutableGDateValue(y, m, d, true, NO_TIMEZONE, Saxon.Hej.type.BuiltInAtomicType.DATE);
             } else {
-                Saxon.Hej.value.DateValue dt = dateFromJulianDayNumber(((((julianDayNumber+(365*12000))+(12000/4))-(12000/100))+(12000/400)));
+                Saxon.Hej.value.GDateValue.MutableGDateValue dt = mutableDateFromJulianDayNumber(((((julianDayNumber+(365*12000))+(12000/4))-(12000/100))+(12000/400)));
                 dt.year -= 12000;
                 return dt;
             }

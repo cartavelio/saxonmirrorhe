@@ -36,7 +36,7 @@ namespace Saxon.Hej.functions.registry {
         private readonly System.Collections.Generic.Dictionary<string,int> sequenceVariadicFunctions = new System.Collections.Generic.Dictionary<string, int>(10);
         public void importFunctionSet(Saxon.Hej.functions.registry.BuiltInFunctionSet importee) {
             if (!(importee.getNamespace().Equals(getNamespace()))) {
-                throw new Saxon.Ejava.lang.IllegalArgumentException(importee.getNamespace());
+                throw new Saxon.Ejava.lang.IllegalArgumentException(importee.getNamespace().ToString());
             }
             Saxon.Impl.Helpers.MapUtils.PutAll(functionTable, importee.functionTable);
             Saxon.Impl.Helpers.MapUtils.PutAll(sequenceVariadicFunctions, importee.sequenceVariadicFunctions);
@@ -63,12 +63,13 @@ namespace Saxon.Hej.functions.registry {
             }
             return null;
         }
-        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F symbolicName, Saxon.Hej.expr.Expression[] staticArgs, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
+        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F symbolicName, Saxon.Hej.expr.Expression[] staticArgs, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
             Saxon.Hej.om.StructuredQName functionName = symbolicName.getComponentName();
             int arity = symbolicName.getArity();
             string localName = functionName.getLocalPart();
             Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry entry = getFunctionDetails(localName, arity);
             if ((functionName.hasURI(getNamespace()) && (entry != null))) {
+                entry.ensurePopulated();
                 if ((((entry.properties&SEQV)) != 0)) {
                     if ((env.getXPathVersion()<40)) {
                         if (localName.Equals("concat")) {
@@ -81,7 +82,8 @@ namespace Saxon.Hej.functions.registry {
                                 if ((staticArgs[i] is Saxon.Hej.expr.StringLiteral)) {
                                     a2[i] = staticArgs[i];
                                 } else {
-                                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "concat", i);
+                                    int pos = i;
+                                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "concat", pos);
                                     a2[i] = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(staticArgs[i], Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE, role);
                                     a2[i].setRetainedStaticContext(env.makeRetainedStaticContext());
                                 }
@@ -89,7 +91,7 @@ namespace Saxon.Hej.functions.registry {
                             staticArgs = a2;
                         }
                     }
-                    int declaredArity = entry.arity;
+                    int declaredArity = entry.maxArity;
                     Saxon.Hej.expr.Expression[] newArgs = Saxon.Ejava.util.Arrays.copyOf(staticArgs, declaredArity);
                     if ((declaredArity>staticArgs.Length)) {
                         newArgs[(declaredArity-1)] = Saxon.Hej.expr.Literal.makeEmptySequence();
@@ -101,6 +103,10 @@ namespace Saxon.Hej.functions.registry {
                         }
                     }
                     staticArgs = newArgs;
+                } else {
+                    if (((((keywords != null) && !(keywords.Count==0))) || (staticArgs.Length<entry.maxArity))) {
+                        staticArgs = Saxon.Hej.expr.instruct.UserFunction.makeExpandedArgumentArray(staticArgs, keywords, entry);
+                    }
                 }
                 Saxon.Hej.expr.parser.RetainedStaticContext rsc = new Saxon.Hej.expr.parser.RetainedStaticContext(env);
                 try {
@@ -120,7 +126,7 @@ namespace Saxon.Hej.functions.registry {
         public Saxon.Hej.functions.SystemFunction makeFunction(string name, int arity) {
             Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry entry = getFunctionDetails(name, arity);
             if ((entry == null)) {
-                string diagName = (getNamespace().Equals(Saxon.Hej.lib.NamespaceConstant.FN) ? ("System function "+name) : ((("Function Q{"+getNamespace())+"}")+name));
+                string diagName = (getNamespace().Equals(Saxon.Hej.om.NamespaceUri.FN) ? ("System function "+name) : ((("Function Q{"+getNamespace())+"}")+name));
                 if ((getFunctionDetails(name, -1) == null)) {
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((diagName+"() does not exist or is not available in this environment"));
                     err.setErrorCode("XPST0017");
@@ -133,20 +139,10 @@ namespace Saxon.Hej.functions.registry {
                     throw err;
                 }
             }
-            System.Type functionClass = entry.implementationClass;
-            Saxon.Hej.functions.SystemFunction f = instantiate(name, functionClass);
+            entry.ensurePopulated();
+            Saxon.Hej.functions.SystemFunction f = entry.implementationFactory();
             f.setDetails(entry);
             f.setArity(arity);
-            return f;
-        }
-        private Saxon.Hej.functions.SystemFunction instantiate(string name, System.Type functionClass) {
-            Saxon.Hej.functions.SystemFunction f;
-            try {
-                f = (Saxon.Hej.functions.SystemFunction)((Saxon.Hej.functions.SystemFunction)System.Activator.CreateInstance(functionClass));
-            } catch (System.Exception err) {
-                System.Console.Error.WriteLine(err);
-                throw new Saxon.Ejava.lang.AssertionError(((("Failed to instantiate system function "+name)+" - ")+err.Message));
-            }
             return f;
         }
         private static string pluralArguments(int num) {
@@ -167,17 +163,15 @@ namespace Saxon.Hej.functions.registry {
             if ((entry == null)) {
                 return false;
             }
-            if ((((entry.properties&SEQV)) != 0)) {
-                if ((((languageLevel<40) && symbolicName.getComponentName().getLocalPart().Equals("concat")) && (symbolicName.getArity()<2))) {
-                    return false;
-                }
+            if ((((languageLevel<40) && symbolicName.getComponentName().getLocalPart().Equals("concat")) && (symbolicName.getArity()<2))) {
+                return false;
             }
             return true;
         }
         public Saxon.Hej.functions.FunctionLibrary copy() {
             return this;
         }
-        public Saxon.Hej.om.Function getFunctionItem(Saxon.Hej.trans.SymbolicName.F symbolicName, Saxon.Hej.expr.StaticContext staticContext) {
+        public Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F symbolicName, Saxon.Hej.expr.StaticContext staticContext) {
             Saxon.Hej.om.StructuredQName functionName = symbolicName.getComponentName();
             int arity = symbolicName.getArity();
             if ((functionName.hasURI(getNamespace()) && (getFunctionDetails(functionName.getLocalPart(), arity) != null))) {
@@ -192,70 +186,110 @@ namespace Saxon.Hej.functions.registry {
                 return null;
             }
         }
-        protected internal Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry register(string name, int arity, System.Type implementationClass, Saxon.Hej.type.ItemType itemType, int cardinality, int properties) {
+        protected internal Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry register(string name, int arity, System.Func<Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry,Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry> populator) {
             Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry e = new Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry();
             e.name = new Saxon.Hej.om.StructuredQName(getConventionalPrefix(), getNamespace(), name);
-            e.arity = arity;
-            e.implementationClass = implementationClass;
+            e.minArity = arity;
+            e.maxArity = arity;
+            e.populator = populator;
             e.functionSet = this;
-            e.itemType = itemType;
-            e.cardinality = cardinality;
-            e.properties = properties;
-            if ((e.arity == -1)) {
-                e.argumentTypes = new Saxon.Hej.value.SequenceType[1];
-                e.resultIfEmpty = new Saxon.Hej.value.AtomicValue[1];
-                e.usage = new Saxon.Hej.expr.OperandUsage[1];
-            } else {
-                e.argumentTypes = new Saxon.Hej.value.SequenceType[arity];
-                e.resultIfEmpty = new Saxon.Hej.om.Sequence[arity];
-                e.usage = new Saxon.Hej.expr.OperandUsage[arity];
-            }
             Saxon.Impl.Helpers.MapUtils.Put(functionTable, ((name+"#")+arity), e);
-            if ((((properties&SEQV)) != 0)) {
-                Saxon.Impl.Helpers.MapUtils.Put(sequenceVariadicFunctions, name, (arity-1));
+            return e;
+        }
+        protected internal Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry register(string name, int minArity, int maxArity, System.Func<Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry,Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry> populator) {
+            Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry e = new Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry();
+            e.name = new Saxon.Hej.om.StructuredQName(getConventionalPrefix(), getNamespace(), name);
+            e.minArity = minArity;
+            e.maxArity = maxArity;
+            e.populator = populator;
+            e.functionSet = this;
+            for (int a = minArity; (a<=maxArity); a++) {
+                Saxon.Impl.Helpers.MapUtils.Put(functionTable, ((name+"#")+a), e);
             }
             return e;
         }
-        protected internal void registerReducedArityVariants(string key, int min, int max) {
-            Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry master = Saxon.Impl.Helpers.MapUtils.Get(functionTable, key);
-            for (int arity = min; (arity<=max); arity++) {
-                Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry e = new Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry();
-                e.name = master.name;
-                e.arity = arity;
-                e.implementationClass = master.implementationClass;
-                e.itemType = master.itemType;
-                e.cardinality = master.cardinality;
-                e.properties = master.properties;
-                e.argumentTypes = new Saxon.Hej.value.SequenceType[arity];
-                e.resultIfEmpty = new Saxon.Hej.om.Sequence[arity];
-                e.usage = new Saxon.Hej.expr.OperandUsage[arity];
-                for (int i = 0; (i<arity); i++) {
-                    e.argumentTypes[i] = master.argumentTypes[i];
-                    e.resultIfEmpty[i] = master.resultIfEmpty[i];
-                    e.usage[i] = master.usage[i];
-                }
-                Saxon.Impl.Helpers.MapUtils.Put(functionTable, ((e.name.getLocalPart()+"#")+arity), e);
-            }
+        protected internal Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry registerVariadic(string name, int arity, System.Func<Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry,Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry> populator) {
+            Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry e = register(name, arity, populator);
+            Saxon.Impl.Helpers.MapUtils.Put(sequenceVariadicFunctions, name, (arity-1));
+            return e;
         }
-        public virtual string getNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.FN;
+        public virtual Saxon.Hej.om.NamespaceUri getNamespace() {
+            return Saxon.Hej.om.NamespaceUri.FN;
         }
         public virtual string getConventionalPrefix() {
             return "fn";
         }
-        public class Entry {
+        public class Entry : Saxon.Hej.functions.registry.FunctionDefinition {
             public Saxon.Hej.om.StructuredQName name;
-            public System.Type implementationClass;
+            public Saxon.Ejava.util.function.Supplier<Saxon.Hej.functions.SystemFunction> implementationFactory;
+            public System.Func<Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry,Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry> populator;
             public Saxon.Hej.functions.registry.BuiltInFunctionSet functionSet;
-            public int arity;
+            public int maxArity;
+            public int minArity;
             public Saxon.Hej.type.ItemType itemType;
             public int cardinality;
             public Saxon.Hej.expr.OperandUsage[] usage;
-            public Saxon.Hej.value.SequenceType[] argumentTypes;
+            public string[] paramNames;
+            public Saxon.Hej.value.SequenceType[] paramTypes;
             public Saxon.Hej.om.Sequence[] resultIfEmpty;
+            public Saxon.Hej.z.IntHashMap<Saxon.Hej.expr.Expression> defaultValueExpressions;
             public int properties;
             public Saxon.Hej.functions.OptionsParameter optionDetails;
+            public void ensurePopulated() { lock(this) {
+                if ((implementationFactory == null)) {
+                    populator(this);
+                }
+            }}
+            public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry populate(Saxon.Ejava.util.function.Supplier<Saxon.Hej.functions.SystemFunction> functionFactory, Saxon.Hej.type.ItemType itemType, int cardinality, int properties) {
+                this.implementationFactory = functionFactory;
+                this.itemType = itemType;
+                this.cardinality = cardinality;
+                this.properties = properties;
+                if ((this.maxArity == -1)) {
+                    this.paramTypes = new Saxon.Hej.value.SequenceType[1];
+                    this.resultIfEmpty = new Saxon.Hej.value.AtomicValue[1];
+                    this.usage = new Saxon.Hej.expr.OperandUsage[1];
+                } else {
+                    this.paramTypes = new Saxon.Hej.value.SequenceType[maxArity];
+                    this.resultIfEmpty = new Saxon.Hej.om.Sequence[maxArity];
+                    this.usage = new Saxon.Hej.expr.OperandUsage[maxArity];
+                }
+                if ((((properties&SEQV)) != 0)) {
+                    Saxon.Impl.Helpers.MapUtils.Put(this.functionSet.sequenceVariadicFunctions, name.getLocalPart(), (this.maxArity-1));
+                }
+                Saxon.Hej.om.NamespaceUri ns = name.getNamespaceUri();
+                System.Collections.Generic.IDictionary<string,string> paramNameMap;
+                if ((ns == Saxon.Hej.om.NamespaceUri.FN)) {
+                    paramNameMap = Saxon.Hej.functions.registry.ParamKeywords.fnParamNames;
+                } else {
+                    if ((ns == Saxon.Hej.om.NamespaceUri.MAP_FUNCTIONS)) {
+                        paramNameMap = Saxon.Hej.functions.registry.ParamKeywords.mapParamNames;
+                    } else {
+                        if ((ns == Saxon.Hej.om.NamespaceUri.ARRAY_FUNCTIONS)) {
+                            paramNameMap = Saxon.Hej.functions.registry.ParamKeywords.arrayParamNames;
+                        } else {
+                            if ((ns == Saxon.Hej.om.NamespaceUri.MATH)) {
+                                paramNameMap = Saxon.Hej.functions.registry.ParamKeywords.mathParamNames;
+                            } else {
+                                paramNameMap = new System.Collections.Generic.Dictionary<string, string>();
+                            }
+                        }
+                    }
+                }
+                string keywords = Saxon.Impl.Helpers.MapUtils.Get(paramNameMap, name.getLocalPart());
+                if ((keywords == null)) {
+                    keywords = Saxon.Impl.Helpers.MapUtils.Get(paramNameMap, ((name.getLocalPart()+"#")+maxArity));
+                }
+                if ((keywords == null)) {
+                    keywords = "a|b|c|d|e|f";
+                }
+                this.paramNames = System.Text.RegularExpressions.Regex.Split(keywords, "\\|");
+                return this;
+            }
             public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry arg(int a, Saxon.Hej.type.ItemType type, int options, Saxon.Hej.om.Sequence resultIfEmpty) {
+                return arg(a, type, options, resultIfEmpty, null);
+            }
+            public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry arg(int a, Saxon.Hej.type.ItemType type, int options, Saxon.Hej.om.Sequence resultIfEmpty, Saxon.Hej.expr.Expression defaultValue) {
                 int cardinality = (options&Saxon.Hej.expr.StaticProperty.CARDINALITY_MASK);
                 Saxon.Hej.expr.OperandUsage usage = Saxon.Hej.expr.OperandUsage.NAVIGATION;
                 if ((((options&ABS)) != 0)) {
@@ -274,17 +308,54 @@ namespace Saxon.Hej.functions.registry {
                     }
                 }
                 try {
-                    this.argumentTypes[a] = Saxon.Hej.value.SequenceType.makeSequenceType(type, cardinality);
+                    this.paramTypes[a] = Saxon.Hej.value.SequenceType.makeSequenceType(type, cardinality);
                     this.resultIfEmpty[a] = resultIfEmpty;
                     this.usage[a] = usage;
+                    if ((defaultValue != null)) {
+                        withDefault(a, defaultValue);
+                    }
                 } catch (System.IndexOutOfRangeException err) {
                     System.Console.Error.WriteLine(((("Internal Saxon error: Can't set argument "+a)+" of ")+name));
                 }
                 return this;
             }
+            public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry withDefault(int arg, Saxon.Hej.expr.Expression defaultValue) {
+                if ((this.defaultValueExpressions == null)) {
+                    this.defaultValueExpressions = new Saxon.Hej.z.IntHashMap<Saxon.Hej.expr.Expression>(getNumberOfParameters());
+                }
+                this.defaultValueExpressions.put(arg, defaultValue);
+                return this;
+            }
             public Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry setOptionDetails(Saxon.Hej.functions.OptionsParameter details) {
                 this.optionDetails = details;
                 return this;
+            }
+            public Saxon.Hej.om.StructuredQName getFunctionName() {
+                return name;
+            }
+            public int getNumberOfParameters() {
+                return maxArity;
+            }
+            public int getMinimumArity() {
+                return minArity;
+            }
+            public Saxon.Hej.om.StructuredQName getParameterName(int i) {
+                return new Saxon.Hej.om.StructuredQName("", "", paramNames[i]);
+            }
+            public Saxon.Hej.expr.Expression getDefaultValueExpression(int i) {
+                if ((defaultValueExpressions != null)) {
+                    return defaultValueExpressions.get(i);
+                } else {
+                    return null;
+                }
+            }
+            public int getPositionOfParameter(Saxon.Hej.om.StructuredQName name) {
+                for (int i = 0; (i<maxArity); i++) {
+                    if (paramNames[i].Equals(name.getLocalPart())) {
+                        return i;
+                    }
+                }
+                return -1;
             }
         
         }

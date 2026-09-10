@@ -6,7 +6,7 @@ using Saxon.Hej.trans;
 
 namespace Saxon.Api.Support {
     /// <summary>
-    /// Converts an <c>Saxon.Api.IResource</c> (the external Saxon-CS representation) to a JAXP <c>Source</c>
+    /// Converts an <c>Saxon.Api.IResource</c> (the external SaxonCS representation) to a JAXP <c>Source</c>
     /// object
     /// </summary>
     public class ResourceToSource  {

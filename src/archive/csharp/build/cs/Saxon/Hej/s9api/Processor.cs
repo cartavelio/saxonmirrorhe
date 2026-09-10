@@ -5,6 +5,8 @@ namespace Saxon.Hej.s9api {
     internal class Processor : Saxon.Hej.Configuration.ApiProvider {
         private Saxon.Hej.Configuration config;
         private Saxon.Hej.s9api.SchemaManager schemaManager;
+        public Processor() : this (Saxon.Hej.Configuration.newLicensedConfiguration()) {
+        }
         public Processor(bool licensedEdition)  {
             if (licensedEdition) {
                 config = Saxon.Hej.Configuration.newConfiguration();

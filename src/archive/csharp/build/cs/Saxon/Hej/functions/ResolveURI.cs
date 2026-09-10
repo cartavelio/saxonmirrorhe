@@ -155,7 +155,18 @@ namespace Saxon.Hej.functions {
                         if (@base.StartsWith("classpath:")) {
                             absoluteURI = new System.Uri(relativeURI, System.UriKind.RelativeOrAbsolute);
                             if (!(absoluteURI.IsAbsoluteUri)) {
-                                absoluteURI = new System.Uri(("classpath:"+relativeURI), System.UriKind.RelativeOrAbsolute);
+                                string path = @base.Substring(10);
+                                System.Uri fakeURI;
+                                if (path.StartsWith("/")) {
+                                    fakeURI = new System.Uri(new System.Uri(("file://"+path), System.UriKind.RelativeOrAbsolute), relativeURI);
+                                } else {
+                                    fakeURI = new System.Uri(new System.Uri(("file:///"+path), System.UriKind.RelativeOrAbsolute), relativeURI);
+                                }
+                                string cpath = fakeURI.LocalPath.Substring(1);
+                                if (cpath.StartsWith("../")) {
+                                    throw new Saxon.Ejava.lang.IllegalArgumentException(("Attempt to navigate above root: classpath:"+cpath));
+                                }
+                                absoluteURI = new System.Uri(("classpath:"+cpath), System.UriKind.RelativeOrAbsolute);
                             }
                         } else {
                             System.Uri baseURI;

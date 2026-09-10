@@ -35,7 +35,7 @@ namespace Saxon.Hej.trans.rules {
                     @out.attribute(Saxon.Hej.om.NameOfNode.makeName(node), (Saxon.Hej.type.SimpleType)(node.getSchemaType()), node.getStringValue(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
                     return ;
                   case Saxon.Hej.type.Type.NAMESPACE:
-                    @out.@namespace(node.getLocalPart(), node.getStringValue(), Saxon.Hej.@event.ReceiverOption.NONE);
+                    @out.@namespace(node.getLocalPart(), Saxon.Hej.om.NamespaceUri.of(node.getStringValue()), Saxon.Hej.@event.ReceiverOption.NONE);
                     return ;
                   default:
                     break;

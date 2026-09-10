@@ -71,7 +71,7 @@ namespace Saxon.Eej.ee.schema {
             serializer.emitAttribute("xml:base", getBaseURI());
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.TypeAlternative thisTypeAlternative = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

@@ -20,9 +20,9 @@ namespace Saxon.Hej.expr.compat {
             Saxon.Hej.expr.Expression oldOp1 = getRhsExpression();
             Saxon.Hej.value.SequenceType atomicType = Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC;
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(true);
-            Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role0 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 0);
             setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
-            Saxon.Hej.expr.parser.RoleDiagnostic role1 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role1 = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.BINARY_EXPR, Saxon.Hej.expr.parser.Token.tokens[@operator], 1);
             setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
             Saxon.Hej.type.ItemType itemType0 = getLhsExpression().getItemType();
             if ((itemType0 is Saxon.Hej.type.ErrorType)) {
@@ -107,7 +107,7 @@ namespace Saxon.Hej.expr.compat {
             }
             Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
             let.setRequiredType(Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC);
-            let.setVariableQName(new Saxon.Hej.om.StructuredQName("nn", Saxon.Hej.lib.NamespaceConstant.SAXON, ("nn"+let.GetHashCode())));
+            let.setVariableQName(new Saxon.Hej.om.StructuredQName("nn", Saxon.Hej.om.NamespaceUri.SAXON, ("nn"+let.GetHashCode())));
             let.setSequence(operand);
             Saxon.Hej.expr.LocalVariableReference var = new Saxon.Hej.expr.LocalVariableReference(let);
             Saxon.Hej.expr.Expression isDouble = new Saxon.Hej.expr.InstanceOfExpression(var, Saxon.Hej.type.BuiltInAtomicType.DOUBLE.zeroOrOne());

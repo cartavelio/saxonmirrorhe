@@ -16,7 +16,7 @@ namespace Saxon.Eej.ee.optim {
             System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> soughtValues = new System.Collections.Generic.List<Saxon.Hej.value.AtomicValue>();
             Saxon.Hej.om.SequenceTool.supply(values, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => soughtValues.Add((Saxon.Hej.value.AtomicValue)(item)))));
             if (soughtValues.Count==0) {
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
             }
             Saxon.Eej.ee.optim.SmallSearchableValue.EqualityComparer compare;
             if (convertUntypedToOther) {

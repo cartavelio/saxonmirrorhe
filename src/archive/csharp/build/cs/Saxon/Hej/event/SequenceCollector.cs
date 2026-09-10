@@ -4,17 +4,10 @@ using System.Linq;
 namespace Saxon.Hej.@event {
     public sealed class SequenceCollector : Saxon.Hej.@event.SequenceWriter {
         private System.Collections.Generic.IList<Saxon.Hej.om.Item> list;
-        public SequenceCollector(Saxon.Hej.@event.PipelineConfiguration pipe) : this (pipe, 50) {
+        public SequenceCollector(Saxon.Hej.@event.PipelineConfiguration pipe) : this (pipe, 20) {
         }
         public SequenceCollector(Saxon.Hej.@event.PipelineConfiguration pipe, int estimatedSize) : base (pipe) {
             this.list = new System.Collections.Generic.List<Saxon.Hej.om.Item>(estimatedSize);
-        }
-        public static Saxon.Hej.@event.Outputter allocateSequenceOutputter(Saxon.Hej.expr.XPathContext context, Saxon.Api.HostLanguage hostLang) {
-            Saxon.Hej.Controller controller = context.getController();
-            Saxon.Hej.@event.PipelineConfiguration pipe = controller.makePipelineConfiguration();
-            pipe.setHostLanguage(hostLang);
-            Saxon.Hej.@event.SequenceCollector collector = new Saxon.Hej.@event.SequenceCollector(pipe, 20);
-            return new Saxon.Hej.@event.ComplexContentOutputter(collector);
         }
         public void reset() {
             list = new System.Collections.Generic.List<Saxon.Hej.om.Item>(System.Math.Min((list.Count+10), 50));
@@ -22,7 +15,7 @@ namespace Saxon.Hej.@event {
         public override void write(Saxon.Hej.om.Item item) {
             list.Add(item);
         }
-        public Saxon.Hej.om.Sequence getSequence() {
+        public Saxon.Hej.om.GroundedValue getSequence() {
             switch (list.Count) {
               case 0:
                 return Saxon.Hej.value.EmptySequence.getInstance();
@@ -34,7 +27,7 @@ namespace Saxon.Hej.@event {
         }
         public Saxon.Hej.om.SequenceIterator iterate() {
             if (list.Count==0) {
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
             } else {
                 return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.Item>(list);
             }

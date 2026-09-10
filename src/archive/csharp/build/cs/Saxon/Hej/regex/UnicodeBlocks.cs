@@ -39,27 +39,24 @@ namespace Saxon.Hej.regex {
             if ((@in == null)) {
                 throw new Saxon.Hej.regex.RESyntaxException("Unable to read unicodeBlocks.xml file");
             }
-            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
-            options.setSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
-            options.setDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
-            options.setSpaceStrippingRule(Saxon.Hej.om.AllElementsSpaceStrippingRule.getInstance());
+            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP).withDTDValidationMode(Saxon.Hej.lib.Validation.SKIP).withSpaceStrippingRule(Saxon.Hej.om.AllElementsSpaceStrippingRule.getInstance()).withPleaseCloseAfterUse(true);
             Saxon.Hej.om.TreeInfo doc;
             try {
                 doc = config.buildDocumentTree(new Saxon.Ejavax.xml.transform.stream.StreamSource(@in, "unicodeBlocks.xml"), options);
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Hej.regex.RESyntaxException(("Failed to process unicodeBlocks.xml: "+e.Message));
             }
-            Saxon.Hej.tree.iter.AxisIterator iter = doc.getRootNode().iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, "", "block", config.getNamePool()));
+            Saxon.Hej.tree.iter.AxisIterator iter = doc.getRootNode().iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, Saxon.Hej.om.NamespaceUri.NULL, "block", config.getNamePool()));
             while (true) {
                 Saxon.Hej.om.NodeInfo item = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next());
                 if ((item == null)) {
                     break ;
                 }
-                string blockName = normalizeBlockName(item.getAttributeValue("", "name"));
+                string blockName = normalizeBlockName(item.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name"));
                 Saxon.Hej.z.IntSet range = null;
                 foreach (Saxon.Hej.om.NodeInfo rangeElement in item.children(Saxon.Hej.pattern.NodeKindTest.ELEMENT)) {
-                    int from = Saxon.Impl.Helpers.Utils.ParseInt(rangeElement.getAttributeValue("", "from").Substring(2), 16);
-                    int to = Saxon.Impl.Helpers.Utils.ParseInt(rangeElement.getAttributeValue("", "to").Substring(2), 16);
+                    int from = Saxon.Impl.Helpers.Utils.ParseInt(rangeElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "from").Substring(2), 16);
+                    int to = Saxon.Impl.Helpers.Utils.ParseInt(rangeElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "to").Substring(2), 16);
                     Saxon.Hej.z.IntSet cr = new Saxon.Hej.z.IntBlockSet(from, to);
                     if ((range == null)) {
                         range = cr;

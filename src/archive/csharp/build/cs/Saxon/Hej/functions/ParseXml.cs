@@ -27,15 +27,15 @@ namespace Saxon.Hej.functions {
                 Saxon.Ejavax.xml.transform.Source pullSource = Saxon.Hej.Version.platform.resolveSource(ss, config);
                 Saxon.Hej.@event.Builder b = Saxon.Hej.om.TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
                 Saxon.Hej.@event.Receiver s = b;
-                Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(config.getParseOptions());
+                Saxon.Hej.lib.ParseOptions options = config.getParseOptions();
                 Saxon.Hej.expr.PackageData pd = getRetainedStaticContext().getPackageData();
                 if ((pd is Saxon.Hej.style.StylesheetPackage)) {
-                    options.setSpaceStrippingRule(((Saxon.Hej.style.StylesheetPackage)(pd)).getSpaceStrippingRule());
+                    options = options.withSpaceStrippingRule(((Saxon.Hej.style.StylesheetPackage)(pd)).getSpaceStrippingRule());
                     if (((Saxon.Hej.style.StylesheetPackage)(pd)).isStripsTypeAnnotations()) {
                         s = config.getAnnotationStripper(s);
                     }
                 } else {
-                    options.setSpaceStrippingRule(Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance());
+                    options = options.withSpaceStrippingRule(Saxon.Hej.om.IgnorableSpaceStrippingRule.getInstance());
                 }
                 s.setPipelineConfiguration(b.getPipelineConfiguration());
                 Saxon.Hej.@event.Sender.send(pullSource, s, options);

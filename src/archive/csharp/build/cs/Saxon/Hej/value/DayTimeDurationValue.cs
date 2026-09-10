@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.value {
     public sealed class DayTimeDurationValue : Saxon.Hej.value.DurationValue, Saxon.Hej.expr.sort.XPathComparable, Saxon.Hej.value.ContextFreeAtomicValue {
-        private DayTimeDurationValue()  {
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DAY_TIME_DURATION;
-        }
         public static Saxon.Hej.type.ConversionResult makeDayTimeDurationValue(Saxon.Hej.str.UnicodeString s) {
             Saxon.Hej.type.ConversionResult d = Saxon.Hej.value.DurationValue.makeDuration(s, false, true);
             if ((d is Saxon.Hej.type.ValidationFailure)) {
@@ -14,68 +11,20 @@ namespace Saxon.Hej.value {
             Saxon.Hej.value.DurationValue dv = (Saxon.Hej.value.DurationValue)(d);
             return Saxon.Hej.type.Converter.DurationToDayTimeDuration.INSTANCE.convert(dv);
         }
-        public DayTimeDurationValue(int sign, int days, int hours, int minutes, long seconds, int microseconds)  {
-            if ((((((days<0) || (hours<0)) || (minutes<0)) || (seconds<0)) || (microseconds<0))) {
-                throw new Saxon.Ejava.lang.IllegalArgumentException("Negative component value");
-            }
-            if (((((((double)(days)*(((24*60)*60)))+((double)(hours)*((60*60))))+((double)(minutes)*60))+(double)(seconds))>System.Int64.MaxValue)) {
-                throw new Saxon.Ejava.lang.IllegalArgumentException("Duration seconds limit exceeded");
-            }
-            _negative = (sign<0);
-            _months = 0;
-            long h = (((long)(days)*24L)+(long)(hours));
-            long m = ((h*60L)+(long)(minutes));
-            long s = ((m*60L)+seconds);
-            if ((microseconds>1000000)) {
-                s += (microseconds/1000000);
-                microseconds %= 1000000;
-            }
-            this._seconds = s;
-            this._nanoseconds = (microseconds*1000);
-            if (((s == 0) && (microseconds == 0))) {
-                _negative = false;
-            }
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DAY_TIME_DURATION;
+        public DayTimeDurationValue(int sign, int days, int hours, int minutes, long seconds, int microseconds) : base ((sign>0), 0, 0, days, hours, minutes, seconds, microseconds, Saxon.Hej.type.BuiltInAtomicType.DAY_TIME_DURATION) {
         }
-        public DayTimeDurationValue(int days, int hours, int minutes, long seconds, int nanoseconds)  {
-            bool somePositive = (((((days>0) || (hours>0)) || (minutes>0)) || (seconds>0)) || (nanoseconds>0));
-            bool someNegative = (((((days<0) || (hours<0)) || (minutes<0)) || (seconds<0)) || (nanoseconds<0));
-            if ((somePositive && someNegative)) {
-                throw new Saxon.Ejava.lang.IllegalArgumentException("Some component values are positive and others are negative");
-            }
-            if (someNegative) {
-                _negative = true;
-                days = -(days);
-                hours = -(hours);
-                minutes = -(minutes);
-                seconds = -(seconds);
-                nanoseconds = -(nanoseconds);
-            }
-            if (((((((double)(days)*(((24*60)*60)))+((double)(hours)*((60*60))))+((double)(minutes)*60))+(double)(seconds))>System.Int64.MaxValue)) {
-                throw new Saxon.Ejava.lang.IllegalArgumentException("Duration seconds limit exceeded");
-            }
-            _months = 0;
-            long h = (((long)(days)*24L)+(long)(hours));
-            long m = ((h*60L)+(long)(minutes));
-            long s = ((m*60L)+seconds);
-            if ((nanoseconds>1_000_000_000)) {
-                s += (nanoseconds/1_000_000_000);
-                nanoseconds %= 1_000_000_000;
-            }
-            this._seconds = s;
-            this._nanoseconds = nanoseconds;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DAY_TIME_DURATION;
+        public DayTimeDurationValue(int days, int hours, int minutes, long seconds, int nanoseconds) : base (0, 0, days, hours, minutes, seconds, nanoseconds, Saxon.Hej.type.BuiltInAtomicType.DAY_TIME_DURATION) {
+        }
+        public DayTimeDurationValue(int days, int hours, int minutes, long seconds, int nanoseconds, Saxon.Hej.type.AtomicType typeLabel) : base (0, 0, days, hours, minutes, seconds, nanoseconds, typeLabel) {
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.DayTimeDurationValue v = Saxon.Hej.value.DayTimeDurationValue.fromSeconds(getTotalSeconds());
-            v.typeLabel = typeLabel;
-            return v;
+            return Saxon.Hej.value.DayTimeDurationValue.fromSeconds(getTotalSeconds(), typeLabel);
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {
             return Saxon.Hej.type.BuiltInAtomicType.DAY_TIME_DURATION;
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             if (_negative) {
                 sb.append('-');
             }
@@ -124,20 +73,15 @@ namespace Saxon.Hej.value {
             return (_negative ? -(a) : a);
         }
         public static Saxon.Hej.value.DayTimeDurationValue fromSeconds(Singulink.Numerics.BigDecimal seconds) {
-            Saxon.Hej.value.DayTimeDurationValue sdv = new Saxon.Hej.value.DayTimeDurationValue();
-            sdv._negative = (seconds.Sign<0);
-            if (sdv._negative) {
-                seconds = -seconds;
-            }
+            return fromSeconds(seconds, Saxon.Hej.type.BuiltInAtomicType.DAY_TIME_DURATION);
+        }
+        public static Saxon.Hej.value.DayTimeDurationValue fromSeconds(Singulink.Numerics.BigDecimal seconds, Saxon.Hej.type.AtomicType typeLabel) {
             System.Numerics.BigInteger wholeSeconds = ((System.Numerics.BigInteger)seconds);
-            sdv._seconds = Saxon.Impl.Helpers.BigIntegerUtils.LongValueExact(wholeSeconds);
+            long wholeSecondsL = Saxon.Impl.Helpers.BigIntegerUtils.LongValueExact(wholeSeconds);
             Singulink.Numerics.BigDecimal fractionalPart = Saxon.Impl.Helpers.BigDecimalUtils.Remainder(seconds, Singulink.Numerics.BigDecimal.One);
             Singulink.Numerics.BigDecimal nanoseconds = (fractionalPart*Saxon.Hej.value.BigDecimalValue.BIG_DECIMAL_ONE_BILLION);
-            sdv._nanoseconds = ((int)nanoseconds);
-            if (((sdv._seconds == 0) && (sdv._nanoseconds == 0))) {
-                sdv._negative = false;
-            }
-            return sdv;
+            int nanosecondsL = ((int)nanoseconds);
+            return new Saxon.Hej.value.DayTimeDurationValue(0, 0, 0, wholeSecondsL, nanosecondsL, typeLabel);
         }
         public static Saxon.Hej.value.DayTimeDurationValue fromMilliseconds(long milliseconds) {
             int sign = System.Math.Sign(milliseconds);
@@ -161,8 +105,8 @@ namespace Saxon.Hej.value {
             return new Saxon.Hej.value.DayTimeDurationValue(0, 0, 0, (nanoseconds/1_000_000_000L), (int)(((nanoseconds%1_000_000_000L))));
         }
         public override Saxon.Hej.value.DurationValue multiply(long factor) {
-            if (((System.Math.Abs(factor)<0x7fff_ffff) && (System.Math.Abs(_seconds)<0x7fff_ffff))) {
-                return new Saxon.Hej.value.DayTimeDurationValue(0, 0, 0, ((_seconds*factor)*((_negative ? -1 : 1))), (int)((((_nanoseconds*factor)*((_negative ? -1 : 1))))));
+            if ((((System.Math.Abs(factor)<0x7fff_ffff) && (System.Math.Abs(_seconds)<0x7fff_ffff)) && (_nanoseconds == 0))) {
+                return new Saxon.Hej.value.DayTimeDurationValue(0, 0, 0, ((_seconds*factor)*((_negative ? -1 : 1))), 0);
             } else {
                 return multiply(Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(factor));
             }
@@ -280,12 +224,11 @@ namespace Saxon.Hej.value {
             }
         }
         public override Saxon.Hej.value.DurationValue negate() {
-            Saxon.Hej.value.DayTimeDurationValue d2 = new Saxon.Hej.value.DayTimeDurationValue();
-            d2.setTypeLabel(typeLabel);
-            d2._seconds = _seconds;
-            d2._nanoseconds = _nanoseconds;
-            d2._negative = !(_negative);
-            return d2;
+            if (_negative) {
+                return new Saxon.Hej.value.DayTimeDurationValue(0, 0, 0, _seconds, _nanoseconds);
+            } else {
+                return new Saxon.Hej.value.DayTimeDurationValue(0, 0, 0, -(_seconds), -(_nanoseconds));
+            }
         }
         public override Saxon.Hej.expr.sort.XPathComparable getXPathComparable(Saxon.Hej.lib.StringCollator collator, int implicitTimezone) {
             return this;

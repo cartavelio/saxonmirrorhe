@@ -13,8 +13,7 @@ namespace Saxon.Hej.expr.flwor {
             if (!(@base.nextTuple(context))) {
                 return false;
             }
-            Saxon.Hej.om.Sequence val = letClause.getEvaluator().evaluate(letClause.getSequence(), context);
-            context.setLocalVariable(letClause.getRangeVariable().getLocalSlotNumber(), val);
+            letClause.evaluateRangeVariable(context);
             return true;
         }
         public override void close() {

@@ -15,7 +15,7 @@ namespace Saxon.Hej.type {
             }
             return type;
         }
-        public Saxon.Hej.om.GroundedValue applyFunctionConversionRules(Saxon.Hej.om.Sequence value, Saxon.Hej.value.SequenceType requiredType, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.s9api.Location locator) {
+        public Saxon.Hej.om.GroundedValue applyFunctionConversionRules(Saxon.Hej.om.Sequence value, Saxon.Hej.value.SequenceType requiredType, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.s9api.Location locator) {
             try {
                 Saxon.Hej.om.GroundedValue groundedValue = value.materialize();
                 if (requiredType.matches(groundedValue, this)) {
@@ -29,6 +29,7 @@ namespace Saxon.Hej.type {
                         try {
                             iterator = Saxon.Hej.expr.Atomizer.getAtomizingIterator(iterator, false);
                         } catch (Saxon.Hej.trans.XPathException e) {
+                            Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                             Saxon.Hej.type.ValidationFailure vf = new Saxon.Hej.type.ValidationFailure(((("Failed to atomize the "+role.getMessage())+": ")+e.Message));
                             vf.setErrorCode("XPTY0117");
                             throw vf.makeException();
@@ -41,6 +42,7 @@ namespace Saxon.Hej.type {
                         if (nsSensitive) {
                             converter = Saxon.Hej.expr.ItemMapper.of(item => {
                                 if (((item is Saxon.Hej.value.AtomicValue) && ((Saxon.Hej.value.AtomicValue)(item)).isUntypedAtomic())) {
+                                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                                     Saxon.Hej.type.ValidationFailure vf = new Saxon.Hej.type.ValidationFailure(((((("Failed to convert the "+role.getMessage())+": ")+"Implicit conversion of untypedAtomic value to ")+requiredItemType)+" is not allowed"));
                                     vf.setErrorCode("XPTY0117");
                                     throw vf.makeException();
@@ -80,7 +82,7 @@ namespace Saxon.Hej.type {
                             if ((item is Saxon.Hej.value.NumericValue)) {
                                 return (Saxon.Hej.value.DoubleValue)(Saxon.Hej.type.Converter.convert((Saxon.Hej.value.NumericValue)(item), Saxon.Hej.type.BuiltInAtomicType.DOUBLE, config.getConversionRules()).asAtomic());
                             } else {
-                                throw new Saxon.Hej.trans.XPathException(((("Failed to convert the "+role.getMessage())+": ")+"Cannot promote non-numeric value to xs:double"), "XPTY0004");
+                                throw new Saxon.Hej.trans.XPathException(((("Failed to convert the "+roleSupplier().getMessage())+": ")+"Cannot promote non-numeric value to xs:double"), "XPTY0004");
                             }
                         } );
                         iterator = new Saxon.Hej.expr.ItemMappingIterator(iterator, promoter, true);
@@ -88,11 +90,13 @@ namespace Saxon.Hej.type {
                         if (requiredItemType.Equals(Saxon.Hej.type.BuiltInAtomicType.FLOAT)) {
                             Saxon.Hej.expr.ItemMappingFunction promoter = Saxon.Hej.expr.ItemMapper.of(item => {
                                 if ((item is Saxon.Hej.value.DoubleValue)) {
+                                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                                     throw new Saxon.Hej.trans.XPathException(((("Failed to convert the "+role.getMessage())+": ")+"Cannot promote xs:double value to xs:float"), "XPTY0004");
                                 } else {
                                     if ((item is Saxon.Hej.value.NumericValue)) {
                                         return (Saxon.Hej.value.FloatValue)(Saxon.Hej.type.Converter.convert((Saxon.Hej.value.NumericValue)(item), Saxon.Hej.type.BuiltInAtomicType.FLOAT, config.getConversionRules()).asAtomic());
                                     } else {
+                                        Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                                         throw new Saxon.Hej.trans.XPathException(((("Failed to convert the "+role.getMessage())+": ")+"Cannot promote non-numeric value to xs:float"), "XPTY0004");
                                     }
                                 }
@@ -114,11 +118,11 @@ namespace Saxon.Hej.type {
                 iterator = applyFunctionCoercion(iterator, suppliedItemType, requiredItemType, locator);
                 Saxon.Hej.type.Affinity relation = relationship(suppliedItemType, requiredItemType);
                 if (!((((relation == /*explicit enum*/ Saxon.Hej.type.Affinity.SAME_TYPE) || (relation == /*explicit enum*/ Saxon.Hej.type.Affinity.SUBSUMED_BY))))) {
-                    Saxon.Hej.expr.ItemTypeCheckingFunction itemChecker = new Saxon.Hej.expr.ItemTypeCheckingFunction(requiredItemType, role, locator, config);
+                    Saxon.Hej.expr.ItemTypeCheckingFunction itemChecker = new Saxon.Hej.expr.ItemTypeCheckingFunction(requiredItemType, roleSupplier, locator, config);
                     iterator = new Saxon.Hej.expr.ItemMappingIterator(iterator, itemChecker, true);
                 }
                 if ((requiredType.getCardinality() != Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE)) {
-                    iterator = new Saxon.Hej.expr.CardinalityCheckingIterator(iterator, requiredType.getCardinality(), role, locator);
+                    iterator = new Saxon.Hej.expr.CardinalityCheckingIterator(iterator, requiredType.getCardinality(), roleSupplier, locator);
                 }
                 return Saxon.Hej.om.SequenceTool.toGroundedValue(iterator);
             } catch (Saxon.Hej.trans.UncheckedXPathException e) {
@@ -446,14 +450,14 @@ namespace Saxon.Hej.type {
                                             Saxon.Hej.type.Affinity assertionRelationship = /*explicit enum*/ Saxon.Hej.type.Affinity.SAME_TYPE;
                                             Saxon.Hej.query.AnnotationList first = ((Saxon.Hej.type.FunctionItemType)(t1)).getAnnotationAssertions();
                                             Saxon.Hej.query.AnnotationList second = ((Saxon.Hej.type.FunctionItemType)(t2)).getAnnotationAssertions();
-                                            System.Collections.Generic.ISet<string> namespaces = new System.Collections.Generic.HashSet<string>();
+                                            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> namespaces = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
                                             foreach (Saxon.Hej.query.Annotation a in first) {
-                                                namespaces.Add(a.getAnnotationQName().getURI());
+                                                namespaces.Add(a.getAnnotationQName().getNamespaceUri());
                                             }
                                             foreach (Saxon.Hej.query.Annotation a in second) {
-                                                namespaces.Add(a.getAnnotationQName().getURI());
+                                                namespaces.Add(a.getAnnotationQName().getNamespaceUri());
                                             }
-                                            foreach (string ns in namespaces) {
+                                            foreach (Saxon.Hej.om.NamespaceUri ns in namespaces) {
                                                 Saxon.Hej.lib.FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ns);
                                                 if ((handler != null)) {
                                                     Saxon.Hej.type.Affinity localRel = /*explicit enum*/ Saxon.Hej.type.Affinity.SAME_TYPE;

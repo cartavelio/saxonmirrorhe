@@ -7,11 +7,11 @@ namespace Saxon.Hej.pattern {
         public Saxon.Hej.pattern.Pattern parsePattern(string pattern, Saxon.Hej.expr.StaticContext env) {
             this.env = env;
             charChecker = env.getConfiguration().getValidCharacterChecker();
-            language = Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XSLT_PATTERN;
+            setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XSLT_PATTERN, env.getXPathVersion());
             string trimmed = pattern.Trim();
             if (trimmed.StartsWith("(:")) {
                 t = new Saxon.Hej.expr.parser.Tokenizer();
-                t.languageLevel = 30;
+                t.languageLevel = env.getXPathVersion();
                 t.tokenize(trimmed, 0, -1);
                 int start = t.currentTokenStartOffset;
                 trimmed = trimmed.Substring(start);
@@ -38,11 +38,11 @@ namespace Saxon.Hej.pattern {
                                         filter = new Saxon.Hej.expr.ValueComparison(filter, Saxon.Hej.expr.parser.Token.FEQ, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.PLUS_ONE));
                                     } else {
                                         Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
-                                        Saxon.Hej.om.StructuredQName varName = new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE, ("v"+filter.GetHashCode()));
+                                        Saxon.Hej.om.StructuredQName varName = new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE, ("v"+filter.GetHashCode()));
                                         let.setVariableQName(varName);
                                         Saxon.Hej.expr.InstanceOfExpression condition = new Saxon.Hej.expr.InstanceOfExpression(new Saxon.Hej.expr.LocalVariableReference(let), Saxon.Hej.value.SequenceType.SINGLE_NUMERIC);
                                         Saxon.Hej.expr.LocalVariableReference @ref = new Saxon.Hej.expr.LocalVariableReference(let);
-                                        @ref.setStaticType(Saxon.Hej.value.SequenceType.SINGLE_NUMERIC, null, 0);
+                                        @ref.setStaticType(Saxon.Hej.value.SequenceType.ANY_SEQUENCE, null, 0);
                                         Saxon.Hej.expr.ValueComparison comparison = new Saxon.Hej.expr.ValueComparison(@ref, Saxon.Hej.expr.parser.Token.FEQ, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.Int64Value.PLUS_ONE));
                                         Saxon.Hej.expr.instruct.Choose choice = new Saxon.Hej.expr.instruct.Choose(new Saxon.Hej.expr.Expression[]{condition, Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE)}, new Saxon.Hej.expr.Expression[]{comparison, new Saxon.Hej.expr.LocalVariableReference(let)});
                                         let.setSequence(filter);

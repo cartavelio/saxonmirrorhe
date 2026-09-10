@@ -8,6 +8,7 @@ namespace Saxon.Hej.expr.instruct {
         private bool _isInstruction;
         public readonly static Saxon.Hej.expr.OperandRole CHOICE_ACTION = new Saxon.Hej.expr.OperandRole(Saxon.Hej.expr.OperandRole.IN_CHOICE_GROUP, Saxon.Hej.expr.OperandUsage.TRANSMISSION, Saxon.Hej.value.SequenceType.ANY_SEQUENCE);
         public Choose(Saxon.Hej.expr.Expression[] conditions, Saxon.Hej.expr.Expression[] actions)  {
+            System.Diagnostics.Debug.Assert((conditions.Length == actions.Length));
             conditionOps = new Saxon.Hej.expr.Operand[conditions.Length];
             for (int i = 0; (i<conditions.Length); i++) {
                 conditionOps[i] = new Saxon.Hej.expr.Operand(this, conditions[i], Saxon.Hej.expr.OperandRole.INSPECT);
@@ -45,9 +46,6 @@ namespace Saxon.Hej.expr.instruct {
         public static bool isSingleBranchChoice(Saxon.Hej.expr.Expression exp) {
             return ((exp is Saxon.Hej.expr.instruct.Choose) && (((Saxon.Hej.expr.instruct.Choose)(exp)).size() == 1));
         }
-        public int getNumberOfConditions() {
-            return size();
-        }
         public Saxon.Hej.expr.Expression getCondition(int i) {
             return conditionOps[i].getChildExpression();
         }
@@ -70,12 +68,7 @@ namespace Saxon.Hej.expr.instruct {
             return Saxon.Ejava.util.Arrays.asList(actionOps);
         }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
-            System.Collections.Generic.IList<Saxon.Hej.expr.Operand> operanda = new System.Collections.Generic.List<Saxon.Hej.expr.Operand>((size()*2));
-            for (int i = 0; (i<size()); i++) {
-                operanda.Add(conditionOps[i]);
-                operanda.Add(actionOps[i]);
-            }
-            return operanda;
+            return new Saxon.Hej.tree.jiter.ConcatenatingIterable<Saxon.Hej.expr.Operand>(Saxon.Ejava.util.Arrays.asList(conditionOps), Saxon.Ejava.util.Arrays.asList(actionOps));
         }
         public override bool allowExtractingCommonSubexpressions() {
             return false;
@@ -245,12 +238,12 @@ namespace Saxon.Hej.expr.instruct {
         public override bool implementsStaticTypeCheck() {
             return true;
         }
-        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
+        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             int count = size();
             Saxon.Hej.expr.parser.TypeChecker tc = getConfiguration().getTypeChecker(backwardsCompatible);
             for (int i = 0; (i<count); i++) {
                 try {
-                    setAction(i, tc.staticTypeCheck(getAction(i), req, role, visitor));
+                    setAction(i, tc.staticTypeCheck(getAction(i), req, roleSupplier, visitor));
                 } catch (Saxon.Hej.trans.XPathException err) {
                     if (err.isStaticError()) {
                         throw;
@@ -269,6 +262,7 @@ namespace Saxon.Hej.expr.instruct {
                 }
                 c[count] = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.BooleanValue.TRUE, this);
                 string cond = ((count == 1) ? "The condition is not" : "None of the conditions is");
+                Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                 string message = (((("Conditional expression: "+cond)+" satisfied, so an empty sequence is returned, ")+"but this is not allowed as the ")+role.getMessage());
                 Saxon.Hej.expr.ErrorExpression errExp = new Saxon.Hej.expr.ErrorExpression(message, role.getErrorCode(), true);
                 Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, errExp);
@@ -312,7 +306,7 @@ namespace Saxon.Hej.expr.instruct {
                     }
                 }
                 if (((((getAction(i) is Saxon.Hej.expr.ErrorExpression) && ((Saxon.Hej.expr.ErrorExpression)(getAction(i))).isTypeError()) && !(Saxon.Hej.expr.Literal.isConstantBoolean(getCondition(i), false))) && !(Saxon.Hej.expr.Literal.isConstantBoolean(getCondition(i), true)))) {
-                    visitor.issueWarning(((("Branch "+((i+1)))+" of conditional will fail with a type error if executed. ")+((Saxon.Hej.expr.ErrorExpression)(getAction(i))).getMessage()), getAction(i).getLocation());
+                    visitor.issueWarning(((("Branch "+((i+1)))+" of conditional will fail with a type error if executed. ")+((Saxon.Hej.expr.ErrorExpression)(getAction(i))).getMessage()), Saxon.Hej.trans.SaxonErrorCode.SXWN9027, getAction(i).getLocation());
                 }
                 if (Saxon.Hej.expr.Literal.hasEffectiveBooleanValue(getCondition(i), true)) {
                     break ;
@@ -505,54 +499,283 @@ namespace Saxon.Hej.expr.instruct {
             }
             @out.endElement();
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            int i = choose(context);
-            if ((i>=0)) {
-                Saxon.Hej.expr.Expression action = getAction(i);
-                if ((action is Saxon.Hej.expr.instruct.TailCallReturner)) {
-                    return ((Saxon.Hej.expr.instruct.TailCallReturner)(action)).processLeavingTail(output, context);
-                } else {
-                    action.process(output, context);
-                    return null;
-                }
-            }
-            return null;
-        }
-        private int choose(Saxon.Hej.expr.XPathContext context) {
-            int count = size();
-            for (int i = 0; (i<count); i++) {
-                bool b;
-                try {
-                    b = getCondition(i).effectiveBooleanValue(context);
-                } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetFailingExpression(getCondition(i));
-                    throw;
-                }
-                if (b) {
-                    return i;
-                }
-            }
-            return -1;
-        }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            int i = choose(context);
-            return ((i<0) ? null : getAction(i).evaluateItem(context));
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(context);
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            int i = choose(context);
-            return ((i<0) ? Saxon.Hej.tree.iter.EmptyIterator.emptyIterator() : getAction(i).iterate(context));
-        }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            int i = choose(context);
-            if ((i>=0)) {
-                getAction(i).evaluatePendingUpdates(context, pul);
-            }
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public override string getExpressionName() {
             return "choose";
         }
         public override string getStreamerName() {
             return "Choose";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.Choose.ChooseExprElaborator();
+        }
+        public Saxon.Hej.expr.elab.BooleanEvaluator[] getConditionEvaluators() {
+            return ((Saxon.Hej.expr.instruct.Choose.ChooseExprElaborator)(makeElaborator())).makeConditionEvaluators(this);
+        }
+        public class ChooseExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            private Saxon.Hej.expr.elab.BooleanEvaluator[] conditions;
+            public Saxon.Hej.expr.elab.BooleanEvaluator[] getConditionEvaluators() {
+                return conditions;
+            }
+            public Saxon.Hej.expr.elab.BooleanEvaluator[] makeConditionEvaluators(Saxon.Hej.expr.instruct.Choose expr) { lock(this) {
+                if ((conditions == null)) {
+                    conditions = new Saxon.Hej.expr.elab.BooleanEvaluator[expr.size()];
+                    for (int i = 0; (i<expr.size()); i++) {
+                        conditions[i] = expr.getCondition(i).makeElaborator().elaborateForBoolean();
+                    }
+                }
+                return conditions;
+            }}
+            public override Saxon.Hej.expr.elab.SequenceEvaluator eagerly() {
+                Saxon.Hej.expr.instruct.Choose expr = (Saxon.Hej.expr.instruct.Choose)(getExpression());
+                int count = expr.size();
+                makeConditionEvaluators(expr);
+                Saxon.Hej.expr.elab.SequenceEvaluator[] actions = new Saxon.Hej.expr.elab.SequenceEvaluator[count];
+                for (int i = 0; (i<count); i++) {
+                    actions[i] = expr.getAction(i).makeElaborator().eagerly();
+                }
+                return new Saxon.Hej.expr.instruct.Choose.EagerChooseEvaluator(conditions, actions);
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.instruct.Choose expr = (Saxon.Hej.expr.instruct.Choose)(getExpression());
+                int count = expr.size();
+                Saxon.Hej.expr.elab.PullEvaluator[] actions = new Saxon.Hej.expr.elab.PullEvaluator[count];
+                makeConditionEvaluators(expr);
+                for (int i = 0; (i<count); i++) {
+                    actions[i] = expr.getAction(i).makeElaborator().elaborateForPull();
+                }
+                switch (count) {
+                  case 1:
+                    return context => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.iterate()*/actions[0](context);
+                        }
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                    } ;
+                  case 2:
+                    return context => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.iterate()*/actions[0](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[1](context)) {
+                            return /*Delegate.iterate()*/actions[1](context);
+                        }
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                    } ;
+                  case 3:
+                    return context => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.iterate()*/actions[0](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[1](context)) {
+                            return /*Delegate.iterate()*/actions[1](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[2](context)) {
+                            return /*Delegate.iterate()*/actions[2](context);
+                        }
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                    } ;
+                  case 4:
+                    return context => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.iterate()*/actions[0](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[1](context)) {
+                            return /*Delegate.iterate()*/actions[1](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[2](context)) {
+                            return /*Delegate.iterate()*/actions[2](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[3](context)) {
+                            return /*Delegate.iterate()*/actions[3](context);
+                        }
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                    } ;
+                  default:
+                    return context => {
+                        for (int i = 0; (i<count); i++) {
+                            if (/*Delegate.eval()*/conditions[i](context)) {
+                                return /*Delegate.iterate()*/actions[i](context);
+                            }
+                        }
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.instruct.Choose expr = (Saxon.Hej.expr.instruct.Choose)(getExpression());
+                int count = expr.size();
+                Saxon.Hej.expr.elab.ItemEvaluator[] actions = new Saxon.Hej.expr.elab.ItemEvaluator[count];
+                makeConditionEvaluators(expr);
+                for (int i = 0; (i<count); i++) {
+                    actions[i] = expr.getAction(i).makeElaborator().elaborateForItem();
+                }
+                switch (count) {
+                  case 1:
+                    return context => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.eval()*/actions[0](context);
+                        }
+                        return null;
+                    } ;
+                  case 2:
+                    return context => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.eval()*/actions[0](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[1](context)) {
+                            return /*Delegate.eval()*/actions[1](context);
+                        }
+                        return null;
+                    } ;
+                  case 3:
+                    return context => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.eval()*/actions[0](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[1](context)) {
+                            return /*Delegate.eval()*/actions[1](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[2](context)) {
+                            return /*Delegate.eval()*/actions[2](context);
+                        }
+                        return null;
+                    } ;
+                  case 4:
+                    return context => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.eval()*/actions[0](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[1](context)) {
+                            return /*Delegate.eval()*/actions[1](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[2](context)) {
+                            return /*Delegate.eval()*/actions[2](context);
+                        }
+                        if (/*Delegate.eval()*/conditions[3](context)) {
+                            return /*Delegate.eval()*/actions[3](context);
+                        }
+                        return null;
+                    } ;
+                  default:
+                    return context => {
+                        for (int i = 0; (i<count); i++) {
+                            if (/*Delegate.eval()*/conditions[i](context)) {
+                                return /*Delegate.eval()*/actions[i](context);
+                            }
+                        }
+                        return null;
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.Choose expr = (Saxon.Hej.expr.instruct.Choose)(getExpression());
+                int count = expr.size();
+                makeConditionEvaluators(expr);
+                Saxon.Hej.expr.elab.PushEvaluator[] actions = new Saxon.Hej.expr.elab.PushEvaluator[count];
+                for (int i = 0; (i<count); i++) {
+                    actions[i] = expr.getAction(i).makeElaborator().elaborateForPush();
+                }
+                switch (count) {
+                  case 1:
+                    return (output, context) => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[0](output, context);
+                        }
+                        return null;
+                    } ;
+                  case 2:
+                    return (output, context) => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[0](output, context);
+                        }
+                        if (/*Delegate.eval()*/conditions[1](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[1](output, context);
+                        }
+                        return null;
+                    } ;
+                  case 3:
+                    return (output, context) => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[0](output, context);
+                        }
+                        if (/*Delegate.eval()*/conditions[1](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[1](output, context);
+                        }
+                        if (/*Delegate.eval()*/conditions[2](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[2](output, context);
+                        }
+                        return null;
+                    } ;
+                  case 4:
+                    return (output, context) => {
+                        if (/*Delegate.eval()*/conditions[0](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[0](output, context);
+                        }
+                        if (/*Delegate.eval()*/conditions[1](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[1](output, context);
+                        }
+                        if (/*Delegate.eval()*/conditions[2](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[2](output, context);
+                        }
+                        if (/*Delegate.eval()*/conditions[3](context)) {
+                            return /*Delegate.processLeavingTail()*/actions[3](output, context);
+                        }
+                        return null;
+                    } ;
+                  default:
+                    return (output, context) => {
+                        for (int i = 0; (i<count); i++) {
+                            if (/*Delegate.eval()*/conditions[i](context)) {
+                                return /*Delegate.processLeavingTail()*/actions[i](output, context);
+                            }
+                        }
+                        return null;
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Hej.expr.instruct.Choose expr = (Saxon.Hej.expr.instruct.Choose)(getExpression());
+                int count = expr.size();
+                makeConditionEvaluators(expr);
+                Saxon.Hej.expr.elab.UpdateEvaluator[] actions = new Saxon.Hej.expr.elab.UpdateEvaluator[count];
+                for (int i = 0; (i<count); i++) {
+                    actions[i] = expr.getAction(i).makeElaborator().elaborateForUpdate();
+                }
+                return (context, updates) => {
+                    for (int i = 0; (i<count); i++) {
+                        if (/*Delegate.eval()*/conditions[i](context)) {
+                            /*Delegate.registerUpdates()*/actions[i](context, updates);
+                            break ;
+                        }
+                    }
+                } ;
+            }
+        
+        }
+        private class EagerChooseEvaluator : Saxon.Hej.expr.elab.SequenceEvaluator {
+            private readonly Saxon.Hej.expr.elab.BooleanEvaluator[] conditions;
+            private readonly Saxon.Hej.expr.elab.SequenceEvaluator[] actions;
+            private readonly int count;
+            public EagerChooseEvaluator(Saxon.Hej.expr.elab.BooleanEvaluator[] conditions, Saxon.Hej.expr.elab.SequenceEvaluator[] actions)  {
+                this.conditions = conditions;
+                this.actions = actions;
+                this.count = conditions.Length;
+            }
+            public Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.XPathContext context) {
+                for (int i = 0; (i<count); i++) {
+                    if (/*Delegate.eval()*/conditions[i](context)) {
+                        return actions[i].evaluate(context);
+                    }
+                }
+                return Saxon.Hej.value.EmptySequence.getInstance();
+            }
+        
         }
     
     }

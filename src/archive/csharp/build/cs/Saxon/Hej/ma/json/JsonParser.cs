@@ -19,7 +19,7 @@ namespace Saxon.Hej.ma.json {
         private const string ERR_SCHEMA = "FOJS0004";
         private const string ERR_OPTIONS = "FOJS0005";
         private const string ERR_LIMITS = "FOJS0001";
-        private Saxon.Hej.om.Function numberParser = null;
+        private Saxon.Hej.om.FunctionItem numberParser = null;
         private int nesting;
         public JsonParser()  {
             nesting = 0;
@@ -524,8 +524,8 @@ namespace Saxon.Hej.ma.json {
             Saxon.Hej.om.Sequence val = Saxon.Impl.Helpers.MapUtils.Get(options, "number-parser");
             if ((val != null)) {
                 Saxon.Hej.om.Item fn = val.head();
-                if ((fn is Saxon.Hej.om.Function)) {
-                    numberParser = (Saxon.Hej.om.Function)(fn);
+                if ((fn is Saxon.Hej.om.FunctionItem)) {
+                    numberParser = (Saxon.Hej.om.FunctionItem)(fn);
                     if ((numberParser.getArity() != 1)) {
                         throw new Saxon.Hej.trans.XPathException("Number-parser function must have arity=1", "FOJS0005");
                     }

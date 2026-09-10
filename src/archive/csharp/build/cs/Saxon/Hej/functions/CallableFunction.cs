@@ -13,7 +13,7 @@ namespace Saxon.Hej.functions {
             this.type = type;
         }
         public CallableFunction(int arity, Saxon.Hej.expr.Callable callable, Saxon.Hej.type.FunctionItemType type)  {
-            this.name = new Saxon.Hej.trans.SymbolicName.F(new Saxon.Hej.om.StructuredQName("", "anon", "anon"), arity);
+            this.name = new Saxon.Hej.trans.SymbolicName.F(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.ANONYMOUS, "anon"), arity);
             this.callable = callable;
             this.type = type;
         }

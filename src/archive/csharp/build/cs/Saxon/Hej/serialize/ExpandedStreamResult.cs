@@ -10,6 +10,7 @@ namespace Saxon.Hej.serialize {
         private System.IO.Stream outputStream;
         private Saxon.Hej.serialize.charcode.CharacterSet characterSet;
         private string encoding;
+        private bool mustCloseAfterUse = false;
         public ExpandedStreamResult(Saxon.Hej.Configuration config, Saxon.Ejavax.xml.transform.stream.StreamResult result, Saxon.Ejava.util.Properties outputProperties)  {
             this.config = config;
             this.systemId = result.getSystemId();
@@ -58,11 +59,15 @@ namespace Saxon.Hej.serialize {
             }
             try {
                 Saxon.Ejava.io.File file = makeWritableOutputFile(uriString);
+                mustCloseAfterUse = true;
                 outputStream = new System.IO.FileStream(file.getPath(), System.IO.FileMode.Create);
             } catch (Exception fnf) when (fnf is Saxon.Ejava.io.FileNotFoundException || fnf is System.UriFormatException || fnf is Saxon.Ejava.lang.IllegalArgumentException) {
                 throw new Saxon.Hej.trans.XPathException(fnf);
             }
             return outputStream;
+        }
+        public bool isMustCloseAfterUse() {
+            return mustCloseAfterUse;
         }
         public static Saxon.Ejava.io.File makeWritableOutputFile(string uriString) {
             System.Uri uri = new System.Uri(uriString, System.UriKind.RelativeOrAbsolute);

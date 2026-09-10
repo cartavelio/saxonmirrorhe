@@ -74,17 +74,17 @@ namespace Saxon.Hej.functions {
             cg.controllingInstruction = controllingInstruction;
             return cg;
         }
-        public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext c) {
-            Saxon.Hej.expr.sort.GroupIterator gi = c.getCurrentGroupIterator();
+        public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
+        }
+        public Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+            Saxon.Hej.expr.sort.GroupIterator gi = context.getCurrentGroupIterator();
             if ((gi == null)) {
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no current group", "XTDE1061");
                 err.setLocation(getLocation());
                 throw err;
             }
-            return gi.iterateCurrentGroup();
-        }
-        public Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
-            return Saxon.Hej.om.SequenceTool.toLazySequence(iterate(context));
+            return gi.currentGroup();
         }
         public override string ToString() {
             return "current-group()";
@@ -94,6 +94,24 @@ namespace Saxon.Hej.functions {
         }
         public override string getStreamerName() {
             return "CurrentGroup";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.CurrentGroupCall.CurrentGroupCallElaborator();
+        }
+        private class CurrentGroupCallElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.functions.CurrentGroupCall expr = (Saxon.Hej.functions.CurrentGroupCall)(getExpression());
+                return context => {
+                    Saxon.Hej.expr.sort.GroupIterator gi = context.getCurrentGroupIterator();
+                    if ((gi == null)) {
+                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no current group", "XTDE1061");
+                        err.setLocation(expr.getLocation());
+                        throw err;
+                    }
+                    return gi.currentGroup().iterate();
+                } ;
+            }
+        
         }
     
     }

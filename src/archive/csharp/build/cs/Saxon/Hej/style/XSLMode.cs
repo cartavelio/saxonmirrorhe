@@ -17,7 +17,7 @@ namespace Saxon.Hej.style {
         public override Saxon.Hej.om.StructuredQName getObjectName() {
             Saxon.Hej.om.StructuredQName qn = base.getObjectName();
             if ((qn == null)) {
-                string nameAtt = Saxon.Hej.value.Whitespace.trim(getAttributeValue("", "name"));
+                string nameAtt = Saxon.Hej.value.Whitespace.trim(getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name"));
                 if ((nameAtt == null)) {
                     return Saxon.Hej.trans.Mode.UNNAMED_MODE_NAME;
                 }
@@ -99,6 +99,10 @@ namespace Saxon.Hej.style {
                       case "deep-skip":
                       case "fail":
                         break ;
+                      case "shallow-skip-all":
+                      case "shallow-copy-all":
+                        requireXslt40("onNoMatch");
+                        break ;
                       default:
                         invalidAttribute(f, "text-only-copy|shallow-copy|deep-copy|shallow-skip|deep-skip|fail");
                         break ;
@@ -128,7 +132,7 @@ namespace Saxon.Hej.style {
                     mode.setDeclaredVisibility(visibility);
                     break ;
                   default:
-                    if (attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
+                    if (attName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON)) {
                         isExtensionAttributeAllowed(attName.getDisplayName());
                         if (attName.getLocalPart().Equals("trace")) {
                             traceMatching = processBooleanAttribute("saxon:trace", value);
@@ -194,7 +198,7 @@ namespace Saxon.Hej.style {
                     }
                     mode.getActivePart().setExplicitProperty(f, normalizedAtt, decl.getPrecedence());
                     if ((mode.isMustBeTyped() && System.Text.RegularExpressions.Regex.IsMatch(getContainingPackage().getTargetEdition(), "JS\\d?"))) {
-                        compileWarning("In Saxon-JS, all data is untyped", "XTTE3110");
+                        issueWarning("In SaxonJS, all data is untyped", "XTTE3110");
                     }
                 } else {
                     if ((f.Equals("use-accumulators") && (accumulators != null))) {

@@ -6,7 +6,8 @@ namespace Saxon.Hej.expr {
         protected internal Saxon.Hej.expr.instruct.SlotManager map;
         protected internal Saxon.Hej.om.Sequence[] slots;
         protected internal System.Collections.Generic.Stack<Saxon.Hej.om.Sequence> dynamicStack;
-        public static readonly Saxon.Hej.expr.StackFrame EMPTY = new Saxon.Hej.expr.StackFrame(Saxon.Hej.expr.instruct.SlotManager.EMPTY, new Saxon.Hej.om.Sequence[0]);
+        public static readonly Saxon.Hej.om.Sequence[] EMPTY_ARRAY_OF_SEQUENCE = new Saxon.Hej.om.Sequence[0];
+        public static readonly Saxon.Hej.expr.StackFrame EMPTY = new Saxon.Hej.expr.StackFrame(Saxon.Hej.expr.instruct.SlotManager.EMPTY, EMPTY_ARRAY_OF_SEQUENCE);
         public StackFrame(Saxon.Hej.expr.instruct.SlotManager map, Saxon.Hej.om.Sequence[] slots)  {
             this.map = map;
             this.slots = slots;

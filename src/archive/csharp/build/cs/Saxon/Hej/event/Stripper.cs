@@ -53,7 +53,7 @@ namespace Saxon.Hej.@event {
                 stripStack = Saxon.Ejava.util.Arrays.copyOf(stripStack, (top*2));
             }
             stripStack[top] = preserve;
-            string xmlSpace = attributes.getValue(Saxon.Hej.lib.NamespaceConstant.XML, "space");
+            string xmlSpace = attributes.getValue(Saxon.Hej.om.NamespaceUri.XML, "space");
             if ((xmlSpace != null)) {
                 if (Saxon.Hej.value.Whitespace.trim(xmlSpace).Equals("preserve")) {
                     stripStack[top] |= PRESERVE_PARENT;

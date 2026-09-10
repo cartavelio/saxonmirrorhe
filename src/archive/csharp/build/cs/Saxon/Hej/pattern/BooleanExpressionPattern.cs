@@ -5,6 +5,7 @@ namespace Saxon.Hej.pattern {
     #pragma warning disable 659
     public class BooleanExpressionPattern : Saxon.Hej.pattern.Pattern, Saxon.Hej.pattern.PatternWithPredicate {
         private readonly Saxon.Hej.expr.Operand expressionOp;
+        internal Saxon.Hej.expr.elab.BooleanEvaluator predicateEvaluator;
         public BooleanExpressionPattern(Saxon.Hej.expr.Expression expression)  {
             this.expressionOp = new Saxon.Hej.expr.Operand(this, expression, Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC);
             setPriority(1);
@@ -42,12 +43,15 @@ namespace Saxon.Hej.pattern {
             return (/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(getPredicate()) == Saxon.Eej.ee.stream.Sweep.MOTIONLESS);
         }
         public override bool matches(Saxon.Hej.om.Item item, Saxon.Hej.expr.XPathContext context) {
+            if ((predicateEvaluator == null)) {
+                predicateEvaluator = getPredicate().makeElaborator().elaborateForBoolean();
+            }
             Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
             Saxon.Hej.tree.iter.ManualIterator iter = new Saxon.Hej.tree.iter.ManualIterator(item);
             c2.setCurrentIterator(iter);
             c2.setCurrentOutputUri(null);
             try {
-                return getPredicate().effectiveBooleanValue(c2);
+                return /*Delegate.eval()*/predicateEvaluator(c2);
             } catch (Saxon.Hej.trans.XPathException e) {
                 return false;
             }

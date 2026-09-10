@@ -209,7 +209,8 @@ namespace Saxon.Hej.s9api {
                 Saxon.Hej.value.SequenceType type = @params[i].getRequiredType();
                 vr[i] = ((Saxon.Hej.om.GroundedValue)arguments[i].Unwrap());
                 if (!(type.matches(vr[i], config.getTypeHierarchy()))) {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, uf.getFunctionName().getDisplayName(), i);
+                    int pos = i;
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, uf.getFunctionName().getDisplayName(), pos);
                     Saxon.Hej.om.Sequence converted = config.getTypeHierarchy().applyFunctionConversionRules(vr[i], type, role, Saxon.Hej.expr.parser.Loc.NONE);
                     vr[i] = converted.materialize();
                 }
@@ -238,7 +239,7 @@ namespace Saxon.Hej.s9api {
             destination.closeAndNotify();
         }}
         public Saxon.Hej.s9api.Destination asDocumentDestination(Saxon.Hej.s9api.Destination finalDestination) {
-            return new Inner_AbstractDestination_137(this, finalDestination);
+            return new Inner_AbstractDestination_139(this, finalDestination);
         }
         public Saxon.Hej.s9api.Serializer newSerializer() {
             Saxon.Hej.s9api.Serializer serializer = processor.newSerializer();
@@ -262,9 +263,9 @@ namespace Saxon.Hej.s9api {
             return serializer;
         }
     
-        private class Inner_AbstractDestination_137 : Saxon.Hej.s9api.AbstractDestination {
+        private class Inner_AbstractDestination_139 : Saxon.Hej.s9api.AbstractDestination {
             private readonly Xslt30Transformer outerInstance;
-            public Inner_AbstractDestination_137(Xslt30Transformer outerInstance, Saxon.Hej.s9api.Destination finalDestination) {
+            public Inner_AbstractDestination_139(Xslt30Transformer outerInstance, Saxon.Hej.s9api.Destination finalDestination) {
                 this.outerInstance = outerInstance;
                 this.finalDestination = finalDestination;
             }

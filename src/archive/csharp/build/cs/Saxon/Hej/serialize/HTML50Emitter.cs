@@ -29,8 +29,8 @@ namespace Saxon.Hej.serialize {
             version = 5;
         }
         protected internal override bool isHTMLElement(Saxon.Hej.om.NodeName name) {
-            string uri = name.getURI();
-            return (uri.Equals("") || uri.Equals(Saxon.Hej.lib.NamespaceConstant.XHTML));
+            Saxon.Hej.om.NamespaceUri uri = name.getNamespaceUri();
+            return (uri.isEmpty() || uri.Equals(Saxon.Hej.om.NamespaceUri.XHTML));
         }
         protected internal override void openDocument() {
             version = 5;

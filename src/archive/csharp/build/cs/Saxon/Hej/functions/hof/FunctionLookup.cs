@@ -19,7 +19,7 @@ namespace Saxon.Hej.functions.hof {
         public override int GetHashCode() {
             return base.GetHashCode();
         }
-        public override Saxon.Hej.om.Function bindContext(Saxon.Hej.expr.XPathContext context) {
+        public override Saxon.Hej.om.FunctionItem bindContext(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.functions.hof.FunctionLookup bound = (Saxon.Hej.functions.hof.FunctionLookup)(Saxon.Hej.functions.SystemFunction.makeFunction("function-lookup", getRetainedStaticContext(), 2));
             Saxon.Hej.om.FocusIterator focusIterator = context.getCurrentIterator();
             if ((focusIterator != null)) {
@@ -32,7 +32,7 @@ namespace Saxon.Hej.functions.hof {
             }
             return bound;
         }
-        public Saxon.Hej.om.Function lookup(Saxon.Hej.om.StructuredQName name, int arity, Saxon.Hej.expr.XPathContext context) {
+        public Saxon.Hej.om.FunctionItem lookup(Saxon.Hej.om.StructuredQName name, int arity, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.Controller controller = context.getController();
             Saxon.Hej.expr.instruct.Executable exec = controller.getExecutable();
             Saxon.Hej.expr.parser.RetainedStaticContext rsc = getRetainedStaticContext();
@@ -46,7 +46,7 @@ namespace Saxon.Hej.functions.hof {
             ic.setNamespaceResolver(rsc);
             ic.setPackageData(pd);
             try {
-                Saxon.Hej.om.Function fi = lib.getFunctionItem(sn, ic);
+                Saxon.Hej.om.FunctionItem fi = lib.getFunctionItem(sn, ic);
                 if ((fi is Saxon.Hej.expr.instruct.UserFunction)) {
                     Saxon.Hej.trans.Visibility vis = ((Saxon.Hej.expr.instruct.UserFunction)(fi)).getDeclaredVisibility();
                     if ((vis == Saxon.Hej.trans.Visibility.ABSTRACT)) {
@@ -76,7 +76,7 @@ namespace Saxon.Hej.functions.hof {
             Saxon.Hej.expr.XPathContext c = ((boundContext == null) ? context : boundContext);
             Saxon.Hej.value.QNameValue qname = (Saxon.Hej.value.QNameValue)(arguments[0].head());
             Saxon.Hej.value.IntegerValue arity = (Saxon.Hej.value.IntegerValue)(arguments[1].head());
-            Saxon.Hej.om.Function fi = lookup(qname.getStructuredQName(), (int)(arity.longValue()), c);
+            Saxon.Hej.om.FunctionItem fi = lookup(qname.getStructuredQName(), (int)(arity.longValue()), c);
             if ((fi == null)) {
                 return Saxon.Hej.value.EmptySequence.getInstance();
             }
@@ -85,7 +85,7 @@ namespace Saxon.Hej.functions.hof {
             }
             Saxon.Hej.expr.Component target = ((fi is Saxon.Hej.expr.instruct.UserFunction) ? ((Saxon.Hej.expr.instruct.UserFunction)(fi)).getDeclaringComponent() : null);
             Saxon.Hej.expr.ExportAgent agent = new Saxon.Hej.functions.hof.FunctionLookup.FunctionLookupExportAgent(this, qname, arity);
-            return new Saxon.Hej.functions.hof.UserFunctionReference.BoundUserFunction(agent, fi, target, c.getController());
+            return new Saxon.Hej.functions.hof.UserFunctionReference.BoundUserFunction(fi, (int)(arity.longValue()), target, agent, c.getController());
         }
         public class FunctionLookupExportAgent : Saxon.Hej.expr.ExportAgent {
             private readonly Saxon.Hej.value.QNameValue qName;

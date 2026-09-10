@@ -17,7 +17,7 @@ namespace Saxon.Hej.functions {
             if (((sv0.length()*sv1.length())>1000)) {
                 return translateUsingMap(sv0, buildMap(sv1, sv2));
             }
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(sv0.length32());
             long s2len = sv2.length();
             Saxon.Hej.z.IntIterator iter = sv0.codePoints();
             while (iter.hasNext()) {
@@ -44,7 +44,7 @@ namespace Saxon.Hej.functions {
             return map;
         }
         public static Saxon.Hej.value.StringValue translateUsingMap(Saxon.Hej.value.StringValue @in, Saxon.Hej.z.IntToIntMap map) {
-            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder(@in.length32());
             Saxon.Hej.z.IntIterator iter = @in.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();
@@ -78,6 +78,39 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.functions.Translate copy = (Saxon.Hej.functions.Translate)(Saxon.Hej.functions.SystemFunction.makeFunction(getFunctionName().getLocalPart(), getRetainedStaticContext(), getArity()));
             copy.staticMap = staticMap;
             return copy;
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.Translate.TranslateFnElaborator();
+        }
+        public class TranslateFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.functions.Translate fn = (Saxon.Hej.functions.Translate)(fnc.getTargetFunction());
+                Saxon.Hej.expr.elab.ItemEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.ItemEvaluator arg2Eval = fnc.getArg(2).makeElaborator().elaborateForItem();
+                Saxon.Hej.z.IntToIntMap staticMap = fn.getStaticMap();
+                if ((staticMap != null)) {
+                    return context => {
+                        Saxon.Hej.value.StringValue s0 = (Saxon.Hej.value.StringValue)(/*Delegate.eval()*/arg0Eval(context));
+                        if (((s0 == null) || s0.isEmpty())) {
+                            return Saxon.Hej.value.StringValue.EMPTY_STRING;
+                        }
+                        return translateUsingMap(s0, staticMap);
+                    } ;
+                } else {
+                    return context => {
+                        Saxon.Hej.value.StringValue s0 = (Saxon.Hej.value.StringValue)(/*Delegate.eval()*/arg0Eval(context));
+                        if (((s0 == null) || s0.isEmpty())) {
+                            return Saxon.Hej.value.StringValue.EMPTY_STRING;
+                        }
+                        Saxon.Hej.value.StringValue s1 = (Saxon.Hej.value.StringValue)(/*Delegate.eval()*/arg1Eval(context));
+                        Saxon.Hej.value.StringValue s2 = (Saxon.Hej.value.StringValue)(/*Delegate.eval()*/arg2Eval(context));
+                        return translate(s0, s1, s2);
+                    } ;
+                }
+            }
+        
         }
     
     }

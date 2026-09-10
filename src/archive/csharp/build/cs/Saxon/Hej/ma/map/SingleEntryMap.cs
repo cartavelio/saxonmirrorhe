@@ -25,7 +25,7 @@ namespace Saxon.Hej.ma.map {
             return false;
         }
         public override Saxon.Hej.tree.iter.AtomicIterator keys() {
-            return new Saxon.Hej.tree.iter.SingleAtomicIterator(key);
+            return Saxon.Hej.tree.iter.SingleAtomicIterator.makeIterator(key);
         }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.ma.map.KeyValuePair> keyValuePairs() {
             System.Collections.Generic.IList<Saxon.Hej.ma.map.KeyValuePair> list = new System.Collections.Generic.List<Saxon.Hej.ma.map.KeyValuePair>(1);

@@ -29,10 +29,11 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Hej.expr.instruct.Choose exp = (Saxon.Hej.expr.instruct.Choose)(getExpression());
             if ((getConsumingCondition()<0)) {
                 return (watchManager, @out, context) => {
+                    Saxon.Hej.expr.elab.BooleanEvaluator[] booleanEvaluators = exp.getConditionEvaluators();
                     @out.open(new Saxon.Eej.ee.stream.watch.Terminator());
                     @out = new Saxon.Eej.ee.stream.feed.NoOpenFeed(@out, context);
                     for (int i = 0; (i<exp.size()); i++) {
-                        if (exp.getCondition(i).effectiveBooleanValue(context)) {
+                        if (/*Delegate.eval()*/booleanEvaluators[i](context)) {
                             Saxon.Hej.expr.Expression action = exp.getAction(i);
                             if ((/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING)) {
                                 Saxon.Eej.ee.stream.Inversion actionInversion = actionInversions[i];
@@ -42,12 +43,12 @@ namespace Saxon.Eej.ee.stream.adjunct {
                                 }
                                 return actionInversion.getWatch(watchManager, @out, context);
                             } else {
-                                Saxon.Hej.om.SequenceTool.supply(action.iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(it => @out.append(it) /* converted from instance method reference */));
+                                Saxon.Hej.om.SequenceTool.supply(action.iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(/* Unresolved method reference */@out.append));
                                 break ;
                             }
                         }
                     }
-                    return new Saxon.Eej.ee.stream.watch.Trigger(new Saxon.Hej.pattern.NodeTestPattern(Saxon.Hej.type.ErrorType.getInstance()), new Saxon.Eej.ee.stream.feed.FilteringFeed(@out, context, Saxon.Eej.ee.stream.feed.FilteringFeed.OpaqueFilter), context);
+                    return new Saxon.Eej.ee.stream.watch.Trigger(new Saxon.Hej.pattern.NodeTestPattern(Saxon.Hej.type.ErrorType.getInstance()), new Saxon.Eej.ee.stream.feed.FilteringFeed(watchManager, @out, context, Saxon.Eej.ee.stream.feed.FilteringFeed.OpaqueFilter), context);
                 } ;
             } else {
                 return null;
@@ -82,21 +83,23 @@ namespace Saxon.Eej.ee.stream.adjunct {
             }
             public Saxon.Eej.ee.stream.feed.ItemFeed makeItemFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {
                 Saxon.Eej.ee.stream.feed.ItemFeed action = new Saxon.Eej.ee.stream.adjunct.ChooseAdjunct.ItemFeedForConsumingCondition(expression, consumingCondition, @out, context);
-                return new Saxon.Eej.ee.stream.adjunct.BooleanFnFeed.Positive(expression, action, context);
+                return new Saxon.Eej.ee.stream.adjunct.BooleanFnFeed.Positive(watchManager, expression, action, context);
             }
         
         }
         private class ItemFeedForConsumingCondition : Saxon.Eej.ee.stream.feed.ItemFeed {
             private readonly int consumingCondition;
             private bool matched = false;
+            internal Saxon.Hej.expr.elab.BooleanEvaluator[] booleanEvaluators;
             public ItemFeedForConsumingCondition(Saxon.Hej.expr.Expression expression, int consumingCondition, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) : base (expression, @out, context) {
                 this.consumingCondition = consumingCondition;
             }
             public override void open(Saxon.Eej.ee.stream.watch.Terminator terminator) {
-                base.open(terminator);
                 Saxon.Hej.expr.instruct.Choose expression = (Saxon.Hej.expr.instruct.Choose)(getExpression());
+                booleanEvaluators = expression.getConditionEvaluators();
+                base.open(terminator);
                 for (int i = 0; (i<consumingCondition); i++) {
-                    bool truth = expression.getCondition(i).effectiveBooleanValue(getContext());
+                    bool truth = /*Delegate.eval()*/booleanEvaluators[i](getContext());
                     if (truth) {
                         Saxon.Hej.om.SequenceIterator iter = expression.getAction(i).iterate(getContext());
                         processItems(iter, getNextOutputter());
@@ -114,7 +117,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                         selectedAction = expression.getAction(consumingCondition);
                     } else {
                         for (int i = 1; (i<expression.size()); i++) {
-                            if (expression.getCondition(i).effectiveBooleanValue(getContext())) {
+                            if (/*Delegate.eval()*/booleanEvaluators[i](getContext())) {
                                 selectedAction = expression.getAction(i);
                                 break ;
                             }

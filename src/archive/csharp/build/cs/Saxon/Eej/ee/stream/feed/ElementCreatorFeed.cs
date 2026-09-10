@@ -7,17 +7,17 @@ namespace Saxon.Eej.ee.stream.feed {
         }
         protected internal override void processLeft(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.instruct.ElementCreator instr = (Saxon.Hej.expr.instruct.ElementCreator)(getExpression());
+            Saxon.Hej.expr.instruct.ElementCreator.ElementCreationDetails details = instr.makeElementCreationDetails();
             try {
-                Saxon.Hej.om.NodeName elemName = instr.getElementName(context, null);
+                Saxon.Hej.om.NodeName elemName = details.getNodeName(context);
                 Saxon.Hej.type.SchemaType typeCode = ((instr.getValidationAction() == Saxon.Hej.lib.Validation.PRESERVE) ? Saxon.Hej.type.AnyType.getInstance() : Saxon.Hej.type.Untyped.getInstance());
                 if (!(instr.isPreservingTypes())) {
-                    Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(instr.getValidationOptions());
-                    options.setTopLevelElement(elemName.getStructuredQName());
+                    Saxon.Hej.lib.ParseOptions options = instr.getValidationOptions().withTopLevelElement(elemName.getStructuredQName());
                     Saxon.Hej.@event.Receiver validator = context.getConfiguration().getElementValidator(next, options, instr.getLocation());
                     next = new Saxon.Hej.@event.ComplexContentOutputter(validator);
                 }
                 if ((next.getSystemId() == null)) {
-                    next.setSystemId(instr.getNewBaseURI(context, null));
+                    next.setSystemId(details.getSystemId(context));
                 }
                 bool condition = !(instr.isBequeathNamespacesToChildren());
                 int properties = (condition ? Saxon.Hej.@event.ReceiverOption.DISINHERIT_NAMESPACES : Saxon.Hej.@event.ReceiverOption.NONE);

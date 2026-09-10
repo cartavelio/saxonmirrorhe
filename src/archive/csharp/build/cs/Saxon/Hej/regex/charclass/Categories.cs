@@ -69,22 +69,18 @@ namespace Saxon.Hej.regex.charclass {
                 throw new System.Exception("Unable to read categories.xml file");
             }
             Saxon.Hej.Configuration config = new Saxon.Hej.Configuration();
-            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
-            options.setSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
-            options.setDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
-            options.setTreeModel(Saxon.Hej.@event.Builder.TINY_TREE);
+            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP).withDTDValidationMode(Saxon.Hej.lib.Validation.SKIP).withTreeModel(Saxon.Hej.@event.Builder.TINY_TREE).withPleaseCloseAfterUse(true);
             Saxon.Hej.om.NodeInfo doc;
             try {
                 doc = config.buildDocumentTree(new Saxon.Ejavax.xml.transform.stream.StreamSource(@in, "categories.xml"), options).getRootNode();
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw new System.Exception("Failed to build categories.xml", e);
             }
-            int fp_name = config.getNamePool().allocateFingerprint("", "name");
-            int fp_f = config.getNamePool().allocateFingerprint("", "f");
-            int fp_t = config.getNamePool().allocateFingerprint("", "t");
-            Saxon.Hej.tree.iter.AxisIterator iter = doc.iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, "", "cat", config.getNamePool()));
-            Saxon.Hej.om.NodeInfo item;
-            while (((item = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next())) != null)) {
+            int fp_name = config.getNamePool().allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, "name");
+            int fp_f = config.getNamePool().allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, "f");
+            int fp_t = config.getNamePool().allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, "t");
+            Saxon.Hej.tree.iter.AxisIterator iter = doc.iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, Saxon.Hej.om.NamespaceUri.NULL, "cat", config.getNamePool()));
+            for (Saxon.Hej.om.NodeInfo item; ((item = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next())) != null); ) {
                 string cat = ((Saxon.Hej.tree.tiny.TinyElementImpl)(item)).getAttributeValue(fp_name);
                 Saxon.Hej.z.IntRangeSet irs = new Saxon.Hej.z.IntRangeSet();
                 foreach (Saxon.Hej.om.NodeInfo r in item.children(Saxon.Hej.pattern.NodeKindTest.ELEMENT)) {

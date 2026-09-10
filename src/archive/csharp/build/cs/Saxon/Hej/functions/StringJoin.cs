@@ -82,7 +82,7 @@ namespace Saxon.Hej.functions {
             }
             public void processItem(Saxon.Hej.om.Item item) {
                 if ((position == 0)) {
-                    data.accept(item.getUnicodeStringValue());
+                    data.append(item.getUnicodeStringValue());
                     position = 1;
                 } else {
                     ((/*1430*/Saxon.Hej.str.UnicodeBuilder)data.accept(separator)).accept(item.getUnicodeStringValue());

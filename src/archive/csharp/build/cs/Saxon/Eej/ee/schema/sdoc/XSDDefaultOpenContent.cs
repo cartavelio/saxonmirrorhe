@@ -15,11 +15,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"appliesToEmpty", "id", "mode"};
             allowAttributes(atts, allowed);
             processId();
-            string attValue = atts.getValue("", "appliesToEmpty");
+            string attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "appliesToEmpty");
             if ((attValue != null)) {
                 appliesToEmpty = parseBooleanAttribute("appliesToEmpty", attValue);
             }
-            attValue = Saxon.Hej.value.Whitespace.trim(atts.getValue("", "mode"));
+            attValue = Saxon.Hej.value.Whitespace.trim(atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "mode"));
             if ((attValue != null)) {
                 if ((attValue.Equals("interleave") || attValue.Equals("suffix"))) {
                     mode = attValue;

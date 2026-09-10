@@ -97,7 +97,7 @@ namespace Saxon.Hej.trans {
             return getLocation().getSystemId();
         }
         public Saxon.Hej.s9api.Location getLocation() {
-            return locator;
+            return ((locator == null) ? Saxon.Hej.expr.parser.Loc.NONE : locator);
         }
         public void setLocation(Saxon.Hej.s9api.Location loc) {
             this.locator = loc;

@@ -147,7 +147,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 level++;
                 getNextOutputter().startElement(elemName, type, attributes, namespaces, location, properties);
             }
-            public override void @namespace(string prefix, string namespaceUri, int properties) {
+            public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
                 action();
                 getNextOutputter().@namespace(prefix, namespaceUri, properties);
             }

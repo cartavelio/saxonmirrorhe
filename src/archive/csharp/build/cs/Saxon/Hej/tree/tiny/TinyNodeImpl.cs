@@ -81,12 +81,19 @@ namespace Saxon.Hej.tree.tiny {
             }
             return tree.prefixPool.getPrefix((code>>20));
         }
-        public virtual string getURI() {
+        public virtual Saxon.Hej.om.NamespaceUri getNamespaceUri() {
             int code = tree.nameCode[nodeNr];
             if ((code<0)) {
-                return "";
+                return Saxon.Hej.om.NamespaceUri.NULL;
             }
             return tree.getNamePool().getURI((code&Saxon.Hej.om.NamePool.FP_MASK));
+        }
+        public virtual bool hasURI(Saxon.Hej.om.NamespaceUri ns) {
+            int code = tree.nameCode[nodeNr];
+            if ((code<0)) {
+                return false;
+            }
+            return getNamePool().getStructuredQName(code).hasURI(ns);
         }
         public virtual string getDisplayName() {
             int code = tree.nameCode[nodeNr];
@@ -124,106 +131,142 @@ namespace Saxon.Hej.tree.tiny {
               case Saxon.Hej.om.AxisInfo.ANCESTOR:
                 return new Saxon.Hej.tree.tiny.AncestorIterator(this, nodeTest);
               case Saxon.Hej.om.AxisInfo.ANCESTOR_OR_SELF:
-                Saxon.Hej.tree.iter.AxisIterator ancestors = new Saxon.Hej.tree.tiny.AncestorIterator(this, nodeTest);
-                if (nodeTest.test(this)) {
-                    return new Saxon.Hej.tree.iter.PrependAxisIterator(this, ancestors);
-                } else {
-                    return ancestors;
-                }
+                return iteratorANCESTOR(nodeTest);
               case Saxon.Hej.om.AxisInfo.ATTRIBUTE:
-                if ((type != Saxon.Hej.type.Type.ELEMENT)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                }
-                if ((tree.alpha[nodeNr]<0)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                }
-                return new Saxon.Hej.tree.tiny.AttributeIterator(tree, nodeNr, nodeTest);
+                return iteratorATTRIBUTE(type, nodeTest);
               case Saxon.Hej.om.AxisInfo.CHILD:
-                if (hasChildNodes()) {
-                    if (((nodeTest is Saxon.Hej.pattern.NameTest) && (((Saxon.Hej.pattern.NameTest)(nodeTest)).getNodeKind() == Saxon.Hej.type.Type.ELEMENT))) {
-                        return new Saxon.Hej.tree.tiny.NamedChildIterator(tree, this, ((Saxon.Hej.pattern.NameTest)(nodeTest)).getFingerprint());
-                    } else {
-                        return new Saxon.Hej.tree.tiny.SiblingIterator(tree, this, nodeTest, true);
-                    }
-                } else {
-                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                }
+                return iteratorCHILD(nodeTest);
               case Saxon.Hej.om.AxisInfo.DESCENDANT:
-                if ((((type == Saxon.Hej.type.Type.DOCUMENT) && (nodeTest is Saxon.Hej.pattern.NameTest)) && (nodeTest.getPrimitiveType() == Saxon.Hej.type.Type.ELEMENT))) {
-                    return ((Saxon.Hej.tree.tiny.TinyDocumentImpl)(this)).getAllElements(nodeTest.getFingerprint());
-                } else {
-                    if (hasChildNodes()) {
-                        if (nodeTest.getUType().overlaps(Saxon.Hej.type.UType.TEXT)) {
-                            return new Saxon.Hej.tree.tiny.DescendantIterator(tree, this, nodeTest);
-                        } else {
-                            return new Saxon.Hej.tree.tiny.DescendantIteratorSansText(tree, this, nodeTest);
-                        }
-                    } else {
-                        return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                    }
-                }
+                return iteratorDESCENDANT(type, nodeTest);
               case Saxon.Hej.om.AxisInfo.DESCENDANT_OR_SELF:
-                Saxon.Hej.tree.iter.AxisIterator descendants = iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, nodeTest);
-                if (nodeTest.test(this)) {
-                    return new Saxon.Hej.tree.iter.PrependAxisIterator(this, descendants);
-                } else {
-                    return descendants;
-                }
+                return iteratorDESCENDANT_OR_SELF(nodeTest);
               case Saxon.Hej.om.AxisInfo.FOLLOWING:
-                if (((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE))) {
-                    return new Saxon.Hej.tree.tiny.FollowingIterator(tree, ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getParent()), nodeTest, true);
-                } else {
-                    if ((tree.depth[nodeNr] == 0)) {
-                        return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                    } else {
-                        return new Saxon.Hej.tree.tiny.FollowingIterator(tree, this, nodeTest, false);
-                    }
-                }
+                return iteratorFOLLOWING(type, nodeTest);
               case Saxon.Hej.om.AxisInfo.FOLLOWING_SIBLING:
-                if ((((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE)) || (tree.depth[nodeNr] == 0))) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                } else {
-                    return new Saxon.Hej.tree.tiny.SiblingIterator(tree, this, nodeTest, false);
-                }
+                return iteratorFOLLOWING_SIBLING(type, nodeTest);
               case Saxon.Hej.om.AxisInfo.NAMESPACE:
-                if ((type != Saxon.Hej.type.Type.ELEMENT)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                }
-                return Saxon.Hej.tree.NamespaceNode.makeIterator(this, nodeTest);
+                return iteratorNAMESPACE(type, nodeTest);
               case Saxon.Hej.om.AxisInfo.PARENT:
-                Saxon.Hej.om.NodeInfo parent = ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getParent());
-                return Saxon.Hej.tree.util.Navigator.filteredSingleton(parent, nodeTest);
+                return iteratorPARENT(nodeTest);
               case Saxon.Hej.om.AxisInfo.PRECEDING:
-                if (((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE))) {
-                    return ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getParent()).iterateAxis(axisNumber, nodeTest);
-                } else {
-                    if ((tree.depth[nodeNr] == 0)) {
-                        return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                    } else {
-                        return new Saxon.Hej.tree.tiny.PrecedingIterator(tree, this, nodeTest, false);
-                    }
-                }
+                return iteratorPRECEDING(type, axisNumber, nodeTest);
               case Saxon.Hej.om.AxisInfo.PRECEDING_SIBLING:
-                if ((((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE)) || (tree.depth[nodeNr] == 0))) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                } else {
-                    return new Saxon.Hej.tree.tiny.PrecedingSiblingIterator(tree, this, nodeTest);
-                }
+                return iteratorPRECEDING_SIBLING(type, nodeTest);
               case Saxon.Hej.om.AxisInfo.SELF:
                 return Saxon.Hej.tree.util.Navigator.filteredSingleton(this, nodeTest);
               case Saxon.Hej.om.AxisInfo.PRECEDING_OR_ANCESTOR:
-                if ((type == Saxon.Hej.type.Type.DOCUMENT)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
-                } else {
-                    if (((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE))) {
-                        Saxon.Hej.tree.tiny.TinyNodeImpl el = ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getParent());
-                        return new Saxon.Hej.tree.iter.PrependAxisIterator(el, new Saxon.Hej.tree.tiny.PrecedingIterator(tree, el, nodeTest, true));
-                    } else {
-                        return new Saxon.Hej.tree.tiny.PrecedingIterator(tree, this, nodeTest, true);
-                    }
-                }
+                return iteratorPRECEDING_OR_ANCESTOR(type, nodeTest);
               default:
                 throw new Saxon.Ejava.lang.IllegalArgumentException(("Unknown axis number "+axisNumber));
+            }
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorANCESTOR(Saxon.Hej.pattern.NodeTest nodeTest) {
+            Saxon.Hej.tree.iter.AxisIterator ancestors = new Saxon.Hej.tree.tiny.AncestorIterator(this, nodeTest);
+            if (nodeTest.test(this)) {
+                return new Saxon.Hej.tree.iter.PrependAxisIterator(this, ancestors);
+            } else {
+                return ancestors;
+            }
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorATTRIBUTE(int type, Saxon.Hej.pattern.NodeTest nodeTest) {
+            if ((type != Saxon.Hej.type.Type.ELEMENT)) {
+                return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+            }
+            if ((tree.alpha[nodeNr]<0)) {
+                return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+            }
+            return new Saxon.Hej.tree.tiny.AttributeIterator(tree, nodeNr, nodeTest);
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorCHILD(Saxon.Hej.pattern.NodeTest nodeTest) {
+            if (hasChildNodes()) {
+                if (((nodeTest is Saxon.Hej.pattern.NameTest) && (((Saxon.Hej.pattern.NameTest)(nodeTest)).getNodeKind() == Saxon.Hej.type.Type.ELEMENT))) {
+                    return new Saxon.Hej.tree.tiny.NamedChildIterator(tree, this, ((Saxon.Hej.pattern.NameTest)(nodeTest)).getFingerprint());
+                } else {
+                    return new Saxon.Hej.tree.tiny.SiblingIterator(tree, this, nodeTest, true);
+                }
+            } else {
+                return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+            }
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorDESCENDANT(int type, Saxon.Hej.pattern.NodeTest nodeTest) {
+            if ((((type == Saxon.Hej.type.Type.DOCUMENT) && (nodeTest is Saxon.Hej.pattern.NameTest)) && (nodeTest.getPrimitiveType() == Saxon.Hej.type.Type.ELEMENT))) {
+                return ((Saxon.Hej.tree.tiny.TinyDocumentImpl)(this)).getAllElements(nodeTest.getFingerprint());
+            } else {
+                if (hasChildNodes()) {
+                    if (nodeTest.getUType().overlaps(Saxon.Hej.type.UType.TEXT)) {
+                        return new Saxon.Hej.tree.tiny.DescendantIterator(tree, this, nodeTest);
+                    } else {
+                        return new Saxon.Hej.tree.tiny.DescendantIteratorSansText(tree, this, nodeTest);
+                    }
+                } else {
+                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+                }
+            }
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorDESCENDANT_OR_SELF(Saxon.Hej.pattern.NodeTest nodeTest) {
+            Saxon.Hej.tree.iter.AxisIterator descendants = iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, nodeTest);
+            if (nodeTest.test(this)) {
+                return new Saxon.Hej.tree.iter.PrependAxisIterator(this, descendants);
+            } else {
+                return descendants;
+            }
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorFOLLOWING(int type, Saxon.Hej.pattern.NodeTest nodeTest) {
+            if (((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE))) {
+                return new Saxon.Hej.tree.tiny.FollowingIterator(tree, ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getParent()), nodeTest, true);
+            } else {
+                if ((tree.depth[nodeNr] == 0)) {
+                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+                } else {
+                    return new Saxon.Hej.tree.tiny.FollowingIterator(tree, this, nodeTest, false);
+                }
+            }
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorFOLLOWING_SIBLING(int type, Saxon.Hej.pattern.NodeTest nodeTest) {
+            if ((((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE)) || (tree.depth[nodeNr] == 0))) {
+                return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+            } else {
+                return new Saxon.Hej.tree.tiny.SiblingIterator(tree, this, nodeTest, false);
+            }
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorNAMESPACE(int type, Saxon.Hej.pattern.NodeTest nodeTest) {
+            if ((type != Saxon.Hej.type.Type.ELEMENT)) {
+                return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+            }
+            return Saxon.Hej.tree.NamespaceNode.makeIterator(this, nodeTest);
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorPARENT(Saxon.Hej.pattern.NodeTest nodeTest) {
+            Saxon.Hej.om.NodeInfo parent = ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getParent());
+            return Saxon.Hej.tree.util.Navigator.filteredSingleton(parent, nodeTest);
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorPRECEDING(int type, int axisNumber, Saxon.Hej.pattern.NodeTest nodeTest) {
+            if (((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE))) {
+                return ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getParent()).iterateAxis(axisNumber, nodeTest);
+            } else {
+                if ((tree.depth[nodeNr] == 0)) {
+                    return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+                } else {
+                    return new Saxon.Hej.tree.tiny.PrecedingIterator(tree, this, nodeTest, false);
+                }
+            }
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorPRECEDING_SIBLING(int type, Saxon.Hej.pattern.NodeTest nodeTest) {
+            if ((((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE)) || (tree.depth[nodeNr] == 0))) {
+                return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+            } else {
+                return new Saxon.Hej.tree.tiny.PrecedingSiblingIterator(tree, this, nodeTest);
+            }
+        }
+        private Saxon.Hej.tree.iter.AxisIterator iteratorPRECEDING_OR_ANCESTOR(int type, Saxon.Hej.pattern.NodeTest nodeTest) {
+            if ((type == Saxon.Hej.type.Type.DOCUMENT)) {
+                return Saxon.Hej.tree.iter.EmptyIterator.ofNodes();
+            } else {
+                if (((type == Saxon.Hej.type.Type.ATTRIBUTE) || (type == Saxon.Hej.type.Type.NAMESPACE))) {
+                    Saxon.Hej.tree.tiny.TinyNodeImpl el = ((/*1430*/Saxon.Hej.tree.tiny.TinyNodeImpl)getParent());
+                    return new Saxon.Hej.tree.iter.PrependAxisIterator(el, new Saxon.Hej.tree.tiny.PrecedingIterator(tree, el, nodeTest, true));
+                } else {
+                    return new Saxon.Hej.tree.tiny.PrecedingIterator(tree, this, nodeTest, true);
+                }
             }
         }
         public virtual Saxon.Hej.om.NodeInfo getParent() {
@@ -253,7 +296,7 @@ namespace Saxon.Hej.tree.tiny {
         public virtual bool hasChildNodes() {
             return false;
         }
-        public virtual string getAttributeValue(string uri, string local) {
+        public virtual string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local) {
             return null;
         }
         public virtual Saxon.Hej.om.NodeInfo getRoot() {
@@ -272,10 +315,7 @@ namespace Saxon.Hej.tree.tiny {
             return null;
         }
         public virtual void generateId(Saxon.Ejava.lang.StringBuilder buffer) {
-            buffer.append("d");
-            buffer.append(tree.getDocumentNumber());
-            buffer.append(NODE_LETTER[getNodeKind()]);
-            buffer.append(nodeNr);
+            buffer.append("d").append(tree.getDocumentNumber()).append(NODE_LETTER[getNodeKind()]).append(nodeNr);
         }
         public virtual bool isAncestorOrSelf(Saxon.Hej.tree.tiny.TinyNodeImpl d) {
             if ((tree != d.tree)) {
@@ -373,12 +413,12 @@ namespace Saxon.Hej.tree.tiny {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */
@@ -389,6 +429,16 @@ namespace Saxon.Hej.tree.tiny {
         /* Expanding default method getPublicId from interface NodeInfo */
         public virtual string getPublicId() {
             return null;
+        }
+
+        /* Expanding default method getURI from interface NodeInfo */
+        public virtual string getURI() {
+            return getNamespaceUri().ToString();
+        }
+
+        /* Expanding default method getAttributeValue from interface NodeInfo */
+        public virtual string getAttributeValue(string uri, string local) {
+            return getAttributeValue((uri.Length==0 ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.of(uri)), local);
         }
 
         /* Expanding default method children from interface NodeInfo */
@@ -450,7 +500,7 @@ namespace Saxon.Hej.tree.tiny {
 
         /* Expanding default method iterate from interface Item */
         public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
         /* Creating stub method getUnicodeStringValue to satisfy interface GroundedValue */

@@ -7,7 +7,6 @@ namespace Saxon.Hej.expr.instruct {
         protected internal int currentOperand;
         protected internal Saxon.Hej.om.SequenceIterator currentIter;
         protected internal Saxon.Hej.expr.XPathContext context;
-        private bool releaseResources;
         public AbstractBlockIterator()  {
         }
         public AbstractBlockIterator(int size, Saxon.Hej.expr.XPathContext context)  {
@@ -20,9 +19,6 @@ namespace Saxon.Hej.expr.instruct {
             this.context = context;
             this.currentOperand = 0;
         }
-        public void discharge() {
-            releaseResources = true;
-        }
         public Saxon.Hej.om.Item next() {
             if ((currentOperand<0)) {
                 return null;
@@ -31,9 +27,6 @@ namespace Saxon.Hej.expr.instruct {
                 if ((currentIter == null)) {
                     try {
                         currentIter = getNthChildIterator(currentOperand++);
-                        if (releaseResources) {
-                            currentIter.discharge();
-                        }
                     } catch (Saxon.Hej.trans.XPathException e) {
                         throw new Saxon.Hej.trans.UncheckedXPathException(e);
                     }

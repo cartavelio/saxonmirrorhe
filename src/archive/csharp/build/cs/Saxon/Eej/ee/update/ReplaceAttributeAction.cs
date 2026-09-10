@@ -17,8 +17,8 @@ namespace Saxon.Eej.ee.update {
             return inherit;
         }
         public override void apply(Saxon.Hej.expr.XPathContext context, System.Collections.Generic.ISet<Saxon.Hej.om.MutableNodeInfo> affectedRootSet) {
-            if (!(((element is Saxon.Hej.om.MutableNodeInfo)))) {
-                throw new Saxon.Hej.trans.XPathException("Attempting to update a non-updateable element");
+            if (!((((element is Saxon.Hej.om.MutableNodeInfo) && element.getTreeInfo().isMutable())))) {
+                throw new Saxon.Hej.trans.XPathException("Attempting to update a non-updatable element", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
             }
             affectedRootSet.Add((Saxon.Hej.om.MutableNodeInfo)(element.getRoot()));
             ((Saxon.Hej.om.MutableNodeInfo)(element)).removeAttribute(oldAttribute);
@@ -28,7 +28,7 @@ namespace Saxon.Eej.ee.update {
                 Saxon.Hej.type.SimpleType typeCode = att.getType();
                 string value = att.getValue();
                 int properties = att.getProperties();
-                if ((element.getAttributeValue(name.getURI(), name.getLocalPart()) != null)) {
+                if ((element.getAttributeValue(name.getNamespaceUri(), name.getLocalPart()) != null)) {
                     throw new Saxon.Hej.trans.XPathException("Attempting to add an attribute that already exists");
                 }
                 ((Saxon.Hej.om.MutableNodeInfo)(element)).addAttribute(name, typeCode, value, properties, inherit);

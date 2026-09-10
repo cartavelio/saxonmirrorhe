@@ -61,10 +61,6 @@ namespace Saxon.Hej.expr.sort {
             e1.close();
             e2.close();
         }
-        public void discharge() {
-            e1.discharge();
-            e2.discharge();
-        }
     
     }
 }

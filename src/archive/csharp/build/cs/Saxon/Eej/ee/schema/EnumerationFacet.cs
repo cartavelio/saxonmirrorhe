@@ -51,7 +51,7 @@ namespace Saxon.Eej.ee.schema {
         public override bool testAtomicValue(Saxon.Hej.value.AtomicValue value) {
             return true;
         }
-        public override Saxon.Hej.om.Function getFacetAsFunctionItem() {
+        public override Saxon.Hej.om.FunctionItem getFacetAsFunctionItem() {
             throw new Saxon.Ejava.lang.UnsupportedOperationException();
         }
     

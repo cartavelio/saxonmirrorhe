@@ -5,16 +5,19 @@ namespace Saxon.Hej.om {
     public class FingerprintedQName : Saxon.Hej.om.NodeName {
         private readonly Saxon.Hej.om.StructuredQName qName;
         private int fingerprint = -1;
-        public FingerprintedQName(string prefix, string uri, string localName)  {
+        public FingerprintedQName(string prefix, Saxon.Hej.om.NamespaceUri uri, string localName)  {
             qName = new Saxon.Hej.om.StructuredQName(prefix, uri, localName);
         }
-        public FingerprintedQName(string prefix, string uri, string localName, int fingerprint)  {
+        public FingerprintedQName(string prefix, Saxon.Hej.om.NamespaceUri uri, string localName, int fingerprint)  {
             qName = new Saxon.Hej.om.StructuredQName(prefix, uri, localName);
             this.fingerprint = fingerprint;
         }
-        public FingerprintedQName(string prefix, string uri, string localName, Saxon.Hej.om.NamePool pool)  {
+        public FingerprintedQName(string prefix, Saxon.Hej.om.NamespaceUri uri, string localName, Saxon.Hej.om.NamePool pool)  {
             qName = new Saxon.Hej.om.StructuredQName(prefix, uri, localName);
             this.fingerprint = pool.allocateFingerprint(uri, localName);
+        }
+        public FingerprintedQName(Saxon.Hej.om.StructuredQName qName)  {
+            this.qName = qName;
         }
         public FingerprintedQName(Saxon.Hej.om.StructuredQName qName, int fingerprint)  {
             this.qName = qName;
@@ -22,7 +25,7 @@ namespace Saxon.Hej.om {
         }
         public FingerprintedQName(Saxon.Hej.om.StructuredQName qName, Saxon.Hej.om.NamePool pool)  {
             this.qName = qName;
-            this.fingerprint = pool.allocateFingerprint(qName.getURI(), qName.getLocalPart());
+            this.fingerprint = pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart());
         }
         public static Saxon.Hej.om.FingerprintedQName fromClarkName(string expandedName) {
             string @namespace;
@@ -41,7 +44,7 @@ namespace Saxon.Hej.om {
                 @namespace = "";
                 localName = expandedName;
             }
-            return new Saxon.Hej.om.FingerprintedQName("", @namespace, localName);
+            return new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.of(@namespace), localName);
         }
         public static Saxon.Hej.om.FingerprintedQName fromEQName(string expandedName) {
             string @namespace;
@@ -60,7 +63,7 @@ namespace Saxon.Hej.om {
                 @namespace = "";
                 localName = expandedName;
             }
-            return new Saxon.Hej.om.FingerprintedQName("", @namespace, localName);
+            return new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.of(@namespace), localName);
         }
         public bool hasFingerprint() {
             return (fingerprint != -1);
@@ -70,7 +73,7 @@ namespace Saxon.Hej.om {
         }
         public int obtainFingerprint(Saxon.Hej.om.NamePool pool) {
             if ((fingerprint == -1)) {
-                fingerprint = pool.allocateFingerprint(getURI(), getLocalPart());
+                fingerprint = pool.allocateFingerprint(getNamespaceUri(), getLocalPart());
             }
             return fingerprint;
         }
@@ -80,8 +83,8 @@ namespace Saxon.Hej.om {
         public string getPrefix() {
             return qName.getPrefix();
         }
-        public string getURI() {
-            return qName.getURI();
+        public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
+            return qName.getNamespaceUri();
         }
         public string getLocalPart() {
             return qName.getLocalPart();
@@ -89,7 +92,7 @@ namespace Saxon.Hej.om {
         public Saxon.Hej.om.StructuredQName getStructuredQName() {
             return qName;
         }
-        public bool hasURI(string ns) {
+        public bool hasURI(Saxon.Hej.om.NamespaceUri ns) {
             return qName.hasURI(ns);
         }
         public Saxon.Hej.om.NamespaceBinding getNamespaceBinding() {
@@ -103,7 +106,7 @@ namespace Saxon.Hej.om {
                 if (((fingerprint != -1) && ((Saxon.Hej.om.NodeName)(other)).hasFingerprint())) {
                     return (getFingerprint() == ((Saxon.Hej.om.NodeName)(other)).getFingerprint());
                 } else {
-                    return (getLocalPart().Equals(((Saxon.Hej.om.NodeName)(other)).getLocalPart()) && hasURI(((Saxon.Hej.om.NodeName)(other)).getURI()));
+                    return (getLocalPart().Equals(((Saxon.Hej.om.NodeName)(other)).getLocalPart()) && hasURI(((Saxon.Hej.om.NodeName)(other)).getNamespaceUri()));
                 }
             } else {
                 return false;
@@ -119,5 +122,10 @@ namespace Saxon.Hej.om {
             return qName.getDisplayName();
         }
     
+        /* Expanding default method getURI from interface NodeName */
+        public virtual string getURI() {
+            return getNamespaceUri().ToString();
+        }
+
     }
 }

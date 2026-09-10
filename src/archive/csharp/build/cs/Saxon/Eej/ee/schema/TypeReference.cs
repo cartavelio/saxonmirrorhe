@@ -37,7 +37,7 @@ namespace Saxon.Eej.ee.schema {
             return Saxon.Eej.ee.schema.SymbolSpace.TYPE;
         }
         public bool isAnonymousType() {
-            return ((getTargetFingerprint()>1023) && getTargetComponentName().hasURI(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS));
+            return ((getTargetFingerprint()>1023) && getTargetComponentName().hasURI(Saxon.Hej.om.NamespaceUri.ANONYMOUS));
         }
         public Saxon.Hej.type.SchemaComponent getTarget() {
             if ((target is Saxon.Eej.ee.schema.sdoc.SimpleTypeDefinition)) {
@@ -59,7 +59,7 @@ namespace Saxon.Eej.ee.schema {
                 if ((target == null)) {
                     if ((compiler.isAllowDanglingReferences() && !(fatal))) {
                         dangling = true;
-                        compiler.warning((("Unknown type "+qName.getEQName())+" (substituting xs:error)"), this);
+                        compiler.warning((("Unknown type "+qName.getEQName())+" (substituting xs:error)"), Saxon.Hej.trans.SaxonErrorCode.SXSD1008, this);
                         target = Saxon.Hej.type.ErrorType.getInstance();
                     } else {
                         dangling = true;

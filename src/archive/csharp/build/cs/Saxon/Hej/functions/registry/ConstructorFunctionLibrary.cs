@@ -7,11 +7,11 @@ namespace Saxon.Hej.functions.registry {
         public ConstructorFunctionLibrary(Saxon.Hej.Configuration config)  {
             this.config = config;
         }
-        public Saxon.Hej.om.Function getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
+        public Saxon.Hej.om.FunctionItem getFunctionItem(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.StaticContext staticContext) {
             if ((functionName.getArity() != 1)) {
                 return null;
             }
-            string uri = functionName.getComponentName().getURI();
+            Saxon.Hej.om.NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
             string localName = functionName.getComponentName().getLocalPart();
             Saxon.Hej.type.SchemaType type = config.getSchemaType(new Saxon.Hej.om.StructuredQName("", uri, localName));
             if (((type == null) || type.isComplexType())) {
@@ -40,9 +40,7 @@ namespace Saxon.Hej.functions.registry {
             if ((functionName.getArity() != 1)) {
                 return false;
             }
-            string uri = functionName.getComponentName().getURI();
-            string localName = functionName.getComponentName().getLocalPart();
-            Saxon.Hej.type.SchemaType type = config.getSchemaType(new Saxon.Hej.om.StructuredQName("", uri, localName));
+            Saxon.Hej.type.SchemaType type = config.getSchemaType(functionName.getComponentName());
             if (((type == null) || type.isComplexType())) {
                 return false;
             }
@@ -51,10 +49,10 @@ namespace Saxon.Hej.functions.registry {
             }
             return (type != Saxon.Hej.type.AnySimpleType.getInstance());
         }
-        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] arguments, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
-            string uri = functionName.getComponentName().getURI();
+        public Saxon.Hej.expr.Expression bind(Saxon.Hej.trans.SymbolicName.F functionName, Saxon.Hej.expr.Expression[] arguments, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.expr.StaticContext env, System.Collections.Generic.IList<string> reasons) {
+            Saxon.Hej.om.NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
             string localName = functionName.getComponentName().getLocalPart();
-            bool builtInNamespace = uri.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA);
+            bool builtInNamespace = uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA);
             if (builtInNamespace) {
                 if ((functionName.getArity() != 1)) {
                     reasons.Add("A constructor function must have exactly one argument");

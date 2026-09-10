@@ -54,7 +54,7 @@ namespace Saxon.Eej.ee.schema {
                 foreach (Saxon.Hej.value.AtomicValue av in v) {
                     if ((av is Saxon.Hej.value.QualifiedNameValue)) {
                         string prefix = ((Saxon.Hej.value.QualifiedNameValue)(av)).getPrefix();
-                        string uri = ((Saxon.Hej.value.QualifiedNameValue)(av)).getNamespaceURI();
+                        Saxon.Hej.om.NamespaceUri uri = ((Saxon.Hej.value.QualifiedNameValue)(av)).getNamespaceURI();
                         serializer.declareNamespace(prefix, uri);
                         namespaceSensitive = true;
                     }
@@ -66,7 +66,7 @@ namespace Saxon.Eej.ee.schema {
                 serializer.endElement();
             }
         }
-        public override Saxon.Hej.om.Function getFacetAsFunctionItem() {
+        public override Saxon.Hej.om.FunctionItem getFacetAsFunctionItem() {
             Saxon.Eej.ee.schema.EnumerationFacetSet facet = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

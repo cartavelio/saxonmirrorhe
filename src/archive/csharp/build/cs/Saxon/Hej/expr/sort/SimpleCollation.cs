@@ -35,5 +35,10 @@ namespace Saxon.Hej.expr.sort {
             return null;
         }
     
+        /* Expanding default method isEqualToEmpty from interface StringCollator */
+        public virtual bool isEqualToEmpty(Saxon.Hej.str.UnicodeString s1) {
+            return comparesEqual(s1, Saxon.Hej.str.EmptyUnicodeString.getInstance());
+        }
+
     }
 }

@@ -22,7 +22,7 @@ namespace Saxon.Eej.ee.schema {
             } else {
                 string name = getTargetComponentName().getEQName();
                 if ((compiler.isAllowDanglingReferences() && !(fatal))) {
-                    compiler.warning((("Unknown attribute declaration "+name)+" (substituting dummy declaration)"), this);
+                    compiler.warning((("Unknown attribute declaration "+name)+" (substituting dummy declaration)"), Saxon.Hej.trans.SaxonErrorCode.SXSD1001, this);
                     Saxon.Eej.ee.schema.AttributeDecl decl = new Saxon.Eej.ee.schema.AttributeDecl(compiler.getConfiguration(), false);
                     decl.setAttributeName(getTargetComponentName());
                     decl.setSimpleType(Saxon.Hej.type.BuiltInAtomicType.STRING);
@@ -185,7 +185,7 @@ namespace Saxon.Eej.ee.schema {
                 serializer.endElement();
             }
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.AttributeUse thisAttributeUse = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

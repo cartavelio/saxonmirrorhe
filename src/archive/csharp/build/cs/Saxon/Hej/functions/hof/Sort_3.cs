@@ -7,7 +7,7 @@ namespace Saxon.Hej.functions.hof {
             Saxon.Hej.om.Sequence input = arguments[0];
             System.Collections.Generic.List<Saxon.Hej.functions.Sort_1.ItemToBeSorted> inputList = new System.Collections.Generic.List<Saxon.Hej.functions.Sort_1.ItemToBeSorted>();
             int i = 0;
-            Saxon.Hej.om.Function key = (Saxon.Hej.om.Function)(arguments[2].head());
+            Saxon.Hej.om.FunctionItem key = (Saxon.Hej.om.FunctionItem)(arguments[2].head());
             Saxon.Hej.om.SequenceIterator iterator = input.iterate();
             Saxon.Hej.om.Item item;
             while (((item = iterator.next()) != null)) {

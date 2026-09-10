@@ -32,11 +32,13 @@ namespace Saxon.Hej.@event {
                         Saxon.Hej.om.TreeModel model = pipe.getController().getModel();
                         if (model.isMutable()) {
                             builder = pipe.getController().makeBuilder();
+                            builder.setDurability(Saxon.Hej.om.Durability.MUTABLE);
                         } else {
-                            builder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe);
+                            builder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe, Saxon.Hej.om.Durability.MUTABLE);
                         }
                     } else {
                         builder = pipe.getController().makeBuilder();
+                        builder.setDurability(Saxon.Hej.om.Durability.TEMPORARY);
                     }
                 } else {
                     Saxon.Hej.om.TreeModel model = getConfiguration().getParseOptions().getModel();
@@ -88,6 +90,9 @@ namespace Saxon.Hej.@event {
         public override void characters(Saxon.Hej.str.UnicodeString s, Saxon.Hej.s9api.Location locationId, int properties) {
             if ((level == 0)) {
                 Saxon.Hej.tree.util.Orphan o = new Saxon.Hej.tree.util.Orphan(getConfiguration());
+                if (((treeModel != null) && treeModel.isMutable())) {
+                    ((Saxon.Hej.om.GenericTreeInfo)(o.getTreeInfo())).setDurability(Saxon.Hej.om.Durability.MUTABLE);
+                }
                 o.setNodeKind(Saxon.Hej.type.Type.TEXT);
                 o.setStringValue(s.tidy());
                 write(o);
@@ -101,6 +106,9 @@ namespace Saxon.Hej.@event {
         public override void comment(Saxon.Hej.str.UnicodeString comment, Saxon.Hej.s9api.Location locationId, int properties) {
             if ((level == 0)) {
                 Saxon.Hej.tree.util.Orphan o = new Saxon.Hej.tree.util.Orphan(getConfiguration());
+                if (((treeModel != null) && treeModel.isMutable())) {
+                    ((Saxon.Hej.om.GenericTreeInfo)(o.getTreeInfo())).setDurability(Saxon.Hej.om.Durability.MUTABLE);
+                }
                 o.setNodeKind(Saxon.Hej.type.Type.COMMENT);
                 o.setStringValue(comment.tidy());
                 write(o);
@@ -112,6 +120,9 @@ namespace Saxon.Hej.@event {
         public override void processingInstruction(string target, Saxon.Hej.str.UnicodeString data, Saxon.Hej.s9api.Location locationId, int properties) {
             if ((level == 0)) {
                 Saxon.Hej.tree.util.Orphan o = new Saxon.Hej.tree.util.Orphan(getConfiguration());
+                if (((treeModel != null) && treeModel.isMutable())) {
+                    ((Saxon.Hej.om.GenericTreeInfo)(o.getTreeInfo())).setDurability(Saxon.Hej.om.Durability.MUTABLE);
+                }
                 o.setNodeName(new Saxon.Hej.om.NoNamespaceName(target));
                 o.setNodeKind(Saxon.Hej.type.Type.PROCESSING_INSTRUCTION);
                 o.setStringValue(data.tidy());

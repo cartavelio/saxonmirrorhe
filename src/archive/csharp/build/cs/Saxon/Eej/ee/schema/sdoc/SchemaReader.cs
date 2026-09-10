@@ -5,16 +5,17 @@ namespace Saxon.Eej.ee.schema.sdoc {
     public abstract class SchemaReader {
         private SchemaReader()  {
         }
-        public static Saxon.Ejavax.xml.transform.Source getSource(string baseURI, string relativeURI, Saxon.Eej.ee.schema.SchemaCompiler compiler, string targetNamespace) {
+        public static Saxon.Ejavax.xml.transform.Source getSource(string baseURI, string relativeURI, Saxon.Eej.ee.schema.SchemaCompiler compiler, Saxon.Hej.om.NamespaceUri targetNamespaceUri) {
             try {
                 string[] locations = {relativeURI};
                 Saxon.Ejavax.xml.transform.Source[] sources = null;
                 Saxon.Hej.lib.SchemaURIResolver r = compiler.getSchemaURIResolver();
+                string targetNamespace = ((targetNamespaceUri == null) ? null : targetNamespaceUri.ToString());
                 if ((r != null)) {
                     sources = r.resolve(targetNamespace, baseURI, locations);
                 }
                 if (((sources == null) || (((sources.Length == 1) && (sources[0] == null))))) {
-                    r = new Saxon.Eej.ee.config.StandardSchemaResolver((Saxon.Eej.config.EnterpriseConfiguration)(compiler.getConfiguration()));
+                    r = new Saxon.Eej.ee.config.StandardSchemaResolver(compiler.getConfiguration());
                     sources = r.resolve(targetNamespace, baseURI, locations);
                 }
                 if (((sources.Length == 0) || (sources[0] == null))) {
@@ -30,12 +31,12 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 throw new Saxon.Hej.type.SchemaException(e);
             }
         }
-        public static Saxon.Ejavax.xml.transform.Source[] getSources(string baseURI, string[] relativeURIs, Saxon.Eej.ee.schema.SchemaCompiler compiler, string targetNamespace) {
+        public static Saxon.Ejavax.xml.transform.Source[] getSources(string baseURI, string[] relativeURIs, Saxon.Eej.ee.schema.SchemaCompiler compiler, Saxon.Hej.om.NamespaceUri targetNamespace) {
             try {
-                Saxon.Ejavax.xml.transform.Source[] sources = compiler.getSchemaURIResolver().resolve(targetNamespace, baseURI, relativeURIs);
+                Saxon.Ejavax.xml.transform.Source[] sources = compiler.getSchemaURIResolver().resolve(targetNamespace.ToString(), baseURI, relativeURIs);
                 if ((sources == null)) {
-                    Saxon.Hej.lib.SchemaURIResolver r = new Saxon.Eej.ee.config.StandardSchemaResolver((Saxon.Eej.config.EnterpriseConfiguration)(compiler.getConfiguration()));
-                    sources = r.resolve(targetNamespace, baseURI, relativeURIs);
+                    Saxon.Hej.lib.SchemaURIResolver r = new Saxon.Eej.ee.config.StandardSchemaResolver(compiler.getConfiguration());
+                    sources = r.resolve(targetNamespace.ToString(), baseURI, relativeURIs);
                 }
                 return sources;
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -54,7 +55,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Eej.ee.schema.sdoc.SchemaDocument schemaDocument = buildSchemaDocument(source, compiler, pipe, referrer);
             Saxon.Hej.tree.iter.AxisIterator children = schemaDocument.getDocument().getRootNode().iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, Saxon.Hej.pattern.NodeKindTest.makeNodeKindTest(Saxon.Hej.type.Type.ELEMENT));
             Saxon.Hej.om.NodeInfo top = ((/*1430*/Saxon.Hej.om.NodeInfo)children.next());
-            if (top.getURI().Equals(Saxon.Hej.lib.NamespaceConstant.SCM)) {
+            if (top.getNamespaceUri().Equals(Saxon.Hej.om.NamespaceUri.SCM)) {
                 if (tracing) {
                     pipe.getConfiguration().getLogger().info(("Loaded compiled schema document "+docId));
                 }
@@ -84,7 +85,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         public static Saxon.Eej.ee.schema.sdoc.SchemaDocument buildSchemaDocument(Saxon.Ejavax.xml.transform.Source source, Saxon.Eej.ee.schema.SchemaCompiler compiler, Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Eej.ee.schema.sdoc.SchemaElement referrer) {
             Saxon.Eej.ee.schema.sdoc.SchemaNodeFactory nodeFactory = new Saxon.Eej.ee.schema.sdoc.SchemaNodeFactory(compiler, pipe, referrer);
-            Saxon.Hej.tree.linked.LinkedTreeBuilder schemaBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe);
+            Saxon.Hej.tree.linked.LinkedTreeBuilder schemaBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe, Saxon.Hej.om.Durability.LASTING);
             schemaBuilder.setSystemId(source.getSystemId());
             schemaBuilder.setNodeFactory(nodeFactory);
             schemaBuilder.setLineNumbering(true);
@@ -97,16 +98,14 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     schemaBuilder.setSystemId(@base);
                 }
                 Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier((((Saxon.Hej.om.NodeInfo)(source)).getNodeKind() == Saxon.Hej.type.Type.DOCUMENT), @base);
-                pipe.setCopyInformee(element => copier.notifyElementNode(element));
+                pipe.setCopyInformee(copier.notifyElementNode /* instance method reference */);
             }
             Saxon.Hej.tree.tiny.TinyBuilder scmBuilder = new Saxon.Hej.tree.tiny.TinyBuilder(pipe);
             scmBuilder.setSystemId(source.getSystemId());
-            Saxon.Hej.@event.Valve valve = new Saxon.Hej.@event.Valve(Saxon.Hej.lib.NamespaceConstant.SCM, commentStripper, scmBuilder);
+            Saxon.Hej.@event.Valve valve = new Saxon.Hej.@event.Valve(Saxon.Hej.om.NamespaceUri.SCM, commentStripper, scmBuilder);
             Saxon.Hej.om.TreeInfo tree;
             Saxon.Hej.Configuration config = pipe.getConfiguration();
-            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(config.getParseOptions());
-            options.setSchemaValidationMode(Saxon.Hej.lib.Validation.PRESERVE);
-            options.setErrorReporter(compiler.getErrorReporter());
+            Saxon.Hej.lib.ParseOptions options = config.getParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.PRESERVE).withErrorReporter(compiler.getErrorReporter());
             try {
                 commentStripper.setPipelineConfiguration(pipe);
                 sendSchemaSource(source, compiler, pipe, valve, config, options);

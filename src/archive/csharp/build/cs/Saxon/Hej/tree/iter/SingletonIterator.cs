@@ -2,36 +2,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.tree.iter {
-    public class SingletonIterator : Saxon.Hej.om.SequenceIterator, Saxon.Hej.tree.iter.ReversibleIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.GroundedIterator, Saxon.Hej.tree.iter.LookaheadIterator {
+    public class SingletonIterator : Saxon.Hej.om.SequenceIterator, Saxon.Hej.om.FocusIterator, Saxon.Hej.tree.iter.ReversibleIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.GroundedIterator, Saxon.Hej.tree.iter.LookaheadIterator {
         private readonly Saxon.Hej.om.Item item;
-        internal bool gone = false;
+        private int currentPosition = -1;
         public SingletonIterator(Saxon.Hej.om.Item value)  {
+            System.Diagnostics.Debug.Assert((value != null));
             this.item = value;
         }
         public static Saxon.Hej.om.SequenceIterator makeIterator(Saxon.Hej.om.Item item) {
             if ((item == null)) {
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
             } else {
                 return new Saxon.Hej.tree.iter.SingletonIterator(item);
             }
-        }
-        public static Saxon.Hej.tree.iter.SingletonIterator rawIterator(Saxon.Hej.om.Item item) {
-            System.Diagnostics.Debug.Assert((item != null));
-            return new Saxon.Hej.tree.iter.SingletonIterator(item);
         }
         public bool supportsHasNext() {
             return true;
         }
         public bool hasNext() {
-            return !(gone);
+            return (currentPosition<0);
         }
         public virtual Saxon.Hej.om.Item next() {
-            if (gone) {
-                return null;
-            } else {
-                gone = true;
-                return item;
-            }
+            return ((++currentPosition == 0) ? item : null);
+        }
+        public Saxon.Hej.om.Item current() {
+            return ((currentPosition == 0) ? item : null);
+        }
+        public int position() {
+            return (currentPosition+1);
+        }
+        public void close() {
         }
         public bool supportsGetLength() {
             return true;
@@ -49,27 +49,11 @@ namespace Saxon.Hej.tree.iter {
             return item;
         }
         public Saxon.Hej.om.GroundedValue materialize() {
-            if ((item != null)) {
-                return item;
-            } else {
-                return Saxon.Hej.value.EmptySequence.getInstance();
-            }
+            return item;
         }
         public Saxon.Hej.om.GroundedValue getResidue() {
-            if (gone) {
-                return Saxon.Hej.value.EmptySequence.getInstance();
-            } else {
-                return item;
-            }
+            return ((currentPosition<0) ? item : Saxon.Hej.value.EmptySequence.getInstance());
         }
     
-        /* Expanding default method close from interface SequenceIterator */
-        public virtual void close() {
-        }
-
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
-        }
-
     }
 }

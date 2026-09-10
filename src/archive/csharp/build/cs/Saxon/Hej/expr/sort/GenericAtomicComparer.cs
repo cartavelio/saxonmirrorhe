@@ -53,6 +53,126 @@ namespace Saxon.Hej.expr.sort {
             }
             return new Saxon.Hej.expr.sort.GenericAtomicComparer(collator, context);
         }
+        public delegate bool AtomicComparisonFunction (Saxon.Hej.value.AtomicValue v0, Saxon.Hej.value.AtomicValue v1, Saxon.Hej.expr.XPathContext context);
+        private static Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction getContextFreeComparisonFunction(int @operator) {
+            return (a, b, context) => {
+                int comp = ((Saxon.Hej.expr.sort.XPathComparable)(a)).compareTo((Saxon.Hej.expr.sort.XPathComparable)(b));
+                return Saxon.Hej.expr.CompareToConstant.interpretComparisonResult(@operator, comp);
+            } ;
+        }
+        private static Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction getFloatingPointComparisonFunction(int @operator) {
+            return (a, b, context) => {
+                if ((a.isNaN() || b.isNaN())) {
+                    return (@operator == Saxon.Hej.expr.parser.Token.FNE);
+                }
+                int comp = ((Saxon.Hej.expr.sort.XPathComparable)(a)).compareTo((Saxon.Hej.expr.sort.XPathComparable)(b));
+                return Saxon.Hej.expr.CompareToConstant.interpretComparisonResult(@operator, comp);
+            } ;
+        }
+        private static int applyPromotion(Saxon.Hej.type.BuiltInAtomicType type) {
+            if (type.isPrimitiveNumeric()) {
+                return Saxon.Hej.om.StandardNames.XS_DOUBLE;
+            }
+            int fp = type.getFingerprint();
+            if (((fp == Saxon.Hej.om.StandardNames.XS_UNTYPED_ATOMIC) || (fp == Saxon.Hej.om.StandardNames.XS_ANY_URI))) {
+                return Saxon.Hej.om.StandardNames.XS_STRING;
+            } else {
+                return fp;
+            }
+        }
+        public static Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction makeAtomicComparisonFunction(Saxon.Hej.type.BuiltInAtomicType type0, Saxon.Hej.type.BuiltInAtomicType type1, Saxon.Hej.lib.StringCollator collator, int @operator, bool allowRecursion) {
+            int fp0 = applyPromotion(type0);
+            int fp1 = applyPromotion(type1);
+            if ((fp0 == fp1)) {
+                switch (fp0) {
+                  case Saxon.Hej.om.StandardNames.XS_DATE_TIME:
+                  case Saxon.Hej.om.StandardNames.XS_DATE:
+                  case Saxon.Hej.om.StandardNames.XS_TIME:
+                  case Saxon.Hej.om.StandardNames.XS_G_DAY:
+                  case Saxon.Hej.om.StandardNames.XS_G_MONTH:
+                  case Saxon.Hej.om.StandardNames.XS_G_YEAR:
+                  case Saxon.Hej.om.StandardNames.XS_G_MONTH_DAY:
+                  case Saxon.Hej.om.StandardNames.XS_G_YEAR_MONTH:
+                    return (a, b, context) => {
+                        int comp = ((Saxon.Hej.value.CalendarValue)(a)).compareTo((Saxon.Hej.value.CalendarValue)(b), context.getImplicitTimezone());
+                        return Saxon.Hej.expr.CompareToConstant.interpretComparisonResult(@operator, comp);
+                    } ;
+                  case Saxon.Hej.om.StandardNames.XS_DOUBLE:
+                  case Saxon.Hej.om.StandardNames.XS_FLOAT:
+                    return getFloatingPointComparisonFunction(@operator);
+                  case Saxon.Hej.om.StandardNames.XS_BOOLEAN:
+                  case Saxon.Hej.om.StandardNames.XS_INTEGER:
+                  case Saxon.Hej.om.StandardNames.XS_DECIMAL:
+                  case Saxon.Hej.om.StandardNames.XS_DAY_TIME_DURATION:
+                  case Saxon.Hej.om.StandardNames.XS_YEAR_MONTH_DURATION:
+                  case Saxon.Hej.om.StandardNames.XS_BASE64_BINARY:
+                  case Saxon.Hej.om.StandardNames.XS_HEX_BINARY:
+                    return getContextFreeComparisonFunction(@operator);
+                  case Saxon.Hej.om.StandardNames.XS_QNAME:
+                  case Saxon.Hej.om.StandardNames.XS_NOTATION:
+                    switch (@operator) {
+                      case Saxon.Hej.expr.parser.Token.FEQ:
+                        return (a, b, context) => a.Equals(b);
+                      case Saxon.Hej.expr.parser.Token.FNE:
+                        return (a, b, context) => !(a.Equals(b));
+                      default:
+                        return (a, b, context) => {
+                            throw new Saxon.Hej.trans.XPathException((type0+" values cannot be compared for ordering"), "XPTY0004");
+                        } ;
+                    }
+                  case Saxon.Hej.om.StandardNames.XS_STRING:
+                    if (((collator is Saxon.Hej.expr.sort.CodepointCollator) && (@operator == Saxon.Hej.expr.parser.Token.FEQ))) {
+                        return (a, b, context) => a.Equals(b);
+                    }
+                    if (((collator is Saxon.Hej.expr.sort.CodepointCollator) && (@operator == Saxon.Hej.expr.parser.Token.FNE))) {
+                        return (a, b, context) => !(a.Equals(b));
+                    } else {
+                        return (a, b, context) => {
+                            int comp = collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
+                            return Saxon.Hej.expr.CompareToConstant.interpretComparisonResult(@operator, comp);
+                        } ;
+                    }
+                }
+            }
+            if ((type0.isDurationType() && type1.isDurationType())) {
+                switch (@operator) {
+                  case Saxon.Hej.expr.parser.Token.FEQ:
+                    return (a, b, context) => a.Equals(b);
+                  case Saxon.Hej.expr.parser.Token.FNE:
+                    return (a, b, context) => !(a.Equals(b));
+                  default:
+                    break ;
+                }
+            }
+            if (allowRecursion) {
+                Saxon.Hej.type.BuiltInAtomicType[] firstTimeTypes = new Saxon.Hej.type.BuiltInAtomicType[2];
+                Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction[] firstTimeFunction = new Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction[1];
+                return (a, b, context) => {
+                    Saxon.Hej.type.BuiltInAtomicType at = a.getPrimitiveType();
+                    Saxon.Hej.type.BuiltInAtomicType bt = b.getPrimitiveType();
+                    lock (firstTimeFunction) {
+                        if ((firstTimeFunction[0] == null)) {
+                            Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparisonFunction = makeAtomicComparisonFunction(at, bt, collator, @operator, false);
+                            firstTimeFunction[0] = comparisonFunction;
+                            firstTimeTypes[0] = at;
+                            firstTimeTypes[1] = bt;
+                            return /*Delegate.compare()*/comparisonFunction(a, b, context);
+                        } else {
+                            if (((firstTimeTypes[0] == at) && (firstTimeTypes[1] == bt))) {
+                                return /*Delegate.compare()*/firstTimeFunction[0](a, b, context);
+                            } else {
+                                Saxon.Hej.expr.sort.GenericAtomicComparer.AtomicComparisonFunction comparisonFunction = makeAtomicComparisonFunction(at, bt, collator, @operator, false);
+                                return /*Delegate.compare()*/comparisonFunction(a, b, context);
+                            }
+                        }
+                    }
+                } ;
+            } else {
+                return (a, b, context) => {
+                    throw new Saxon.Hej.trans.XPathException((((("Values are not comparable ("+Saxon.Hej.type.Type.displayTypeName(a))+", ")+Saxon.Hej.type.Type.displayTypeName(b))+')'), "XPTY0004", context);
+                } ;
+            }
+        }
         public Saxon.Hej.lib.StringCollator getCollator() {
             return collator;
         }

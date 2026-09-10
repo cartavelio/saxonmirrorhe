@@ -45,6 +45,9 @@ namespace Saxon.Hej.expr.sort {
         public Saxon.Hej.expr.sort.AtomicMatchKey getCollationKey(Saxon.Hej.str.UnicodeString s) {
             return s;
         }
+        public bool isEqualToEmpty(Saxon.Hej.str.UnicodeString s1) {
+            return s1.isEmpty();
+        }
     
     }
 }

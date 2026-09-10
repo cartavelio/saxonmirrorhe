@@ -4,7 +4,10 @@ using System.Linq;
 namespace Saxon.Eej.xsltextn.style {
     public class SaxonImportQuery : Saxon.Hej.style.StyleElement {
         private string href;
-        private string moduleURI;
+        private Saxon.Hej.om.NamespaceUri moduleURI;
+        public override bool isInXsltNamespace() {
+            return false;
+        }
         protected internal override void prepareAttributes() {
             if (((href != null) || (moduleURI != null))) {
                 return ;
@@ -17,10 +20,10 @@ namespace Saxon.Eej.xsltextn.style {
                     href = Saxon.Hej.value.Whitespace.trim(value);
                 } else {
                     if (f.Equals("namespace")) {
-                        moduleURI = Saxon.Hej.value.Whitespace.trim(value);
+                        moduleURI = Saxon.Hej.om.NamespaceUri.of(Saxon.Hej.value.Whitespace.trim(value));
                     } else {
                         checkUnknownAttribute(attName);
-                        moduleURI = "";
+                        moduleURI = Saxon.Hej.om.NamespaceUri.NULL;
                     }
                 }
             }
@@ -35,6 +38,7 @@ namespace Saxon.Eej.xsltextn.style {
             }
             try {
                 Saxon.Hej.style.PrincipalStylesheetModule top1 = getPrincipalStylesheetModule();
+                top1.getStylesheetPackage().markNonExportable("Uses saxon:import-query", Saxon.Hej.trans.SaxonErrorCode.SXST0069);
                 Saxon.Hej.query.QueryModule importedModule = getQueryLibrary(moduleURI);
                 if ((importedModule == null)) {
                     if ((href == null)) {
@@ -70,7 +74,7 @@ namespace Saxon.Eej.xsltextn.style {
             checkTopLevel("XTSE0010", false);
             getConfiguration().checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION, "saxon:import-query", getPackageData().getLocalLicenseId());
         }
-        private Saxon.Hej.query.QueryLibrary getQueryLibrary(string @namespace) {
+        private Saxon.Hej.query.QueryLibrary getQueryLibrary(Saxon.Hej.om.NamespaceUri @namespace) {
             Saxon.Hej.trans.CompilerInfo info = getCompilation().getCompilerInfo();
             System.Collections.Generic.IEnumerable<Saxon.Hej.query.QueryLibrary> libs = info.getQueryLibraries();
             if ((libs != null)) {

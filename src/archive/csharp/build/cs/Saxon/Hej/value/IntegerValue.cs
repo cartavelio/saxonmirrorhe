@@ -6,6 +6,8 @@ namespace Saxon.Hej.value {
         private const long NO_LIMIT = -9999;
         private const long MAX_UNSIGNED_LONG = -9998;
         private static readonly long[] ranges = {Saxon.Hej.om.StandardNames.XS_INTEGER, NO_LIMIT, NO_LIMIT, Saxon.Hej.om.StandardNames.XS_LONG, System.Int64.MinValue, System.Int64.MaxValue, Saxon.Hej.om.StandardNames.XS_INT, System.Int32.MinValue, System.Int32.MaxValue, Saxon.Hej.om.StandardNames.XS_SHORT, System.Int16.MinValue, System.Int16.MaxValue, Saxon.Hej.om.StandardNames.XS_BYTE, -128, 127, Saxon.Hej.om.StandardNames.XS_NON_NEGATIVE_INTEGER, 0, NO_LIMIT, Saxon.Hej.om.StandardNames.XS_POSITIVE_INTEGER, 1, NO_LIMIT, Saxon.Hej.om.StandardNames.XS_NON_POSITIVE_INTEGER, NO_LIMIT, 0, Saxon.Hej.om.StandardNames.XS_NEGATIVE_INTEGER, NO_LIMIT, -1, Saxon.Hej.om.StandardNames.XS_UNSIGNED_LONG, 0, MAX_UNSIGNED_LONG, Saxon.Hej.om.StandardNames.XS_UNSIGNED_INT, 0, 4294967295L, Saxon.Hej.om.StandardNames.XS_UNSIGNED_SHORT, 0, 65535, Saxon.Hej.om.StandardNames.XS_UNSIGNED_BYTE, 0, 255};
+        public IntegerValue(Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
+        }
         public static Saxon.Hej.value.IntegerValue makeIntegerValue(System.Numerics.BigInteger value) {
             if (((value.CompareTo(Saxon.Hej.value.BigIntegerValue.MAX_LONG)>0) || (value.CompareTo(Saxon.Hej.value.BigIntegerValue.MIN_LONG)<0))) {
                 return new Saxon.Hej.value.BigIntegerValue(value);
@@ -33,7 +35,6 @@ namespace Saxon.Hej.value {
             }
             return Saxon.Hej.value.Int64Value.makeIntegerValue((long)(value));
         }
-        public abstract Saxon.Hej.type.ValidationFailure convertToSubType(Saxon.Hej.type.BuiltInAtomicType type, bool validate);
         public abstract Saxon.Hej.type.ValidationFailure validateAgainstSubType(Saxon.Hej.type.BuiltInAtomicType type);
         public static bool checkRange(long value, Saxon.Hej.type.BuiltInAtomicType type) {
             int fp = type.getFingerprint();

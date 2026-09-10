@@ -38,7 +38,7 @@ namespace Saxon.Eej.ee.schema {
             assertion.serialize(serializer);
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getFacetAsFunctionItem() {
+        public override Saxon.Hej.om.FunctionItem getFacetAsFunctionItem() {
             Saxon.Eej.ee.schema.AssertionFacet facet = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

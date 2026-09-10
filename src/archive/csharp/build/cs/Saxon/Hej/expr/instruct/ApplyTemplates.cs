@@ -133,62 +133,6 @@ namespace Saxon.Hej.expr.instruct {
         public override bool mayCreateNewNodes() {
             return true;
         }
-        public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            apply(output, context, false);
-        }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            return apply(output, context, _useTailRecursion);
-        }
-        protected internal Saxon.Hej.om.NodeInfo makeSeparator(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.NodeInfo separator;
-            Saxon.Hej.str.UnicodeString sepValue = separatorOp.getChildExpression().evaluateAsString(context);
-            Saxon.Hej.tree.util.Orphan orphan = new Saxon.Hej.tree.util.Orphan(context.getConfiguration());
-            orphan.setNodeKind(Saxon.Hej.type.Type.TEXT);
-            orphan.setStringValue(sepValue);
-            separator = orphan;
-            return separator;
-        }
-        protected internal Saxon.Hej.expr.instruct.TailCall apply(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context, bool returnTailCall) {
-            Saxon.Hej.expr.Component.M targetMode = getTargetMode(context);
-            Saxon.Hej.trans.Mode thisMode = targetMode.getActor();
-            Saxon.Hej.om.NodeInfo separator = null;
-            if ((separatorOp != null)) {
-                separator = makeSeparator(context);
-            }
-            Saxon.Hej.expr.instruct.ParameterSet @params = assembleParams(context, getActualParams());
-            Saxon.Hej.expr.instruct.ParameterSet tunnels = assembleTunnelParams(context, getTunnelParams());
-            if (returnTailCall) {
-                Saxon.Hej.expr.XPathContextMajor context2 = context.newContext();
-                context2.setOrigin(this);
-                return new Saxon.Hej.expr.instruct.ApplyTemplates.ApplyTemplatesPackage(Saxon.Hej.expr.parser.ExpressionTool.lazyEvaluate(getSelect(), context, false), targetMode, @params, tunnels, separator, output, context2, getLocation());
-            }
-            Saxon.Hej.om.SequenceIterator iter = getSelect().iterate(context);
-            if ((iter is Saxon.Hej.tree.iter.EmptyIterator)) {
-                return null;
-            }
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            c2.trackFocus(iter);
-            c2.setCurrentMode(targetMode);
-            c2.setOrigin(this);
-            c2.setCurrentComponent(targetMode);
-            if (inStreamableConstruct) {
-                c2.setCurrentGroupIterator(null);
-            }
-            Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
-            pipe.setXPathContext(c2);
-            try {
-                Saxon.Hej.expr.instruct.TailCall tc = thisMode.applyTemplates(@params, tunnels, separator, output, c2, getLocation());
-                while ((tc != null)) {
-                    tc = tc.processLeavingTail();
-                }
-            } catch (System.StackOverflowException e) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested apply-templates calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, getLocation());
-                err.setXPathContext(context);
-                throw err;
-            }
-            pipe.setXPathContext(context);
-            return null;
-        }
         public Saxon.Hej.expr.Component.M getTargetMode(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.Component.M targetMode;
             if (useCurrentMode) {
@@ -277,14 +221,14 @@ namespace Saxon.Hej.expr.instruct {
             return bindingSlot;
         }
         protected internal class ApplyTemplatesPackage : Saxon.Hej.expr.instruct.TailCall {
-            private Saxon.Hej.om.Sequence selectedItems;
-            private Saxon.Hej.expr.Component.M targetMode;
-            private Saxon.Hej.expr.instruct.ParameterSet @params;
-            private Saxon.Hej.expr.instruct.ParameterSet tunnelParams;
-            private Saxon.Hej.om.NodeInfo separator;
-            private Saxon.Hej.expr.XPathContextMajor evaluationContext;
-            private Saxon.Hej.@event.Outputter output;
-            private Saxon.Hej.s9api.Location locationId;
+            private readonly Saxon.Hej.om.Sequence selectedItems;
+            private readonly Saxon.Hej.expr.Component.M targetMode;
+            private readonly Saxon.Hej.expr.instruct.ParameterSet @params;
+            private readonly Saxon.Hej.expr.instruct.ParameterSet tunnelParams;
+            private readonly Saxon.Hej.om.NodeInfo separator;
+            private readonly Saxon.Hej.expr.XPathContextMajor evaluationContext;
+            private readonly Saxon.Hej.@event.Outputter output;
+            private readonly Saxon.Hej.s9api.Location locationId;
             internal ApplyTemplatesPackage(Saxon.Hej.om.Sequence selectedItems, Saxon.Hej.expr.Component.M targetMode, Saxon.Hej.expr.instruct.ParameterSet @params, Saxon.Hej.expr.instruct.ParameterSet tunnelParams, Saxon.Hej.om.NodeInfo separator, Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContextMajor context, Saxon.Hej.s9api.Location locationId)  {
                 this.selectedItems = selectedItems;
                 this.targetMode = targetMode;
@@ -305,6 +249,77 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override string getStreamerName() {
             return "ApplyTemplates";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.ApplyTemplates.ApplyTemplatesElaborator();
+        }
+        public class ApplyTemplatesElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            private Saxon.Hej.om.NodeInfo makeSeparator(Saxon.Hej.expr.elab.UnicodeStringEvaluator sep, Saxon.Hej.expr.XPathContext context) {
+                Saxon.Hej.om.NodeInfo separator;
+                Saxon.Hej.str.UnicodeString sepValue = /*Delegate.eval()*/sep(context);
+                Saxon.Hej.tree.util.Orphan orphan = new Saxon.Hej.tree.util.Orphan(context.getConfiguration());
+                orphan.setNodeKind(Saxon.Hej.type.Type.TEXT);
+                orphan.setStringValue(sepValue);
+                separator = orphan;
+                return separator;
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.ApplyTemplates expr = (Saxon.Hej.expr.instruct.ApplyTemplates)(getExpression());
+                Saxon.Hej.expr.elab.UnicodeStringEvaluator sep = ((expr.separatorOp == null) ? null : expr.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true));
+                if (expr.useTailRecursion()) {
+                    Saxon.Hej.expr.elab.SequenceEvaluator select = expr.getSelect().makeElaborator().lazily(false);
+                    return (output, context) => {
+                        Saxon.Hej.expr.Component.M targetMode = expr.getTargetMode(context);
+                        Saxon.Hej.om.NodeInfo separator = null;
+                        if ((sep != null)) {
+                            separator = makeSeparator(sep, context);
+                        }
+                        Saxon.Hej.expr.instruct.ParameterSet @params = assembleParams(context, expr.getActualParams());
+                        Saxon.Hej.expr.instruct.ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
+                        Saxon.Hej.expr.XPathContextMajor context2 = context.newContext();
+                        context2.setOrigin(expr);
+                        context2.setCaller(context.getCaller());
+                        return new Saxon.Hej.expr.instruct.ApplyTemplates.ApplyTemplatesPackage(select.evaluate(context), targetMode, @params, tunnels, separator, output, context2, expr.getLocation());
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.PullEvaluator select = expr.getSelect().makeElaborator().elaborateForPull();
+                    return (output, context) => {
+                        Saxon.Hej.expr.Component.M targetMode = expr.getTargetMode(context);
+                        Saxon.Hej.trans.Mode thisMode = targetMode.getActor();
+                        Saxon.Hej.om.NodeInfo separator = null;
+                        if ((sep != null)) {
+                            separator = makeSeparator(sep, context);
+                        }
+                        Saxon.Hej.expr.instruct.ParameterSet @params = assembleParams(context, expr.getActualParams());
+                        Saxon.Hej.expr.instruct.ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
+                        Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/select(context);
+                        if ((iter is Saxon.Hej.tree.iter.EmptyIterator)) {
+                            return null;
+                        }
+                        Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                        c2.trackFocus(iter);
+                        c2.setCurrentMode(targetMode);
+                        c2.setOrigin(expr);
+                        c2.setCurrentComponent(targetMode);
+                        if (expr.inStreamableConstruct) {
+                            c2.setCurrentGroupIterator(null);
+                        }
+                        Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
+                        pipe.setXPathContext(c2);
+                        try {
+                            Saxon.Hej.expr.instruct.TailCall tc = thisMode.applyTemplates(@params, tunnels, separator, output, c2, expr.getLocation());
+                            dispatchTailCall(tc);
+                        } catch (System.StackOverflowException e) {
+                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested apply-templates calls. The stylesheet may be looping.", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, expr.getLocation());
+                            err.setXPathContext(context);
+                            throw err;
+                        }
+                        pipe.setXPathContext(context);
+                        return null;
+                    } ;
+                }
+            }
+        
         }
     
     }

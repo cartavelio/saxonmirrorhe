@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.value {
     public class GDayValue : Saxon.Hej.value.GDateValue {
         private static readonly Saxon.Ejava.util.regex.Pattern regex = Saxon.Ejava.util.regex.Pattern.compile("---([0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
-        private GDayValue()  {
+        protected internal GDayValue(Saxon.Hej.value.GDateValue.MutableGDateValue m) : base (m) {
         }
         public static Saxon.Hej.type.ConversionResult makeGDayValue(Saxon.Hej.str.UnicodeString value) {
             Saxon.Hej.str.UnicodeString trimmed = Saxon.Hej.value.Whitespace.trim(value);
@@ -12,32 +12,28 @@ namespace Saxon.Hej.value {
             if (!(m.matches())) {
                 return new Saxon.Hej.type.ValidationFailure((("Cannot convert '"+value)+"' to a gDay"));
             }
-            Saxon.Hej.value.GDayValue g = new Saxon.Hej.value.GDayValue();
+            Saxon.Hej.value.GDateValue.MutableGDateValue g = new Saxon.Hej.value.GDateValue.MutableGDateValue();
             string @base = m.group(1);
             string tz = m.group(2);
             string date = (("2000-01-"+@base)+(((tz == null) ? "" : tz)));
             g.typeLabel = Saxon.Hej.type.BuiltInAtomicType.G_DAY;
-            return setLexicalValue(g, Saxon.Hej.str.BMPString.of(date), true);
+            setLexicalValue(g, Saxon.Hej.str.BMPString.of(date), true);
+            return ((g.error == null) ? new Saxon.Hej.value.GDayValue(g) : g.error);
         }
         public GDayValue(byte day, int tz) : this (day, tz, Saxon.Hej.type.BuiltInAtomicType.G_DAY) {
         }
-        public GDayValue(byte day, int tz, Saxon.Hej.type.AtomicType type)  {
-            this.year = 2000;
-            this.month = 1;
-            this.day = day;
-            setTimezoneInMinutes(tz);
-            this.typeLabel = type;
+        public GDayValue(byte day, int tz, Saxon.Hej.type.AtomicType type) : this (new Saxon.Hej.value.GDateValue.MutableGDateValue(2000, 1, day, false, tz, type)) {
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.GDayValue v = new Saxon.Hej.value.GDayValue(day, getTimezoneInMinutes());
-            v.typeLabel = typeLabel;
-            return v;
+            Saxon.Hej.value.GDateValue.MutableGDateValue m = makeMutableCopy();
+            m.typeLabel = typeLabel;
+            return new Saxon.Hej.value.GDayValue(m);
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {
             return Saxon.Hej.type.BuiltInAtomicType.G_DAY;
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             sb.appendLatin("---");
             appendTwoDigits(sb, day);
             if (hasTimezone()) {

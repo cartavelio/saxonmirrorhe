@@ -35,9 +35,9 @@ namespace Saxon.Hej.style {
             foreach (Saxon.Hej.om.AttributeInfo att in attributes()) {
                 Saxon.Hej.om.NodeName attName = att.getNodeName();
                 string value = att.getValue();
-                string uri = attName.getURI();
+                Saxon.Hej.om.NamespaceUri uri = attName.getNamespaceUri();
                 string local = attName.getLocalPart();
-                if ("".Equals(uri)) {
+                if (uri.isEmpty()) {
                     switch (local) {
                       case "name":
                         nameAtt = Saxon.Hej.value.Whitespace.trim(value);
@@ -60,9 +60,9 @@ namespace Saxon.Hej.style {
                         break ;
                     }
                 } else {
-                    if ((local.Equals("range-key") && uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON))) {
+                    if ((local.Equals("range-key") && uri.Equals(Saxon.Hej.om.NamespaceUri.SAXON))) {
                         if (Saxon.Hej.Version.platform.isDotNet()) {
-                            compileError("saxon:range-key is not supported in Saxon-CS");
+                            compileError("saxon:range-key is not supported in SaxonCS");
                         }
                         rangeKey = processBooleanAttribute("range-key", value);
                     } else {
@@ -87,7 +87,7 @@ namespace Saxon.Hej.style {
         }
         public Saxon.Hej.om.StructuredQName getKeyName() {
             if ((getObjectName() == null)) {
-                string nameAtt = getAttributeValue("", "name");
+                string nameAtt = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                 if ((nameAtt != null)) {
                     setObjectName(makeQName(nameAtt, null, "name"));
                 }
@@ -103,7 +103,7 @@ namespace Saxon.Hej.style {
                     compileError("An xsl:key element with a @use attribute must be empty", "XTSE1205");
                 }
                 try {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:key/use", 0);
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:key/use", 0);
                     use = config.getTypeChecker(false).staticTypeCheck(use, Saxon.Hej.value.SequenceType.ATOMIC_SEQUENCE, role, makeExpressionVisitor());
                 } catch (Saxon.Hej.trans.XPathException err) {
                     compileError(err);
@@ -169,7 +169,7 @@ namespace Saxon.Hej.style {
                     compileError(e);
                 }
                 try {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:key/use", 0);
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:key/use", 0);
                     use = config.getTypeChecker(false).staticTypeCheck(use, Saxon.Hej.value.SequenceType.ATOMIC_SEQUENCE, role, makeExpressionVisitor());
                     System.Diagnostics.Debug.Assert((match != null));
                     use = use.typeCheck(makeExpressionVisitor(), config.makeContextItemStaticInfo(match.getItemType(), false));
@@ -220,8 +220,6 @@ namespace Saxon.Hej.style {
             useExp = useExp.optimize(visitor, contextItemType);
             allocateLocalSlots(useExp);
             keyDefinition.setBody(useExp);
-        }
-        public void generateByteCode(Saxon.Hej.expr.parser.Optimizer opt) {
         }
     
     }

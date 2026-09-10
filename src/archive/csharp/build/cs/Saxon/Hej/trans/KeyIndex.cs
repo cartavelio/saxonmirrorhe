@@ -64,8 +64,8 @@ namespace Saxon.Hej.trans {
             xc.setCurrentIterator(si);
             Saxon.Hej.lib.StringCollator collation = keydef.getCollation();
             int implicitTimezone = xc.getImplicitTimezone();
-            Saxon.Hej.expr.Expression use = keydef.getUse();
-            Saxon.Hej.om.SequenceIterator useval = use.iterate(xc);
+            Saxon.Hej.expr.elab.PullEvaluator use = keydef.obtainUseEvaluator();
+            Saxon.Hej.om.SequenceIterator useval = /*Delegate.iterate()*/use(xc);
             if (keydef.isComposite()) {
                 System.Collections.Generic.IList<Saxon.Hej.expr.sort.AtomicMatchKey> amks = new System.Collections.Generic.List<Saxon.Hej.expr.sort.AtomicMatchKey>(4);
                 Saxon.Hej.om.SequenceTool.supply(useval, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((keyVal => amks.Add(getCollationKey((Saxon.Hej.value.AtomicValue)(keyVal), collation, implicitTimezone)))));

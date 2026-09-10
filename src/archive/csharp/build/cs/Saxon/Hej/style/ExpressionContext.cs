@@ -43,8 +43,8 @@ namespace Saxon.Hej.style {
             }
             return containingLocation;
         }
-        public void issueWarning(string s, Saxon.Hej.s9api.Location locator) {
-            element.compileWarning(s, Saxon.Hej.trans.SaxonErrorCode.SXWN9000, locator);
+        public void issueWarning(string s, string errorCode, Saxon.Hej.s9api.Location locator) {
+            element.issueWarning(s, errorCode, locator);
         }
         public string getSystemId() {
             return element.getSystemId();
@@ -67,7 +67,7 @@ namespace Saxon.Hej.style {
         public virtual Saxon.Hej.expr.Expression bindVariable(Saxon.Hej.om.StructuredQName qName) {
             Saxon.Hej.style.SourceBinding sourceBinding = element.bindVariable(qName);
             if ((sourceBinding == null)) {
-                if ((qName.hasURI(Saxon.Hej.lib.NamespaceConstant.XSLT) && qName.getLocalPart().Equals("original"))) {
+                if ((qName.hasURI(Saxon.Hej.om.NamespaceUri.XSLT) && qName.getLocalPart().Equals("original"))) {
                     element.getXslOriginal(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
                     return new Saxon.Hej.expr.GlobalVariableReference(qName);
                 }
@@ -86,7 +86,7 @@ namespace Saxon.Hej.style {
                     vref.setStaticType(globalVar.getRequiredType(), null, 0);
                     return vref;
                 }
-                if (((getXPathVersion()>=30) && qName.hasURI(Saxon.Hej.lib.NamespaceConstant.ERR))) {
+                if (((getXPathVersion()>=30) && qName.hasURI(Saxon.Hej.om.NamespaceUri.ERR))) {
                     Saxon.Hej.tree.iter.AxisIterator catchers = element.iterateAxis(Saxon.Hej.om.AxisInfo.ANCESTOR_OR_SELF, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, Saxon.Hej.om.StandardNames.XSL_CATCH, element.getNamePool()));
                     Saxon.Hej.style.StyleElement catcher = (Saxon.Hej.style.StyleElement)(((/*1430*/Saxon.Hej.om.NodeInfo)catchers.next()));
                     if ((catcher != null)) {
@@ -125,39 +125,31 @@ namespace Saxon.Hej.style {
             }
         }
         public Saxon.Hej.functions.FunctionLibrary getFunctionLibrary() {
-            Saxon.Hej.functions.FunctionLibrary lib = element.getContainingPackage().getFunctionLibrary();
-            Saxon.Hej.style.StyleElement containingOverride = element.findAncestorElement(Saxon.Hej.om.StandardNames.XSL_OVERRIDE);
-            if ((containingOverride != null)) {
-                Saxon.Hej.functions.FunctionLibraryList libList = new Saxon.Hej.functions.FunctionLibraryList();
-                libList.addFunctionLibrary(lib);
-                ((Saxon.Hej.style.XSLOverride)(containingOverride)).addXSLOverrideFunctionLibrary(libList);
-                return libList;
-            }
-            return lib;
+            return element.getContainingPackage().getFunctionLibrary();
         }
         public string getDefaultCollationName() {
             return element.getDefaultCollationName();
         }
-        public string getDefaultElementNamespace() {
+        public Saxon.Hej.om.NamespaceUri getDefaultElementNamespace() {
             return element.getDefaultXPathNamespace();
         }
-        public string getDefaultFunctionNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.FN;
+        public Saxon.Hej.om.NamespaceUri getDefaultFunctionNamespace() {
+            return Saxon.Hej.om.NamespaceUri.FN;
         }
         public bool isInBackwardsCompatibleMode() {
             return element.xPath10ModeIsEnabled();
         }
         public int getXPathVersion() {
-            if (((element.getEffectiveVersion() == 40) || (element.getCompilation().getCompilerInfo().getXsltVersion() == 40))) {
+            if ((((element.getEffectiveVersion() == 40) || (element.getCompilation().getCompilerInfo().getXsltVersion() == 40)) || (((attributeName != null) && attributeName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON))))) {
                 return 40;
             } else {
                 return getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT);
             }
         }
-        public bool isImportedSchema(string @namespace) {
+        public bool isImportedSchema(Saxon.Hej.om.NamespaceUri @namespace) {
             return element.getPrincipalStylesheetModule().isImportedSchema(@namespace);
         }
-        public System.Collections.Generic.ISet<string> getImportedSchemaNamespaces() {
+        public System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getImportedSchemaNamespaces() {
             return element.getPrincipalStylesheetModule().getImportedSchemaTable();
         }
         public Saxon.Hej.trans.KeyManager getKeyManager() {

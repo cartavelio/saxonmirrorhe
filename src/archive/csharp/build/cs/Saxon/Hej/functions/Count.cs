@@ -35,6 +35,18 @@ namespace Saxon.Hej.functions {
         public override string getStreamerName() {
             return "Count";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.Count.CountFnElaborator();
+        }
+        public class CountFnElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.Expression arg = fnc.getArg(0);
+                Saxon.Hej.expr.elab.PullEvaluator puller = arg.makeElaborator().elaborateForPull();
+                return context => Saxon.Hej.value.Int64Value.makeIntegerValue(count(/*Delegate.iterate()*/puller(context)));
+            }
+        
+        }
     
     }
 }

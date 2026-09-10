@@ -30,20 +30,6 @@ namespace Saxon.Eej.ee.parallel {
         public override int getImplementationMethod() {
             return PROCESS_METHOD;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            Saxon.Hej.om.FocusIterator fit = c2.getController().getFocusTrackerFactory(true)(getSelect().iterate(context));
-            c2.setCurrentIterator(fit);
-            int maxThreads = evaluateThreads(context);
-            if ((maxThreads<=1)) {
-                return base.processLeavingTail(output, context);
-            } else {
-                Saxon.Impl.Parallel.MultithreadedContextMappingIterator mapper = new Saxon.Impl.Parallel.MultithreadedContextMappingIterator(getAction(), c2, maxThreads);
-                Saxon.Hej.om.SequenceTool.supply(mapper, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(it => output.append(it) /* converted from instance method reference */));
-                mapper.close();
-                return null;
-            }
-        }
         private int evaluateThreads(Saxon.Hej.expr.XPathContext context) {
             if ((threadsOp == null)) {
                 return 1;
@@ -62,10 +48,7 @@ namespace Saxon.Eej.ee.parallel {
             }
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            int threads = evaluateThreads(context);
-            Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
-            c2.trackFocus(getSelect().iterate(context));
-            return new Saxon.Impl.Parallel.MultithreadedContextMappingIterator(getAction(), c2, threads);
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public override string getExpressionName() {
             return "multithreadedForEach";
@@ -73,6 +56,52 @@ namespace Saxon.Eej.ee.parallel {
         protected internal override void explainThreads(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.setChildRole("threads");
             getThreads().export(@out);
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.ee.parallel.MultithreadedForEach.MultithreadedForEachElaborator();
+        }
+        public class MultithreadedForEachElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            private Saxon.Hej.expr.elab.StringEvaluator threadsEvaluator;
+            private void makeThreadsEvaluator(Saxon.Eej.ee.parallel.MultithreadedForEach forEach) {
+                if ((forEach.threadsOp == null)) {
+                    threadsEvaluator = context => "1";
+                } else {
+                    threadsEvaluator = forEach.getThreads().makeElaborator().elaborateForString(true);
+                }
+            }
+            private int evaluateThreads(Saxon.Eej.ee.parallel.MultithreadedForEach forEach, Saxon.Hej.expr.XPathContext context) {
+                if ((forEach.threadsOp == null)) {
+                    return 1;
+                } else {
+                    string threadsValue = /*Delegate.eval()*/threadsEvaluator(context);
+                    int threads;
+                    try {
+                        threads = Saxon.Impl.Helpers.Utils.ParseInt(threadsValue);
+                    } catch (Saxon.Ejava.lang.NumberFormatException e) {
+                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Value of 'threads' is not an integer ("+threadsValue)+")"));
+                        err.setLocation(forEach.getLocation());
+                        err.setXPathContext(context);
+                        throw err;
+                    }
+                    return threads;
+                }
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Eej.ee.parallel.MultithreadedForEach forEach = (Saxon.Eej.ee.parallel.MultithreadedForEach)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
+                makeThreadsEvaluator(forEach);
+                return context => {
+                    int threads = evaluateThreads(forEach, context);
+                    Saxon.Hej.expr.XPathContextMinor c2 = context.newMinorContext();
+                    c2.trackFocus(/*Delegate.iterate()*/select(context));
+                    return new Saxon.Impl.Parallel.MultithreadedContextMappingIterator(action, c2, threads);
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                throw new Saxon.Ejava.lang.UnsupportedOperationException("Multi-threading is not supported for updating expressions");
+            }
+        
         }
     
     }

@@ -40,9 +40,8 @@ namespace Saxon.Hej.om {
             }
         }
         public static void supply(Saxon.Hej.om.SequenceIterator iter, Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item> consumer) {
-            Saxon.Hej.om.Item item;
             try {
-                while (((item = iter.next()) != null)) {
+                for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                     /*Delegate.accept()*/consumer(item);
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -115,6 +114,13 @@ namespace Saxon.Hej.om {
             }
             return first;
         }
+        public static Saxon.Hej.om.FocusIterator focusTracker(Saxon.Hej.om.SequenceIterator basis) {
+            if ((basis is Saxon.Hej.om.FocusIterator)) {
+                return (Saxon.Hej.om.FocusIterator)(basis);
+            } else {
+                return new Saxon.Hej.om.FocusTrackingIterator(basis);
+            }
+        }
         public static Saxon.Hej.str.UnicodeString getStringValue(Saxon.Hej.om.Sequence sequence) {
             Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder();
             supply(sequence.iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => {
@@ -143,8 +149,7 @@ namespace Saxon.Hej.om {
                     try {
                         Saxon.Hej.type.ItemType type = null;
                         Saxon.Hej.om.SequenceIterator iter = sequence.iterate();
-                        Saxon.Hej.om.Item item;
-                        while (((item = iter.next()) != null)) {
+                        for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                             if ((type == null)) {
                                 type = Saxon.Hej.type.Type.getItemType(item, th);
                             } else {
@@ -169,9 +174,8 @@ namespace Saxon.Hej.om {
             } else {
                 if ((sequence is Saxon.Hej.om.GroundedValue)) {
                     Saxon.Hej.type.UType type = Saxon.Hej.type.UType.VOID;
-                    Saxon.Hej.om.SequenceIterator iter = ((Saxon.Hej.om.GroundedValue)(sequence)).iterate();
-                    Saxon.Hej.om.Item item;
-                    while (((item = iter.next()) != null)) {
+                    Saxon.Hej.om.SequenceIterator iter = sequence.iterate();
+                    for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                         type = type.union(Saxon.Hej.type.UType.getUType(item));
                         if ((type == Saxon.Hej.type.UType.ANY)) {
                             break ;
@@ -211,7 +215,13 @@ namespace Saxon.Hej.om {
             }
         }
         public static void process(Saxon.Hej.om.Sequence value, Saxon.Hej.@event.Outputter output, Saxon.Hej.s9api.Location locationId) {
-            supply(value.iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((it => output.append(it, locationId, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES))));
+            try {
+                supply(value.iterate(), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((it => output.append(it, locationId, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES))));
+            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
+                Saxon.Hej.trans.XPathException xpe = e.getXPathException();
+                xpe.maybeSetLocation(locationId);
+                throw xpe;
+            }
         }
         public static Saxon.Hej.om.Sequence[] makeSequenceArray(int length) {
             return new Saxon.Hej.om.Sequence[length];

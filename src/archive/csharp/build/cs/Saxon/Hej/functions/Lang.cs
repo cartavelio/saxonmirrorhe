@@ -7,7 +7,7 @@ namespace Saxon.Hej.functions {
             string doclang = null;
             Saxon.Hej.om.NodeInfo node = target;
             while ((node != null)) {
-                doclang = node.getAttributeValue(Saxon.Hej.lib.NamespaceConstant.XML, "lang");
+                doclang = node.getAttributeValue(Saxon.Hej.om.NamespaceUri.XML, "lang");
                 if ((doclang != null)) {
                     break ;
                 }

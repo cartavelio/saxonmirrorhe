@@ -33,7 +33,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             processId();
             string[] allowed = {"base", "id"};
             allowAttributes(atts, allowed);
-            string @base = atts.getValue("", "base");
+            string @base = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "base");
             if ((@base == null)) {
                 missingAttribute("base");
             } else {

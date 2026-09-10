@@ -92,13 +92,13 @@ namespace Saxon.Hej.style {
                                         Saxon.Hej.expr.Expression exp = makeAttributeValueTemplate(val, att);
                                         Saxon.Impl.Helpers.MapUtils.Put(serializationAttributes, name, exp);
                                     } else {
-                                        if ((name.getLocalPart().Equals("asynchronous") && name.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON))) {
+                                        if ((name.getLocalPart().Equals("asynchronous") && name.hasURI(Saxon.Hej.om.NamespaceUri.SAXON))) {
                                             async = processBooleanAttribute("saxon:asynchronous", value);
                                             if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
                                                 async = false;
                                             } else {
                                                 if (!("EE".Equals(getConfiguration().getEditionCode()))) {
-                                                    compileWarning("saxon:asynchronous - ignored when not running Saxon-EE", Saxon.Hej.trans.SaxonErrorCode.SXWN9013);
+                                                    issueWarning("saxon:asynchronous - ignored when not running Saxon-EE", Saxon.Hej.trans.SaxonErrorCode.SXWN9013);
                                                     async = false;
                                                 }
                                             }
@@ -137,7 +137,7 @@ namespace Saxon.Hej.style {
             }
             if ((useCharacterMapsAtt != null)) {
                 string s = Saxon.Hej.style.XSLOutput.prepareCharacterMaps(this, useCharacterMapsAtt, new Saxon.Ejava.util.Properties());
-                Saxon.Impl.Helpers.MapUtils.Put(serializationAttributes, new Saxon.Hej.om.StructuredQName("", "", "use-character-maps"), new Saxon.Hej.expr.StringLiteral(s));
+                Saxon.Impl.Helpers.MapUtils.Put(serializationAttributes, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "use-character-maps"), new Saxon.Hej.expr.StringLiteral(s));
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
@@ -155,14 +155,14 @@ namespace Saxon.Hej.style {
             }
             getContainingPackage().setCreatesSecondaryResultDocuments(true);
         }
-        public static Saxon.Hej.om.StructuredQName METHOD = new Saxon.Hej.om.StructuredQName("", "", "method");
-        public static Saxon.Hej.om.StructuredQName BUILD_TREE = new Saxon.Hej.om.StructuredQName("", "", "build-tree");
+        public static Saxon.Hej.om.StructuredQName METHOD = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "method");
+        public static Saxon.Hej.om.StructuredQName BUILD_TREE = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "build-tree");
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.tree.iter.AxisIterator ai = iterateAxis(Saxon.Hej.om.AxisInfo.ANCESTOR);
             Saxon.Hej.om.NodeInfo node;
             while (((node = ((/*1430*/Saxon.Hej.om.NodeInfo)ai.next())) != null)) {
                 if (((node is Saxon.Hej.style.XSLGeneralVariable) || (node is Saxon.Hej.style.XSLFunction))) {
-                    issueWarning((("An xsl:result-document instruction inside "+node.getDisplayName())+" will always fail at run-time"), this);
+                    issueWarning((("An xsl:result-document instruction inside "+node.getDisplayName())+" will always fail at run-time"), "XTDE1480");
                     return new Saxon.Hej.expr.ErrorExpression("Call to xsl:result-document while in temporary output state", "XTDE1480", false);
                 }
             }
@@ -183,10 +183,10 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.tree.iter.AxisIterator kids = iterateAxis(Saxon.Hej.om.AxisInfo.CHILD);
                 Saxon.Hej.om.NodeInfo first = ((/*1430*/Saxon.Hej.om.NodeInfo)kids.next());
                 if ((first is Saxon.Hej.style.LiteralResultElement)) {
-                    if ((first.getURI().Equals(Saxon.Hej.lib.NamespaceConstant.XHTML) && first.getLocalPart().Equals("html"))) {
-                        method = ((getEffectiveVersion() == 10) ? "xml" : "xhtml");
+                    if ((first.getNamespaceUri().Equals(Saxon.Hej.om.NamespaceUri.XHTML) && first.getLocalPart().Equals("html"))) {
+                        method = "xhtml";
                     } else {
-                        if ((Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(first.getLocalPart(), "html") && first.getURI().Length==0)) {
+                        if ((Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(first.getLocalPart(), "html") && first.getNamespaceUri().isEmpty())) {
                             method = "html";
                         } else {
                             method = "xml";
@@ -203,7 +203,7 @@ namespace Saxon.Hej.style {
                 if ((exp is Saxon.Hej.expr.StringLiteral)) {
                     string s = ((Saxon.Hej.expr.StringLiteral)(exp)).stringify();
                     string lname = property.getLocalPart();
-                    string uri = property.getURI();
+                    Saxon.Hej.om.NamespaceUri uri = property.getNamespaceUri();
                     try {
                         Saxon.Hej.expr.instruct.ResultDocument.setSerializationProperty(localProps, uri, lname, s, namespaceResolver, false, exec.getConfiguration());
                         @fixed.Add(property);
@@ -211,7 +211,7 @@ namespace Saxon.Hej.style {
                             method = s;
                         }
                     } catch (Saxon.Hej.trans.XPathException e) {
-                        if (Saxon.Hej.lib.NamespaceConstant.SAXON.Equals(e.getErrorCodeNamespace())) {
+                        if (Saxon.Hej.om.NamespaceUri.SAXON.Equals(e.getErrorCodeNamespace())) {
                             compileWarning(e.Message, e.getErrorCodeQName());
                         } else {
                             e.setErrorCode("XTSE0020");

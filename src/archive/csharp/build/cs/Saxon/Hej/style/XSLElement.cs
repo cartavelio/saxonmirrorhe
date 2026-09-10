@@ -105,10 +105,10 @@ namespace Saxon.Hej.style {
                     compileErrorInAttribute(("Invalid element name: "+qName), "XTDE0820", "name");
                     return null;
                 }
-                string nsuri = null;
+                Saxon.Hej.om.NamespaceUri nsuri = null;
                 if ((@namespace is Saxon.Hej.expr.StringLiteral)) {
-                    nsuri = ((Saxon.Hej.expr.StringLiteral)(@namespace)).stringify();
-                    if (nsuri.Length==0) {
+                    nsuri = Saxon.Hej.om.NamespaceUri.of(((Saxon.Hej.expr.StringLiteral)(@namespace)).stringify());
+                    if (nsuri.isEmpty()) {
                         parts[0] = "";
                     }
                 } else {

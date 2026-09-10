@@ -4,9 +4,9 @@ using System.Linq;
 namespace Saxon.Hej.expr.instruct {
     public class TemplateRule : Saxon.Hej.trans.rules.RuleTarget, Saxon.Hej.s9api.Location, Saxon.Hej.expr.ExpressionOwner, Saxon.Hej.trace.TraceableComponent {
         protected internal Saxon.Hej.expr.Expression body;
+        protected internal Saxon.Hej.expr.elab.PushEvaluator bodyEvaluator;
         protected internal Saxon.Hej.pattern.Pattern matchPattern;
         private bool _hasRequiredParams;
-        private bool bodyIsTailCallReturner;
         private Saxon.Hej.value.SequenceType requiredType;
         private bool declaredStreamable;
         private Saxon.Hej.type.ItemType requiredContextItemType = Saxon.Hej.type.AnyItemType.getInstance();
@@ -47,7 +47,6 @@ namespace Saxon.Hej.expr.instruct {
         }
         public void setBody(Saxon.Hej.expr.Expression body) {
             this.body = body;
-            bodyIsTailCallReturner = ((body is Saxon.Hej.expr.instruct.TailCallReturner));
         }
         public void setStackFrameMap(Saxon.Hej.expr.instruct.SlotManager map) {
             stackFrameMap = map;
@@ -118,7 +117,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         public System.Collections.Generic.IList<Saxon.Hej.expr.instruct.LocalParam> getLocalParams() {
             System.Collections.Generic.IList<Saxon.Hej.expr.instruct.LocalParam> result = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.LocalParam>();
-            gatherLocalParams(getInterpretedBody(), result);
+            gatherLocalParams(getBody(), result);
             return result;
         }
         private static void gatherLocalParams(Saxon.Hej.expr.Expression exp, System.Collections.Generic.IList<Saxon.Hej.expr.instruct.LocalParam> result) {
@@ -155,12 +154,8 @@ namespace Saxon.Hej.expr.instruct {
                 context.setCurrentIterator(null);
             }
             try {
-                if (bodyIsTailCallReturner) {
-                    return ((Saxon.Hej.expr.instruct.TailCallReturner)(body)).processLeavingTail(output, context);
-                } else {
-                    body.process(output, context);
-                    return null;
-                }
+                ensureBodyEvaluatorExists();
+                return /*Delegate.processLeavingTail()*/bodyEvaluator(output, context);
             } catch (Saxon.Hej.trans.UncheckedXPathException e) {
                 Saxon.Hej.trans.XPathException xe = e.getXPathException();
                 xe.maybeSetLocation(this);
@@ -176,6 +171,14 @@ namespace Saxon.Hej.expr.instruct {
                 throw new System.Exception(message, e2);
             }
         }
+        private void ensureBodyEvaluatorExists() {
+            ensureBodyEvaluatorExistsCS();
+        }
+        private void ensureBodyEvaluatorExistsCS() { lock(this) {
+            if ((bodyEvaluator == null)) {
+                bodyEvaluator = body.makeElaborator().elaborateForPush();
+            }
+        }}
         public void export(Saxon.Hej.trace.ExpressionPresenter presenter) {
             throw new Saxon.Ejava.lang.UnsupportedOperationException();
         }
@@ -203,9 +206,6 @@ namespace Saxon.Hej.expr.instruct {
                 presenter.emitAttribute("streamable", "1");
             }
         }
-        public Saxon.Hej.expr.Expression getInterpretedBody() {
-            return body.getInterpretedExpression();
-        }
         public virtual Saxon.Hej.expr.instruct.TemplateRule copy() {
             Saxon.Hej.expr.instruct.TemplateRule tr = new Saxon.Hej.expr.instruct.TemplateRule();
             if (((body == null) || (matchPattern == null))) {
@@ -228,7 +228,6 @@ namespace Saxon.Hej.expr.instruct {
                 tr.matchPattern = matchPattern.copy(new Saxon.Hej.expr.parser.RebindingMap());
             }
             tr._hasRequiredParams = _hasRequiredParams;
-            tr.bodyIsTailCallReturner = bodyIsTailCallReturner;
             tr.requiredType = requiredType;
             tr.declaredStreamable = declaredStreamable;
             tr.requiredContextItemType = requiredContextItemType;

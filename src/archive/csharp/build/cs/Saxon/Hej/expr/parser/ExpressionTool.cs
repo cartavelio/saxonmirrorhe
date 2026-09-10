@@ -6,8 +6,7 @@ namespace Saxon.Hej.expr.parser {
         private ExpressionTool()  {
         }
         public static Saxon.Hej.expr.Expression make(string expression, Saxon.Hej.expr.StaticContext env, int start, int terminator, Saxon.Hej.expr.parser.CodeInjector codeInjector) {
-            int languageLevel = env.getXPathVersion();
-            Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, languageLevel);
+            Saxon.Hej.expr.parser.XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
             if ((codeInjector != null)) {
                 parser.setCodeInjector(codeInjector);
             }
@@ -69,84 +68,8 @@ namespace Saxon.Hej.expr.parser {
             }
             return injector.inject(exp);
         }
-        public static Saxon.Hej.expr.parser.Evaluator lazyEvaluator(Saxon.Hej.expr.Expression exp, bool repeatable) {
-            if ((exp is Saxon.Hej.expr.Literal)) {
-                return Saxon.Hej.expr.parser.Evaluator.Literal.INSTANCE;
-            } else {
-                if ((exp is Saxon.Hej.expr.VariableReference)) {
-                    return Saxon.Hej.expr.parser.Evaluator.Variable.INSTANCE;
-                } else {
-                    if ((exp is Saxon.Hej.expr.SuppliedParameterReference)) {
-                        return Saxon.Hej.expr.parser.Evaluator.SuppliedParameter.INSTANCE;
-                    } else {
-                        if ((((exp.getDependencies()&(((((Saxon.Hej.expr.StaticProperty.DEPENDS_ON_POSITION|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LAST)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CURRENT_ITEM)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CURRENT_GROUP)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_REGEX_GROUP)))) != 0)) {
-                            return eagerEvaluator(exp);
-                        } else {
-                            if ((exp is Saxon.Hej.expr.ErrorExpression)) {
-                                return Saxon.Hej.expr.parser.Evaluator.SingleItem.INSTANCE;
-                            } else {
-                                if (!(Saxon.Hej.value.Cardinality.allowsMany(exp.getCardinality()))) {
-                                    return eagerEvaluator(exp);
-                                } else {
-                                    if ((exp is Saxon.Hej.expr.TailExpression)) {
-                                        Saxon.Hej.expr.TailExpression tail = (Saxon.Hej.expr.TailExpression)(exp);
-                                        Saxon.Hej.expr.Expression @base = tail.getBaseExpression();
-                                        if ((@base is Saxon.Hej.expr.VariableReference)) {
-                                            return Saxon.Hej.expr.parser.Evaluator.LazyTail.INSTANCE;
-                                        } else {
-                                            if (repeatable) {
-                                                return Saxon.Hej.expr.parser.Evaluator.MemoClosureEvaluator.INSTANCE;
-                                            } else {
-                                                return Saxon.Hej.expr.parser.Evaluator.LazySequence.INSTANCE;
-                                            }
-                                        }
-                                    } else {
-                                        if (((exp is Saxon.Hej.expr.instruct.Block) && ((Saxon.Hej.expr.instruct.Block)(exp)).isCandidateForSharedAppend())) {
-                                            return Saxon.Hej.expr.parser.Evaluator.SharedAppend.INSTANCE;
-                                        } else {
-                                            if (repeatable) {
-                                                return Saxon.Hej.expr.parser.Evaluator.MemoClosureEvaluator.INSTANCE;
-                                            } else {
-                                                return Saxon.Hej.expr.parser.Evaluator.LazySequence.INSTANCE;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        public static Saxon.Hej.expr.parser.Evaluator eagerEvaluator(Saxon.Hej.expr.Expression exp) {
-            if (((exp is Saxon.Hej.expr.Literal) && !(((((Saxon.Hej.expr.Literal)(exp)).getGroundedValue() is Saxon.Hej.value.Closure))))) {
-                return Saxon.Hej.expr.parser.Evaluator.Literal.INSTANCE;
-            }
-            if ((exp is Saxon.Hej.expr.VariableReference)) {
-                return Saxon.Hej.expr.parser.Evaluator.Variable.INSTANCE;
-            }
-            int m = exp.getImplementationMethod();
-            if (((((m&Saxon.Hej.expr.Expression.EVALUATE_METHOD)) != 0) && !(Saxon.Hej.value.Cardinality.allowsMany(exp.getCardinality())))) {
-                if (Saxon.Hej.value.Cardinality.allowsZero(exp.getCardinality())) {
-                    return Saxon.Hej.expr.parser.Evaluator.OptionalItem.INSTANCE;
-                } else {
-                    return Saxon.Hej.expr.parser.Evaluator.SingleItem.INSTANCE;
-                }
-            } else {
-                if ((((m&Saxon.Hej.expr.Expression.ITERATE_METHOD)) != 0)) {
-                    return Saxon.Hej.expr.parser.Evaluator.EagerSequence.INSTANCE;
-                } else {
-                    return Saxon.Hej.expr.parser.Evaluator.Process.INSTANCE;
-                }
-            }
-        }
-        public static Saxon.Hej.om.Sequence lazyEvaluate(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.XPathContext context, bool repeatable) {
-            Saxon.Hej.expr.parser.Evaluator evaluator = lazyEvaluator(exp, repeatable);
-            return evaluator.evaluate(exp, context);
-        }
         public static Saxon.Hej.om.GroundedValue eagerEvaluate(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.parser.Evaluator evaluator = eagerEvaluator(exp);
-            return evaluator.evaluate(exp, context).materialize();
+            return (Saxon.Hej.om.GroundedValue)(exp.makeElaborator().eagerly().evaluate(context));
         }
         public static int markTailFunctionCalls(Saxon.Hej.expr.Expression exp, Saxon.Hej.om.StructuredQName qName, int arity) {
             return exp.markTailFunctionCalls(qName, arity);
@@ -194,7 +117,6 @@ namespace Saxon.Hej.expr.parser {
             return false;
         }
         public static bool changesXsltContext(Saxon.Hej.expr.Expression exp) {
-            exp = exp.getInterpretedExpression();
             if ((((((((exp is Saxon.Hej.expr.instruct.ResultDocument) || (exp is Saxon.Hej.expr.instruct.CallTemplate)) || (exp is Saxon.Hej.expr.instruct.ApplyTemplates)) || (exp is Saxon.Hej.expr.instruct.NextMatch)) || (exp is Saxon.Hej.expr.instruct.ApplyImports)) || exp.isCallOn(typeof(Saxon.Hej.functions.RegexGroup))) || exp.isCallOn(typeof(Saxon.Hej.functions.CurrentGroup)))) {
                 return true;
             }
@@ -314,6 +236,20 @@ namespace Saxon.Hej.expr.parser {
                 }
             }
         }
+        public static int getAxisNavigation(Saxon.Hej.expr.Expression exp) {
+            Saxon.Hej.expr.Expression unfiltered = unfilteredExpression(exp, true);
+            if ((unfiltered is Saxon.Hej.expr.AxisExpression)) {
+                return ((Saxon.Hej.expr.AxisExpression)(unfiltered)).getAxis();
+            }
+            if ((unfiltered is Saxon.Hej.expr.VennExpression)) {
+                int v1 = getAxisNavigation(((Saxon.Hej.expr.VennExpression)(unfiltered)).getLhsExpression());
+                int v2 = getAxisNavigation(((Saxon.Hej.expr.VennExpression)(unfiltered)).getRhsExpression());
+                if ((v1 == v2)) {
+                    return v1;
+                }
+            }
+            return -1;
+        }
         public static bool equalOrNull(System.Object x, System.Object y) {
             if ((x == null)) {
                 return (y == null);
@@ -328,18 +264,6 @@ namespace Saxon.Hej.expr.parser {
             exp.process(new Saxon.Hej.@event.ComplexContentOutputter(seq), context);
             seq.close();
             return seq.iterate();
-        }
-        public static Saxon.Hej.om.Item getItemFromProcessMethod(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.Controller controller = context.getController();
-            if ((controller == null)) {
-                throw new Saxon.Hej.trans.NoDynamicContextException("No controller available");
-            }
-            Saxon.Hej.@event.SequenceCollector seq = controller.allocateSequenceOutputter(1);
-            exp.process(new Saxon.Hej.@event.ComplexContentOutputter(seq), context);
-            seq.close();
-            Saxon.Hej.om.Item result = seq.getFirstItem();
-            seq.reset();
-            return result;
         }
         public static int allocateSlots(Saxon.Hej.expr.Expression exp, int nextFree, Saxon.Hej.expr.instruct.SlotManager frame) {
             if ((exp is Saxon.Hej.expr.Assignation)) {
@@ -563,8 +487,15 @@ namespace Saxon.Hej.expr.parser {
                     list.Add(function);
                 }
             } else {
-                foreach (Saxon.Hej.expr.Operand o in e.operands()) {
-                    gatherCalledFunctions(o.getChildExpression(), list);
+                if ((e is Saxon.Hej.functions.hof.UserFunctionReference)) {
+                    Saxon.Hej.expr.instruct.UserFunction function = ((Saxon.Hej.functions.hof.UserFunctionReference)(e)).getNominalTarget();
+                    if (!(list.Contains(function))) {
+                        list.Add(function);
+                    }
+                } else {
+                    foreach (Saxon.Hej.expr.Operand o in e.operands()) {
+                        gatherCalledFunctions(o.getChildExpression(), list);
+                    }
                 }
             }
         }
@@ -578,9 +509,7 @@ namespace Saxon.Hej.expr.parser {
             }
         }
         public static Saxon.Hej.expr.Expression optimizeComponentBody(Saxon.Hej.expr.Expression body, Saxon.Hej.style.Compilation compilation, Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo cisi, bool extractGlobals) {
-            Saxon.Hej.Configuration config = visitor.getConfiguration();
             Saxon.Hej.expr.parser.Optimizer opt = visitor.obtainOptimizer();
-            Saxon.Hej.expr.StaticContext env = visitor.getStaticContext();
             if (opt.isOptionSet(Saxon.Hej.expr.parser.OptimizerOptions.MISCELLANEOUS)) {
                 Saxon.Hej.expr.parser.ExpressionTool.resetPropertiesWithinSubtree(body);
                 if (opt.isOptionSet(Saxon.Hej.expr.parser.OptimizerOptions.MISCELLANEOUS)) {
@@ -604,7 +533,6 @@ namespace Saxon.Hej.expr.parser {
                 body = opt.eliminateCommonSubexpressions(body);
             }
             opt.prepareForStreaming(body);
-            computeEvaluationModesForUserFunctionCalls(body);
             body.restoreParentPointers();
             return body;
         }
@@ -672,7 +600,7 @@ namespace Saxon.Hej.expr.parser {
                 }
                 if (callsFunction(exp, Saxon.Hej.functions.Current.FN_CURRENT, false)) {
                     Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
-                    let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE, ("current"+exp.GetHashCode())));
+                    let.setVariableQName(new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE, ("current"+exp.GetHashCode())));
                     let.setRequiredType(Saxon.Hej.value.SequenceType.SINGLE_ITEM);
                     let.setSequence(new Saxon.Hej.expr.CurrentItemExpression());
                     replaceCallsToCurrent(exp, let);
@@ -753,13 +681,14 @@ namespace Saxon.Hej.expr.parser {
             return rcount;
         }
         public static int expressionSize(Saxon.Hej.expr.Expression exp) {
-            exp = exp.getInterpretedExpression();
             int total = 1;
             foreach (Saxon.Hej.expr.Operand o in exp.operands()) {
                 total += expressionSize(o.getChildExpression());
                 if ((o.getChildExpression() is Saxon.Hej.functions.hof.UserFunctionReference)) {
                     Saxon.Hej.expr.instruct.UserFunction uf = ((Saxon.Hej.functions.hof.UserFunctionReference)(o.getChildExpression())).getNominalTarget();
-                    total += expressionSize(uf.getBody());
+                    if ((uf.getFunctionName() == null)) {
+                        total += expressionSize(uf.getBody());
+                    }
                 }
             }
             return total;
@@ -804,10 +733,14 @@ namespace Saxon.Hej.expr.parser {
             if (((exp is Saxon.Hej.expr.FilterExpression) && ((allowPositional || !(((Saxon.Hej.expr.FilterExpression)(exp)).isFilterIsPositional()))))) {
                 return unfilteredExpression(((Saxon.Hej.expr.FilterExpression)(exp)).getSelectExpression(), allowPositional);
             } else {
-                if (((exp is Saxon.Hej.expr.SingleItemFilter) && allowPositional)) {
-                    return unfilteredExpression(((Saxon.Hej.expr.SingleItemFilter)(exp)).getBaseExpression(), allowPositional);
+                if (((exp is Saxon.Hej.expr.TailExpression) && allowPositional)) {
+                    return unfilteredExpression(((Saxon.Hej.expr.UnaryExpression)(exp)).getBaseExpression(), allowPositional);
                 } else {
-                    return exp;
+                    if (((exp is Saxon.Hej.expr.SingleItemFilter) && allowPositional)) {
+                        return unfilteredExpression(((Saxon.Hej.expr.SingleItemFilter)(exp)).getBaseExpression(), allowPositional);
+                    } else {
+                        return exp;
+                    }
                 }
             }
         }
@@ -825,11 +758,12 @@ namespace Saxon.Hej.expr.parser {
                 } else {
                     if ((((exp.getDependencies()&((Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CONTEXT_ITEM|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CONTEXT_DOCUMENT)))) != 0)) {
                         Saxon.Hej.expr.LetExpression let = new Saxon.Hej.expr.LetExpression();
-                        let.setVariableQName(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, ("dot"+exp.GetHashCode())));
+                        let.setVariableQName(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, ("dot"+exp.GetHashCode())));
                         let.setRequiredType(Saxon.Hej.value.SequenceType.makeSequenceType(contextItemType, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE));
                         let.setSequence(new Saxon.Hej.expr.ContextItemExpression());
-                        let.setAction(exp);
-                        bool changed = factorOutDot(exp, let);
+                        Saxon.Hej.expr.Expression actionCopy = exp.copy(new Saxon.Hej.expr.parser.RebindingMap());
+                        let.setAction(actionCopy);
+                        bool changed = factorOutDot(actionCopy, let);
                         if (changed) {
                             return let;
                         } else {
@@ -1030,6 +964,7 @@ namespace Saxon.Hej.expr.parser {
                     return true;
                 }
                 Saxon.Hej.expr.Operand o = findOperand(parent, child);
+                System.Diagnostics.Debug.Assert((o != null));
                 if ((o.getUsage() != Saxon.Hej.expr.OperandUsage.TRANSMISSION)) {
                     return false;
                 }

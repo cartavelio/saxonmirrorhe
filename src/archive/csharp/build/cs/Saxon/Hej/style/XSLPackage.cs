@@ -9,6 +9,7 @@ namespace Saxon.Hej.style {
         private bool prepared = false;
         public override void initialise(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType elementType, Saxon.Hej.om.AttributeMap atts, Saxon.Hej.om.NodeInfo parent, int sequenceNumber) {
             base.initialise(elemName, elementType, atts, parent, sequenceNumber);
+            processDefaultCollationAttribute();
             declaredModes = getLocalPart().Equals("package");
         }
         public string getName() {
@@ -50,7 +51,7 @@ namespace Saxon.Hej.style {
                     } else {
                         if (lexicalName.Equals("version")) {
                             if ((version == -1)) {
-                                processVersionAttribute("");
+                                processVersionAttribute(Saxon.Hej.om.NamespaceUri.NULL);
                             }
                         } else {
                             if ((lexicalName.Equals("package-version") && getLocalPart().Equals("package"))) {
@@ -111,11 +112,11 @@ namespace Saxon.Hej.style {
                     if ((child is Saxon.Hej.style.StyleElement)) {
                         if ((getLocalPart().Equals("package") && (((fp == Saxon.Hej.om.StandardNames.XSL_USE_PACKAGE) || (fp == Saxon.Hej.om.StandardNames.XSL_EXPOSE))))) {
                         } else {
-                            if ((!(Saxon.Hej.lib.NamespaceConstant.XSLT.Equals(child.getURI())) && !("".Equals(child.getURI())))) {
+                            if ((!(((Saxon.Hej.style.StyleElement)(child)).isInXsltNamespace()) && !("".Equals(child.getNamespaceUri())))) {
                             } else {
                                 if (((child is Saxon.Hej.style.AbsentExtensionElement) && ((Saxon.Hej.style.StyleElement)(child)).forwardsCompatibleModeIsEnabled())) {
                                 } else {
-                                    if (Saxon.Hej.lib.NamespaceConstant.XSLT.Equals(child.getURI())) {
+                                    if (((Saxon.Hej.style.StyleElement)(child)).isInXsltNamespace()) {
                                         if ((child is Saxon.Hej.style.AbsentExtensionElement)) {
                                         } else {
                                             ((Saxon.Hej.style.StyleElement)(child)).compileError(((("Element "+child.getDisplayName())+" must not appear directly within ")+getDisplayName()), "XTSE0010");

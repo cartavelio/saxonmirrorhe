@@ -85,7 +85,7 @@ namespace Saxon.Hej.expr {
             } catch (Saxon.Hej.trans.XPathException e) {
                 e.maybeSetLocation(getChildExpression().getLocation());
                 if (!(e.isReportableStatically())) {
-                    visitor.getStaticContext().issueWarning(("Evaluation will always throw a dynamic error: "+e.Message), getChildExpression().getLocation());
+                    visitor.getStaticContext().issueWarning(("Evaluation will always throw a dynamic error: "+e.Message), Saxon.Hej.trans.SaxonErrorCode.SXWN9027, getChildExpression().getLocation());
                     setChildExpression(new Saxon.Hej.expr.ErrorExpression(new Saxon.Hej.trans.XmlProcessingException(e)));
                 } else {
                     throw;
@@ -98,7 +98,7 @@ namespace Saxon.Hej.expr {
             } catch (Saxon.Hej.trans.XPathException e) {
                 e.maybeSetLocation(getChildExpression().getLocation());
                 if (!(e.isReportableStatically())) {
-                    visitor.getStaticContext().issueWarning(("Evaluation will always throw a dynamic error: "+e.Message), getChildExpression().getLocation());
+                    visitor.getStaticContext().issueWarning(("Evaluation will always throw a dynamic error: "+e.Message), Saxon.Hej.trans.SaxonErrorCode.SXWN9027, getChildExpression().getLocation());
                     setChildExpression(new Saxon.Hej.expr.ErrorExpression(new Saxon.Hej.trans.XmlProcessingException(e)));
                 } else {
                     throw;

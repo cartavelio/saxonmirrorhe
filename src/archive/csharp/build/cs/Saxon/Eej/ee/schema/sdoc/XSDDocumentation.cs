@@ -19,13 +19,13 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.om.AttributeMap atts = attributes();
             string[] allowed = {"source"};
             allowAttributes(atts, allowed);
-            string source = atts.getValue("", "source");
+            string source = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "source");
             if ((getXSDSchema().getSchemaCompiler().getLanguageVersion() == Saxon.Hej.Configuration.XSD10)) {
                 if (((source != null) && !(Saxon.Hej.lib.StandardURIChecker.getInstance().isValidURI(source)))) {
                     error("Value of source attribute must be a valid anyURI value");
                 }
             }
-            string lang = atts.getValue(Saxon.Hej.lib.NamespaceConstant.XML, "lang");
+            string lang = atts.getValue(Saxon.Hej.om.NamespaceUri.XML, "lang");
             if ((lang != null)) {
                 Saxon.Hej.type.ValidationFailure vf = Saxon.Hej.type.StringConverter.StringToLanguage.INSTANCE.validate(Saxon.Hej.str.StringView.tidy(lang));
                 if ((vf != null)) {

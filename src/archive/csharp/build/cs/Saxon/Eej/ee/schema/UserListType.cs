@@ -22,7 +22,7 @@ namespace Saxon.Eej.ee.schema {
         public override bool isListType() {
             return true;
         }
-        private System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.tree.iter.AtomicIterator> tokenizerFactory = str => new Saxon.Hej.value.Whitespace.Tokenizer(str);
+        private System.Func<Saxon.Hej.str.UnicodeString,Saxon.Hej.tree.iter.AtomicIterator> tokenizerFactory = /* ctor#1 */ (a) => new Saxon.Hej.value.Whitespace.Tokenizer(a);
         protected internal override System.Collections.Generic.IList<Saxon.Eej.ee.schema.Facet> addInheritedFacets(System.Collections.Generic.IList<Saxon.Eej.ee.schema.Facet> localFacets) {
             localFacets = base.addInheritedFacets(localFacets);
             for (int i = 0; (i<localFacets.Count); i++) {

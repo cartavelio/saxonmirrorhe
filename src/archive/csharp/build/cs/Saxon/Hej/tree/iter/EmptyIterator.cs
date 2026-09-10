@@ -7,9 +7,6 @@ namespace Saxon.Hej.tree.iter {
         public static Saxon.Hej.tree.iter.EmptyIterator getInstance() {
             return theInstance;
         }
-        public static Saxon.Hej.tree.iter.EmptyIterator emptyIterator() {
-            return theInstance;
-        }
         protected internal EmptyIterator()  {
         }
         public Saxon.Hej.om.AtomicSequence nextAtomizedValue() {
@@ -65,10 +62,6 @@ namespace Saxon.Hej.tree.iter {
     
         /* Expanding default method close from interface SequenceIterator */
         public virtual void close() {
-        }
-
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
         }
 
     }

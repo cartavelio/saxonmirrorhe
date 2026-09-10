@@ -6,6 +6,8 @@ namespace Saxon.Hej.om {
         private readonly Saxon.Hej.om.SequenceIterator inputIterator;
         private Saxon.Hej.om.Item[] reservoir = null;
         private int used;
+        private Saxon.Hej.expr.elab.LearningEvaluator learningEvaluator;
+        private int serialNumber;
         private enum State {
             UNREAD,
             MAYBE_MORE,
@@ -16,6 +18,10 @@ namespace Saxon.Hej.om {
         private Saxon.Hej.om.MemoSequence.State state = Saxon.Hej.om.MemoSequence.State.UNREAD;
         public MemoSequence(Saxon.Hej.om.SequenceIterator iterator)  {
             this.inputIterator = iterator;
+        }
+        public void setLearningEvaluator(Saxon.Hej.expr.elab.LearningEvaluator caller, int serialNumber) {
+            this.learningEvaluator = caller;
+            this.serialNumber = serialNumber;
         }
         public Saxon.Hej.om.Item head() {
             return iterate().next();
@@ -38,7 +44,7 @@ namespace Saxon.Hej.om {
                 switch (used) {
                   case 0:
                     state = Saxon.Hej.om.MemoSequence.State.EMPTY;
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                   case 1:
                     System.Diagnostics.Debug.Assert((reservoir != null));
                     return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(reservoir[0]);
@@ -50,7 +56,7 @@ namespace Saxon.Hej.om {
                 de.setErrorCode("XTDE0640");
                 throw new Saxon.Hej.trans.UncheckedXPathException(de);
               case Saxon.Hej.om.MemoSequence.State.EMPTY:
-                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
               default:
                 throw new Saxon.Ejava.lang.IllegalStateException("Unknown iterator state");
             }
@@ -105,7 +111,7 @@ namespace Saxon.Hej.om {
             }
         }
         public sealed class ProgressiveIterator : Saxon.Hej.om.SequenceIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.GroundedIterator {
-            private Saxon.Hej.om.MemoSequence container;
+            private readonly Saxon.Hej.om.MemoSequence container;
             private int position = -1;
             public ProgressiveIterator(Saxon.Hej.om.MemoSequence container)  {
                 this.container = container;
@@ -132,6 +138,7 @@ namespace Saxon.Hej.om {
                                 container.state = Saxon.Hej.om.MemoSequence.State.ALL_READ;
                                 container.condense();
                                 position = -2;
+                                reportCompletion();
                                 return null;
                             }
                             position = container.used;
@@ -208,15 +215,17 @@ namespace Saxon.Hej.om {
                     }
                 }
             }
-        
-            /* Expanding default method close from interface SequenceIterator */
             public void close() {
+                if ((container.state == Saxon.Hej.om.MemoSequence.State.ALL_READ)) {
+                    reportCompletion();
+                }
             }
-
-            /* Expanding default method discharge from interface SequenceIterator */
-            public void discharge() {
+            private void reportCompletion() {
+                if ((container.learningEvaluator != null)) {
+                    container.learningEvaluator.reportCompletion(container.serialNumber);
+                }
             }
-
+        
         }
     
         /* Expanding default method materialize from interface Sequence */

@@ -11,18 +11,17 @@ namespace Saxon.Hej.style {
                 string f = attName.getDisplayName();
                 string value = att.getValue();
                 if (f.Equals("character")) {
-                    string s = value;
-                    switch (s.Length) {
+                    switch (value.Length) {
                       case 0:
                         compileError("character attribute must not be zero-length", "XTSE0020");
                         codepoint = 256;
                         break ;
                       case 1:
-                        codepoint = s[0];
+                        codepoint = value[0];
                         break ;
                       case 2:
-                        if ((Saxon.Hej.serialize.charcode.UTF16CharacterSet.isHighSurrogate(s[0]) && Saxon.Hej.serialize.charcode.UTF16CharacterSet.isLowSurrogate(s[1]))) {
-                            codepoint = Saxon.Hej.serialize.charcode.UTF16CharacterSet.combinePair(s[0], s[1]);
+                        if ((Saxon.Hej.serialize.charcode.UTF16CharacterSet.isHighSurrogate(value[0]) && Saxon.Hej.serialize.charcode.UTF16CharacterSet.isLowSurrogate(value[1]))) {
+                            codepoint = Saxon.Hej.serialize.charcode.UTF16CharacterSet.combinePair(value[0], value[1]);
                         } else {
                             compileError("character attribute must be a single XML character", "XTSE0020");
                             codepoint = 256;
@@ -43,10 +42,12 @@ namespace Saxon.Hej.style {
             }
             if ((codepoint == -1)) {
                 reportAbsence("character");
+                codepoint = 256;
                 return ;
             }
             if ((replacementString == null)) {
                 reportAbsence("string");
+                replacementString = "";
             }
         }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {

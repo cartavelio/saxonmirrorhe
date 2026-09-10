@@ -25,7 +25,7 @@ namespace Saxon.Eej.xsltextn.instruct {
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             typeCheckChildren(visitor, contextInfo);
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
             selectOp.setChildExpression(tc.staticTypeCheck(getSelectExpr(), binding.getRequiredType(), role, visitor));
             return this;
         }
@@ -41,24 +41,34 @@ namespace Saxon.Eej.xsltextn.instruct {
         public override int getInstructionNameCode() {
             return Saxon.Hej.om.StandardNames.SAXON_ASSIGN;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            if ((binding == null)) {
-                throw new Saxon.Ejava.lang.IllegalStateException("saxon:assign binding has not been fixed up");
-            }
-            Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(getSelectExpr().iterate(context));
-            Saxon.Hej.Controller controller = context.getController();
-            System.Diagnostics.Debug.Assert((controller != null));
-            controller.getBindery(getPackageData()).setGlobalVariable(binding, value);
-            return null;
-        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
-            if ("JS".Equals(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions())).target)) {
-                throw new Saxon.Hej.trans.XPathException("Export failure: Saxon-JS does not implement saxon:assign");
+            if ("JS".Equals(@out.getOptions().target)) {
+                throw new Saxon.Hej.trans.XPathException("Export failure: SaxonJS does not implement saxon:assign", Saxon.Hej.trans.SaxonErrorCode.SXJS0001);
             }
             @out.startElement("assign", this);
             @out.emitAttribute("name", binding.getVariableQName());
             getSelectExpr().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.xsltextn.instruct.Assign.AssignElaborator();
+        }
+        private class AssignElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Eej.xsltextn.instruct.Assign expr = (Saxon.Eej.xsltextn.instruct.Assign)(getExpression());
+                if ((expr.binding == null)) {
+                    throw new Saxon.Ejava.lang.IllegalStateException("saxon:assign binding has not been fixed up");
+                }
+                Saxon.Hej.expr.elab.SequenceEvaluator select = expr.getSelectExpr().makeElaborator().eagerly();
+                return (output, context) => {
+                    Saxon.Hej.om.GroundedValue value = (Saxon.Hej.om.GroundedValue)(select.evaluate(context));
+                    Saxon.Hej.Controller controller = context.getController();
+                    System.Diagnostics.Debug.Assert((controller != null));
+                    controller.getBindery(expr.getPackageData()).setGlobalVariable(expr.binding, value);
+                    return null;
+                } ;
+            }
+        
         }
     
     }

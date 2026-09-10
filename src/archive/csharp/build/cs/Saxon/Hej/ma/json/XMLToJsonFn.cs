@@ -12,7 +12,7 @@ namespace Saxon.Hej.ma.json {
         }
         private class Options {
             public bool indent;
-            public Saxon.Hej.om.Function numberFormatter;
+            public Saxon.Hej.om.FunctionItem numberFormatter;
         
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
@@ -35,7 +35,7 @@ namespace Saxon.Hej.ma.json {
                 o.indent = ((Saxon.Hej.value.BooleanValue)(Saxon.Impl.Helpers.MapUtils.Get(options, "indent").head())).getBooleanValue();
                 Saxon.Hej.om.Sequence format = Saxon.Impl.Helpers.MapUtils.Get(options, "number-formatter");
                 if ((format != null)) {
-                    o.numberFormatter = (Saxon.Hej.om.Function)(format.head());
+                    o.numberFormatter = (Saxon.Hej.om.FunctionItem)(format.head());
                 }
                 return o;
             } else {

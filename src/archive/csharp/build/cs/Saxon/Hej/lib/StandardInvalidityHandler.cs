@@ -27,14 +27,13 @@ namespace Saxon.Hej.lib {
             }
             string explanation = getExpandedMessage(failure);
             string constraintReference = getConstraintReferenceMessage(failure);
-            string validationLocation = ((Saxon.Hej.type.ValidationFailure)(failure)).getValidationLocationText();
             string contextLocation = ((Saxon.Hej.type.ValidationFailure)(failure)).getContextLocationText();
             string finalMessage = (((((("Validation error "+getLocationMessage(failure))+"\n  ")+wordWrap(explanation))+wordWrap((contextLocation.Length==0 ? "" : ("\n  "+contextLocation))))+wordWrap(((constraintReference == null) ? "" : ("\n  "+constraintReference))))+formatListOfOffendingNodes((Saxon.Hej.type.ValidationFailure)(failure)));
             localLogger.error(finalMessage);
         }
         public string getLocationMessage(Saxon.Hej.lib.Invalidity err) {
             string locMessage = "";
-            string systemId = null;
+            string systemId;
             Saxon.Hej.om.NodeInfo node = err.getInvalidNode();
             Saxon.Hej.om.AbsolutePath path;
             string nodeMessage = null;
@@ -72,7 +71,7 @@ namespace Saxon.Hej.lib {
             if ((err.getSchemaPart() == -1)) {
                 return null;
             }
-            return ((((("See http://www.w3.org/TR/xmlschema-"+err.getSchemaPart())+"/#")+err.getConstraintName())+" clause ")+err.getConstraintClauseNumber());
+            return ((((("See https://www.w3.org/TR/xmlschema11-"+err.getSchemaPart())+"/#")+err.getConstraintName())+" clause ")+err.getConstraintClauseNumber());
         }
         public virtual Saxon.Hej.om.Sequence endReporting() {
             return Saxon.Hej.value.EmptySequence.getInstance();

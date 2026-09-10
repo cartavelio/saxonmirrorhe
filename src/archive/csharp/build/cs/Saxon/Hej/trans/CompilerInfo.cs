@@ -19,7 +19,7 @@ namespace Saxon.Hej.trans {
         private bool relocatable = false;
         private System.Collections.Generic.IEnumerable<Saxon.Hej.query.QueryLibrary> queryLibraries;
         private Saxon.Hej.expr.parser.OptimizerOptions optimizerOptions;
-        private string defaultNamespaceForElementsAndTypes = "";
+        private Saxon.Hej.om.NamespaceUri defaultNamespaceForElementsAndTypes = Saxon.Hej.om.NamespaceUri.NULL;
         private Saxon.Api.UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy = Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace;
         private int languageVersion = 30;
         public CompilerInfo(Saxon.Hej.Configuration config)  {
@@ -65,9 +65,6 @@ namespace Saxon.Hej.trans {
         public bool isJustInTimeCompilation() {
             return optimizerOptions.isSet(Saxon.Hej.expr.parser.OptimizerOptions.JIT);
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            resourceResolver = new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver);
-        }
         public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
             resourceResolver = resolver;
         }
@@ -109,23 +106,6 @@ namespace Saxon.Hej.trans {
         }
         public Saxon.Hej.expr.parser.OptimizerOptions getOptimizerOptions() {
             return this.optimizerOptions;
-        }
-        public void setGenerateByteCode(bool option) {
-            if (option) {
-                optimizerOptions = optimizerOptions.union(new Saxon.Hej.expr.parser.OptimizerOptions(Saxon.Hej.expr.parser.OptimizerOptions.BYTE_CODE));
-            } else {
-                optimizerOptions = optimizerOptions.except(new Saxon.Hej.expr.parser.OptimizerOptions(Saxon.Hej.expr.parser.OptimizerOptions.BYTE_CODE));
-            }
-        }
-        public bool isGenerateByteCode() {
-            return optimizerOptions.isSet(Saxon.Hej.expr.parser.OptimizerOptions.BYTE_CODE);
-        }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            if ((resourceResolver is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(resourceResolver)).getWrappedURIResolver();
-            } else {
-                return null;
-            }
         }
         public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
             return resourceResolver;
@@ -175,10 +155,10 @@ namespace Saxon.Hej.trans {
         public int getXsltVersion() {
             return languageVersion;
         }
-        public string getDefaultElementNamespace() {
+        public Saxon.Hej.om.NamespaceUri getDefaultElementNamespace() {
             return defaultNamespaceForElementsAndTypes;
         }
-        public void setDefaultElementNamespace(string defaultNamespaceForElementsAndTypes) {
+        public void setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri defaultNamespaceForElementsAndTypes) {
             this.defaultNamespaceForElementsAndTypes = defaultNamespaceForElementsAndTypes;
         }
         public Saxon.Api.UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {

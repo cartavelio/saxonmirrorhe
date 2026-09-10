@@ -74,11 +74,6 @@ namespace Saxon.Hej.expr {
                 intake.iter.close();
             }
         }
-        public void discharge() {
-            foreach (Saxon.Hej.expr.UnionIterator.Intake intake in intakes) {
-                intake.iter.discharge();
-            }
-        }
     
     }
 }

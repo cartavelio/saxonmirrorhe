@@ -30,17 +30,17 @@ namespace Saxon.Hej.@event {
         public virtual void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
             startElement(elemName, type, location, properties);
             foreach (Saxon.Hej.om.NamespaceBinding ns in namespaces) {
-                @namespace(ns.getPrefix(), ns.getURI(), properties);
+                @namespace(ns.getPrefix(), ns.getNamespaceUri(), properties);
             }
             foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                 attribute(att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties());
             }
             startContent();
         }
-        abstract public void @namespace(string prefix, string namespaceUri, int properties);
+        abstract public void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties);
         public virtual void namespaces(Saxon.Hej.om.NamespaceBindingSet bindings, int properties) {
             foreach (Saxon.Hej.om.NamespaceBinding nb in bindings) {
-                @namespace(nb.getPrefix(), nb.getURI(), properties);
+                @namespace(nb.getPrefix(), nb.getNamespaceUri(), properties);
             }
         }
         abstract public void attribute(Saxon.Hej.om.NodeName attName, Saxon.Hej.type.SimpleType typeCode, string value, Saxon.Hej.s9api.Location location, int properties);

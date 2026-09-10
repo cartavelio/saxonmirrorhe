@@ -9,7 +9,6 @@ namespace Saxon.Hej.expr {
         private readonly Saxon.Hej.om.SequenceIterator @base;
         private readonly Saxon.Hej.expr.MappingFunction action;
         private Saxon.Hej.om.SequenceIterator results = null;
-        private bool discharged;
         public MappingIterator(Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.expr.MappingFunction action)  {
             this.@base = @base;
             this.action = action;
@@ -32,9 +31,6 @@ namespace Saxon.Hej.expr {
                     Saxon.Hej.om.Item nextSource = @base.next();
                     if ((nextSource != null)) {
                         Saxon.Hej.om.SequenceIterator obj = action.map(nextSource);
-                        if (discharged) {
-                            obj.discharge();
-                        }
                         if ((obj != null)) {
                             results = obj;
                             nextItem = results.next();
@@ -59,13 +55,6 @@ namespace Saxon.Hej.expr {
                 results.close();
             }
             @base.close();
-        }
-        public void discharge() {
-            if ((results != null)) {
-                results.discharge();
-            }
-            @base.discharge();
-            discharged = true;
         }
     
     }

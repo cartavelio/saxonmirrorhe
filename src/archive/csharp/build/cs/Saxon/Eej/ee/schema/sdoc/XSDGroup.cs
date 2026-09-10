@@ -28,7 +28,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 requireAttribute(atts, "ref");
             }
             string attValue;
-            string name = atts.getValue("", "name");
+            string name = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
             if ((groupDeclaration != null)) {
                 if ((name != null)) {
                     Saxon.Hej.om.StructuredQName qName;
@@ -45,7 +45,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                 }
             }
-            attValue = atts.getValue("", "maxOccurs");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "maxOccurs");
             if (((attValue != null) && (modelGroupParticle != null))) {
                 foundMaxOccurs = true;
                 if ((groupDeclaration != null)) {
@@ -55,7 +55,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     modelGroupParticle.setMaxOccurs(max);
                 }
             }
-            attValue = atts.getValue("", "minOccurs");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "minOccurs");
             if (((attValue != null) && (modelGroupParticle != null))) {
                 foundMinOccurs = true;
                 if ((groupDeclaration != null)) {
@@ -71,7 +71,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     error("maxOccurs must not be less than minOccurs");
                 }
             }
-            attValue = atts.getValue("", "ref");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
             if (((attValue != null) && (modelGroupParticle != null))) {
                 if ((groupDeclaration != null)) {
                     mutuallyExclusiveAttributes("name", "ref");
@@ -160,7 +160,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     return ;
                 }
                 if (!(((Saxon.Eej.ee.schema.sdoc.XSDRedefine)(((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent()))).getExternalSchemaDocumentURI().Equals(originalGroup.getSchemaDocumentURI()))) {
-                    compiler.warning((("The redefined model group was found, but not in the schema document referenced by "+"the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD ")+"specification. However, Saxon does not currently enforce this rule."), this);
+                    compiler.warning((("The redefined model group was found, but not in the schema document referenced by "+"the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD ")+"specification. However, Saxon does not currently enforce this rule."), Saxon.Hej.trans.SaxonErrorCode.SXSD1016, this);
                 }
                 groupDeclaration.setRedefinitionLevel((originalGroup.getRedefinitionLevel()+1));
                 bool found = patchUpSelfReferences(groupDeclaration.getParticles(), groupDeclaration.getModelGroupName(), originalGroup, false);
@@ -186,7 +186,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     if ((gref.getMaxOccurs() != 1)) {
                         error((("Redefined group "+Saxon.Hej.trans.Err.wrap(groupDeclaration.getName()))+" must have maxOccurs=1"));
                     }
-                    string uri = getXSDSchema().getTargetNamespace();
+                    Saxon.Hej.om.NamespaceUri uri = getXSDSchema().getTargetNamespace();
                     string localName = gref.getTargetComponentName().getLocalPart();
                     string newLocalName = ((localName+'_')+gref.GetHashCode());
                     Saxon.Hej.om.StructuredQName newNameCode = new Saxon.Hej.om.StructuredQName("", uri, newLocalName);

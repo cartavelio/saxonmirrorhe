@@ -1,6 +1,4 @@
-using System.Xml;
-using HtmlAgilityPack;
-using Saxon.Api;
+using AngleSharp.Dom;
 using Saxon.Hej.om;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
@@ -8,23 +6,23 @@ using Saxon.Hej.tree.wrapper;
 
 namespace Saxon.Impl.Dom {
     /**
-     * Wraps an HTML DOM tree produced by HTMLAgilityPack. This object represents the document node.
+     * Wraps an HTML DOM tree produced by AngleSharp. This object represents the document node.
      */
     public class HtmlDocumentWrapper : AbstractNodeWrapper, HtmlContainerNodeWrapper, SteppingNode, SiblingCountingNode {
         
         
 
-        private readonly HtmlDocument htmlDocument;
+        private readonly AngleSharp.Dom.IDocument htmlDocument;
         private readonly HtmlNodeWrapper outermostElement;
         
 
-        public HtmlDocumentWrapper(HtmlDocument doc, string baseURI, Saxon.Hej.Configuration config) {
+        public HtmlDocumentWrapper(AngleSharp.Dom.IDocument doc, string baseURI, Saxon.Hej.Configuration config) {
             htmlDocument = doc;
             treeInfo = new GenericTreeInfo(config);
             ((GenericTreeInfo) treeInfo).setSystemId(baseURI);
             ((GenericTreeInfo) treeInfo).setRootNode(this);
-            foreach (HtmlNode node in doc.DocumentNode.ChildNodes) {
-                if (node.NodeType == HtmlNodeType.Element) {
+            foreach (AngleSharp.Dom.INode node in doc.ChildNodes) {
+                if (node.NodeType == AngleSharp.Dom.NodeType.Element) {
                     outermostElement = HtmlNodeWrapper.makeWrapper(node, this, this, 0);
                     break;
                 }
@@ -74,6 +72,10 @@ namespace Saxon.Impl.Dom {
             return "";
         }
 
+        public override NamespaceUri getNamespaceUri() {
+            return NamespaceUri.NULL;
+        }
+
         public override string getPrefix() {
             return "";
         }
@@ -103,7 +105,22 @@ namespace Saxon.Impl.Dom {
         }
 
         protected internal override AxisIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
-            return SingleNodeIterator.makeIterator(outermostElement);
+            //return SingleNodeIterator.makeIterator(outermostElement);
+            if (!htmlDocument.HasChildNodes) {
+                return EmptyIterator.ofNodes();
+            }
+            System.Collections.Generic.List<NodeInfo> childList = new ();
+            int indexPosition = 0;
+            foreach (AngleSharp.Dom.INode child in htmlDocument.ChildNodes) {
+                if (child.NodeType != NodeType.DocumentType) {
+                    HtmlNodeWrapper wrapper = HtmlNodeWrapper.makeWrapper(child, this, this, indexPosition++);
+                    if (nodeTest.test(wrapper)) {
+                        childList.Add(wrapper);
+                    }
+                }
+            }
+
+            return new NodeListIterator(childList);
         }
 
         protected internal override AxisIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
@@ -143,7 +160,7 @@ namespace Saxon.Impl.Dom {
             return null;
         }
 
-        public SteppingNode getSuccessorElement(SteppingNode anchor, string uri, string local) {
+        public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, string local) {
             return outermostElement;
         }
 

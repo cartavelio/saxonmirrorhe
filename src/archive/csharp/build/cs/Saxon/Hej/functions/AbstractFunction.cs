@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions {
-    public abstract class AbstractFunction : Saxon.Hej.om.Function {
+    public abstract class AbstractFunction : Saxon.Hej.om.FunctionItem {
         public virtual Saxon.Hej.expr.OperandRole[] getOperandRoles() {
             Saxon.Hej.expr.OperandRole[] roles = new Saxon.Hej.expr.OperandRole[getArity()];
             Saxon.Ejava.util.Arrays.fill(roles, new Saxon.Hej.expr.OperandRole(0, Saxon.Hej.expr.OperandUsage.NAVIGATION));
@@ -18,7 +18,7 @@ namespace Saxon.Hej.functions {
             return false;
         }
         public Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
-            throw new Saxon.Ejava.lang.UnsupportedOperationException("The string value of a function is not defined");
+            throw new Saxon.Hej.trans.UncheckedXPathException(new Saxon.Hej.trans.XPathException("The string value of a function is not defined", "FOTY0014"));
         }
         public virtual Saxon.Hej.query.AnnotationList getAnnotations() {
             return Saxon.Hej.query.AnnotationList.EMPTY;
@@ -33,7 +33,7 @@ namespace Saxon.Hej.functions {
         public virtual Saxon.Hej.expr.XPathContext makeNewContext(Saxon.Hej.expr.XPathContext callingContext, Saxon.Hej.expr.ContextOriginator originator) {
             return callingContext;
         }
-        public bool deepEquals(Saxon.Hej.om.Function other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
+        public bool deepEquals(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
             throw new Saxon.Hej.trans.XPathException("Argument to deep-equal() contains a function item", "FOTY0015");
         }
         public virtual void export(Saxon.Hej.trace.ExpressionPresenter @out) {
@@ -46,6 +46,16 @@ namespace Saxon.Hej.functions {
             return getDescription();
         }
     
+        /* Expanding default method isSequenceVariadic from interface FunctionItem */
+        public virtual bool isSequenceVariadic() {
+            return false;
+        }
+
+        /* Expanding default method getGenre from interface FunctionItem */
+        public virtual Saxon.Hej.om.Genre getGenre() {
+            return Saxon.Hej.om.Genre.FUNCTION;
+        }
+
         /* Expanding default method reduce from interface Item */
         public virtual Saxon.Hej.om.GroundedValue reduce() {
             return this;
@@ -68,27 +78,17 @@ namespace Saxon.Hej.functions {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */
         public virtual Saxon.Hej.om.Sequence makeRepeatable() {
             return this;
-        }
-
-        /* Expanding default method isSequenceVariadic from interface Function */
-        public virtual bool isSequenceVariadic() {
-            return false;
-        }
-
-        /* Expanding default method getGenre from interface Function */
-        public virtual Saxon.Hej.om.Genre getGenre() {
-            return Saxon.Hej.om.Genre.FUNCTION;
         }
 
         /* Expanding default method head from interface Item */
@@ -122,7 +122,7 @@ namespace Saxon.Hej.functions {
 
         /* Expanding default method iterate from interface Item */
         public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
         /* Expanding default method isStreamed from interface Item */
@@ -130,22 +130,22 @@ namespace Saxon.Hej.functions {
             return false;
         }
 
-        /* Creating stub method getFunctionItemType to satisfy interface Function */
+        /* Creating stub method getFunctionItemType to satisfy interface FunctionItem */
         public virtual Saxon.Hej.type.FunctionItemType getFunctionItemType() {
             throw new System.NotImplementedException();
         }
 
-        /* Creating stub method getFunctionName to satisfy interface Function */
+        /* Creating stub method getFunctionName to satisfy interface FunctionItem */
         public virtual Saxon.Hej.om.StructuredQName getFunctionName() {
             throw new System.NotImplementedException();
         }
 
-        /* Creating stub method getArity to satisfy interface Function */
+        /* Creating stub method getArity to satisfy interface FunctionItem */
         public virtual int getArity() {
             throw new System.NotImplementedException();
         }
 
-        /* Creating stub method getDescription to satisfy interface Function */
+        /* Creating stub method getDescription to satisfy interface FunctionItem */
         public virtual string getDescription() {
             throw new System.NotImplementedException();
         }

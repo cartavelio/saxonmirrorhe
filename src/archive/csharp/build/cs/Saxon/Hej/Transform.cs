@@ -26,11 +26,12 @@ namespace Saxon.Hej {
             options.addRecognizedOption("ea", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Enable assertions");
             options.addRecognizedOption("expand", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Expand attribute defaults from DTD or Schema");
             options.addRecognizedOption("explain", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "Display compiled expression tree and optimization decisions in human-readable form");
-            options.addRecognizedOption("export", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "Display compiled expression tree and optimization decisions for exportation");
+            options.addRecognizedOption("export", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Export compiled stylesheet to specified SEF file");
             options.addRecognizedOption("ext", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Allow calls to Java extension functions and xsl:result-document");
             options.addRecognizedOption("im", (Saxon.Hej.trans.CommandLineOptions.TYPE_QNAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Name of initial mode");
+            options.addRecognizedOption("init", Saxon.Hej.trans.CommandLineOptions.TYPE_CLASSNAME, "User-supplied code to initialize the Saxon Configuration");
             options.addRecognizedOption("it", Saxon.Hej.trans.CommandLineOptions.TYPE_QNAME, "Name of initial template");
-            options.addRecognizedOption("jit", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Just-in-time compilation");
+            options.addRecognizedOption("jit", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Enable just-in-time compilation");
             options.addRecognizedOption("json", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Source JSON file for primary input");
             options.addRecognizedOption("l", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Maintain line numbers for source documents");
             options.addRecognizedOption("lib", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME_LIST|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "List of file names of library packages used by the stylesheet");
@@ -46,16 +47,16 @@ namespace Saxon.Hej {
             options.addRecognizedOption("repeat", (Saxon.Hej.trans.CommandLineOptions.TYPE_INTEGER|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Run N times for performance measurement");
             options.addRecognizedOption("s", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Source XML file for primary input");
             options.addRecognizedOption("sa", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Run in schema-aware mode");
-            options.addRecognizedOption("scmin", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "Pre-load schema in SCM format");
+            options.addRecognizedOption("scmin", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Pre-load schema in SCM format");
             options.addRecognizedOption("strip", (Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Handling of whitespace text nodes in source documents");
             options.setPermittedValues("strip", new string[]{"none", "all", "ignorable"}, null);
             options.addRecognizedOption("t", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Display version and timing information, and names of output files");
             options.addRecognizedOption("target", (Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Target Saxon edition for execution via -export");
-            options.setPermittedValues("target", new string[]{"EE", "PE", "HE", "JS"}, null);
+            options.setPermittedValues("target", new string[]{"EE", "PE", "HE", "JS", "JS2", "JS3"}, null);
             options.addRecognizedOption("T", Saxon.Hej.trans.CommandLineOptions.TYPE_CLASSNAME, "Use named TraceListener class, or standard TraceListener");
             options.addRecognizedOption("Tlevel", Saxon.Hej.trans.CommandLineOptions.TYPE_STRING, "Level of detail for trace listener output");
             options.setPermittedValues("Tlevel", new string[]{"none", "low", "normal", "high"}, "normal");
-            options.addRecognizedOption("Tout", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "File for trace listener output");
+            options.addRecognizedOption("Tout", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "File for trace listener output");
             options.addRecognizedOption("tree", (Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Use specified tree model for source documents");
             options.setPermittedValues("tree", new string[]{"linked", "tiny", "tinyc"}, null);
             options.addRecognizedOption("traceout", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "File for output of trace() and -T output");
@@ -413,14 +414,15 @@ namespace Saxon.Hej {
                     if (isURI) {
                         Saxon.Hej.lib.JJ_ResourceRequest request = new Saxon.Hej.lib.JJ_ResourceRequest();
                         request.relativeUri = styleFileName;
-                        System.Uri cwd = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI();
-                        request.baseUri = cwd.ToString();
+                        System.Uri cwd = getCurrentWorkingDirectory();
+                        request.baseUri = cwd.OriginalString;
                         request.uri = new System.Uri(cwd, styleFileName).ToString();
                         request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
-                        request.purpose = "transformation";
+                        request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
+                        styleSource = request.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     } else {
                         if (styleFileName.Equals("-")) {
-                            string sysId = new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI().OriginalString;
+                            string sysId = getCurrentWorkingDirectory().OriginalString;
                             styleSource = new Saxon.Ejavax.xml.transform.stream.StreamSource(System.Console.In, sysId);
                         } else {
                             Saxon.Hej.trans.packages.PackageLibrary library = config.getDefaultXsltCompilerInfo().getPackageLibrary();
@@ -517,7 +519,9 @@ namespace Saxon.Hej {
                         sheet.explain(@out);
                     }
                     if (export) {
-                        sheet.export(new System.IO.FileStream(exportOutputFileName, System.IO.FileMode.OpenOrCreate));
+                        Saxon.Ejava.io.File sef = new Saxon.Ejava.io.File(exportOutputFileName);
+                        Saxon.Hej.Query.createFileIfNecessary(sef);
+                        sheet.export(new System.IO.FileStream(sef.getPath(), System.IO.FileMode.Create));
                         if (showTime) {
                             config.getLogger().info(("Stylesheet exported to: "+new Saxon.Ejava.io.File(exportOutputFileName).getAbsolutePath()));
                         }
@@ -536,8 +540,9 @@ namespace Saxon.Hej {
                             }
                         }
                     }
-                    if ((options.getOptionValue("TB") != null)) {
-                        config.createByteCodeReport(options.getOptionValue("TB"));
+                    if ((Saxon.Hej.trace.Instrumentation.ACTIVE && !(run))) {
+                        Saxon.Hej.trace.Instrumentation.report();
+                        Saxon.Hej.trace.Instrumentation.reset();
                     }
                 }
             } catch (Saxon.Hej.expr.instruct.TerminationException err) {
@@ -554,6 +559,12 @@ namespace Saxon.Hej {
                 System.Console.Error.WriteLine(err2);
                 quit(((("Fatal error during transformation: "+err2.GetType().Name)+": ")+(((err2.Message == null) ? " (no message)" : err2.Message))), 2);
             }
+        }
+        public void doTransform(string[] args, string command) {
+            doTransform(args);
+        }
+        private static System.Uri getCurrentWorkingDirectory() {
+            return Saxon.Ejava.io.File.CurrentDirectoryUri();
         }
         protected internal void initializeConfiguration(Saxon.Hej.Configuration config) {
         }
@@ -694,7 +705,7 @@ namespace Saxon.Hej {
                 Saxon.Hej.s9api.Xslt30Transformer transformer = newTransformer(sheet, options);
                 Saxon.Hej.s9api.Serializer serializer;
                 if ((outputFile == null)) {
-                    transformer.setBaseOutputURI(new Saxon.Ejava.io.File(Saxon.Ejava.lang.System.getProperty("user.dir")).toURI().OriginalString);
+                    transformer.setBaseOutputURI(getCurrentWorkingDirectory().OriginalString);
                     serializer = processor.newSerializer(System.Console.Out);
                 } else {
                     serializer = processor.newSerializer(outputFile);
@@ -735,8 +746,10 @@ namespace Saxon.Hej {
                         }
                         Saxon.Hej.style.StylesheetPackage top = pss.getTopLevelPackage();
                         if (top.isStripsTypeAnnotations()) {
+                            Saxon.Hej.lib.ParseOptions opt = ((source is Saxon.Hej.lib.AugmentedSource) ? ((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions() : new Saxon.Hej.lib.ParseOptions());
+                            opt = opt.withFilter(receiver => getConfiguration().getAnnotationStripper(receiver));
                             source = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(source);
-                            ((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions().addFilter(receiver => getConfiguration().getAnnotationStripper(receiver));
+                            ((Saxon.Hej.lib.AugmentedSource)(source)).setParseOptions(opt);
                         }
                         Saxon.Api.XdmNode node = builder.build(source);
                         transformer.setGlobalContextItem(node, true);

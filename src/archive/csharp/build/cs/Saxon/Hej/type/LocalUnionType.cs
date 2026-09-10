@@ -8,7 +8,7 @@ namespace Saxon.Hej.type {
             return Saxon.Hej.om.Genre.ATOMIC;
         }
         public virtual Saxon.Hej.om.StructuredQName getTypeName() {
-            return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, ("U"+GetHashCode()));
+            return new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.ANONYMOUS, ("U"+GetHashCode()));
         }
         public LocalUnionType(System.Collections.Generic.IList<Saxon.Hej.type.AtomicType> memberTypes)  {
             this.memberTypes = memberTypes;
@@ -41,10 +41,10 @@ namespace Saxon.Hej.type {
             return false;
         }
         public virtual bool isIdType() {
-            return someMemberTypeSatisfies(x => x.isIdType() /* converted from static method reference */);
+            return someMemberTypeSatisfies(x => x.isIdType() /* method reference */);
         }
         public virtual bool isIdRefType() {
-            return someMemberTypeSatisfies(x => x.isIdRefType() /* converted from static method reference */);
+            return someMemberTypeSatisfies(x => x.isIdRefType() /* method reference */);
         }
         public virtual bool isBuiltInType() {
             return false;
@@ -66,7 +66,7 @@ namespace Saxon.Hej.type {
             return "A";
         }
         public virtual bool isNamespaceSensitive() {
-            return someMemberTypeSatisfies(x => x.isNamespaceSensitive() /* converted from static method reference */);
+            return someMemberTypeSatisfies(x => x.isNamespaceSensitive() /* method reference */);
         }
         public virtual Saxon.Hej.type.ValidationFailure validateContent(Saxon.Hej.str.UnicodeString value, Saxon.Hej.om.NamespaceResolver nsResolver, Saxon.Hej.lib.ConversionRules rules) {
             foreach (Saxon.Hej.type.AtomicType at in memberTypes) {

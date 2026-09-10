@@ -170,7 +170,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     Saxon.Hej.tree.iter.ManualIterator popIter = new Saxon.Hej.tree.iter.ManualIterator(currentGroup[0], groupCounter);
                     c2.setCurrentIterator(popIter);
                     Saxon.Eej.ee.stream.ManualGroupIterator gi = new Saxon.Eej.ee.stream.ManualGroupIterator(currentGroup[0], 1);
-                    gi.setCurrentGroup(currentGroup);
+                    gi.setCurrentGroup(Saxon.Hej.value.SequenceExtent.makeSequenceExtent(currentGroup));
                     gi.setCurrentGroupingKey(currentGroupingKey);
                     c2.setCurrentGroupIterator(gi);
                     ((Saxon.Hej.expr.instruct.ForEachGroup)(getExpression())).getActionExpression().process(getNextOutputter(), c2);
@@ -188,13 +188,15 @@ namespace Saxon.Eej.ee.stream.adjunct {
             public override void close() {
                 Saxon.Hej.expr.instruct.ForEachGroup inst = (Saxon.Hej.expr.instruct.ForEachGroup)(getExpression());
                 Saxon.Hej.expr.Literal pop = Saxon.Hej.expr.Literal.makeLiteral(Saxon.Hej.value.SequenceExtent.makeSequenceExtent(population), inst);
-                Saxon.Hej.expr.sort.GroupIterator groupIterator = inst.getGroupIterator(pop, getContext());
+                Saxon.Hej.expr.sort.GroupIterator groupIterator = inst.getGroupIterator(context => pop.iterate(), getContext());
                 Saxon.Hej.expr.XPathContextMajor c2 = getContext().newContext();
                 Saxon.Hej.om.FocusIterator focusIterator = c2.trackFocus(groupIterator);
                 c2.setCurrentGroupIterator(groupIterator);
                 c2.setCurrentTemplateRule(null);
+                Saxon.Hej.expr.elab.PushEvaluator action = inst.getActionExpression().makeElaborator().elaborateForPush();
+                Saxon.Hej.@event.Outputter output = getNextOutputter();
                 while ((focusIterator.next() != null)) {
-                    inst.getActionExpression().process(getNextOutputter(), c2);
+                    Saxon.Hej.expr.Expression.dispatchTailCall(/*Delegate.processLeavingTail()*/action(output, c2));
                 }
                 base.close();
             }

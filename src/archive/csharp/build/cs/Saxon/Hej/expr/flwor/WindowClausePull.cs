@@ -7,7 +7,6 @@ namespace Saxon.Hej.expr.flwor {
         private readonly Saxon.Hej.expr.flwor.TuplePull source;
         private Saxon.Hej.om.SequenceIterator baseIterator;
         private bool finished = false;
-        private readonly Saxon.Hej.expr.XPathContext context;
         private Saxon.Hej.om.Item previous = null;
         private Saxon.Hej.om.Item current = null;
         private Saxon.Hej.om.Item next = null;
@@ -16,12 +15,11 @@ namespace Saxon.Hej.expr.flwor {
         internal WindowClausePull(Saxon.Hej.expr.flwor.TuplePull source, Saxon.Hej.expr.flwor.WindowClause windowClause, Saxon.Hej.expr.XPathContext context)  {
             this.windowClause = windowClause;
             this.source = source;
-            this.context = context;
         }
         public override bool nextTuple(Saxon.Hej.expr.XPathContext context) {
-            bool deliver = false;
-            bool pending = lookForEarliest();
-            if (pending) {
+            Saxon.Hej.expr.flwor.WindowClause.Window earliest = lookForEarliest();
+            if ((earliest != null)) {
+                processWindow(earliest, context);
                 return true;
             }
             if ((finished || (baseIterator == null))) {
@@ -36,7 +34,6 @@ namespace Saxon.Hej.expr.flwor {
             }
             while (!(finished)) {
                 bool autoclose = (windowClause.isTumblingWindow() && (windowClause.getEndCondition() == null));
-                deliver = false;
                 Saxon.Hej.om.Item oldPrevious = previous;
                 previous = current;
                 current = next;
@@ -53,7 +50,7 @@ namespace Saxon.Hej.expr.flwor {
                             w.endPreviousItem = oldPrevious;
                             w.endNextItem = current;
                             w.endPosition = (position-1);
-                            deliver = despatch(w, context);
+                            earliest = despatch(w, context);
                             currentWindows.Clear();
                         }
                         Saxon.Hej.expr.flwor.WindowClause.Window window = new Saxon.Hej.expr.flwor.WindowClause.Window();
@@ -79,8 +76,8 @@ namespace Saxon.Hej.expr.flwor {
                                 w.endPreviousItem = previous;
                                 w.endNextItem = next;
                                 w.endPosition = position;
-                                if (!(deliver)) {
-                                    deliver = despatch(w, context);
+                                if ((earliest == null)) {
+                                    earliest = despatch(w, context);
                                     if (w.isDespatched()) {
                                         removals.Add(w);
                                     }
@@ -91,18 +88,19 @@ namespace Saxon.Hej.expr.flwor {
                             Saxon.Impl.Helpers.ListUtils.Remove(currentWindows, w);
                         }
                     }
-                    if (deliver) {
+                    if ((earliest != null)) {
+                        processWindow(earliest, context);
                         return true;
                     }
                 }
             }
             return false;
         }
-        private bool despatch(Saxon.Hej.expr.flwor.WindowClause.Window w, Saxon.Hej.expr.XPathContext context) {
+        private Saxon.Hej.expr.flwor.WindowClause.Window despatch(Saxon.Hej.expr.flwor.WindowClause.Window w, Saxon.Hej.expr.XPathContext context) {
             windowClause.checkWindowContents(w);
             return lookForEarliest();
         }
-        private bool lookForEarliest() {
+        private Saxon.Hej.expr.flwor.WindowClause.Window lookForEarliest() {
             int earliestStart = System.Int32.MaxValue;
             Saxon.Hej.expr.flwor.WindowClause.Window earliestWindow = null;
             foreach (Saxon.Hej.expr.flwor.WindowClause.Window u in currentWindows) {
@@ -112,10 +110,10 @@ namespace Saxon.Hej.expr.flwor {
                 }
             }
             if (((earliestWindow == null) || !(earliestWindow.isFinished()))) {
-                return false;
+                return null;
             } else {
-                processWindow(earliestWindow, context);
-                return true;
+                earliestWindow.despatched = true;
+                return earliestWindow;
             }
         }
         private void processWindow(Saxon.Hej.expr.flwor.WindowClause.Window w, Saxon.Hej.expr.XPathContext context) {

@@ -61,11 +61,9 @@ namespace Saxon.Hej.lib {
                     throw Saxon.Hej.trans.XPathException.makeXPathException(err);
                 }
                 rr.nature = Saxon.Hej.lib.NamespaceConstant.OUTPUT;
-                rr.purpose = "serialization";
+                rr.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                 Saxon.Ejavax.xml.transform.Source source = rr.resolve(config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
-                Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
-                options.setSchemaValidationMode(Saxon.Hej.lib.Validation.LAX);
-                options.setDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
+                Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.LAX).withDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
                 Saxon.Hej.om.TreeInfo doc = config.buildDocumentTree(source);
                 Saxon.Hej.serialize.SerializationParamsHandler ph = new Saxon.Hej.serialize.SerializationParamsHandler();
                 ph.setSerializationParams(doc.getRootNode());
@@ -105,6 +103,7 @@ namespace Saxon.Hej.lib {
                         emitter.setPipelineConfiguration(pipe);
                         if ((uWriter == null)) {
                             uWriter = expandedResult.obtainUnicodeWriter();
+                            emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                         }
                         emitter.setUnicodeWriter(uWriter);
                         target = createHTMLSerializer(emitter, @params, pipe);
@@ -117,6 +116,7 @@ namespace Saxon.Hej.lib {
                         if ((uWriter == null)) {
                             System.Diagnostics.Debug.Assert((expandedResult != null));
                             uWriter = expandedResult.obtainUnicodeWriter();
+                            emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                         }
                         emitter.setUnicodeWriter(uWriter);
                         target = createXMLSerializer((Saxon.Hej.serialize.XMLEmitter)(emitter), @params);
@@ -129,6 +129,7 @@ namespace Saxon.Hej.lib {
                         if ((uWriter == null)) {
                             System.Diagnostics.Debug.Assert((expandedResult != null));
                             uWriter = expandedResult.obtainUnicodeWriter();
+                            emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                         }
                         emitter.setUnicodeWriter(uWriter);
                         target = createXHTMLSerializer(emitter, @params, pipe);
@@ -141,6 +142,7 @@ namespace Saxon.Hej.lib {
                         if ((uWriter == null)) {
                             System.Diagnostics.Debug.Assert((expandedResult != null));
                             uWriter = expandedResult.obtainUnicodeWriter();
+                            emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                         }
                         emitter.setUnicodeWriter(uWriter);
                         target = createTextSerializer(emitter, @params);
@@ -153,6 +155,9 @@ namespace Saxon.Hej.lib {
                             uWriter = expandedResult.obtainUnicodeWriter();
                         }
                         Saxon.Hej.serialize.JSONEmitter je = new Saxon.Hej.serialize.JSONEmitter(pipe, uWriter, props);
+                        if ((expandedResult != null)) {
+                            je.setMustClose(expandedResult.isMustCloseAfterUse());
+                        }
                         Saxon.Hej.serialize.JSONSerializer js = new Saxon.Hej.serialize.JSONSerializer(pipe, je, props);
                         string sortOrder = props.getProperty(Saxon.Hej.lib.SaxonOutputKeys.PROPERTY_ORDER);
                         if ((sortOrder != null)) {
@@ -170,6 +175,9 @@ namespace Saxon.Hej.lib {
                         }
                         Saxon.Hej.serialize.AdaptiveEmitter je = new Saxon.Hej.serialize.AdaptiveEmitter(pipe, uWriter);
                         je.setOutputProperties(props);
+                        if ((expandedResult != null)) {
+                            je.setMustClose(expandedResult.isMustCloseAfterUse());
+                        }
                         Saxon.Hej.serialize.CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                         Saxon.Hej.@event.ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);
                         return customizeAdaptiveSerializer(je, props, characterMapExpander, normalizer);
@@ -647,8 +655,14 @@ namespace Saxon.Hej.lib {
         }
         private string checkMethod(string key, string value) {
             if ((((!("xml".Equals(value)) && !("html".Equals(value))) && !("xhtml".Equals(value))) && !("text".Equals(value)))) {
-                if ((!(Saxon.Hej.lib.SaxonOutputKeys.JSON_NODE_OUTPUT_METHOD.Equals(key)) && (("json".Equals(value) || "adaptive".Equals(value))))) {
-                    return value;
+                string allowed;
+                if (Saxon.Hej.lib.SaxonOutputKeys.JSON_NODE_OUTPUT_METHOD.Equals(key)) {
+                    allowed = "xml|html|xhtml|text";
+                } else {
+                    allowed = "xml|html|xhtml|text|json|adaptive";
+                    if (("json".Equals(value) || "adaptive".Equals(value))) {
+                        return value;
+                    }
                 }
                 if (value.StartsWith("{")) {
                     value = ("Q"+value);
@@ -656,7 +670,7 @@ namespace Saxon.Hej.lib {
                 if (isValidEQName(value)) {
                     checkExtensions(value);
                 } else {
-                    throw new Saxon.Hej.trans.XPathException(((("Invalid value ("+value)+") for serialization method: ")+"must be xml|html|xhtml|text|json|adaptive, or a QName in 'Q{uri}local' form"), "SEPM0016");
+                    throw new Saxon.Hej.trans.XPathException(((((("Invalid value ("+value)+") for serialization method: ")+"must be ")+allowed)+", or a QName in 'Q{uri}local' form"), "SEPM0016");
                 }
             }
             return value;

@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.validate {
     public class CompactStringValue : Saxon.Hej.om.AtomicSequence {
-        internal char[] value;
+        private readonly char[] value;
         public CompactStringValue(Saxon.Hej.str.UnicodeString content)  {
             this.value = content.ToString().ToCharArray();
+        }
+        public CompactStringValue(string content)  {
+            this.value = content.ToCharArray();
         }
         public Saxon.Hej.om.Item head() {
             return new Saxon.Hej.value.StringValue(new string(value));
         }
         public Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingleAtomicIterator(((/*1430*/Saxon.Hej.value.StringValue)head()));
+            return Saxon.Hej.tree.iter.SingleAtomicIterator.makeIterator(((/*1430*/Saxon.Hej.value.StringValue)head()));
         }
         public Saxon.Hej.om.Item itemAt(int n) {
             return ((n == 0) ? ((/*1430*/Saxon.Hej.value.StringValue)head()) : null);
@@ -57,6 +60,9 @@ namespace Saxon.Eej.ee.validate {
         public override string ToString() {
             return new string(value);
         }
+        public char[] getChars() {
+            return value;
+        }
     
         /* Expanding default method materialize from interface Sequence */
         public virtual Saxon.Hej.om.GroundedValue materialize() {
@@ -80,12 +86,12 @@ namespace Saxon.Eej.ee.validate {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */

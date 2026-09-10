@@ -12,7 +12,7 @@ namespace Saxon.Api {
     /// </summary>
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class XdmNodeKind : XdmItemType {
-        private int kind;
+        private readonly int kind;
 
         internal XdmNodeKind(NodeKindTest test) : base(test) {
             kind = test.getNodeKind();
@@ -92,6 +92,23 @@ namespace Saxon.Api {
         /// <returns>true if the item matches this item type, false if it does not match.</returns>
         public override bool Matches(XdmItem item) {
             return item.Unwrap() is NodeInfo && kind == ((Saxon.Hej.om.NodeInfo) item.Unwrap()).getNodeKind();
+        }
+
+        /// <summary>
+        /// Ask whether this node kind is the same as another
+        /// </summary>
+        /// <param name="other">The other object</param>
+        /// <returns>True if the argument is the same node kind.</returns>
+        public override bool Equals(object other) {
+            return other is XdmNodeKind nodeKind && kind == nodeKind.kind;
+        }
+
+        /// <summary>
+        /// Get a hash code
+        /// </summary>
+        /// <returns>A suitable hash code</returns>
+        public override int GetHashCode() {
+            return kind;
         }
 
         /// <summary>

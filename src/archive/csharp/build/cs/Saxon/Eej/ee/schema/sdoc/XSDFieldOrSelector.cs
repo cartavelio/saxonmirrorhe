@@ -11,12 +11,13 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.om.AttributeMap atts = attributes();
             string[] allowed = {"id", "xpath", "xpathDefaultNamespace"};
             allowAttributes(atts, allowed);
-            string defaultNS = atts.getValue("", "xpathDefaultNamespace");
-            if ((defaultNS == null)) {
-                defaultNS = getXSDSchema().getXPathDefaultNamespace();
+            Saxon.Hej.om.NamespaceUri defaultNS;
+            string defaultNSstring = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "xpathDefaultNamespace");
+            if ((defaultNSstring == null)) {
+                defaultNSstring = getXSDSchema().getXPathDefaultNamespace();
             }
-            if ((defaultNS != null)) {
-                switch (defaultNS) {
+            if ((defaultNSstring != null)) {
+                switch (defaultNSstring) {
                   case "##defaultNamespace":
                     defaultNS = getURIForPrefix("", true);
                     break ;
@@ -24,19 +25,23 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     defaultNS = getXSDSchema().getTargetNamespace();
                     break ;
                   case "##local":
-                    defaultNS = "";
+                    defaultNS = Saxon.Hej.om.NamespaceUri.NULL;
+                    break ;
+                  default:
+                    defaultNS = Saxon.Hej.om.NamespaceUri.of(defaultNSstring);
                     break ;
                 }
             } else {
-                defaultNS = "";
+                defaultNS = Saxon.Hej.om.NamespaceUri.NULL;
             }
-            string xpath = atts.getValue("", "xpath");
+            string xpath = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "xpath");
             if ((xpath == null)) {
                 missingAttribute("xpath");
                 xpath = ".";
             }
             Saxon.Eej.ee.schema.sdoc.SchemaElement.XPathStaticContext env = new Saxon.Eej.ee.schema.sdoc.SchemaElement.XPathStaticContext(this);
             env.setDefaultElementNamespace(defaultNS);
+            env.setXPathLanguageLevel(20);
             Saxon.Hej.pattern.Pattern selector;
             Saxon.Hej.expr.Expression exp;
             try {
@@ -62,7 +67,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             processId();
             if (isField) {
-                string order = Saxon.Hej.value.Whitespace.trim(getAttributeValue(Saxon.Hej.lib.NamespaceConstant.SAXON, "order"));
+                string order = Saxon.Hej.value.Whitespace.trim(getAttributeValue(Saxon.Hej.om.NamespaceUri.SAXON, "order"));
                 bool ascending = true;
                 if ((order != null)) {
                     switch (order) {

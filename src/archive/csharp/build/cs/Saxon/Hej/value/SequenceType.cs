@@ -19,6 +19,7 @@ namespace Saxon.Hej.value {
         public static readonly Saxon.Hej.value.SequenceType SINGLE_INTEGER = Saxon.Hej.type.BuiltInAtomicType.INTEGER.one();
         public static readonly Saxon.Hej.value.SequenceType SINGLE_DECIMAL = Saxon.Hej.type.BuiltInAtomicType.DECIMAL.one();
         public static readonly Saxon.Hej.value.SequenceType OPTIONAL_INTEGER = Saxon.Hej.type.BuiltInAtomicType.INTEGER.zeroOrOne();
+        public static readonly Saxon.Hej.value.SequenceType INTEGER_SEQUENCE = Saxon.Hej.type.BuiltInAtomicType.INTEGER.zeroOrMore();
         public static readonly Saxon.Hej.value.SequenceType SINGLE_SHORT = Saxon.Hej.type.BuiltInAtomicType.SHORT.one();
         public static readonly Saxon.Hej.value.SequenceType OPTIONAL_SHORT = Saxon.Hej.type.BuiltInAtomicType.SHORT.zeroOrOne();
         public static readonly Saxon.Hej.value.SequenceType SINGLE_BYTE = Saxon.Hej.type.BuiltInAtomicType.BYTE.one();
@@ -96,8 +97,7 @@ namespace Saxon.Hej.value {
         public bool matches(Saxon.Hej.om.GroundedValue value, Saxon.Hej.type.TypeHierarchy th) {
             int count = 0;
             Saxon.Hej.om.SequenceIterator iter = value.iterate();
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 count++;
                 if (!(primaryType.matches(item, th))) {
                     return false;
@@ -108,8 +108,7 @@ namespace Saxon.Hej.value {
         public Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.GroundedValue value, Saxon.Hej.type.TypeHierarchy th) {
             int count = 0;
             Saxon.Hej.om.SequenceIterator iter = value.iterate();
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 count++;
                 if (!(primaryType.matches(item, th))) {
                     string s = (("The "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal(count))+" item is not an instance of the required type");

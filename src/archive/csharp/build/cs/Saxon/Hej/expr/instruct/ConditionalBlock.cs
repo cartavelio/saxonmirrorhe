@@ -147,7 +147,7 @@ namespace Saxon.Hej.expr.instruct {
                 }
             }
             if (alwaysEmpty) {
-                visitor.getStaticContext().issueWarning(("The result of the sequence constructor will always be empty, so xsl:on-empty "+"instructions will always be evaluated, and xsl:on-non-empty instructions will never be evaluated"), getLocation());
+                visitor.getStaticContext().issueWarning(("The result of the sequence constructor will always be empty, so xsl:on-empty "+"instructions will always be evaluated, and xsl:on-non-empty instructions will never be evaluated"), Saxon.Hej.trans.SaxonErrorCode.SXWN9029, getLocation());
                 System.Collections.Generic.IList<Saxon.Hej.expr.Expression> retain = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>();
                 for (int c = 0; (c<size()); c++) {
                     if ((getChildExpression(c) is Saxon.Hej.expr.instruct.OnNonEmptyExpr)) {
@@ -162,7 +162,7 @@ namespace Saxon.Hej.expr.instruct {
                 return Saxon.Hej.expr.instruct.Block.makeBlock(retain);
             }
             if (alwaysNonEmpty) {
-                visitor.getStaticContext().issueWarning(("The result of the sequence constructor will never be empty, so xsl:on-empty "+"instructions will never be evaluated, and xsl:on-non-empty instructions will always be evaluated"), getLocation());
+                visitor.getStaticContext().issueWarning(("The result of the sequence constructor will never be empty, so xsl:on-empty "+"instructions will never be evaluated, and xsl:on-non-empty instructions will always be evaluated"), Saxon.Hej.trans.SaxonErrorCode.SXWN9029, getLocation());
                 System.Collections.Generic.IList<Saxon.Hej.expr.Expression> retain = new System.Collections.Generic.List<Saxon.Hej.expr.Expression>();
                 for (int c = 0; (c<size()); c++) {
                     if ((getChildExpression(c) is Saxon.Hej.expr.instruct.OnEmptyExpr)) {
@@ -204,50 +204,77 @@ namespace Saxon.Hej.expr.instruct {
         public override string toShortString() {
             return (("("+getChildExpression(0).toShortString())+", ...)");
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            System.Collections.Generic.IList<Saxon.Hej.expr.instruct.OnNonEmptyExpr> onNonEmptyPending = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.OnNonEmptyExpr>();
-            Saxon.Hej.om.Action action = () => {
-                foreach (Saxon.Hej.expr.Expression e in onNonEmptyPending) {
-                    e.process(output, context);
-                }
-            } ;
-            Saxon.Hej.@event.SignificantItemDetector significantItemDetector = new Saxon.Hej.@event.SignificantItemDetector(output, action);
-            foreach (Saxon.Hej.expr.Operand o in operands()) {
-                Saxon.Hej.expr.Expression child = o.getChildExpression();
-                try {
-                    if ((child is Saxon.Hej.expr.instruct.OnEmptyExpr)) {
-                    } else {
-                        if ((child is Saxon.Hej.expr.instruct.OnNonEmptyExpr)) {
-                            if (significantItemDetector.isEmpty()) {
-                                onNonEmptyPending.Add((Saxon.Hej.expr.instruct.OnNonEmptyExpr)(child));
-                            } else {
-                                child.process(output, context);
-                            }
-                        } else {
-                            child.process(significantItemDetector, context);
-                        }
-                    }
-                } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(child.getLocation());
-                    e.maybeSetContext(context);
-                    throw;
-                }
-            }
-            if (significantItemDetector.isEmpty()) {
-                foreach (Saxon.Hej.expr.Operand o in operands()) {
-                    Saxon.Hej.expr.Expression child = o.getChildExpression();
-                    if ((child is Saxon.Hej.expr.instruct.OnEmptyExpr)) {
-                        child.process(output, context);
-                    }
-                }
-            }
-            return null;
-        }
         public override int getImplementationMethod() {
             return PROCESS_METHOD;
         }
         public override string getStreamerName() {
             return "ConditionalBlock";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.ConditionalBlock.ConditionalBlockElaborator();
+        }
+        private class ConditionalBlockElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            private const int ON_EMPTY = 0;
+            private const int ON_NON_EMPTY = 1;
+            private const int ALWAYS = 2;
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.ConditionalBlock expr = (Saxon.Hej.expr.instruct.ConditionalBlock)(getExpression());
+                Saxon.Hej.expr.elab.PushEvaluator[] pushers = new Saxon.Hej.expr.elab.PushEvaluator[expr.operanda.Length];
+                int[] instruction = new int[expr.operanda.Length];
+                for (int i = 0; (i<pushers.Length); i++) {
+                    Saxon.Hej.expr.Expression child = expr.operanda[i].getChildExpression();
+                    pushers[i] = child.makeElaborator().elaborateForPush();
+                    if ((child is Saxon.Hej.expr.instruct.OnEmptyExpr)) {
+                        instruction[i] = ON_EMPTY;
+                    } else {
+                        if ((child is Saxon.Hej.expr.instruct.OnNonEmptyExpr)) {
+                            instruction[i] = ON_NON_EMPTY;
+                        } else {
+                            instruction[i] = ALWAYS;
+                        }
+                    }
+                }
+                return (output, context) => {
+                    System.Collections.Generic.IList<Saxon.Hej.expr.elab.PushEvaluator> onNonEmptyPending = new System.Collections.Generic.List<Saxon.Hej.expr.elab.PushEvaluator>();
+                    Saxon.Hej.om.Action action = () => {
+                        foreach (Saxon.Hej.expr.elab.PushEvaluator e in onNonEmptyPending) {
+                            dispatchTailCall(/*Delegate.processLeavingTail()*/e(output, context));
+                        }
+                    } ;
+                    Saxon.Hej.@event.SignificantItemDetector significantItemDetector = new Saxon.Hej.@event.SignificantItemDetector(output, action);
+                    for (int i = 0; (i<instruction.Length); i++) {
+                        try {
+                            switch (instruction[i]) {
+                              case ON_EMPTY:
+                                break ;
+                              case ON_NON_EMPTY:
+                                if (significantItemDetector.isEmpty()) {
+                                    onNonEmptyPending.Add(pushers[i]);
+                                } else {
+                                    dispatchTailCall(/*Delegate.processLeavingTail()*/pushers[i](output, context));
+                                }
+                                break ;
+                              case ALWAYS:
+                                dispatchTailCall(/*Delegate.processLeavingTail()*/pushers[i](significantItemDetector, context));
+                                break ;
+                            }
+                        } catch (Saxon.Hej.trans.XPathException e) {
+                            e.maybeSetLocation(expr.operanda[i].getChildExpression().getLocation());
+                            e.maybeSetContext(context);
+                            throw;
+                        }
+                    }
+                    if (significantItemDetector.isEmpty()) {
+                        for (int i = 0; (i<instruction.Length); i++) {
+                            if ((instruction[i] == ON_EMPTY)) {
+                                dispatchTailCall(/*Delegate.processLeavingTail()*/pushers[i](output, context));
+                            }
+                        }
+                    }
+                    return null;
+                } ;
+            }
+        
         }
     
     }

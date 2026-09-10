@@ -67,7 +67,7 @@ namespace Saxon.Hej.style {
         }
         private Saxon.Hej.type.ItemType makeItemType(Saxon.Hej.expr.StaticContext env) {
             try {
-                Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false, env.getXPathVersion());
+                Saxon.Hej.expr.parser.XPathParser parser = getConfiguration().newExpressionParser("XP", false);
                 Saxon.Hej.om.QNameParser qp = new Saxon.Hej.om.QNameParser(env.getNamespaceResolver()).withAcceptEQName(true).withErrorOnBadSyntax("XPST0003").withErrorOnUnresolvedPrefix("XPST0081");
                 parser.setQNameParser(qp);
                 string typeAtt = getAttributeValue("as");
@@ -89,7 +89,7 @@ namespace Saxon.Hej.style {
             return null;
         }
         private class TypeAliasContext : Saxon.Hej.style.ExpressionContext {
-            public TypeAliasContext(Saxon.Hej.style.XSLItemType declaration) : base (declaration, new Saxon.Hej.om.StructuredQName("", "", "as")) {
+            public TypeAliasContext(Saxon.Hej.style.XSLItemType declaration) : base (declaration, new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "as")) {
             }
             public override Saxon.Hej.type.ItemType resolveTypeAlias(Saxon.Hej.om.StructuredQName typeName) {
                 Saxon.Hej.type.ItemType resolved = base.resolveTypeAlias(typeName);

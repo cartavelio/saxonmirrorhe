@@ -63,11 +63,11 @@ namespace Saxon.Eej.trans {
         protected internal override void readSchemaNamespaces(Saxon.Hej.om.NodeInfo packageElement) {
             Saxon.Hej.Configuration config = getConfiguration();
             foreach (Saxon.Hej.om.NodeInfo varElement in packageElement.children(Saxon.Hej.pattern.NodeSelector.of(n => n.getLocalPart().Equals("schema")))) {
-                string ns = varElement.getAttributeValue("", "ns");
-                if ((!(config.isSchemaAvailable(ns)) && !(ns.Equals(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS)))) {
+                string ns = varElement.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "ns");
+                if ((!(config.isSchemaAvailable(Saxon.Hej.om.NamespaceUri.of(ns))) && !(ns.Equals(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS)))) {
                     throw new Saxon.Hej.trans.XPathException((("The XSLT package requires access to "+((ns.Length==0 ? "a no-namespace schema" : ("a schema for namespace "+ns))))+", but this is not available in this Configuration"), Saxon.Hej.trans.SaxonErrorCode.SXPK0003);
                 }
-                packStack.Peek().getSchemaNamespaces().Add(ns);
+                packStack.Peek().getSchemaNamespaces().Add(Saxon.Hej.om.NamespaceUri.of(ns));
             }
         }
         protected internal override Saxon.Hej.expr.instruct.UserFunction makeFunction(string flags) {
@@ -85,6 +85,9 @@ namespace Saxon.Eej.trans {
                 return base.processComponentReference(pack, call);
             }
             return false;
+        }
+        protected internal override void addVendorFunctionLibrary(Saxon.Hej.functions.FunctionLibraryList targetList, Saxon.Hej.Configuration config) {
+            targetList.addFunctionLibrary(((Saxon.Eej.config.ProfessionalConfiguration)(config)).getVendorFunctionSet());
         }
     
     }

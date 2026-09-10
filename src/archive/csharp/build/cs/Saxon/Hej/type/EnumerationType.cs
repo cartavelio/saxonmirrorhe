@@ -101,7 +101,7 @@ namespace Saxon.Hej.type {
         public string getName() {
             return null;
         }
-        public string getTargetNamespace() {
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
             return null;
         }
         public int getFingerprint() {
@@ -163,7 +163,7 @@ namespace Saxon.Hej.type {
         public int getRedefinitionLevel() {
             return 0;
         }
-        public Saxon.Hej.om.Function getComponentAsFunction() {
+        public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     

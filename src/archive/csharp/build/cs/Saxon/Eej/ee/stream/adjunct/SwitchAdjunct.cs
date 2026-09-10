@@ -35,9 +35,9 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     }
                     return actionInversion.getWatch(watchManager, @out, context);
                 } else {
-                    Saxon.Hej.om.SequenceTool.supply(action.iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(it => @out.append(it) /* converted from instance method reference */));
+                    Saxon.Hej.om.SequenceTool.supply(action.iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(/* Unresolved method reference */@out.append));
                 }
-                return new Saxon.Eej.ee.stream.watch.Trigger(new Saxon.Hej.pattern.NodeTestPattern(Saxon.Hej.type.ErrorType.getInstance()), new Saxon.Eej.ee.stream.feed.FilteringFeed(@out, context, Saxon.Eej.ee.stream.feed.FilteringFeed.OpaqueFilter), context);
+                return new Saxon.Eej.ee.stream.watch.Trigger(new Saxon.Hej.pattern.NodeTestPattern(Saxon.Hej.type.ErrorType.getInstance()), new Saxon.Eej.ee.stream.feed.FilteringFeed(watchManager, @out, context, Saxon.Eej.ee.stream.feed.FilteringFeed.OpaqueFilter), context);
             } ;
         }
         public override Saxon.Eej.ee.stream.watch.Trigger makeTransmissionFlow(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression exp, Saxon.Eej.ee.stream.feed.ItemFeed @out, Saxon.Hej.expr.XPathContext context) {

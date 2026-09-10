@@ -142,14 +142,14 @@ namespace Saxon.Eej.ee.schema {
             serializer.startElement("assertion");
             serializer.emitNamespaceContext(staticContext.getNamespaceResolver());
             serializer.emitAttribute("test", getConditionText());
-            serializer.emitAttribute("defaultNamespace", staticContext.getDefaultElementNamespace());
+            serializer.emitAttribute("defaultNamespace", staticContext.getDefaultElementNamespace().ToString());
             serializer.emitAttribute("xml:base", staticContext.getStaticBaseURI());
             if ((sweep != Saxon.Eej.ee.stream.Sweep.FREE_RANGING)) {
                 serializer.emitAttribute("sweep", sweep.ToString());
             }
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.Assertion thisAssertion = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();

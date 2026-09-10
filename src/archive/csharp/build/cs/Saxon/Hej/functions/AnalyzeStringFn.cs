@@ -21,16 +21,16 @@ namespace Saxon.Hej.functions {
             return false;
         }
         private void init(Saxon.Hej.Configuration config, bool schemaAware) { lock(this) {
-            vocab.resultName = new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.lib.NamespaceConstant.FN, "analyze-string-result");
-            vocab.nonMatchName = new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.lib.NamespaceConstant.FN, "non-match");
-            vocab.matchName = new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.lib.NamespaceConstant.FN, "match");
-            vocab.groupName = new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.lib.NamespaceConstant.FN, "group");
+            vocab.resultName = new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.FN, "analyze-string-result");
+            vocab.nonMatchName = new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.FN, "non-match");
+            vocab.matchName = new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.FN, "match");
+            vocab.groupName = new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.FN, "group");
             vocab.groupNrName = new Saxon.Hej.om.NoNamespaceName("nr");
             if (schemaAware) {
-                vocab.resultType = config.getSchemaType(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.FN, "analyze-string-result-type"));
+                vocab.resultType = config.getSchemaType(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.FN, "analyze-string-result-type"));
                 vocab.nonMatchType = Saxon.Hej.type.BuiltInAtomicType.STRING;
-                vocab.matchType = config.getSchemaType(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.FN, "match-type"));
-                vocab.groupType = config.getSchemaType(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.lib.NamespaceConstant.FN, "group-type"));
+                vocab.matchType = config.getSchemaType(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.FN, "match-type"));
+                vocab.groupType = config.getSchemaType(new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.FN, "group-type"));
                 vocab.groupNrType = Saxon.Hej.type.BuiltInAtomicType.POSITIVE_INTEGER;
                 if ((((vocab.resultType == null) || (vocab.matchType == null)) || (vocab.groupType == null))) {
                     throw new Saxon.Hej.trans.XPathException("Schema for analyze-string has not been successfully loaded");
@@ -51,7 +51,7 @@ namespace Saxon.Hej.functions {
                 bool schemaAware = context.getController().getExecutable().isSchemaAware();
                 Saxon.Hej.Configuration config = context.getConfiguration();
                 lock (config) {
-                    if ((schemaAware && !(config.isSchemaAvailable(Saxon.Hej.lib.NamespaceConstant.FN)))) {
+                    if ((schemaAware && !(config.isSchemaAvailable(Saxon.Hej.om.NamespaceUri.FN)))) {
                         config.addSchemaSource(/*134*/Saxon.Eej.ee.config.StandardSchemaResolver.fetchResource("xpath-functions.scm", config));
                     }
                 }
@@ -61,11 +61,11 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.@event.ComplexContentOutputter @out = new Saxon.Hej.@event.ComplexContentOutputter(builder);
             Saxon.Hej.functions.AnalyzeStringFn.LocalRegexMatchHandler handler = new Saxon.Hej.functions.AnalyzeStringFn.LocalRegexMatchHandler(@out, vocab);
             builder.setBaseURI(getStaticBaseUriString());
+            builder.setDurability(Saxon.Hej.om.Durability.TEMPORARY);
             @out.open();
             @out.startElement(vocab.resultName, vocab.resultType, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
             @out.startContent();
-            Saxon.Hej.om.Item item;
-            while (((item = ((/*1430*/Saxon.Hej.value.StringValue)iter.next())) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = ((/*1430*/Saxon.Hej.value.StringValue)iter.next())) != null); ) {
                 if (iter.isMatching()) {
                     @out.startElement(vocab.matchName, vocab.matchType, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
                     @out.startContent();

@@ -7,6 +7,8 @@ namespace Saxon.Hej.trans {
         }
         public UncheckedXPathException(string message) : base (new Saxon.Hej.trans.XPathException(message)) {
         }
+        public UncheckedXPathException(string message, string errorCode) : base (new Saxon.Hej.trans.XPathException(message, errorCode)) {
+        }
         public UncheckedXPathException(System.Exception cause) : base (new Saxon.Hej.trans.XPathException(cause)) {
         }
         public Saxon.Hej.trans.XPathException getXPathException() {

@@ -5,65 +5,65 @@ namespace Saxon.Eej.ee.stream.adjunct {
     public class StreamingAdjunct {
 
         static StreamingAdjunct() {
-            map("AdjacentTextNodeMerger", typeof(Saxon.Eej.ee.stream.adjunct.AdjacentTextNodeMergerAdjunct));
-            map("ApplyImports", typeof(Saxon.Eej.ee.stream.adjunct.ApplyImportsAdjunct));
-            map("ApplyTemplates", typeof(Saxon.Eej.ee.stream.adjunct.ApplyTemplatesAdjunct));
-            map("ArrayBlock", typeof(Saxon.Eej.ee.stream.adjunct.ArrayBlockAdjunct));
-            map("AtomicSequenceConverter", typeof(Saxon.Eej.ee.stream.adjunct.AtomicSequenceConverterAdjunct));
-            map("Atomizer", typeof(Saxon.Eej.ee.stream.adjunct.AtomizerAdjunct));
-            map("AxisExpression", typeof(Saxon.Eej.ee.stream.adjunct.AxisExpressionAdjunct));
-            map("Block", typeof(Saxon.Eej.ee.stream.adjunct.BlockAdjunct));
-            map("CallTemplate", typeof(Saxon.Eej.ee.stream.adjunct.CallTemplateAdjunct));
-            map("CardinalityChecker", typeof(Saxon.Eej.ee.stream.adjunct.CardinalityCheckerAdjunct));
-            map("Choose", typeof(Saxon.Eej.ee.stream.adjunct.ChooseAdjunct));
-            map("ConditionalBlock", typeof(Saxon.Eej.ee.stream.adjunct.ConditionalBlockAdjunct));
-            map("ContextItemExpr", typeof(Saxon.Eej.ee.stream.adjunct.ContextItemExprAdjunct));
-            map("Copy", typeof(Saxon.Eej.ee.stream.adjunct.CopyAdjunct));
-            map("CopyOf", typeof(Saxon.Eej.ee.stream.adjunct.CopyOfAdjunct));
-            map("CurrentGroup", typeof(Saxon.Eej.ee.stream.adjunct.CurrentGroupStreamer));
-            map("DocumentInstr", typeof(Saxon.Eej.ee.stream.adjunct.DocumentInstrAdjunct));
-            map("DocumentSorterAdjunct", typeof(Saxon.Eej.ee.stream.adjunct.DocumentSorterAdjunct));
-            map("ElementCreator", typeof(Saxon.Eej.ee.stream.adjunct.ElementCreatorAdjunct));
-            map("EmptyTextNodeRemover", typeof(Saxon.Eej.ee.stream.adjunct.EmptyTextNodeRemoverAdjunct));
-            map("FilterExpression", typeof(Saxon.Eej.ee.stream.adjunct.FilterExpressionAdjunct));
-            map("FirstItemExpression", typeof(Saxon.Eej.ee.stream.adjunct.FirstItemExpressionAdjunct));
-            map("ForEach", typeof(Saxon.Eej.ee.stream.adjunct.ForEachAdjunct));
-            map("ForEachGroup", typeof(Saxon.Eej.ee.stream.adjunct.ForEachGroupAdjunct));
-            map("ForExpression", typeof(Saxon.Eej.ee.stream.adjunct.ForExpressionAdjunct));
-            map("Fork", typeof(Saxon.Eej.ee.stream.adjunct.ForkAdjunct));
-            map("GeneralComparison", typeof(Saxon.Eej.ee.stream.adjunct.GeneralComparisonAdjunct));
-            map("InstanceOf", typeof(Saxon.Eej.ee.stream.adjunct.InstanceOfAdjunct));
-            map("IsLastExpr", typeof(Saxon.Eej.ee.stream.adjunct.IsLastExprAdjunct));
-            map("ItemChecker", typeof(Saxon.Eej.ee.stream.adjunct.ItemCheckerAdjunct));
-            map("Iterate", typeof(Saxon.Eej.ee.stream.adjunct.IterateAdjunct));
-            map("Literal", typeof(Saxon.Eej.ee.stream.adjunct.LiteralAdjunct));
-            map("MergeInstr", typeof(Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct));
-            map("NextIteration", typeof(Saxon.Eej.ee.stream.adjunct.NextIterationAdjunct));
-            map("NextMatch", typeof(Saxon.Eej.ee.stream.adjunct.NextMatchAdjunct));
-            map("OnEmpty", typeof(Saxon.Eej.ee.stream.adjunct.OnEmptyAdjunct));
-            map("OnNonEmpty", typeof(Saxon.Eej.ee.stream.adjunct.OnNonEmptyAdjunct));
-            map("RootExpression", typeof(Saxon.Eej.ee.stream.adjunct.RootExpressionAdjunct));
-            map("ResultDocument", typeof(Saxon.Eej.ee.stream.adjunct.ResultDocumentAdjunct));
-            map("SequenceInstr", typeof(Saxon.Eej.ee.stream.adjunct.SequenceInstrAdjunct));
-            map("SimpleNodeConstructor", typeof(Saxon.Eej.ee.stream.adjunct.SimpleNodeConstructorAdjunct));
-            map("SingletonAtomizer", typeof(Saxon.Eej.ee.stream.adjunct.SingletonAtomizerAdjunct));
-            map("SlashExpression", typeof(Saxon.Eej.ee.stream.adjunct.ForEachAdjunct));
-            map("SortExpression", typeof(Saxon.Eej.ee.stream.adjunct.SortExpressionAdjunct));
-            map("SubscriptExpression", typeof(Saxon.Eej.ee.stream.adjunct.SubscriptExpressionAdjunct));
-            map("SwitchExpression", typeof(Saxon.Eej.ee.stream.adjunct.SwitchAdjunct));
-            map("TailExpression", typeof(Saxon.Eej.ee.stream.adjunct.TailExpressionAdjunct));
-            map("TraceExpr", typeof(Saxon.Eej.ee.stream.adjunct.TraceExprAdjunct));
-            map("TryCatch", typeof(Saxon.Eej.ee.stream.adjunct.TryCatchAdjunct));
-            map("UseAttributeSet", typeof(Saxon.Eej.ee.stream.adjunct.UseAttributeSetAdjunct));
-            map("VariableReference", typeof(Saxon.Eej.ee.stream.adjunct.VariableReferenceAdjunct));
-            map("VennExpression", typeof(Saxon.Eej.ee.stream.adjunct.VennExpressionAdjunct));
-            map("WherePopulated", typeof(Saxon.Eej.ee.stream.adjunct.WherePopulatedAdjunct));
+            map("AdjacentTextNodeMerger", () => new Saxon.Eej.ee.stream.adjunct.AdjacentTextNodeMergerAdjunct());
+            map("ApplyImports", () => new Saxon.Eej.ee.stream.adjunct.ApplyImportsAdjunct());
+            map("ApplyTemplates", () => new Saxon.Eej.ee.stream.adjunct.ApplyTemplatesAdjunct());
+            map("ArrayBlock", () => new Saxon.Eej.ee.stream.adjunct.ArrayBlockAdjunct());
+            map("AtomicSequenceConverter", () => new Saxon.Eej.ee.stream.adjunct.AtomicSequenceConverterAdjunct());
+            map("Atomizer", () => new Saxon.Eej.ee.stream.adjunct.AtomizerAdjunct());
+            map("AxisExpression", () => new Saxon.Eej.ee.stream.adjunct.AxisExpressionAdjunct());
+            map("Block", () => new Saxon.Eej.ee.stream.adjunct.BlockAdjunct());
+            map("CallTemplate", () => new Saxon.Eej.ee.stream.adjunct.CallTemplateAdjunct());
+            map("CardinalityChecker", () => new Saxon.Eej.ee.stream.adjunct.CardinalityCheckerAdjunct());
+            map("Choose", () => new Saxon.Eej.ee.stream.adjunct.ChooseAdjunct());
+            map("ConditionalBlock", () => new Saxon.Eej.ee.stream.adjunct.ConditionalBlockAdjunct());
+            map("ContextItemExpr", () => new Saxon.Eej.ee.stream.adjunct.ContextItemExprAdjunct());
+            map("Copy", () => new Saxon.Eej.ee.stream.adjunct.CopyAdjunct());
+            map("CopyOf", () => new Saxon.Eej.ee.stream.adjunct.CopyOfAdjunct());
+            map("CurrentGroup", () => new Saxon.Eej.ee.stream.adjunct.CurrentGroupStreamer());
+            map("DocumentInstr", () => new Saxon.Eej.ee.stream.adjunct.DocumentInstrAdjunct());
+            map("DocumentSorterAdjunct", () => new Saxon.Eej.ee.stream.adjunct.DocumentSorterAdjunct());
+            map("ElementCreator", () => new Saxon.Eej.ee.stream.adjunct.ElementCreatorAdjunct());
+            map("EmptyTextNodeRemover", () => new Saxon.Eej.ee.stream.adjunct.EmptyTextNodeRemoverAdjunct());
+            map("FilterExpression", () => new Saxon.Eej.ee.stream.adjunct.FilterExpressionAdjunct());
+            map("FirstItemExpression", () => new Saxon.Eej.ee.stream.adjunct.FirstItemExpressionAdjunct());
+            map("ForEach", () => new Saxon.Eej.ee.stream.adjunct.ForEachAdjunct());
+            map("ForEachGroup", () => new Saxon.Eej.ee.stream.adjunct.ForEachGroupAdjunct());
+            map("ForExpression", () => new Saxon.Eej.ee.stream.adjunct.ForExpressionAdjunct());
+            map("Fork", () => new Saxon.Eej.ee.stream.adjunct.ForkAdjunct());
+            map("GeneralComparison", () => new Saxon.Eej.ee.stream.adjunct.GeneralComparisonAdjunct());
+            map("InstanceOf", () => new Saxon.Eej.ee.stream.adjunct.InstanceOfAdjunct());
+            map("IsLastExpr", () => new Saxon.Eej.ee.stream.adjunct.IsLastExprAdjunct());
+            map("ItemChecker", () => new Saxon.Eej.ee.stream.adjunct.ItemCheckerAdjunct());
+            map("Iterate", () => new Saxon.Eej.ee.stream.adjunct.IterateAdjunct());
+            map("Literal", () => new Saxon.Eej.ee.stream.adjunct.LiteralAdjunct());
+            map("MergeInstr", () => new Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct());
+            map("NextIteration", () => new Saxon.Eej.ee.stream.adjunct.NextIterationAdjunct());
+            map("NextMatch", () => new Saxon.Eej.ee.stream.adjunct.NextMatchAdjunct());
+            map("OnEmpty", () => new Saxon.Eej.ee.stream.adjunct.OnEmptyAdjunct());
+            map("OnNonEmpty", () => new Saxon.Eej.ee.stream.adjunct.OnNonEmptyAdjunct());
+            map("RootExpression", () => new Saxon.Eej.ee.stream.adjunct.RootExpressionAdjunct());
+            map("ResultDocument", () => new Saxon.Eej.ee.stream.adjunct.ResultDocumentAdjunct());
+            map("SequenceInstr", () => new Saxon.Eej.ee.stream.adjunct.SequenceInstrAdjunct());
+            map("SimpleNodeConstructor", () => new Saxon.Eej.ee.stream.adjunct.SimpleNodeConstructorAdjunct());
+            map("SingletonAtomizer", () => new Saxon.Eej.ee.stream.adjunct.SingletonAtomizerAdjunct());
+            map("SlashExpression", () => new Saxon.Eej.ee.stream.adjunct.ForEachAdjunct());
+            map("SortExpression", () => new Saxon.Eej.ee.stream.adjunct.SortExpressionAdjunct());
+            map("SubscriptExpression", () => new Saxon.Eej.ee.stream.adjunct.SubscriptExpressionAdjunct());
+            map("SwitchExpression", () => new Saxon.Eej.ee.stream.adjunct.SwitchAdjunct());
+            map("TailExpression", () => new Saxon.Eej.ee.stream.adjunct.TailExpressionAdjunct());
+            map("TraceExpr", () => new Saxon.Eej.ee.stream.adjunct.TraceExprAdjunct());
+            map("TryCatch", () => new Saxon.Eej.ee.stream.adjunct.TryCatchAdjunct());
+            map("UseAttributeSet", () => new Saxon.Eej.ee.stream.adjunct.UseAttributeSetAdjunct());
+            map("VariableReference", () => new Saxon.Eej.ee.stream.adjunct.VariableReferenceAdjunct());
+            map("VennExpression", () => new Saxon.Eej.ee.stream.adjunct.VennExpressionAdjunct());
+            map("WherePopulated", () => new Saxon.Eej.ee.stream.adjunct.WherePopulatedAdjunct());
         }
-        private static readonly System.Collections.Generic.IDictionary<string,System.Type> adjunctMap = emptyAdjunctMap();
-        public static System.Collections.Generic.IDictionary<string,System.Type> emptyAdjunctMap() {
-            return new System.Collections.Generic.Dictionary<string, System.Type>();
+        private static readonly System.Collections.Generic.IDictionary<string,Saxon.Ejava.util.function.Supplier<Saxon.Eej.ee.stream.adjunct.StreamingAdjunct>> adjunctMap = emptyAdjunctMap();
+        public static System.Collections.Generic.IDictionary<string,Saxon.Ejava.util.function.Supplier<Saxon.Eej.ee.stream.adjunct.StreamingAdjunct>> emptyAdjunctMap() {
+            return new System.Collections.Generic.Dictionary<string, Saxon.Ejava.util.function.Supplier<Saxon.Eej.ee.stream.adjunct.StreamingAdjunct>>();
         }
-        private static void map(string s, System.Type a) {
+        private static void map(string s, Saxon.Ejava.util.function.Supplier<Saxon.Eej.ee.stream.adjunct.StreamingAdjunct> a) {
             Saxon.Impl.Helpers.MapUtils.Put(adjunctMap, s, a);
         }
         private Saxon.Hej.Configuration config;
@@ -163,12 +163,12 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 }
             }
             if ((exp.getStreamerName() != null)) {
-                System.Type aClass = Saxon.Impl.Helpers.MapUtils.Get(adjunctMap, exp.getStreamerName());
-                if ((aClass == null)) {
+                Saxon.Ejava.util.function.Supplier<Saxon.Eej.ee.stream.adjunct.StreamingAdjunct> supplier = Saxon.Impl.Helpers.MapUtils.Get(adjunctMap, exp.getStreamerName());
+                if ((supplier == null)) {
                     throw new Saxon.Ejava.lang.AssertionError(("No streaming support for "+exp.getStreamerName()));
                 }
                 try {
-                    return (Saxon.Eej.ee.stream.adjunct.StreamingAdjunct)System.Activator.CreateInstance(aClass);
+                    return supplier();
                 } catch (System.Exception e) {
                     throw new Saxon.Ejava.lang.AssertionError(e);
                 }
@@ -176,7 +176,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
             return new Saxon.Eej.ee.stream.adjunct.StreamingAdjunct();
         }
         private static Saxon.Eej.ee.stream.adjunct.StreamingAdjunct adjunctForStreamInstr(Saxon.Eej.ee.stream.StreamInstr stream) {
-            return new Inner_StreamingAdjunct_114(stream);
+            return new Inner_StreamingAdjunct_167(stream);
         }
         public void setConfiguration(Saxon.Hej.Configuration config) {
             this.config = config;
@@ -241,7 +241,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 }
             }
             if (((getExpression() is Saxon.Hej.expr.StaticFunctionCall) && !(allowsMany))) {
-                Saxon.Hej.om.Function fn = ((Saxon.Hej.expr.StaticFunctionCall)(getExpression())).getTargetFunction();
+                Saxon.Hej.om.FunctionItem fn = ((Saxon.Hej.expr.StaticFunctionCall)(getExpression())).getTargetFunction();
                 Saxon.Hej.expr.Expression[] args = ((Saxon.Hej.expr.StaticFunctionCall)(getExpression())).getArguments();
                 return new Saxon.Eej.ee.stream.feed.FeedMakerDelegate((watchManager, @out, context) => new Saxon.Eej.ee.stream.feed.CallableFeed(fn, @out, context, args));
             }
@@ -253,9 +253,14 @@ namespace Saxon.Eej.ee.stream.adjunct {
             /*134*/Saxon.Eej.ee.stream.Streamability.setPostureAndSweep(co, /*134*/Saxon.Eej.ee.stream.Streamability.getPostureAndSweepIfKnown(proxy));
             return new Saxon.Eej.ee.stream.feed.FeedMakerDelegate((watchManager, @out, context) => new Saxon.Eej.ee.stream.feed.BufferingFeed(getExpression(), @out, context));
         }
+        public static string genId(Saxon.Hej.om.NodeInfo node) {
+            Saxon.Ejava.lang.StringBuilder buffer = new Saxon.Ejava.lang.StringBuilder(16);
+            node.generateId(buffer);
+            return buffer.ToString();
+        }
     
-        private class Inner_StreamingAdjunct_114 : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct {
-            public Inner_StreamingAdjunct_114(Saxon.Eej.ee.stream.StreamInstr stream) {
+        private class Inner_StreamingAdjunct_167 : Saxon.Eej.ee.stream.adjunct.StreamingAdjunct {
+            public Inner_StreamingAdjunct_167(Saxon.Eej.ee.stream.StreamInstr stream) {
                 this.stream = stream;
             }
             private Saxon.Eej.ee.stream.StreamInstr stream;

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.schema {
     public class Wildcard : Saxon.Eej.ee.schema.SchemaStructure, Saxon.Eej.ee.schema.UserSchemaComponent, Saxon.Eej.ee.schema.SerializableSchemaComponent, Saxon.Eej.ee.schema.Term {
-        private System.Collections.Generic.ISet<string> allowedNamespaces = null;
-        private System.Collections.Generic.ISet<string> disallowedNamespaces = null;
+        private System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> allowedNamespaces = null;
+        private System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> disallowedNamespaces = null;
         private string processContents = "strict";
         private bool disallowsDefinedNames = false;
         private bool disallowsDefinedSiblings = false;
@@ -18,24 +18,24 @@ namespace Saxon.Eej.ee.schema {
             return ((allowedNamespaces == null) && (disallowedNamespaces == null));
         }
         public void setNoNamespacesAllowed() {
-            allowedNamespaces = new System.Collections.Generic.HashSet<string>(3);
+            allowedNamespaces = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>(3);
         }
-        public void addAllowedNamespace(string @namespace) {
+        public void addAllowedNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
             if ((allowedNamespaces == null)) {
-                allowedNamespaces = new System.Collections.Generic.HashSet<string>(3);
+                allowedNamespaces = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>(3);
             }
             allowedNamespaces.Add(@namespace);
         }
-        public void addDisallowedNamespace(string @namespace) {
+        public void addDisallowedNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
             if ((disallowedNamespaces == null)) {
-                disallowedNamespaces = new System.Collections.Generic.HashSet<string>(3);
+                disallowedNamespaces = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>(3);
             }
             disallowedNamespaces.Add(@namespace);
         }
-        public System.Collections.Generic.ISet<string> getDisallowedNamespaces() {
+        public System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getDisallowedNamespaces() {
             return disallowedNamespaces;
         }
-        public bool matches(string uri) {
+        public bool matches(Saxon.Hej.om.NamespaceUri uri) {
             if ((allowedNamespaces != null)) {
                 return allowedNamespaces.Contains(uri);
             } else {
@@ -81,9 +81,9 @@ namespace Saxon.Eej.ee.schema {
                 }
             }
             if ((allowedNamespaces != null)) {
-                return allowedNamespaces.Contains(name.getURI());
+                return allowedNamespaces.Contains(name.getNamespaceUri());
             } else {
-                return ((disallowedNamespaces == null) || !(disallowedNamespaces.Contains(name.getURI())));
+                return ((disallowedNamespaces == null) || !(disallowedNamespaces.Contains(name.getNamespaceUri())));
             }
         }
         public string reasonForNonMatch(Saxon.Hej.om.NodeName nn, bool isElement, Saxon.Hej.Configuration config, Saxon.Eej.ee.schema.UserComplexType parentType) {
@@ -105,7 +105,7 @@ namespace Saxon.Eej.ee.schema {
                     return "The wildcard disallows defined siblings, and the name is a permitted sibling. ";
                 }
             }
-            string uri = nn.getURI();
+            Saxon.Hej.om.NamespaceUri uri = nn.getNamespaceUri();
             if ((allowedNamespaces != null)) {
                 if (allowedNamespaces.Contains(uri)) {
                     return null;
@@ -123,7 +123,7 @@ namespace Saxon.Eej.ee.schema {
         public bool disallowsQName(int fingerprint) {
             return ((disallowedQNames != null) && disallowedQNames.contains(fingerprint));
         }
-        public System.Collections.Generic.ISet<string> getAllowedNamespaces() {
+        public System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getAllowedNamespaces() {
             return allowedNamespaces;
         }
         public string getProcessContents() {
@@ -187,11 +187,11 @@ namespace Saxon.Eej.ee.schema {
             }
             return fsb.ToString();
         }
-        private void appendNamespaces(System.Collections.Generic.ISet<string> namespaces, Saxon.Ejava.lang.StringBuilder sb) {
+        private void appendNamespaces(System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> namespaces, Saxon.Ejava.lang.StringBuilder sb) {
             if ((namespaces == null)) {
                 return ;
             }
-            System.Collections.Generic.IEnumerator<string> iter = namespaces.GetEnumerator();
+            System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceUri> iter = namespaces.GetEnumerator();
             bool first = true;
             while (iter.MoveNext() /*UNSAFE CONVERSION*/) {
                 if (first) {
@@ -199,11 +199,11 @@ namespace Saxon.Eej.ee.schema {
                 } else {
                     sb.append(' ');
                 }
-                string s = iter.Current;
-                sb.append((s.Length==0 ? "##local" : s));
+                Saxon.Hej.om.NamespaceUri s = iter.Current;
+                sb.append((s.isEmpty() ? "##local" : s));
             }
         }
-        private string listOfNamespaces(System.Collections.Generic.ISet<string> namespaces) {
+        private string listOfNamespaces(System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> namespaces) {
             if ((namespaces == null)) {
                 return "";
             }
@@ -218,7 +218,7 @@ namespace Saxon.Eej.ee.schema {
             if ((sup.disallowedQNames != null)) {
                 for (Saxon.Hej.z.IntIterator it = sup.disallowedQNames.iterator(); it.hasNext(); ) {
                     int fp = it.next();
-                    string uri = pool.getURI(fp);
+                    Saxon.Hej.om.NamespaceUri uri = pool.getURI(fp);
                     if ((this.matches(uri) && !(this.disallowsQName(fp)))) {
                         return false;
                     }
@@ -278,10 +278,10 @@ namespace Saxon.Eej.ee.schema {
             return r1.CompareTo(r2);
         }
         public static Saxon.Eej.ee.schema.Wildcard makeIntersection(Saxon.Eej.ee.schema.Wildcard wat1, Saxon.Eej.ee.schema.Wildcard wat2, Saxon.Hej.om.NamePool pool) {
-            System.Collections.Generic.ISet<string> allowed1 = wat1.getAllowedNamespaces();
-            System.Collections.Generic.ISet<string> allowed2 = wat2.getAllowedNamespaces();
-            System.Collections.Generic.ISet<string> disallowed1 = wat1.getDisallowedNamespaces();
-            System.Collections.Generic.ISet<string> disallowed2 = wat2.getDisallowedNamespaces();
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> allowed1 = wat1.getAllowedNamespaces();
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> allowed2 = wat2.getAllowedNamespaces();
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> disallowed1 = wat1.getDisallowedNamespaces();
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> disallowed2 = wat2.getDisallowedNamespaces();
             Saxon.Eej.ee.schema.Wildcard result = new Saxon.Eej.ee.schema.Wildcard();
             result.setConfiguration(wat1.getConfiguration());
             result.setProcessContents(wat1.getProcessContents());
@@ -319,7 +319,7 @@ namespace Saxon.Eej.ee.schema {
             if ((wat1.disallowedQNames != null)) {
                 for (Saxon.Hej.z.IntIterator it = wat1.disallowedQNames.iterator(); it.hasNext(); ) {
                     int fp = it.next();
-                    string uri = pool.getURI(fp);
+                    Saxon.Hej.om.NamespaceUri uri = pool.getURI(fp);
                     if (wat2.matches(uri)) {
                         result.addDisallowedQName(fp);
                     }
@@ -328,7 +328,7 @@ namespace Saxon.Eej.ee.schema {
             if ((wat2.disallowedQNames != null)) {
                 for (Saxon.Hej.z.IntIterator it = wat2.disallowedQNames.iterator(); it.hasNext(); ) {
                     int fp = it.next();
-                    string uri = pool.getURI(fp);
+                    Saxon.Hej.om.NamespaceUri uri = pool.getURI(fp);
                     if (wat1.matches(uri)) {
                         result.addDisallowedQName(fp);
                     }
@@ -340,10 +340,10 @@ namespace Saxon.Eej.ee.schema {
             return result;
         }
         public static Saxon.Eej.ee.schema.Wildcard makeUnion(Saxon.Eej.ee.schema.Wildcard wat1, Saxon.Eej.ee.schema.Wildcard wat2, Saxon.Hej.om.NamePool pool) {
-            System.Collections.Generic.ISet<string> allowed1 = wat1.getAllowedNamespaces();
-            System.Collections.Generic.ISet<string> allowed2 = wat2.getAllowedNamespaces();
-            System.Collections.Generic.ISet<string> disallowed1 = wat1.getDisallowedNamespaces();
-            System.Collections.Generic.ISet<string> disallowed2 = wat2.getDisallowedNamespaces();
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> allowed1 = wat1.getAllowedNamespaces();
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> allowed2 = wat2.getAllowedNamespaces();
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> disallowed1 = wat1.getDisallowedNamespaces();
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> disallowed2 = wat2.getDisallowedNamespaces();
             Saxon.Eej.ee.schema.Wildcard result = new Saxon.Eej.ee.schema.Wildcard();
             result.setConfiguration(wat1.getConfiguration());
             result.setProcessContents(wat1.getProcessContents());
@@ -384,7 +384,7 @@ namespace Saxon.Eej.ee.schema {
             if ((wat1.disallowedQNames != null)) {
                 for (Saxon.Hej.z.IntIterator it = wat1.disallowedQNames.iterator(); it.hasNext(); ) {
                     int fp = it.next();
-                    string uri = pool.getURI(fp);
+                    Saxon.Hej.om.NamespaceUri uri = pool.getURI(fp);
                     if ((!(wat2.matches(uri)) || wat2.disallowsQName(fp))) {
                         result.addDisallowedQName(fp);
                     }
@@ -393,7 +393,7 @@ namespace Saxon.Eej.ee.schema {
             if ((wat2.disallowedQNames != null)) {
                 for (Saxon.Hej.z.IntIterator it = wat2.disallowedQNames.iterator(); it.hasNext(); ) {
                     int fp = it.next();
-                    string uri = pool.getURI(fp);
+                    Saxon.Hej.om.NamespaceUri uri = pool.getURI(fp);
                     if ((!(wat1.matches(uri)) || wat1.disallowsQName(fp))) {
                         result.addDisallowedQName(fp);
                     }
@@ -404,28 +404,24 @@ namespace Saxon.Eej.ee.schema {
             }
             return result;
         }
-        private static System.Collections.Generic.ISet<string> union(System.Collections.Generic.ISet<string> a, System.Collections.Generic.ISet<string> b) {
-            System.Collections.Generic.ISet<string> result = new System.Collections.Generic.HashSet<string>((a.Count+b.Count));
-            foreach (string s in a) {
-                result.Add(s);
-            }
-            foreach (string s in b) {
-                result.Add(s);
-            }
+        private static System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> union(System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> a, System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> b) {
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> result = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>((a.Count+b.Count));
+            Saxon.Impl.Helpers.SetUtils.AddAll(result, a);
+            Saxon.Impl.Helpers.SetUtils.AddAll(result, b);
             return result;
         }
-        private static System.Collections.Generic.ISet<string> intersection(System.Collections.Generic.ISet<string> a, System.Collections.Generic.ISet<string> b) {
-            System.Collections.Generic.ISet<string> result = new System.Collections.Generic.HashSet<string>();
-            foreach (string s in a) {
+        private static System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> intersection(System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> a, System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> b) {
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> result = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
+            foreach (Saxon.Hej.om.NamespaceUri s in a) {
                 if (b.Contains(s)) {
                     result.Add(s);
                 }
             }
             return result;
         }
-        private static System.Collections.Generic.ISet<string> difference(System.Collections.Generic.ISet<string> a, System.Collections.Generic.ISet<string> b) {
-            System.Collections.Generic.ISet<string> result = new System.Collections.Generic.HashSet<string>();
-            foreach (string s in a) {
+        private static System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> difference(System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> a, System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> b) {
+            System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> result = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
+            foreach (Saxon.Hej.om.NamespaceUri s in a) {
                 if (!(b.Contains(s))) {
                     result.Add(s);
                 }
@@ -469,7 +465,7 @@ namespace Saxon.Eej.ee.schema {
             }
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.Wildcard thisWildcard = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
@@ -498,10 +494,10 @@ namespace Saxon.Eej.ee.schema {
                             if (allowsAny()) {
                                 return Saxon.Hej.value.EmptySequence.getInstance();
                             } else {
-                                System.Collections.Generic.ISet<string> namespaces = ((allowedNamespaces != null) ? allowedNamespaces : disallowedNamespaces);
+                                System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> namespaces = ((allowedNamespaces != null) ? allowedNamespaces : disallowedNamespaces);
                                 System.Collections.Generic.IList<Saxon.Hej.value.AtomicValue> uriList = new System.Collections.Generic.List<Saxon.Hej.value.AtomicValue>(namespaces.Count);
-                                foreach (string ns in namespaces) {
-                                    uriList.Add(new Saxon.Hej.value.AnyURIValue(ns));
+                                foreach (Saxon.Hej.om.NamespaceUri ns in namespaces) {
+                                    uriList.Add(new Saxon.Hej.value.AnyURIValue(ns.toUnicodeString()));
                                 }
                                 return new Saxon.Hej.om.AtomicArray(uriList);
                             }
@@ -517,7 +513,7 @@ namespace Saxon.Eej.ee.schema {
                             Saxon.Hej.z.IntIterator iter = disallowedQNames.iterator();
                             while (iter.hasNext()) {
                                 int fp = iter.next();
-                                string uri = pool.getURI(fp);
+                                Saxon.Hej.om.NamespaceUri uri = pool.getURI(fp);
                                 string local = pool.getLocalName(fp);
                                 Saxon.Hej.value.QNameValue value = new Saxon.Hej.value.QNameValue("", uri, local);
                                 disallowedList.Add(value);

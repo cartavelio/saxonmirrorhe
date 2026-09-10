@@ -7,7 +7,7 @@ namespace Saxon.Eej.ee.update {
         public DeleteAction(Saxon.Hej.om.NodeInfo node)  {
             targetNode = node;
             if (!(((node is Saxon.Hej.om.MutableNodeInfo)))) {
-                throw new Saxon.Ejava.lang.IllegalArgumentException("Attempting to delete a non-updateable node");
+                throw new Saxon.Ejava.lang.IllegalArgumentException("Attempting to delete a non-updatable node");
             }
         }
         public override void apply(Saxon.Hej.expr.XPathContext context, System.Collections.Generic.ISet<Saxon.Hej.om.MutableNodeInfo> affectedRootSet) {

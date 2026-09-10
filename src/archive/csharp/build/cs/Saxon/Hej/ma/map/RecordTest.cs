@@ -8,10 +8,10 @@ namespace Saxon.Hej.ma.map {
         private bool extensible;
         public RecordTest()  {
         }
-        public RecordTest(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.IList<string> optionalFieldNames, bool extensible)  {
+        public RecordTest(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.ICollection<string> optionalFieldNames, bool extensible)  {
             setDetails(names, types, optionalFieldNames, extensible);
         }
-        public void setDetails(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.IList<string> optionalFieldNames, bool extensible) {
+        public void setDetails(System.Collections.Generic.IList<string> names, System.Collections.Generic.IList<Saxon.Hej.value.SequenceType> types, System.Collections.Generic.ICollection<string> optionalFieldNames, bool extensible) {
             for (int i = 0; (i<names.Count); i++) {
                 Saxon.Impl.Helpers.MapUtils.Put(fieldTypes, names[i], types[i]);
             }
@@ -98,10 +98,10 @@ namespace Saxon.Hej.ma.map {
             return (extensible ? (0.5+(prio/2)) : prio);
         }
         public override string ToString() {
-            return makeString(x => x.ToString() /* converted from static method reference */);
+            return makeString(x => x.ToString() /* method reference */);
         }
         public override  /* REPLACING public */ string toExportString() {
-            return makeString(x => x.toExportString() /* converted from static method reference */);
+            return makeString(x => x.toExportString() /* method reference */);
         }
         public override string getBasicAlphaCode() {
             return "FM";
@@ -116,7 +116,11 @@ namespace Saxon.Hej.ma.map {
                 } else {
                     sb.append(", ");
                 }
-                sb.append(field.Key);
+                if (Saxon.Hej.om.NameChecker.isValidNCName(field.Key)) {
+                    sb.append(field.Key);
+                } else {
+                    sb.append('"').append(field.Key).append('"');
+                }
                 if (isOptionalField(field.Key)) {
                     sb.append('?');
                 }
@@ -309,7 +313,7 @@ namespace Saxon.Hej.ma.map {
             }
             return Saxon.Ejava.util.Optional<string>.empty();
         }
-        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.parser.RoleDiagnostic role) {
+        public override Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
             return new Saxon.Hej.type.SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
         }
     

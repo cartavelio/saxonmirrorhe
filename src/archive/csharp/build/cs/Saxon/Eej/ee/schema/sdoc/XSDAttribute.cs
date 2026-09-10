@@ -21,8 +21,8 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 string[] allowed = {"default", "fixed", "form", "id", "inheritable", "name", "ref", "targetNamespace", "type", "use"};
                 allowAttributes(atts, allowed);
             }
-            isReference = (atts.getValue("", "ref") != null);
-            string form = atts.getValue("", "form");
+            isReference = (atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref") != null);
+            string form = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "form");
             if ((form != null)) {
                 if (isReference) {
                     mutuallyExclusiveAttributes("form", "ref");
@@ -43,17 +43,17 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                 }
             }
-            string localTargetNamespace = atts.getValue("", "targetNamespace");
+            string localTargetNamespace = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
             if ((localTargetNamespace != null)) {
                 if ((getXSDSchema().getSchemaCompiler().getLanguageVersion() == Saxon.Hej.Configuration.XSD10)) {
                     error("The targetNamespace cannot be defined locally unless XSD 1.1 is enabled");
                 }
-                if ((atts.getValue("", "name") == null)) {
+                if ((atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name") == null)) {
                     error("If there is no @name then there must be no @targetNamespace");
                 }
                 checkMutuallyExclusiveAttributes("targetNamespace", "form");
             }
-            string attValue = atts.getValue("", "name");
+            string attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
             Saxon.Hej.om.StructuredQName nc = null;
             if ((attValue != null)) {
                 attributeDecl = new Saxon.Eej.ee.schema.AttributeDecl((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), isTopLevel());
@@ -61,13 +61,13 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 if (attValue.Equals("xmlns")) {
                     error("The attribute name 'xmlns' is reserved");
                 }
-                if ((atts.getValue("", "ref") != null)) {
+                if ((atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref") != null)) {
                     mutuallyExclusiveAttributes("name", "ref");
                     nc = Saxon.Hej.om.StandardNames.SQ_XS_INVALID_NAME;
                 } else {
                     try {
                         if (((localTargetNamespace != null) || "qualified".Equals(form))) {
-                            if (getXSDSchema().getTargetNamespace().Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)) {
+                            if (getXSDSchema().getTargetNamespace().Equals(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE)) {
                                 error("Attributes cannot be declared in the 'xsi:' namespace");
                             }
                             nc = getComponentName(attValue, REQUIRE_TARGET_NS);
@@ -88,14 +88,14 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     attributeUse.setLocator(this);
                 }
             }
-            attValue = atts.getValue("", "ref");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "ref");
             if ((attValue != null)) {
                 attributeUse = new Saxon.Eej.ee.schema.AttributeUse((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()));
                 attributeUse.setLocator(this);
                 try {
                     nc = getComponentName(attValue, USE_DEFAULT_NS);
-                    if (nc.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)) {
-                        getConfiguration().addSchemaForBuiltInNamespace(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE);
+                    if (nc.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE)) {
+                        getConfiguration().addSchemaForBuiltInNamespace(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE);
                     }
                 } catch (Saxon.Hej.type.SchemaException err) {
                     nc = Saxon.Hej.om.StandardNames.SQ_XS_INVALID_NAME;
@@ -103,8 +103,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 }
                 attributeUse.setTargetComponentName(nc);
             }
-            attValue = atts.getValue("", "default");
-            if (((attValue != null) && !(nc.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)))) {
+            if ((nc == null)) {
+                nc = Saxon.Hej.om.StandardNames.SQ_XS_INVALID_NAME;
+            }
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "default");
+            if (((attValue != null) && !(nc.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE)))) {
                 Saxon.Eej.ee.schema.ValueConstraint vc = new Saxon.Eej.ee.schema.ValueConstraint(Saxon.Eej.ee.schema.ValueConstraint.Variety.DEFAULT, Saxon.Hej.str.StringView.tidy(attValue));
                 if ((attributeUse != null)) {
                     attributeUse.setValueConstraint(vc);
@@ -115,9 +118,9 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 }
             }
             processId();
-            attValue = atts.getValue("", "fixed");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "fixed");
             if ((attValue != null)) {
-                if (((atts.getValue("", "default") != null) && !(nc.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)))) {
+                if (((atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "default") != null) && !(nc.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE)))) {
                     mutuallyExclusiveAttributes("fixed", "default");
                 }
                 Saxon.Eej.ee.schema.ValueConstraint vc = new Saxon.Eej.ee.schema.ValueConstraint(Saxon.Eej.ee.schema.ValueConstraint.Variety.FIXED, Saxon.Hej.str.StringView.tidy(attValue));
@@ -129,7 +132,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     }
                 }
             }
-            attValue = atts.getValue("", "type");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "type");
             int typeFingerprint = -1;
             if ((attValue == null)) {
                 if ((attributeDecl != null)) {
@@ -152,14 +155,14 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     attributeDecl.setTypeReference(new Saxon.Eej.ee.schema.TypeReference(typeFingerprint, getSchema().getConfiguration(), this));
                 }
             }
-            attValue = atts.getValue("", "use");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "use");
             if ((attValue != null)) {
-                bool hasDefault = (atts.getValue("", "default") != null);
+                bool hasDefault = (atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "default") != null);
                 if ((hasDefault && !(attValue.Equals("optional")))) {
                     error("When @default is present, the @use attribute must have the value \"optional\"");
                     attValue = "optional";
                 }
-                bool hasFixed = (atts.getValue("", "fixed") != null);
+                bool hasFixed = (atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "fixed") != null);
                 if (((hasFixed && attValue.Equals("prohibited")) && (getXSDSchema().getSchemaCompiler().getLanguageVersion() != Saxon.Hej.Configuration.XSD10))) {
                     error("When @fixed is present, the @use attribute must not have the value \"prohibited\"");
                     attValue = "optional";
@@ -184,7 +187,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     attributeUse.setUse(useFlag);
                 }
             }
-            string inheritAtt = atts.getValue("", "inheritable");
+            string inheritAtt = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "inheritable");
             if ((inheritAtt != null)) {
                 if ((getXSDSchema().getSchemaCompiler().getLanguageVersion() == Saxon.Hej.Configuration.XSD10)) {
                     error("The inheritable attribute cannot be used unless XSD 1.1 is enabled");
@@ -197,7 +200,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     attributeDecl.setInheritable(inherit);
                 }
             }
-            if (((atts.getValue("", "fixed") != null) || (atts.getValue("", "default") != null))) {
+            if (((atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "fixed") != null) || (atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "default") != null))) {
                 bool needResolver = true;
                 if (typeSpecified) {
                     if ((typeFingerprint<1024)) {
@@ -225,8 +228,8 @@ namespace Saxon.Eej.ee.schema.sdoc {
             return attributeUse;
         }
         public override void validate(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
-            string localTargetNamespace = getAttributeValue("", "targetNamespace");
-            if (((localTargetNamespace != null) && !(localTargetNamespace.Equals(getXSDSchema().getTargetNamespace())))) {
+            string localTargetNamespace = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
+            if (((localTargetNamespace != null) && !(Saxon.Hej.om.NamespaceUri.of(localTargetNamespace).Equals(getXSDSchema().getTargetNamespace())))) {
                 checkLocalTargetNamespace("attribute");
             }
             if ((attributeDecl != null)) {

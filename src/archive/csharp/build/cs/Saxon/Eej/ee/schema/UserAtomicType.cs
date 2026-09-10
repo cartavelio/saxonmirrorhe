@@ -173,18 +173,6 @@ namespace Saxon.Eej.ee.schema {
         public bool matches(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
             return ((item is Saxon.Hej.value.AtomicValue) && Saxon.Hej.type.Type.isSubType(((Saxon.Hej.value.AtomicValue)(item)).getItemType(), this));
         }
-        public bool isCompilable() {
-            Saxon.Hej.type.BuiltInAtomicType @base = (Saxon.Hej.type.BuiltInAtomicType)(getBuiltInBaseType());
-            if (@base.isNamespaceSensitive()) {
-                return false;
-            }
-            foreach (Saxon.Eej.ee.schema.Facet f in getExtendedFacetList()) {
-                if ((f is Saxon.Eej.ee.schema.PreprocessFacet)) {
-                    return false;
-                }
-            }
-            return true;
-        }
         public override Saxon.Hej.type.ValidationFailure validateContent(Saxon.Hej.str.UnicodeString value, Saxon.Hej.om.NamespaceResolver nsResolver, Saxon.Hej.lib.ConversionRules rules) {
             Saxon.Hej.type.StringConverter converter = getStringConverter(rules);
             if (isNamespaceSensitive()) {

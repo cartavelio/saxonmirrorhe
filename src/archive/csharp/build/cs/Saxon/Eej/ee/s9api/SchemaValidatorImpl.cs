@@ -94,6 +94,13 @@ namespace Saxon.Eej.ee.s9api {
             Saxon.Hej.om.GroundedValue value = suppliedParams.get(name.GetStructuredQName());
             return ((value == null) ? null : Saxon.Api.XdmValue.Wrap(value));
         }
+        public override Saxon.Hej.type.ValidationParams getValidationParameters() {
+            try {
+                return convertParams(suppliedParams, processor.getUnderlyingConfiguration().getDeclaredSchemaParameters());
+            } catch (Saxon.Hej.trans.XPathException e) {
+                throw new Saxon.Api.SaxonApiException(e);
+            }
+        }
         public void setThreadCount(int tc) {
             threadCount = tc;
         }
@@ -197,22 +204,17 @@ namespace Saxon.Eej.ee.s9api {
             Saxon.Hej.@event.PipelineConfiguration pipe = controller.makePipelineConfiguration();
             pipe.setUseXsiSchemaLocation(useXsiSchemaLocation);
             pipe.setHostLanguage(Saxon.Api.HostLanguage.XML_SCHEMA);
-            Saxon.Hej.lib.ParseOptions options = pipe.getParseOptions();
-            options.setCheckEntityReferences(true);
-            options.setExpandAttributeDefaults(expandAttributeDefaults);
-            options.setSchemaValidationMode((lax ? Saxon.Hej.lib.Validation.LAX : Saxon.Hej.lib.Validation.STRICT));
-            options.setSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
-            options.setTopLevelType(documentElementType);
-            options.setInvalidityHandler(invalidityHandler);
+            Saxon.Hej.lib.ParseOptions options = pipe.getParseOptions().withCheckEntityReferences(true).withExpandAttributeDefaults(expandAttributeDefaults).withSchemaValidationMode((lax ? Saxon.Hej.lib.Validation.LAX : Saxon.Hej.lib.Validation.STRICT)).withSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance()).withTopLevelType(documentElementType).withInvalidityHandler(invalidityHandler);
             if ((documentElementName != null)) {
-                options.setTopLevelElement(new Saxon.Hej.om.StructuredQName(documentElementName.Prefix, documentElementName.Uri, documentElementName.LocalName));
+                options = options.withTopLevelElement(new Saxon.Hej.om.StructuredQName(documentElementName.Prefix, documentElementName.NamespaceUri, documentElementName.LocalName));
             }
             try {
-                options.setValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
+                options = options.withValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
             } catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
-            options.setCheckEntityReferences(true);
+            options = options.withCheckEntityReferences(true);
+            pipe.setParseOptions(options);
             Saxon.Hej.@event.Receiver output = ((destination == null) ? new Saxon.Hej.@event.Sink(pipe) : destination.getReceiver(pipe, config.obtainDefaultSerializationProperties()));
             output.setPipelineConfiguration(pipe);
             return config.getDocumentValidator(output, systemId, options, null);

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.tree.iter {
-    public abstract class ArrayIterator : Saxon.Hej.om.SequenceIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.LookaheadIterator, Saxon.Hej.tree.iter.GroundedIterator, Saxon.Hej.tree.iter.ReversibleIterator {
+    public abstract class ArrayIterator : Saxon.Hej.om.SequenceIterator, Saxon.Hej.om.FocusIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.LookaheadIterator, Saxon.Hej.tree.iter.GroundedIterator, Saxon.Hej.tree.iter.ReversibleIterator {
         protected internal int index;
         protected internal int start;
         protected internal int end;
@@ -12,6 +12,12 @@ namespace Saxon.Hej.tree.iter {
         }
         public bool supportsHasNext() {
             return true;
+        }
+        public int position() {
+            return (index-start);
+        }
+        public virtual int getLength() {
+            return (end-start);
         }
         public class Of<T>  : Saxon.Hej.tree.iter.ArrayIterator where T : Saxon.Hej.om.Item {
             protected internal T[] items;
@@ -43,7 +49,7 @@ namespace Saxon.Hej.tree.iter {
                     newEnd = currentEnd;
                 }
                 if ((newEnd<=newStart)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 return new Saxon.Hej.tree.iter.ArrayIterator.Of<T>(items, newStart, newEnd);
             }
@@ -56,6 +62,9 @@ namespace Saxon.Hej.tree.iter {
                     return null;
                 }
                 return items[index++];
+            }
+            public override Saxon.Hej.om.Item current() {
+                return (((index>start) && (index<=end)) ? items[(index-1)] : null);
             }
             public override bool supportsGetLength() {
                 return true;
@@ -93,7 +102,12 @@ namespace Saxon.Hej.tree.iter {
                 return seq.reduce();
             }
             public override Saxon.Hej.om.SequenceIterator getReverseIterator() {
-                return Saxon.Hej.functions.Reverse.reverseIterator(Saxon.Ejava.util.Arrays.asList(items));
+                if (((start == 0) && (end == items.Length))) {
+                    return Saxon.Hej.functions.Reverse.reverseIterator(Saxon.Ejava.util.Arrays.asList(items));
+                } else {
+                    System.Collections.Generic.IList<T> sublist = Saxon.Impl.Helpers.ListUtils.SubList(Saxon.Ejava.util.Arrays.asList(items), start, end);
+                    return Saxon.Hej.functions.Reverse.reverseIterator(sublist);
+                }
             }
         
         }
@@ -115,10 +129,6 @@ namespace Saxon.Hej.tree.iter {
         public virtual void close() {
         }
 
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
-        }
-
         /* Creating stub method hasNext to satisfy interface LookaheadIterator */
         public virtual bool hasNext() {
             throw new System.NotImplementedException();
@@ -134,6 +144,11 @@ namespace Saxon.Hej.tree.iter {
             throw new System.NotImplementedException();
         }
 
+        /* Creating stub method current to satisfy interface FocusIterator */
+        public virtual Saxon.Hej.om.Item current() {
+            throw new System.NotImplementedException();
+        }
+
         /* Creating stub method next to satisfy interface SequenceIterator */
         public virtual Saxon.Hej.om.Item next() {
             throw new System.NotImplementedException();
@@ -141,11 +156,6 @@ namespace Saxon.Hej.tree.iter {
 
         /* Creating stub method supportsGetLength to satisfy interface LastPositionFinder */
         public virtual bool supportsGetLength() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method getLength to satisfy interface LastPositionFinder */
-        public virtual int getLength() {
             throw new System.NotImplementedException();
         }
 

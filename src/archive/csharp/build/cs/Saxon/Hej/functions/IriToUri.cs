@@ -28,7 +28,7 @@ namespace Saxon.Hej.functions {
             if (allAllowedAscii(s.codePoints())) {
                 return s;
             }
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder((s.length32()+20));
             Saxon.Hej.z.IntIterator iter = s.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();

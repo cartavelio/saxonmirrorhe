@@ -62,9 +62,6 @@ namespace Saxon.Hej.expr {
         public virtual  /* REPLACING public */ void close() {
             @base.close();
         }
-        public void discharge() {
-            @base.discharge();
-        }
         public bool supportsGetLength() {
             return (oneToOne && Saxon.Hej.om.SequenceTool.supportsGetLength(@base));
         }

@@ -45,8 +45,8 @@ namespace Saxon.Hej.functions.hof {
                     throw new Saxon.Hej.trans.XPathException(("Unsupported XQuery version "+decimalVn), "FOQM0006");
                 }
             }
-            string moduleUri = args[0].head().getStringValue();
-            if (moduleUri.Length==0) {
+            Saxon.Hej.om.NamespaceUri moduleUri = Saxon.Hej.om.NamespaceUri.of(args[0].head().getStringValue());
+            if (moduleUri.isEmpty()) {
                 throw new Saxon.Hej.trans.XPathException("First argument of fn:load-xquery-module() must not be a zero length string", "FOQM0001");
             }
             System.Collections.Generic.IList<string> locationHints = new System.Collections.Generic.List<string>();
@@ -69,9 +69,9 @@ namespace Saxon.Hej.functions.hof {
             Saxon.Ejavax.xml.transform.stream.StreamSource[] streamSources;
             try {
                 string[] hints = locationHints.ToArray();
-                streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri, baseURI, hints);
+                streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri.ToString(), baseURI, hints);
                 if ((streamSources == null)) {
-                    streamSources = new Saxon.Hej.lib.StandardModuleURIResolver(config).resolve(moduleUri, baseURI, hints);
+                    streamSources = new Saxon.Hej.lib.StandardModuleURIResolver(config).resolve(moduleUri.ToString(), baseURI, hints);
                 }
             } catch (Saxon.Hej.trans.XPathException e) {
                 e.maybeSetErrorCode("FOQM0002");
@@ -121,7 +121,7 @@ namespace Saxon.Hej.functions.hof {
             foreach (Saxon.Hej.expr.instruct.GlobalVariable var in lib.getImportedGlobalVariables()) {
                 Saxon.Hej.om.GroundedValue value;
                 Saxon.Hej.value.QNameValue qNameValue = new Saxon.Hej.value.QNameValue(var.getVariableQName(), Saxon.Hej.type.BuiltInAtomicType.QNAME);
-                if (qNameValue.getNamespaceURI().Equals(moduleUri)) {
+                if ((qNameValue.getNamespaceURI().Equals(moduleUri) && !(var.isPrivate()))) {
                     try {
                         value = ((/*1430*/Saxon.Hej.om.GroundedValue)var.evaluateVariable(newContext));
                     } catch (Saxon.Hej.trans.XPathException e) {
@@ -141,13 +141,13 @@ namespace Saxon.Hej.functions.hof {
             foreach (Saxon.Hej.query.XQueryFunction function in functionLib.getFunctionDefinitions()) {
                 Saxon.Hej.ma.map.MapItem newMap;
                 Saxon.Hej.value.QNameValue functionQName = new Saxon.Hej.value.QNameValue(function.getFunctionName(), Saxon.Hej.type.BuiltInAtomicType.QNAME);
-                if (functionQName.getNamespaceURI().Equals(moduleUri)) {
+                if ((functionQName.getNamespaceURI().Equals(moduleUri) && !(function.isPrivate()))) {
                     Saxon.Hej.expr.instruct.UserFunction userFunction = function.getUserFunction();
-                    Saxon.Hej.functions.hof.UserFunctionReference.BoundUserFunction buf = new Saxon.Hej.functions.hof.UserFunctionReference.BoundUserFunction(agent, userFunction, null, newController);
+                    Saxon.Hej.functions.hof.UserFunctionReference.BoundUserFunction buf = new Saxon.Hej.functions.hof.UserFunctionReference.BoundUserFunction(userFunction, userFunction.getArity(), null, agent, newController);
                     if ((functionsMap.get(functionQName) != null)) {
-                        newMap = ((Saxon.Hej.ma.map.MapItem)(functionsMap.get(functionQName))).addEntry(new Saxon.Hej.value.Int64Value(function.getNumberOfArguments()), buf);
+                        newMap = ((Saxon.Hej.ma.map.MapItem)(functionsMap.get(functionQName))).addEntry(new Saxon.Hej.value.Int64Value(function.getNumberOfParameters()), buf);
                     } else {
-                        newMap = new Saxon.Hej.ma.map.SingleEntryMap(Saxon.Hej.value.Int64Value.makeIntegerValue(function.getNumberOfArguments()), buf);
+                        newMap = new Saxon.Hej.ma.map.SingleEntryMap(Saxon.Hej.value.Int64Value.makeIntegerValue(function.getNumberOfParameters()), buf);
                     }
                     functionsMap = functionsMap.addEntry(functionQName, newMap);
                 }

@@ -7,7 +7,7 @@ namespace Saxon.Eej.ee.schema {
         protected internal Saxon.Hej.expr.Expression selectExpression;
         private Saxon.Hej.pattern.Pattern selection;
         private Saxon.Hej.om.NamespaceResolver namespaceContext;
-        private string xpathDefaultNamespace;
+        private Saxon.Hej.om.NamespaceUri xpathDefaultNamespace;
         public string getXPath() {
             return xpath;
         }
@@ -32,10 +32,10 @@ namespace Saxon.Eej.ee.schema {
         public Saxon.Hej.om.NamespaceResolver getNamespaceContext() {
             return namespaceContext;
         }
-        public void setXPathDefaultNamespace(string uri) {
+        public void setXPathDefaultNamespace(Saxon.Hej.om.NamespaceUri uri) {
             xpathDefaultNamespace = uri;
         }
-        public string getXPathDefaultNamespace() {
+        public Saxon.Hej.om.NamespaceUri getXPathDefaultNamespace() {
             return xpathDefaultNamespace;
         }
     

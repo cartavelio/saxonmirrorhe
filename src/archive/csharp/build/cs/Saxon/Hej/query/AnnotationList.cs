@@ -12,18 +12,18 @@ namespace Saxon.Hej.query {
             return new Saxon.Hej.query.AnnotationList(Saxon.Ejava.util.Collections.singletonList(ann));
         }
         public void check(Saxon.Hej.Configuration config, string where) {
-            System.Collections.Generic.IDictionary<string,System.Collections.Generic.IList<Saxon.Hej.query.Annotation>> map = groupByNamespace();
-            foreach (System.Collections.Generic.KeyValuePair<string,System.Collections.Generic.IList<Saxon.Hej.query.Annotation>> entry in map) {
+            System.Collections.Generic.IDictionary<Saxon.Hej.om.NamespaceUri,System.Collections.Generic.IList<Saxon.Hej.query.Annotation>> map = groupByNamespace();
+            foreach (System.Collections.Generic.KeyValuePair<Saxon.Hej.om.NamespaceUri,System.Collections.Generic.IList<Saxon.Hej.query.Annotation>> entry in map) {
                 Saxon.Hej.lib.FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(entry.Key);
                 if ((handler != null)) {
                     handler.check(new Saxon.Hej.query.AnnotationList(entry.Value), where);
                 }
             }
         }
-        private System.Collections.Generic.IDictionary<string,System.Collections.Generic.IList<Saxon.Hej.query.Annotation>> groupByNamespace() {
-            System.Collections.Generic.IDictionary<string,System.Collections.Generic.IList<Saxon.Hej.query.Annotation>> result = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Saxon.Hej.query.Annotation>>();
+        private System.Collections.Generic.IDictionary<Saxon.Hej.om.NamespaceUri,System.Collections.Generic.IList<Saxon.Hej.query.Annotation>> groupByNamespace() {
+            System.Collections.Generic.IDictionary<Saxon.Hej.om.NamespaceUri,System.Collections.Generic.IList<Saxon.Hej.query.Annotation>> result = new System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri, System.Collections.Generic.IList<Saxon.Hej.query.Annotation>>();
             foreach (Saxon.Hej.query.Annotation ann in list) {
-                string ns = ann.getAnnotationQName().getURI();
+                Saxon.Hej.om.NamespaceUri ns = ann.getAnnotationQName().getNamespaceUri();
                 if (result.ContainsKey(ns)) {
                     Saxon.Impl.Helpers.MapUtils.Get(result, ns).Add(ann);
                 } else {
@@ -34,7 +34,7 @@ namespace Saxon.Hej.query {
             }
             return result;
         }
-        public Saxon.Hej.query.AnnotationList filterByNamespace(string ns) {
+        public Saxon.Hej.query.AnnotationList filterByNamespace(Saxon.Hej.om.NamespaceUri ns) {
             System.Collections.Generic.IList<Saxon.Hej.query.Annotation> @out = new System.Collections.Generic.List<Saxon.Hej.query.Annotation>();
             foreach (Saxon.Hej.query.Annotation ann in list) {
                 if (ann.getAnnotationQName().hasURI(ns)) {

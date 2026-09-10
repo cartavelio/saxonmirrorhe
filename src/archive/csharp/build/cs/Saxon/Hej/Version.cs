@@ -9,11 +9,11 @@ namespace Saxon.Hej {
             softwareEdition = "EE";
               platform = new Saxon.Impl.Helpers.DotNetPlatform();
         }
-        private const int MAJOR_VERSION = 11;
-        private const int MINOR_VERSION = 1;
-        private const int BUILD = 12816;
-        private const string MAJOR_RELEASE_DATE = "2021-10-05";
-        private const string MINOR_RELEASE_DATE = "2022-01-28";
+        private const int MAJOR_VERSION = 12;
+        private const int MINOR_VERSION = 0;
+        private const int BUILD = 11208;
+        private const string MAJOR_RELEASE_DATE = "2023-01-12";
+        private const string MINOR_RELEASE_DATE = "2023-01-12";
         private Version()  {
         }
         public static string getProductName() {

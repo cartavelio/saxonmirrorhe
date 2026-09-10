@@ -11,35 +11,35 @@ namespace Saxon.Eej.ee.extfn.js {
             init();
         }
         private void init() {
-            register("page", 0, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.pattern.NodeKindTest.DOCUMENT, ONE, (SIDE|LATE));
-            register("source", 0, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Source), Saxon.Hej.pattern.NodeKindTest.DOCUMENT, OPT, LATE);
-            register("window", 0, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), ONE, LATE);
-            register("query-params", 0, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, (SIDE|LATE));
-            register("event", 0, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), OPT, (SIDE|LATE));
-            register("location", 0, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, (SIDE|LATE));
-            register("style", 1, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), OPT, null);
-            register("get", 2, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("call", 3, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Call), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.ma.arrays.ArrayItemType.getInstance(), ONE, null);
-            register("contains", 2, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("eval", 1, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Eval), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null);
-            register("apply", 2, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null).arg(1, Saxon.Hej.ma.arrays.ArrayItemType.getInstance(), ONE, null);
-            register("schedule-action", 3, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null);
-            register("schedule-action", 4, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(3, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, OPT, null);
-            register("set-attribute", 3, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null);
-            register("remove-attribute", 2, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null);
-            register("set-property", 3, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), OPT, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null);
-            register("remove-property", 2, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null);
-            register("set-style", 3, typeof(Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null);
+            register("page", 0, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.pattern.NodeKindTest.DOCUMENT, ONE, (SIDE|LATE)));
+            register("source", 0, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Source(), Saxon.Hej.pattern.NodeKindTest.DOCUMENT, OPT, LATE));
+            register("window", 0, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), ONE, LATE));
+            register("query-params", 0, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, (SIDE|LATE)));
+            register("event", 0, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), OPT, (SIDE|LATE)));
+            register("location", 0, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, (SIDE|LATE)));
+            register("style", 1, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, ONE, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), OPT, null));
+            register("get", 2, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("call", 3, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Call(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.ma.arrays.ArrayItemType.getInstance(), ONE, null));
+            register("contains", 2, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.BuiltInAtomicType.BOOLEAN, ONE, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("eval", 1, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Eval(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null));
+            register("apply", 2, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null).arg(1, Saxon.Hej.ma.arrays.ArrayItemType.getInstance(), ONE, null));
+            register("schedule-action", 3, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null));
+            register("schedule-action", 4, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), STAR, (SIDE|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.INTEGER, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), STAR, null).arg(3, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE, OPT, null));
+            register("set-attribute", 3, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null));
+            register("remove-attribute", 2, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null));
+            register("set-property", 3, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), OPT, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null));
+            register("remove-property", 2, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null));
+            register("set-style", 3, e => e.populate(() => new Saxon.Eej.ee.extfn.js.IXSLFunctionSet.Stub(), Saxon.Hej.type.AnyItemType.getInstance(), OPT, ((SIDE|FOCUS)|LATE)).arg(0, Saxon.Hej.type.BuiltInAtomicType.STRING, ONE, null).arg(1, Saxon.Hej.type.BuiltInAtomicType.STRING, OPT, null).arg(2, Saxon.Hej.type.AnyItemType.getInstance(), ONE, null));
         }
-        public override string getNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.IXSL;
+        public override Saxon.Hej.om.NamespaceUri getNamespace() {
+            return Saxon.Hej.om.NamespaceUri.IXSL;
         }
         public override string getConventionalPrefix() {
             return "ixsl";
         }
         public class Stub : Saxon.Hej.functions.SystemFunction {
             public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] args) {
-                throw new Saxon.Hej.trans.XPathException((("ixsl:"+getDetails().name.getLocalPart())+" is available only in Saxon-JS"));
+                throw new Saxon.Hej.trans.XPathException((("ixsl:"+getDetails().name.getLocalPart())+" is available only in SaxonJS"));
             }
         
         }

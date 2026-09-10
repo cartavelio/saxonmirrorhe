@@ -32,7 +32,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             particle = new Saxon.Eej.ee.schema.ModelGroupParticle(getSchema().getConfiguration(), this);
             particle.setTarget(modelGroup);
             Saxon.Hej.tree.linked.NodeImpl parent = ((/*1430*/Saxon.Hej.tree.linked.NodeImpl)getParent());
-            attValue = atts.getValue("", "maxOccurs");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "maxOccurs");
             if ((attValue != null)) {
                 if ((parent.getFingerprint() == Saxon.Hej.om.StandardNames.XS_GROUP)) {
                     error((("Cannot specify 'maxOccurs' on a top-level '"+getLocalPart())+"' compositor within a named group"));
@@ -40,7 +40,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 int max = processMaxOccurs(attValue);
                 particle.setMaxOccurs(max);
             }
-            attValue = atts.getValue("", "minOccurs");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "minOccurs");
             if ((attValue != null)) {
                 if ((parent.getFingerprint() == Saxon.Hej.om.StandardNames.XS_GROUP)) {
                     error((("Cannot specify 'minOccurs' on a top-level '"+getLocalPart())+"' compositor within a named group"));

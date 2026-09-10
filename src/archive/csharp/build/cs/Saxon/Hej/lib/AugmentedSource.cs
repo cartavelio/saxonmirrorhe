@@ -26,7 +26,7 @@ namespace Saxon.Hej.lib {
             return new Saxon.Hej.lib.AugmentedSource(source);
         }
         public void addFilter(Saxon.Hej.@event.FilterFactory filter) {
-            options.addFilter(filter);
+            options = options.withFilter(filter);
         }
         public System.Collections.Generic.IList<Saxon.Hej.@event.FilterFactory> getFilters() {
             return options.getFilters();
@@ -37,50 +37,47 @@ namespace Saxon.Hej.lib {
         public Saxon.Hej.lib.ParseOptions getParseOptions() {
             return options;
         }
+        public void setParseOptions(Saxon.Hej.lib.ParseOptions options) {
+            this.options = options;
+        }
         public void setModel(Saxon.Hej.om.TreeModel model) {
-            options.setModel(model);
+            options = options.withModel(model);
         }
         public Saxon.Hej.om.TreeModel getModel() {
             return options.getModel();
         }
         public void setSchemaValidationMode(int option) {
-            options.setSchemaValidationMode(option);
+            options = options.withSchemaValidationMode(option);
         }
         public int getSchemaValidation() {
             return options.getSchemaValidationMode();
         }
         public void setTopLevelElement(Saxon.Hej.om.StructuredQName elementName) {
-            options.setTopLevelElement(elementName);
+            options = options.withTopLevelElement(elementName);
         }
         public Saxon.Hej.om.StructuredQName getTopLevelElement() {
             return options.getTopLevelElement();
         }
         public void setTopLevelType(Saxon.Hej.type.SchemaType type) {
-            options.setTopLevelType(type);
+            options = options.withTopLevelType(type);
         }
         public Saxon.Hej.type.SchemaType getTopLevelType() {
             return options.getTopLevelType();
         }
         public void setDTDValidationMode(int option) {
-            options.setDTDValidationMode(option);
+            options = options.withDTDValidationMode(option);
         }
         public int getDTDValidation() {
             return options.getDTDValidationMode();
         }
         public void setLineNumbering(bool lineNumbering) {
-            options.setLineNumbering(lineNumbering);
+            options = options.withLineNumbering(lineNumbering);
         }
         public bool isLineNumbering() {
             return options.isLineNumbering();
         }
         public bool isLineNumberingSet() {
             return options.isLineNumberingSet();
-        }
-        public void setWrapDocument(Saxon.Ejava.util.Optional<bool> wrap) {
-            options.setWrapDocument(wrap);
-        }
-        public Saxon.Ejava.util.Optional<bool> getWrapDocument() {
-            return options.getWrapDocument();
         }
         public void setSystemId(string id) {
             systemID = id;
@@ -89,7 +86,7 @@ namespace Saxon.Hej.lib {
             return ((systemID != null) ? systemID : source.getSystemId());
         }
         public void setXIncludeAware(bool state) {
-            options.setXIncludeAware(state);
+            options = options.withXIncludeAware(state);
         }
         public bool isXIncludeAwareSet() {
             return options.isXIncludeAwareSet();
@@ -98,13 +95,13 @@ namespace Saxon.Hej.lib {
             return options.isXIncludeAware();
         }
         public void setErrorReporter(Saxon.Hej.lib.ErrorReporter listener) {
-            options.setErrorReporter(listener);
+            options = options.withErrorReporter(listener);
         }
         public Saxon.Hej.lib.ErrorReporter getErrorReporter() {
             return options.getErrorReporter();
         }
         public void setPleaseCloseAfterUse(bool close) {
-            options.setPleaseCloseAfterUse(close);
+            options = options.withPleaseCloseAfterUse(close);
         }
         public bool isPleaseCloseAfterUse() {
             return options.isPleaseCloseAfterUse();

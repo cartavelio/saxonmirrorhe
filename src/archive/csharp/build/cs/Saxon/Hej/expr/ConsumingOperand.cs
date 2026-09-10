@@ -42,15 +42,47 @@ namespace Saxon.Hej.expr {
             return "consume";
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter destination) {
-            destination.startElement("consume", this);
-            getBaseExpression().export(destination);
-            destination.endElement();
+            if ("JS".Equals(destination.getOptions().target)) {
+                getBaseExpression().export(destination);
+            } else {
+                destination.startElement("consume", this);
+                getBaseExpression().export(destination);
+                destination.endElement();
+            }
         }
         public override string ToString() {
             return (("consume("+getBaseExpression().ToString())+")");
         }
         public override string toShortString() {
             return (("consume("+getBaseExpression().toShortString())+")");
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.ConsumingOperand.ConsumingOperandElaborator();
+        }
+        private class ConsumingOperandElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.ConsumingOperand expr = (Saxon.Hej.expr.ConsumingOperand)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    if (context.getStackFrame().holdsDynamicValue()) {
+                        return context.getStackFrame().popDynamicValue().iterate();
+                    } else {
+                        return /*Delegate.iterate()*/baseEval(context);
+                    }
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.ConsumingOperand expr = (Saxon.Hej.expr.ConsumingOperand)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+                return context => {
+                    if (context.getStackFrame().holdsDynamicValue()) {
+                        return context.getStackFrame().popDynamicValue().head();
+                    } else {
+                        return /*Delegate.eval()*/baseEval(context);
+                    }
+                } ;
+            }
+        
         }
     
     }

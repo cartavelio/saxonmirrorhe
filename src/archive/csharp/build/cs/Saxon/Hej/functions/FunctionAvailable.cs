@@ -47,8 +47,7 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.om.StructuredQName qName;
             try {
                 if (Saxon.Hej.om.NameChecker.isValidNCName(Saxon.Hej.str.StringTool.codePoints(lexicalName))) {
-                    string uri = Saxon.Hej.lib.NamespaceConstant.FN;
-                    qName = new Saxon.Hej.om.StructuredQName("", uri, lexicalName);
+                    qName = new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.FN, lexicalName);
                 } else {
                     qName = Saxon.Hej.om.StructuredQName.fromLexicalQName(lexicalName, false, true, getRetainedStaticContext());
                 }

@@ -17,21 +17,11 @@ namespace Saxon.Hej.s9api {
         public string getBaseOutputURI() {
             return controller.getBaseOutputURI();
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            controller.setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver));
-        }
         public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
             controller.setResourceResolver(resolver);
         }
         public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
             return controller.getResourceResolver();
-        }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            Saxon.Hej.lib.JJ_ResourceResolver resolver = controller.getResourceResolver();
-            if ((resolver is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(resolver)).getWrappedURIResolver();
-            }
-            return null;
         }
         public void setUnparsedTextResolver(Saxon.Hej.lib.UnparsedTextURIResolver resolver) {
             controller.setUnparsedTextURIResolver(resolver);
@@ -46,7 +36,7 @@ namespace Saxon.Hej.s9api {
             return controller.getErrorReporter();
         }
         public void setResultDocumentHandler(System.Func<System.Uri,Saxon.Hej.s9api.Destination> handler) {
-            controller.setResultDocumentResolver(new Inner_ResultDocumentResolver_7(handler));
+            controller.setResultDocumentResolver(new Inner_ResultDocumentResolver_5(handler));
         }
         public void setAssertionsEnabled(bool enabled) {
             controller.setAssertionsEnabled(enabled);
@@ -156,6 +146,7 @@ namespace Saxon.Hej.s9api {
                 }
             } else {
                 Saxon.Hej.@event.Builder sourceTreeBuilder = controller.makeBuilder();
+                sourceTreeBuilder.setDurability(Saxon.Hej.om.Durability.LASTING);
                 if ((sourceTreeBuilder is Saxon.Hej.tree.tiny.TinyBuilder)) {
                     ((Saxon.Hej.tree.tiny.TinyBuilder)(sourceTreeBuilder)).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
                 }
@@ -167,11 +158,11 @@ namespace Saxon.Hej.s9api {
             }
         }
         private Saxon.Hej.@event.TreeReceiver makeTreeReceiver(Saxon.Hej.trans.XsltController controller, Saxon.Hej.expr.instruct.GlobalParameterSet parameters, Saxon.Hej.s9api.Destination finalDestination, Saxon.Hej.@event.Builder sourceTreeBuilder, Saxon.Hej.@event.Receiver stripper) {
-            return new Inner_TreeReceiver_85(this, stripper, sourceTreeBuilder, controller, finalDestination, parameters);
+            return new Inner_TreeReceiver_80(this, stripper, sourceTreeBuilder, controller, finalDestination, parameters);
         }
     
-        private class Inner_ResultDocumentResolver_7 : Saxon.Hej.lib.ResultDocumentResolver {
-            public Inner_ResultDocumentResolver_7(System.Func<System.Uri,Saxon.Hej.s9api.Destination> handler) {
+        private class Inner_ResultDocumentResolver_5 : Saxon.Hej.lib.ResultDocumentResolver {
+            public Inner_ResultDocumentResolver_5(System.Func<System.Uri,Saxon.Hej.s9api.Destination> handler) {
                 this.handler = handler;
             }
             private System.Func<System.Uri,Saxon.Hej.s9api.Destination> handler;
@@ -198,9 +189,9 @@ namespace Saxon.Hej.s9api {
             }
         }
 
-        private class Inner_TreeReceiver_85 : Saxon.Hej.@event.TreeReceiver {
+        private class Inner_TreeReceiver_80 : Saxon.Hej.@event.TreeReceiver {
             private readonly AbstractXsltTransformer outerInstance;
-            public Inner_TreeReceiver_85(AbstractXsltTransformer outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Builder sourceTreeBuilder, Saxon.Hej.trans.XsltController controller, Saxon.Hej.s9api.Destination finalDestination, Saxon.Hej.expr.instruct.GlobalParameterSet parameters) : base(arg1) {
+            public Inner_TreeReceiver_80(AbstractXsltTransformer outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Builder sourceTreeBuilder, Saxon.Hej.trans.XsltController controller, Saxon.Hej.s9api.Destination finalDestination, Saxon.Hej.expr.instruct.GlobalParameterSet parameters) : base(arg1) {
                 this.outerInstance = outerInstance;
                 this.sourceTreeBuilder = sourceTreeBuilder;
                 this.controller = controller;

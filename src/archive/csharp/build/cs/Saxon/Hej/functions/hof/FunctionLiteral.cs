@@ -4,10 +4,10 @@ using System.Linq;
 namespace Saxon.Hej.functions.hof {
     #pragma warning disable 659
     public class FunctionLiteral : Saxon.Hej.expr.Literal {
-        public FunctionLiteral(Saxon.Hej.om.Function value) : base (value) {
+        public FunctionLiteral(Saxon.Hej.om.FunctionItem value) : base (value) {
         }
-        public override Saxon.Hej.om.Function getGroundedValue() {
-            return (Saxon.Hej.om.Function)(base.getGroundedValue());
+        public override Saxon.Hej.om.FunctionItem getGroundedValue() {
+            return (Saxon.Hej.om.FunctionItem)(base.getGroundedValue());
         }
         public override Saxon.Hej.expr.Expression simplify() {
             if ((getGroundedValue() is Saxon.Hej.functions.AbstractFunction)) {
@@ -51,7 +51,7 @@ namespace Saxon.Hej.functions.hof {
             return "namedFunctionRef";
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
-            Saxon.Hej.om.Function f = getGroundedValue();
+            Saxon.Hej.om.FunctionItem f = getGroundedValue();
             if ((f is Saxon.Hej.expr.instruct.UserFunction)) {
                 new Saxon.Hej.functions.hof.UserFunctionReference((Saxon.Hej.expr.instruct.UserFunction)(f)).export(@out);
             } else {

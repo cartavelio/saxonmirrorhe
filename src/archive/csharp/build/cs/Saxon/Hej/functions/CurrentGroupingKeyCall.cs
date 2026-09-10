@@ -25,18 +25,30 @@ namespace Saxon.Hej.functions {
         public override int getIntrinsicDependencies() {
             return Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CURRENT_GROUP;
         }
-        public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext c) {
-            Saxon.Hej.expr.sort.GroupIterator gi = c.getCurrentGroupIterator();
-            Saxon.Hej.om.AtomicSequence result = ((gi == null) ? null : gi.getCurrentGroupingKey());
-            if ((result == null)) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no current grouping key", "XTDE1071");
-                err.setLocation(getLocation());
-                throw err;
-            }
-            return ((/*1430*/Saxon.Hej.tree.iter.AtomicIterator)result.iterate());
+        public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             return Saxon.Hej.om.SequenceTool.toLazySequence(iterate(context));
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.CurrentGroupingKeyCall.CurrentGroupingKeyCallElaborator();
+        }
+        private class CurrentGroupingKeyCallElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.functions.CurrentGroupingKeyCall expr = (Saxon.Hej.functions.CurrentGroupingKeyCall)(getExpression());
+                return context => {
+                    Saxon.Hej.expr.sort.GroupIterator gi = context.getCurrentGroupIterator();
+                    Saxon.Hej.om.AtomicSequence result = ((gi == null) ? null : gi.getCurrentGroupingKey());
+                    if ((result == null)) {
+                        Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("There is no current grouping key", "XTDE1071");
+                        err.setLocation(expr.getLocation());
+                        throw err;
+                    }
+                    return ((/*1430*/Saxon.Hej.tree.iter.AtomicIterator)result.iterate());
+                } ;
+            }
+        
         }
     
     }

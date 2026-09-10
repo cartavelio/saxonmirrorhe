@@ -73,11 +73,6 @@ namespace Saxon.Hej.expr.sort {
             public Saxon.Hej.expr.Expression getForEachItem() {
                 return ((forEachItemOp == null) ? null : forEachItemOp.getChildExpression());
             }
-            public void setForEachItem(Saxon.Hej.expr.Expression forEachItem) {
-                if ((forEachItem != null)) {
-                    forEachItemOp.setChildExpression(forEachItem);
-                }
-            }
             public Saxon.Hej.expr.Expression getForEachSource() {
                 return ((forEachStreamOp == null) ? null : forEachStreamOp.getChildExpression());
             }
@@ -152,7 +147,7 @@ namespace Saxon.Hej.expr.sort {
                 } else {
                     if ((mergeSource.getForEachSource() != null)) {
                         mergeSource.forEachStreamOp.typeCheck(visitor, contextInfo);
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:merge/for-each-source", 0);
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:merge/for-each-source", 0);
                         mergeSource.setForEachStream(tc.staticTypeCheck(mergeSource.getForEachSource(), Saxon.Hej.value.SequenceType.STRING_SEQUENCE, role, visitor));
                         rowContextItemType = config.makeContextItemStaticInfo(Saxon.Hej.pattern.NodeKindTest.DOCUMENT, false);
                     }
@@ -170,8 +165,7 @@ namespace Saxon.Hej.expr.sort {
                         Saxon.Hej.expr.Expression sortKey = skd.getSortKey();
                         sortKey = sortKey.typeCheck(visitor, cit);
                         if ((sortKey != null)) {
-                            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:merge-key/select", 0);
-                            role.setErrorCode("XTTE1020");
+                            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:merge-key/select", 0, "XTTE1020");
                             sortKey = Saxon.Hej.expr.CardinalityChecker.makeCardinalityChecker(sortKey, Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE, role);
                             skd.setSortKey(sortKey, true);
                         }
@@ -307,13 +301,10 @@ namespace Saxon.Hej.expr.sort {
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
             try {
                 Saxon.Hej.expr.sort.AtomicComparer[] comps = getComparators(context);
-                Saxon.Hej.expr.sort.GroupIterator mgi = context.getCurrentMergeGroupIterator();
-                Saxon.Hej.expr.XPathContextMajor c1 = context.newContext();
-                c1.setCurrentMergeGroupIterator(mgi);
-                Saxon.Hej.om.SequenceIterator inputIterator = getMergedInputIterator(context, comps, c1);
+                Saxon.Hej.om.SequenceIterator inputIterator = getMergedInputIterator(context, comps);
                 inputIterator = new Saxon.Hej.expr.sort.MergeGroupingIterator(inputIterator, getComparer(mergeSources[0].mergeKeyDefinitions, comps), getLastPositionFinder(context));
-                c1.setCurrentMergeGroupIterator((Saxon.Hej.expr.sort.GroupIterator)(inputIterator));
-                Saxon.Hej.expr.XPathContext c3 = c1.newMinorContext();
+                Saxon.Hej.expr.XPathContextMajor c3 = context.newContext();
+                c3.setCurrentMergeGroupIterator((Saxon.Hej.expr.sort.GroupIterator)(inputIterator));
                 c3.trackFocus(inputIterator);
                 return new Saxon.Hej.expr.ContextMappingIterator(cxt => getAction().iterate(cxt), c3);
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -321,51 +312,48 @@ namespace Saxon.Hej.expr.sort {
                 throw;
             }
         }
-        private Saxon.Hej.om.SequenceIterator getMergedInputIterator(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer[] comps, Saxon.Hej.expr.XPathContextMajor c1) {
+        private Saxon.Hej.om.SequenceIterator getMergedInputIterator(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
             Saxon.Hej.om.SequenceIterator inputIterator = Saxon.Hej.tree.iter.EmptyIterator.getInstance();
             foreach (Saxon.Hej.expr.sort.MergeInstr.MergeSource ms in mergeSources) {
-                Saxon.Hej.om.SequenceIterator anchorsIter = null;
+                Saxon.Hej.om.SequenceIterator anchorsIter;
                 if ((ms.streamable && (ms.getForEachSource() != null))) {
-                    System.Collections.Generic.IList<Saxon.Hej.expr.ContextMappingIterator> msIters = /*134*/Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.makeSourceIterators(ms, getPackageData(), c1);
+                    System.Collections.Generic.IList<Saxon.Hej.expr.ContextMappingIterator> msIters = /*134*/Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.makeSourceIterators(ms, getPackageData(), context);
                     foreach (Saxon.Hej.expr.ContextMappingIterator iter in msIters) {
                         inputIterator = makeMergeIterator(inputIterator, comps, ms, iter);
                     }
                 } else {
                     if ((ms.getForEachSource() != null)) {
-                        Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(context.getConfiguration().getParseOptions());
-                        options.setSchemaValidationMode(ms.validation);
-                        options.setTopLevelType(ms.schemaType);
-                        options.setApplicableAccumulators(ms.accumulators);
-                        Saxon.Hej.om.SequenceIterator uriIter = ms.getForEachSource().iterate(c1);
+                        Saxon.Hej.lib.ParseOptions options = context.getConfiguration().getParseOptions().withSchemaValidationMode(ms.validation).withTopLevelType(ms.schemaType).withApplicableAccumulators(ms.accumulators);
+                        Saxon.Hej.om.SequenceIterator uriIter = ms.getForEachSource().iterate(context);
                         Saxon.Hej.trans.XsltController controller = (Saxon.Hej.trans.XsltController)(context.getController());
                         Saxon.Hej.expr.accum.AccumulatorManager accumulatorManager = controller.getAccumulatorManager();
                         anchorsIter = Saxon.Hej.expr.ItemMappingIterator.map(uriIter, baseItem => {
                             string uri = baseItem.getStringValue();
-                            Saxon.Hej.om.NodeInfo node = Saxon.Hej.functions.DocumentFn.makeDoc(uri, getRetainedStaticContext().getStaticBaseUriString(), getPackageData(), options, c1, getLocation(), true);
+                            Saxon.Hej.om.NodeInfo node = Saxon.Hej.functions.DocumentFn.makeDoc(uri, getRetainedStaticContext().getStaticBaseUriString(), getPackageData(), options, context, getLocation(), true);
                             if ((node != null)) {
                                 accumulatorManager.setApplicableAccumulators(node.getTreeInfo(), ms.accumulators);
                             }
                             return node;
                         } );
-                        Saxon.Hej.expr.XPathContext c2 = c1.newMinorContext();
+                        Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
                         Saxon.Hej.om.FocusIterator anchorsIterFocus = c2.trackFocus(anchorsIter);
                         while ((anchorsIterFocus.next() != null)) {
                             Saxon.Hej.expr.XPathContext c4 = c2.newMinorContext();
-                            Saxon.Hej.om.FocusIterator rowIntr = c4.trackFocus(ms.getRowSelect().iterate(c2));
+                            c4.trackFocus(ms.getRowSelect().iterate(c2));
                             Saxon.Hej.expr.sort.MergeInstr.MergeKeyMappingFunction addMergeKeys = new Saxon.Hej.expr.sort.MergeInstr.MergeKeyMappingFunction(c4, ms);
-                            Saxon.Hej.expr.ContextMappingIterator contextMapKeysItr = new Saxon.Hej.expr.ContextMappingIterator(it => addMergeKeys.map(it) /* converted from instance method reference */, c4);
+                            Saxon.Hej.expr.ContextMappingIterator contextMapKeysItr = new Saxon.Hej.expr.ContextMappingIterator(/* Unresolved method reference */addMergeKeys.map, c4);
                             inputIterator = makeMergeIterator(inputIterator, comps, ms, contextMapKeysItr);
                         }
                     } else {
                         if ((ms.getForEachItem() != null)) {
-                            anchorsIter = ms.getForEachItem().iterate(c1);
-                            Saxon.Hej.expr.XPathContext c2 = c1.newMinorContext();
+                            anchorsIter = ms.getForEachItem().iterate(context);
+                            Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
                             Saxon.Hej.om.FocusIterator anchorsIterFocus = c2.trackFocus(anchorsIter);
                             while ((anchorsIterFocus.next() != null)) {
                                 inputIterator = getInputIterator(comps, inputIterator, ms, c2);
                             }
                         } else {
-                            inputIterator = getInputIterator(comps, inputIterator, ms, c1);
+                            inputIterator = getInputIterator(comps, inputIterator, ms, context);
                         }
                     }
                 }
@@ -375,9 +363,9 @@ namespace Saxon.Hej.expr.sort {
         private Saxon.Hej.om.SequenceIterator getInputIterator(Saxon.Hej.expr.sort.AtomicComparer[] comps, Saxon.Hej.om.SequenceIterator inputIterator, Saxon.Hej.expr.sort.MergeInstr.MergeSource ms, Saxon.Hej.expr.XPathContext c2) {
             Saxon.Hej.expr.XPathContext c4 = c2.newMinorContext();
             c4.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_MERGE_KEY);
-            Saxon.Hej.om.FocusIterator rowIntr = c4.trackFocus(ms.getRowSelect().iterate(c2));
+            c4.trackFocus(ms.getRowSelect().iterate(c2));
             Saxon.Hej.expr.sort.MergeInstr.MergeKeyMappingFunction addMergeKeys = new Saxon.Hej.expr.sort.MergeInstr.MergeKeyMappingFunction(c4, ms);
-            Saxon.Hej.expr.ContextMappingIterator contextMapKeysItr = new Saxon.Hej.expr.ContextMappingIterator(it => addMergeKeys.map(it) /* converted from instance method reference */, c4);
+            Saxon.Hej.expr.ContextMappingIterator contextMapKeysItr = new Saxon.Hej.expr.ContextMappingIterator(/* Unresolved method reference */addMergeKeys.map, c4);
             inputIterator = makeMergeIterator(inputIterator, comps, ms, contextMapKeysItr);
             return inputIterator;
         }
@@ -434,7 +422,7 @@ namespace Saxon.Hej.expr.sort {
             return mergeSources[0].mergeKeyDefinitions.getSortKeyDefinition(0).getSortKey();
         }
         public System.Collections.Generic.Comparer<Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>> getComparer(Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
-            return new Inner_Comparator_221(sKeys, comps);
+            return new Inner_Comparator_215(this, sKeys, comps);
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
             Saxon.Hej.expr.sort.MergeInstr newMerge = new Saxon.Hej.expr.sort.MergeInstr();
@@ -491,31 +479,17 @@ namespace Saxon.Hej.expr.sort {
             getAction().export(@out);
             @out.endElement();
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.SequenceIterator iter = iterate(context);
-            try {
-                Saxon.Hej.om.SequenceTool.supply(iter, it => output.append(it, getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES));
-            } catch (Saxon.Hej.trans.UncheckedXPathException err) {
-                iter.close();
-                Saxon.Hej.trans.XPathException e = err.getXPathException();
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw e;
-            } finally {
-                iter.close();
-            }
-            return null;
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.sort.MergeInstr.MergeInstrElaborator();
         }
         public override string getStreamerName() {
             return "MergeInstr";
         }
         public class MergeKeyMappingFunction {
             private readonly Saxon.Hej.expr.sort.MergeInstr.MergeSource ms;
-            private readonly Saxon.Hej.expr.XPathContext baseContext;
             private readonly Saxon.Hej.expr.XPathContext keyContext;
             private readonly Saxon.Hej.tree.iter.ManualIterator manualIterator;
             public MergeKeyMappingFunction(Saxon.Hej.expr.XPathContext baseContext, Saxon.Hej.expr.sort.MergeInstr.MergeSource ms)  {
-                this.baseContext = baseContext;
                 this.ms = ms;
                 keyContext = baseContext.newMinorContext();
                 keyContext.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_MERGE_KEY);
@@ -528,6 +502,46 @@ namespace Saxon.Hej.expr.sort {
                 manualIterator.setContextItem(currentItem);
                 Saxon.Hej.expr.sort.ItemWithMergeKeys newItem = new Saxon.Hej.expr.sort.ItemWithMergeKeys(currentItem, ms.mergeKeyDefinitions, ms.sourceName, keyContext);
                 return Saxon.Hej.tree.iter.SingletonIterator.makeIterator(new Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>(newItem));
+            }
+        
+        }
+        private class MergeInstrElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.sort.MergeInstr expr = (Saxon.Hej.expr.sort.MergeInstr)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator actionPull = expr.getAction().makeElaborator().elaborateForPull();
+                return context => {
+                    try {
+                        Saxon.Hej.expr.sort.AtomicComparer[] comps = expr.getComparators(context);
+                        Saxon.Hej.om.SequenceIterator inputIterator = expr.getMergedInputIterator(context, comps);
+                        inputIterator = new Saxon.Hej.expr.sort.MergeGroupingIterator(inputIterator, expr.getComparer(expr.mergeSources[0].mergeKeyDefinitions, comps), expr.getLastPositionFinder(context));
+                        Saxon.Hej.expr.XPathContextMajor c3 = context.newContext();
+                        c3.setCurrentMergeGroupIterator((Saxon.Hej.expr.sort.GroupIterator)(inputIterator));
+                        c3.trackFocus(inputIterator);
+                        return new Saxon.Hej.expr.ContextMappingIterator(cxt => /*Delegate.iterate()*/actionPull(cxt), c3);
+                    } catch (Saxon.Hej.trans.XPathException e) {
+                        e.maybeSetLocation(expr.getLocation());
+                        throw;
+                    }
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.sort.MergeInstr expr = (Saxon.Hej.expr.sort.MergeInstr)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator puller = elaborateForPull();
+                return (output, context) => {
+                    Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/puller(context);
+                    try {
+                        Saxon.Hej.om.SequenceTool.supply(iter, it => output.append(it, expr.getLocation(), Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES));
+                    } catch (Saxon.Hej.trans.UncheckedXPathException err) {
+                        iter.close();
+                        Saxon.Hej.trans.XPathException e = err.getXPathException();
+                        e.maybeSetLocation(expr.getLocation());
+                        e.maybeSetContext(context);
+                        throw e;
+                    } finally {
+                        iter.close();
+                    }
+                    return null;
+                } ;
             }
         
         }
@@ -553,7 +567,7 @@ namespace Saxon.Hej.expr.sort {
                         Saxon.Hej.expr.sort.GroupIterator mgi = /*extraParam*/context.getCurrentMergeGroupIterator();
                         Saxon.Hej.expr.XPathContextMajor c1 = /*extraParam*/context.newContext();
                         /*localvar*/c1.setCurrentMergeGroupIterator(/*localvar*/mgi);
-                        Saxon.Hej.om.SequenceIterator inputIterator = outerInstance.getMergedInputIterator(/*extraParam*/context, /*localvar*/comps, /*localvar*/c1);
+                        Saxon.Hej.om.SequenceIterator inputIterator = outerInstance.getMergedInputIterator(/*extraParam*/context, /*localvar*/comps);
                         /*localvar*/inputIterator = new Saxon.Hej.expr.sort.MergeGroupingIterator(/*localvar*/inputIterator, outerInstance.getComparer(outerInstance.mergeSources[0].mergeKeyDefinitions, /*localvar*/comps), null);
                         return /*field*/last = Saxon.Hej.functions.Count.steppingCount(/*localvar*/inputIterator);
                     }
@@ -563,8 +577,10 @@ namespace Saxon.Hej.expr.sort {
             }
         }
 
-        private class Inner_Comparator_221 : System.Collections.Generic.Comparer<Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>> {
-            public Inner_Comparator_221(Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
+        private class Inner_Comparator_215 : System.Collections.Generic.Comparer<Saxon.Hej.value.ObjectValue<Saxon.Hej.expr.sort.ItemWithMergeKeys>> {
+            private readonly MergeInstr outerInstance;
+            public Inner_Comparator_215(MergeInstr outerInstance, Saxon.Hej.expr.sort.SortKeyDefinitionList sKeys, Saxon.Hej.expr.sort.AtomicComparer[] comps) {
+                this.outerInstance = outerInstance;
                 this.sKeys = sKeys;
                 this.comps = comps;
             }

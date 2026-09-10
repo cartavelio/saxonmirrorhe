@@ -13,9 +13,9 @@ namespace Saxon.Eej.ee.schema.sdoc {
         private int blockDefault = 0;
         private string elementFormDefault = null;
         private int finalDefault = 0;
-        private string targetNamespace;
+        private Saxon.Hej.om.NamespaceUri targetNamespace;
         private bool chameleon = false;
-        private System.Collections.Generic.ISet<string> importedNamespaces = null;
+        private System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> importedNamespaces = null;
         private Saxon.Eej.ee.schema.Wildcard openContentWildcard;
         private string openContentMode;
         private bool openContentAppliesToEmpty = false;
@@ -55,14 +55,15 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.om.AttributeMap atts = attributes();
             string[] allowed = {"attributeFormDefault", "blockDefault", "defaultAttributes", "elementFormDefault", "finalDefault", "id", "targetNamespace", "version", "xpathDefaultNamespace"};
             allowAttributes(atts, allowed);
-            string nsURI = atts.getValue("", "targetNamespace");
-            if (((nsURI != null) && nsURI.Length==0)) {
+            string nsURIatt = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
+            if (((nsURIatt != null) && nsURIatt.Length==0)) {
                 error("The zero-length string is not a legal namespace URI");
-                nsURI = null;
+                nsURIatt = null;
             }
-            if ((nsURI != null)) {
+            if ((nsURIatt != null)) {
+                Saxon.Hej.om.NamespaceUri nsURI = Saxon.Hej.om.NamespaceUri.of(nsURIatt);
                 if (((referrer is Saxon.Eej.ee.schema.sdoc.XSDInclude) || (referrer is Saxon.Eej.ee.schema.sdoc.XSDRedefine))) {
-                    string includingNamespace = referrer.getXSDSchema().getTargetNamespace();
+                    Saxon.Hej.om.NamespaceUri includingNamespace = referrer.getXSDSchema().getTargetNamespace();
                     if (!(includingNamespace.Equals(nsURI))) {
                         error("The target namespace of the included schema must be the same as the target namespace of the including schema");
                         return ;
@@ -76,11 +77,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     targetNamespace = referrer.getXSDSchema().getTargetNamespace();
                     chameleon = true;
                 } else {
-                    targetNamespace = "";
-                    ((Saxon.Eej.config.EnterpriseConfiguration)(config)).addSurrogateSchema("");
+                    targetNamespace = Saxon.Hej.om.NamespaceUri.NULL;
+                    ((Saxon.Eej.config.EnterpriseConfiguration)(config)).addSurrogateSchema(Saxon.Hej.om.NamespaceUri.NULL);
                 }
             }
-            string extensions = atts.getValue(Saxon.Hej.lib.NamespaceConstant.SAXON, "extensions");
+            string extensions = atts.getValue(Saxon.Hej.om.NamespaceUri.SAXON, "extensions");
             if ((extensions != null)) {
                 Saxon.Ejava.util.StringTokenizer st = new Saxon.Ejava.util.StringTokenizer(extensions, " \t\n\r");
                 while (st.hasMoreTokens()) {
@@ -88,7 +89,8 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 }
             }
             processId();
-            string attValue = atts.getValue("", "attributeFormDefault");
+            atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "version");
+            string attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "attributeFormDefault");
             if ((attValue != null)) {
                 if ((attValue.Equals("qualified") || attValue.Equals("unqualified"))) {
                     setAttributeFormDefault(attValue);
@@ -96,7 +98,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     invalidAttributeValue("attributeFormDefault", attValue, "Must be 'qualified' or 'unqualified'");
                 }
             }
-            attValue = atts.getValue("", "defaultAttributes");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "defaultAttributes");
             if ((attValue != null)) {
                 try {
                     defaultAttributeGroup = getComponentName(attValue, USE_DEFAULT_NS_WITHOUT_IMPORT);
@@ -104,7 +106,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     error(err.Message);
                 }
             }
-            attValue = atts.getValue("", "elementFormDefault");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "elementFormDefault");
             if ((attValue != null)) {
                 if ((attValue.Equals("qualified") || attValue.Equals("unqualified"))) {
                     setElementFormDefault(attValue);
@@ -112,30 +114,30 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     invalidAttributeValue("elementFormDefault", attValue, "Must be 'qualified' or 'unqualified'");
                 }
             }
-            attValue = atts.getValue("", "blockDefault");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "blockDefault");
             if ((attValue != null)) {
                 int v = parseFinalOrBlock("blockDefault", attValue, ((Saxon.Hej.type.Derivation.DERIVATION_EXTENSION|Saxon.Hej.type.Derivation.DERIVATION_RESTRICTION)|Saxon.Hej.type.Derivation.DERIVE_BY_SUBSTITUTION));
                 setBlockDefault(v);
             }
-            attValue = atts.getValue("", "finalDefault");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "finalDefault");
             if ((attValue != null)) {
                 int v = parseFinalOrBlock("finalDefault", attValue, (((Saxon.Hej.type.Derivation.DERIVATION_EXTENSION|Saxon.Hej.type.Derivation.DERIVATION_RESTRICTION)|Saxon.Hej.type.Derivation.DERIVATION_LIST)|Saxon.Hej.type.Derivation.DERIVATION_UNION));
                 setFinalDefault(v);
             }
-            attValue = atts.getValue("", "xpathDefaultNamespace");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "xpathDefaultNamespace");
             if ((attValue != null)) {
                 xpathDefaultNamespace = attValue;
             }
         }
-        public bool isImportedNamespace(string uri) {
+        public bool isImportedNamespace(Saxon.Hej.om.NamespaceUri uri) {
             if ((importedNamespaces == null)) {
                 if (getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.IMPLICIT_SCHEMA_IMPORTS)) {
                     return true;
                 }
-                importedNamespaces = new System.Collections.Generic.HashSet<string>(10);
+                importedNamespaces = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>(10);
                 foreach (Saxon.Hej.om.NodeInfo child in children()) {
                     if ((child is Saxon.Eej.ee.schema.sdoc.XSDImport)) {
-                        string targetNamespace = ((Saxon.Eej.ee.schema.sdoc.XSDImport)(child)).getTargetNamespace();
+                        Saxon.Hej.om.NamespaceUri targetNamespace = ((Saxon.Eej.ee.schema.sdoc.XSDImport)(child)).getTargetNamespace();
                         importedNamespaces.Add(targetNamespace);
                     }
                 }
@@ -153,7 +155,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             checkContentModel(stateTerms, stateTargets, false);
             if ((defaultAttributeGroup != null)) {
-                string attValue = getAttributeValue("", "defaultAttributes");
+                string attValue = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "defaultAttributes");
                 try {
                     defaultAttributeGroup = getComponentName(attValue, USE_DEFAULT_NS);
                 } catch (Saxon.Hej.type.SchemaException err) {
@@ -302,10 +304,10 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 }
             }
         }
-        public string getTargetNamespace() {
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
             if ((targetNamespace == null)) {
-                string tn = getAttributeValue("", "targetNamespace");
-                targetNamespace = ((tn == null) ? "" : tn);
+                string tn = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
+                targetNamespace = ((tn == null) ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.of(tn));
             }
             return targetNamespace;
         }

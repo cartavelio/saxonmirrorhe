@@ -11,13 +11,17 @@ namespace Saxon.Hej.tree.linked {
         private readonly System.Collections.Generic.Stack<Saxon.Hej.om.NamespaceMap> namespaceStack = new System.Collections.Generic.Stack<Saxon.Hej.om.NamespaceMap>();
         private bool allocateSequenceNumbers = true;
         private int nextNodeNumber = 1;
-        private bool mutable;
         public LinkedTreeBuilder(Saxon.Hej.@event.PipelineConfiguration pipe) : base (pipe) {
             nodeFactory = Saxon.Hej.tree.linked.LinkedTreeBuilder.DefaultNodeFactory.THE_INSTANCE;
         }
-        public LinkedTreeBuilder(Saxon.Hej.@event.PipelineConfiguration pipe, bool mutable) : base (pipe) {
-            this.mutable = mutable;
+        public LinkedTreeBuilder(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.om.Durability durability) : base (pipe) {
+            this.durability = durability;
             nodeFactory = Saxon.Hej.tree.linked.LinkedTreeBuilder.DefaultNodeFactory.THE_INSTANCE;
+        }
+        public override void setDurability(Saxon.Hej.om.Durability durability) {
+            if ((this.durability != Saxon.Hej.om.Durability.MUTABLE)) {
+                this.durability = durability;
+            }
         }
         public override Saxon.Hej.om.NodeInfo getCurrentRoot() {
             Saxon.Hej.om.NodeInfo physicalRoot = currentRoot;
@@ -58,7 +62,7 @@ namespace Saxon.Hej.tree.linked {
         }
         public override void startDocument(int properties) {
             Saxon.Hej.tree.linked.DocumentImpl doc = new Saxon.Hej.tree.linked.DocumentImpl();
-            doc.setMutable(mutable);
+            doc.setMutable((durability == Saxon.Hej.om.Durability.MUTABLE));
             currentRoot = doc;
             doc.setSystemId(getSystemId());
             doc.setBaseURI(getBaseURI());
@@ -95,9 +99,12 @@ namespace Saxon.Hej.tree.linked {
             bool isNilled = Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.NILLED_ELEMENT);
             namespaceStack.Push(namespaces);
             bool isTopWithinEntity = false;
-            Saxon.Hej.om.AttributeInfo xmlId = suppliedAttributes.get(Saxon.Hej.lib.NamespaceConstant.XML, "id");
+            Saxon.Hej.om.AttributeInfo xmlId = suppliedAttributes.get(Saxon.Hej.om.NamespaceUri.XML, "id");
             if (((xmlId != null) && Saxon.Hej.value.Whitespace.containsWhitespace(Saxon.Hej.str.StringTool.codePoints(xmlId.getValue())))) {
                 suppliedAttributes = suppliedAttributes.put(new Saxon.Hej.om.AttributeInfo(xmlId.getNodeName(), xmlId.getType(), Saxon.Hej.value.Whitespace.trim(xmlId.getValue()), xmlId.getLocation(), xmlId.getProperties()));
+            }
+            if ((location.getSystemId() == null)) {
+                location = new Saxon.Hej.expr.parser.Loc(getSystemId(), location.getLineNumber(), location.getColumnNumber());
             }
             Saxon.Hej.tree.linked.ElementImpl elem = nodeFactory.makeElementNode(currentNode, elemName, type, isNilled, suppliedAttributes, namespaceStack.Peek(), pipe, location, (allocateSequenceNumbers ? nextNodeNumber++ : -1));
             while ((depth>=arrays.Count)) {

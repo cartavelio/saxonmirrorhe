@@ -10,19 +10,16 @@ namespace Saxon.Hej.value {
         public static readonly Saxon.Hej.value.Int64Value MIN_LONG = new Saxon.Hej.value.Int64Value(System.Int64.MinValue);
         private readonly long value;
         private static readonly Saxon.Hej.value.Int64Value[] SMALL_INTEGERS = {new Saxon.Hej.value.Int64Value(0), new Saxon.Hej.value.Int64Value(1), new Saxon.Hej.value.Int64Value(2), new Saxon.Hej.value.Int64Value(3), new Saxon.Hej.value.Int64Value(4), new Saxon.Hej.value.Int64Value(5), new Saxon.Hej.value.Int64Value(6), new Saxon.Hej.value.Int64Value(7), new Saxon.Hej.value.Int64Value(8), new Saxon.Hej.value.Int64Value(9), new Saxon.Hej.value.Int64Value(10), new Saxon.Hej.value.Int64Value(11), new Saxon.Hej.value.Int64Value(12), new Saxon.Hej.value.Int64Value(13), new Saxon.Hej.value.Int64Value(14), new Saxon.Hej.value.Int64Value(15), new Saxon.Hej.value.Int64Value(16), new Saxon.Hej.value.Int64Value(17), new Saxon.Hej.value.Int64Value(18), new Saxon.Hej.value.Int64Value(19), new Saxon.Hej.value.Int64Value(20)};
-        public Int64Value(long value)  {
+        public Int64Value(long value) : base (Saxon.Hej.type.BuiltInAtomicType.INTEGER) {
             this.value = value;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.INTEGER;
         }
-        public Int64Value(long value, Saxon.Hej.type.AtomicType type)  {
+        public Int64Value(long value, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
             this.value = value;
-            this.typeLabel = type;
         }
-        public Int64Value(long val, Saxon.Hej.type.BuiltInAtomicType type, bool check)  {
+        public Int64Value(long val, Saxon.Hej.type.BuiltInAtomicType typeLabel, bool check) : base (typeLabel) {
             value = val;
-            typeLabel = type;
-            if ((check && !(checkRange(value, type)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Integer value "+val)+" is out of range for the requested type ")+type.getDescription()));
+            if ((check && !(checkRange(value, typeLabel)))) {
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((("Integer value "+val)+" is out of range for the requested type ")+typeLabel.getDescription()));
                 err.setErrorCode("XPTY0004");
                 err.setIsTypeError(true);
                 throw err;
@@ -36,9 +33,7 @@ namespace Saxon.Hej.value {
             }
         }
         public static Saxon.Hej.value.Int64Value makeDerived(long val, Saxon.Hej.type.AtomicType type) {
-            Saxon.Hej.value.Int64Value v = new Saxon.Hej.value.Int64Value(val);
-            v.typeLabel = type;
-            return v;
+            return new Saxon.Hej.value.Int64Value(val, type);
         }
         public static Saxon.Hej.value.Int64Value signum(long val) {
             if ((val == 0)) {
@@ -56,25 +51,9 @@ namespace Saxon.Hej.value {
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
             if ((typeLabel.getPrimitiveType() == Saxon.Hej.om.StandardNames.XS_INTEGER)) {
-                Saxon.Hej.value.Int64Value v = new Saxon.Hej.value.Int64Value(value);
-                v.typeLabel = typeLabel;
-                return v;
+                return new Saxon.Hej.value.Int64Value(value, typeLabel);
             } else {
-                return new Saxon.Hej.value.BigDecimalValue(value);
-            }
-        }
-        public override Saxon.Hej.type.ValidationFailure convertToSubType(Saxon.Hej.type.BuiltInAtomicType subtype, bool validate) {
-            if (!(validate)) {
-                setSubType(subtype);
-                return null;
-            } else {
-                if (checkRange(subtype)) {
-                    return null;
-                } else {
-                    Saxon.Hej.type.ValidationFailure err = new Saxon.Hej.type.ValidationFailure(((("String "+value)+" cannot be converted to integer subtype ")+subtype.getDescription()));
-                    err.setErrorCode("FORG0001");
-                    return err;
-                }
+                return new Saxon.Hej.value.BigDecimalValue(value).copyAsSubType(typeLabel);
             }
         }
         public override Saxon.Hej.type.ValidationFailure validateAgainstSubType(Saxon.Hej.type.BuiltInAtomicType type) {
@@ -85,13 +64,6 @@ namespace Saxon.Hej.value {
                 err.setErrorCode("FORG0001");
                 return err;
             }
-        }
-        public void setSubType(Saxon.Hej.type.AtomicType type) {
-            typeLabel = type;
-        }
-        public bool checkRange(Saxon.Hej.type.BuiltInAtomicType type) {
-            typeLabel = type;
-            return checkRange(value, type);
         }
         public override int GetHashCode() {
             if (((value>System.Int32.MinValue) && (value<System.Int32.MaxValue))) {

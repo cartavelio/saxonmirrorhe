@@ -24,8 +24,6 @@ namespace Saxon.Hej.expr {
             targetEdition = config.getEditionCode();
             globalSlotManager = config.makeSlotManager();
         }
-        public PackageData(Saxon.Hej.expr.PackageData p)  {
-        }
         public Saxon.Hej.Configuration getConfiguration() {
             return config;
         }

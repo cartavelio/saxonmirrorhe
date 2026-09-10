@@ -97,7 +97,7 @@ namespace Saxon.Hej.expr.flwor {
                 break ;
               case Saxon.Hej.type.Affinity.OVERLAPS:
               case Saxon.Hej.type.Affinity.SUBSUMED_BY:
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableBinding(Saxon.Hej.expr.flwor.WindowClause.WINDOW_VAR).getVariableQName().getDisplayName(), 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableBinding(Saxon.Hej.expr.flwor.WindowClause.WINDOW_VAR).getVariableQName().getDisplayName(), 0);
                 itemTypeChecker = new Saxon.Hej.expr.ItemTypeCheckingFunction(required, role, getLocation(), config);
                 break ;
               case Saxon.Hej.type.Affinity.DISJOINT:

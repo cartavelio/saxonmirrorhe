@@ -70,7 +70,7 @@ namespace Saxon.Hej.serialize {
         private int inScript;
         protected internal int version = 5;
         private string parentElement;
-        private string uri;
+        private Saxon.Hej.om.NamespaceUri uri;
         private bool escapeNonAscii = false;
         private readonly System.Collections.Generic.Stack<Saxon.Hej.om.NodeName> nodeNameStack = new System.Collections.Generic.Stack<Saxon.Hej.om.NodeName>();
         private static int representationCode(string rep) {
@@ -134,7 +134,7 @@ namespace Saxon.Hej.serialize {
             base.writeDocType(name, displayName, systemId, publicId);
         }
         public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
-            uri = elemName.getURI();
+            uri = elemName.getNamespaceUri();
             base.startElement(elemName, type, attributes, namespaces, location, properties);
             parentElement = elementStack.Peek();
             if ((isHTMLElement(elemName) && ((Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(parentElement, "script") || Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(parentElement, "style"))))) {

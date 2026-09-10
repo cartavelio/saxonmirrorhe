@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.stream.feed {
     public class FilteringFeed : Saxon.Eej.ee.stream.feed.GroundedItemFeed {
+        private Saxon.Eej.ee.stream.watch.WatchManager watchManager;
         private readonly Saxon.Eej.ee.stream.feed.FilteringFeed.Filter filter;
         private int position;
         private readonly System.Collections.Generic.Stack<bool> matchStack = new System.Collections.Generic.Stack<bool>();
         private bool terminated;
-        public FilteringFeed(Saxon.Eej.ee.stream.feed.ItemFeed nextFeed, Saxon.Hej.expr.XPathContext context, Saxon.Eej.ee.stream.feed.FilteringFeed.Filter filter) : base (nextFeed, context) {
+        private bool closed;
+        public FilteringFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Eej.ee.stream.feed.ItemFeed nextFeed, Saxon.Hej.expr.XPathContext context, Saxon.Eej.ee.stream.feed.FilteringFeed.Filter filter) : base (nextFeed, context) {
+            this.watchManager = watchManager;
             this.filter = filter;
         }
         public override void open(Saxon.Eej.ee.stream.watch.Terminator terminator) {
@@ -23,9 +26,12 @@ namespace Saxon.Eej.ee.stream.feed {
                     return getResultFeed().startSelectedParentNode(node, locationId);
                 } else {
                     if (((match == Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.DONE) && (getTerminator() != null))) {
-                        getNextOutputter().close();
                         terminated = true;
-                        getTerminator().terminate();
+                        if (watchManager.allowsEarlyExit()) {
+                            closed = true;
+                            getNextOutputter().close();
+                            getTerminator().terminate();
+                        }
                     }
                 }
             }
@@ -47,9 +53,12 @@ namespace Saxon.Eej.ee.stream.feed {
                         getNextOutputter().append(item);
                     } else {
                         if (((match == Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.DONE) && (getTerminator() != null))) {
-                            getNextOutputter().close();
                             terminated = true;
-                            getTerminator().terminate();
+                            if (watchManager.allowsEarlyExit()) {
+                                closed = true;
+                                getNextOutputter().close();
+                                getTerminator().terminate();
+                            }
                         }
                     }
                 } catch (Saxon.Hej.trans.XPathException e) {
@@ -58,7 +67,7 @@ namespace Saxon.Eej.ee.stream.feed {
             }
         }
         public override void close() {
-            if ((!(terminated) && !(hasFailed()))) {
+            if ((((!(terminated) && !(hasFailed()))) || !(closed))) {
                 getNextOutputter().close();
             }
         }

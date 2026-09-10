@@ -3,10 +3,52 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.value {
     public abstract class GDateValue : Saxon.Hej.value.CalendarValue {
-        protected internal int year;
-        protected internal byte month;
-        protected internal byte day;
-        protected internal bool hasNoYearZero;
+        protected internal readonly int year;
+        protected internal readonly byte month;
+        protected internal readonly byte day;
+        protected internal readonly bool hasNoYearZero;
+        public GDateValue(int year, byte month, byte day, bool hasNoYearZero, int tzMinutes, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel, tzMinutes) {
+            this.year = year;
+            this.month = month;
+            this.day = day;
+            this.hasNoYearZero = hasNoYearZero;
+        }
+        protected internal class MutableGDateValue {
+            public int year;
+            public byte month;
+            public byte day;
+            public bool hasNoYearZero;
+            public int tzMinutes = NO_TIMEZONE;
+            public Saxon.Hej.type.AtomicType typeLabel = Saxon.Hej.type.BuiltInAtomicType.DATE_TIME;
+            public Saxon.Hej.type.ValidationFailure error = null;
+            public MutableGDateValue()  {
+            }
+            public MutableGDateValue(int year, int month, int day, bool hasNoYearZero, int tzMinutes, Saxon.Hej.type.AtomicType typeLabel)  {
+                this.year = year;
+                this.month = (byte)(month);
+                this.day = (byte)(day);
+                this.hasNoYearZero = hasNoYearZero;
+                this.tzMinutes = tzMinutes;
+                this.typeLabel = typeLabel;
+            }
+        
+        }
+        protected internal Saxon.Hej.value.GDateValue.MutableGDateValue makeMutableCopy() {
+            Saxon.Hej.value.GDateValue.MutableGDateValue m = new Saxon.Hej.value.GDateValue.MutableGDateValue();
+            m.year = year;
+            m.month = month;
+            m.day = day;
+            m.hasNoYearZero = hasNoYearZero;
+            m.tzMinutes = getTimezoneInMinutes();
+            m.typeLabel = typeLabel;
+            return m;
+        }
+        protected internal GDateValue(Saxon.Hej.value.GDateValue.MutableGDateValue m) : base (m.typeLabel, m.tzMinutes) {
+            this.year = m.year;
+            this.month = m.month;
+            this.day = m.day;
+            this.hasNoYearZero = m.hasNoYearZero;
+        }
         protected internal static byte[] daysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
         protected internal static readonly short[] monthData = {306, 337, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275};
         public int getYear() {
@@ -18,160 +60,192 @@ namespace Saxon.Hej.value {
         public byte getDay() {
             return day;
         }
-        protected internal static Saxon.Hej.type.ConversionResult setLexicalValue(Saxon.Hej.value.GDateValue d, Saxon.Hej.str.UnicodeString s, bool allowYearZero) {
-            d.hasNoYearZero = !(allowYearZero);
+        protected internal static void setLexicalValue(Saxon.Hej.value.GDateValue.MutableGDateValue m, Saxon.Hej.str.UnicodeString s, bool allowYearZero) {
+            m.hasNoYearZero = !(allowYearZero);
             Saxon.Ejava.util.StringTokenizer tok = new Saxon.Ejava.util.StringTokenizer(Saxon.Hej.value.Whitespace.trim(s).ToString(), "-:+TZ", true);
             try {
                 if (!(tok.hasMoreTokens())) {
-                    return badDate("Too short", s);
+                    m.error = badDate("Too short", s);
+                    return ;
                 }
-                string part = (string)(tok.nextToken());
+                string part = tok.nextToken();
                 int era = +(1);
                 if ("+".Equals(part)) {
-                    return badDate("Date must not start with '+' sign", s);
+                    m.error = badDate("Date must not start with '+' sign", s);
+                    return ;
                 } else {
                     if ("-".Equals(part)) {
                         era = -1;
                         if (!(tok.hasMoreTokens())) {
-                            return badDate("No year after '-'", s);
+                            m.error = badDate("No year after '-'", s);
+                            return ;
                         }
                         part = (string)(tok.nextToken());
                     }
                 }
                 if ((part.Length<4)) {
-                    return badDate("Year is less than four digits", s);
+                    m.error = badDate("Year is less than four digits", s);
+                    return ;
                 }
                 if (((part.Length>4) && (part[0] == '0'))) {
-                    return badDate("When year exceeds 4 digits, leading zeroes are not allowed", s);
+                    m.error = badDate("When year exceeds 4 digits, leading zeroes are not allowed", s);
+                    return ;
                 }
                 int value = Saxon.Hej.value.DurationValue.simpleInteger(part);
                 if ((value<0)) {
                     if ((value == -1)) {
-                        return badDate("Non-numeric year component", s);
+                        m.error = badDate("Non-numeric year component", s);
                     } else {
-                        return badDate("Year is outside the range that Saxon can handle", s, "FODT0001");
+                        m.error = badDate("Year is outside the range that Saxon can handle", s, "FODT0001");
                     }
+                    return ;
                 }
-                d.year = (value*era);
-                if (((d.year == 0) && !(allowYearZero))) {
-                    return badDate("Year zero is not allowed", s);
+                m.year = (value*era);
+                if (((m.year == 0) && !(allowYearZero))) {
+                    m.error = badDate("Year zero is not allowed", s);
+                    return ;
                 }
                 if (((era<0) && !(allowYearZero))) {
-                    d.year++;
+                    m.year++;
                 }
                 if (!(tok.hasMoreTokens())) {
-                    return badDate("Too short", s);
+                    m.error = badDate("Too short", s);
+                    return ;
                 }
                 if (!("-".Equals(tok.nextToken()))) {
-                    return badDate("Wrong delimiter after year", s);
+                    m.error = badDate("Wrong delimiter after year", s);
+                    return ;
                 }
                 if (!(tok.hasMoreTokens())) {
-                    return badDate("Too short", s);
+                    m.error = badDate("Too short", s);
+                    return ;
                 }
-                part = (string)(tok.nextToken());
+                part = tok.nextToken();
                 if ((part.Length != 2)) {
-                    return badDate("Month must be two digits", s);
+                    m.error = badDate("Month must be two digits", s);
+                    return ;
                 }
                 value = Saxon.Hej.value.DurationValue.simpleInteger(part);
                 if ((value<0)) {
-                    return badDate("Non-numeric month component", s);
+                    m.error = badDate("Non-numeric month component", s);
+                    return ;
                 }
-                d.month = (byte)(value);
-                if (((d.month<1) || (d.month>12))) {
-                    return badDate("Month is out of range", s);
+                m.month = (byte)(value);
+                if (((m.month<1) || (m.month>12))) {
+                    m.error = badDate("Month is out of range", s);
+                    return ;
                 }
                 if (!(tok.hasMoreTokens())) {
-                    return badDate("Too short", s);
+                    m.error = badDate("Too short", s);
+                    return ;
                 }
                 if (!("-".Equals(tok.nextToken()))) {
-                    return badDate("Wrong delimiter after month", s);
+                    m.error = badDate("Wrong delimiter after month", s);
+                    return ;
                 }
                 if (!(tok.hasMoreTokens())) {
-                    return badDate("Too short", s);
+                    m.error = badDate("Too short", s);
+                    return ;
                 }
                 part = (string)(tok.nextToken());
                 if ((part.Length != 2)) {
-                    return badDate("Day must be two digits", s);
+                    m.error = badDate("Day must be two digits", s);
+                    return ;
                 }
                 value = Saxon.Hej.value.DurationValue.simpleInteger(part);
                 if ((value<0)) {
-                    return badDate("Non-numeric day component", s);
+                    m.error = badDate("Non-numeric day component", s);
+                    return ;
                 }
-                d.day = (byte)(value);
-                if (((d.day<1) || (d.day>31))) {
-                    return badDate("Day is out of range", s);
+                m.day = (byte)(value);
+                if (((m.day<1) || (m.day>31))) {
+                    m.error = badDate("Day is out of range", s);
+                    return ;
                 }
                 int tzOffset;
                 if (tok.hasMoreTokens()) {
-                    string delim = (string)(tok.nextToken());
+                    string delim = tok.nextToken();
                     if ("T".Equals(delim)) {
-                        return badDate("Value includes time", s);
+                        m.error = badDate("Value includes time", s);
+                        return ;
                     } else {
                         if ("Z".Equals(delim)) {
                             tzOffset = 0;
                             if (tok.hasMoreTokens()) {
-                                return badDate("Continues after 'Z'", s);
+                                m.error = badDate("Continues after 'Z'", s);
+                                return ;
                             }
-                            d.setTimezoneInMinutes(tzOffset);
+                            m.tzMinutes = tzOffset;
                         } else {
                             if (!(((!("+".Equals(delim)) && !("-".Equals(delim)))))) {
                                 if (!(tok.hasMoreTokens())) {
-                                    return badDate("Missing timezone", s);
+                                    m.error = badDate("Missing timezone", s);
+                                    return ;
                                 }
                                 part = (string)(tok.nextToken());
                                 value = Saxon.Hej.value.DurationValue.simpleInteger(part);
                                 if ((value<0)) {
-                                    return badDate("Non-numeric timezone hour component", s);
+                                    m.error = badDate("Non-numeric timezone hour component", s);
+                                    return ;
                                 }
                                 int tzhour = value;
                                 if ((part.Length != 2)) {
-                                    return badDate("Timezone hour must be two digits", s);
+                                    m.error = badDate("Timezone hour must be two digits", s);
+                                    return ;
                                 }
                                 if ((tzhour>14)) {
-                                    return badDate("Timezone hour is out of range", s);
+                                    m.error = badDate("Timezone hour is out of range", s);
+                                    return ;
                                 }
                                 if (!(tok.hasMoreTokens())) {
-                                    return badDate("No minutes in timezone", s);
+                                    m.error = badDate("No minutes in timezone", s);
+                                    return ;
                                 }
                                 if (!(":".Equals(tok.nextToken()))) {
-                                    return badDate("Wrong delimiter after timezone hour", s);
+                                    m.error = badDate("Wrong delimiter after timezone hour", s);
+                                    return ;
                                 }
                                 if (!(tok.hasMoreTokens())) {
-                                    return badDate("No minutes in timezone", s);
+                                    m.error = badDate("No minutes in timezone", s);
+                                    return ;
                                 }
                                 part = (string)(tok.nextToken());
                                 value = Saxon.Hej.value.DurationValue.simpleInteger(part);
                                 if ((value<0)) {
-                                    return badDate("Non-numeric timezone minute component", s);
+                                    m.error = badDate("Non-numeric timezone minute component", s);
+                                    return ;
                                 }
                                 int tzminute = value;
                                 if ((part.Length != 2)) {
-                                    return badDate("Timezone minute must be two digits", s);
+                                    m.error = badDate("Timezone minute must be two digits", s);
+                                    return ;
                                 }
                                 if ((tzminute>59)) {
-                                    return badDate("Timezone minute is out of range", s);
+                                    m.error = badDate("Timezone minute is out of range", s);
+                                    return ;
                                 }
                                 if (tok.hasMoreTokens()) {
-                                    return badDate("Continues after timezone", s);
+                                    m.error = badDate("Continues after timezone", s);
+                                    return ;
                                 }
                                 tzOffset = ((tzhour*60)+tzminute);
                                 if ("-".Equals(delim)) {
                                     tzOffset = -(tzOffset);
                                 }
-                                d.setTimezoneInMinutes(tzOffset);
+                                m.tzMinutes = tzOffset;
                             } else {
-                                return badDate("Timezone format is incorrect", s);
+                                m.error = badDate("Timezone format is incorrect", s);
+                                return ;
                             }
                         }
                     }
                 }
-                if (!(isValidDate(d.year, d.month, d.day))) {
-                    return badDate("Non-existent date", s);
+                if (!(isValidDate(m.year, m.month, m.day))) {
+                    m.error = badDate("Non-existent date", s);
                 }
             } catch (Saxon.Ejava.lang.NumberFormatException err) {
-                return badDate("Non-numeric component", s);
+                m.error = badDate("Non-numeric component", s);
             }
-            return d;
         }
         private static Saxon.Hej.type.ValidationFailure badDate(string msg, Saxon.Hej.str.UnicodeString value) {
             Saxon.Hej.type.ValidationFailure err = new Saxon.Hej.type.ValidationFailure((((("Invalid date "+Saxon.Hej.trans.Err.wrap(value, Saxon.Hej.trans.Err.VALUE))+" (")+msg)+")"));
@@ -191,7 +265,7 @@ namespace Saxon.Hej.value {
         }
         public override void checkValidInJavascript() {
             if (((year<=0) || (year>9999))) {
-                throw new Saxon.Hej.trans.XPathException("Year out of range for Saxon-JS", "FODT0001");
+                throw new Saxon.Hej.trans.XPathException("Year out of range for SaxonJS", "FODT0001");
             }
         }
         public override bool Equals(System.Object o) {

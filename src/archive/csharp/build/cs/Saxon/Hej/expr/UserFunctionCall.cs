@@ -8,18 +8,32 @@ namespace Saxon.Hej.expr {
         private int bindingSlot = -1;
         private int tailCall = NOT_TAIL_CALL;
         private Saxon.Hej.om.StructuredQName name;
+        private bool beingInlined = false;
+        private Saxon.Hej.expr.elab.SequenceEvaluator[] argumentEvaluators = null;
+        private Saxon.Hej.query.UnboundFunctionLibrary.UnboundFunctionCallDetails unboundCallDetails;
         public bool isBeingInlined() {
             return beingInlined;
         }
         public void setBeingInlined(bool beingInlined) {
             this.beingInlined = beingInlined;
         }
-        private bool beingInlined = false;
-        private Saxon.Hej.expr.parser.Evaluator[] argumentEvaluators = null;
         public const int NOT_TAIL_CALL = 0;
         public const int FOREIGN_TAIL_CALL = 1;
         public const int SELF_TAIL_CALL = 2;
         public UserFunctionCall()  {
+        }
+        public UserFunctionCall(Saxon.Hej.query.UnboundFunctionLibrary.UnboundFunctionCallDetails details)  {
+            this.unboundCallDetails = details;
+        }
+        public void copyFrom(Saxon.Hej.expr.UserFunctionCall ufc2) {
+            staticType = ufc2.staticType;
+            function = ufc2.function;
+            bindingSlot = ufc2.bindingSlot;
+            tailCall = ufc2.tailCall;
+            name = ufc2.name;
+            beingInlined = false;
+            argumentEvaluators = ufc2.argumentEvaluators;
+            unboundCallDetails = null;
         }
         public void setFunctionName(Saxon.Hej.om.StructuredQName name) {
             this.name = name;
@@ -47,6 +61,9 @@ namespace Saxon.Hej.expr {
                 return null;
             }
         }
+        public Saxon.Hej.query.UnboundFunctionLibrary.UnboundFunctionCallDetails getUnboundCallDetails() {
+            return unboundCallDetails;
+        }
         public bool isTailCall() {
             return (tailCall != NOT_TAIL_CALL);
         }
@@ -66,50 +83,31 @@ namespace Saxon.Hej.expr {
         public Saxon.Hej.expr.Component getTarget() {
             return function.getDeclaringComponent();
         }
-        public void setArgumentEvaluators(Saxon.Hej.expr.parser.Evaluator[] evalModes) {
-            argumentEvaluators = evalModes;
-        }
         private static readonly int UNHANDLED_DEPENDENCIES = (((Saxon.Hej.expr.StaticProperty.DEPENDS_ON_POSITION|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LAST)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_XSLT_CONTEXT)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_USER_FUNCTIONS);
         public void allocateArgumentEvaluators() {
-            argumentEvaluators = new Saxon.Hej.expr.parser.Evaluator[getArity()];
+            argumentEvaluators = new Saxon.Hej.expr.elab.SequenceEvaluator[getArity()];
+            Saxon.Hej.expr.instruct.UserFunction target = getFunction();
             int i = 0;
             foreach (Saxon.Hej.expr.Operand o in operands()) {
                 Saxon.Hej.expr.Expression arg = o.getChildExpression();
-                Saxon.Hej.value.SequenceType required = function.getArgumentType(i);
-                int cardinality = required.getCardinality();
-                if (((i == 0) && function.getDeclaredStreamability().isConsuming())) {
-                    argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.StreamingArgument.INSTANCE;
+                if (((arg is Saxon.Hej.expr.ErrorExpression) && ((Saxon.Hej.expr.ErrorExpression)(arg)).getErrorCodeLocalPart().Equals("UseDefault"))) {
+                    arg = target.getDefaultValueExpression(i);
+                    o.setChildExpression(arg);
+                }
+                if (((i == 0) && target.getDeclaredStreamability().isConsuming())) {
+                    argumentEvaluators[i] = new Saxon.Hej.expr.elab.StreamingArgumentEvaluator(arg);
                 } else {
-                    if (function.getParameterDefinitions()[i].isIndexedVariable()) {
-                        argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.MakeIndexedVariable.INSTANCE;
+                    if (target.getParameterDefinitions()[i].isIndexedVariable()) {
+                        Saxon.Hej.expr.elab.PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
+                        argumentEvaluators[i] = new Saxon.Hej.expr.elab.IndexedVariableEvaluator(argPull);
                     } else {
-                        if ((arg is Saxon.Hej.expr.Literal)) {
-                            argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.Literal.INSTANCE;
+                        if ((((arg.getDependencies()&UNHANDLED_DEPENDENCIES)) != 0)) {
+                            argumentEvaluators[i] = arg.makeElaborator().eagerly();
                         } else {
-                            if ((arg is Saxon.Hej.expr.VariableReference)) {
-                                argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.Variable.INSTANCE;
+                            if (((arg is Saxon.Hej.expr.instruct.Block) && ((Saxon.Hej.expr.instruct.Block)(arg)).isCandidateForSharedAppend())) {
+                                argumentEvaluators[i] = new Saxon.Hej.expr.elab.SharedAppendEvaluator((Saxon.Hej.expr.instruct.Block)(arg));
                             } else {
-                                if ((cardinality == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE)) {
-                                    argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.SingleItem.INSTANCE;
-                                } else {
-                                    if ((((arg.getDependencies()&UNHANDLED_DEPENDENCIES)) != 0)) {
-                                        argumentEvaluators[i] = new Saxon.Hej.expr.parser.Evaluator.EagerSequence();
-                                    } else {
-                                        if ((!(Saxon.Hej.value.Cardinality.allowsMany(arg.getCardinality())) && (arg.getCost()<20))) {
-                                            argumentEvaluators[i] = new Saxon.Hej.expr.parser.Evaluator.EagerSequence();
-                                        } else {
-                                            if ((cardinality == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_ONE)) {
-                                                argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.OptionalItem.INSTANCE;
-                                            } else {
-                                                if (((arg is Saxon.Hej.expr.instruct.Block) && ((Saxon.Hej.expr.instruct.Block)(arg)).isCandidateForSharedAppend())) {
-                                                    argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.SharedAppend.INSTANCE;
-                                                } else {
-                                                    argumentEvaluators[i] = Saxon.Hej.expr.parser.Evaluator.MemoClosureEvaluator.INSTANCE;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                                argumentEvaluators[i] = new Saxon.Hej.expr.elab.LearningEvaluator(arg, arg.makeElaborator().lazily(true));
                             }
                         }
                     }
@@ -117,7 +115,7 @@ namespace Saxon.Hej.expr {
                 i++;
             }
         }
-        public Saxon.Hej.expr.parser.Evaluator[] getArgumentEvaluators() {
+        public Saxon.Hej.expr.elab.SequenceEvaluator[] getArgumentEvaluators() {
             return argumentEvaluators;
         }
         public override Saxon.Hej.expr.Expression preEvaluate(Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
@@ -210,7 +208,6 @@ namespace Saxon.Hej.expr {
         }
         public override void resetLocalStaticProperties() {
             base.resetLocalStaticProperties();
-            argumentEvaluators = null;
         }
         public override Saxon.Hej.expr.parser.PathMap.PathMapNodeSet addToPathMap(Saxon.Hej.expr.parser.PathMap pathMap, Saxon.Hej.expr.parser.PathMap.PathMapNodeSet pathMapNodeSet) {
             return addExternalFunctionCallToPathMap(pathMap, pathMapNodeSet);
@@ -227,49 +224,10 @@ namespace Saxon.Hej.expr {
             }
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext c) {
-            return callFunction(c).head();
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(c);
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext c) {
-            return callFunction(c).iterate();
-        }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            Saxon.Hej.om.Sequence[] actualArgs = evaluateArguments(context);
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newCleanContext();
-            c2.setOrigin(this);
-            function.callUpdating(actualArgs, c2, pul);
-        }
-        private const int depth = 0;
-        private Saxon.Hej.om.Sequence callFunction(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.instruct.UserFunction targetFunction;
-            Saxon.Hej.om.Sequence[] actualArgs = evaluateArguments(context);
-            Saxon.Hej.expr.XPathContextMajor c2;
-            if (isTailCall()) {
-                requestTailCall(context, actualArgs);
-                return Saxon.Hej.value.EmptySequence.getInstance();
-            }
-            if ((bindingSlot>=0)) {
-                Saxon.Hej.expr.Component target = getTargetComponent(context);
-                if (target.isHiddenAbstractComponent()) {
-                    throw new Saxon.Hej.trans.XPathException((("Cannot call an abstract function ("+name.getDisplayName())+") with no implementation"), "XTDE3052");
-                }
-                targetFunction = (Saxon.Hej.expr.instruct.UserFunction)(target.getActor());
-                c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)targetFunction.makeNewContext(context, this));
-                c2.setCurrentComponent(target);
-                c2.setOrigin(this);
-            } else {
-                targetFunction = function;
-                c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)targetFunction.makeNewContext(context, this));
-                c2.setOrigin(this);
-            }
-            try {
-                return targetFunction.call(c2, actualArgs);
-            } catch (Saxon.Hej.trans.UncheckedXPathException e) {
-                Saxon.Hej.trans.XPathException xe = e.getXPathException();
-                xe.maybeSetLocation(getLocation());
-                throw xe;
-            } catch (System.StackOverflowException err) {
-                throw new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested function calls. May be due to infinite recursion", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, getLocation());
-            }
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(c);
         }
         private void requestTailCall(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] actualArgs) {
             if ((bindingSlot>=0)) {
@@ -288,26 +246,8 @@ namespace Saxon.Hej.expr {
             }
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.Sequence[] actualArgs = evaluateArguments(context);
-            if (isTailCall()) {
-                requestTailCall(context, actualArgs);
-                return ;
-            }
-            if ((bindingSlot>=0)) {
-                Saxon.Hej.expr.Component target = getTargetComponent(context);
-                Saxon.Hej.expr.instruct.UserFunction targetFunction = (Saxon.Hej.expr.instruct.UserFunction)(target.getActor());
-                if ((target.getVisibility() == Saxon.Hej.trans.Visibility.ABSTRACT)) {
-                    throw new Saxon.Hej.trans.XPathException("Cannot call a function defined with visibility=abstract", "XTDE3052");
-                }
-                Saxon.Hej.expr.XPathContextMajor c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)targetFunction.makeNewContext(context, this));
-                c2.setCurrentComponent(target);
-                c2.setOrigin(this);
-                targetFunction.process(c2, actualArgs, output);
-            } else {
-                Saxon.Hej.expr.XPathContextMajor c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)function.makeNewContext(context, this));
-                c2.setOrigin(this);
-                function.process(c2, actualArgs, output);
-            }
+            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context);
+            dispatchTailCall(tc);
         }
         public Saxon.Hej.expr.Component getTargetComponent(Saxon.Hej.expr.XPathContext context) {
             if ((bindingSlot == -1)) {
@@ -319,9 +259,6 @@ namespace Saxon.Hej.expr {
         public override Saxon.Hej.expr.instruct.UserFunction getTargetFunction(Saxon.Hej.expr.XPathContext context) {
             return (Saxon.Hej.expr.instruct.UserFunction)(getTargetComponent(context).getActor());
         }
-        public override Saxon.Hej.om.Sequence[] evaluateArguments(Saxon.Hej.expr.XPathContext c) {
-            return evaluateArguments(c, false);
-        }
         public Saxon.Hej.om.Sequence[] evaluateArguments(Saxon.Hej.expr.XPathContext c, bool streamed) {
             int numArgs = getArity();
             Saxon.Hej.om.Sequence[] actualArgs = Saxon.Hej.om.SequenceTool.makeSequenceArray(numArgs);
@@ -331,14 +268,11 @@ namespace Saxon.Hej.expr {
                 }
             }
             for (int i = 0; (i<numArgs); i++) {
-                Saxon.Hej.expr.parser.Evaluator eval = argumentEvaluators[i];
-                if (((eval == null) || ((eval == Saxon.Hej.expr.parser.Evaluator.StreamingArgument.INSTANCE) && !(streamed)))) {
-                    eval = Saxon.Hej.expr.parser.Evaluator.EagerSequence.INSTANCE;
+                Saxon.Hej.expr.elab.SequenceEvaluator eval = argumentEvaluators[i];
+                if (((eval == null) || (((eval is Saxon.Hej.expr.elab.StreamingArgumentEvaluator) && !(streamed))))) {
+                    eval = getArguments()[0].makeElaborator().eagerly();
                 }
-                actualArgs[i] = eval.evaluate(getArg(i), c);
-                if ((actualArgs[i] == null)) {
-                    actualArgs[i] = Saxon.Hej.value.EmptySequence.getInstance();
-                }
+                actualArgs[i] = eval.evaluate(c);
             }
             return actualArgs;
         }
@@ -349,13 +283,6 @@ namespace Saxon.Hej.expr {
                 @out.emitAttribute("tailCall", ((tailCall == NOT_TAIL_CALL) ? "false" : ((tailCall == SELF_TAIL_CALL) ? "self" : "foreign")));
             }
             @out.emitAttribute("bSlot", (""+getBindingSlot()));
-            if (((argumentEvaluators != null) && (getArity()>0))) {
-                Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
-                foreach (Saxon.Hej.expr.parser.Evaluator e in argumentEvaluators) {
-                    fsb.append((e.getCode()+" "));
-                }
-                @out.emitAttribute("eval", Saxon.Hej.value.Whitespace.trim(fsb.ToString()));
-            }
             foreach (Saxon.Hej.expr.Operand o in operands()) {
                 o.getChildExpression().export(@out);
             }
@@ -377,6 +304,154 @@ namespace Saxon.Hej.expr {
         }
         public override Saxon.Hej.om.StructuredQName getObjectName() {
             return getFunctionName();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            if (isTailCall()) {
+                return new Saxon.Hej.expr.UserFunctionCall.TailCallElaborator();
+            } else {
+                return new Saxon.Hej.expr.UserFunctionCall.UserFunctionCallElaborator();
+            }
+        }
+        private class TailCallElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.UserFunctionCall expr = (Saxon.Hej.expr.UserFunctionCall)(getExpression());
+                if ((expr.bindingSlot>=0)) {
+                    return context => {
+                        Saxon.Hej.expr.TailCallLoop.TailCallComponent info = new Saxon.Hej.expr.TailCallLoop.TailCallComponent();
+                        Saxon.Hej.expr.Component target = expr.getTargetComponent(context);
+                        info.component = target;
+                        info.function = (Saxon.Hej.expr.instruct.UserFunction)(target.getActor());
+                        if (target.isHiddenAbstractComponent()) {
+                            throw new Saxon.Hej.trans.XPathException((("Cannot call an abstract function ("+expr.getFunctionName().getDisplayName())+") with no implementation"), "XTDE3052");
+                        }
+                        Saxon.Hej.om.Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                        ((Saxon.Hej.expr.XPathContextMajor)(context)).requestTailCall(info, actualArgs);
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                    } ;
+                } else {
+                    Saxon.Hej.expr.TailCallLoop.TailCallFunction info = new Saxon.Hej.expr.TailCallLoop.TailCallFunction();
+                    info.function = expr.getFunction();
+                    return context => {
+                        Saxon.Hej.om.Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                        ((Saxon.Hej.expr.XPathContextMajor)(context)).requestTailCall(info, actualArgs);
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                    } ;
+                }
+            }
+        
+        }
+        private class UserFunctionCallElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            private void testNotAbstract(Saxon.Hej.expr.UserFunctionCall expr, Saxon.Hej.expr.Component target) {
+                if (target.isHiddenAbstractComponent()) {
+                    throw new Saxon.Hej.trans.XPathException((("Cannot call an abstract function ("+expr.getFunctionName().getDisplayName())+") with no implementation"), "XTDE3052");
+                }
+            }
+            private Saxon.Hej.trans.XPathException.StackOverflow reportStackOverflow(Saxon.Hej.expr.Expression expr) {
+                return new Saxon.Hej.trans.XPathException.StackOverflow("Too many nested function calls. May be due to infinite recursion", Saxon.Hej.trans.SaxonErrorCode.SXLM0001, expr.getLocation());
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.UserFunctionCall expr = (Saxon.Hej.expr.UserFunctionCall)(getExpression());
+                if ((expr.bindingSlot>=0)) {
+                    return context => {
+                        Saxon.Hej.expr.Component target = expr.getTargetComponent(context);
+                        testNotAbstract(expr, target);
+                        try {
+                            Saxon.Hej.om.Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                            Saxon.Hej.expr.instruct.UserFunction targetFunction = (Saxon.Hej.expr.instruct.UserFunction)(target.getActor());
+                            Saxon.Hej.expr.XPathContextMajor c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)targetFunction.makeNewContext(context, expr));
+                            c2.setCurrentComponent(target);
+                            return targetFunction.call(c2, actualArgs).iterate();
+                        } catch (System.StackOverflowException err) {
+                            throw reportStackOverflow(expr);
+                        }
+                    } ;
+                } else {
+                    Saxon.Hej.expr.instruct.UserFunction targetFunction = expr.getFunction();
+                    return context => {
+                        try {
+                            Saxon.Hej.om.Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                            Saxon.Hej.expr.XPathContextMajor c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)targetFunction.makeNewContext(context, expr));
+                            return targetFunction.call(c2, actualArgs).iterate();
+                        } catch (System.StackOverflowException err) {
+                            throw reportStackOverflow(expr);
+                        }
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.UserFunctionCall expr = (Saxon.Hej.expr.UserFunctionCall)(getExpression());
+                if ((expr.bindingSlot>=0)) {
+                    return context => {
+                        Saxon.Hej.expr.Component target = expr.getTargetComponent(context);
+                        testNotAbstract(expr, target);
+                        try {
+                            Saxon.Hej.om.Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                            Saxon.Hej.expr.instruct.UserFunction targetFunction = (Saxon.Hej.expr.instruct.UserFunction)(target.getActor());
+                            Saxon.Hej.expr.XPathContextMajor c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)targetFunction.makeNewContext(context, expr));
+                            c2.setCurrentComponent(target);
+                            return targetFunction.call(c2, actualArgs).head();
+                        } catch (System.StackOverflowException err) {
+                            throw reportStackOverflow(expr);
+                        }
+                    } ;
+                } else {
+                    Saxon.Hej.expr.instruct.UserFunction targetFunction = expr.getFunction();
+                    return context => {
+                        try {
+                            Saxon.Hej.om.Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                            Saxon.Hej.expr.XPathContextMajor c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)targetFunction.makeNewContext(context, expr));
+                            return targetFunction.call(c2, actualArgs).head();
+                        } catch (System.StackOverflowException err) {
+                            throw reportStackOverflow(expr);
+                        }
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.UserFunctionCall expr = (Saxon.Hej.expr.UserFunctionCall)(getExpression());
+                if (expr.isTailCall()) {
+                    throw new Saxon.Ejava.lang.AssertionError("Not using tail call path");
+                }
+                if ((expr.bindingSlot>=0)) {
+                    return (output, context) => {
+                        Saxon.Hej.expr.Component target = expr.getTargetComponent(context);
+                        testNotAbstract(expr, target);
+                        try {
+                            Saxon.Hej.om.Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                            Saxon.Hej.expr.instruct.UserFunction targetFunction = (Saxon.Hej.expr.instruct.UserFunction)(target.getActor());
+                            Saxon.Hej.expr.XPathContextMajor c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)targetFunction.makeNewContext(context, expr));
+                            c2.setCurrentComponent(target);
+                            targetFunction.process(c2, actualArgs, output);
+                        } catch (System.StackOverflowException err) {
+                            throw reportStackOverflow(expr);
+                        }
+                        return null;
+                    } ;
+                } else {
+                    Saxon.Hej.expr.instruct.UserFunction targetFunction = expr.getFunction();
+                    return (output, context) => {
+                        try {
+                            Saxon.Hej.om.Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                            Saxon.Hej.expr.XPathContextMajor c2 = ((/*1430*/Saxon.Hej.expr.XPathContextMajor)targetFunction.makeNewContext(context, expr));
+                            targetFunction.process(c2, actualArgs, output);
+                        } catch (System.StackOverflowException err) {
+                            throw reportStackOverflow(expr);
+                        }
+                        return null;
+                    } ;
+                }
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Hej.expr.UserFunctionCall expr = (Saxon.Hej.expr.UserFunctionCall)(getExpression());
+                Saxon.Hej.expr.instruct.UserFunction targetFunction = expr.getFunction();
+                return (context, pul) => {
+                    Saxon.Hej.om.Sequence[] actualArgs = expr.evaluateArguments(context, false);
+                    Saxon.Hej.expr.XPathContextMajor c2 = context.newCleanContext();
+                    c2.setOrigin(expr);
+                    targetFunction.callUpdating(actualArgs, c2, pul);
+                } ;
+            }
+        
         }
     
     }

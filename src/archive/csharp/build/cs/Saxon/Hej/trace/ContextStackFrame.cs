@@ -70,7 +70,7 @@ namespace Saxon.Hej.trace {
                             if ((contextItem is Saxon.Hej.ma.arrays.ArrayItem)) {
                                 diag = "array";
                             } else {
-                                if ((contextItem is Saxon.Hej.om.Function)) {
+                                if ((contextItem is Saxon.Hej.om.FunctionItem)) {
                                     diag = "function";
                                 } else {
                                     diag = "item";
@@ -151,7 +151,7 @@ namespace Saxon.Hej.trace {
                             } else {
                                 if ((container is Saxon.Hej.expr.instruct.GlobalVariable)) {
                                     Saxon.Hej.om.StructuredQName qName = ((Saxon.Hej.expr.instruct.GlobalVariable)(container)).getVariableQName();
-                                    if (qName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE)) {
+                                    if (qName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE)) {
                                         return "optimizer-created global variable";
                                     } else {
                                         return ("global variable $"+qName.getDisplayName());

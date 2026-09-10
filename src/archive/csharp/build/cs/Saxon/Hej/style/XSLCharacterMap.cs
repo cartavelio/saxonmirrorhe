@@ -13,7 +13,7 @@ namespace Saxon.Hej.style {
         public Saxon.Hej.om.StructuredQName getCharacterMapName() {
             Saxon.Hej.om.StructuredQName name = getObjectName();
             if ((name == null)) {
-                return makeQName(getAttributeValue("", "name"), null, "name");
+                return makeQName(getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name"), null, "name");
             }
             return name;
         }
@@ -71,7 +71,7 @@ namespace Saxon.Hej.style {
                     string displayname = st.nextToken();
                     try {
                         string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(displayname);
-                        string uri = getURIForPrefix(parts[0], false);
+                        Saxon.Hej.om.NamespaceUri uri = getURIForPrefix(parts[0], false);
                         if ((uri == null)) {
                             compileError((("Undeclared namespace prefix "+Saxon.Hej.trans.Err.wrap(parts[0]))+" in character map name"), "XTSE0280");
                         }

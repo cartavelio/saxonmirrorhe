@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.trans {
     public abstract class Mode : Saxon.Hej.expr.instruct.Actor {
-        public static readonly Saxon.Hej.om.StructuredQName OMNI_MODE = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "_omniMode");
-        public static readonly Saxon.Hej.om.StructuredQName UNNAMED_MODE_NAME = new Saxon.Hej.om.StructuredQName("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "unnamed");
-        public static readonly Saxon.Hej.om.StructuredQName DEFAULT_MODE_NAME = new Saxon.Hej.om.StructuredQName("xsl", Saxon.Hej.lib.NamespaceConstant.XSLT, "default");
+        public static readonly Saxon.Hej.om.StructuredQName OMNI_MODE = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "_omniMode");
+        public static readonly Saxon.Hej.om.StructuredQName UNNAMED_MODE_NAME = new Saxon.Hej.om.StructuredQName("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "unnamed");
+        public static readonly Saxon.Hej.om.StructuredQName DEFAULT_MODE_NAME = new Saxon.Hej.om.StructuredQName("xsl", Saxon.Hej.om.NamespaceUri.XSLT, "default");
         protected internal Saxon.Hej.om.StructuredQName modeName;
         private bool streamable;
         public const int RECOVER_WITH_WARNINGS = 1;
@@ -79,7 +79,7 @@ namespace Saxon.Hej.trans {
         public bool isDeclaredStreamable() {
             return streamable;
         }
-        public abstract System.Collections.Generic.ISet<string> getExplicitNamespaces(Saxon.Hej.om.NamePool pool);
+        public abstract System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getExplicitNamespaces(Saxon.Hej.om.NamePool pool);
         public void setDefaultResultType(Saxon.Hej.value.SequenceType type) {
             defaultResultType = type;
         }
@@ -158,26 +158,10 @@ namespace Saxon.Hej.trans {
                     }
                 }
                 if (mustBeTyped) {
-                    if ((item is Saxon.Hej.om.NodeInfo)) {
-                        int kind = ((Saxon.Hej.om.NodeInfo)(item)).getNodeKind();
-                        if (((kind == Saxon.Hej.type.Type.ELEMENT) || (kind == Saxon.Hej.type.Type.ATTRIBUTE))) {
-                            Saxon.Hej.type.SchemaType annotation = ((Saxon.Hej.om.NodeInfo)(item)).getSchemaType();
-                            if (((annotation == Saxon.Hej.type.Untyped.getInstance()) || (annotation == Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC))) {
-                                throw new Saxon.Hej.trans.XPathException((getModeTitle(true)+" requires typed nodes, but the input is untyped"), "XTTE3100");
-                            }
-                        }
-                    }
+                    checkMustBeTyped(item);
                 } else {
                     if (mustBeUntyped) {
-                        if ((item is Saxon.Hej.om.NodeInfo)) {
-                            int kind = ((Saxon.Hej.om.NodeInfo)(item)).getNodeKind();
-                            if (((kind == Saxon.Hej.type.Type.ELEMENT) || (kind == Saxon.Hej.type.Type.ATTRIBUTE))) {
-                                Saxon.Hej.type.SchemaType annotation = ((Saxon.Hej.om.NodeInfo)(item)).getSchemaType();
-                                if (!((((annotation == Saxon.Hej.type.Untyped.getInstance()) || (annotation == Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC))))) {
-                                    throw new Saxon.Hej.trans.XPathException((getModeTitle(true)+" requires untyped nodes, but the input is typed"), "XTTE3110");
-                                }
-                            }
-                        }
+                        checkMustByUntyped(item);
                     }
                 }
                 if ((traceListener != null)) {
@@ -185,52 +169,88 @@ namespace Saxon.Hej.trans {
                 }
                 Saxon.Hej.trans.rules.Rule rule = getRule(item, context);
                 if ((traceListener != null)) {
-                    if ((rule == null)) {
-                        traceListener.endRuleSearch(getBuiltInRuleSet(), this, item);
-                    } else {
-                        traceListener.endRuleSearch(rule, this, item);
-                    }
+                    handleTraceListener(rule, item, traceListener);
                 }
                 Saxon.Hej.trace.TemplateRuleTraceListener ruleTraceListener = null;
                 if (modeTracing) {
-                    ruleTraceListener = ((Saxon.Hej.trans.XsltController)(controller)).getTemplateRuleTraceListener();
-                    if ((ruleTraceListener == null)) {
-                        ruleTraceListener = new Saxon.Hej.trace.TemplateRuleTraceListener(controller.getConfiguration().getLogger());
-                        ((Saxon.Hej.trans.XsltController)(controller)).setTemplateRuleTraceListener(ruleTraceListener);
-                    }
-                    ruleTraceListener.enter("apply-templates", locationId, item, ((rule == null) ? null : (Saxon.Hej.expr.instruct.TemplateRule)(rule.getAction())));
+                    ruleTraceListener = handleRuleTraceListener(ruleTraceListener, controller, locationId, item, rule);
                 }
                 if ((rule == null)) {
                     getBuiltInRuleSet().process(item, parameters, tunnelParameters, output, context, locationId);
                 } else {
-                    Saxon.Hej.expr.instruct.TemplateRule template = (Saxon.Hej.expr.instruct.TemplateRule)(rule.getAction());
-                    if ((template != previousTemplate)) {
-                        previousTemplate = template;
-                        template.initialize();
-                        context.openStackFrame(template.getStackFrameMap());
-                        context.setLocalParameters(parameters);
-                        context.setTunnelParameters(tunnelParameters);
-                        context.setCurrentMergeGroupIterator(null);
-                    }
-                    context.setCurrentTemplateRule(rule);
-                    if ((traceListener != null)) {
-                        traceListener.startCurrentItem(item);
-                        tc = template.applyLeavingTail(output, context);
-                        if ((tc != null)) {
-                            do {
-                                tc = tc.processLeavingTail();
-                            } while ((tc != null));
-                        }
-                        traceListener.endCurrentItem(item);
-                    } else {
-                        tc = template.applyLeavingTail(output, context);
-                    }
+                    System.Object[] result = handleRuleNotNull(rule, traceListener, context, item, previousTemplate, parameters, tunnelParameters, output);
+                    tc = (Saxon.Hej.expr.instruct.TailCall)(result[0]);
+                    previousTemplate = (Saxon.Hej.expr.instruct.TemplateRule)(result[1]);
                 }
                 if (modeTracing) {
                     ruleTraceListener.leave();
                 }
             }
             return tc;
+        }
+        private void checkMustBeTyped(Saxon.Hej.om.Item item) {
+            if ((item is Saxon.Hej.om.NodeInfo)) {
+                int kind = ((Saxon.Hej.om.NodeInfo)(item)).getNodeKind();
+                if (((kind == Saxon.Hej.type.Type.ELEMENT) || (kind == Saxon.Hej.type.Type.ATTRIBUTE))) {
+                    Saxon.Hej.type.SchemaType annotation = ((Saxon.Hej.om.NodeInfo)(item)).getSchemaType();
+                    if (((annotation == Saxon.Hej.type.Untyped.getInstance()) || (annotation == Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC))) {
+                        throw new Saxon.Hej.trans.XPathException((getModeTitle(true)+" requires typed nodes, but the input is untyped"), "XTTE3100");
+                    }
+                }
+            }
+        }
+        private void checkMustByUntyped(Saxon.Hej.om.Item item) {
+            if ((item is Saxon.Hej.om.NodeInfo)) {
+                int kind = ((Saxon.Hej.om.NodeInfo)(item)).getNodeKind();
+                if (((kind == Saxon.Hej.type.Type.ELEMENT) || (kind == Saxon.Hej.type.Type.ATTRIBUTE))) {
+                    Saxon.Hej.type.SchemaType annotation = ((Saxon.Hej.om.NodeInfo)(item)).getSchemaType();
+                    if (!((((annotation == Saxon.Hej.type.Untyped.getInstance()) || (annotation == Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC))))) {
+                        throw new Saxon.Hej.trans.XPathException((getModeTitle(true)+" requires untyped nodes, but the input is typed"), "XTTE3110");
+                    }
+                }
+            }
+        }
+        private System.Object[] handleRuleNotNull(Saxon.Hej.trans.rules.Rule rule, Saxon.Hej.lib.TraceListener traceListener, Saxon.Hej.expr.XPathContextMajor context, Saxon.Hej.om.Item item, Saxon.Hej.expr.instruct.TemplateRule previousTemplate, Saxon.Hej.expr.instruct.ParameterSet parameters, Saxon.Hej.expr.instruct.ParameterSet tunnelParameters, Saxon.Hej.@event.Outputter output) {
+            Saxon.Hej.expr.instruct.TemplateRule template = (Saxon.Hej.expr.instruct.TemplateRule)(rule.getAction());
+            if ((template != previousTemplate)) {
+                previousTemplate = template;
+                template.initialize();
+                context.openStackFrame(template.getStackFrameMap());
+                context.setLocalParameters(parameters);
+                context.setTunnelParameters(tunnelParameters);
+                context.setCurrentMergeGroupIterator(null);
+            }
+            context.setCurrentTemplateRule(rule);
+            Saxon.Hej.expr.instruct.TailCall tc;
+            if ((traceListener != null)) {
+                traceListener.startCurrentItem(item);
+                tc = template.applyLeavingTail(output, context);
+                if ((tc != null)) {
+                    do {
+                        tc = tc.processLeavingTail();
+                    } while ((tc != null));
+                }
+                traceListener.endCurrentItem(item);
+            } else {
+                tc = template.applyLeavingTail(output, context);
+            }
+            return new System.Object[]{tc, previousTemplate};
+        }
+        private Saxon.Hej.trace.TemplateRuleTraceListener handleRuleTraceListener(Saxon.Hej.trace.TemplateRuleTraceListener ruleTraceListener, Saxon.Hej.Controller controller, Saxon.Hej.s9api.Location locationId, Saxon.Hej.om.Item item, Saxon.Hej.trans.rules.Rule rule) {
+            ruleTraceListener = ((Saxon.Hej.trans.XsltController)(controller)).getTemplateRuleTraceListener();
+            if ((ruleTraceListener == null)) {
+                ruleTraceListener = new Saxon.Hej.trace.TemplateRuleTraceListener(controller.getConfiguration().getLogger());
+                ((Saxon.Hej.trans.XsltController)(controller)).setTemplateRuleTraceListener(ruleTraceListener);
+            }
+            ruleTraceListener.enter("apply-templates", locationId, item, ((rule == null) ? null : (Saxon.Hej.expr.instruct.TemplateRule)(rule.getAction())));
+            return ruleTraceListener;
+        }
+        private void handleTraceListener(Saxon.Hej.trans.rules.Rule rule, Saxon.Hej.om.Item item, Saxon.Hej.lib.TraceListener traceListener) {
+            if ((rule == null)) {
+                traceListener.endRuleSearch(getBuiltInRuleSet(), this, item);
+            } else {
+                traceListener.endRuleSearch(rule, this, item);
+            }
         }
         public abstract int getStackFrameSlotsNeeded();
         public string getCodeForBuiltInRuleSet(Saxon.Hej.trans.rules.BuiltInRuleSet builtInRuleSet) {

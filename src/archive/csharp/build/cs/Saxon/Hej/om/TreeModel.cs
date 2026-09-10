@@ -6,6 +6,7 @@ namespace Saxon.Hej.om {
         public readonly static Saxon.Hej.om.TreeModel TINY_TREE = new Saxon.Hej.om.TreeModel.TinyTree();
         public readonly static Saxon.Hej.om.TreeModel TINY_TREE_CONDENSED = new Saxon.Hej.om.TreeModel.TinyTreeCondensed();
         public readonly static Saxon.Hej.om.TreeModel LINKED_TREE = new Saxon.Hej.om.TreeModel.LinkedTree();
+        public readonly static Saxon.Hej.om.TreeModel IMMUTABLE_LINKED_TREE = new Saxon.Hej.om.TreeModel.LinkedTree(false);
         public abstract Saxon.Hej.@event.Builder makeBuilder(Saxon.Hej.@event.PipelineConfiguration pipe);
         public virtual int getSymbolicValue() {
             return Saxon.Hej.@event.Builder.UNSPECIFIED_TREE_MODEL;
@@ -22,7 +23,7 @@ namespace Saxon.Hej.om {
                 throw new Saxon.Ejava.lang.IllegalArgumentException(("tree model "+symbolicValue));
             }
         }
-        public bool isMutable() {
+        public virtual bool isMutable() {
             return false;
         }
         public virtual bool isSchemaAware() {
@@ -66,8 +67,15 @@ namespace Saxon.Hej.om {
         
         }
         private class LinkedTree : Saxon.Hej.om.TreeModel {
+            private readonly bool mutable;
+            public LinkedTree()  {
+                this.mutable = true;
+            }
+            public LinkedTree(bool mutable)  {
+                this.mutable = mutable;
+            }
             public override Saxon.Hej.@event.Builder makeBuilder(Saxon.Hej.@event.PipelineConfiguration pipe) {
-                return new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe);
+                return new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe, (mutable ? Saxon.Hej.om.Durability.MUTABLE : Saxon.Hej.om.Durability.LASTING));
             }
             public override int getSymbolicValue() {
                 return Saxon.Hej.@event.Builder.LINKED_TREE;
@@ -77,6 +85,9 @@ namespace Saxon.Hej.om {
             }
             public override string getName() {
                 return "LinkedTree";
+            }
+            public override bool isMutable() {
+                return mutable;
             }
         
         }

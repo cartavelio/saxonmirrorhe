@@ -10,15 +10,11 @@ namespace Saxon.Hej.s9api {
             this.processor = processor;
             this.config = processor.getUnderlyingConfiguration();
             compilerInfo = new Saxon.Hej.trans.CompilerInfo(config.getDefaultXsltCompilerInfo());
-            compilerInfo.setGenerateByteCode(config.isGenerateByteCode(Saxon.Api.HostLanguage.XSLT));
             compilerInfo.setTargetEdition(config.getEditionCode());
             compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
         }
         public Saxon.Hej.s9api.Processor getProcessor() {
             return processor;
-        }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            compilerInfo.setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver));
         }
         public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
             compilerInfo.setResourceResolver(resolver);
@@ -32,14 +28,6 @@ namespace Saxon.Hej.s9api {
         }
         public void clearParameters() {
             compilerInfo.clearParameters();
-        }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            Saxon.Hej.lib.JJ_ResourceResolver rr = compilerInfo.getResourceResolver();
-            if ((rr is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(rr)).getWrappedURIResolver();
-            } else {
-                return null;
-            }
         }
         public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
             return compilerInfo.getResourceResolver();
@@ -63,10 +51,18 @@ namespace Saxon.Hej.s9api {
             compilerInfo.setRelocatable(relocatable);
         }
         public void setTargetEdition(string edition) {
-            if (!((((("EE".Equals(edition) || "PE".Equals(edition)) || "HE".Equals(edition)) || "JS".Equals(edition))))) {
+            switch (edition) {
+              case "EE":
+              case "PE":
+              case "HE":
+              case "JS":
+              case "JS2":
+              case "JS3":
+                compilerInfo.setTargetEdition(edition);
+                return ;
+              default:
                 throw new Saxon.Ejava.lang.IllegalArgumentException(("Unknown Saxon edition "+edition));
             }
-            compilerInfo.setTargetEdition(edition);
         }
         public string getTargetEdition() {
             return compilerInfo.getTargetEdition();
@@ -129,10 +125,9 @@ namespace Saxon.Hej.s9api {
             return compilerInfo.isCompileWithTracing();
         }
         public void setGenerateByteCode(bool option) {
-            compilerInfo.setGenerateByteCode(option);
         }
         public bool isGenerateByteCode() {
-            return compilerInfo.isGenerateByteCode();
+            return false;
         }
         public void importXQueryEnvironment(Saxon.Hej.s9api.XQueryCompiler queryCompiler) {
             compilerInfo.setXQueryLibraries(queryCompiler.getUnderlyingStaticContext().getCompiledLibraries());
@@ -165,6 +160,9 @@ namespace Saxon.Hej.s9api {
             } catch (Exception e) when (e is Saxon.Hej.trans.XPathException || e is Saxon.Hej.trans.XmlProcessingAbort) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
+        }
+        public Saxon.Hej.s9api.XsltPackage compilePackage(Saxon.Ejava.io.File file) {
+            return compilePackage(new Saxon.Ejavax.xml.transform.stream.StreamSource(file));
         }
         private Saxon.Hej.trans.packages.PackageLibrary getPackageLibrary() {
             return compilerInfo.getPackageLibrary();
@@ -260,6 +258,9 @@ namespace Saxon.Hej.s9api {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }
+        public Saxon.Hej.s9api.XsltExecutable compile(Saxon.Ejava.io.File file) {
+            return compile(new Saxon.Ejavax.xml.transform.stream.StreamSource(file));
+        }
         public Saxon.Hej.trans.CompilerInfo getUnderlyingCompilerInfo() {
             return compilerInfo;
         }
@@ -273,10 +274,10 @@ namespace Saxon.Hej.s9api {
             return compilerInfo.isJustInTimeCompilation();
         }
         public string getDefaultElementNamespace() {
-            return compilerInfo.getDefaultElementNamespace();
+            return compilerInfo.getDefaultElementNamespace().ToString();
         }
         public void setDefaultElementNamespace(string defaultNS) {
-            compilerInfo.setDefaultElementNamespace(defaultNS);
+            compilerInfo.setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri.of(defaultNS));
         }
         public Saxon.Api.UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
             return compilerInfo.getUnprefixedElementMatchingPolicy();

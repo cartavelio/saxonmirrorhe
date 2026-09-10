@@ -40,6 +40,7 @@ namespace Saxon.Hej {
             options.addRecognizedOption("expand", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Expand attribute defaults from DTD or Schema");
             options.addRecognizedOption("explain", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "Display compiled expression tree and optimization decisions");
             options.addRecognizedOption("ext", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Allow calls to Java extension functions and xsl:result-document");
+            options.addRecognizedOption("init", Saxon.Hej.trans.CommandLineOptions.TYPE_CLASSNAME, "User-supplied code to initialize the Saxon configuration");
             options.addRecognizedOption("json", (Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Source file for primary JSON input");
             options.addRecognizedOption("l", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Maintain line numbers for source documents");
             options.addRecognizedOption("now", (Saxon.Hej.trans.CommandLineOptions.TYPE_DATETIME|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Run with specified current date/time");
@@ -62,7 +63,6 @@ namespace Saxon.Hej {
             options.setPermittedValues("strip", new string[]{"none", "all", "ignorable"}, null);
             options.addRecognizedOption("t", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Display version and timing information");
             options.addRecognizedOption("T", Saxon.Hej.trans.CommandLineOptions.TYPE_CLASSNAME, "Use named TraceListener class, or standard TraceListener");
-            options.addRecognizedOption("TB", Saxon.Hej.trans.CommandLineOptions.TYPE_FILENAME, "Trace hotspot bytecode generation to specified XML file");
             options.addRecognizedOption("TJ", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Debug binding and execution of extension functions");
             options.setPermittedValues("TJ", new string[]{"on", "off"}, "on");
             options.addRecognizedOption("tree", (Saxon.Hej.trans.CommandLineOptions.TYPE_ENUMERATION|Saxon.Hej.trans.CommandLineOptions.VALUE_REQUIRED), "Use specified tree model for source documents");
@@ -84,7 +84,7 @@ namespace Saxon.Hej {
             options.addRecognizedOption("xsiloc", Saxon.Hej.trans.CommandLineOptions.TYPE_BOOLEAN, "Load schemas named in xsi:schemaLocation (default on)");
             options.addRecognizedOption("?", Saxon.Hej.trans.CommandLineOptions.VALUE_PROHIBITED, "Display command line help text");
         }
-        protected internal void doQuery(string[] args, string command) {
+        public void doQuery(string[] args, string command) {
             Saxon.Hej.trans.CommandLineOptions options = new Saxon.Hej.trans.CommandLineOptions();
             setPermittedOptions(options);
             try {
@@ -226,7 +226,7 @@ namespace Saxon.Hej {
                         throw new Saxon.Api.SaxonApiException(("Cannot read JSON input: "+e.Message));
                     }
                 }
-                options.setParams(processor, (name, value) => evaluator.setExternalVariable(name, value));
+                options.setParams(processor, evaluator.setExternalVariable /* instance method reference */);
                 startTime = Saxon.Ejava.lang.System.nanoTime();
                 long totalTime = 0;
                 int r;
@@ -238,8 +238,7 @@ namespace Saxon.Hej {
                             if (outputFile.isDirectory()) {
                                 quit("Output is a directory", 2);
                             }
-                            createFileIfNecessary(outputFile);
-                            serializer = processor.newSerializer(new System.IO.FileStream(outputFile.getPath(), System.IO.FileMode.Create));
+                            serializer = processor.newSerializer(outputFile);
                         } else {
                             serializer = processor.newSerializer(System.Console.Out);
                         }
@@ -262,11 +261,11 @@ namespace Saxon.Hej {
                             throw;
                         }
                     }
+                    long endTime = Saxon.Ejava.lang.System.nanoTime();
+                    if ((r>=3)) {
+                        totalTime += (endTime-startTime);
+                    }
                     if (showTime) {
-                        long endTime = Saxon.Ejava.lang.System.nanoTime();
-                        if ((r>=3)) {
-                            totalTime += (endTime-startTime);
-                        }
                         if ((repeat<100)) {
                             config.getLogger().info(("Execution time: "+Saxon.Hej.trans.Timer.showExecutionTimeNano((endTime-startTime))));
                             config.getLogger().info(Saxon.Hej.trans.Timer.showMemoryUsed());
@@ -276,14 +275,11 @@ namespace Saxon.Hej {
                                 break ;
                             }
                         }
-                        startTime = endTime;
                     }
+                    startTime = endTime;
                 }
                 if ((repeat>3)) {
                     config.getLogger().info(("Average execution time: "+Saxon.Hej.trans.Timer.showExecutionTimeNano((totalTime/((r-3))))));
-                }
-                if ((options.getOptionValue("TB") != null)) {
-                    config.createByteCodeReport(options.getOptionValue("TB"));
                 }
             } catch (Saxon.Hej.expr.instruct.TerminationException err) {
                 quit(err.Message, 1);
@@ -389,10 +385,6 @@ namespace Saxon.Hej {
                     makeXQueryTraceListener(options);
                 }
             }
-            value = options.getOptionValue("TB");
-            if ((value != null)) {
-                config.setBooleanProperty(Saxon.Hej.lib.Feature<bool>.MONITOR_HOT_SPOT_BYTE_CODE, true);
-            }
             value = options.getOptionValue("u");
             if ((value != null)) {
                 useURLs = "on".Equals(value);
@@ -480,7 +472,7 @@ namespace Saxon.Hej {
                 request.baseUri = cwd.ToString();
                 request.uri = new System.Uri(cwd, sourceFileName).ToString();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-                request.purpose = "source document";
+                request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                 sourceInput = request.resolve(config.getResourceResolver());
             } else {
                 if (sourceFileName.Equals("-")) {

@@ -52,35 +52,28 @@ namespace Saxon.Hej.expr {
             return "SubscriptExpression";
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.value.NumericValue index = (Saxon.Hej.value.NumericValue)(getSubscript().evaluateItem(context));
-            if ((index == null)) {
-                return null;
-            }
-            int intindex = index.asSubscript();
-            if ((intindex != -1)) {
-                Saxon.Hej.om.Item item;
-                Saxon.Hej.om.SequenceIterator iter = getBaseExpression().iterate(context);
-                if ((intindex == 1)) {
-                    item = iter.next();
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(context);
+        }
+        public static Saxon.Hej.om.Item getItemAt(Saxon.Hej.om.SequenceIterator iter, int index) {
+            Saxon.Hej.om.Item item;
+            if ((index == 1)) {
+                item = iter.next();
+            } else {
+                if ((iter is Saxon.Hej.om.MemoSequence.ProgressiveIterator)) {
+                    Saxon.Hej.om.MemoSequence mem = ((Saxon.Hej.om.MemoSequence.ProgressiveIterator)(iter)).getMemoSequence();
+                    item = mem.itemAt((index-1));
                 } else {
-                    if ((iter is Saxon.Hej.om.MemoSequence.ProgressiveIterator)) {
-                        Saxon.Hej.om.MemoSequence mem = ((Saxon.Hej.om.MemoSequence.ProgressiveIterator)(iter)).getMemoSequence();
-                        item = mem.itemAt((intindex-1));
+                    if (((iter is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(iter)).isActuallyGrounded())) {
+                        Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(iter);
+                        item = value.itemAt((index-1));
                     } else {
-                        if (((iter is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(iter)).isActuallyGrounded())) {
-                            Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(iter);
-                            item = value.itemAt((intindex-1));
-                        } else {
-                            Saxon.Hej.om.SequenceIterator tail = Saxon.Hej.expr.TailIterator.make(iter, intindex);
-                            item = tail.next();
-                            tail.close();
-                        }
+                        Saxon.Hej.om.SequenceIterator tail = Saxon.Hej.expr.TailIterator.make(iter, index);
+                        item = tail.next();
+                        tail.close();
                     }
                 }
-                return item;
-            } else {
-                return null;
             }
+            return item;
         }
         public override string getExpressionName() {
             return "subscript";
@@ -96,6 +89,30 @@ namespace Saxon.Hej.expr {
         }
         public override string toShortString() {
             return (((Saxon.Hej.expr.parser.ExpressionTool.parenthesize(getBaseExpression())+"[")+getSubscript().toShortString())+"]");
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.SubscriptExpression.SubscriptExprElaborator();
+        }
+        public class SubscriptExprElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SubscriptExpression expr = (Saxon.Hej.expr.SubscriptExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.ItemEvaluator indexEval = expr.getSubscriptExpression().makeElaborator().elaborateForItem();
+                return context => {
+                    Saxon.Hej.value.NumericValue index = (Saxon.Hej.value.NumericValue)(/*Delegate.eval()*/indexEval(context));
+                    if ((index == null)) {
+                        return null;
+                    }
+                    int intIndex = index.asSubscript();
+                    if ((intIndex != -1)) {
+                        Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/baseEval(context);
+                        return getItemAt(iter, intIndex);
+                    } else {
+                        return null;
+                    }
+                } ;
+            }
+        
         }
     
     }

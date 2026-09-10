@@ -22,16 +22,8 @@ namespace Saxon.Hej.expr.instruct {
         public override int getInstructionNameCode() {
             return Saxon.Hej.om.StandardNames.XSL_BREAK;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            markContext(context);
-            return null;
-        }
         public void markContext(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.XPathContext c = context;
-            while (!(((c is Saxon.Hej.expr.XPathContextMajor)))) {
-                c = c.getCaller();
-            }
-            ((Saxon.Hej.expr.XPathContextMajor)(c)).requestTailCall(this, null);
+            context.getMajorContext().requestTailCall(this, null);
         }
         public override string getExpressionName() {
             return "xsl:break";
@@ -39,6 +31,33 @@ namespace Saxon.Hej.expr.instruct {
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("break", this);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.BreakInstr.BreakElaborator();
+        }
+        public class BreakElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.BreakInstr expr = (Saxon.Hej.expr.instruct.BreakInstr)(getExpression());
+                return (output, context) => {
+                    expr.markContext(context);
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.instruct.BreakInstr expr = (Saxon.Hej.expr.instruct.BreakInstr)(getExpression());
+                return (context) => {
+                    expr.markContext(context);
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.instruct.BreakInstr expr = (Saxon.Hej.expr.instruct.BreakInstr)(getExpression());
+                return (context) => {
+                    expr.markContext(context);
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                } ;
+            }
+        
         }
     
     }

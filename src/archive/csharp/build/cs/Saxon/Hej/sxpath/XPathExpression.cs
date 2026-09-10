@@ -56,7 +56,7 @@ namespace Saxon.Hej.sxpath {
         }
         public Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.sxpath.XPathDynamicContext context) {
             context.checkExternalVariables(stackFrameMap, numberOfExternalVariables);
-            return expression.iterate(context.getXPathContextObject());
+            return /*Delegate.iterate()*/expression.makeElaborator().elaborateForPull()(context.getXPathContextObject());
         }
         public System.Collections.Generic.IList<Saxon.Hej.om.Item> evaluate(Saxon.Hej.sxpath.XPathDynamicContext context) {
             System.Collections.Generic.IList<Saxon.Hej.om.Item> list = new System.Collections.Generic.List<Saxon.Hej.om.Item>(20);
@@ -70,7 +70,7 @@ namespace Saxon.Hej.sxpath {
             return result;
         }
         public bool effectiveBooleanValue(Saxon.Hej.sxpath.XPathDynamicContext context) {
-            return expression.effectiveBooleanValue(context.getXPathContextObject());
+            return /*Delegate.eval()*/expression.makeElaborator().elaborateForBoolean()(context.getXPathContextObject());
         }
         public Saxon.Hej.expr.Expression getInternalExpression() {
             return expression;

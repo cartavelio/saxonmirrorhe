@@ -2,11 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.xsltextn.style {
-    public class SaxonEntityRef : Saxon.Hej.style.StyleElement {
+    public class SaxonEntityRef : Saxon.Hej.style.ExtensionInstruction {
         internal string nameAttribute;
-        public override bool isInstruction() {
-            return true;
-        }
         protected internal override void prepareAttributes() {
             foreach (Saxon.Hej.om.AttributeInfo att in attributes()) {
                 Saxon.Hej.om.NodeName attName = att.getNodeName();

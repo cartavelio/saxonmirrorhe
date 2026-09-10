@@ -8,21 +8,17 @@ namespace Saxon.Hej.value {
         public static readonly Saxon.Hej.value.DoubleValue ONE = new Saxon.Hej.value.DoubleValue(1.0);
         public static readonly Saxon.Hej.value.DoubleValue NaN = new Saxon.Hej.value.DoubleValue(System.Double.NaN);
         private readonly double value;
-        public DoubleValue(double value)  {
+        public DoubleValue(double value) : base (Saxon.Hej.type.BuiltInAtomicType.DOUBLE) {
             this.value = value;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.DOUBLE;
         }
-        public DoubleValue(double value, Saxon.Hej.type.AtomicType type)  {
+        public DoubleValue(double value, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
             this.value = value;
-            typeLabel = type;
         }
         public static Saxon.Hej.value.DoubleValue makeDoubleValue(double value) {
             return new Saxon.Hej.value.DoubleValue(value);
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.DoubleValue v = new Saxon.Hej.value.DoubleValue(value);
-            v.typeLabel = typeLabel;
-            return v;
+            return new Saxon.Hej.value.DoubleValue(value, typeLabel);
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {
             return Saxon.Hej.type.BuiltInAtomicType.DOUBLE;

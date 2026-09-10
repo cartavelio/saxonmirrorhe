@@ -10,7 +10,7 @@ namespace Saxon.Hej.expr {
             getOperand().typeCheck(visitor, contextInfo);
             Saxon.Hej.value.SequenceType atomicType = Saxon.Hej.value.SequenceType.ATOMIC_SEQUENCE;
             Saxon.Hej.Configuration config = visitor.getConfiguration();
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.TYPE_OP, "castable as", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.TYPE_OP, "castable as", 0);
             Saxon.Hej.expr.parser.TypeChecker tc = config.getTypeChecker(false);
             Saxon.Hej.expr.Expression operand = tc.staticTypeCheck(getBaseExpression(), atomicType, role, visitor);
             setBaseExpression(operand);
@@ -70,43 +70,7 @@ namespace Saxon.Hej.expr {
             return Saxon.Hej.value.BooleanValue.get(effectiveBooleanValue(context));
         }
         public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
-            int count = 0;
-            Saxon.Hej.om.SequenceIterator iter = getBaseExpression().iterate(context);
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
-                if ((item is Saxon.Hej.om.NodeInfo)) {
-                    Saxon.Hej.om.AtomicSequence atomizedValue = item.atomize();
-                    int length = Saxon.Hej.om.SequenceTool.getLength(atomizedValue);
-                    count += length;
-                    if ((count>1)) {
-                        return false;
-                    }
-                    if ((length != 0)) {
-                        Saxon.Hej.value.AtomicValue av = ((/*1430*/Saxon.Hej.value.AtomicValue)atomizedValue.head());
-                        if (!(isCastable(av, getTargetType(), context))) {
-                            return false;
-                        }
-                    }
-                } else {
-                    if ((item is Saxon.Hej.value.AtomicValue)) {
-                        Saxon.Hej.value.AtomicValue av = (Saxon.Hej.value.AtomicValue)(item);
-                        count++;
-                        if ((count>1)) {
-                            return false;
-                        }
-                        if (!(isCastable(av, getTargetType(), context))) {
-                            return false;
-                        }
-                    } else {
-                        if ((item is Saxon.Hej.ma.arrays.ArrayItem)) {
-                            return false;
-                        } else {
-                            throw new Saxon.Hej.trans.XPathException("Input to cast cannot be atomized", "XPTY0004");
-                        }
-                    }
-                }
-            }
-            return ((count != 0) || allowsEmpty());
+            return /*Delegate.eval()*/makeElaborator().elaborateForBoolean()(context);
         }
         private bool isCastable(Saxon.Hej.value.AtomicValue value, Saxon.Hej.type.AtomicType targetType, Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.type.Converter converter = this.converter;
@@ -132,6 +96,54 @@ namespace Saxon.Hej.expr {
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             export(@out, "castable");
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.CastableExpression.CastableExpressionElaborator();
+        }
+        private class CastableExpressionElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.CastableExpression expr = (Saxon.Hej.expr.CastableExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator argPull = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    int count = 0;
+                    Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/argPull(context);
+                    for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                        if ((item is Saxon.Hej.om.NodeInfo)) {
+                            Saxon.Hej.om.AtomicSequence atomizedValue = item.atomize();
+                            int length = Saxon.Hej.om.SequenceTool.getLength(atomizedValue);
+                            count += length;
+                            if ((count>1)) {
+                                return false;
+                            }
+                            if ((length != 0)) {
+                                Saxon.Hej.value.AtomicValue av = ((/*1430*/Saxon.Hej.value.AtomicValue)atomizedValue.head());
+                                if (!(expr.isCastable(av, expr.getTargetType(), context))) {
+                                    return false;
+                                }
+                            }
+                        } else {
+                            if ((item is Saxon.Hej.value.AtomicValue)) {
+                                Saxon.Hej.value.AtomicValue av = (Saxon.Hej.value.AtomicValue)(item);
+                                count++;
+                                if ((count>1)) {
+                                    return false;
+                                }
+                                if (!(expr.isCastable(av, expr.getTargetType(), context))) {
+                                    return false;
+                                }
+                            } else {
+                                if ((item is Saxon.Hej.ma.arrays.ArrayItem)) {
+                                    return false;
+                                } else {
+                                    throw new Saxon.Hej.trans.XPathException("Input to cast cannot be atomized", "XPTY0004");
+                                }
+                            }
+                        }
+                    }
+                    return ((count != 0) || expr.allowsEmpty());
+                } ;
+            }
+        
         }
     
     }

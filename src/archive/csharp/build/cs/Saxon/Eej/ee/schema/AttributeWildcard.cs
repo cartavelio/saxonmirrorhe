@@ -35,7 +35,7 @@ namespace Saxon.Eej.ee.schema {
             serializer.emitAttribute("ref", id);
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return wildcard.getComponentAsFunction();
         }
         public override Saxon.Hej.type.SchemaValidationStatus getValidationStatus() {

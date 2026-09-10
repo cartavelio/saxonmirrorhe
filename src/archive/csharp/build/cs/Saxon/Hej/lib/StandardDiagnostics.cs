@@ -196,7 +196,7 @@ namespace Saxon.Hej.lib {
         public void logStackTrace(Saxon.Hej.expr.XPathContext context, Saxon.Hej.lib.Logger @out, int level) {
             if ((level>0)) {
                 int depth = 20;
-                while ((depth-->0)) {
+                while (((depth-->0) && (context != null))) {
                     Saxon.Hej.expr.Component component = context.getCurrentComponent();
                     if ((component != null)) {
                         if ((component.getActor() is Saxon.Hej.trans.Mode)) {
@@ -221,9 +221,7 @@ namespace Saxon.Hej.lib {
                         context.getStackFrame().getStackFrameMap().showStackFrame(context, @out);
                     } catch (System.Exception e) {
                     }
-                    while (!(((context is Saxon.Hej.expr.XPathContextMajor)))) {
-                        context = context.getCaller();
-                    }
+                    context = context.getMajorContext();
                     Saxon.Hej.expr.ContextOriginator originator = ((Saxon.Hej.expr.XPathContextMajor)(context)).getOrigin();
                     if (((originator == null) || (originator is Saxon.Hej.Controller))) {
                         return ;
@@ -241,6 +239,12 @@ namespace Saxon.Hej.lib {
             } else {
                 if ((originator is Saxon.Hej.expr.instruct.Instruction)) {
                     sb.append(getInstructionName((Saxon.Hej.expr.instruct.Instruction)(originator)));
+                    if (((originator is Saxon.Hej.expr.instruct.CallTemplate) && ((Saxon.Hej.expr.instruct.CallTemplate)(originator)).usesTailRecursion())) {
+                        sb.append(" (tail calls omitted)");
+                    }
+                    if (((originator is Saxon.Hej.expr.instruct.ApplyTemplates) && ((Saxon.Hej.expr.instruct.ApplyTemplates)(originator)).useTailRecursion())) {
+                        sb.append(" (tail calls omitted)");
+                    }
                 } else {
                     if ((originator is Saxon.Hej.expr.UserFunctionCall)) {
                         sb.append("function call");

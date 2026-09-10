@@ -96,7 +96,7 @@ namespace Saxon.Hej.style {
                     } else {
                         if ((componentTypeCode == Saxon.Hej.om.StandardNames.XSL_FUNCTION)) {
                             Saxon.Hej.om.StructuredQName name = makeQName(tok.Substring(0, hash - 0), null, "names");
-                            test = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getURI(), name.getLocalPart(), getNamePool());
+                            test = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), getNamePool());
                             int arity = 0;
                             try {
                                 arity = Saxon.Impl.Helpers.Utils.ParseInt(tok.Substring((hash+1)));
@@ -118,17 +118,17 @@ namespace Saxon.Hej.style {
                                 compileErrorInAttribute("No prefix before ':*'", "XTSE0020", "names");
                             }
                             string prefix = tok.Substring(0, (tok.Length-2) - 0);
-                            string uri = getURIForPrefix(prefix, false);
+                            Saxon.Hej.om.NamespaceUri uri = getURIForPrefix(prefix, false);
                             if ((uri == null)) {
                                 compileErrorInAttribute(("Undeclared prefix "+prefix), "XTSE0020", "names");
-                                uri = Saxon.Hej.lib.NamespaceConstant.ANONYMOUS;
+                                uri = Saxon.Hej.om.NamespaceUri.ANONYMOUS;
                             }
                             test = new Saxon.Hej.pattern.NamespaceTest(getNamePool(), Saxon.Hej.type.Type.ELEMENT, uri);
                             addWildCardTest(componentTypeCode, test);
                         } else {
                             if ((tok.StartsWith("Q{") && tok.EndsWith("}*"))) {
                                 string uri = tok.Substring(2, (tok.Length-2) - 2);
-                                test = new Saxon.Hej.pattern.NamespaceTest(getNamePool(), Saxon.Hej.type.Type.ELEMENT, uri);
+                                test = new Saxon.Hej.pattern.NamespaceTest(getNamePool(), Saxon.Hej.type.Type.ELEMENT, Saxon.Hej.om.NamespaceUri.of(uri));
                                 wildcardComponentTests.Add(new Saxon.Hej.trans.ComponentTest(componentTypeCode, test, -1));
                             } else {
                                 if (tok.StartsWith("*:")) {
@@ -146,7 +146,7 @@ namespace Saxon.Hej.style {
                                             compileErrorInAttribute("When the name identifies a function, the arity must be given (XSLT 3.0 erratum E36)", "XTSE3020", "names");
                                         } else {
                                             Saxon.Hej.om.StructuredQName name = makeQName(tok, null, "names");
-                                            test = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getURI(), name.getLocalPart(), getNamePool());
+                                            test = new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), getNamePool());
                                             explicitComponentTests.Add(new Saxon.Hej.trans.ComponentTest(componentTypeCode, test, -1));
                                         }
                                     }

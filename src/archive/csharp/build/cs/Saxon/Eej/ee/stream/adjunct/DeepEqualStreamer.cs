@@ -16,18 +16,21 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Hej.expr.SystemFunctionCall call = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
             Saxon.Eej.ee.stream.Posture posture = /*134*/Saxon.Eej.ee.stream.Streamability.getPosture(call.getArg(consumingArg));
             if (((posture == Saxon.Eej.ee.stream.Posture.GROUNDED) || (posture == Saxon.Eej.ee.stream.Posture.CLIMBING))) {
-                return new Saxon.Eej.ee.stream.adjunct.DeepEqualStreamer.GroundedDeepEqualFeed(call, @out, context, consumingArg);
+                return new Saxon.Eej.ee.stream.adjunct.DeepEqualStreamer.GroundedDeepEqualFeed(watchManager, call, @out, context, consumingArg);
             } else {
-                Saxon.Eej.ee.stream.feed.ItemFeed comparisonFeed = new Saxon.Eej.ee.stream.adjunct.DeepEqualStreamer.GroundedDeepEqualFeed(call, @out, context, consumingArg);
+                Saxon.Eej.ee.stream.feed.ItemFeed comparisonFeed = new Saxon.Eej.ee.stream.adjunct.DeepEqualStreamer.GroundedDeepEqualFeed(watchManager, call, @out, context, consumingArg);
                 return new Saxon.Eej.ee.stream.feed.CopyOfFeed(watchManager, comparisonFeed, context);
             }
         }
         private class GroundedDeepEqualFeed : Saxon.Eej.ee.stream.feed.ItemFeed {
+            internal Saxon.Eej.ee.stream.watch.WatchManager watchManager;
             internal int consumingArg;
             internal Saxon.Hej.om.SequenceIterator other;
             internal Saxon.Hej.expr.sort.AtomicComparer comparer;
             internal bool done;
-            public GroundedDeepEqualFeed(Saxon.Hej.expr.SystemFunctionCall exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context, int consumingArg) : base (exp, result, context) {
+            internal bool closed;
+            public GroundedDeepEqualFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.SystemFunctionCall exp, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context, int consumingArg) : base (exp, result, context) {
+                this.watchManager = watchManager;
                 other = exp.getArg((1-consumingArg)).iterate(context);
                 this.consumingArg = consumingArg;
                 Saxon.Hej.expr.SystemFunctionCall call = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
@@ -52,9 +55,12 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     Saxon.Hej.om.Item otherItem = other.next();
                     if (((otherItem == null) || !(Saxon.Hej.functions.DeepEqual.deepEqual(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(item), Saxon.Hej.tree.iter.SingletonIterator.makeIterator(otherItem), comparer, getContext(), 0)))) {
                         getNextOutputter().append(Saxon.Hej.value.BooleanValue.FALSE);
-                        getNextOutputter().close();
                         done = true;
-                        getTerminator().terminate();
+                        if (watchManager.allowsEarlyExit()) {
+                            closed = true;
+                            getNextOutputter().close();
+                            getTerminator().terminate();
+                        }
                     }
                 }
             }
@@ -62,6 +68,8 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 if (!(done)) {
                     bool more = (other.next() != null);
                     getNextOutputter().append(Saxon.Hej.value.BooleanValue.get(!(more)));
+                }
+                if (!(closed)) {
                     getNextOutputter().close();
                 }
             }

@@ -27,8 +27,8 @@ namespace Saxon.Hej.@event {
             foreach (Saxon.Hej.om.AbsolutePath.PathElement pe in path) {
                 fsb.append('/');
                 if (useURIs) {
-                    string uri = pe.getName().getURI();
-                    if (!(uri.Length==0)) {
+                    Saxon.Hej.om.NamespaceUri uri = pe.getName().getNamespaceUri();
+                    if (!(uri.isEmpty())) {
                         fsb.append('"');
                         fsb.append(uri);
                         fsb.append('"');

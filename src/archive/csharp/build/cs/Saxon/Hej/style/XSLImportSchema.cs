@@ -32,8 +32,8 @@ namespace Saxon.Hej.style {
         }
         public void readSchema() {
             try {
-                string schemaLoc = Saxon.Hej.value.Whitespace.trim(getAttributeValue("", "schema-location"));
-                string @namespace = Saxon.Hej.value.Whitespace.trim(getAttributeValue("", "namespace"));
+                string schemaLoc = Saxon.Hej.value.Whitespace.trim(getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "schema-location"));
+                string @namespace = Saxon.Hej.value.Whitespace.trim(getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "namespace"));
                 if ((@namespace == null)) {
                     @namespace = "";
                 } else {
@@ -49,6 +49,7 @@ namespace Saxon.Hej.style {
                     throw xe;
                 }
                 Saxon.Hej.om.NodeInfo inlineSchema = null;
+                Saxon.Hej.om.NamespaceUri targetNamespace = null;
                 foreach (Saxon.Hej.om.NodeInfo child in children()) {
                     if ((inlineSchema != null)) {
                         compileError((getDisplayName()+" must not have more than one child element"));
@@ -61,38 +62,41 @@ namespace Saxon.Hej.style {
                         compileError("The schema-location attribute must be absent if an inline schema is present", "XTSE0215");
                     }
                     if (@namespace.Length==0) {
-                        @namespace = inlineSchema.getAttributeValue("", "targetNamespace");
+                        @namespace = inlineSchema.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
                         if ((@namespace == null)) {
                             @namespace = "";
                         }
                     }
-                    @namespace = config.readInlineSchema(inlineSchema, @namespace, getCompilation().getCompilerInfo().getErrorReporter());
-                    getPrincipalStylesheetModule().addImportedSchema(@namespace);
+                    targetNamespace = Saxon.Hej.om.NamespaceUri.of(@namespace);
+                    targetNamespace = config.readInlineSchema(inlineSchema, targetNamespace, getCompilation().getCompilerInfo().getErrorReporter());
+                    getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
                 }
                 if ((inlineSchema != null)) {
                     return ;
                 }
                 if (((@namespace.Equals(Saxon.Hej.lib.NamespaceConstant.XML) || @namespace.Equals(Saxon.Hej.lib.NamespaceConstant.FN)) || @namespace.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE))) {
-                    config.addSchemaForBuiltInNamespace(@namespace);
-                    getPrincipalStylesheetModule().addImportedSchema(@namespace);
+                    targetNamespace = Saxon.Hej.om.NamespaceUri.of(@namespace);
+                    config.addSchemaForBuiltInNamespace(targetNamespace);
+                    getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
                     return ;
                 }
-                bool namespaceKnown = config.isSchemaAvailable(@namespace);
+                targetNamespace = Saxon.Hej.om.NamespaceUri.of(@namespace);
+                bool namespaceKnown = config.isSchemaAvailable(targetNamespace);
                 if (((schemaLoc == null) && !(namespaceKnown))) {
-                    compileWarning(("No schema for this namespace is known, "+"and no schema-location was supplied, so no schema has been imported"), Saxon.Hej.trans.SaxonErrorCode.SXWN9006);
+                    issueWarning(("No schema for this namespace is known, "+"and no schema-location was supplied, so no schema has been imported"), Saxon.Hej.trans.SaxonErrorCode.SXWN9006);
                     return ;
                 }
                 if ((namespaceKnown && !(config.getBooleanProperty(Saxon.Hej.lib.Feature<bool>.MULTIPLE_SCHEMA_IMPORTS)))) {
                     if ((schemaLoc != null)) {
-                        compileWarning((("The schema document at "+schemaLoc)+" is ignored because a schema for this namespace is already loaded"), Saxon.Hej.trans.SaxonErrorCode.SXWN9006);
+                        issueWarning((("The schema document at "+schemaLoc)+" is ignored because a schema for this namespace is already loaded"), Saxon.Hej.trans.SaxonErrorCode.SXWN9006);
                     }
                 }
                 if (!(namespaceKnown)) {
                     Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
                     pipe.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
-                    @namespace = config.readSchema(pipe, getBaseURI(), schemaLoc, @namespace);
+                    targetNamespace = config.readSchema(pipe, getBaseURI(), schemaLoc, targetNamespace);
                 }
-                getPrincipalStylesheetModule().addImportedSchema(@namespace);
+                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
             } catch (Saxon.Hej.type.SchemaException err) {
                 string errorCode = ((err.getErrorCodeLocalPart() == null) ? "XTSE0220" : err.getErrorCodeLocalPart());
                 compileError(err.Message, errorCode);

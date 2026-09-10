@@ -9,10 +9,10 @@ namespace Saxon.Hej.om {
         private readonly System.Collections.Concurrent.ConcurrentDictionary<Saxon.Hej.om.StructuredQName,int> qNameToInteger = new /* java.util.concurrent.ConcurrentHashMap */ System.Collections.Concurrent.ConcurrentDictionary<Saxon.Hej.om.StructuredQName, int>(16, 1000);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<int,Saxon.Hej.om.StructuredQName> integerToQName = new /* java.util.concurrent.ConcurrentHashMap */ System.Collections.Concurrent.ConcurrentDictionary<int, Saxon.Hej.om.StructuredQName>(16, 1000);
         private readonly Saxon.Hej.om.AtomicCounter unique = new Saxon.Hej.om.AtomicCounter(1024);
-        private readonly System.Collections.Concurrent.ConcurrentDictionary<string,string> suggestedPrefixes = new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<Saxon.Hej.om.NamespaceUri,string> suggestedPrefixes = new System.Collections.Concurrent.ConcurrentDictionary<Saxon.Hej.om.NamespaceUri, string>();
         public NamePool()  {
         }
-        public void suggestPrefix(string prefix, string uri) {
+        public void suggestPrefix(string prefix, Saxon.Hej.om.NamespaceUri uri) {
             Saxon.Impl.Helpers.MapUtils.Put(suggestedPrefixes, uri, prefix);
         }
         public Saxon.Hej.om.StructuredQName getUnprefixedQName(int nameCode) {
@@ -28,14 +28,14 @@ namespace Saxon.Hej.om {
         public static bool isPrefixed(int nameCode) {
             return (((nameCode&0x3ff00000)) != 0);
         }
-        public string suggestPrefixForURI(string uri) {
-            if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XML)) {
+        public string suggestPrefixForURI(Saxon.Hej.om.NamespaceUri uri) {
+            if (uri.Equals(Saxon.Hej.om.NamespaceUri.XML)) {
                 return "xml";
             }
             return Saxon.Impl.Helpers.MapUtils.Get(suggestedPrefixes, uri);
         }
-        public int allocateFingerprint(string uri, string local) { lock(this) {
-            if ((Saxon.Hej.lib.NamespaceConstant.isReserved(uri) || Saxon.Hej.lib.NamespaceConstant.SAXON.Equals(uri))) {
+        public int allocateFingerprint(Saxon.Hej.om.NamespaceUri uri, string local) { lock(this) {
+            if ((Saxon.Hej.om.NamespaceUri.isReserved(uri) || Saxon.Hej.om.NamespaceUri.SAXON.Equals(uri))) {
                 int fp = Saxon.Hej.om.StandardNames.getFingerprint(uri, local);
                 if ((fp != -1)) {
                     return fp;
@@ -62,12 +62,12 @@ namespace Saxon.Hej.om {
         private static bool keyWasAbsent(int result) {
             return result == default(System.Int32);
         }
-        public string getURI(int nameCode) {
+        public Saxon.Hej.om.NamespaceUri getURI(int nameCode) {
             int fp = (nameCode&FP_MASK);
             if ((((fp&USER_DEFINED_MASK)) == 0)) {
                 return Saxon.Hej.om.StandardNames.getURI(fp);
             }
-            return getUnprefixedQName(fp).getURI();
+            return getUnprefixedQName(fp).getNamespaceUri();
         }
         public string getLocalName(int nameCode) {
             return getUnprefixedQName(nameCode).getLocalPart();
@@ -82,26 +82,26 @@ namespace Saxon.Hej.om {
             return getUnprefixedQName(nameCode).getEQName();
         }
         public int allocateClarkName(string expandedName) {
-            string @namespace;
+            Saxon.Hej.om.NamespaceUri @namespace;
             string localName;
             if ((expandedName[0] == '{')) {
                 int closeBrace = expandedName.IndexOf('}');
                 if ((closeBrace<0)) {
                     throw new Saxon.Ejava.lang.IllegalArgumentException("No closing '}' in Clark name");
                 }
-                @namespace = expandedName.Substring(1, closeBrace - 1);
+                @namespace = Saxon.Hej.om.NamespaceUri.of(expandedName.Substring(1, closeBrace - 1));
                 if ((closeBrace == expandedName.Length)) {
                     throw new Saxon.Ejava.lang.IllegalArgumentException("Missing local part in Clark name");
                 }
                 localName = expandedName.Substring((closeBrace+1));
             } else {
-                @namespace = "";
+                @namespace = Saxon.Hej.om.NamespaceUri.NULL;
                 localName = expandedName;
             }
             return allocateFingerprint(@namespace, localName);
         }
-        public int getFingerprint(string uri, string localName) {
-            if ((Saxon.Hej.lib.NamespaceConstant.isReserved(uri) || uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON))) {
+        public int getFingerprint(Saxon.Hej.om.NamespaceUri uri, string localName) {
+            if ((Saxon.Hej.om.NamespaceUri.isReserved(uri) || uri.Equals(Saxon.Hej.om.NamespaceUri.SAXON))) {
                 int fp = Saxon.Hej.om.StandardNames.getFingerprint(uri, localName);
                 if ((fp != -1)) {
                     return fp;

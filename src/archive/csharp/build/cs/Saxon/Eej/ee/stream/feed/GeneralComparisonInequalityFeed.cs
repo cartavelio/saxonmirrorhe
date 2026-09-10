@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.stream.feed {
     public class GeneralComparisonInequalityFeed : Saxon.Eej.ee.stream.feed.AtomicItemFeed {
+        private Saxon.Eej.ee.stream.watch.WatchManager watchManager;
         private readonly Saxon.Hej.lib.StringCollator collator;
         private Saxon.Hej.expr.sort.AtomicMatchKey firstStreamed = null;
         private Saxon.Hej.value.StringValue firstUntypedStreamed = null;
-        private Saxon.Hej.expr.sort.AtomicMatchKey firstUnstreamed = null;
-        private Saxon.Hej.value.StringValue firstUntypedUnstreamed = null;
         private bool done = false;
+        private bool closed = false;
         private readonly Saxon.Hej.expr.Expression pullOperand;
         private readonly int implicitTimezone;
-        public GeneralComparisonInequalityFeed(Saxon.Hej.expr.Expression expr, int pushedArg, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expr, result, context) {
+        public GeneralComparisonInequalityFeed(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression expr, int pushedArg, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expr, result, context) {
+            this.watchManager = watchManager;
             Saxon.Hej.expr.GeneralComparison gc = (Saxon.Hej.expr.GeneralComparison)(getExpression());
-            collator = gc.getAtomicComparer().getCollator();
+            collator = gc.getStringCollator();
             pullOperand = ((pushedArg == 0) ? gc.getRhsExpression() : gc.getLhsExpression());
             implicitTimezone = context.getImplicitTimezone();
         }
@@ -22,8 +23,6 @@ namespace Saxon.Eej.ee.stream.feed {
             done = false;
             firstStreamed = null;
             firstUntypedStreamed = null;
-            firstUnstreamed = null;
-            firstUntypedUnstreamed = null;
         }
         public override void append(Saxon.Hej.om.Item item) {
             if (!(done)) {
@@ -48,25 +47,20 @@ namespace Saxon.Eej.ee.stream.feed {
                     while (((val = (Saxon.Hej.value.AtomicValue)(comparand.next())) != null)) {
                         existsUnstreamed = true;
                         if (!(Saxon.Hej.type.Type.isGenerallyComparable(matchType, val.getPrimitiveType(), false))) {
-                            throw new Saxon.Hej.trans.XPathException(((("Cannot compare "+matchType)+" to ")+val.getPrimitiveType()), "FORG0001");
+                            throw new Saxon.Hej.trans.XPathException((((("Comparison between "+matchType)+" and ")+val.getPrimitiveType())+" is not allowed"), "XPTY0004", getExpression().getLocation());
                         }
                         if (val.isUntypedAtomic()) {
-                            firstUntypedUnstreamed = (Saxon.Hej.value.StringValue)(val);
                             Saxon.Hej.value.AtomicValue cval = Saxon.Hej.type.Converter.convert(firstUntypedStreamed, matchType, rules);
                             Saxon.Hej.expr.sort.AtomicMatchKey ku1 = cval.getXPathMatchKey(collator, implicitTimezone);
                             if (!(ku1.Equals(ks1))) {
                                 reportDone(true);
                                 break ;
-                            } else {
-                                firstUnstreamed = ku1;
                             }
                         } else {
                             Saxon.Hej.expr.sort.AtomicMatchKey ku2 = val.getXPathMatchKey(collator, implicitTimezone);
                             if (!(ks1.Equals(ku2))) {
                                 reportDone(true);
                                 break ;
-                            } else {
-                                firstUnstreamed = ku2;
                             }
                             if ((firstUntypedStreamed != null)) {
                                 Saxon.Hej.value.AtomicValue cval = Saxon.Hej.type.Converter.convert(firstUntypedStreamed, matchType, rules);
@@ -92,17 +86,20 @@ namespace Saxon.Eej.ee.stream.feed {
             Saxon.Hej.@event.Outputter @out = getNextOutputter();
             done = true;
             @out.append(Saxon.Hej.value.BooleanValue.get(result));
-            @out.close();
-            getTerminator().terminate();
+            if (watchManager.allowsEarlyExit()) {
+                closed = true;
+                @out.close();
+                getTerminator().terminate();
+            }
         }
         public override void close() {
             if (!(done)) {
                 getNextOutputter().append(Saxon.Hej.value.BooleanValue.FALSE);
+            }
+            if (!(closed)) {
                 base.close();
                 firstStreamed = null;
                 firstUntypedStreamed = null;
-                firstUnstreamed = null;
-                firstUntypedUnstreamed = null;
             }
         }
     

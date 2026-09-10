@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.expr.instruct {
     public class SlotManager {
         public static Saxon.Hej.expr.instruct.SlotManager EMPTY = new Saxon.Hej.expr.instruct.SlotManager(0);
-        private System.Collections.Generic.List<Saxon.Hej.om.StructuredQName> variableMap = new System.Collections.Generic.List<Saxon.Hej.om.StructuredQName>(10);
+        private readonly System.Collections.Generic.List<Saxon.Hej.om.StructuredQName> variableMap;
         private int numberOfVariables = 0;
         public SlotManager()  {
             numberOfVariables = 0;

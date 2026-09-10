@@ -17,13 +17,13 @@ namespace Saxon.Hej.pattern {
         }
         public override Saxon.Hej.pattern.Pattern typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
             selectionOp.setChildExpression(getSelectionExpression().typeCheck(visitor, contextItemType));
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MATCH_PATTERN, getSelectionExpression().ToString(), 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.MATCH_PATTERN, getSelectionExpression().ToString(), 0);
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-            Saxon.Hej.expr.Expression @checked = getSelectionExpression();
+            Saxon.Hej.expr.Expression @checked;
             try {
                 @checked = tc.staticTypeCheck(getSelectionExpression(), Saxon.Hej.value.SequenceType.NODE_SEQUENCE, role, visitor);
             } catch (Saxon.Hej.trans.XPathException e) {
-                visitor.issueWarning(("Pattern will never match anything. "+e.Message), getLocation());
+                visitor.issueWarning(("Pattern will never match anything. "+e.Message), Saxon.Hej.trans.SaxonErrorCode.SXWN9015, getLocation());
                 @checked = Saxon.Hej.expr.Literal.makeEmptySequence();
             }
             selectionOp.setChildExpression(@checked);

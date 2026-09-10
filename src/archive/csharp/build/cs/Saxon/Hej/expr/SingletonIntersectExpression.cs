@@ -54,6 +54,25 @@ namespace Saxon.Hej.expr {
         protected internal override string tag() {
             return "among";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.SingletonIntersectExpression.SingletonIntersectElaborator();
+        }
+        public class SingletonIntersectElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.SingletonIntersectExpression exp = (Saxon.Hej.expr.SingletonIntersectExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator lhs = exp.getLhsExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.expr.elab.PullEvaluator rhs = exp.getRhsExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(/*Delegate.eval()*/lhs(context));
+                    if ((node == null)) {
+                        return null;
+                    }
+                    Saxon.Hej.om.SequenceIterator nodeSet = /*Delegate.iterate()*/rhs(context);
+                    return (containsNode(nodeSet, node) ? node : null);
+                } ;
+            }
+        
+        }
     
     }
 }

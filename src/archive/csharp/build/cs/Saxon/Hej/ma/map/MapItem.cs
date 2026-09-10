@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.ma.map {
-    public abstract class MapItem : Saxon.Hej.om.Function {
+    public abstract class MapItem : Saxon.Hej.om.FunctionItem {
         abstract public Saxon.Hej.om.GroundedValue get(Saxon.Hej.value.AtomicValue key);
         abstract public int size();
         public virtual bool isEmpty() {
@@ -10,6 +10,9 @@ namespace Saxon.Hej.ma.map {
         }
         abstract public Saxon.Hej.tree.iter.AtomicIterator keys();
         abstract public System.Collections.Generic.IEnumerable<Saxon.Hej.ma.map.KeyValuePair> keyValuePairs();
+        public Saxon.Hej.om.SequenceIterator entries() {
+            return new Saxon.Hej.tree.iter.SequenceIteratorOverJavaIterator<Saxon.Hej.ma.map.KeyValuePair>(keyValuePairs().GetEnumerator(), entry => new Saxon.Hej.ma.map.SingleEntryMap(entry.key, entry.value));
+        }
         abstract public Saxon.Hej.ma.map.MapItem addEntry(Saxon.Hej.value.AtomicValue key, Saxon.Hej.om.GroundedValue value);
         abstract public Saxon.Hej.ma.map.MapItem remove(Saxon.Hej.value.AtomicValue key);
         abstract public bool conforms(Saxon.Hej.type.AtomicType keyType, Saxon.Hej.value.SequenceType valueType, Saxon.Hej.type.TypeHierarchy th);
@@ -58,8 +61,7 @@ namespace Saxon.Hej.ma.map {
             }
             try {
                 Saxon.Hej.om.SequenceIterator iter = value.iterate();
-                Saxon.Hej.om.Item item;
-                while (((item = iter.next()) != null)) {
+                for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                     if ((item is Saxon.Hej.value.AtomicValue)) {
                         if ((itemType is Saxon.Hej.type.AtomicType)) {
                             if (!(Saxon.Hej.type.Type.isSubType(((Saxon.Hej.value.AtomicValue)(item)).getItemType(), (Saxon.Hej.type.AtomicType)(itemType)))) {
@@ -141,12 +143,12 @@ namespace Saxon.Hej.ma.map {
             }
         }
         public Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
-            throw new Saxon.Ejava.lang.UnsupportedOperationException("A map has no string value");
+            throw new Saxon.Hej.trans.UncheckedXPathException(new Saxon.Hej.trans.XPathException("A map has no string value", "FOTY0014"));
         }
         public Saxon.Hej.om.SequenceIterator getTypedValue() {
             throw new Saxon.Hej.trans.XPathException("A map has no typed value");
         }
-        public virtual bool deepEquals(Saxon.Hej.om.Function other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
+        public virtual bool deepEquals(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
             if (((other is Saxon.Hej.ma.map.MapItem) && (((Saxon.Hej.ma.map.MapItem)(other)).size() == size()))) {
                 Saxon.Hej.tree.iter.AtomicIterator keyIter = keys();
                 Saxon.Hej.value.AtomicValue key;
@@ -198,6 +200,11 @@ namespace Saxon.Hej.ma.map {
             return true;
         }
     
+        /* Expanding default method isSequenceVariadic from interface FunctionItem */
+        public virtual bool isSequenceVariadic() {
+            return false;
+        }
+
         /* Expanding default method reduce from interface Item */
         public virtual Saxon.Hej.om.GroundedValue reduce() {
             return this;
@@ -220,22 +227,17 @@ namespace Saxon.Hej.ma.map {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */
         public virtual Saxon.Hej.om.Sequence makeRepeatable() {
             return this;
-        }
-
-        /* Expanding default method isSequenceVariadic from interface Function */
-        public virtual bool isSequenceVariadic() {
-            return false;
         }
 
         /* Expanding default method head from interface Item */
@@ -264,7 +266,7 @@ namespace Saxon.Hej.ma.map {
 
         /* Expanding default method iterate from interface Item */
         public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
         /* Expanding default method isStreamed from interface Item */

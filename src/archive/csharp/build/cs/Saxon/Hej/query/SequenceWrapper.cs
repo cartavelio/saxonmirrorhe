@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.query {
     public class SequenceWrapper : Saxon.Hej.@event.SequenceReceiver {
-        public static readonly string RESULT_NS = Saxon.Hej.query.QueryResult.RESULT_NS;
+        public static readonly Saxon.Hej.om.NamespaceUri RESULT_NS = Saxon.Hej.om.NamespaceUri.of(Saxon.Hej.query.QueryResult.RESULT_NS);
         private readonly Saxon.Hej.@event.ComplexContentOutputter @out;
         private int depth = 0;
         private Saxon.Hej.om.FingerprintedQName resultDocument;
@@ -32,8 +32,8 @@ namespace Saxon.Hej.query {
         }
         private void startWrapper(Saxon.Hej.om.NodeName name) {
             @out.startElement(name, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
-            @out.@namespace("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, Saxon.Hej.@event.ReceiverOption.NONE);
-            @out.@namespace("xsi", Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE, Saxon.Hej.@event.ReceiverOption.NONE);
+            @out.@namespace("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, Saxon.Hej.@event.ReceiverOption.NONE);
+            @out.@namespace("xsi", Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE, Saxon.Hej.@event.ReceiverOption.NONE);
             @out.startContent();
         }
         private void endWrapper() {
@@ -57,7 +57,7 @@ namespace Saxon.Hej.query {
             resultMapKey = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "map-key");
             resultMapValue = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "map-value");
             resultExternalValue = new Saxon.Hej.om.FingerprintedQName("result", RESULT_NS, "external-object");
-            xsiType = new Saxon.Hej.om.FingerprintedQName("xsi", Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE, "type");
+            xsiType = new Saxon.Hej.om.FingerprintedQName("xsi", Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE, "type");
             @out.open();
             @out.startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
             startWrapper(resultSequence);
@@ -121,7 +121,7 @@ namespace Saxon.Hej.query {
                 Saxon.Hej.om.StructuredQName name = type.getStructuredQName();
                 string prefix = name.getPrefix();
                 string localName = name.getLocalPart();
-                string uri = name.getURI();
+                Saxon.Hej.om.NamespaceUri uri = name.getNamespaceUri();
                 if (prefix.Length==0) {
                     prefix = pool.suggestPrefixForURI(uri);
                     if ((prefix == null)) {
@@ -142,7 +142,7 @@ namespace Saxon.Hej.query {
                         attribute(Saxon.Hej.om.NameOfNode.makeName(node), (Saxon.Hej.type.SimpleType)(node.getSchemaType()), node.getStringValue(), Saxon.Hej.expr.parser.Loc.NONE, 0);
                     } else {
                         if ((kind == Saxon.Hej.type.Type.NAMESPACE)) {
-                            @namespace(new Saxon.Hej.om.NamespaceBinding(node.getLocalPart(), node.getStringValue()), 0);
+                            @namespace(new Saxon.Hej.om.NamespaceBinding(node.getLocalPart(), Saxon.Hej.om.NamespaceUri.of(node.getStringValue())), 0);
                         } else {
                             ((Saxon.Hej.om.NodeInfo)(item)).copy(this, (Saxon.Hej.om.CopyOptions.ALL_NAMESPACES|Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS), locationId);
                         }
@@ -182,10 +182,10 @@ namespace Saxon.Hej.query {
                             }
                             @out.endElement();
                         } else {
-                            if ((item is Saxon.Hej.om.Function)) {
+                            if ((item is Saxon.Hej.om.FunctionItem)) {
                                 @out.startElement(resultFunction, Saxon.Hej.type.Untyped.getInstance(), Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE);
                                 @out.startContent();
-                                @out.characters(Saxon.Hej.str.StringView.of(((Saxon.Hej.om.Function)(item)).getDescription()), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
+                                @out.characters(Saxon.Hej.str.StringView.of(((Saxon.Hej.om.FunctionItem)(item)).getDescription()), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
                                 @out.endElement();
                             } else {
                                 if ((item.getGenre() == Saxon.Hej.om.Genre.EXTERNAL)) {
@@ -213,8 +213,8 @@ namespace Saxon.Hej.query {
         private void attribute(Saxon.Hej.om.NodeName attName, Saxon.Hej.type.SimpleType typeCode, string value, Saxon.Hej.s9api.Location locationId, int properties) {
             Saxon.Hej.om.AttributeMap atts = Saxon.Hej.om.SingletonAttributeMap.of(new Saxon.Hej.om.AttributeInfo(attName, typeCode, value.ToString(), locationId, properties));
             Saxon.Hej.om.NamespaceMap ns = Saxon.Hej.om.NamespaceMap.emptyMap();
-            if (!(attName.hasURI(""))) {
-                ns = ns.put(attName.getPrefix(), attName.getURI());
+            if (!(attName.hasURI(Saxon.Hej.om.NamespaceUri.NULL))) {
+                ns = ns.put(attName.getPrefix(), attName.getNamespaceUri());
             }
             @out.startElement(resultAttribute, Saxon.Hej.type.Untyped.getInstance(), atts, ns, Saxon.Hej.expr.parser.Loc.NONE, 0);
             @out.startContent();

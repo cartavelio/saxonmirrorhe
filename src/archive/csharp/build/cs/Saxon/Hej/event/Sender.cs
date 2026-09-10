@@ -6,22 +6,21 @@ namespace Saxon.Hej.@event {
         private Sender()  {
         }
         public static void send(Saxon.Ejavax.xml.transform.Source source, Saxon.Hej.@event.Receiver receiver, Saxon.Hej.lib.ParseOptions options) {
+            Saxon.Ejavax.xml.transform.Source suppliedSource = source;
             Saxon.Hej.@event.PipelineConfiguration pipe = receiver.getPipelineConfiguration();
             if ((options == null)) {
-                options = new Saxon.Hej.lib.ParseOptions(pipe.getParseOptions());
-            } else {
-                options = new Saxon.Hej.lib.ParseOptions(options);
+                options = pipe.getParseOptions();
             }
             string systemId = source.getSystemId();
             Saxon.Hej.lib.AugmentedSource originalAugmentedSource = null;
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
                 originalAugmentedSource = (Saxon.Hej.lib.AugmentedSource)(source);
-                options.merge(((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions());
+                options = options.merge(((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions());
                 systemId = source.getSystemId();
                 source = ((Saxon.Hej.lib.AugmentedSource)(source)).getContainedSource();
             }
             Saxon.Hej.Configuration config = pipe.getConfiguration();
-            options.applyDefaults(config);
+            options = options.applyDefaults(config);
             receiver.setSystemId(systemId);
             Saxon.Hej.@event.Receiver next = receiver;
             System.Collections.Generic.IList<Saxon.Hej.@event.FilterFactory> filters = options.getFilters();
@@ -42,7 +41,7 @@ namespace Saxon.Hej.@event {
                 source = config.resolveSource(source, config);
             }
             if ((source == null)) {
-                throw new Saxon.Hej.trans.XPathException((("A source of type "+source.GetType().Name)+" is not supported in this environment"));
+                throw new Saxon.Hej.trans.XPathException((("A source of type "+suppliedSource.GetType().Name)+" is not supported in this environment"));
             }
             ((Saxon.Hej.lib.ActiveSource)(source)).deliver(next, options);
             if (((originalAugmentedSource != null) && originalAugmentedSource.isPleaseCloseAfterUse())) {
@@ -57,7 +56,7 @@ namespace Saxon.Hej.@event {
             }
             Saxon.Hej.@event.LocationCopier copier = new Saxon.Hej.@event.LocationCopier((top.getNodeKind() == Saxon.Hej.type.Type.DOCUMENT), location.getSystemId());
             pipe.setComponent(typeof(Saxon.Hej.@event.CopyInformee).Name, copier);
-            pipe.setCopyInformee(element => copier.notifyElementNode(element));
+            pipe.setCopyInformee(copier.notifyElementNode /* instance method reference */);
             receiver.open();
             switch (top.getNodeKind()) {
               case Saxon.Hej.type.Type.DOCUMENT:

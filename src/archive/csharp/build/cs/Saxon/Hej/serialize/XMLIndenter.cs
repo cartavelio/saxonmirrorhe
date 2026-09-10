@@ -44,7 +44,7 @@ namespace Saxon.Hej.serialize {
             }
             level++;
             if ((suppressedAtLevel<0)) {
-                string xmlSpace = attributes.getValue(Saxon.Hej.lib.NamespaceConstant.XML, "space");
+                string xmlSpace = attributes.getValue(Saxon.Hej.om.NamespaceUri.XML, "space");
                 if (((xmlSpace != null) && xmlSpace.Trim().Equals("preserve"))) {
                     suppressedAtLevel = level;
                 }
@@ -65,9 +65,9 @@ namespace Saxon.Hej.serialize {
                     foreach (Saxon.Hej.om.NamespaceBinding binding in nbs) {
                         string prefix = binding.getPrefix();
                         if (prefix.Length==0) {
-                            len += (9+binding.getURI().Length);
+                            len += (9+binding.getNamespaceUri().ToString().Length);
                         } else {
-                            len += ((prefix.Length+10)+binding.getURI().Length);
+                            len += ((prefix.Length+10)+binding.getNamespaceUri().ToString().Length);
                         }
                     }
                 }

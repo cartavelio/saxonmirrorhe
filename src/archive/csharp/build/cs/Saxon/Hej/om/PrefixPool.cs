@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.om {
     public class PrefixPool {
+        private const int LIMIT = 2047;
         internal string[] prefixes = new string[8];
         internal int used = 0;
         internal System.Collections.Generic.IDictionary<string,int> index = null;
@@ -30,6 +31,9 @@ namespace Saxon.Hej.om {
                 }
             }
             int code = used++;
+            if ((used>LIMIT)) {
+                throw new Saxon.Ejava.lang.IllegalStateException((("Too many namespace prefixes - limit is "+LIMIT)+" per document"));
+            }
             if ((used>=prefixes.Length)) {
                 prefixes = Saxon.Ejava.util.Arrays.copyOf(prefixes, (used*2));
             }

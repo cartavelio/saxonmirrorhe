@@ -33,7 +33,7 @@ namespace Saxon.Hej.expr.instruct {
             Saxon.Hej.str.UnicodeString comment = checkContent(value, context);
             output.comment(comment, getLocation(), Saxon.Hej.@event.ReceiverOption.NONE);
         }
-        protected internal override Saxon.Hej.str.UnicodeString checkContent(Saxon.Hej.str.UnicodeString comment, Saxon.Hej.expr.XPathContext context) {
+        public override Saxon.Hej.str.UnicodeString checkContent(Saxon.Hej.str.UnicodeString comment, Saxon.Hej.expr.XPathContext context) {
             if (isXSLT()) {
                 return checkContentXSLT(comment);
             } else {
@@ -87,6 +87,32 @@ namespace Saxon.Hej.expr.instruct {
             }
             getSelect().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.Comment.CommentElaborator();
+        }
+        private class CommentElaborator : Saxon.Hej.expr.elab.SimpleNodePushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.Comment expr = (Saxon.Hej.expr.instruct.Comment)(getExpression());
+                Saxon.Hej.s9api.Location loc = expr.getLocation();
+                Saxon.Hej.expr.elab.UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+                if (expr.isXSLT()) {
+                    return (@out, context) => {
+                        Saxon.Hej.str.UnicodeString content = /*Delegate.eval()*/contentEval(context);
+                        content = Saxon.Hej.expr.instruct.Comment.checkContentXSLT(content);
+                        @out.comment(content, loc, Saxon.Hej.@event.ReceiverOption.NONE);
+                        return null;
+                    } ;
+                } else {
+                    return (@out, context) => {
+                        Saxon.Hej.str.UnicodeString content = /*Delegate.eval()*/contentEval(context);
+                        Saxon.Hej.expr.instruct.Comment.checkContentXQuery(content);
+                        @out.comment(content, loc, Saxon.Hej.@event.ReceiverOption.NONE);
+                        return null;
+                    } ;
+                }
+            }
+        
         }
     
     }

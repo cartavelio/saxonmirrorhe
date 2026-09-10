@@ -14,19 +14,19 @@ namespace Saxon.Hej.trans.packages {
             if ((elementCount++>=1)) {
                 throw new Saxon.Hej.trans.XPathException("#start#");
             }
-            isSefFile = elemName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON_XSLT_EXPORT);
-            if ((attributes.get("", "name") == null)) {
+            isSefFile = elemName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON_XSLT_EXPORT);
+            if ((attributes.get(Saxon.Hej.om.NamespaceUri.NULL, "name") == null)) {
                 diagnostics = (("Top level element "+elemName.getStructuredQName().getEQName())+" has no @name attribute");
             } else {
-                packageName = attributes.get("", "name").getValue();
+                packageName = attributes.get(Saxon.Hej.om.NamespaceUri.NULL, "name").getValue();
             }
-            if ((attributes.get("", "package-version") != null)) {
-                packageVersion = attributes.get("", "package-version").getValue();
+            if ((attributes.get(Saxon.Hej.om.NamespaceUri.NULL, "package-version") != null)) {
+                packageVersion = attributes.get(Saxon.Hej.om.NamespaceUri.NULL, "package-version").getValue();
             }
-            if ((attributes.get("", "packageVersion") != null)) {
-                packageVersion = attributes.get("", "packageVersion").getValue();
+            if ((attributes.get(Saxon.Hej.om.NamespaceUri.NULL, "packageVersion") != null)) {
+                packageVersion = attributes.get(Saxon.Hej.om.NamespaceUri.NULL, "packageVersion").getValue();
             }
-            Saxon.Hej.om.AttributeInfo saxonVersion = attributes.get("", "saxonVersion");
+            Saxon.Hej.om.AttributeInfo saxonVersion = attributes.get(Saxon.Hej.om.NamespaceUri.NULL, "saxonVersion");
             if ((saxonVersion != null)) {
                 if (saxonVersion.getValue().StartsWith("9")) {
                     throw new Saxon.Hej.trans.XPathException(((("Saxon "+Saxon.Hej.Version.getProductVersion())+" cannot load a SEF file created using version ")+saxonVersion.getValue()));
@@ -45,10 +45,8 @@ namespace Saxon.Hej.trans.packages {
         }
         public Saxon.Hej.trans.packages.PackageDetails getPackageDetails(Saxon.Ejava.io.File top, Saxon.Hej.Configuration config) {
             try {
-                Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
-                options.setDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
-                options.setSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
-                Saxon.Hej.@event.Sender.send(new Saxon.Ejavax.xml.transform.stream.StreamSource(top), this, new Saxon.Hej.lib.ParseOptions());
+                Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions().withDTDValidationMode(Saxon.Hej.lib.Validation.SKIP).withSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
+                Saxon.Hej.@event.Sender.send(new Saxon.Ejavax.xml.transform.stream.StreamSource(top), this, options);
             } catch (Saxon.Hej.trans.XPathException e) {
                 if (!(e.Message.Equals("#start#"))) {
                     throw;

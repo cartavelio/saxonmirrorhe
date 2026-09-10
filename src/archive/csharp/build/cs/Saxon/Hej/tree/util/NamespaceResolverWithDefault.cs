@@ -4,12 +4,12 @@ using System.Linq;
 namespace Saxon.Hej.tree.util {
     public class NamespaceResolverWithDefault : Saxon.Hej.om.NamespaceResolver {
         private readonly Saxon.Hej.om.NamespaceResolver baseResolver;
-        private readonly string defaultNamespace;
-        public NamespaceResolverWithDefault(Saxon.Hej.om.NamespaceResolver @base, string defaultNamespace)  {
+        private readonly Saxon.Hej.om.NamespaceUri defaultNamespace;
+        public NamespaceResolverWithDefault(Saxon.Hej.om.NamespaceResolver @base, Saxon.Hej.om.NamespaceUri defaultNamespace)  {
             this.baseResolver = @base;
             this.defaultNamespace = defaultNamespace;
         }
-        public string getURIForPrefix(string prefix, bool useDefault) {
+        public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {
             if ((useDefault && prefix.Length==0)) {
                 return defaultNamespace;
             } else {

@@ -35,14 +35,6 @@ namespace Saxon.Hej.style {
                   case "select":
                     select = makeExpression(value, att);
                     break ;
-                  case "array":
-                    requireXslt40("array");
-                    select = arrayToSequence(makeExpression(value, att));
-                    break ;
-                  case "map":
-                    requireXslt40("map");
-                    select = mapToSequence(makeExpression(value, att));
-                    break ;
                   case "group-by":
                     groupByAtt = value;
                     groupBy = makeExpression(groupByAtt, att);
@@ -76,11 +68,7 @@ namespace Saxon.Hej.style {
             }
             if ((select == null)) {
                 select = Saxon.Hej.expr.Literal.makeEmptySequence();
-                if ((getEffectiveVersion()>=40)) {
-                    compileError("One of the attributes select|array|map must be present");
-                } else {
-                    reportAbsence("select");
-                }
+                reportAbsence("select");
             }
             int c = (((((((groupByAtt == null) ? 0 : 1))+(((groupAdjacentAtt == null) ? 0 : 1)))+(((startingAtt == null) ? 0 : 1)))+(((endingAtt == null) ? 0 : 1)))+(((breakWhenAtt == null) ? 0 : 1)));
             if ((c != 1)) {
@@ -130,7 +118,7 @@ namespace Saxon.Hej.style {
             if ((groupBy != null)) {
                 groupBy = typeCheck("group-by", groupBy);
                 try {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/group-by", 0);
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/group-by", 0);
                     groupBy = tc.staticTypeCheck(groupBy, Saxon.Hej.value.SequenceType.ATOMIC_SEQUENCE, role, visitor);
                 } catch (Saxon.Hej.trans.XPathException err) {
                     compileError(err);
@@ -139,8 +127,7 @@ namespace Saxon.Hej.style {
                 if ((groupAdjacent != null)) {
                     groupAdjacent = typeCheck("group-adjacent", groupAdjacent);
                     try {
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/group-adjacent", 0);
-                        role.setErrorCode("XTTE1100");
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/group-adjacent", 0, "XTTE1100");
                         groupAdjacent = tc.staticTypeCheck(groupAdjacent, (composite ? Saxon.Hej.value.SequenceType.ATOMIC_SEQUENCE : Saxon.Hej.value.SequenceType.SINGLE_ATOMIC), role, visitor);
                     } catch (Saxon.Hej.trans.XPathException err) {
                         compileError(err);
@@ -150,8 +137,7 @@ namespace Saxon.Hej.style {
                         breakWhen = typeCheck("break-when", breakWhen);
                         try {
                             Saxon.Hej.type.SpecificFunctionType breakWhenType = new Saxon.Hej.type.SpecificFunctionType(new Saxon.Hej.value.SequenceType[]{Saxon.Hej.value.SequenceType.ANY_SEQUENCE, Saxon.Hej.value.SequenceType.SINGLE_ITEM}, Saxon.Hej.value.SequenceType.SINGLE_BOOLEAN);
-                            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0);
-                            role.setErrorCode("XTTE1100");
+                            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0, "XTTE1100");
                             breakWhen = tc.staticTypeCheck(breakWhen, Saxon.Hej.value.SequenceType.makeSequenceType(breakWhenType, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE), role, visitor);
                         } catch (Saxon.Hej.trans.XPathException err) {
                             compileError(err);
@@ -163,8 +149,7 @@ namespace Saxon.Hej.style {
             ending = typeCheck("group-ending-with", ending);
             if (((((starting != null) || (ending != null))) && (visitor.getStaticContext().getXPathVersion()<30))) {
                 try {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/select", 0);
-                    role.setErrorCode("XTTE1120");
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/select", 0, "XTTE1120");
                     select = tc.staticTypeCheck(select, Saxon.Hej.value.SequenceType.NODE_SEQUENCE, role, visitor);
                 } catch (Saxon.Hej.trans.XPathException err) {
                     string prefix = ((starting != null) ? "With group-starting-with attribute: " : "With group-ending-with attribute: ");
@@ -172,7 +157,7 @@ namespace Saxon.Hej.style {
                 }
             }
             if (!(hasChildNodes())) {
-                compileWarning("An empty xsl:for-each-group instruction has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9009);
+                issueWarning("An empty xsl:for-each-group instruction has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9009);
             }
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation compilation, Saxon.Hej.style.ComponentDeclaration decl) {

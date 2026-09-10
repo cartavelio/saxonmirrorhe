@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.lib;
+using Saxon.Hej.om;
 using static Saxon.Api.Steps;
 using static Saxon.Api.Predicates;
 using NamespaceConstant = Saxon.Api.NamespaceConstant;
@@ -266,9 +267,9 @@ namespace TestDriver {
 
         internal void CopySchemaNamespace(Environment env, XPathCompiler testXpc) {
             JConfiguration config = env.xpathCompiler.Processor.Implementation;
-            SysCollGen.ISet<string> ns = config.getImportedNamespaces();
-            foreach (string s in ns.ToArray()) {
-                testXpc.ImportSchemaNamespace(s);
+            SysCollGen.ISet<NamespaceUri> ns = config.getImportedNamespaces();
+            foreach (NamespaceUri s in ns.ToArray()) {
+                testXpc.ImportSchemaNamespace(s.ToString());
             }
         }
 
@@ -1583,7 +1584,7 @@ namespace TestDriver {
 
     public class ModuleResolver : ModuleURIResolver {
         // To support XSLT stylesheets that use load-query-module(), we're setting a query module resolver
-        // in the Configuration. This isn't supported directly in the Saxon-CS API, we have to dive down into
+        // in the Configuration. This isn't supported directly in the SaxonCS API, we have to dive down into
         // internals to achieve the required effect
         XQueryCompiler catXQC;
         XdmNode testCase;

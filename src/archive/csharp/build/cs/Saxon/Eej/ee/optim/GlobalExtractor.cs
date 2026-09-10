@@ -102,7 +102,7 @@ namespace Saxon.Eej.ee.optim {
             gvd.setRequiredType(Saxon.Hej.value.SequenceType.makeSequenceType(expr.getItemType(), expr.getCardinality()));
             gvd.setBody(expr);
             expr.setRetainedStaticContext(rsc);
-            Saxon.Hej.om.StructuredQName varName = new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE, ("gg"+gvd.GetHashCode()));
+            Saxon.Hej.om.StructuredQName varName = new Saxon.Hej.om.StructuredQName("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE, ("gg"+gvd.GetHashCode()));
             gvd.setVariableQName(varName);
             globalVariableManager.addGlobalVariable(gvd);
             Saxon.Hej.expr.GlobalVariableReference @ref = new Saxon.Hej.expr.GlobalVariableReference(gvd);

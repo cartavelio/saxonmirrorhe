@@ -27,8 +27,7 @@ namespace Saxon.Hej.resource {
                         }
                     } else {
                         Saxon.Hej.resource.AbstractResourceCollection.InputDetails id = getInputDetails(uri);
-                        id.parseOptions = new Saxon.Hej.lib.ParseOptions(context.getConfiguration().getParseOptions());
-                        id.parseOptions.setSpaceStrippingRule(whitespaceRules);
+                        id.parseOptions = context.getConfiguration().getParseOptions().withSpaceStrippingRule(whitespaceRules);
                         id.resourceUri = uri;
                         return makeResource(context, id);
                     }
@@ -58,9 +57,7 @@ namespace Saxon.Hej.resource {
         }
         protected internal System.Collections.Generic.IEnumerator<string> catalogContents(string href, Saxon.Hej.expr.XPathContext context) {
             Saxon.Ejavax.xml.transform.Source source = Saxon.Hej.functions.DocumentFn.resolveURI(href, null, null, context);
-            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
-            options.setSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
-            options.setDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
+            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP).withDTDValidationMode(Saxon.Hej.lib.Validation.SKIP);
             Saxon.Hej.om.TreeInfo catalog = context.getConfiguration().buildDocumentTree(source, options);
             if ((catalog == null)) {
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Failed to load collection catalog "+href));
@@ -70,12 +67,12 @@ namespace Saxon.Hej.resource {
             }
             Saxon.Hej.tree.iter.AxisIterator iter = catalog.getRootNode().iterateAxis(Saxon.Hej.om.AxisInfo.CHILD, Saxon.Hej.pattern.NodeKindTest.ELEMENT);
             Saxon.Hej.om.NodeInfo top = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next());
-            if (((top == null) || !((("collection".Equals(top.getLocalPart()) && top.getURI().Length==0))))) {
+            if (((top == null) || !((("collection".Equals(top.getLocalPart()) && (top.getNamespaceUri() == Saxon.Hej.om.NamespaceUri.NULL)))))) {
                 string message;
                 if ((top == null)) {
                     message = "No outermost element found in collection catalog";
                 } else {
-                    message = ((((("Outermost element of collection catalog should be Q{}collection "+"(found Q{")+top.getURI())+"}")+top.getLocalPart())+")");
+                    message = ((((("Outermost element of collection catalog should be Q{}collection "+"(found Q{")+top.getNamespaceUri())+"}")+top.getLocalPart())+")");
                 }
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
                 err.setErrorCode("FODC0004");
@@ -83,7 +80,7 @@ namespace Saxon.Hej.resource {
                 throw err;
             }
             iter.close();
-            string stableAtt = top.getAttributeValue("", "stable");
+            string stableAtt = top.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "stable");
             if ((stableAtt != null)) {
                 if ("true".Equals(stableAtt)) {
                     stable = true;
@@ -102,13 +99,13 @@ namespace Saxon.Hej.resource {
             System.Collections.Generic.IList<string> result = new System.Collections.Generic.List<string>();
             Saxon.Hej.om.NodeInfo item;
             while (((item = ((/*1430*/Saxon.Hej.om.NodeInfo)documents.next())) != null)) {
-                if (!((("doc".Equals(item.getLocalPart()) && item.getURI().Length==0)))) {
+                if (!((("doc".Equals(item.getLocalPart()) && (item.getNamespaceUri() == Saxon.Hej.om.NamespaceUri.NULL))))) {
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Children of <collection> element must be <doc> elements");
                     err.setErrorCode("FODC0004");
                     err.setXPathContext(context);
                     throw err;
                 }
-                string hrefAtt = item.getAttributeValue("", "href");
+                string hrefAtt = item.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "href");
                 if ((hrefAtt == null)) {
                     Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("A <doc> element in the collection catalog has no @href attribute");
                     err.setErrorCode("FODC0004");

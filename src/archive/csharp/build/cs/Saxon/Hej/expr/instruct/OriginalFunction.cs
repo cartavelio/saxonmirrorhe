@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.instruct {
-    public class OriginalFunction : Saxon.Hej.functions.AbstractFunction, Saxon.Hej.om.Function, Saxon.Hej.expr.ContextOriginator {
+    public class OriginalFunction : Saxon.Hej.functions.AbstractFunction, Saxon.Hej.om.FunctionItem, Saxon.Hej.expr.ContextOriginator {
         private readonly Saxon.Hej.expr.instruct.UserFunction userFunction;
         private readonly Saxon.Hej.expr.Component component;
         public OriginalFunction(Saxon.Hej.expr.Component component)  {
@@ -33,7 +33,7 @@ namespace Saxon.Hej.expr.instruct {
             return component;
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
-            Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = (Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions());
+            Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = @out.getOptions();
             @out.startElement("origF");
             @out.emitAttribute("name", getFunctionName());
             @out.emitAttribute("arity", (""+getArity()));

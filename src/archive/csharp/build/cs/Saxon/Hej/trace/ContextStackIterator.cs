@@ -94,10 +94,7 @@ namespace Saxon.Hej.trace {
         }
         private static Saxon.Hej.expr.XPathContextMajor getMajorCaller(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.XPathContext caller = context.getCaller();
-            while (!((((caller == null) || (caller is Saxon.Hej.expr.XPathContextMajor))))) {
-                caller = caller.getCaller();
-            }
-            return (Saxon.Hej.expr.XPathContextMajor)(caller);
+            return caller.getMajorContext();
         }
         public void remove() {
             throw new Saxon.Ejava.lang.UnsupportedOperationException();

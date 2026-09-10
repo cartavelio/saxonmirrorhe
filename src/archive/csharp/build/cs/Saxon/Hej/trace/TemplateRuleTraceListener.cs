@@ -25,7 +25,7 @@ namespace Saxon.Hej.trace {
             } else {
                 builder.append("rule at ").append(Saxon.Hej.trans.Err.show(rule));
             }
-            string message = System.Text.RegularExpressions.Regex.Replace(builder.ToString(), " \\.\\.\\./", " ");
+            string message = builder.ToString().Replace(" .../", " ");
             logger.info(message);
         }
         public void leave() {

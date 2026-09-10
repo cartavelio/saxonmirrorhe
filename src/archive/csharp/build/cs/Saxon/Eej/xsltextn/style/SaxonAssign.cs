@@ -13,12 +13,15 @@ namespace Saxon.Eej.xsltextn.style {
         public override bool isInstruction() {
             return true;
         }
+        public override bool isInXsltNamespace() {
+            return false;
+        }
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
             base.validate(decl);
             instruction = new Saxon.Eej.xsltextn.instruct.Assign(makeExpression("()", null));
             getConfiguration().checkLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION, "saxon:assign", getPackageData().getLocalLicenseId());
             if (getConfiguration().getBooleanProperty(Saxon.Hej.lib.Feature<bool>.ALLOW_MULTITHREADING)) {
-                compileWarning(("saxon:assign should not be used in a configuration "+"that allows multi-threading: see FeatureKeys.ALLOW_MULTITHREADING"), Saxon.Hej.trans.SaxonErrorCode.SXWN9016);
+                issueWarning(("saxon:assign should not be used in a configuration "+"that allows multi-threading: see FeatureKeys.ALLOW_MULTITHREADING"), Saxon.Hej.trans.SaxonErrorCode.SXWN9016);
             }
             Saxon.Hej.om.StructuredQName name = getSourceBinding().getVariableQName();
             Saxon.Hej.style.SourceBinding globalVariable;

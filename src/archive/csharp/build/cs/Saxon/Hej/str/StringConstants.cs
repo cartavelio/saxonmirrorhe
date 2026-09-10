@@ -7,6 +7,7 @@ namespace Saxon.Hej.str {
             return System.Text.Encoding.ASCII.GetBytes(s);
         }
         public static readonly Saxon.Hej.str.UnicodeString SINGLE_SPACE = new Saxon.Hej.str.Twine8(bytes(" "));
+        public static readonly Saxon.Hej.str.UnicodeString NEWLINE = new Saxon.Hej.str.Twine8(bytes("\n"));
         public static readonly Saxon.Hej.str.UnicodeString TRUE = new Saxon.Hej.str.Twine8(bytes("true"));
         public static readonly Saxon.Hej.str.UnicodeString FALSE = new Saxon.Hej.str.Twine8(bytes("false"));
         public static readonly Saxon.Hej.str.UnicodeString ONE = new Saxon.Hej.str.Twine8(bytes("1"));

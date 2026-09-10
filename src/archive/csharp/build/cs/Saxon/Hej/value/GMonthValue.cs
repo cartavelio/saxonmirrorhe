@@ -4,10 +4,10 @@ using System.Linq;
 namespace Saxon.Hej.value {
     public class GMonthValue : Saxon.Hej.value.GDateValue {
         private static readonly Saxon.Ejava.util.regex.Pattern regex = Saxon.Ejava.util.regex.Pattern.compile("--([0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
-        private GMonthValue()  {
+        private GMonthValue(Saxon.Hej.value.GDateValue.MutableGDateValue m) : base (m) {
         }
         public static Saxon.Hej.type.ConversionResult makeGMonthValue(Saxon.Hej.str.UnicodeString value) {
-            Saxon.Hej.value.GMonthValue g = new Saxon.Hej.value.GMonthValue();
+            Saxon.Hej.value.GDateValue.MutableGDateValue g = new Saxon.Hej.value.GDateValue.MutableGDateValue();
             Saxon.Hej.str.UnicodeString trimmed = Saxon.Hej.value.Whitespace.trim(value);
             Saxon.Ejava.util.regex.Matcher m = regex.matcher(trimmed.ToString());
             if (!(m.matches())) {
@@ -17,27 +17,23 @@ namespace Saxon.Hej.value {
             string tz = m.group(2);
             string date = ((("2000-"+@base)+"-01")+(((tz == null) ? "" : tz)));
             g.typeLabel = Saxon.Hej.type.BuiltInAtomicType.G_MONTH;
-            return setLexicalValue(g, Saxon.Hej.str.BMPString.of(date), true);
+            setLexicalValue(g, Saxon.Hej.str.BMPString.of(date), true);
+            return ((g.error == null) ? new Saxon.Hej.value.GMonthValue(g) : g.error);
         }
         public GMonthValue(byte month, int tz) : this (month, tz, Saxon.Hej.type.BuiltInAtomicType.G_MONTH) {
         }
-        public GMonthValue(byte month, int tz, Saxon.Hej.type.AtomicType type)  {
-            this.year = 2000;
-            this.month = month;
-            this.day = 1;
-            setTimezoneInMinutes(tz);
-            this.typeLabel = type;
+        public GMonthValue(byte month, int tz, Saxon.Hej.type.AtomicType type) : this (new Saxon.Hej.value.GDateValue.MutableGDateValue(2000, month, 1, false, tz, type)) {
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.GMonthValue v = new Saxon.Hej.value.GMonthValue(month, getTimezoneInMinutes());
-            v.typeLabel = typeLabel;
-            return v;
+            Saxon.Hej.value.GDateValue.MutableGDateValue m = makeMutableCopy();
+            m.typeLabel = typeLabel;
+            return new Saxon.Hej.value.GMonthValue(m);
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {
             return Saxon.Hej.type.BuiltInAtomicType.G_MONTH;
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder(16);
             sb.appendLatin("--");
             appendTwoDigits(sb, month);
             if (hasTimezone()) {

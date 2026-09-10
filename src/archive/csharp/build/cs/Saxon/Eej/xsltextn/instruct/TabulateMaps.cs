@@ -32,11 +32,11 @@ namespace Saxon.Eej.xsltextn.instruct {
             Saxon.Hej.expr.parser.ContextItemStaticInfo ciso2 = new Saxon.Hej.expr.parser.ContextItemStaticInfo(getRootExpression().getItemType(), false);
             selectOp.typeCheck(visitor, ciso2);
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "saxon:tabulate-maps/root", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "saxon:tabulate-maps/root", 0);
             Saxon.Hej.value.SequenceType required = Saxon.Hej.value.SequenceType.FUNCTION_ITEM_SEQUENCE;
             setRootExpression(tc.staticTypeCheck(getRootExpression(), required, role, visitor));
             required = Saxon.Hej.ma.map.MapType.SEQUENCE_OF_MAPS;
-            role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "saxon:tabulate-maps/select", 0);
+            role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "saxon:tabulate-maps/select", 0);
             setSelectExpression(tc.staticTypeCheck(getSelectExpression(), required, role, visitor));
             return this;
         }
@@ -48,19 +48,8 @@ namespace Saxon.Eej.xsltextn.instruct {
         public override Saxon.Hej.type.ItemType getItemType() {
             return Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.Item root;
-            Saxon.Hej.om.SequenceIterator rootIterator = getRootExpression().iterate(context);
-            Saxon.Hej.om.SequenceIterator mappedRootIterator = Saxon.Hej.expr.MappingIterator.map(rootIterator, item => Saxon.Hej.tree.iter.SingletonIterator.makeIterator(/*134*/Saxon.Eej.functions.extfn.WithPedigree.makeRootWithPedigree(item)));
-            Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
-            Saxon.Hej.om.FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
-            while (((root = trackingIterator.next()) != null)) {
-                processRootItem(output, root, c2);
-            }
-            return null;
-        }
         private void processRootItem(Saxon.Hej.@event.Outputter output, Saxon.Hej.om.Item root, Saxon.Hej.expr.XPathContext c2) {
-            Saxon.Hej.om.FocusIterator selectIterator = new Saxon.Hej.om.FocusTrackingIterator(getSelectExpression().iterate(c2));
+            Saxon.Hej.om.FocusIterator selectIterator = Saxon.Hej.om.SequenceTool.focusTracker(getSelectExpression().iterate(c2));
             Saxon.Hej.om.Item selected;
             while (((selected = selectIterator.next()) != null)) {
                 if (!(((selected is Saxon.Eej.xsltextn.pedigree.PedigreeMapItem)))) {
@@ -125,6 +114,27 @@ namespace Saxon.Eej.xsltextn.instruct {
             getRootExpression().export(@out);
             getSelectExpression().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.xsltextn.instruct.TabulateMaps.TabulateMapsElaborator();
+        }
+        private class TabulateMapsElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Eej.xsltextn.instruct.TabulateMaps expr = (Saxon.Eej.xsltextn.instruct.TabulateMaps)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator rootPull = expr.getRootExpression().makeElaborator().elaborateForPull();
+                return (output, context) => {
+                    Saxon.Hej.om.Item root;
+                    Saxon.Hej.om.SequenceIterator rootIterator = /*Delegate.iterate()*/rootPull(context);
+                    Saxon.Hej.om.SequenceIterator mappedRootIterator = Saxon.Hej.expr.MappingIterator.map(rootIterator, item => Saxon.Hej.tree.iter.SingletonIterator.makeIterator(/*134*/Saxon.Eej.functions.extfn.WithPedigree.makeRootWithPedigree(item)));
+                    Saxon.Hej.expr.XPathContext c2 = context.newMinorContext();
+                    Saxon.Hej.om.FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
+                    while (((root = trackingIterator.next()) != null)) {
+                        expr.processRootItem(output, root, c2);
+                    }
+                    return null;
+                } ;
+            }
+        
         }
     
     }

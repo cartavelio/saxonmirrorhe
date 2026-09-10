@@ -26,14 +26,6 @@ namespace Saxon.Hej.style {
                   case "select":
                     select = makeExpression(value, att);
                     break ;
-                  case "array":
-                    requireXslt40("array");
-                    select = arrayToSequence(makeExpression(value, att));
-                    break ;
-                  case "map":
-                    requireXslt40("map");
-                    select = mapToSequence(makeExpression(value, att));
-                    break ;
                   default:
                     checkUnknownAttribute(attName);
                     break ;
@@ -41,11 +33,7 @@ namespace Saxon.Hej.style {
             }
             if ((select == null)) {
                 select = Saxon.Hej.expr.Literal.makeEmptySequence();
-                if ((getEffectiveVersion()>=40)) {
-                    compileError("One of the attributes select|array|map must be present");
-                } else {
-                    reportAbsence("select");
-                }
+                reportAbsence("select");
             }
         }
         public void setCompilable(bool compilable) {
@@ -57,7 +45,7 @@ namespace Saxon.Hej.style {
         public override void validate(Saxon.Hej.style.ComponentDeclaration decl) {
             select = typeCheck("select", select);
             if (!(hasChildNodes())) {
-                compileWarning("An empty xsl:iterate instruction has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9009);
+                issueWarning("An empty xsl:iterate instruction has no effect", Saxon.Hej.trans.SaxonErrorCode.SXWN9009);
             }
         }
         public override Saxon.Hej.expr.Expression compile(Saxon.Hej.style.Compilation exec, Saxon.Hej.style.ComponentDeclaration decl) {

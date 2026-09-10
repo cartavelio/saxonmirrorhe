@@ -46,21 +46,28 @@ namespace Saxon.Hej.expr.instruct {
             }
             @out.endElement();
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            foreach (Saxon.Hej.expr.Operand o in operands()) {
-                Saxon.Hej.expr.instruct.LocalParam param = (Saxon.Hej.expr.instruct.LocalParam)(o.getChildExpression());
-                try {
-                    context.setLocalVariable(param.getSlotNumber(), param.getSelectValue(context));
-                } catch (Saxon.Hej.trans.XPathException e) {
-                    e.maybeSetLocation(param.getLocation());
-                    e.maybeSetContext(context);
-                    throw;
-                }
-            }
-            return null;
-        }
         public override int getImplementationMethod() {
             return PROCESS_METHOD;
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.LocalParamBlock.LocalParamBlockElaborator();
+        }
+        public class LocalParamBlockElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            internal Saxon.Hej.expr.elab.SequenceEvaluator[] paramEval;
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.LocalParamBlock expr = (Saxon.Hej.expr.instruct.LocalParamBlock)(getExpression());
+                paramEval = new Saxon.Hej.expr.elab.SequenceEvaluator[expr.operanda.Length];
+                for (int i = 0; (i<expr.operanda.Length); i++) {
+                    paramEval[i] = expr.operanda[i].getChildExpression().makeElaborator().eagerly();
+                }
+                return (@out, context) => {
+                    foreach (Saxon.Hej.expr.elab.SequenceEvaluator eagerEvaluator in paramEval) {
+                        eagerEvaluator.evaluate(context);
+                    }
+                    return null;
+                } ;
+            }
+        
         }
     
     }

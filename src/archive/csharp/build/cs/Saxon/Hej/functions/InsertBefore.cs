@@ -59,10 +59,6 @@ namespace Saxon.Hej.functions {
                 @base.close();
                 insert.close();
             }
-            public void discharge() {
-                @base.discharge();
-                insert.discharge();
-            }
         
         }
         public override string getStreamerName() {

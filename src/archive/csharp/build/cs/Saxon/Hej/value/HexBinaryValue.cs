@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Hej.value {
     public class HexBinaryValue : Saxon.Hej.value.AtomicValue, Saxon.Hej.expr.sort.AtomicMatchKey, Saxon.Hej.expr.sort.XPathComparable, Saxon.Hej.value.ContextFreeAtomicValue {
         private readonly byte[] binaryValue;
-        public HexBinaryValue(Saxon.Hej.str.UnicodeString @in)  {
+        public HexBinaryValue(Saxon.Hej.str.UnicodeString @in) : base (Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY) {
             Saxon.Hej.str.UnicodeString s = Saxon.Hej.value.Whitespace.trim(@in);
             int len32 = s.length32();
             if ((((len32&1)) != 0)) {
@@ -16,16 +16,15 @@ namespace Saxon.Hej.value {
             for (int i = 0; (i<binaryValue.Length); i++) {
                 binaryValue[i] = (byte)(((((fromHex(s.codePointAt((2*i)))<<4))+fromHex(s.codePointAt(((2*i)+1))))));
             }
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY;
         }
-        public HexBinaryValue(byte[] value)  {
+        public HexBinaryValue(byte[] value) : base (Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY) {
             binaryValue = value;
-            typeLabel = Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY;
+        }
+        public HexBinaryValue(byte[] value, Saxon.Hej.type.AtomicType typeLabel) : base (typeLabel) {
+            binaryValue = value;
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
-            Saxon.Hej.value.HexBinaryValue v = new Saxon.Hej.value.HexBinaryValue(binaryValue);
-            v.typeLabel = typeLabel;
-            return v;
+            return new Saxon.Hej.value.HexBinaryValue(binaryValue, typeLabel);
         }
         public override Saxon.Hej.type.BuiltInAtomicType getPrimitiveType() {
             return Saxon.Hej.type.BuiltInAtomicType.HEX_BINARY;
@@ -47,7 +46,7 @@ namespace Saxon.Hej.value {
         }
         public override Saxon.Hej.str.UnicodeString getPrimitiveStringValue() {
             string digits = "0123456789ABCDEF";
-            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder sb = new Saxon.Hej.str.UnicodeBuilder((binaryValue.Length*2));
             foreach (byte aBinaryValue in binaryValue) {
                 sb.append(digits[(((aBinaryValue>>4))&unchecked((int)0xf))]);
                 sb.append(digits[(aBinaryValue&unchecked((int)0xf))]);

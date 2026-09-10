@@ -29,7 +29,7 @@ namespace Saxon.Hej.expr.instruct {
             }
             if ((requiredType != null)) {
                 if (convert) {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, qName.getDisplayName(), -1);
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, qName.getDisplayName(), -1);
                     Saxon.Hej.Configuration config = context.getConfiguration();
                     val = config.getTypeHierarchy().applyFunctionConversionRules(val, requiredType, role, Saxon.Hej.expr.parser.Loc.NONE);
                 } else {

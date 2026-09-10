@@ -55,7 +55,7 @@ namespace Saxon.Eej.ee.schema {
             if ((target == null)) {
                 string name = getTargetComponentName().getEQName();
                 if ((compiler.isAllowDanglingReferences() && !(fatal))) {
-                    compiler.warning((("Unknown model group "+name)+" (substituting empty group)"), this);
+                    compiler.warning((("Unknown model group "+name)+" (substituting empty group)"), Saxon.Hej.trans.SaxonErrorCode.SXSD1006, this);
                     Saxon.Eej.ee.schema.ModelGroupDefinition decl = new Saxon.Eej.ee.schema.ModelGroupDefinition(getConfiguration(), this);
                     decl.setModelGroupName(getTargetComponentName());
                     target = decl;

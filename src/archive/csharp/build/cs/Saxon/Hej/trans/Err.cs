@@ -59,7 +59,7 @@ namespace Saxon.Hej.trans {
                 if (s.StartsWith("Q{")) {
                     try {
                         Saxon.Hej.om.StructuredQName qn = Saxon.Hej.om.StructuredQName.fromEQName(sb.ToString());
-                        string uri = abbreviateURI(qn.getURI());
+                        string uri = abbreviateURI(qn.getNamespaceUri());
                         s = ((("Q{"+uri)+"}")+qn.getLocalPart());
                     } catch (System.Exception e) {
                         s = sb.ToString();
@@ -176,13 +176,16 @@ namespace Saxon.Hej.trans {
                 return ("..."+uri.Substring(lastSlash));
             }
         }
+        public static string abbreviateURI(Saxon.Hej.om.NamespaceUri uri) {
+            return abbreviateURI(uri.ToString());
+        }
         public static string abbreviateEQName(string eqName) {
             try {
                 if (eqName.StartsWith("{")) {
                     eqName = ("Q"+eqName);
                 }
                 Saxon.Hej.om.StructuredQName sq = Saxon.Hej.om.StructuredQName.fromEQName(eqName);
-                return ((("Q{"+abbreviateURI(sq.getURI()))+"}")+sq.getLocalPart());
+                return ((("Q{"+abbreviateURI(sq.getNamespaceUri()))+"}")+sq.getLocalPart());
             } catch (System.Exception e) {
                 return eqName;
             }
@@ -218,6 +221,13 @@ namespace Saxon.Hej.trans {
         }
         public static string show(Saxon.Hej.s9api.Location loc) {
             return ((abbreviateURI(loc.getSystemId())+"#")+loc.getLineNumber());
+        }
+        public static string indefiniteArticleFor(string s, bool caps) {
+            if (("aeioux".IndexOf(s[0])>=0)) {
+                return ((caps ? "An" : "an"));
+            } else {
+                return ((caps ? "A" : "a"));
+            }
         }
     
     }

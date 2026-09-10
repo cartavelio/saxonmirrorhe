@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.functions {
     public class ContextItemAccessorFunction : Saxon.Hej.functions.ContextAccessorFunction {
-        public override Saxon.Hej.om.Function bindContext(Saxon.Hej.expr.XPathContext context) {
+        public override Saxon.Hej.om.FunctionItem bindContext(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.om.Item ci = context.getContextItem();
             if ((ci == null)) {
                 Saxon.Hej.expr.Callable callable = new Saxon.Hej.expr.CallableDelegate((context1, arguments) => {
@@ -26,7 +26,7 @@ namespace Saxon.Hej.functions {
         }
         public override  /* REPLACING public override */ Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
             Saxon.Hej.expr.Expression arg = new Saxon.Hej.expr.ContextItemExpression();
-            if (getFunctionName().hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
+            if (getFunctionName().hasURI(Saxon.Hej.om.NamespaceUri.SAXON)) {
                 Saxon.Hej.functions.registry.BuiltInFunctionSet.Entry entry = getDetails();
                 try {
                     return entry.functionSet.makeFunction(entry.name.getLocalPart(), 1).makeFunctionCall(arg);

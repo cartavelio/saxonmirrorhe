@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.lib {
     public class InvalidityReportGenerator : Saxon.Hej.lib.StandardInvalidityHandler {
-        public const string REPORT_NS = "http://saxon.sf.net/ns/validation";
+        public static readonly Saxon.Hej.om.NamespaceUri REPORT_NS = Saxon.Hej.om.NamespaceUri.of("http://saxon.sf.net/ns/validation");
         public InvalidityReportGenerator(Saxon.Hej.Configuration config) : base (config) {
         }
         public InvalidityReportGenerator(Saxon.Hej.Configuration config, Saxon.Hej.@event.Outputter receiver) : base (config) {

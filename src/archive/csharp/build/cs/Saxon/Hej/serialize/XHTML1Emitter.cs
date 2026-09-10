@@ -10,7 +10,7 @@ namespace Saxon.Hej.serialize {
         static System.Collections.Generic.ISet<string> emptyTags1 = new System.Collections.Generic.HashSet<string>(31);
         private static readonly string[] emptyTagNames1 = {"area", "base", "basefont", "br", "col", "embed", "frame", "hr", "img", "input", "isindex", "link", "meta", "param"};
         private bool isRecognizedHtmlElement(Saxon.Hej.om.NodeName name) {
-            return name.hasURI(Saxon.Hej.lib.NamespaceConstant.XHTML);
+            return name.hasURI(Saxon.Hej.om.NamespaceUri.XHTML);
         }
         protected internal override void writeEmptyElementTagCloser(string displayName, Saxon.Hej.om.NodeName name) {
             if ((isRecognizedHtmlElement(name) && emptyTags1.Contains(name.getLocalPart()))) {

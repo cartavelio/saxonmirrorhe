@@ -60,12 +60,19 @@ namespace Saxon.Hej.tree.tiny {
         public override string getLocalPart() {
             return tree.getNamePool().getLocalName(tree.attCode[nodeNr]);
         }
-        public override string getURI() {
+        public override Saxon.Hej.om.NamespaceUri getNamespaceUri() {
             int code = tree.attCode[nodeNr];
             if (!(Saxon.Hej.om.NamePool.isPrefixed(code))) {
-                return "";
+                return Saxon.Hej.om.NamespaceUri.NULL;
             }
             return tree.getNamePool().getURI(code);
+        }
+        public override bool hasURI(Saxon.Hej.om.NamespaceUri ns) {
+            int code = tree.attCode[nodeNr];
+            if (!(Saxon.Hej.om.NamePool.isPrefixed(code))) {
+                return ns.isEmpty();
+            }
+            return getNamePool().getStructuredQName(code).hasURI(ns);
         }
         public override Saxon.Hej.type.SchemaType getSchemaType() {
             if ((tree.attType == null)) {

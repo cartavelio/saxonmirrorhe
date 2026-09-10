@@ -88,12 +88,12 @@ namespace Saxon.Hej.expr.instruct {
                 nonMatchingOp.typeCheck(visitor, config.makeContextItemStaticInfo(Saxon.Hej.type.BuiltInAtomicType.STRING, false));
             }
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "analyze-string/select", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "analyze-string/select", 0);
             Saxon.Hej.value.SequenceType required = Saxon.Hej.value.SequenceType.OPTIONAL_STRING;
             setSelect(tc.staticTypeCheck(getSelect(), required, role, visitor));
-            role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "analyze-string/regex", 0);
+            role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "analyze-string/regex", 0);
             setRegex(tc.staticTypeCheck(getRegex(), Saxon.Hej.value.SequenceType.SINGLE_STRING, role, visitor));
-            role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "analyze-string/flags", 0);
+            role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.INSTRUCTION, "analyze-string/flags", 0);
             setFlags(tc.staticTypeCheck(getFlags(), Saxon.Hej.value.SequenceType.SINGLE_STRING, role, visitor));
             return this;
         }
@@ -111,7 +111,7 @@ namespace Saxon.Hej.expr.instruct {
             System.Collections.Generic.IList<string> warnings = new System.Collections.Generic.List<string>();
             precomputeRegex(config, warnings);
             foreach (string w in warnings) {
-                visitor.getStaticContext().issueWarning(w, getLocation());
+                visitor.getStaticContext().issueWarning(w, Saxon.Hej.trans.SaxonErrorCode.SXWN9022, getLocation());
             }
             return this;
         }
@@ -185,62 +185,8 @@ namespace Saxon.Hej.expr.instruct {
             }
             return dependencies;
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.regex.RegexIterator iter = getRegexIterator(context);
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            c2.setOrigin(this);
-            Saxon.Hej.om.FocusIterator focusIter = c2.trackFocus(iter);
-            c2.setCurrentRegexIterator(iter);
-            Saxon.Hej.@event.PipelineConfiguration pipe = output.getPipelineConfiguration();
-            pipe.setXPathContext(c2);
-            Saxon.Hej.om.Item it;
-            while (((it = focusIter.next()) != null)) {
-                if (iter.isMatching()) {
-                    if ((getMatching() != null)) {
-                        getMatching().process(output, c2);
-                    }
-                } else {
-                    if ((getNonMatching() != null)) {
-                        getNonMatching().process(output, c2);
-                    }
-                }
-            }
-            pipe.setXPathContext(context);
-            return null;
-        }
-        private Saxon.Hej.regex.RegexIterator getRegexIterator(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.value.StringValue input = (Saxon.Hej.value.StringValue)(getSelect().evaluateItem(context));
-            if ((input == null)) {
-                input = Saxon.Hej.value.StringValue.EMPTY_STRING;
-            }
-            Saxon.Hej.regex.RegularExpression re = pattern;
-            if ((re == null)) {
-                string flagstr = getFlags().evaluateAsString(context).ToString();
-                Saxon.Hej.value.StringValue regexString = (Saxon.Hej.value.StringValue)(getRegex().evaluateItem(context));
-                re = context.getConfiguration().compileRegularExpression(regexString.getUnicodeStringValue(), flagstr, "XP30", null);
-            }
-            return re.analyze(input.getUnicodeStringValue());
-        }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.regex.RegexIterator iter = getRegexIterator(context);
-            Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
-            c2.setOrigin(this);
-            c2.trackFocus(iter);
-            c2.setCurrentRegexIterator(iter);
-            Saxon.Hej.expr.Expression matchingExpr = getMatching();
-            Saxon.Hej.expr.Expression nonMatchExpr = getNonMatching();
-            return new Saxon.Hej.expr.ContextMappingIterator(cxt => {
-                if (iter.isMatching()) {
-                    if ((matchingExpr != null)) {
-                        return matchingExpr.iterate(c2);
-                    }
-                } else {
-                    if ((nonMatchExpr != null)) {
-                        return nonMatchExpr.iterate(c2);
-                    }
-                }
-                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
-            } , c2);
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
         public override string getExpressionName() {
             return "analyzeString";
@@ -262,6 +208,85 @@ namespace Saxon.Hej.expr.instruct {
                 getNonMatching().export(@out);
             }
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.AnalyzeString.AnalyzeStringElaborator();
+        }
+        private delegate Saxon.Hej.regex.RegularExpression RegexEvaluator (Saxon.Hej.expr.XPathContext context);
+        public class AnalyzeStringElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.instruct.AnalyzeString expr = (Saxon.Hej.expr.instruct.AnalyzeString)(getExpression());
+                Saxon.Hej.expr.elab.UnicodeStringEvaluator input = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+                Saxon.Hej.expr.elab.PullEvaluator matching = ((expr.getMatching() == null) ? null : expr.getMatching().makeElaborator().elaborateForPull());
+                Saxon.Hej.expr.elab.PullEvaluator nonMatching = ((expr.getNonMatching() == null) ? null : expr.getNonMatching().makeElaborator().elaborateForPull());
+                Saxon.Hej.expr.instruct.AnalyzeString.RegexEvaluator regexSupplier = getRegexSupplier(expr);
+                return context => {
+                    Saxon.Hej.regex.RegularExpression re = /*Delegate.compileRegex()*/regexSupplier(context);
+                    Saxon.Hej.str.UnicodeString @in = /*Delegate.eval()*/input(context);
+                    Saxon.Hej.regex.RegexIterator iter = re.analyze(@in);
+                    Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                    c2.setOrigin(expr);
+                    c2.trackFocus(iter);
+                    c2.setCurrentRegexIterator(iter);
+                    return new Saxon.Hej.expr.ContextMappingIterator(cxt => {
+                        if (iter.isMatching()) {
+                            if ((matching != null)) {
+                                return /*Delegate.iterate()*/matching(c2);
+                            }
+                        } else {
+                            if ((nonMatching != null)) {
+                                return /*Delegate.iterate()*/nonMatching(c2);
+                            }
+                        }
+                        return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
+                    } , c2);
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.AnalyzeString expr = (Saxon.Hej.expr.instruct.AnalyzeString)(getExpression());
+                Saxon.Hej.expr.elab.UnicodeStringEvaluator input = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
+                Saxon.Hej.expr.elab.PushEvaluator matching = ((expr.getMatching() == null) ? null : expr.getMatching().makeElaborator().elaborateForPush());
+                Saxon.Hej.expr.elab.PushEvaluator nonMatching = ((expr.getNonMatching() == null) ? null : expr.getNonMatching().makeElaborator().elaborateForPush());
+                Saxon.Hej.expr.instruct.AnalyzeString.RegexEvaluator regexSupplier = getRegexSupplier(expr);
+                return (@out, context) => {
+                    Saxon.Hej.regex.RegularExpression re = /*Delegate.compileRegex()*/regexSupplier(context);
+                    Saxon.Hej.str.UnicodeString @in = /*Delegate.eval()*/input(context);
+                    Saxon.Hej.regex.RegexIterator iter = re.analyze(@in);
+                    Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
+                    c2.setOrigin(expr);
+                    Saxon.Hej.om.FocusIterator focus = c2.trackFocus(iter);
+                    c2.setCurrentRegexIterator(iter);
+                    while ((focus.next() != null)) {
+                        if (iter.isMatching()) {
+                            if ((matching != null)) {
+                                dispatchTailCall(/*Delegate.processLeavingTail()*/matching(@out, c2));
+                            }
+                        } else {
+                            if ((nonMatching != null)) {
+                                dispatchTailCall(/*Delegate.processLeavingTail()*/nonMatching(@out, c2));
+                            }
+                        }
+                    }
+                    return null;
+                } ;
+            }
+            private Saxon.Hej.expr.instruct.AnalyzeString.RegexEvaluator getRegexSupplier(Saxon.Hej.expr.instruct.AnalyzeString expr) {
+                Saxon.Hej.regex.RegularExpression pattern = expr.getPatternExpression();
+                Saxon.Hej.expr.instruct.AnalyzeString.RegexEvaluator regexSupplier;
+                if ((expr.pattern != null)) {
+                    regexSupplier = context => pattern;
+                } else {
+                    Saxon.Hej.expr.elab.StringEvaluator flagsEval = expr.getFlags().makeElaborator().elaborateForString(true);
+                    Saxon.Hej.expr.elab.UnicodeStringEvaluator regexEval = expr.getRegex().makeElaborator().elaborateForUnicodeString(false);
+                    regexSupplier = context => {
+                        string flagsStr = /*Delegate.eval()*/flagsEval(context);
+                        Saxon.Hej.str.UnicodeString regexStr = /*Delegate.eval()*/regexEval(context);
+                        return context.getConfiguration().compileRegularExpression(regexStr, flagsStr, "XP31", null);
+                    } ;
+                }
+                return regexSupplier;
+            }
+        
         }
     
     }

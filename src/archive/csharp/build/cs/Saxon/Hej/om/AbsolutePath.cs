@@ -91,10 +91,10 @@ namespace Saxon.Hej.om {
                     break ;
                   case Saxon.Hej.type.Type.ATTRIBUTE:
                     fsb.append('@');
-                    if (!(name.getURI().Length==0)) {
+                    if (!(name.getNamespaceUri().isEmpty())) {
                         if ((option == 'u')) {
                             fsb.append("Q{");
-                            fsb.append(name.getURI());
+                            fsb.append(name.getNamespaceUri());
                             fsb.append("}");
                         } else {
                             if ((option == 'p')) {
@@ -106,7 +106,7 @@ namespace Saxon.Hej.om {
                             } else {
                                 if ((option == 's')) {
                                     fsb.append("Q{");
-                                    fsb.append(Saxon.Hej.trans.Err.abbreviateURI(name.getURI()));
+                                    fsb.append(Saxon.Hej.trans.Err.abbreviateURI(name.getNamespaceUri()));
                                     fsb.append("}");
                                 }
                             }
@@ -117,7 +117,7 @@ namespace Saxon.Hej.om {
                   case Saxon.Hej.type.Type.ELEMENT:
                     if ((option == 'u')) {
                         fsb.append("Q{");
-                        fsb.append(name.getURI());
+                        fsb.append(name.getNamespaceUri());
                         fsb.append("}");
                     } else {
                         if ((option == 'p')) {
@@ -128,9 +128,9 @@ namespace Saxon.Hej.om {
                             }
                         } else {
                             if ((option == 's')) {
-                                if (!(name.getURI().Length==0)) {
+                                if (!(name.getNamespaceUri().isEmpty())) {
                                     fsb.append("Q{");
-                                    fsb.append(Saxon.Hej.trans.Err.abbreviateURI(name.getURI()));
+                                    fsb.append(Saxon.Hej.trans.Err.abbreviateURI(name.getNamespaceUri()));
                                     fsb.append("}");
                                 }
                             }

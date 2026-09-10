@@ -47,7 +47,7 @@ namespace Saxon.Hej.expr.sort {
                         return (count>0);
                     } catch (Saxon.Hej.trans.XPathException err) {
                         count = -1;
-                        @base = new Saxon.Hej.om.FocusTrackingIterator(new Saxon.Hej.expr.ErrorIterator(err));
+                        @base = Saxon.Hej.om.SequenceTool.focusTracker(new Saxon.Hej.expr.ErrorIterator(err));
                         return true;
                     }
                 }
@@ -156,10 +156,6 @@ namespace Saxon.Hej.expr.sort {
     
         /* Expanding default method close from interface SequenceIterator */
         public virtual void close() {
-        }
-
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
         }
 
     }

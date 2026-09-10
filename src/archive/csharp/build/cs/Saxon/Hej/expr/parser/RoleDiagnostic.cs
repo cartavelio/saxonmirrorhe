@@ -31,6 +31,12 @@ namespace Saxon.Hej.expr.parser {
             this.operation = operation;
             this.operand = operand;
         }
+        public RoleDiagnostic(int kind, string operation, int operand, string errorCode)  {
+            this.kind = kind;
+            this.operation = operation;
+            this.operand = operand;
+            this.errorCode = errorCode;
+        }
         public void setErrorCode(string code) {
             if ((code != null)) {
                 this.errorCode = code;

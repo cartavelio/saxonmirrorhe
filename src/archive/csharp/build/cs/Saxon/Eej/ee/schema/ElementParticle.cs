@@ -21,8 +21,8 @@ namespace Saxon.Eej.ee.schema {
         public string getDisplayName() {
             return getTargetComponentName().getDisplayName();
         }
-        public string getNamespaceURI() {
-            return getTargetComponentName().getURI();
+        public Saxon.Hej.om.NamespaceUri getNamespaceURI() {
+            return getTargetComponentName().getNamespaceUri();
         }
         public string getName() {
             return getTargetComponentName().getLocalPart();

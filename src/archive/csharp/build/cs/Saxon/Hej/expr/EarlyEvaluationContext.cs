@@ -14,6 +14,9 @@ namespace Saxon.Hej.expr {
         public Saxon.Hej.expr.XPathContext getCaller() {
             return null;
         }
+        public Saxon.Hej.expr.XPathContextMajor getMajorContext() {
+            return null;
+        }
         public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
             return config.getResourceResolver();
         }

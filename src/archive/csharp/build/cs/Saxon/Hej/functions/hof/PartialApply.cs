@@ -44,7 +44,8 @@ namespace Saxon.Hej.functions.hof {
                 if ((op != null)) {
                     Saxon.Hej.expr.Expression arg = op.getChildExpression();
                     if (((baseType is Saxon.Hej.type.SpecificFunctionType) && (i<((Saxon.Hej.type.SpecificFunctionType)(baseType)).getArity()))) {
-                        Saxon.Hej.expr.parser.RoleDiagnostic argRole = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "saxon:call", i);
+                        int pos = i;
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> argRole = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "saxon:call", pos);
                         Saxon.Hej.value.SequenceType requiredArgType = ((Saxon.Hej.type.SpecificFunctionType)(baseType)).getArgumentTypes()[i];
                         argTypes[i] = requiredArgType;
                         Saxon.Hej.expr.Expression a3 = tc.staticTypeCheck(arg, requiredArgType, argRole, visitor);
@@ -55,7 +56,7 @@ namespace Saxon.Hej.functions.hof {
                 }
             }
             requiredFunctionType = Saxon.Hej.value.SequenceType.makeSequenceType(new Saxon.Hej.type.SpecificFunctionType(argTypes, (((baseType is Saxon.Hej.type.AnyFunctionType)) ? ((Saxon.Hej.type.AnyFunctionType)(baseType)).getResultType() : Saxon.Hej.value.SequenceType.ANY_SEQUENCE)), Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "saxon:call", 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, "saxon:call", 0);
             setBaseExpression(tc.staticTypeCheck(getBaseExpression(), requiredFunctionType, role, visitor));
             return this;
         }
@@ -179,21 +180,41 @@ namespace Saxon.Hej.functions.hof {
             buff.append(")");
             return buff.ToString();
         }
-        public override Saxon.Hej.om.Function evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.Function f = (Saxon.Hej.om.Function)(getBaseExpression().evaluateItem(context));
-            System.Diagnostics.Debug.Assert((f != null));
-            Saxon.Hej.om.Sequence[] values = new Saxon.Hej.om.Sequence[boundArgumentsOp.Length];
-            for (int i = 0; (i<boundArgumentsOp.Length); i++) {
-                if ((boundArgumentsOp[i] == null)) {
-                    values[i] = null;
-                } else {
-                    values[i] = Saxon.Hej.om.SequenceTool.toGroundedValue(boundArgumentsOp[i].getChildExpression().iterate(context));
-                }
-            }
-            return new Saxon.Hej.functions.hof.CurriedFunction(f, values);
+        public override Saxon.Hej.om.FunctionItem evaluateItem(Saxon.Hej.expr.XPathContext context) {
+            return (Saxon.Hej.om.FunctionItem)(/*Delegate.eval()*/makeElaborator().elaborateForItem()(context));
         }
         public override string getExpressionName() {
             return "partialApply";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.hof.PartialApply.PartialApplyElaborator();
+        }
+        private class PartialApplyElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.functions.hof.PartialApply expr = (Saxon.Hej.functions.hof.PartialApply)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator functionEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+                int len = expr.boundArgumentsOp.Length;
+                Saxon.Hej.expr.elab.SequenceEvaluator[] boundArgumentsEvaluators = new Saxon.Hej.expr.elab.SequenceEvaluator[len];
+                for (int i = 0; (i<len); i++) {
+                    if ((expr.boundArgumentsOp[i] == null)) {
+                        boundArgumentsEvaluators[i] = null;
+                    } else {
+                        boundArgumentsEvaluators[i] = expr.boundArgumentsOp[i].getChildExpression().makeElaborator().eagerly();
+                    }
+                }
+                return context => {
+                    Saxon.Hej.om.FunctionItem f = (Saxon.Hej.om.FunctionItem)(/*Delegate.eval()*/functionEval(context));
+                    System.Diagnostics.Debug.Assert((f != null));
+                    Saxon.Hej.om.Sequence[] values = new Saxon.Hej.om.Sequence[len];
+                    for (int i = 0; (i<boundArgumentsEvaluators.Length); i++) {
+                        if ((boundArgumentsEvaluators[i] != null)) {
+                            values[i] = boundArgumentsEvaluators[i].evaluate(context);
+                        }
+                    }
+                    return new Saxon.Hej.functions.hof.CurriedFunction(f, values);
+                } ;
+            }
+        
         }
     
     }

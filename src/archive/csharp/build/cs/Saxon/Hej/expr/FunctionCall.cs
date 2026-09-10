@@ -13,12 +13,12 @@ namespace Saxon.Hej.expr {
         }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
             if ((operanda != null)) {
-                return operanda.operands();
+                return operanda;
             } else {
                 return new System.Collections.Generic.List<Saxon.Hej.expr.Operand>();
             }
         }
-        public abstract Saxon.Hej.om.Function getTargetFunction(Saxon.Hej.expr.XPathContext context);
+        public abstract Saxon.Hej.om.FunctionItem getTargetFunction(Saxon.Hej.expr.XPathContext context);
         public abstract Saxon.Hej.om.StructuredQName getFunctionName();
         public int getArity() {
             return getOperanda().getNumberOfOperands();
@@ -78,19 +78,35 @@ namespace Saxon.Hej.expr {
             }
             return this;
         }
-        public void checkFunctionCall(Saxon.Hej.om.Function target, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
+        public void checkFunctionCall(Saxon.Hej.om.FunctionItem target, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
             Saxon.Hej.value.SequenceType[] argTypes = target.getFunctionItemType().getArgumentTypes();
+            Saxon.Hej.functions.registry.FunctionDefinition fd = null;
+            if ((target is Saxon.Hej.functions.registry.FunctionDefinition)) {
+                fd = (Saxon.Hej.functions.registry.FunctionDefinition)(target);
+            }
             if ((target.isSequenceVariadic() && (getArity() == 1))) {
                 string name = ((getFunctionName() == null) ? "" : getFunctionName().getDisplayName());
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, name, 0);
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, name, 0);
                 setArg(0, tc.staticTypeCheck(getArg(0), new Saxon.Hej.value.SequenceType(argTypes[0].getPrimaryType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE), role, visitor));
             } else {
                 int n = target.getArity();
                 for (int i = 0; (i<n); i++) {
-                    string name = ((getFunctionName() == null) ? "" : getFunctionName().getDisplayName());
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, name, i);
-                    setArg(i, tc.staticTypeCheck(getArg(i), argTypes[i], role, visitor));
+                    int pos = i;
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => {
+                        string name = ((getFunctionName() == null) ? "" : getFunctionName().getDisplayName());
+                        return new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, name, pos);
+                    } ;
+                    Saxon.Hej.expr.Expression arg = getArg(i);
+                    if (((arg is Saxon.Hej.expr.DefaultedArgumentExpression) && (fd != null))) {
+                        if ((i<fd.getMinimumArity())) {
+                            throw new Saxon.Hej.trans.XPathException(((("No value supplied for "+Saxon.Hej.expr.parser.RoleDiagnostic.ordinal((i+1)))+" parameter of function ")+(((getFunctionName() == null) ? "" : getFunctionName().getDisplayName()))), "XPST0141");
+                        }
+                        arg = fd.getDefaultValueExpression(i);
+                    }
+                    if (((arg != null) && !(((arg is Saxon.Hej.expr.DefaultedArgumentExpression))))) {
+                        setArg(i, tc.staticTypeCheck(arg, argTypes[i], role, visitor));
+                    }
                 }
             }
         }
@@ -161,7 +177,7 @@ namespace Saxon.Hej.expr {
             return numArgs;
         }
         public override int getImplementationMethod() {
-            return ITERATE_METHOD;
+            return (ITERATE_METHOD|EVALUATE_METHOD);
         }
         public static string pluralArguments(int num) {
             return ((num == 1) ? "one argument" : ((num+" arguments")));
@@ -188,7 +204,7 @@ namespace Saxon.Hej.expr {
             if ((fName == null)) {
                 f = "$anonymousFunction";
             } else {
-                if (fName.hasURI(Saxon.Hej.lib.NamespaceConstant.FN)) {
+                if (fName.hasURI(Saxon.Hej.om.NamespaceUri.FN)) {
                     f = fName.getLocalPart();
                 } else {
                     f = fName.getEQName();
@@ -252,27 +268,35 @@ namespace Saxon.Hej.expr {
             return h;
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.Function target = getTargetFunction(context);
-            Saxon.Hej.om.Sequence[] actualArgs = evaluateArguments(context);
-            try {
-                return target.call(context, actualArgs).iterate();
-            } catch (Saxon.Hej.trans.XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                e.maybeSetFailingExpression(this);
-                throw;
-            }
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
-        public virtual Saxon.Hej.om.Sequence[] evaluateArguments(Saxon.Hej.expr.XPathContext context) {
-            int numArgs = getArity();
-            Saxon.Hej.om.Sequence[] actualArgs = new Saxon.Hej.om.Sequence[numArgs];
-            for (int i = 0; (i<numArgs); i++) {
-                actualArgs[i] = Saxon.Hej.expr.parser.ExpressionTool.lazyEvaluate(getArg(i), context, false);
-            }
-            return actualArgs;
+        public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(context);
         }
         public bool adjustRequiredType(Saxon.Hej.type.JavaExternalObjectType requiredType) {
             return false;
+        }
+        public abstract class FunctionCallElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            protected internal Saxon.Hej.expr.elab.SequenceEvaluator[] argumentEvaluators;
+            public override void setExpression(Saxon.Hej.expr.Expression expr) {
+                base.setExpression(expr);
+                allocateArgumentEvaluators((Saxon.Hej.expr.FunctionCall)(expr), true);
+            }
+            protected internal void allocateArgumentEvaluators(Saxon.Hej.expr.FunctionCall expr, bool allowRepeatedUse) {
+                int arity = expr.getArity();
+                argumentEvaluators = new Saxon.Hej.expr.elab.SequenceEvaluator[arity];
+                for (int i = 0; (i<arity); i++) {
+                    argumentEvaluators[i] = expr.getArg(i).makeElaborator().lazily(allowRepeatedUse);
+                }
+            }
+            protected internal Saxon.Hej.om.Sequence[] evaluateArguments(Saxon.Hej.expr.XPathContext context) {
+                Saxon.Hej.om.Sequence[] args = new Saxon.Hej.om.Sequence[argumentEvaluators.Length];
+                for (int i = 0; (i<argumentEvaluators.Length); i++) {
+                    args[i] = argumentEvaluators[i].evaluate(context);
+                }
+                return args;
+            }
+        
         }
     
     }

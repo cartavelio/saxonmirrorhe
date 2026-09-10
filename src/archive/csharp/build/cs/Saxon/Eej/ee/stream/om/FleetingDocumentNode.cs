@@ -31,6 +31,9 @@ namespace Saxon.Eej.ee.stream.om {
         public long getDocumentNumber() {
             return documentNumber;
         }
+        public Saxon.Hej.om.Durability getDurability() {
+            return Saxon.Hej.om.Durability.FLEETING;
+        }
         public void setConfiguration(Saxon.Hej.Configuration config) {
             this.config = config;
         }

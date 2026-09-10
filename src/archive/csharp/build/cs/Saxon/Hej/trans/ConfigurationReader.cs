@@ -89,11 +89,11 @@ namespace Saxon.Hej.trans {
             }
         }
         public void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap atts, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
-            string uri = elemName.getURI();
+            Saxon.Hej.om.NamespaceUri uri = elemName.getNamespaceUri();
             string localName = elemName.getLocalPart();
             localNameStack.Push(localName);
             buffer.setLength(0);
-            if (Saxon.Hej.lib.NamespaceConstant.SAXON_CONFIGURATION.Equals(uri)) {
+            if (Saxon.Hej.om.NamespaceUri.SAXON_CONFIGURATION.Equals(uri)) {
                 if ((level == 0)) {
                     if (!("configuration".Equals(localName))) {
                         error(localName, null, null, "configuration");
@@ -125,7 +125,7 @@ namespace Saxon.Hej.trans {
                     }
                     packageLibrary = new Saxon.Hej.trans.packages.PackageLibrary(targetConfig.getDefaultXsltCompilerInfo());
                     string licenseLoc = atts.getValue("licenseFileLocation");
-                    if ((((licenseLoc != null) && !(edition.Equals("HE"))) && !(targetConfig.isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.PROFESSIONAL_EDITION)))) {
+                    if (((licenseLoc != null) && !(edition.Equals("HE")))) {
                         string @base = getSystemId();
                         try {
                             System.Uri absoluteLoc = Saxon.Hej.functions.ResolveURI.makeAbsolute(licenseLoc, @base);
@@ -242,7 +242,7 @@ namespace Saxon.Hej.trans {
             foreach (Saxon.Hej.om.AttributeInfo a in atts) {
                 string name = a.getNodeName().getLocalPart();
                 string value = a.getValue();
-                if ((!(value.Length==0) && a.getNodeName().getURI().Length==0)) {
+                if ((!(value.Length==0) && a.getNodeName().getNamespaceUri().isEmpty())) {
                     props.setProperty(name, value);
                 }
             }
@@ -314,7 +314,7 @@ namespace Saxon.Hej.trans {
             string value = props.getProperty(attributeName);
             if ((value != null)) {
                 if (!(checkPlatform(flags))) {
-                    error(props.getProperty("#element"), attributeName, value, (("Property "+attributeName)+" is not available in Saxon-CS"));
+                    error(props.getProperty("#element"), attributeName, value, (("Property "+attributeName)+" is not available in SaxonCS"));
                     return ;
                 }
                 try {
@@ -337,7 +337,7 @@ namespace Saxon.Hej.trans {
         private void readSerializationElement(Saxon.Hej.om.AttributeMap atts, Saxon.Hej.om.NamespaceMap nsMap) {
             Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties();
             foreach (Saxon.Hej.om.AttributeInfo a in atts) {
-                string uri = a.getNodeName().getURI();
+                Saxon.Hej.om.NamespaceUri uri = a.getNodeName().getNamespaceUri();
                 string name = a.getNodeName().getLocalPart();
                 string value = a.getValue();
                 if (value.Length==0) {
@@ -355,10 +355,10 @@ namespace Saxon.Hej.trans {
             Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties();
             string collationUri = null;
             foreach (Saxon.Hej.om.AttributeInfo a in atts) {
-                string uri = a.getNodeName().getURI();
+                Saxon.Hej.om.NamespaceUri uri = a.getNodeName().getNamespaceUri();
                 string name = a.getNodeName().getLocalPart();
                 string value = a.getValue();
-                if (uri.Length==0) {
+                if (uri.isEmpty()) {
                     if (value.Length==0) {
                         continue ;
                     }
@@ -382,10 +382,10 @@ namespace Saxon.Hej.trans {
         }
         private void readLocalizationsElement(Saxon.Hej.om.AttributeMap atts) {
             foreach (Saxon.Hej.om.AttributeInfo a in atts) {
-                string uri = a.getNodeName().getURI();
+                Saxon.Hej.om.NamespaceUri uri = a.getNodeName().getNamespaceUri();
                 string name = a.getNodeName().getLocalPart();
                 string value = a.getValue();
-                if (uri.Length==0) {
+                if (uri.isEmpty()) {
                     if (("defaultLanguage".Equals(name) && !(value.Length==0))) {
                         targetConfig.setConfigurationProperty(Saxon.Hej.lib.FeatureKeys.DEFAULT_LANGUAGE, value);
                     }
@@ -399,10 +399,10 @@ namespace Saxon.Hej.trans {
             string lang = null;
             Saxon.Ejava.util.Properties properties = new Saxon.Ejava.util.Properties();
             foreach (Saxon.Hej.om.AttributeInfo a in atts) {
-                string uri = a.getNodeName().getURI();
+                Saxon.Hej.om.NamespaceUri uri = a.getNodeName().getNamespaceUri();
                 string name = a.getNodeName().getLocalPart();
                 string value = a.getValue();
-                if (uri.Length==0) {
+                if (uri.isEmpty()) {
                     if (("lang".Equals(name) && !(value.Length==0))) {
                         lang = value;
                     } else {
@@ -431,7 +431,7 @@ namespace Saxon.Hej.trans {
             targetConfig.registerFileExtension(extension, mediaType);
         }
         protected internal virtual void readExtensionElement(Saxon.Hej.om.AttributeMap atts) {
-            Saxon.Hej.trans.XmlProcessingIncident err = new Saxon.Hej.trans.XmlProcessingIncident("Extension elements are not available in Saxon-HE");
+            Saxon.Hej.trans.XmlProcessingIncident err = new Saxon.Hej.trans.XmlProcessingIncident(((("Extension elements are not available in Saxon"+Saxon.Hej.Version.getSoftwarePlatform())+"-")+targetConfig.getEditionCode()));
             errors.Add(err);
         }
         protected internal void readXsltPackage(Saxon.Hej.om.AttributeMap atts) {
@@ -515,7 +515,7 @@ namespace Saxon.Hej.trans {
             Saxon.Hej.om.QNameParser qp = new Saxon.Hej.om.QNameParser(nsMap).withAcceptEQName(true);
             Saxon.Hej.om.StructuredQName qName = null;
             try {
-                qName = qp.parse(name, "");
+                qName = qp.parse(name, Saxon.Hej.om.NamespaceUri.NULL);
             } catch (Saxon.Hej.trans.XPathException e) {
                 error("withParam", "name", name, "Requires valid QName");
             }
@@ -541,10 +541,10 @@ namespace Saxon.Hej.trans {
         private void readXQueryElement(Saxon.Hej.om.AttributeMap atts) {
             Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties();
             foreach (Saxon.Hej.om.AttributeInfo a in atts) {
-                string uri = a.getNodeName().getURI();
+                Saxon.Hej.om.NamespaceUri uri = a.getNodeName().getNamespaceUri();
                 string name = a.getNodeName().getLocalPart();
                 string value = a.getValue();
-                if ((!(value.Length==0) && uri.Length==0)) {
+                if ((!(value.Length==0) && uri.isEmpty())) {
                     props.setProperty(name, value);
                 }
             }
@@ -566,10 +566,10 @@ namespace Saxon.Hej.trans {
         private void readXsltElement(Saxon.Hej.om.AttributeMap atts) {
             Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties();
             foreach (Saxon.Hej.om.AttributeInfo a in atts) {
-                string uri = a.getNodeName().getURI();
+                Saxon.Hej.om.NamespaceUri uri = a.getNodeName().getNamespaceUri();
                 string name = a.getNodeName().getLocalPart();
                 string value = a.getValue();
-                if ((!(value.Length==0) && uri.Length==0)) {
+                if ((!(value.Length==0) && uri.isEmpty())) {
                     props.setProperty(name, value);
                 }
             }
@@ -592,10 +592,10 @@ namespace Saxon.Hej.trans {
         private void readXsdElement(Saxon.Hej.om.AttributeMap atts) {
             Saxon.Ejava.util.Properties props = new Saxon.Ejava.util.Properties();
             foreach (Saxon.Hej.om.AttributeInfo a in atts) {
-                string uri = a.getNodeName().getURI();
+                Saxon.Hej.om.NamespaceUri uri = a.getNodeName().getNamespaceUri();
                 string name = a.getNodeName().getLocalPart();
                 string value = a.getValue();
-                if ((!(value.Length==0) && uri.Length==0)) {
+                if ((!(value.Length==0) && uri.isEmpty())) {
                     props.setProperty(name, value);
                 }
             }

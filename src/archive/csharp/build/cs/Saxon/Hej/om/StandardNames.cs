@@ -46,7 +46,6 @@ namespace Saxon.Hej.om {
             bindXSLTName(XSL_KEY, "key");
             bindXSLTName(XSL_MAP, "map");
             bindXSLTName(XSL_MAP_ENTRY, "map-entry");
-            bindXSLTName(XSL_MATCH, "match");
             bindXSLTName(XSL_MATCHING_SUBSTRING, "matching-substring");
             bindXSLTName(XSL_MERGE, "merge");
             bindXSLTName(XSL_MERGE_SOURCE, "merge-source");
@@ -357,7 +356,7 @@ namespace Saxon.Hej.om {
         public const int XML_ID = (XML+4);
         public const int XML_LANG_TYPE = (XML+5);
         public const int XML_SPACE_TYPE = 6;
-        public static readonly Saxon.Hej.om.NodeName XML_ID_NAME = new Saxon.Hej.om.FingerprintedQName("xml", Saxon.Hej.lib.NamespaceConstant.XML, "id", XML_ID);
+        public static readonly Saxon.Hej.om.NodeName XML_ID_NAME = new Saxon.Hej.om.FingerprintedQName("xml", Saxon.Hej.om.NamespaceUri.XML, "id", XML_ID);
         public const int XS_STRING = (XS+1);
         public const int XS_BOOLEAN = (XS+2);
         public const int XS_DECIMAL = (XS+3);
@@ -470,7 +469,7 @@ namespace Saxon.Hej.om {
         public const int XSI_SCHEMA_LOCATION_TYPE = (XSI+5);
         private static readonly string[] localNames = new string[1023];
         private static readonly System.Collections.Generic.Dictionary<string,int> lookup = new System.Collections.Generic.Dictionary<string, int>(1023);
-        public static Saxon.Hej.om.StructuredQName[] errorVariables = {new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, "code"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, "description"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, "value"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, "module"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, "line-number"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, "column-number"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.lib.NamespaceConstant.ERR, "additional")};
+        public static Saxon.Hej.om.StructuredQName[] errorVariables = {new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, "code"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, "description"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, "value"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, "module"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, "line-number"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, "column-number"), new Saxon.Hej.om.StructuredQName("err", Saxon.Hej.om.NamespaceUri.ERR, "additional")};
         private StandardNames()  {
         }
         private static void bindXSLTName(int constant, string localName) {
@@ -493,37 +492,37 @@ namespace Saxon.Hej.om {
             localNames[constant] = localName;
             Saxon.Impl.Helpers.MapUtils.Put(lookup, ((('{'+Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)+'}')+localName), constant);
         }
-        public static int getFingerprint(string uri, string localName) {
-            return Saxon.Impl.Helpers.MapUtils.GetOrDefault(lookup, ((('{'+uri)+'}')+localName), -1);
+        public static int getFingerprint(Saxon.Hej.om.NamespaceUri uri, string localName) {
+            return Saxon.Impl.Helpers.MapUtils.GetOrDefault(lookup, ((('{'+uri.ToString())+'}')+localName), -1);
         }
         public static string getLocalName(int fingerprint) {
             return localNames[fingerprint];
         }
-        public static string getURI(int fingerprint) {
+        public static Saxon.Hej.om.NamespaceUri getURI(int fingerprint) {
             int c = (fingerprint>>7);
             switch (c) {
               case DFLT_NS:
-                return "";
+                return Saxon.Hej.om.NamespaceUri.NULL;
               case XSL_NS:
-                return Saxon.Hej.lib.NamespaceConstant.XSLT;
+                return Saxon.Hej.om.NamespaceUri.XSLT;
               case SAXON_NS:
-                return Saxon.Hej.lib.NamespaceConstant.SAXON;
+                return Saxon.Hej.om.NamespaceUri.SAXON;
               case XML_NS:
-                return Saxon.Hej.lib.NamespaceConstant.XML;
+                return Saxon.Hej.om.NamespaceUri.XML;
               case XS_NS:
-                return Saxon.Hej.lib.NamespaceConstant.SCHEMA;
+                return Saxon.Hej.om.NamespaceUri.SCHEMA;
               case XSI_NS:
-                return Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE;
+                return Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE;
               default:
                 throw new Saxon.Ejava.lang.IllegalArgumentException(("Unknown system fingerprint "+fingerprint));
             }
         }
         public static string getClarkName(int fingerprint) {
-            string uri = getURI(fingerprint);
-            if (uri.Length==0) {
+            Saxon.Hej.om.NamespaceUri uri = getURI(fingerprint);
+            if ((uri == Saxon.Hej.om.NamespaceUri.NULL)) {
                 return getLocalName(fingerprint);
             } else {
-                return ((('{'+uri)+'}')+getLocalName(fingerprint));
+                return ((('{'+uri.ToString())+'}')+getLocalName(fingerprint));
             }
         }
         public static string getPrefix(int fingerprint) {
@@ -563,7 +562,7 @@ namespace Saxon.Hej.om {
         public static Saxon.Hej.om.StructuredQName getUnprefixedQName(int fingerprint) {
             return new Saxon.Hej.om.StructuredQName("", getURI(fingerprint), getLocalName(fingerprint));
         }
-        public readonly static Saxon.Hej.om.StructuredQName SQ_XS_INVALID_NAME = new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, "invalid-name");
+        public readonly static Saxon.Hej.om.StructuredQName SQ_XS_INVALID_NAME = new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, "invalid-name");
     
     }
 }

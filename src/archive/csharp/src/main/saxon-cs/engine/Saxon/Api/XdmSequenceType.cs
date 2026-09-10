@@ -1,5 +1,6 @@
 using System;
 using Saxon.Hej.expr;
+using Saxon.Hej.s9api;
 using Saxon.Hej.type;
 using ItemType = Saxon.Hej.type.ItemType;
 using SequenceType = Saxon.Hej.value.SequenceType;
@@ -107,7 +108,8 @@ namespace Saxon.Api {
         public XdmItemType ItemType => itemType;
 
         /// <summary>
-        /// The occurrence indicator. One of "?", "*", "+", or " " (single space) meaning exactly 1, or "0" meaning exactly zero.
+        /// The occurrence indicator. One of "?", "*", "+", or " " (single space) meaning exactly 1,
+        /// or "0" meaning exactly zero.
         /// </summary>
         public char OccurrenceIndicator => occurrenceIn;
 
@@ -115,10 +117,50 @@ namespace Saxon.Api {
             ItemType jit = itemType.Unwrap();
             return SequenceType.makeSequenceType(jit, occurrence);
         }
-
         
- 
+        /// <summary>
+        /// Ask whether a supplied value is an instance of this SequenceType
+        /// </summary>
+        /// <param name="value">the value to be tested</param>
+        /// <returns>true if the supplied value conforms to this SequenceType</returns>
 
+        public bool Matches(XdmValue value) {
+            OccurrenceIndicator indicator = Saxon.Hej.s9api.OccurrenceIndicator.getOccurrenceIndicator(occurrence);
+            if (!indicator.allows(value.Count)) {
+                return false;
+            }
+
+            return value.AllMatch<XdmItem>(item => itemType.Matches(item));
+        }
+
+        /// <summary>
+        /// Get a string representation of the sequence type
+        /// </summary>
+        /// <returns>the string representation of the item type, followed by an occurrence indicator</returns>
+        public override string ToString() {
+            return (itemType.ToString() + occurrenceIn).Trim();
+        }
+
+        /// <summary>
+        /// Compare two sequence types for equality
+        /// </summary>
+        /// <param name="obj">The object to be compared</param>
+        /// <returns>The result of the equality comparison.</returns>
+        public override bool Equals(object obj) {
+            if (obj is XdmSequenceType other) {
+                return itemType.Equals(other.itemType) && occurrence == other.occurrence;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Get a hash code to support equality comparison
+        /// </summary>
+        /// <returns>A suitable hash code</returns>
+        public override int GetHashCode() {
+            return itemType.GetHashCode() ^ (occurrence<<3);
+        }
     }
 }
 

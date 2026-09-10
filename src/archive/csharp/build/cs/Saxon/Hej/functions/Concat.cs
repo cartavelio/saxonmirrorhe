@@ -13,17 +13,20 @@ namespace Saxon.Hej.functions {
         }
         public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
             if (Saxon.Hej.expr.oper.OperandArray.every(arguments, arg => ((arg.getCardinality() == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) && (arg.getItemType() == Saxon.Hej.type.BuiltInAtomicType.BOOLEAN)))) {
-                visitor.getStaticContext().issueWarning((("Did you intend to apply string concatenation to boolean operands? "+"Perhaps you intended 'or' rather than '||'. ")+"To suppress this warning, use string() on the arguments."), arguments[0].getLocation());
+                visitor.getStaticContext().issueWarning((("Did you intend to apply string concatenation to boolean operands? "+"Perhaps you intended 'or' rather than '||'. ")+"To suppress this warning, use string() on the arguments."), Saxon.Hej.trans.SaxonErrorCode.SXWN9035, arguments[0].getLocation());
             }
             return new Inner_Optimized_7(this, this, arguments);
         }
         public override Saxon.Hej.value.StringValue call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.str.UnicodeBuilder builder = new Saxon.Hej.str.UnicodeBuilder();
             foreach (Saxon.Hej.om.Sequence arg in arguments) {
-                Saxon.Hej.om.SequenceIterator iter = arg.iterate();
-                Saxon.Hej.om.Item item;
-                while (((item = iter.next()) != null)) {
-                    builder.accept(item.getUnicodeStringValue());
+                if ((arg is Saxon.Hej.om.Item)) {
+                    builder.accept(((Saxon.Hej.om.Item)(arg)).getUnicodeStringValue());
+                } else {
+                    Saxon.Hej.om.SequenceIterator iter = arg.iterate();
+                    for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                        builder.accept(item.getUnicodeStringValue());
+                    }
                 }
             }
             return new Saxon.Hej.value.StringValue(builder.toUnicodeString());
@@ -33,15 +36,14 @@ namespace Saxon.Hej.functions {
             output.open();
             foreach (Saxon.Hej.om.Sequence arg in arguments) {
                 Saxon.Hej.om.SequenceIterator iter = arg.iterate();
-                Saxon.Hej.om.Item item;
-                while (((item = iter.next()) != null)) {
+                for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                     output.accept(item.getUnicodeStringValue());
                 }
             }
             output.close();
         }
         public override Saxon.Hej.value.SequenceType getRequiredType(int arg) {
-            return getDetails().argumentTypes[0];
+            return getDetails().paramTypes[0];
         }
         public override string getCompilerName() {
             return "ConcatCompiler";
@@ -56,8 +58,7 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.str.UnicodeBuilder buffer = new Saxon.Hej.str.UnicodeBuilder();
                 foreach (Saxon.Hej.expr.Operand o in /*superMethod*/operands()) {
                     Saxon.Hej.om.SequenceIterator iter = /*localvar*/o.getChildExpression().iterate(/*localparam*/context);
-                    Saxon.Hej.om.Item item;
-                    while (((/*localvar*/item = /*localvar*/iter.next()) != null)) {
+                    for (Saxon.Hej.om.Item item; ((/*localvar*/item = /*localvar*/iter.next()) != null); ) {
                         /*localvar*/buffer.accept(/*localvar*/item.getUnicodeStringValue());
                     }
                 }

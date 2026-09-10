@@ -10,7 +10,7 @@ namespace Saxon.Hej.om {
         void removeAttribute(Saxon.Hej.om.NodeInfo attribute);
         void addAttribute(Saxon.Hej.om.NodeName name, Saxon.Hej.type.SimpleType attType, string value, int properties, bool inheritNamespaces);
         void removeNamespace(string prefix);
-        void addNamespace(string prefix, string uri);
+        void addNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri);
         void delete();
         bool isDeleted();
         void replace(Saxon.Hej.om.NodeInfo[] replacement, bool inherit);

@@ -5,6 +5,9 @@ namespace Saxon.Hej.style {
     public class AbsentExtensionElement : Saxon.Hej.style.StyleElement {
         internal Saxon.Hej.expr.instruct.CallTemplate instruction;
         internal bool useTailRecursion;
+        public override bool isInXsltNamespace() {
+            return getNodeName().hasURI(Saxon.Hej.om.NamespaceUri.XSLT);
+        }
         public override bool isInstruction() {
             return true;
         }
@@ -26,7 +29,7 @@ namespace Saxon.Hej.style {
                     System.Collections.Generic.IList<Saxon.Hej.expr.instruct.NamedTemplate.LocalParamInfo> declaredParams = template.getLocalParamDetails();
                     foreach (Saxon.Hej.expr.instruct.NamedTemplate.LocalParamInfo param in declaredParams) {
                         if ((param.isRequired && !(param.isTunnel))) {
-                            if ((attributes().get(param.name.getURI(), param.name.getLocalPart()) == null)) {
+                            if ((attributes().get(param.name.getNamespaceUri(), param.name.getLocalPart()) == null)) {
                                 compileError(("No value supplied for required parameter "+Saxon.Hej.trans.Err.wrap(param.name.getDisplayName(), Saxon.Hej.trans.Err.VARIABLE)), "XTSE0690");
                             }
                         }
@@ -34,7 +37,7 @@ namespace Saxon.Hej.style {
                     System.Collections.Generic.IList<Saxon.Hej.expr.instruct.WithParam> @params = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.WithParam>();
                     foreach (Saxon.Hej.om.AttributeInfo att in attributes().asList()) {
                         Saxon.Hej.om.StructuredQName name = att.getNodeName().getStructuredQName();
-                        if ((!(name.hasURI(Saxon.Hej.lib.NamespaceConstant.XSLT)) && !(name.hasURI(Saxon.Hej.lib.NamespaceConstant.XML)))) {
+                        if ((!(name.hasURI(Saxon.Hej.om.NamespaceUri.XSLT)) && !(name.hasURI(Saxon.Hej.om.NamespaceUri.XML)))) {
                             foreach (Saxon.Hej.expr.instruct.NamedTemplate.LocalParamInfo param in declaredParams) {
                                 if ((param.name.Equals(name) && !(param.isTunnel))) {
                                     Saxon.Hej.value.SequenceType required = param.requiredType;

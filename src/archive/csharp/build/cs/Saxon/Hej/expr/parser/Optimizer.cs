@@ -140,14 +140,6 @@ namespace Saxon.Hej.expr.parser {
         public virtual Saxon.Hej.expr.Expression generateMultithreadedInstruction(Saxon.Hej.expr.Expression instruction) {
             return instruction;
         }
-        public Saxon.Hej.expr.Expression compileToByteCode(Saxon.Hej.expr.parser.ICompilerService compilerService, Saxon.Hej.expr.Expression expr, string objectName, int evaluationMethods) {
-            return null;
-        }
-        public Saxon.Hej.expr.Expression makeByteCodeCandidate(Saxon.Hej.expr.ExpressionOwner owner, Saxon.Hej.expr.Expression expr, string objectName, int requiredEvaluationModes) {
-            return expr;
-        }
-        public void injectByteCodeCandidates(Saxon.Hej.expr.Expression exp) {
-        }
         public virtual Saxon.Hej.expr.Expression optimizeNumberInstruction(Saxon.Hej.expr.instruct.NumberInstruction ni, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             return null;
         }

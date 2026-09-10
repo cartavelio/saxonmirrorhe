@@ -24,7 +24,7 @@ namespace Saxon.Hej.@event {
             written = true;
             next.attribute(name, type, value, location, properties);
         }
-        public override void @namespace(string prefix, string uri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri uri, int properties) {
             written = true;
             next.@namespace(prefix, uri, properties);
         }

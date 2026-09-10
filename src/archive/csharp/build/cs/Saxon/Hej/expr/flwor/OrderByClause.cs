@@ -64,8 +64,12 @@ namespace Saxon.Hej.expr.flwor {
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
             foreach (Saxon.Hej.expr.sort.SortKeyDefinition skd in sortKeys) {
                 Saxon.Hej.expr.Expression sortKey = skd.getSortKey();
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.ORDER_BY, "", i);
-                role.setErrorCode("XPTY0004");
+                int pos = i;
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => {
+                    Saxon.Hej.expr.parser.RoleDiagnostic role0 = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.ORDER_BY, "", pos);
+                    role0.setErrorCode("XPTY0004");
+                    return role0;
+                } ;
                 sortKey = tc.staticTypeCheck(sortKey, Saxon.Hej.value.SequenceType.OPTIONAL_ATOMIC, role, visitor);
                 skd.setSortKey(sortKey, false);
                 skd.typeCheck(visitor, contextInfo);

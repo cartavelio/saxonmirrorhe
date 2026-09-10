@@ -17,7 +17,7 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.om.StructuredQName getFunctionName() {
             return name;
         }
-        public override Saxon.Hej.om.Function getTargetFunction(Saxon.Hej.expr.XPathContext context) {
+        public override Saxon.Hej.om.FunctionItem getTargetFunction(Saxon.Hej.expr.XPathContext context) {
             return null;
         }
         public Saxon.Hej.lib.ExtensionFunctionCall getFunction() {
@@ -34,7 +34,9 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.value.SequenceType[] actualArgumentTypes = new Saxon.Hej.value.SequenceType[args];
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
             for (int i = 0; (i<args); i++) {
-                setArg(i, tc.staticTypeCheck(getArg(i), ((i<declaredArgumentTypes.Length) ? declaredArgumentTypes[i] : declaredArgumentTypes[(declaredArgumentTypes.Length-1)]), new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), i), visitor));
+                int pos = i;
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), pos);
+                setArg(i, tc.staticTypeCheck(getArg(i), ((i<declaredArgumentTypes.Length) ? declaredArgumentTypes[i] : declaredArgumentTypes[(declaredArgumentTypes.Length-1)]), role, visitor));
                 actualArgumentTypes[i] = Saxon.Hej.value.SequenceType.makeSequenceType(getArg(i).getItemType(), getArg(i).getCardinality());
             }
             resultType = definition.getResultType(actualArgumentTypes);
@@ -74,10 +76,7 @@ namespace Saxon.Hej.functions {
             return (definition.hasSideEffects() ? Saxon.Hej.expr.StaticProperty.HAS_SIDE_EFFECTS : Saxon.Hej.expr.StaticProperty.NO_NODES_NEWLY_CREATED);
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
-            Saxon.Hej.lib.ExtensionFunctionCall newCall = function.getDefinition().makeCallExpression();
-            newCall.setDefinition(function.getDefinition());
-            function.copyLocalData(newCall);
-            Saxon.Hej.functions.IntegratedFunctionCall copy = new Saxon.Hej.functions.IntegratedFunctionCall(getFunctionName(), newCall);
+            Saxon.Hej.functions.IntegratedFunctionCall copy = new Saxon.Hej.functions.IntegratedFunctionCall(getFunctionName(), function);
             Saxon.Hej.expr.Expression[] args = new Saxon.Hej.expr.Expression[getArity()];
             for (int i = 0; (i<args.Length); i++) {
                 args[i] = getArg(i).copy(rebindings);
@@ -103,7 +102,7 @@ namespace Saxon.Hej.functions {
             for (int i = 0; (i<argValues.Length); i++) {
                 argValues[i] = Saxon.Hej.om.SequenceTool.toLazySequence(getArg(i).iterate(context));
             }
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, getFunctionName().getDisplayName(), 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, getFunctionName().getDisplayName(), 0);
             Saxon.Hej.Configuration config = context.getConfiguration();
             Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
             Saxon.Hej.om.SequenceIterator result;
@@ -122,7 +121,7 @@ namespace Saxon.Hej.functions {
                 if ((type != Saxon.Hej.type.AnyItemType.getInstance())) {
                     result = new Saxon.Hej.expr.ItemMappingIterator(result, Saxon.Hej.expr.ItemMapper.of(item => {
                         if (!(type.matches(item, th))) {
-                            string msg = role.composeErrorMessage(type, item, th);
+                            string msg = role().composeErrorMessage(type, item, th);
                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, "XPTY0004");
                             err.setLocation(getLocation());
                             throw err;
@@ -132,6 +131,36 @@ namespace Saxon.Hej.functions {
                 }
                 if ((th.relationship(type, Saxon.Hej.pattern.AnyNodeTest.getInstance()) != Saxon.Hej.type.Affinity.DISJOINT)) {
                     result = new Saxon.Hej.expr.ItemMappingIterator(result, new Saxon.Hej.functions.IntegratedFunctionCall.ConfigurationCheckingFunction(context.getConfiguration()), true);
+                }
+            }
+            return result;
+        }
+        public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
+            Saxon.Hej.lib.ExtensionFunctionDefinition definition = function.getDefinition();
+            Saxon.Hej.om.Sequence[] argValues = new Saxon.Hej.om.Sequence[getArity()];
+            for (int i = 0; (i<argValues.Length); i++) {
+                argValues[i] = Saxon.Hej.om.SequenceTool.toLazySequence(getArg(i).iterate(context));
+            }
+            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, getFunctionName().getDisplayName(), 0);
+            Saxon.Hej.Configuration config = context.getConfiguration();
+            Saxon.Hej.type.TypeHierarchy th = config.getTypeHierarchy();
+            Saxon.Hej.om.Item result;
+            try {
+                result = function.call(context, argValues).head();
+            } catch (Saxon.Hej.trans.XPathException e) {
+                e.maybeSetLocation(getLocation());
+                throw;
+            }
+            if (!(definition.trustResultType())) {
+                Saxon.Hej.type.ItemType type = resultType.getPrimaryType();
+                if ((!(type.matches(result, th)) || (((result == null) && !(Saxon.Hej.value.Cardinality.allowsZero(resultType.getCardinality())))))) {
+                    string msg = role.composeErrorMessage(type, result, th);
+                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(msg, "XPTY0004");
+                    err.setLocation(getLocation());
+                    throw err;
+                }
+                if (((result is Saxon.Hej.om.NodeInfo) && !(config.isCompatible(((Saxon.Hej.om.NodeInfo)(result)).getConfiguration())))) {
+                    throw new Saxon.Hej.trans.XPathException("Node returned by extension function was created with an incompatible Configuration", Saxon.Hej.trans.SaxonErrorCode.SXXP0004);
                 }
             }
             return result;

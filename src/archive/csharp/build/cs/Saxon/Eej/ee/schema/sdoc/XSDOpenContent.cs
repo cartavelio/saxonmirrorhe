@@ -12,7 +12,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"id", "mode"};
             allowAttributes(atts, allowed);
             processId();
-            string attValue = Saxon.Hej.value.Whitespace.trim(atts.getValue("", "mode"));
+            string attValue = Saxon.Hej.value.Whitespace.trim(atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "mode"));
             if ((attValue != null)) {
                 if (((attValue.Equals("interleave") || attValue.Equals("suffix")) || attValue.Equals("none"))) {
                     mode = attValue;

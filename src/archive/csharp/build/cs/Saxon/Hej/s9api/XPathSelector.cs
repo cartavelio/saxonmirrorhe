@@ -50,16 +50,6 @@ namespace Saxon.Hej.s9api {
         public Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
             return dynamicContext.getResourceResolver();
         }
-        public void setURIResolver(Saxon.Ejavax.xml.transform.URIResolver resolver) {
-            dynamicContext.setResourceResolver(new Saxon.Hej.lib.ResourceResolverWrappingURIResolver(resolver));
-        }
-        public Saxon.Ejavax.xml.transform.URIResolver getURIResolver() {
-            if ((dynamicContext.getResourceResolver() is Saxon.Hej.lib.ResourceResolverWrappingURIResolver)) {
-                return ((Saxon.Hej.lib.ResourceResolverWrappingURIResolver)(dynamicContext.getResourceResolver())).getWrappedURIResolver();
-            } else {
-                return null;
-            }
-        }
         public void setUnparsedTextResolver(Saxon.Hej.lib.UnparsedTextURIResolver resolver) {
             dynamicContext.setUnparsedTextURIResolver(resolver);
         }

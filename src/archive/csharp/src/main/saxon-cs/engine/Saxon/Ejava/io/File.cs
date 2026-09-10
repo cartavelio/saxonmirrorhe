@@ -122,7 +122,8 @@ namespace Saxon.Ejava.io {
         }
 
         public File getParentFile() {
-            return new File(SysIO.Path.GetDirectoryName(fileName));
+            string dir = SysIO.Path.GetDirectoryName(fileName);
+            return string.IsNullOrEmpty(dir) ? null : new File(SysIO.Path.GetDirectoryName(fileName));
         }
         
         public string getParent() {
@@ -176,8 +177,8 @@ namespace Saxon.Ejava.io {
             stream.Close();
         }
         
-        public void mkdir() {
-            mkdirs();
+        public bool mkdir() {
+            return mkdirs();
         }
 
         public bool mkdirs() {
@@ -290,6 +291,16 @@ namespace Saxon.Ejava.io {
 
         public override string ToString() {
             return fileName;
+        }
+
+        public static SysUri CurrentDirectoryUri() {
+            string dir = Environment.CurrentDirectory;
+            dir = dir.Replace('\\', '/');
+            if (!dir.EndsWith('/')) {
+                dir = dir + "/";
+            }
+
+            return new SysUri(dir);
         }
     }
 }

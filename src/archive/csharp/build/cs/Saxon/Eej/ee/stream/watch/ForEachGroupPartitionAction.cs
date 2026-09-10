@@ -126,7 +126,7 @@ namespace Saxon.Eej.ee.stream.watch {
                     currentGroupFeed = actionFeed;
                 } else {
                     Saxon.Eej.ee.stream.feed.FilteringFeed.Filter filter = new Saxon.Eej.ee.stream.feed.FilteringFeed.FilterLambda((item, position) => (pattern.matchesBeneathAnchor((Saxon.Hej.om.NodeInfo)(item), anchorNode, bodyContext) ? Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.MATCHES : Saxon.Eej.ee.stream.feed.FilteringFeed.FilterResult.SKIP));
-                    currentGroupFeed = new Saxon.Eej.ee.stream.feed.FilteringFeed(actionFeed, getContext(), filter);
+                    currentGroupFeed = new Saxon.Eej.ee.stream.feed.FilteringFeed(watchManager, actionFeed, getContext(), filter);
                     if ((pattern is Saxon.Hej.pattern.AncestorQualifiedPattern)) {
                         watchManager.addWatch(watch, true);
                         opened = true;

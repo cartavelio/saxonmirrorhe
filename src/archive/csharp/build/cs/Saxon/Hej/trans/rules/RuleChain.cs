@@ -26,6 +26,9 @@ namespace Saxon.Hej.trans.rules {
             }
             return i;
         }
+        public bool hasOptimizationData() {
+            return (optimizationData != null);
+        }
     
     }
 }

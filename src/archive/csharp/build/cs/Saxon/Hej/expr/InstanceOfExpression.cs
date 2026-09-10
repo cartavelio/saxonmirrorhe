@@ -102,24 +102,7 @@ namespace Saxon.Hej.expr {
             return Saxon.Hej.value.BooleanValue.get(effectiveBooleanValue(context));
         }
         public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.SequenceIterator iter = getBaseExpression().iterate(context);
-            return isInstance(iter, context);
-        }
-        private bool isInstance(Saxon.Hej.om.SequenceIterator iter, Saxon.Hej.expr.XPathContext context) {
-            int count = 0;
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
-                count++;
-                if (!(targetType.matches(item, context.getConfiguration().getTypeHierarchy()))) {
-                    iter.close();
-                    return false;
-                }
-                if (((count == 2) && !(Saxon.Hej.value.Cardinality.allowsMany(targetCardinality)))) {
-                    iter.close();
-                    return false;
-                }
-            }
-            return !((((count == 0) && ((((targetCardinality&Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO)) == 0)))));
+            return /*Delegate.eval()*/makeElaborator().elaborateForBoolean()(context);
         }
         public override string getExpressionName() {
             return "instance";
@@ -141,6 +124,47 @@ namespace Saxon.Hej.expr {
         }
         public override string getStreamerName() {
             return "InstanceOf";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.InstanceOfExpression.InstanceOfElaborator();
+        }
+        public class InstanceOfElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.InstanceOfExpression exp = (Saxon.Hej.expr.InstanceOfExpression)(getExpression());
+                Saxon.Hej.type.TypeHierarchy th = getConfiguration().getTypeHierarchy();
+                Saxon.Hej.expr.Expression arg = exp.getBaseExpression();
+                int requiredCardinality = exp.getRequiredCardinality();
+                bool allowsMany = Saxon.Hej.value.Cardinality.allowsMany(requiredCardinality);
+                bool allowsZero = Saxon.Hej.value.Cardinality.allowsZero(requiredCardinality);
+                Saxon.Hej.type.ItemType requiredType = exp.getRequiredItemType();
+                if (((requiredCardinality == Saxon.Hej.expr.StaticProperty.EXACTLY_ONE) && !(Saxon.Hej.value.Cardinality.allowsMany(arg.getCardinality())))) {
+                    Saxon.Hej.expr.elab.ItemEvaluator itemEval = arg.makeElaborator().elaborateForItem();
+                    return context => {
+                        Saxon.Hej.om.Item item = /*Delegate.eval()*/itemEval(context);
+                        return ((item != null) && requiredType.matches(item, th));
+                    } ;
+                } else {
+                    Saxon.Hej.expr.elab.PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
+                    bool itemTypeOK = th.isSubType(arg.getItemType(), requiredType);
+                    return context => {
+                        Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/argPull(context);
+                        int count = 0;
+                        for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
+                            count++;
+                            if ((!(itemTypeOK) && !(requiredType.matches(item, th)))) {
+                                iter.close();
+                                return false;
+                            }
+                            if ((!(allowsMany) && (count == 2))) {
+                                iter.close();
+                                return false;
+                            }
+                        }
+                        return (allowsZero || (count != 0));
+                    } ;
+                }
+            }
+        
         }
     
     }

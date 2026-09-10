@@ -2,6 +2,11 @@ using System;
 using System.Text.RegularExpressions;
 
 namespace Saxon.Ejava.util.regex {
+    
+    /// <summary>
+    /// This class emulates a subset of the functionality of the Java regular expression engine
+    /// by making use of the .NET regular expression engine.
+    /// </summary>
     public class Pattern {
         
         public const int UNIX_LINES = 1;

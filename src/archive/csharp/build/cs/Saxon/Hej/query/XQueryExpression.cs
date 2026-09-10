@@ -7,6 +7,8 @@ namespace Saxon.Hej.query {
         protected internal Saxon.Hej.expr.instruct.SlotManager stackFrameMap;
         protected internal Saxon.Hej.expr.instruct.Executable executable;
         protected internal Saxon.Hej.query.QueryModule mainModule;
+        protected internal Saxon.Hej.expr.elab.PullEvaluator pullEvaluator = null;
+        protected internal Saxon.Hej.expr.elab.PushEvaluator pushEvaluator = null;
         public XQueryExpression(Saxon.Hej.expr.Expression exp, Saxon.Hej.query.QueryModule mainModule, bool streaming)  {
             Saxon.Hej.expr.instruct.Executable exec = mainModule.getExecutable();
             Saxon.Hej.Configuration config = mainModule.getConfiguration();
@@ -139,7 +141,7 @@ namespace Saxon.Hej.query {
                     controller.preEvaluateGlobals(context);
                 }
                 context.openStackFrame(stackFrameMap);
-                Saxon.Hej.om.SequenceIterator iterator = expression.iterate(context);
+                Saxon.Hej.om.SequenceIterator iterator = getExpressionIterator(context);
                 if (((iterator is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(iterator)).isActuallyGrounded())) {
                     return iterator;
                 } else {
@@ -154,6 +156,14 @@ namespace Saxon.Hej.query {
                 controller.reportFatalError(de);
                 throw de;
             }
+        }
+        protected internal Saxon.Hej.om.SequenceIterator getExpressionIterator(Saxon.Hej.expr.XPathContext context) {
+            lock (this) {
+                if ((pullEvaluator == null)) {
+                    pullEvaluator = expression.makeElaborator().elaborateForPull();
+                }
+            }
+            return /*Delegate.iterate()*/pullEvaluator(context);
         }
         public void run(Saxon.Hej.query.DynamicQueryContext env, Saxon.Ejavax.xml.transform.Result result, Saxon.Ejava.util.Properties outputProperties) {
             if (isUpdateQuery()) {
@@ -190,7 +200,7 @@ namespace Saxon.Hej.query {
             Saxon.Hej.@event.ComplexContentOutputter dest = new Saxon.Hej.@event.ComplexContentOutputter(@out);
             dest.open();
             try {
-                expression.process(dest, context);
+                processQuery(dest, context);
             } catch (Saxon.Hej.trans.XPathException err) {
                 controller.reportFatalError(err);
                 throw;
@@ -207,6 +217,14 @@ namespace Saxon.Hej.query {
             if ((result is Saxon.Ejavax.xml.transform.stream.StreamResult)) {
                 closeStreamIfNecessary((Saxon.Ejavax.xml.transform.stream.StreamResult)(result), mustClose);
             }
+        }
+        protected internal virtual void processQuery(Saxon.Hej.@event.Outputter dest, Saxon.Hej.expr.XPathContext context) {
+            lock (this) {
+                if ((pushEvaluator == null)) {
+                    pushEvaluator = expression.makeElaborator().elaborateForPush();
+                }
+            }
+            Saxon.Hej.expr.Expression.dispatchTailCall(/*Delegate.processLeavingTail()*/pushEvaluator(dest, context));
         }
         protected internal void closeStreamIfNecessary(Saxon.Ejavax.xml.transform.stream.StreamResult result, bool mustClose) {
             if (mustClose) {
@@ -332,9 +350,6 @@ namespace Saxon.Hej.query {
             }
             public void close() {
                 @base.close();
-            }
-            public void discharge() {
-                @base.discharge();
             }
         
         }

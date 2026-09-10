@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 using Saxon.Ejava.util;
 using Saxon.Hej;
 using Saxon.Hej.@event;
@@ -10,6 +11,7 @@ using Saxon.Hej.om;
 using Saxon.Hej.pattern;
 using Saxon.Hej.tree.wrapper;
 using Saxon.Api.Support;
+using Saxon.Hej.type;
 using Saxon.Impl.Helpers;
 using Type = Saxon.Hej.type.Type;
 
@@ -28,6 +30,8 @@ namespace Saxon.Api {
     /// as its name, its string value, and its typed value. Navigation to other nodes
     /// is supported through a single method, <c>EnumerateAxis</c>, which allows
     /// other nodes to be retrieved by following any of the XPath axes.</para>
+    /// <para>Navigation from a node to other related nodes can be achieved using the
+    /// <see cref="XdmValue.Select"/> method, which this class inherits.</para>
     /// </remarks>
     [Serializable]
     public class XdmNode : XdmItem {
@@ -38,7 +42,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// Applications using the class <c>Saxon.Hej.om.NodeInfo</c> should be aware that it is subject to occasional
         /// changes from one release to the next. For documentation on this class, see the Saxon-EE Javadoc documentation
-        /// for the very similar class <c>net.sf.saxon.om.NodeInfo</c>.
+        /// for the very similar class <see cref="Saxon.Hej.om.NodeInfo"/>.
         /// </remarks>
         /// <param name="node">The object to be wrapped</param>
 		public XdmNode(Saxon.Hej.om.NodeInfo node) : base(node) {
@@ -141,8 +145,8 @@ namespace Saxon.Api {
         /// For a document constructed using the document
         /// builder, this is available only if the line numbering option was set when the document was built (and
         /// then only for element nodes). If the line number is not available, the value -1 is returned.
-        /// Line numbers will typically be as reported by a SAX parser; this means that the line number for an element
-        /// node is the line number containing the closing ">" of the start tag.
+        /// Line numbers will be as reported by the XML parser; the Microsoft XML parser reports the line number
+        /// of the opening "&lt;" of the start tag.
         /// </remarks>
 
         public int LineNumber => ((NodeInfo) value).getLineNumber();
@@ -154,11 +158,38 @@ namespace Saxon.Api {
         /// For a document constructed using the document
         /// builder, this is available only if the line numbering option was set when the document was built (and
         /// then only for element nodes). If the column number is not available, the value -1 is returned.
-        /// Line numbers will typically be as reported by a SAX parser; this means that the column number for an element
-        /// node is the column number containing the closing ">" of the start tag.
+        /// Column numbers will be as reported by the XML parser; the Microsoft XML parser reports the column number
+        /// of the opening "&lt;" of the start tag.
         /// </remarks>
 
         public int ColumnNumber => ((NodeInfo) value).getColumnNumber();
+
+        /// <summary>
+        /// The name of the type annotation of the node. 
+        /// </summary>
+        /// <remarks>
+        /// <para>For elements and attributes, this
+        /// will be the name of the schema type against which the node was validated; if
+        /// the node has not been validated it will be <c>xs:untyped</c> for elements,
+        /// and <c>xs:untypedAtomic</c> for attributes.
+        /// </para>
+        /// <para>For a document node, the value will be <c>xs:anyType</c> if the document
+        /// has been validated, or <c>xs:untyped</c> otherwise.
+        /// </para>
+        /// <para>For any other kind of node, the value will be null.
+        /// </para>
+        /// <para>If the node has been validated against an anonymous type in the schema,
+        /// the result will be a system-generated name, with the namespace URI
+        /// <c>http://ns.saxonica.com/anonymous-type</c>.
+        /// </para>
+        /// </remarks>
+
+        public QName TypeAnnotationName {
+            get {
+                SchemaType type = ((NodeInfo)value).getSchemaType();
+                return type == null ? null : new QName(type.getStructuredQName());
+            }
+        }
 
         /// <summary>
         /// The typed value of the node, as an instance of <c>XdmValue</c>.
@@ -200,11 +231,11 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Unwraps the underlying DOM <c>XmlNode</c> object from the <c>XdmValue</c>.
+        /// Unwraps the underlying DOM <c>XmlNode</c> object from this <c>XdmNode</c>.
         /// If the method does not wrap a DOM <c>XmlNode</c> then null is returned
         /// </summary>
         /// <returns>The underlying <c>XmlNode</c></returns>
-        public XmlNode getUnderlyingXmlNode() {
+        public XmlNode GetUnderlyingXmlNode() {
             NodeInfo localNode = (NodeInfo)value;
             if (localNode is VirtualNode virtualNode) {
                 object realNode = virtualNode.getRealNode();
@@ -214,6 +245,41 @@ namespace Saxon.Api {
             }
             if (value is Saxon.Impl.Dom.DomNodeWrapper wrapper) {
                 return (XmlNode) wrapper.getRealNode();
+            }
+
+            return null;
+        }
+        
+        /// <summary>
+        /// Incorrectly-named synonym of GetUnderlyingXmlNode, retained temporarily for compatibility with 11.0 and 11.1
+        /// </summary>
+        /// <returns>The underlying <c>XmlNode</c> if there is one</returns>
+    
+        [Obsolete("This is an obsolete synonym of GetUnderlyingXmlNode")]
+        public XmlNode getUnderlyingXmlNode() {
+            return GetUnderlyingXmlNode();
+        }
+        
+        /// <summary>
+        /// Unwraps the underlying Linq <c>XNode</c> object from this <c>XdmNode</c>.
+        /// If the method does not wrap a Linq <c>XNode</c> then null is returned
+        /// </summary>
+        /// <remarks>
+        /// <para>The result will always be null if the supplied node is an attribute or namespace node,
+        /// even if it is within a tree that wraps a Linq tree.
+        /// </para>
+        /// </remarks>
+        /// <returns>The underlying <c>XNode</c> if there is one, or null otherwise</returns>
+        public System.Xml.Linq.XNode GetUnderlyingXNode() {
+            NodeInfo localNode = (NodeInfo)value;
+            if (localNode is VirtualNode virtualNode) {
+                object realNode = virtualNode.getRealNode();
+                if (realNode is XNode xNode) {
+                    return xNode;
+                }
+            }
+            if (value is Saxon.Impl.XDoc.XNodeWrapper wrapper) {
+                return (XNode) wrapper.getRealNode();
             }
 
             return null;
@@ -252,6 +318,23 @@ namespace Saxon.Api {
                 }
             }
         }
+        
+        /// <summary>
+        /// Get the outermost element of the tree containing this node.
+        /// </summary>
+        /// <remarks>
+        /// <para>If this node is a document node, the property returns the first element child
+        /// of the document node. Any subsequent element children are ignored. If there are no element
+        /// children, the method returns null.</para>
+        /// <para>In all other cases, the property returns the value of <c>ancestor-or-self::*[last()]</c>,
+        /// that is the outermost element ancestor of the starting node if there is one, or null otherwise.</para>
+        /// </remarks>
+
+        public XdmNode OutermostElement => 
+            NodeKind.Equals(XdmNodeKind.Document) 
+                ? Select(Steps.Child("*")).First() 
+                : Select(Steps.AncestorOrSelf("*")).Last();
+
 
         /// <summary>
         /// Get a the string value of a named attribute of this element. 
@@ -390,7 +473,7 @@ namespace Saxon.Api {
             }
 
             NamePool pool = ((NodeInfo) value).getConfiguration().getNamePool();
-            NameTest test = new NameTest(kind, nodeName.Uri, nodeName.LocalName, pool);
+            NameTest test = new NameTest(kind, nodeName.NamespaceUri, nodeName.LocalName, pool);
             return new SequenceEnumerator<XdmNode>(((NodeInfo) value).iterateAxis(GetAxisNumber(axis), test));
         }
 

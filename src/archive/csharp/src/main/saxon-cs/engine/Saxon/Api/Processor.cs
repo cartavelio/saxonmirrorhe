@@ -17,6 +17,7 @@ using Saxon.Callbacks;
 using Saxon.Ejava.lang;
 using Saxon.Hej.expr;
 using Saxon.Hej.expr.parser;
+using Saxon.Hej.om;
 using Saxon.Hej.sxpath;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
@@ -43,7 +44,7 @@ namespace Saxon.Api {
         private SchemaManager schemaManager;
         private TextWriter textWriter = Console.Error;
         private CollectionFinder userCollectionFinder;
-
+        private bool licenseHasBeenChecked = false;
         internal Processor(Saxon.Hej.s9api.Processor p) {
             JProcessor = p;
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
@@ -51,7 +52,7 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Create a new Saxon-CS <c>Processor</c>. This <c>Processor</c> will have capabilities that depend on the version
+        /// Create a new SaxonCS <c>Processor</c>. This <c>Processor</c> will have capabilities that depend on the version
         /// of the software that has been loaded, and on the features that have been licensed.
         /// </summary>
         public Processor() {
@@ -129,16 +130,18 @@ namespace Saxon.Api {
         }
 
         private void init() {
-            checkLicense();
-            Saxon.Hej.expr.XPathContext context = new EarlyEvaluationContext(Implementation);
+            Saxon.Hej.expr.XPathContext context = new EarlyEvaluationContext(JProcessor.getUnderlyingConfiguration());
             StandardCollectionFinder = uri => new ResourceCollectionWrapper(
                 new StandardCollectionFinder().findCollection(context, uri.ToString()), context);
             userCollectionFinder = StandardCollectionFinder;
         }
 
         private void checkLicense() {
-            Implementation.checkLicensedFeature(
-                Configuration.LicenseFeature.SCHEMA_VALIDATION, "Saxon-CS", -1);
+            if (!licenseHasBeenChecked) {
+                Implementation.checkLicensedFeature(
+                    Configuration.LicenseFeature.SCHEMA_VALIDATION, "Saxon-CS", -1);
+                licenseHasBeenChecked = true;
+            }
         }
         
         /// <summary>
@@ -247,6 +250,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A new <c>DocumentBuilder</c></returns>
         public DocumentBuilder NewDocumentBuilder() {
+            checkLicense();
             return new DocumentBuilder(this);
         }
         
@@ -256,6 +260,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A new <c>JsonBuilder</c></returns>
         public JsonBuilder NewJsonBuilder() {
+            checkLicense();
             return new JsonBuilder(Implementation);
         }
 
@@ -268,6 +273,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>A new <c>XQueryCompiler</c></returns>
         public XQueryCompiler NewXQueryCompiler() {
+            checkLicense();
             return new XQueryCompiler(this);
         }
 
@@ -280,6 +286,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>A new <c>XsltCompiler</c></returns>
         public XsltCompiler NewXsltCompiler() {
+            checkLicense();
             return new XsltCompiler(this);
         }
 
@@ -292,6 +299,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <returns>A new <c>XPathCompiler</c></returns>
         public XPathCompiler NewXPathCompiler() {
+            checkLicense();
             return new XPathCompiler(this, JProcessor.newXPathCompiler());
         }
 
@@ -300,6 +308,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns> a new <c>Serializer</c> </returns>
         public Serializer NewSerializer() {
+            checkLicense();
             return new Serializer(this, JProcessor.newSerializer());
         }
 
@@ -310,6 +319,7 @@ namespace Saxon.Api {
         /// <param name="textWriter">The <c>TextWriter</c> to which the <c>Serializer</c> will write</param>
         /// <returns> a new <c>Serializer</c> </returns>
         public Serializer NewSerializer(TextWriter textWriter) {
+            checkLicense();
             Serializer s = new Serializer(this, JProcessor.newSerializer());
             s.OutputWriter = textWriter;
             return s;
@@ -322,6 +332,7 @@ namespace Saxon.Api {
         /// <param name="stream">The output <c>Stream</c> to which the <c>Serializer</c> will write</param>
         /// <returns> a new Serializer </returns>
         public Serializer NewSerializer(Stream stream) {
+            checkLicense();
             Serializer s = new Serializer(this, JProcessor.newSerializer());
             s.OutputStream = stream;
             return s;
@@ -531,7 +542,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <remarks>
         /// <para>This property provides access to internal methods in the Saxon engine that are
-        /// not specifically exposed in the Saxon-CS API. In general these methods should be
+        /// not specifically exposed in the SaxonCS API. In general these methods should be
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
@@ -554,7 +565,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>This method provides the ability to set named properties of the configuration.
         /// The property names are set as strings, whose values can be found in the Java
-        /// class <c>Saxon.Hej.FeatureKeys</c>. The property values are always strings. 
+        /// class <see cref="Saxon.Hej.lib.FeatureKeys"/>. The property values are always strings. 
         /// Properties whose values are other types are not available via this interface:
         /// however all properties have an effective equivalent whose value is a string.
         /// Note that on/off properties are set using the strings "true" and "false".</para>
@@ -583,7 +594,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>This method provides the ability to get named properties of the configuration.
         /// The property names are supplied as strings, whose values can be found in the Java
-        /// class <c>Saxon.Hej.FeatureKeys</c>. The property values are always returned as strings. 
+        /// class <see cref="Saxon.Hej.lib.FeatureKeys"/>. The property values are always returned as strings. 
         /// Properties whose values are other types are returned by converting the value to a string.
         /// Note that on/off properties are returned using the strings "true" and "false".</para>
         /// <para><i>Method added in Saxon 9.1</i></para>
@@ -627,7 +638,7 @@ namespace Saxon.Api {
             }
         }
         /// <summary>
-        /// Construct an XdmItemType object by parsing an item type definition in XPath syntax
+        /// Construct an <c>XdmItemType</c> object by parsing an item type definition in XPath syntax
         /// </summary>
         /// <param name="input">The input string, in XPath syntax (for example <c>array(xs:integer)</c>). The only
         /// namespace prefix recognized is "xs", representing the XML Schema namespace.</param>
@@ -637,8 +648,9 @@ namespace Saxon.Api {
             try {
                 XPathParser parser = new ();
                 IndependentContext env = new IndependentContext(Implementation);
-                env.declareNamespace("xs", NamespaceConstant.SCHEMA);
-                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 31);
+                env.setXPathLanguageLevel(40);
+                env.declareNamespace("xs", NamespaceUri.SCHEMA);
+                parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 40);
                 SequenceType st = parser.parseSequenceType(input, env);
                 if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
                     throw new XPathException("Item type must not have an occurrence indicator", "XPST0003");
@@ -657,7 +669,8 @@ namespace Saxon.Api {
         /// <param name="arity">The required arity</param>
         /// <returns>The system function if it exists, or null otherwise</returns>
         public XdmFunctionItem GetSystemFunction(QName name, int arity) {
-            Saxon.Hej.om.Function f = Implementation.getSystemFunction(name.GetStructuredQName(), arity);
+            checkLicense();
+            Saxon.Hej.om.FunctionItem f = Implementation.getSystemFunction(name.GetStructuredQName(), arity);
             return f==null ? null : new XdmFunctionItem(f);
         }
     }

@@ -21,7 +21,10 @@ namespace Saxon.Eej.ee.update {
             return inherit;
         }
         public override void apply(Saxon.Hej.expr.XPathContext context, System.Collections.Generic.ISet<Saxon.Hej.om.MutableNodeInfo> affectedRootSet) {
-            if ((element.getAttributeValue(name.getURI(), name.getLocalPart()) != null)) {
+            if (!(element.getTreeInfo().isMutable())) {
+                throw new Saxon.Hej.trans.XPathException("Attempting to update a non-updatable element", Saxon.Hej.trans.SaxonErrorCode.SXUP0081);
+            }
+            if ((element.getAttributeValue(name.getNamespaceUri(), name.getLocalPart()) != null)) {
                 throw new Saxon.Hej.trans.XPathException((("Attempt to insert an attribute "+name.getDisplayName())+" that is already present on the target element"), "XUDY0021");
             }
             affectedRootSet.Add((Saxon.Hej.om.MutableNodeInfo)(element.getRoot()));

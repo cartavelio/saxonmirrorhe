@@ -4,14 +4,18 @@ using System.Linq;
 namespace Saxon.Eej.ee.stream.watch {
     public class ForEachAction : Saxon.Eej.ee.stream.feed.ItemFeed {
         protected internal Saxon.Hej.expr.XPathContext bodyContext;
-        private readonly Saxon.Eej.ee.stream.watch.WatchManager watchManager;
+        protected internal readonly Saxon.Eej.ee.stream.watch.WatchManager watchManager;
         private readonly Saxon.Hej.expr.Expression action;
         private Saxon.Eej.ee.stream.Inversion inversion;
+        protected internal Saxon.Hej.expr.elab.PullEvaluator actionPuller;
         private readonly bool actionIsConsuming;
         public ForEachAction(Saxon.Eej.ee.stream.watch.WatchManager watchManager, Saxon.Hej.expr.Expression expression, Saxon.Eej.ee.stream.feed.ItemFeed result, Saxon.Hej.expr.XPathContext context) : base (expression, result, context) {
             this.watchManager = watchManager;
             action = ((Saxon.Hej.expr.ContextSwitchingExpression)(expression)).getActionExpression();
             actionIsConsuming = (/*134*/Saxon.Eej.ee.stream.Streamability.getSweep(action) == Saxon.Eej.ee.stream.Sweep.CONSUMING);
+            if (((actionPuller == null) && !(actionIsConsuming))) {
+                actionPuller = action.makeElaborator().elaborateForPull();
+            }
         }
         public void setInversion(Saxon.Eej.ee.stream.Inversion inversion) {
             this.inversion = inversion;
@@ -52,7 +56,7 @@ namespace Saxon.Eej.ee.stream.watch {
                 Saxon.Hej.tree.iter.ManualIterator iter = (Saxon.Hej.tree.iter.ManualIterator)(bodyContext.getCurrentIterator());
                 iter.setContextItem(node);
                 iter.incrementPosition();
-                Saxon.Hej.om.SequenceIterator stepIter = action.iterate(bodyContext);
+                Saxon.Hej.om.SequenceIterator stepIter = /*Delegate.iterate()*/actionPuller(bodyContext);
                 processItems(stepIter, getResultFeed());
                 return null;
             }
@@ -78,13 +82,16 @@ namespace Saxon.Eej.ee.stream.watch {
                     getWatchManager().addWatch(watch, true);
                 }
             } else {
+                if ((actionPuller == null)) {
+                    actionPuller = action.makeElaborator().elaborateForPull();
+                }
                 Saxon.Hej.expr.XPathContext context = bodyContext;
                 Saxon.Hej.tree.iter.ManualIterator iterator = (Saxon.Hej.tree.iter.ManualIterator)(context.getCurrentIterator());
                 iterator.setContextItem(it);
                 iterator.incrementPosition();
                 Saxon.Hej.@event.Outputter @out = getNextOutputter();
                 try {
-                    Saxon.Hej.om.SequenceTool.supply(action.iterate(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(it => @out.append(it) /* converted from instance method reference */));
+                    Saxon.Hej.om.SequenceTool.supply(/*Delegate.iterate()*/actionPuller(context), (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(/* Unresolved method reference */@out.append));
                 } catch (Saxon.Hej.trans.UncheckedXPathException e) {
                     throw e.getXPathException();
                 }

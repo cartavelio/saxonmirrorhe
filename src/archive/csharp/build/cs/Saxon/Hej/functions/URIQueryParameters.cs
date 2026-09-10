@@ -173,15 +173,15 @@ namespace Saxon.Hej.functions {
             Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
             Saxon.Ejava.util.Optional<Saxon.Hej.om.SpaceStrippingRule> stripSpace = getSpaceStrippingRule();
             if (stripSpace.isPresent()) {
-                options.setSpaceStrippingRule(stripSpace.get());
+                options = options.withSpaceStrippingRule(stripSpace.get());
             }
             Saxon.Ejava.util.Optional<int> validation = getValidationMode();
             if (validation.isPresent()) {
-                options.setSchemaValidationMode(validation.get());
+                options = options.withSchemaValidationMode(validation.get());
             }
             Saxon.Ejava.util.Optional<bool> xinclude = getXInclude();
             if (xinclude.isPresent()) {
-                options.setXIncludeAware(xinclude.get());
+                options = options.withXIncludeAware(xinclude.get());
             }
             return options;
         }

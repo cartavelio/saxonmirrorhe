@@ -19,7 +19,7 @@ namespace Saxon.Hej.expr {
                     if (((@base is Saxon.Hej.tree.iter.GroundedIterator) && ((Saxon.Hej.tree.iter.GroundedIterator)(@base)).isActuallyGrounded())) {
                         Saxon.Hej.om.GroundedValue value = Saxon.Hej.om.SequenceTool.toGroundedValue(@base);
                         if ((start>value.getLength())) {
-                            return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                            return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                         } else {
                             return new Saxon.Hej.expr.ValueTailIterator(value, (start-1));
                         }
@@ -27,7 +27,7 @@ namespace Saxon.Hej.expr {
                         for (int i = 0; (i<(start-1)); i++) {
                             Saxon.Hej.om.Item b = @base.next();
                             if ((b == null)) {
-                                return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                                return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                             }
                         }
                         return new Saxon.Hej.expr.TailIterator(@base, start);
@@ -53,9 +53,6 @@ namespace Saxon.Hej.expr {
         }
         public void close() {
             @base.close();
-        }
-        public void discharge() {
-            @base.discharge();
         }
     
     }

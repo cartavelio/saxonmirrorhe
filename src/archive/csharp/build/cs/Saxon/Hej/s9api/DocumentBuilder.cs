@@ -78,31 +78,34 @@ namespace Saxon.Hej.s9api {
                     throw new Saxon.Api.SaxonApiException("When schema validation is used, the whitespace stripping policy must be IGNORABLE");
                 }
             }
-            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(config.getParseOptions());
-            options.setDTDValidationMode((dtdValidation ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.STRIP));
+            Saxon.Hej.lib.ParseOptions options = config.getParseOptions().withDTDValidationMode((dtdValidation ? Saxon.Hej.lib.Validation.STRICT : Saxon.Hej.lib.Validation.STRIP));
             if ((schemaValidator != null)) {
-                options.setSchemaValidationMode((schemaValidator.isLax() ? Saxon.Hej.lib.Validation.LAX : Saxon.Hej.lib.Validation.STRICT));
+                options = options.withSchemaValidationMode((schemaValidator.isLax() ? Saxon.Hej.lib.Validation.LAX : Saxon.Hej.lib.Validation.STRICT));
                 if ((schemaValidator.getDocumentElementName() != null)) {
                     Saxon.Api.QName qn = schemaValidator.getDocumentElementName();
-                    options.setTopLevelElement(qn.GetStructuredQName());
+                    options = options.withTopLevelElement(qn.GetStructuredQName());
                 }
                 if ((schemaValidator.getDocumentElementType() != null)) {
-                    options.setTopLevelType(schemaValidator.getDocumentElementType());
+                    options = options.withTopLevelType(schemaValidator.getDocumentElementType());
                 }
+                options = options.withExpandAttributeDefaults(schemaValidator.isExpandAttributeDefaults());
+                options = options.withUseXsiSchemaLocation(schemaValidator.isUseXsiSchemaLocation());
+                options = options.withValidationParams(schemaValidator.getValidationParameters());
+                options = options.withInvalidityHandler(schemaValidator.getInvalidityHandler());
             }
             if ((treeModel != null)) {
-                options.setModel(treeModel);
+                options = options.withModel(treeModel);
             }
             if (((whitespacePolicy != null) && (whitespacePolicy != Saxon.Api.WhitespacePolicy.Unspecified))) {
                 int option = whitespacePolicy.Ordinal();
                 if ((option == Saxon.Hej.value.Whitespace.XSLT)) {
-                    options.setSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
-                    options.addFilter((next => (new Saxon.Hej.@event.Stripper(whitespacePolicy.Implementation, next))));
+                    options = options.withSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
+                    options = options.withFilter((next => (new Saxon.Hej.@event.Stripper(whitespacePolicy.Implementation, next))));
                 } else {
-                    options.setSpaceStrippingRule(whitespacePolicy.Implementation);
+                    options = options.withSpaceStrippingRule(whitespacePolicy.Implementation);
                 }
             }
-            options.setLineNumbering(lineNumbering);
+            options = options.withLineNumbering(lineNumbering);
             if (((source.getSystemId() == null) && (baseURI != null))) {
                 source.setSystemId(baseURI.ToString());
             }
@@ -110,11 +113,11 @@ namespace Saxon.Hej.s9api {
                 Saxon.Hej.query.XQueryExpression exp = projectionQuery.getUnderlyingCompiledQuery();
                 Saxon.Hej.@event.FilterFactory ff = config.makeDocumentProjector(exp);
                 if ((ff != null)) {
-                    options.addFilter(ff);
+                    options = options.withFilter(ff);
                 }
             }
             if ((source is Saxon.Hej.lib.AugmentedSource)) {
-                options.merge(((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions());
+                options = options.merge(((Saxon.Hej.lib.AugmentedSource)(source)).getParseOptions());
             }
             return options;
         }

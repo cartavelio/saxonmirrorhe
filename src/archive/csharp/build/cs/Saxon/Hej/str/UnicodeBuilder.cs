@@ -3,17 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.str {
     public sealed class UnicodeBuilder : Saxon.Hej.str.UniStringConsumer, Saxon.Hej.str.UnicodeWriter {
-        internal Saxon.Hej.str.ZenoString content = Saxon.Hej.str.ZenoString.of(Saxon.Hej.str.EmptyUnicodeString.getInstance());
-        public UnicodeBuilder()  {
+        private int[] codepoints;
+        private int used;
+        private int bits;
+        private Saxon.Hej.str.ZenoString archive = Saxon.Hej.str.ZenoString.EMPTY;
+        public UnicodeBuilder() : this (256) {
         }
         public UnicodeBuilder(int allocate)  {
+            codepoints = new int[allocate];
         }
         public Saxon.Hej.str.UnicodeBuilder append(char ch) {
-            content = content.concat(new Saxon.Hej.str.UnicodeChar(ch));
+            append((int)(ch));
             return this;
         }
         public Saxon.Hej.str.UnicodeBuilder append(int codePoint) {
-            content = content.concat(new Saxon.Hej.str.UnicodeChar(codePoint));
+            ensureCapacity(1);
+            codepoints[used++] = codePoint;
+            bits |= codePoint;
             return this;
         }
         public Saxon.Hej.str.UnicodeBuilder append(Saxon.Hej.z.IntIterator codePoints) {
@@ -26,36 +32,84 @@ namespace Saxon.Hej.str {
             return append(new Saxon.Hej.str.BMPString(str));
         }
         public Saxon.Hej.str.UnicodeBuilder appendAll(Saxon.Hej.om.SequenceIterator iter) {
-            Saxon.Hej.om.Item item;
-            while (((item = iter.next()) != null)) {
+            for (Saxon.Hej.om.Item item; ((item = iter.next()) != null); ) {
                 append(item.getUnicodeStringValue());
             }
             return this;
         }
         public Saxon.Hej.str.UnicodeBuilder append(string str) {
-            return append(Saxon.Hej.str.StringTool.codePoints(str));
+            return append(Saxon.Hej.str.StringTool.fromCharSequence(str));
         }
         public Saxon.Hej.str.UnicodeBuilder append(Saxon.Hej.str.UnicodeString str) {
-            content = content.concat(str);
+            int len = str.length32();
+            if ((len == 0)) {
+                return this;
+            }
+            ensureCapacity(len);
+            str.copy32bit(codepoints, used);
+            used += len;
+            int width = str.getWidth();
+            if ((width>8)) {
+                if ((width>16)) {
+                    bits |= unchecked((int)0xffffff);
+                } else {
+                    bits |= unchecked((int)0xffff);
+                }
+            }
             return this;
         }
         public long length() {
-            return content.length();
+            return (archive.length()+used);
         }
         public bool isEmpty() {
-            return content.isEmpty();
+            return (archive.isEmpty() && (used == 0));
+        }
+        private void ensureCapacity(int required) {
+            if ((used>65535)) {
+                archive = archive.concat(getActivePart());
+                used = 0;
+                bits = unchecked((int)0xff);
+            }
+            while (((used+required)>codepoints.Length)) {
+                codepoints = Saxon.Ejava.util.Arrays.copyOf(codepoints, (codepoints.Length*2));
+            }
         }
         public Saxon.Hej.str.UnicodeString toUnicodeString() {
-            return content.economize();
+            if (archive.isEmpty()) {
+                return getActivePart();
+            } else {
+                return archive.concat(getActivePart());
+            }
+        }
+        private Saxon.Hej.str.UnicodeString getActivePart() {
+            if ((((bits&unchecked((int)0xff0000))) != 0)) {
+                return new Saxon.Hej.str.Twine24(codepoints, used);
+            } else {
+                if ((((bits&unchecked((int)0xff00))) != 0)) {
+                    char[] chars = new char[used];
+                    for (int i = 0; (i<used); i++) {
+                        chars[i] = (char)(((codepoints[i]&unchecked((int)0xffff))));
+                    }
+                    return new Saxon.Hej.str.Twine16(chars);
+                } else {
+                    byte[] bytes = new byte[used];
+                    for (int i = 0; (i<used); i++) {
+                        bytes[i] = (byte)(((codepoints[i]&unchecked((int)0xff))));
+                    }
+                    return new Saxon.Hej.str.Twine8(bytes);
+                }
+            }
         }
         public Saxon.Hej.value.StringValue toStringItem(Saxon.Hej.type.AtomicType type) {
             return new Saxon.Hej.value.StringValue(toUnicodeString(), type);
         }
         public override string ToString() {
-            return content.ToString();
+            return toUnicodeString().ToString();
         }
         public void clear() {
-            content = Saxon.Hej.str.ZenoString.of(Saxon.Hej.str.EmptyUnicodeString.getInstance());
+            archive = Saxon.Hej.str.ZenoString.EMPTY;
+            used = 0;
+            bits = 0;
         }
         public static byte[] expand1to2(byte[] @in, int start, int used, int allocate) {
             byte[] result = new byte[(allocate*2)];
@@ -123,6 +177,7 @@ namespace Saxon.Hej.str {
             append(chars);
         }
         public void trimToSize() {
+            codepoints = Saxon.Ejava.util.Arrays.copyOf(codepoints, used);
         }
         public void close() {
         }

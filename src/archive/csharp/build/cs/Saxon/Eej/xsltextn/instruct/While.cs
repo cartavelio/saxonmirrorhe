@@ -41,17 +41,28 @@ namespace Saxon.Eej.xsltextn.instruct {
         public override bool mayCreateNewNodes() {
             return !(getAction().hasSpecialProperty(Saxon.Hej.expr.StaticProperty.NO_NODES_NEWLY_CREATED));
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            while (getTest().effectiveBooleanValue(context)) {
-                getAction().process(output, context);
-            }
-            return null;
-        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("while", this);
             getTest().export(@out);
             getAction().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Eej.xsltextn.instruct.While.WhileElaborator();
+        }
+        public class WhileElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Eej.xsltextn.instruct.While expr = (Saxon.Eej.xsltextn.instruct.While)(getExpression());
+                Saxon.Hej.expr.elab.BooleanEvaluator test = expr.getTest().makeElaborator().elaborateForBoolean();
+                Saxon.Hej.expr.elab.PushEvaluator action = expr.getAction().makeElaborator().elaborateForPush();
+                return (output, context) => {
+                    while (/*Delegate.eval()*/test(context)) {
+                        Saxon.Hej.expr.Expression.dispatchTailCall(/*Delegate.processLeavingTail()*/action(output, context));
+                    }
+                    return null;
+                } ;
+            }
+        
         }
     
     }

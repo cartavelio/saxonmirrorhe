@@ -11,7 +11,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"id", "mixed"};
             allowAttributes(atts, allowed);
             processId();
-            string mixedAtt = atts.getValue("", "mixed");
+            string mixedAtt = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "mixed");
             if ((mixedAtt != null)) {
                 mixed = Saxon.Ejava.util.Optional<bool>.of(parseBooleanAttribute("mixed", mixedAtt));
             }

@@ -12,14 +12,16 @@ namespace Saxon.Hej.trace {
         private readonly System.Collections.Generic.Stack<Saxon.Hej.expr.Expression> expressionStack = new System.Collections.Generic.Stack<Saxon.Hej.expr.Expression>();
         private readonly System.Collections.Generic.Stack<string> nameStack = new System.Collections.Generic.Stack<string>();
         private Saxon.Hej.om.NamespaceMap namespaceMap = Saxon.Hej.om.NamespaceMap.emptyMap();
-        private string defaultNamespace;
-        private Saxon.Hej.trace.ExpressionPresenter.Options options = new Saxon.Hej.trace.ExpressionPresenter.ExportOptions();
-        private bool relocatable = false;
+        private Saxon.Hej.om.NamespaceUri defaultNamespace;
+        private Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = new Saxon.Hej.trace.ExpressionPresenter.ExportOptions();
         public ExpressionPresenter()  {
         }
         public ExpressionPresenter(Saxon.Hej.Configuration config) : this (config, config.getLogger()) {
         }
         public ExpressionPresenter(Saxon.Hej.Configuration config, Saxon.Ejavax.xml.transform.stream.StreamResult @out) : this (config, @out, false) {
+        }
+        public ExpressionPresenter(Saxon.Hej.@event.Builder builder) : this () {
+            init(builder.getConfiguration(), builder, false);
         }
         public ExpressionPresenter(Saxon.Hej.Configuration config, Saxon.Ejavax.xml.transform.stream.StreamResult @out, bool checksum)  {
             init(config, @out, checksum);
@@ -27,11 +29,7 @@ namespace Saxon.Hej.trace {
         public void init(Saxon.Hej.Configuration config, Saxon.Ejavax.xml.transform.stream.StreamResult @out, bool checksum) {
             Saxon.Hej.serialize.SerializationProperties props = makeDefaultProperties(config);
             if ((config.getXMLVersion() == Saxon.Hej.Configuration.XML11)) {
-                if ("JS".Equals(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(getOptions())).target)) {
-                    config.getLogger().warning("For target=JS, the SEF file will use XML 1.0, which disallows control characters");
-                } else {
-                    props.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.VERSION, "1.1");
-                }
+                props.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.VERSION, "1.1");
             }
             try {
                 receiver = config.getSerializerFactory().getReceiver(@out, props);
@@ -83,21 +81,18 @@ namespace Saxon.Hej.trace {
                 throw new Saxon.Ejava.lang.InternalError(err.Message);
             }
         }
-        public void setDefaultNamespace(string @namespace) {
+        public void setDefaultNamespace(Saxon.Hej.om.NamespaceUri @namespace) {
             defaultNamespace = @namespace;
             namespaceMap = namespaceMap.put("", @namespace);
         }
-        public void setOptions(Saxon.Hej.trace.ExpressionPresenter.Options options) {
+        public void setOptions(Saxon.Hej.trace.ExpressionPresenter.ExportOptions options) {
             this.options = options;
         }
-        public Saxon.Hej.trace.ExpressionPresenter.Options getOptions() {
+        public Saxon.Hej.trace.ExpressionPresenter.ExportOptions getOptions() {
             return options;
         }
-        public bool isRelocatable() {
-            return relocatable;
-        }
         public void setRelocatable(bool relocatable) {
-            this.relocatable = relocatable;
+            this.options.relocatable = relocatable;
         }
         public static Saxon.Hej.@event.Receiver defaultDestination(Saxon.Hej.Configuration config, Saxon.Hej.lib.Logger @out) {
             Saxon.Hej.serialize.SerializationProperties props = makeDefaultProperties(config);
@@ -139,46 +134,47 @@ namespace Saxon.Hej.trace {
             return n;
         }
         private string truncatedModuleName(string module) {
-            if (!(relocatable)) {
-                return module;
-            } else {
+            if (options.relocatable) {
                 string[] parts = System.Text.RegularExpressions.Regex.Split(module, "/");
                 for (int p = (parts.Length-1); (p>=0); p--) {
                     if (!(parts[p].Length==0)) {
                         return parts[p];
                     }
                 }
-                return module;
             }
+            return module;
         }
         public void emitRetainedStaticContext(Saxon.Hej.expr.parser.RetainedStaticContext sc, Saxon.Hej.expr.parser.RetainedStaticContext parentSC) {
             try {
-                if ((((!(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(options)).suppressStaticContext) && !(relocatable)) && (sc.getStaticBaseUri() != null)) && (((parentSC == null) || !(sc.getStaticBaseUri().Equals(parentSC.getStaticBaseUri())))))) {
+                if ((((!(options.suppressStaticContext) && !(options.relocatable)) && (sc.getStaticBaseUri() != null)) && (((parentSC == null) || !(sc.getStaticBaseUri().Equals(parentSC.getStaticBaseUri())))))) {
                     emitAttribute("baseUri", sc.getStaticBaseUriString());
                 }
                 if ((!(sc.getDefaultCollationName().Equals(Saxon.Hej.lib.NamespaceConstant.CODEPOINT_COLLATION_URI)) && (((parentSC == null) || !(sc.getDefaultCollationName().Equals(parentSC.getDefaultCollationName())))))) {
                     emitAttribute("defaultCollation", sc.getDefaultCollationName());
                 }
-                if ((!(sc.getDefaultElementNamespace().Length==0) && (((parentSC == null) || !(sc.getDefaultElementNamespace().Equals(parentSC.getDefaultElementNamespace())))))) {
-                    emitAttribute("defaultElementNS", sc.getDefaultElementNamespace());
+                if ((!(sc.getDefaultElementNamespace().isEmpty()) && (((parentSC == null) || !(sc.getDefaultElementNamespace().Equals(parentSC.getDefaultElementNamespace())))))) {
+                    emitAttribute("defaultElementNS", sc.getDefaultElementNamespace().ToString());
                 }
-                if (!(Saxon.Hej.lib.NamespaceConstant.FN.Equals(sc.getDefaultFunctionNamespace()))) {
-                    emitAttribute("defaultFunctionNS", sc.getDefaultFunctionNamespace());
+                string defaultFnNs = sc.getDefaultFunctionNamespace().ToString();
+                if (!(Saxon.Hej.lib.NamespaceConstant.FN.Equals(defaultFnNs))) {
+                    emitAttribute("defaultFunctionNS", defaultFnNs);
                 }
-                if ((!(((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(options)).suppressStaticContext) && (((parentSC == null) || !(sc.declaresSameNamespaces(parentSC)))))) {
+                if ((!(options.suppressStaticContext) && (((parentSC == null) || !(sc.declaresSameNamespaces(parentSC)))))) {
                     Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder();
                     for (System.Collections.Generic.IEnumerator<string> iter = sc.iteratePrefixes(); iter.MoveNext() /*UNSAFE CONVERSION*/; ) {
                         string p = iter.Current;
-                        string uri = sc.getURIForPrefix(p, true);
+                        Saxon.Hej.om.NamespaceUri uri = sc.getURIForPrefix(p, true);
                         ub.append(p);
                         ub.append("=");
-                        if (Saxon.Hej.value.Whitespace.containsWhitespace(Saxon.Hej.str.StringTool.codePoints(uri))) {
-                            throw new Saxon.Hej.trans.XPathException((("Cannot export a stylesheet if namespaces contain whitespace: '"+uri)+"'"));
+                        if (uri.Equals(Saxon.Hej.om.NamespaceUri.getUriForConventionalPrefix(p))) {
+                            ub.append("~");
+                        } else {
+                            Saxon.Hej.str.UnicodeString uUri = uri.toUnicodeString();
+                            if (Saxon.Hej.value.Whitespace.containsWhitespace(uUri.codePoints())) {
+                                throw new Saxon.Hej.trans.XPathException((("Cannot export a stylesheet if namespaces contain whitespace: '"+uri)+"'"));
+                            }
+                            ub.append(uUri);
                         }
-                        if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.getUriForConventionalPrefix(p))) {
-                            uri = "~";
-                        }
-                        ub.append(uri);
                         ub.append(" ");
                     }
                     emitAttribute("ns", Saxon.Hej.value.Whitespace.trim(ub.toUnicodeString()).ToString());
@@ -240,7 +236,7 @@ namespace Saxon.Hej.trace {
                 throw new Saxon.Ejava.lang.InternalError(err.Message);
             }
         }
-        public void @namespace(string prefix, string uri) {
+        public void @namespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
             try {
                 cco.@namespace(prefix, uri, Saxon.Hej.@event.ReceiverOption.NONE);
             } catch (Saxon.Hej.trans.XPathException e) {
@@ -329,7 +325,7 @@ namespace Saxon.Hej.trace {
                         while ((hex.length()<4)) {
                             hex.insert(0, "0");
                         }
-                        @out.append(hex.ToString());
+                        @out.append(hex);
                     } else {
                         @out.append(c);
                     }
@@ -338,18 +334,15 @@ namespace Saxon.Hej.trace {
             }
             return @out.ToString();
         }
-        public interface Options {
-        
-        }
-        public class ExportOptions : Saxon.Hej.trace.ExpressionPresenter.Options {
+        public class ExportOptions {
             public string target = "";
             public int targetVersion = 0;
+            public bool relocatable = false;
             public Saxon.Hej.style.StylesheetPackage rootPackage;
             public System.Collections.Generic.IDictionary<Saxon.Hej.expr.Component,int> componentMap;
             public System.Collections.Generic.IDictionary<Saxon.Hej.style.StylesheetPackage,int> packageMap;
             public bool explaining;
             public bool suppressStaticContext;
-            public bool addStaticType;
         
         }
     

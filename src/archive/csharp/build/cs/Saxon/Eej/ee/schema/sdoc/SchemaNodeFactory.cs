@@ -102,7 +102,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 }
               case Saxon.Hej.om.StandardNames.XS_SCHEMA:
                 Saxon.Eej.ee.schema.sdoc.XSDSchema s = new Saxon.Eej.ee.schema.sdoc.XSDSchema();
-                Saxon.Eej.ee.schema.SingleNamespaceSchema preparedSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema(config, "");
+                Saxon.Eej.ee.schema.SingleNamespaceSchema preparedSchema = new Saxon.Eej.ee.schema.SingleNamespaceSchema(config, Saxon.Hej.om.NamespaceUri.NULL);
                 s.setSchema(preparedSchema);
                 s.setSchemaCompiler(compiler);
                 s.setReferrer(referrer);

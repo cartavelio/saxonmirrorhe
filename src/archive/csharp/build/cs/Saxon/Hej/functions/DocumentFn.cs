@@ -123,23 +123,24 @@ namespace Saxon.Hej.functions {
                     newdoc = startNode.getTreeInfo();
                 } else {
                     Saxon.Hej.@event.Builder b = controller.makeBuilder();
+                    b.setDurability(Saxon.Hej.om.Durability.LASTING);
                     b.setUseEventLocation(true);
                     if ((b is Saxon.Hej.tree.tiny.TinyBuilder)) {
                         ((Saxon.Hej.tree.tiny.TinyBuilder)(b)).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
                     }
                     Saxon.Hej.@event.Receiver s = b;
                     if ((options == null)) {
-                        options = new Saxon.Hej.lib.ParseOptions(b.getPipelineConfiguration().getParseOptions());
+                        options = b.getPipelineConfiguration().getParseOptions();
                         if ((packageData is Saxon.Hej.style.StylesheetPackage)) {
                             Saxon.Hej.om.SpaceStrippingRule rule = ((Saxon.Hej.style.StylesheetPackage)(packageData)).getSpaceStrippingRule();
                             if ((rule != Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance())) {
-                                options.setSpaceStrippingRule(rule);
+                                options = options.withSpaceStrippingRule(rule);
                             }
                         }
-                        options.setSchemaValidationMode(controller.getSchemaValidationMode());
+                        options = options.withSchemaValidationMode(controller.getSchemaValidationMode());
                     }
                     if ((@params != null)) {
-                        options.merge(@params.makeParseOptions(config));
+                        options = options.merge(@params.makeParseOptions(config));
                     }
                     b.getPipelineConfiguration().setParseOptions(options);
                     if (options.isLineNumbering()) {
@@ -152,7 +153,7 @@ namespace Saxon.Hej.functions {
                     if ((map != null)) {
                         Saxon.Hej.expr.parser.PathMap.PathMapRoot pathRoot = map.getRootForDocument(documentKey.ToString());
                         if ((((pathRoot != null) && !(pathRoot.isReturnable())) && !(pathRoot.hasUnknownDependencies()))) {
-                            options.addFilter(config.makeDocumentProjector(pathRoot));
+                            options = options.withFilter(config.makeDocumentProjector(pathRoot));
                         }
                     }
                     s.setPipelineConfiguration(b.getPipelineConfiguration());
@@ -164,6 +165,8 @@ namespace Saxon.Hej.functions {
                         if (((err.getErrorCodeLocalPart() == null) || err.getErrorCodeLocalPart().Equals("SXXP0003"))) {
                             err.setErrorCode("FODC0002");
                         }
+                        err.maybeSetLocation(locator);
+                        err.maybeSetContext(c);
                         throw;
                     } finally {
                         if (options.isPleaseCloseAfterUse()) {
@@ -234,7 +237,7 @@ namespace Saxon.Hej.functions {
                 request.uri = href;
             }
             request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-            request.purpose = "source document";
+            request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
             try {
                 return request.resolve(resolver, config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
             } catch (Saxon.Hej.trans.XPathException err) {
@@ -315,7 +318,7 @@ namespace Saxon.Hej.functions {
             }
             Saxon.Hej.lib.ParseOptions options = config.getParseOptions();
             if ((@params != null)) {
-                options.merge(@params.makeParseOptions(config));
+                options = options.merge(@params.makeParseOptions(config));
             }
             Saxon.Hej.om.TreeInfo newdoc = config.buildDocumentTree(source, options);
             config.getGlobalDocumentPool().add(newdoc, documentKey);
@@ -348,7 +351,7 @@ namespace Saxon.Hej.functions {
                     request.uri = documentKey.getAbsoluteURI();
                     request.streamable = true;
                     request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XML_NATURE;
-                    request.purpose = "source document";
+                    request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                     source = request.resolve(context.getResourceResolver(), config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                     if ((source == null)) {
                         Saxon.Hej.trans.XPathException xerr = new Saxon.Hej.trans.XPathException(("Failed to resolve streamed document URI "+request.uri), "FODC0005");

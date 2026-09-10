@@ -46,7 +46,7 @@ namespace Saxon.Eej.ee.schema.fsa {
                 }
             }
             if (((wildcardEdges != null) && (compiler.getLanguageVersion() == Saxon.Hej.Configuration.XSD10))) {
-                string uri = decl.getTargetNamespace();
+                Saxon.Hej.om.NamespaceUri uri = decl.getTargetNamespace();
                 foreach (Saxon.Eej.ee.schema.fsa.Edge wedge in wildcardEdges) {
                     if (((Saxon.Eej.ee.schema.Wildcard)(wedge.getTerm())).matches(uri)) {
                         throw new Saxon.Hej.type.SchemaException((("Ambiguous content model, element "+Saxon.Hej.trans.Err.wrap(decl.getDisplayName(), Saxon.Hej.trans.Err.ELEMENT))+" appears in its own right, and also matches an <xs:any> wildcard"));

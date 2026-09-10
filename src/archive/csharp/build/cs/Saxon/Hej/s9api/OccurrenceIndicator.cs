@@ -74,6 +74,23 @@ namespace Saxon.Hej.s9api {
         public bool allowsMany() {
             return Saxon.Hej.value.Cardinality.allowsMany(getCardinality());
         }
+        public bool allows(int size) {
+            Saxon.Hej.s9api.OccurrenceIndicator indicator = this;
+            switch (indicator.innerEnumValue) {
+              case Saxon.Hej.s9api.OccurrenceIndicator.InnerEnum.ZERO:
+                return (size == 0);
+              case Saxon.Hej.s9api.OccurrenceIndicator.InnerEnum.ZERO_OR_ONE:
+                return (size<=1);
+              case Saxon.Hej.s9api.OccurrenceIndicator.InnerEnum.ZERO_OR_MORE:
+                return true;
+              case Saxon.Hej.s9api.OccurrenceIndicator.InnerEnum.ONE:
+                return (size == 1);
+              case Saxon.Hej.s9api.OccurrenceIndicator.InnerEnum.ONE_OR_MORE:
+                return (size>0);
+              default:
+                return false;
+            }
+        }
         public bool subsumes(Saxon.Hej.s9api.OccurrenceIndicator other) {
             return Saxon.Hej.value.Cardinality.subsumes(getCardinality(), other.getCardinality());
         }

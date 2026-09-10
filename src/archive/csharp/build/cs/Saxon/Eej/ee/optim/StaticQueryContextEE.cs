@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.optim {
     public class StaticQueryContextEE : Saxon.Eej.expr.StaticQueryContextPE {
-        private readonly System.Collections.Generic.IDictionary<string,Saxon.Hej.query.QueryLibrary> compiledLibraries = new System.Collections.Concurrent.ConcurrentDictionary<string, Saxon.Hej.query.QueryLibrary>();
+        private readonly System.Collections.Generic.IDictionary<Saxon.Hej.om.NamespaceUri,Saxon.Hej.query.QueryLibrary> compiledLibraries = new System.Collections.Concurrent.ConcurrentDictionary<Saxon.Hej.om.NamespaceUri, Saxon.Hej.query.QueryLibrary>();
         private bool schemaAware;
         private bool streaming;
         public StaticQueryContextEE(Saxon.Hej.Configuration config) : base (config) {
@@ -43,7 +43,7 @@ namespace Saxon.Eej.ee.optim {
                 Saxon.Hej.functions.FunctionLibraryList libList = new Saxon.Hej.functions.FunctionLibraryList();
                 libList.addFunctionLibrary(new Saxon.Hej.functions.ExecutableFunctionLibrary(config));
                 executable.setFunctionLibrary(libList);
-                Saxon.Hej.query.XQueryParser qp = (Saxon.Hej.query.XQueryParser)(config.newExpressionParser("XQ", isUpdating(), 31));
+                Saxon.Hej.query.XQueryParser qp = (Saxon.Hej.query.XQueryParser)(config.newExpressionParser("XQ", isUpdating()));
                 if ((getCodeInjector() != null)) {
                     qp.setCodeInjector(getCodeInjector());
                 }
@@ -81,7 +81,7 @@ namespace Saxon.Eej.ee.optim {
             string query = Saxon.Hej.query.QueryReader.readInputStream(source, encoding, getConfiguration().getValidCharacterChecker());
             compileLibrary(query);
         }
-        public override Saxon.Hej.query.QueryLibrary getCompiledLibrary(string @namespace) {
+        public override Saxon.Hej.query.QueryLibrary getCompiledLibrary(Saxon.Hej.om.NamespaceUri @namespace) {
             return Saxon.Impl.Helpers.MapUtils.Get(compiledLibraries, @namespace);
         }
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.query.QueryLibrary> getCompiledLibraries() {

@@ -16,14 +16,7 @@ namespace Saxon.Hej.expr.sort {
             return this;
         }
         public int compareAtomicValues(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b) {
-            if ((a == null)) {
-                return (((b == null) ? 0 : -1));
-            } else {
-                if ((b == null)) {
-                    return +(1);
-                }
-            }
-            return ((Saxon.Hej.value.ContextFreeAtomicValue)(a)).getXPathComparable().compareTo(((Saxon.Hej.value.ContextFreeAtomicValue)(b)).getXPathComparable());
+            return ((Saxon.Hej.expr.sort.XPathComparable)(a)).compareTo((Saxon.Hej.expr.sort.XPathComparable)(b));
         }
         public bool comparesEqual(Saxon.Hej.value.AtomicValue a, Saxon.Hej.value.AtomicValue b) {
             return a.Equals(b);

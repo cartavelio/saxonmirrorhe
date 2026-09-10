@@ -35,7 +35,7 @@ namespace Saxon.Hej.type {
             return Saxon.Hej.query.AnnotationList.EMPTY;
         }
         public virtual bool matches(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
-            return (item is Saxon.Hej.om.Function);
+            return (item is Saxon.Hej.om.FunctionItem);
         }
         public Saxon.Hej.type.ItemType getPrimitiveItemType() {
             return ANY_FUNCTION;
@@ -59,7 +59,7 @@ namespace Saxon.Hej.type {
                 return Saxon.Hej.type.Affinity.SUBSUMES;
             }
         }
-        public virtual Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Hej.expr.parser.RoleDiagnostic role) {
+        public virtual Saxon.Hej.expr.Expression makeFunctionSequenceCoercer(Saxon.Hej.expr.Expression exp, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) {
             return new Saxon.Hej.expr.ItemChecker(exp, this, role);
         }
         public virtual Saxon.Hej.value.SequenceType getResultType() {

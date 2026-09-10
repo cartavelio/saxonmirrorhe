@@ -80,7 +80,7 @@ namespace Saxon.Eej.ee.validate {
             childValidator.setNamespaceResolver(namespaces);
             Saxon.Hej.om.AttributeMap validatedAtts = childValidator.validateAttributes(attributes, additionalNamespaces);
             foreach (Saxon.Hej.om.NamespaceBinding ns in additionalNamespaces) {
-                namespaces = namespaces.put(ns.getPrefix(), ns.getURI());
+                namespaces = namespaces.put(ns.getPrefix(), ns.getNamespaceUri());
             }
             try {
                 nextReceiver.startElement(elemName, type, validatedAtts, namespaces, location, properties);
@@ -222,7 +222,7 @@ namespace Saxon.Eej.ee.validate {
                         }
                     } catch (Saxon.Hej.trans.XPathException err) {
                         Saxon.Hej.@event.PipelineConfiguration pipe = startTagBuffer.getPipelineConfiguration();
-                        Saxon.Hej.trans.XmlProcessingIncident warning = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(("Dynamic error occurred during evaluation of Conditional Type Alternative test: "+err.Message)).asWarning());
+                        Saxon.Hej.trans.XmlProcessingIncident warning = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(("Dynamic error occurred during evaluation of Conditional Type Alternative test: "+err.Message), Saxon.Hej.trans.SaxonErrorCode.SXWN9047).asWarning());
                         warning.setCause(err);
                         pipe.getErrorReporter().report(warning);
                     }

@@ -7,9 +7,9 @@ namespace Saxon.Hej.trans.rules {
         public static Saxon.Hej.trans.rules.ShallowCopyRuleSet getInstance() {
             return THE_INSTANCE;
         }
-        private ShallowCopyRuleSet()  {
+        protected internal ShallowCopyRuleSet()  {
         }
-        public void process(Saxon.Hej.om.Item item, Saxon.Hej.expr.instruct.ParameterSet parameters, Saxon.Hej.expr.instruct.ParameterSet tunnelParams, Saxon.Hej.@event.Outputter @out, Saxon.Hej.expr.XPathContext context, Saxon.Hej.s9api.Location locationId) {
+        public virtual void process(Saxon.Hej.om.Item item, Saxon.Hej.expr.instruct.ParameterSet parameters, Saxon.Hej.expr.instruct.ParameterSet tunnelParams, Saxon.Hej.@event.Outputter @out, Saxon.Hej.expr.XPathContext context, Saxon.Hej.s9api.Location locationId) {
             if ((item is Saxon.Hej.om.NodeInfo)) {
                 Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(item);
                 switch (node.getNodeKind()) {
@@ -43,7 +43,7 @@ namespace Saxon.Hej.trans.rules {
                         Saxon.Hej.om.NodeName fqn = Saxon.Hej.om.NameOfNode.makeName(node);
                         @out.startElement(fqn, (schemaAware ? Saxon.Hej.type.AnyType.getInstance() : Saxon.Hej.type.Untyped.getInstance()), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
                         foreach (Saxon.Hej.om.NamespaceBinding ns in node.getAllNamespaces()) {
-                            @out.@namespace(ns.getPrefix(), ns.getURI(), Saxon.Hej.@event.ReceiverOption.NONE);
+                            @out.@namespace(ns.getPrefix(), ns.getNamespaceUri(), Saxon.Hej.@event.ReceiverOption.NONE);
                         }
                         Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
                         c2.setCurrentComponent(c2.getCurrentMode());
@@ -81,7 +81,7 @@ namespace Saxon.Hej.trans.rules {
                     @out.attribute(Saxon.Hej.om.NameOfNode.makeName(node), (Saxon.Hej.type.SimpleType)(node.getSchemaType()), node.getStringValue(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
                     return ;
                   case Saxon.Hej.type.Type.NAMESPACE:
-                    @out.@namespace(node.getLocalPart(), node.getStringValue(), Saxon.Hej.@event.ReceiverOption.NONE);
+                    @out.@namespace(node.getLocalPart(), Saxon.Hej.om.NamespaceUri.of(node.getStringValue()), Saxon.Hej.@event.ReceiverOption.NONE);
                     return ;
                   default:
                     break;
@@ -90,7 +90,7 @@ namespace Saxon.Hej.trans.rules {
                 @out.append(item, locationId, Saxon.Hej.@event.ReceiverOption.NONE);
             }
         }
-        public string getName() {
+        public virtual string getName() {
             return "shallow-copy";
         }
         public Saxon.Hej.trans.rules.BuiltInRules[] getActionForParentNodes(int nodeKind) {

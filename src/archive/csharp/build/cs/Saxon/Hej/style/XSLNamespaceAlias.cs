@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.style {
     public class XSLNamespaceAlias : Saxon.Hej.style.StyleElement {
-        private string stylesheetURI;
+        private Saxon.Hej.om.NamespaceUri stylesheetURI;
         private Saxon.Hej.om.NamespaceBinding resultNamespaceBinding;
         public override bool isDeclaration() {
             return true;
@@ -42,15 +42,15 @@ namespace Saxon.Hej.style {
             stylesheetURI = getURIForPrefix(stylesheetPrefix, true);
             if ((stylesheetURI == null)) {
                 compileError((("stylesheet-prefix "+stylesheetPrefix)+" has not been declared"), "XTSE0812");
-                stylesheetURI = "";
+                stylesheetURI = Saxon.Hej.om.NamespaceUri.NULL;
                 resultNamespaceBinding = Saxon.Hej.om.NamespaceBinding.DEFAULT_UNDECLARATION;
                 return ;
             }
-            string resultURI = getURIForPrefix(resultPrefix, true);
+            Saxon.Hej.om.NamespaceUri resultURI = getURIForPrefix(resultPrefix, true);
             if ((resultURI == null)) {
                 compileError((("result-prefix "+resultPrefix)+" has not been declared"), "XTSE0812");
-                stylesheetURI = "";
-                resultURI = "";
+                stylesheetURI = Saxon.Hej.om.NamespaceUri.NULL;
+                resultURI = Saxon.Hej.om.NamespaceUri.NULL;
             }
             resultNamespaceBinding = new Saxon.Hej.om.NamespaceBinding(resultPrefix, resultURI);
         }
@@ -63,7 +63,7 @@ namespace Saxon.Hej.style {
         public override void index(Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.style.PrincipalStylesheetModule top) {
             top.addNamespaceAlias(decl);
         }
-        public string getStylesheetURI() {
+        public Saxon.Hej.om.NamespaceUri getStylesheetURI() {
             return stylesheetURI;
         }
         public Saxon.Hej.om.NamespaceBinding getResultNamespaceBinding() {

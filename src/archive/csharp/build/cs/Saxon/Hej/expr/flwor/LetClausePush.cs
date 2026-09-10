@@ -10,8 +10,7 @@ namespace Saxon.Hej.expr.flwor {
             this.letClause = letClause;
         }
         public override void processTuple(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.Sequence val = letClause.getEvaluator().evaluate(letClause.getSequence(), context);
-            context.setLocalVariable(letClause.getRangeVariable().getLocalSlotNumber(), val);
+            letClause.evaluateRangeVariable(context);
             destination.processTuple(context);
         }
         public override void close() {

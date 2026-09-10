@@ -26,6 +26,7 @@ namespace Saxon.Hej.str {
         public abstract long indexOf(int codePoint, long from);
         public virtual long indexWhere(Saxon.Ejava.util.function.IntPredicate predicate, long from) {
             Saxon.Hej.z.IntIterator iter = codePoints();
+            from = System.Math.Max(from, 0);
             long i = 0;
             while (iter.hasNext()) {
                 int ch = iter.next();
@@ -58,7 +59,7 @@ namespace Saxon.Hej.str {
             }
             return -1;
         }
-        public bool hasSubstring(Saxon.Hej.str.UnicodeString other, long offset) {
+        public virtual bool hasSubstring(Saxon.Hej.str.UnicodeString other, long offset) {
             if (((offset<0) || (offset>length()))) {
                 throw new System.IndexOutOfRangeException();
             }
@@ -87,13 +88,13 @@ namespace Saxon.Hej.str {
         }
         protected internal void checkSubstringBounds(long start, long end) {
             if ((start<0)) {
-                throw new System.IndexOutOfRangeException("UnicodeString.substring(): start < 0");
+                throw new System.IndexOutOfRangeException((("UnicodeString.substring(): start ("+start)+") < 0"));
             }
             if ((end<start)) {
-                throw new System.IndexOutOfRangeException("UnicodeString.substring(): end < start");
+                throw new System.IndexOutOfRangeException((("UnicodeString.substring(): end ("+end)+") < start ( + start + "));
             }
             if ((end>length())) {
-                throw new System.IndexOutOfRangeException("UnicodeString.substring(): end > length()");
+                throw new System.IndexOutOfRangeException((((("UnicodeString.substring(): end ("+end)+") > length (")+length())+")"));
             }
         }
         public void verifyCharacters() {
@@ -188,6 +189,12 @@ namespace Saxon.Hej.str {
             }
             return (int)(value);
         }
+        public static int requireNonNegativeInt(long value) {
+            if ((value>System.Int32.MaxValue)) {
+                throw new Saxon.Ejava.lang.UnsupportedOperationException("String exceeds 2^31 characters");
+            }
+            return (int)(System.Math.Max(value, 0));
+        }
         internal virtual void copy8bit(byte[] target, int offset) {
             throw new Saxon.Ejava.lang.UnsupportedOperationException();
         }
@@ -196,6 +203,12 @@ namespace Saxon.Hej.str {
         }
         internal virtual void copy24bit(byte[] target, int offset) {
             throw new Saxon.Ejava.lang.UnsupportedOperationException();
+        }
+        internal virtual void copy32bit(int[] target, int offset) {
+            Saxon.Hej.z.IntIterator iter = codePoints();
+            while (iter.hasNext()) {
+                target[offset++] = iter.next();
+            }
         }
     
     }

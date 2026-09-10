@@ -22,8 +22,8 @@ namespace Saxon.Eej.ee.schema {
         public string getName() {
             return constraintName.getLocalPart();
         }
-        public string getTargetNamespace() {
-            return constraintName.getURI();
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return constraintName.getNamespaceUri();
         }
         public Saxon.Eej.ee.schema.IdentitySelector getSelector() {
             return selector;
@@ -69,7 +69,7 @@ namespace Saxon.Eej.ee.schema {
         public void typeCheck(Saxon.Eej.ee.schema.SchemaCompiler compiler, Saxon.Hej.type.SchemaType contextType) {
             Saxon.Eej.config.EnterpriseConfiguration config = compiler.getConfiguration();
             Saxon.Hej.sxpath.IndependentContext env = new Saxon.Hej.sxpath.IndependentContext(config);
-            env.setWarningHandler((message, loc) => compiler.warning(message, this));
+            env.setWarningHandler((message, code, loc) => compiler.warning(message, code, this));
             env.setSchemaAware(true);
             Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(env);
             Saxon.Hej.type.ItemType contextItemType = new Saxon.Hej.pattern.ContentTypeTest(Saxon.Hej.type.Type.ELEMENT, contextType, config, false);
@@ -82,20 +82,20 @@ namespace Saxon.Eej.ee.schema {
                     field.setSelectExpression(field.getSelectExpression().typeCheck(visitor, sit));
                     int card = field.getCardinality(visitor, sit);
                     if (Saxon.Hej.value.Cardinality.allowsMany(card)) {
-                        compiler.warning((("The field expression ("+field.getXPath())+") may select multiple nodes, which would make the instance document invalid"), field);
+                        compiler.warning((("The field expression ("+field.getXPath())+") may select multiple nodes, which would make the instance document invalid"), Saxon.Hej.trans.SaxonErrorCode.SXSD1004, field);
                     } else {
                         if (((this is Saxon.Eej.ee.schema.Key) && Saxon.Hej.value.Cardinality.allowsZero(card))) {
-                            compiler.warning((("The field expression ("+field.getXPath())+") may select no nodes, which would make the instance document invalid"), field);
+                            compiler.warning((("The field expression ("+field.getXPath())+") may select no nodes, which would make the instance document invalid"), Saxon.Hej.trans.SaxonErrorCode.SXSD1004, field);
                         }
                     }
                     Saxon.Hej.pattern.NodeTest fieldType = (Saxon.Hej.pattern.NodeTest)(field.getSelectExpression().getItemType());
                     Saxon.Hej.type.AtomicType atomizedType = ((/*1430*/Saxon.Hej.type.AtomicType)fieldType.getAtomizedItemType());
                     if ((atomizedType == null)) {
-                        compiler.warning("The node selected by the field expression cannot be atomized", field);
+                        compiler.warning("The node selected by the field expression cannot be atomized", Saxon.Hej.trans.SaxonErrorCode.SXSD1005, field);
                     }
                     Saxon.Hej.type.SchemaType contentType = fieldType.getContentType();
                     if (!(((((contentType == Saxon.Hej.type.AnyType.getInstance()) || contentType.isSimpleType()) || (contentType.isComplexType() && ((Saxon.Hej.type.ComplexType)(contentType)).isSimpleContent()))))) {
-                        compiler.warning("The node selected by the field expression must have a simple type, or a complex type with simple content", field);
+                        compiler.warning("The node selected by the field expression must have a simple type, or a complex type with simple content", Saxon.Hej.trans.SaxonErrorCode.SXSD1005, field);
                     }
                     bool listValued = (contentType.isSimpleType() && ((Saxon.Hej.type.SimpleType)(contentType)).isListType());
                     if ((((atomizedType != null) && ((Saxon.Hej.type.ItemType)(atomizedType)).isAtomicType()) && (contentType != Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC))) {
@@ -116,7 +116,7 @@ namespace Saxon.Eej.ee.schema {
             serializer.emitAttribute("id", serializer.getId(this, false));
             serializer.emitAttribute("name", getName());
             if ((getTargetNamespace() != null)) {
-                serializer.emitAttribute("targetNamespace", getTargetNamespace());
+                serializer.emitAttribute("targetNamespace", getTargetNamespace().ToString());
             }
             if ((this is Saxon.Eej.ee.schema.KeyRef)) {
                 Saxon.Eej.ee.schema.IdentityConstraint target = (Saxon.Eej.ee.schema.IdentityConstraint)(((Saxon.Eej.ee.schema.KeyRef)(this)).getTarget());
@@ -125,13 +125,13 @@ namespace Saxon.Eej.ee.schema {
             serializer.startElement("selector");
             serializer.emitNamespaceContext(selector.getNamespaceContext());
             serializer.emitAttribute("xpath", selector.getXPath());
-            serializer.emitAttribute("defaultNamespace", selector.getXPathDefaultNamespace());
+            serializer.emitAttribute("defaultNamespace", selector.getXPathDefaultNamespace().ToString());
             serializer.endElement();
             foreach (Saxon.Eej.ee.schema.IdentityField f in fields) {
                 serializer.startElement("field");
                 serializer.emitNamespaceContext(f.getNamespaceContext());
                 serializer.emitAttribute("xpath", f.getXPath());
-                serializer.emitAttribute("defaultNamespace", f.getXPathDefaultNamespace());
+                serializer.emitAttribute("defaultNamespace", f.getXPathDefaultNamespace().ToString());
                 Saxon.Hej.type.BuiltInAtomicType baseType = f.getBuiltInBaseType();
                 if ((baseType != null)) {
                     serializer.emitAttribute("type", (("#"+baseType.getName())+((f.isListValued() ? "*" : ""))));
@@ -140,7 +140,7 @@ namespace Saxon.Eej.ee.schema {
             }
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.IdentityConstraint thisConstraint = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
@@ -152,7 +152,7 @@ namespace Saxon.Eej.ee.schema {
                   case "name":
                     return new Saxon.Hej.value.StringValue(getName(), Saxon.Hej.type.BuiltInAtomicType.NCNAME);
                   case "target namespace":
-                    return new Saxon.Hej.value.AnyURIValue((getTargetNamespace()));
+                    return new Saxon.Hej.value.AnyURIValue((getTargetNamespace().toUnicodeString()));
                   case "identity-constraint category":
                     string kind = this.getConstraintCategory();
                     return new Saxon.Hej.value.StringValue(kind);

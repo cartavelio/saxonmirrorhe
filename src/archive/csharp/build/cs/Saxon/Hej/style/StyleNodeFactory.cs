@@ -27,12 +27,9 @@ namespace Saxon.Hej.style {
         public virtual Saxon.Hej.tree.linked.ElementImpl makeElementNode(Saxon.Hej.om.NodeInfo parent, Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType elemType, bool isNilled, Saxon.Hej.om.AttributeMap attlist, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.s9api.Location location, int sequence) {
             int f = elemName.obtainFingerprint(pipe.getConfiguration().getNamePool());
             bool toplevel = (parent is Saxon.Hej.style.XSLModuleRoot);
-            string baseURI = null;
-            int lineNumber = -1;
-            int columnNumber = -1;
-            baseURI = location.getSystemId();
-            lineNumber = location.getLineNumber();
-            columnNumber = location.getColumnNumber();
+            string baseURI = location.getSystemId();
+            int lineNumber = location.getLineNumber();
+            int columnNumber = location.getColumnNumber();
             if ((parent is Saxon.Hej.style.DataElement)) {
                 Saxon.Hej.style.DataElement d = new Saxon.Hej.style.DataElement();
                 d.setNamespaceMap(namespaces);
@@ -51,12 +48,12 @@ namespace Saxon.Hej.style {
                 e.setNamespaceMap(namespaces);
                 e.initialise(elemName, elemType, attlist, parent, sequence);
                 e.setLocation(baseURI, lineNumber, columnNumber);
-                e.processExtensionElementAttribute("");
-                e.processExcludedNamespaces("");
-                e.processVersionAttribute("");
-                e.processDefaultXPathNamespaceAttribute("");
-                e.processExpandTextAttribute("");
-                e.processDefaultValidationAttribute("");
+                e.processExtensionElementAttribute(Saxon.Hej.om.NamespaceUri.NULL);
+                e.processExcludedNamespaces(Saxon.Hej.om.NamespaceUri.NULL);
+                e.processVersionAttribute(Saxon.Hej.om.NamespaceUri.NULL);
+                e.processDefaultXPathNamespaceAttribute(Saxon.Hej.om.NamespaceUri.NULL);
+                e.processExpandTextAttribute(Saxon.Hej.om.NamespaceUri.NULL);
+                e.processDefaultValidationAttribute(Saxon.Hej.om.NamespaceUri.NULL);
                 if ((((toplevel && !(e.isDeclaration())) && !(((e is Saxon.Hej.style.XSLExpose)))) && e.forwardsCompatibleModeIsEnabled())) {
                     Saxon.Hej.style.DataElement d = new Saxon.Hej.style.DataElement();
                     d.setNamespaceMap(namespaces);
@@ -64,7 +61,7 @@ namespace Saxon.Hej.style {
                     d.setLocation(baseURI, lineNumber, columnNumber);
                     return d;
                 }
-                if (((((parent is Saxon.Hej.style.AbsentExtensionElement) && ((Saxon.Hej.style.AbsentExtensionElement)(parent)).forwardsCompatibleModeIsEnabled()) && parent.getURI().Equals(Saxon.Hej.lib.NamespaceConstant.XSLT)) && !(((e is Saxon.Hej.style.XSLFallback))))) {
+                if (((((parent is Saxon.Hej.style.AbsentExtensionElement) && ((Saxon.Hej.style.AbsentExtensionElement)(parent)).forwardsCompatibleModeIsEnabled()) && ((Saxon.Hej.style.AbsentExtensionElement)(parent)).isInXsltNamespace()) && !(((e is Saxon.Hej.style.XSLFallback))))) {
                     Saxon.Hej.style.AbsentExtensionElement temp = new Saxon.Hej.style.AbsentExtensionElement();
                     temp.initialise(elemName, elemType, attlist, parent, sequence);
                     temp.setLocation(baseURI, lineNumber, columnNumber);
@@ -74,8 +71,8 @@ namespace Saxon.Hej.style {
                 }
                 return e;
             }
-            string uri = elemName.getURI();
-            if ((toplevel && !(uri.Equals(Saxon.Hej.lib.NamespaceConstant.XSLT)))) {
+            Saxon.Hej.om.NamespaceUri uri = elemName.getNamespaceUri();
+            if ((toplevel && !(uri.Equals(Saxon.Hej.om.NamespaceUri.XSLT)))) {
                 Saxon.Hej.style.DataElement d = new Saxon.Hej.style.DataElement();
                 d.setNamespaceMap(namespaces);
                 d.initialise(elemName, elemType, attlist, parent, sequence);
@@ -84,7 +81,7 @@ namespace Saxon.Hej.style {
             } else {
                 string localname = elemName.getLocalPart();
                 Saxon.Hej.style.StyleElement temp = null;
-                if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XSLT)) {
+                if (uri.Equals(Saxon.Hej.om.NamespaceUri.XSLT)) {
                     if ((parent is Saxon.Hej.style.XSLStylesheet)) {
                         if ((((Saxon.Hej.style.XSLStylesheet)(parent)).getEffectiveVersion()<=20)) {
                             temp = new Saxon.Hej.style.AbsentExtensionElement();
@@ -96,15 +93,21 @@ namespace Saxon.Hej.style {
                         temp.initialise(elemName, elemType, attlist, parent, sequence);
                         temp.setLocation(baseURI, lineNumber, columnNumber);
                         temp.setCompilation(compilation);
-                        temp.processStandardAttributes("");
-                        if ((temp.getEffectiveVersion()>20)) {
-                            temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident("Unknown XSLT instruction"), Saxon.Hej.style.StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
+                        temp.processStandardAttributes(Saxon.Hej.om.NamespaceUri.NULL);
+                        int effectiveVersion = temp.getEffectiveVersion();
+                        Saxon.Hej.trans.XmlProcessingIncident incident = new Saxon.Hej.trans.XmlProcessingIncident(("Unknown XSLT instruction xsl:"+localname), "XTSE0010", location);
+                        if ((effectiveVersion>compilation.getCompilerInfo().getXsltVersion())) {
+                            temp.setValidationError(incident, Saxon.Hej.style.StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
                         } else {
-                            temp.setValidationError(new Saxon.Hej.trans.XmlProcessingIncident("Unknown XSLT instruction"), Saxon.Hej.style.StyleElement.OnFailure.REPORT_IF_INSTANTIATED);
+                            if ((effectiveVersion == 10)) {
+                                temp.setValidationError(incident, Saxon.Hej.style.StyleElement.OnFailure.REPORT_IF_INSTANTIATED);
+                            } else {
+                                temp.setValidationError(incident, Saxon.Hej.style.StyleElement.OnFailure.REPORT_ALWAYS);
+                            }
                         }
                     }
                 }
-                if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
+                if (uri.Equals(Saxon.Hej.om.NamespaceUri.SAXON)) {
                     string message = (elemName.getDisplayName()+" is not recognized as a Saxon instruction");
                     if (config.getEditionCode().Equals("HE")) {
                         message += ". Saxon extensions require Saxon-PE or higher";
@@ -116,47 +119,51 @@ namespace Saxon.Hej.style {
                     Saxon.Hej.trans.XmlProcessingIncident err = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(message, Saxon.Hej.trans.SaxonErrorCode.SXWN9008, location.saveLocation()).asWarning());
                     pipe.getErrorReporter().report(err);
                 }
-                System.Type assumedClass = typeof(Saxon.Hej.style.LiteralResultElement);
+                bool extensionElement = isExtensionNamespace(uri, parent, namespaces, attlist);
                 if ((temp == null)) {
-                    temp = new Saxon.Hej.style.LiteralResultElement();
+                    if (extensionElement) {
+                        temp = new Saxon.Hej.style.AbsentExtensionElement();
+                    } else {
+                        temp = new Saxon.Hej.style.LiteralResultElement();
+                    }
                 }
                 temp.setNamespaceMap(namespaces);
                 temp.setCompilation(compilation);
                 temp.initialise(elemName, elemType, attlist, parent, sequence);
                 temp.setLocation(baseURI, lineNumber, columnNumber);
-                temp.processStandardAttributes(Saxon.Hej.lib.NamespaceConstant.XSLT);
+                temp.processStandardAttributes(Saxon.Hej.om.NamespaceUri.XSLT);
                 Saxon.Hej.trans.XmlProcessingIncident reason;
-                System.Type actualClass;
-                if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XSLT)) {
-                    reason = new Saxon.Hej.trans.XmlProcessingIncident(("Unknown XSLT element: "+Saxon.Hej.trans.Err.wrap(localname, Saxon.Hej.trans.Err.ELEMENT)), "XTSE0010");
-                    actualClass = typeof(Saxon.Hej.style.AbsentExtensionElement);
-                    temp.setValidationError(reason, Saxon.Hej.style.StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
+                if (uri.Equals(Saxon.Hej.om.NamespaceUri.XSLT)) {
                 } else {
-                    if ((temp.isExtensionNamespace(uri) && !(toplevel))) {
-                        actualClass = typeof(Saxon.Hej.style.AbsentExtensionElement);
-                        if (Saxon.Hej.lib.NamespaceConstant.isReserved(uri)) {
+                    if (extensionElement) {
+                        if (Saxon.Hej.om.NamespaceUri.isReserved(uri)) {
                             reason = new Saxon.Hej.trans.XmlProcessingIncident("Cannot use a reserved namespace for extension instructions", "XTSE0800");
                             temp.setValidationError(reason, Saxon.Hej.style.StyleElement.OnFailure.REPORT_ALWAYS);
                         } else {
                             reason = new Saxon.Hej.trans.XmlProcessingIncident(("Unknown extension instruction "+Saxon.Hej.trans.Err.wrap(elemName.getDisplayName(), Saxon.Hej.trans.Err.ELEMENT)), "XTDE1450");
                             temp.setValidationError(reason, Saxon.Hej.style.StyleElement.OnFailure.REPORT_DYNAMICALLY_UNLESS_FALLBACK_AVAILABLE);
                         }
-                    } else {
-                        actualClass = typeof(Saxon.Hej.style.LiteralResultElement);
                     }
                 }
-                Saxon.Hej.style.StyleElement node;
-                if (actualClass.Equals(assumedClass)) {
-                    node = temp;
-                } else {
-                    node = makeStyleElement(actualClass);
-                    node.substituteFor(temp);
-                }
-                return node;
+                return temp;
             }
         }
-        protected internal Saxon.Hej.style.StyleElement makeStyleElement(System.Type actualClass) {
-            return (Saxon.Hej.style.StyleElement)System.Activator.CreateInstance(actualClass);
+        private static bool isExtensionNamespace(Saxon.Hej.om.NamespaceUri uri, Saxon.Hej.om.NodeInfo parent, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.om.AttributeMap attlist) {
+            string attValue = attlist.getValue(Saxon.Hej.om.NamespaceUri.XSLT, "extension-element-prefixes");
+            if ((attValue != null)) {
+                Saxon.Ejava.util.StringTokenizer st2 = new Saxon.Ejava.util.StringTokenizer(attValue, " \t\n\r", false);
+                while (st2.hasMoreTokens()) {
+                    string s = st2.nextToken();
+                    if ("#default".Equals(s)) {
+                        s = "";
+                    }
+                    Saxon.Hej.om.NamespaceUri ns = namespaces.getURIForPrefix(s, false);
+                    if (uri.Equals(ns)) {
+                        return true;
+                    }
+                }
+            }
+            return ((parent is Saxon.Hej.style.StyleElement) && ((Saxon.Hej.style.StyleElement)(parent)).isExtensionNamespace(uri));
         }
         protected internal Saxon.Hej.style.StyleElement makeXSLElement(int f, Saxon.Hej.tree.linked.NodeImpl parent) {
             switch (f) {
@@ -240,8 +247,6 @@ namespace Saxon.Hej.style {
                 return new Saxon.Hej.style.XSLMap();
               case Saxon.Hej.om.StandardNames.XSL_MAP_ENTRY:
                 return new Saxon.Hej.style.XSLMapEntry();
-              case Saxon.Hej.om.StandardNames.XSL_MATCH:
-                return new Saxon.Hej.style.XSLMatch();
               case Saxon.Hej.om.StandardNames.XSL_MATCHING_SUBSTRING:
                 return new Saxon.Hej.style.XSLMatchingSubstring();
               case Saxon.Hej.om.StandardNames.XSL_MERGE:
@@ -337,9 +342,9 @@ namespace Saxon.Hej.style {
                 return new Saxon.Hej.tree.linked.TextImpl(content);
             }
         }
-        public virtual bool isElementAvailable(string uri, string localName, bool instructionsOnly) {
+        public virtual bool isElementAvailable(Saxon.Hej.om.NamespaceUri uri, string localName, bool instructionsOnly) {
             int fingerprint = namePool.getFingerprint(uri, localName);
-            if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XSLT)) {
+            if (uri.Equals(Saxon.Hej.om.NamespaceUri.XSLT)) {
                 if ((fingerprint == -1)) {
                     return false;
                 }

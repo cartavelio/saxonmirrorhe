@@ -72,6 +72,21 @@ namespace Saxon.Hej.expr {
                 return (((getBaseExpression().toShortString()+"[position() ge ")+start)+"]");
             }
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.TailExpression.TailExprElaborator();
+        }
+        public class TailExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.TailExpression expr = (Saxon.Hej.expr.TailExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                int start = expr.getStart();
+                return context => {
+                    Saxon.Hej.om.SequenceIterator baseIter = /*Delegate.iterate()*/baseEval(context);
+                    return Saxon.Hej.expr.TailIterator.make(baseIter, start);
+                } ;
+            }
+        
+        }
     
     }
 }

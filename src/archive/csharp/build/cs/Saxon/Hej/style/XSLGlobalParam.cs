@@ -25,7 +25,7 @@ namespace Saxon.Hej.style {
                     compileError("The select attribute must be absent when required='yes'", "XTSE0010");
                 }
                 if (hasChildNodes()) {
-                    compileError("A parameter specifying required='yes' must have empty content", "XTSE0010");
+                    compileError("A parameter specifying required='yes' must have empty content", "XTSE0760");
                 }
                 Saxon.Hej.trans.Visibility vis = getVisibility();
                 if ((!(sourceBinding.isStatic()) && !(((((vis == Saxon.Hej.trans.Visibility.PUBLIC) || (vis == Saxon.Hej.trans.Visibility.FINAL)) || (vis == Saxon.Hej.trans.Visibility.ABSTRACT)))))) {
@@ -68,8 +68,6 @@ namespace Saxon.Hej.style {
             } else {
                 return Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
             }
-        }
-        public void insertBytecodeCandidate(Saxon.Hej.expr.parser.Optimizer opt) {
         }
     
     }

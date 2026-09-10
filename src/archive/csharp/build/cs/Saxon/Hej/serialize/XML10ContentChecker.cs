@@ -24,15 +24,13 @@ namespace Saxon.Hej.serialize {
             nextReceiver.processingInstruction(target, data, locationId, properties);
         }
         private void checkString(Saxon.Hej.str.UnicodeString @in, Saxon.Hej.s9api.Location locationId) {
-            Saxon.Hej.z.IntIterator iter = @in.codePoints();
-            while (iter.hasNext()) {
-                int ch32 = iter.next();
-                if (!(Saxon.Hej.serialize.charcode.XMLCharacterData.isValid10(ch32))) {
-                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The result tree contains a character not allowed by XML 1.0 (hex "+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')'));
-                    err.setErrorCode("SERE0006");
-                    err.setLocator(locationId);
-                    throw err;
-                }
+            long foundInvalid = @in.indexWhere(c => !(Saxon.Hej.serialize.charcode.XMLCharacterData.isValid10(c)), 0);
+            if ((foundInvalid>=0)) {
+                int ch32 = @in.codePointAt(foundInvalid);
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The result tree contains a character not allowed by XML 1.0 (hex "+Saxon.Impl.Helpers.Utils.intToHexString(ch32))+')'));
+                err.setErrorCode("SERE0006");
+                err.setLocator(locationId);
+                throw err;
             }
         }
     

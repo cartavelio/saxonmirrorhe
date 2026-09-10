@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.sort {
     public class GroupAdjacentIterator : Saxon.Hej.expr.sort.GroupIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.LookaheadIterator {
-        private readonly Saxon.Hej.expr.Expression select;
+        private readonly Saxon.Hej.expr.elab.PullEvaluator select;
         private readonly Saxon.Hej.om.FocusIterator population;
         private readonly Saxon.Hej.expr.Expression keyExpression;
         private readonly Saxon.Hej.lib.StringCollator collator;
@@ -18,12 +18,12 @@ namespace Saxon.Hej.expr.sort {
         private Saxon.Hej.om.Item current = null;
         private int position = 0;
         private bool composite = false;
-        public GroupAdjacentIterator(Saxon.Hej.expr.Expression select, Saxon.Hej.expr.Expression keyExpression, Saxon.Hej.expr.XPathContext baseContext, Saxon.Hej.lib.StringCollator collator, bool composite)  {
+        public GroupAdjacentIterator(Saxon.Hej.expr.elab.PullEvaluator select, Saxon.Hej.expr.Expression keyExpression, Saxon.Hej.expr.XPathContext baseContext, Saxon.Hej.lib.StringCollator collator, bool composite)  {
             this.select = select;
             this.keyExpression = keyExpression;
             this.baseContext = baseContext;
             this.runningContext = baseContext.newMinorContext();
-            this.population = runningContext.trackFocus(select.iterate(baseContext));
+            this.population = runningContext.trackFocus(/*Delegate.iterate()*/select(baseContext));
             this.collator = collator;
             this.composite = composite;
             nextItem = population.next();
@@ -101,8 +101,8 @@ namespace Saxon.Hej.expr.sort {
         public Saxon.Hej.om.AtomicSequence getCurrentGroupingKey() {
             return currentKey;
         }
-        public Saxon.Hej.om.SequenceIterator iterateCurrentGroup() {
-            return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.Item>(currentMembers);
+        public Saxon.Hej.om.GroundedValue currentGroup() {
+            return Saxon.Hej.value.SequenceExtent.makeSequenceExtent(currentMembers);
         }
         public bool supportsHasNext() {
             return true;
@@ -134,25 +134,12 @@ namespace Saxon.Hej.expr.sort {
         public void close() {
             population.close();
         }
-        public void discharge() {
-            population.discharge();
-        }
         public Saxon.Eej.ee.stream.ManualGroupIterator getSnapShot(Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Hej.expr.sort.GroupAdjacentIterator.ManualGroupAdjacentIterator(current, position, currentMembers, currentKey, runningContext.newMinorContext());
-        }
-        private class ManualGroupAdjacentIterator : Saxon.Eej.ee.stream.ManualGroupIterator {
-            private readonly System.Collections.Generic.IList<Saxon.Hej.om.Item> currentMembers;
-            private readonly Saxon.Hej.expr.XPathContext savedcontext;
-            internal ManualGroupAdjacentIterator(Saxon.Hej.om.Item current, int position, System.Collections.Generic.IList<Saxon.Hej.om.Item> currentMembers, Saxon.Hej.om.AtomicSequence currentKey, Saxon.Hej.expr.XPathContext savedContext) : base (current, position) {
-                this.currentMembers = currentMembers;
-                this.savedcontext = savedContext;
-                setCurrentGroupingKey(currentKey);
-                setLengthFinder(() => savedcontext.getLast());
-            }
-            public override Saxon.Hej.om.SequenceIterator iterateCurrentGroup() {
-                return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.Item>(currentMembers);
-            }
-        
+            Saxon.Eej.ee.stream.ManualGroupIterator iter = new Saxon.Eej.ee.stream.ManualGroupIterator(current, position);
+            iter.setCurrentGroup(Saxon.Hej.value.SequenceExtent.makeSequenceExtent(currentMembers));
+            iter.setCurrentGroupingKey(currentKey);
+            iter.setLengthFinder(context.getLast /* instance method reference */);
+            return iter;
         }
     
     }

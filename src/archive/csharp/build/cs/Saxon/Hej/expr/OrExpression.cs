@@ -54,6 +54,38 @@ namespace Saxon.Hej.expr {
         public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext c) {
             return (getLhsExpression().effectiveBooleanValue(c) || getRhsExpression().effectiveBooleanValue(c));
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.OrExpression.OrElaborator();
+        }
+        public class OrElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.OrExpression expr = (Saxon.Hej.expr.OrExpression)(getExpression());
+                Saxon.Hej.expr.elab.BooleanEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForBoolean();
+                Saxon.Hej.expr.elab.BooleanEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForBoolean();
+                return context => {
+                    Saxon.Hej.trans.XPathException saved = null;
+                    try {
+                        bool b0 = /*Delegate.eval()*/eval0(context);
+                        if (b0) {
+                            return true;
+                        }
+                    } catch (Saxon.Hej.trans.UncheckedXPathException err) {
+                        saved = err.getXPathException();
+                    } catch (Saxon.Hej.trans.XPathException err) {
+                        saved = err;
+                    }
+                    bool b1 = /*Delegate.eval()*/eval1(context);
+                    if (b1) {
+                        return true;
+                    }
+                    if ((saved != null)) {
+                        throw saved;
+                    }
+                    return false;
+                } ;
+            }
+        
+        }
     
     }
 }

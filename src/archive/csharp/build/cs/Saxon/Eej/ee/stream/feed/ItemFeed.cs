@@ -19,7 +19,7 @@ namespace Saxon.Eej.ee.stream.feed {
         }
         public static void processItems(Saxon.Hej.om.SequenceIterator iter, Saxon.Hej.@event.Outputter result) {
             try {
-                Saxon.Hej.om.SequenceTool.supply(iter, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(it => result.append(it) /* converted from instance method reference */));
+                Saxon.Hej.om.SequenceTool.supply(iter, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)(/* Unresolved method reference */result.append));
             } catch (Saxon.Hej.trans.UncheckedXPathException unxe) {
                 Saxon.Hej.trans.XPathException xe = unxe.getXPathException();
                 if ((xe is Saxon.Hej.trans.QuitParsingException)) {

@@ -40,31 +40,36 @@ namespace Saxon.Hej.expr.instruct {
         public override string getStreamerName() {
             return "NextIteration";
         }
-        public override Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.XPathContext c = context;
-            while (!(((c is Saxon.Hej.expr.XPathContextMajor)))) {
-                c = c.getCaller();
-            }
-            Saxon.Hej.expr.XPathContextMajor cm = (Saxon.Hej.expr.XPathContextMajor)(c);
-            if ((actualParams.Length == 1)) {
-                cm.setLocalVariable(actualParams[0].getSlotNumber(), actualParams[0].getSelectValue(context));
-            } else {
-                Saxon.Hej.om.Sequence[] oldVars = cm.getAllVariableValues();
-                Saxon.Hej.om.Sequence[] newVars = Saxon.Ejava.util.Arrays.copyOf(oldVars, oldVars.Length);
-                foreach (Saxon.Hej.expr.instruct.WithParam wp in actualParams) {
-                    newVars[wp.getSlotNumber()] = wp.getSelectValue(context);
-                }
-                cm.resetAllVariableValues(newVars);
-            }
-            cm.requestTailCall(this, null);
-            return null;
-        }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             @out.startElement("nextIteration", this);
             if (((actualParams != null) && (actualParams.Length>0))) {
                 Saxon.Hej.expr.instruct.WithParam.exportParameters(actualParams, @out, false);
             }
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.NextIteration.NextIterationElaborator();
+        }
+        public class NextIterationElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.NextIteration expr = (Saxon.Hej.expr.instruct.NextIteration)(getExpression());
+                return (output, context) => {
+                    Saxon.Hej.expr.XPathContextMajor cm = context.getMajorContext();
+                    if ((expr.actualParams.Length == 1)) {
+                        cm.setLocalVariable(expr.actualParams[0].getSlotNumber(), expr.actualParams[0].getSelectValue(context));
+                    } else {
+                        Saxon.Hej.om.Sequence[] oldVars = cm.getAllVariableValues();
+                        Saxon.Hej.om.Sequence[] newVars = Saxon.Ejava.util.Arrays.copyOf(oldVars, oldVars.Length);
+                        foreach (Saxon.Hej.expr.instruct.WithParam wp in expr.actualParams) {
+                            newVars[wp.getSlotNumber()] = wp.getSelectValue(context);
+                        }
+                        cm.resetAllVariableValues(newVars);
+                    }
+                    cm.requestTailCall(expr, null);
+                    return null;
+                } ;
+            }
+        
         }
     
     }

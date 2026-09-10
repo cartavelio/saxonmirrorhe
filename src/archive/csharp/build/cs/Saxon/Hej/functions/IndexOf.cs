@@ -28,9 +28,6 @@ namespace Saxon.Hej.functions {
             public void close() {
                 @base.close();
             }
-            public void discharge() {
-                @base.discharge();
-            }
             public Saxon.Hej.om.Item next() {
                 try {
                     Saxon.Hej.value.AtomicValue baseItem;

@@ -15,18 +15,16 @@ namespace Saxon.Eej.ee.validate {
             Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
             pipe.setHostLanguage(Saxon.Api.HostLanguage.XML_SCHEMA);
             Saxon.Hej.@event.SequenceReceiver endPoint = new Saxon.Eej.ee.validate.InSituValidator.NodeUpdater(nodeBuffer, pipe);
-            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions();
-            options.setSchemaValidationMode(validationMode);
-            options.setSpaceStrippingRule(null);
+            Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions().withSchemaValidationMode(validationMode).withSpaceStrippingRule(null);
             Saxon.Hej.@event.Receiver validator;
             if ((root.getNodeKind() == Saxon.Hej.type.Type.DOCUMENT)) {
                 validator = config.getDocumentValidator(endPoint, root.getSystemId(), options, null);
             } else {
-                options.setTopLevelElement(Saxon.Hej.om.NameOfNode.makeName(root).getStructuredQName());
+                options = options.withTopLevelElement(Saxon.Hej.om.NameOfNode.makeName(root).getStructuredQName());
                 validator = config.getElementValidator(endPoint, options, Saxon.Hej.expr.parser.Loc.NONE);
             }
             Saxon.Eej.ee.validate.InSituValidator.NodeCounter nodeCounter = new Saxon.Eej.ee.validate.InSituValidator.NodeCounter(nodeBuffer);
-            pipe.setCopyInformee(element => nodeCounter.notifyElementNode(element));
+            pipe.setCopyInformee(nodeCounter.notifyElementNode /* instance method reference */);
             root.copy(validator, Saxon.Hej.om.CopyOptions.ALL_NAMESPACES, Saxon.Hej.expr.parser.Loc.NONE);
         }
         private class NodeCounter : Saxon.Hej.@event.CopyInformee {

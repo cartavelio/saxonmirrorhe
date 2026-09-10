@@ -55,7 +55,7 @@ namespace Saxon.Hej.lib {
             featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/linenumbering", 38, "HE PE EE", typeof(bool), false));
             featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/markDefaultedAttributes", 39, "HE PE EE", typeof(bool), false));
             featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/maxCompiledClasses", 40, "EE", typeof(int), null));
-            featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/messageEmitterClass", 41, "HE PE EE", typeof(string), null));
+            featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/messageEmitterClass", 41, "HE PE EE", typeof(System.Object), null));
             featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/moduleURIResolver", 42, "HE PE EE", typeof(Saxon.Hej.lib.ModuleURIResolver), null));
             featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/moduleURIResolverClass", 43, "HE PE EE", typeof(string), null));
             featureList.Add(new Saxon.Hej.lib.FeatureData("http://saxon.sf.net/feature/monitorHotSpotByteCode", 44, "EE", typeof(bool), false));

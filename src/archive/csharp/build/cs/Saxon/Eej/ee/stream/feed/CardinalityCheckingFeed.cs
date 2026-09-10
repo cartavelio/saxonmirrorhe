@@ -87,7 +87,7 @@ namespace Saxon.Eej.ee.stream.feed {
                 base.startElement(elemName, type, attributes, namespaces, location, properties);
             }
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             if (!(hasFailed())) {
                 if ((level++ == 0)) {
                     checkCount();

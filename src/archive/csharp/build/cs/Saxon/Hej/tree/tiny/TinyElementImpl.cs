@@ -46,7 +46,7 @@ namespace Saxon.Hej.tree.tiny {
         public bool hasUniformNamespaces() {
             return false;
         }
-        public override string getAttributeValue(string uri, string local) {
+        public override string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string local) {
             int a = tree.alpha[nodeNr];
             if ((a<0)) {
                 return null;
@@ -56,7 +56,7 @@ namespace Saxon.Hej.tree.tiny {
                 int nc = tree.attCode[a];
                 Saxon.Hej.om.StructuredQName name = pool.getUnprefixedQName(nc);
                 if ((name.getLocalPart().Equals(local) && name.hasURI(uri))) {
-                    return tree.attValue[a].ToString();
+                    return tree.attValue[a];
                 }
                 a++;
             }
@@ -87,6 +87,7 @@ namespace Saxon.Hej.tree.tiny {
         }
         public override void copy(Saxon.Hej.@event.Receiver receiver, int copyOptions, Saxon.Hej.s9api.Location location) {
             bool copyTypes = Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS);
+            bool copyForUpdate = Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.FOR_UPDATE);
             short level = -1;
             bool closePending = false;
             short startLevel = tree.depth[nodeNr];
@@ -111,6 +112,10 @@ namespace Saxon.Hej.tree.tiny {
                   case Saxon.Hej.type.Type.ELEMENT:
                   case Saxon.Hej.type.Type.TEXTUAL_ELEMENT:
                     {
+                        int receiverOptions = Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY;
+                        if (copyForUpdate) {
+                            receiverOptions |= Saxon.Hej.@event.ReceiverOption.MUTABLE_TREE;
+                        }
                         if (copyTypes) {
                             elementType = tree.getSchemaType(next);
                             if (disallowNamespaceSensitiveContent) {
@@ -147,23 +152,24 @@ namespace Saxon.Hej.tree.tiny {
                                 }
                             } else {
                                 addAttributeNamespaces = true;
-                                string uri = pool.getURI(nameCode);
-                                if (!(uri.Length==0)) {
+                                Saxon.Hej.om.NamespaceUri uri = pool.getURI(nameCode);
+                                if (!(uri.isEmpty())) {
                                     namespaces = Saxon.Hej.om.NamespaceMap.of(prefix, uri);
                                 }
                             }
                         }
                         if ((kind == Saxon.Hej.type.Type.TEXTUAL_ELEMENT)) {
                             closePending = false;
-                            receiver.startElement(new Saxon.Hej.om.CodedName(fp, prefix, pool), elementType, Saxon.Hej.om.EmptyAttributeMap.getInstance(), namespaces, location, Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY);
+                            receiver.startElement(new Saxon.Hej.om.CodedName(fp, prefix, pool), elementType, Saxon.Hej.om.EmptyAttributeMap.getInstance(), namespaces, location, receiverOptions);
                             Saxon.Hej.str.UnicodeString value = Saxon.Hej.tree.tiny.TinyTextImpl.getStringValue(tree, next);
                             receiver.characters(value, location, Saxon.Hej.@event.ReceiverOption.WHOLE_TEXT_NODE);
                             receiver.endElement();
                         } else {
                             closePending = true;
-                            Saxon.Hej.om.AttributeMap attributes = Saxon.Hej.om.EmptyAttributeMap.getInstance();
+                            Saxon.Hej.om.AttributeMap attributes;
                             int att = tree.alpha[next];
                             if ((att>=0)) {
+                                System.Collections.Generic.IList<Saxon.Hej.om.AttributeInfo> attributeInfoList = new System.Collections.Generic.List<Saxon.Hej.om.AttributeInfo>(8);
                                 while (((att<tree.numberOfAttributes) && (tree.attParent[att] == next))) {
                                     int attCode = tree.attCode[att];
                                     int attfp = (attCode&Saxon.Hej.om.NamePool.FP_MASK);
@@ -186,14 +192,17 @@ namespace Saxon.Hej.tree.tiny {
                                     if (tree.isIdrefAttribute(att)) {
                                         attProps |= Saxon.Hej.@event.ReceiverOption.IS_IDREF;
                                     }
-                                    attributes = attributes.put(new Saxon.Hej.om.AttributeInfo(new Saxon.Hej.om.CodedName(attfp, attPrefix, pool), attributeType, tree.attValue[att].ToString(), location, attProps));
+                                    attributeInfoList.Add(new Saxon.Hej.om.AttributeInfo(new Saxon.Hej.om.CodedName(attfp, attPrefix, pool), attributeType, tree.attValue[att], location, attProps));
                                     if ((addAttributeNamespaces && !(attPrefix.Length==0))) {
                                         namespaces = namespaces.put(attPrefix, pool.getURI(attCode));
                                     }
                                     att++;
                                 }
+                                attributes = Saxon.Hej.om.SequenceTool.attributeMapFromList(attributeInfoList);
+                            } else {
+                                attributes = Saxon.Hej.om.EmptyAttributeMap.getInstance();
                             }
-                            receiver.startElement(new Saxon.Hej.om.CodedName(fp, prefix, pool), elementType, attributes, namespaces, location, Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY);
+                            receiver.startElement(new Saxon.Hej.om.CodedName(fp, prefix, pool), elementType, attributes, namespaces, location, receiverOptions);
                         }
                         break ;
                     }
@@ -273,14 +282,6 @@ namespace Saxon.Hej.tree.tiny {
                     }
                 }
             }
-        }
-        public string getURIForPrefix(string prefix, bool useDefault) {
-            if ((!(useDefault) && (((prefix == null) || prefix.Length==0)))) {
-                return "";
-            }
-            int ns = tree.beta[nodeNr];
-            Saxon.Hej.om.NamespaceMap map = tree.namespaceMaps[ns];
-            return map.getURIForPrefix(prefix, useDefault);
         }
         public override bool isId() {
             return tree.isIdElement(nodeNr);

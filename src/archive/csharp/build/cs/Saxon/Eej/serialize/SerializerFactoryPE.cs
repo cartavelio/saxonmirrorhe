@@ -15,6 +15,7 @@ namespace Saxon.Eej.serialize {
                     emitter.setUnicodeWriter(((Saxon.Hej.serialize.UnicodeWriterResult)(result)).getUnicodeWriter());
                 } else {
                     emitter.setUnicodeWriter(expandedResult.obtainUnicodeWriter());
+                    emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                 }
                 props.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "yes");
                 emitter.setOutputProperties(props);
@@ -40,6 +41,7 @@ namespace Saxon.Eej.serialize {
                                 emitter.setUnicodeWriter(((Saxon.Hej.serialize.UnicodeWriterResult)(result)).getUnicodeWriter());
                             } else {
                                 emitter.setUnicodeWriter(expandedResult.obtainUnicodeWriter());
+                                emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                             }
                             props.setProperty(Saxon.Ejavax.xml.transform.OutputKeys.OMIT_XML_DECLARATION, "yes");
                             emitter.setOutputProperties(props);
@@ -177,7 +179,6 @@ namespace Saxon.Eej.serialize {
                     throw Saxon.Hej.trans.XPathException.makeXPathException(e);
                 }
                 Saxon.Hej.trans.CompilerInfo compilerInfo = new Saxon.Hej.trans.CompilerInfo(config.getDefaultXsltCompilerInfo());
-                compilerInfo.setGenerateByteCode(config.isGenerateByteCode(Saxon.Api.HostLanguage.XSLT));
                 compilerInfo.setTargetEdition(config.getEditionCode());
                 compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
                 next = Saxon.Hej.style.Compilation.compileSingletonPackage(config, compilerInfo, source);

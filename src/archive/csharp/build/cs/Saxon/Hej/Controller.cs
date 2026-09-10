@@ -35,7 +35,7 @@ namespace Saxon.Hej {
         private Saxon.Hej.lib.CollectionFinder collectionFinder = null;
         public const string ANONYMOUS_PRINCIPAL_OUTPUT_URI = "dummy:/anonymous/principal/result";
         private Saxon.Hej.trans.StylesheetCache stylesheetCache = null;
-        private System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> focusTrackerFactory = (iter) => new Saxon.Hej.om.FocusTrackingIterator(iter);
+        private System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> focusTrackerFactory = /* ctor#1 */ (a) => new Saxon.Hej.om.FocusTrackingIterator(a);
         private System.Func<Saxon.Hej.om.SequenceIterator,Saxon.Hej.om.FocusTrackingIterator> multiThreadedFocusTrackerFactory;
         public Controller(Saxon.Hej.Configuration config)  {
             this.config = config;
@@ -138,14 +138,9 @@ namespace Saxon.Hej {
             return new Saxon.Hej.@event.SequenceCollector(pipe, size);
         }
         public Saxon.Hej.@event.PipelineConfiguration makePipelineConfiguration() {
-            Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.getParseOptions().setSchemaValidationMode(validationMode);
-            pipe.getParseOptions().setErrorReporter(errorReporter);
+            Saxon.Hej.lib.ParseOptions parseOptions = getConfiguration().getParseOptions().withSchemaValidationMode(validationMode).withErrorReporter(errorReporter);
+            Saxon.Hej.@event.PipelineConfiguration pipe = new Saxon.Hej.@event.PipelineConfiguration(getConfiguration(), parseOptions);
             pipe.setController(this);
-            Saxon.Hej.expr.instruct.Executable executable = getExecutable();
-            if ((executable != null)) {
-                pipe.setHostLanguage(executable.getHostLanguage());
-            }
             return pipe;
         }
         public void setErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {
@@ -459,7 +454,7 @@ namespace Saxon.Hej {
                 r = config.getAnnotationStripper(r);
             }
             Saxon.Hej.@event.PipelineConfiguration pipe = sourceBuilder.getPipelineConfiguration();
-            pipe.getParseOptions().setSchemaValidationMode(validationMode);
+            pipe.setParseOptions(pipe.getParseOptions().withSchemaValidationMode(validationMode));
             r.setPipelineConfiguration(pipe);
             Saxon.Hej.@event.Sender.send(source, r, null);
             if (((source is Saxon.Hej.lib.AugmentedSource) && ((Saxon.Hej.lib.AugmentedSource)(source)).isPleaseCloseAfterUse())) {

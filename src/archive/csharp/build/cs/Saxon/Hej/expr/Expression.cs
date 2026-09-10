@@ -20,6 +20,7 @@ namespace Saxon.Hej.expr {
         private System.Collections.Generic.IDictionary<string,System.Object> extraProperties;
         private double cost = -1;
         private int cachedHashCode = -1;
+        private Saxon.Hej.expr.elab.Elaborator elaborator;
         public Expression()  {
         }
         public virtual string getExpressionName() {
@@ -27,9 +28,6 @@ namespace Saxon.Hej.expr {
         }
         public virtual System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> operands() {
             return new System.Collections.Generic.List<Saxon.Hej.expr.Operand>();
-        }
-        public Saxon.Hej.expr.Expression getInterpretedExpression() {
-            return this;
         }
         public System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> checkedOperands() {
             System.Collections.Generic.IEnumerable<Saxon.Hej.expr.Operand> ops = operands();
@@ -110,6 +108,9 @@ namespace Saxon.Hej.expr {
             int p = getSpecialProperties();
             int d = getDependencies();
             return (((((((p&Saxon.Hej.expr.StaticProperty.NO_NODES_NEWLY_CREATED)) != 0) && (((p&Saxon.Hej.expr.StaticProperty.HAS_SIDE_EFFECTS)) == 0)) && ((((d&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_ASSIGNABLE_GLOBALS)) == 0))) && ((((d&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_POSITION)) == 0))) && ((((d&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LAST)) == 0)));
+        }
+        public virtual bool supportsLazyEvaluation() {
+            return (((getDependencies()&(((((Saxon.Hej.expr.StaticProperty.DEPENDS_ON_POSITION|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_LAST)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CURRENT_ITEM)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_CURRENT_GROUP)|Saxon.Hej.expr.StaticProperty.DEPENDS_ON_REGEX_GROUP)))) == 0);
         }
         public virtual Saxon.Hej.expr.Expression getScopingExpression() {
             int d = (getIntrinsicDependencies()&Saxon.Hej.expr.StaticProperty.DEPENDS_ON_FOCUS);
@@ -215,7 +216,7 @@ namespace Saxon.Hej.expr {
                 o.typeCheck(visitor, contextInfo);
             }
         }
-        public virtual Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
+        public virtual Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             throw new Saxon.Ejava.lang.UnsupportedOperationException("staticTypeCheck");
         }
         public virtual Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
@@ -342,11 +343,9 @@ namespace Saxon.Hej.expr {
                 throw;
             }
         }
-        public virtual void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            if (isVacuousExpression()) {
-                iterate(context).next();
-            } else {
-                throw new Saxon.Ejava.lang.UnsupportedOperationException((("Expression "+this.GetType())+" is not an updating expression"));
+        public static void dispatchTailCall(Saxon.Hej.expr.instruct.TailCall tc) {
+            while ((tc != null)) {
+                tc = tc.processLeavingTail();
             }
         }
         public override string ToString() {
@@ -420,10 +419,10 @@ namespace Saxon.Hej.expr {
                     exp = exp.getParentExpression();
                     limit++;
                 } else {
-                    return exp.location;
+                    break ;
                 }
             }
-            return exp.location;
+            return ((exp.location == null) ? Saxon.Hej.expr.parser.Loc.NONE : exp.location);
         }
         public Saxon.Hej.Configuration getConfiguration() {
             try {
@@ -533,7 +532,6 @@ namespace Saxon.Hej.expr {
             return slotsUsed;
         }}
         private static void gatherSlotsUsed(Saxon.Hej.expr.Expression exp, Saxon.Hej.z.IntHashSet slots) {
-            exp = exp.getInterpretedExpression();
             if ((exp is Saxon.Hej.expr.LocalVariableReference)) {
                 slots.add(((Saxon.Hej.expr.LocalVariableReference)(exp)).getSlotNumber());
             } else {
@@ -682,6 +680,18 @@ namespace Saxon.Hej.expr {
         }
         public virtual string getStreamerName() {
             return null;
+        }
+        public virtual Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.elab.FallbackElaborator();
+        }
+        public Saxon.Hej.expr.elab.Elaborator makeElaborator() {
+            if ((elaborator == null)) {
+                Saxon.Hej.expr.elab.Elaborator elab = getElaborator();
+                elab.setExpression(this);
+                return elaborator = elab;
+            } else {
+                return elaborator;
+            }
         }
     
         /* Expanding default method gatherProperties from interface Traceable */

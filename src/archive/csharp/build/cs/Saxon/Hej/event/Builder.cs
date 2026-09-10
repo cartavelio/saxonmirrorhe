@@ -21,6 +21,7 @@ namespace Saxon.Hej.@event {
         protected internal Saxon.Hej.om.NodeInfo currentRoot;
         protected internal bool lineNumbering = false;
         protected internal bool useEventLocation = true;
+        protected internal Saxon.Hej.om.Durability durability = Saxon.Hej.om.Durability.LASTING;
         protected internal bool started = false;
         protected internal bool timing = false;
         protected internal bool opened = false;
@@ -65,6 +66,12 @@ namespace Saxon.Hej.@event {
         }
         public string getBaseURI() {
             return baseURI;
+        }
+        public virtual void setDurability(Saxon.Hej.om.Durability durability) {
+            this.durability = durability;
+        }
+        public Saxon.Hej.om.Durability getDurability() {
+            return durability;
         }
         public void setLineNumbering(bool lineNumbering) {
             this.lineNumbering = lineNumbering;

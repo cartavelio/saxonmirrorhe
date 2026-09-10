@@ -24,7 +24,7 @@ namespace Saxon.Hej.style {
             Saxon.Hej.Configuration config = compilation.getConfiguration();
             Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
             pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
-            Saxon.Hej.tree.linked.LinkedTreeBuilder styleBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe);
+            Saxon.Hej.tree.linked.LinkedTreeBuilder styleBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe, Saxon.Hej.om.Durability.LASTING);
             styleBuilder.setSystemId(styleSource.getSystemId());
             styleBuilder.setNodeFactory(compilation.getStyleNodeFactory(topLevelModule));
             styleBuilder.setLineNumbering(true);
@@ -59,11 +59,7 @@ namespace Saxon.Hej.style {
             } else {
                 options = new Saxon.Hej.lib.ParseOptions();
             }
-            options.setSchemaValidationMode(Saxon.Hej.lib.Validation.STRIP);
-            options.setDTDValidationMode(Saxon.Hej.lib.Validation.STRIP);
-            options.setLineNumbering(true);
-            options.setSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance());
-            options.setErrorReporter(pipe.getErrorReporter());
+            options = options.withSchemaValidationMode(Saxon.Hej.lib.Validation.STRIP).withDTDValidationMode(Saxon.Hej.lib.Validation.STRIP).withLineNumbering(true).withSpaceStrippingRule(Saxon.Hej.om.NoElementsSpaceStrippingRule.getInstance()).withErrorReporter(pipe.getErrorReporter());
             return options;
         }
         private static void sendStylesheetSource(Saxon.Ejavax.xml.transform.Source styleSource, Saxon.Hej.Configuration config, Saxon.Hej.@event.Receiver sourcePipeline, Saxon.Hej.lib.ParseOptions options) {
@@ -80,7 +76,7 @@ namespace Saxon.Hej.style {
             Saxon.Hej.Configuration config = compilation.getConfiguration();
             Saxon.Hej.@event.PipelineConfiguration pipe = config.makePipelineConfiguration();
             pipe.setErrorReporter(compilation.getCompilerInfo().getErrorReporter());
-            Saxon.Hej.tree.linked.LinkedTreeBuilder styleBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe);
+            Saxon.Hej.tree.linked.LinkedTreeBuilder styleBuilder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(pipe, Saxon.Hej.om.Durability.LASTING);
             styleBuilder.setSystemId(styleSource.getSystemId());
             styleBuilder.setNodeFactory(compilation.getStyleNodeFactory(true));
             styleBuilder.setLineNumbering(true);
@@ -94,7 +90,7 @@ namespace Saxon.Hej.style {
             packageBuilder.setSystemId(styleSource.getSystemId());
             Saxon.Hej.@event.CheckSumFilter checksummer = new Saxon.Hej.@event.CheckSumFilter(packageBuilder);
             checksummer.setCheckExistingChecksum(true);
-            Saxon.Hej.@event.Valve valve = new Saxon.Hej.@event.Valve(Saxon.Hej.lib.NamespaceConstant.SAXON_XSLT_EXPORT, commentStripper, checksummer);
+            Saxon.Hej.@event.Valve valve = new Saxon.Hej.@event.Valve(Saxon.Hej.om.NamespaceUri.SAXON_XSLT_EXPORT, commentStripper, checksummer);
             sourcePipeline = valve;
             Saxon.Hej.lib.ParseOptions options = makeStylesheetParseOptions(styleSource, pipe);
             try {
@@ -184,7 +180,7 @@ namespace Saxon.Hej.style {
                     }
                 } else {
                     if ((child is Saxon.Hej.style.DataElement)) {
-                        if (((Saxon.Hej.style.DataElement)(child)).getNodeName().getURI().Length==0) {
+                        if (((Saxon.Hej.style.DataElement)(child)).getNodeName().getNamespaceUri().isEmpty()) {
                             Saxon.Hej.expr.parser.Loc loc = new Saxon.Hej.expr.parser.Loc(child);
                             previousElement.compileError((("Top-level elements must be in a namespace: "+((Saxon.Hej.style.DataElement)(child)).getNodeName().getLocalPart())+" is not"), "XTSE0130", loc);
                         }

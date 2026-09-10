@@ -163,8 +163,8 @@ namespace Saxon.Hej.style {
             pack.setPackageVersion(xslpackage.getPackageVersion());
             pack.setPackageName(xslpackage.getName());
             pack.setSchemaAware((info.isSchemaAware() || isSchemaAware()));
-            pack.createFunctionLibrary();
             pack.setLanguageVersion(info.getXsltVersion());
+            pack.createFunctionLibrary();
             psm.getRuleManager().setCompilerInfo(info);
             setPrincipalStylesheetModule(psm);
             packageData = null;

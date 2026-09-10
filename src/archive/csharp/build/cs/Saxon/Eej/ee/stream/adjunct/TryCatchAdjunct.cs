@@ -49,7 +49,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                         Saxon.Hej.om.StructuredQName code = err.getErrorCodeQName();
                         foreach (Saxon.Hej.expr.TryCatch.CatchClause clause in ((Saxon.Hej.expr.TryCatch)(getExpression())).getCatchClauses()) {
                             if ((code == null)) {
-                                code = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "XXXX9999");
+                                code = new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "XXXX9999");
                             }
                             if (clause.nameTest.matches(code)) {
                                 Saxon.Hej.expr.Expression caught = clause.catchOp.getChildExpression();

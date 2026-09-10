@@ -6,17 +6,10 @@ namespace Saxon.Hej.expr {
         private Saxon.Hej.expr.instruct.ParameterSet localParameters;
         private Saxon.Hej.expr.instruct.ParameterSet tunnelParameters;
         private Saxon.Hej.expr.TailCallLoop.TailCallInfo tailCallInfo;
-        private Saxon.Hej.expr.Component.M currentMode;
-        private Saxon.Hej.trans.rules.Rule currentTemplate;
-        private Saxon.Hej.expr.sort.GroupIterator currentGroupIterator;
-        private Saxon.Hej.expr.sort.GroupIterator currentMergeGroupIterator;
-        private Saxon.Hej.regex.RegexIterator currentRegexIterator;
+        private Saxon.Hej.expr.XPathContextMajor.ContextProperty firstProperty;
         private Saxon.Hej.expr.ContextOriginator origin;
         private Saxon.Hej.expr.XPathContextMajor.ThreadManager threadManager = null;
-        private Saxon.Hej.lib.JJ_ResourceResolver resourceResolver;
-        private Saxon.Hej.lib.ErrorReporter errorReporter;
         private Saxon.Hej.expr.Component currentComponent;
-        internal Saxon.Hej.trans.XPathException currentException;
         public XPathContextMajor(Saxon.Hej.Controller controller)  {
             this.controller = controller;
             stackFrame = Saxon.Hej.expr.StackFrame.EMPTY;
@@ -28,7 +21,7 @@ namespace Saxon.Hej.expr {
             controller = ((exec is Saxon.Hej.PreparedStylesheet) ? new Saxon.Hej.trans.XsltController(exec.getConfiguration(), (Saxon.Hej.PreparedStylesheet)(exec)) : new Saxon.Hej.Controller(exec.getConfiguration(), exec));
             if ((item != null)) {
                 Saxon.Hej.om.SequenceIterator iter = Saxon.Hej.tree.iter.SingletonIterator.makeIterator(item);
-                currentIterator = new Saxon.Hej.om.FocusTrackingIterator(iter);
+                currentIterator = Saxon.Hej.om.SequenceTool.focusTracker(iter);
                 currentIterator.next();
                 last = new Saxon.Hej.expr.XPathContextMinor.LastValue(1);
             }
@@ -43,27 +36,17 @@ namespace Saxon.Hej.expr {
             c.tunnelParameters = tunnelParameters;
             c.last = last;
             c.currentDestination = currentDestination;
-            c.currentMode = currentMode;
-            c.currentTemplate = currentTemplate;
-            c.currentRegexIterator = currentRegexIterator;
-            c.currentGroupIterator = currentGroupIterator;
-            c.currentMergeGroupIterator = currentMergeGroupIterator;
-            c.currentException = currentException;
+            c.firstProperty = firstProperty;
             c.caller = this;
             c.tailCallInfo = null;
             c.temporaryOutputState = temporaryOutputState;
             c.threadManager = threadManager;
             c.currentComponent = currentComponent;
-            c.errorReporter = errorReporter;
-            c.resourceResolver = resourceResolver;
             return c;
         }
         public static Saxon.Hej.expr.XPathContextMajor newContext(Saxon.Hej.expr.XPathContextMinor prev) {
             Saxon.Hej.expr.XPathContextMajor c = new Saxon.Hej.expr.XPathContextMajor();
-            Saxon.Hej.expr.XPathContext p = prev;
-            while (!(((p is Saxon.Hej.expr.XPathContextMajor)))) {
-                p = p.getCaller();
-            }
+            Saxon.Hej.expr.XPathContextMajor p = prev.getMajorContext();
             c.controller = p.getController();
             c.currentIterator = prev.getCurrentIterator();
             c.stackFrame = prev.getStackFrame();
@@ -71,17 +54,11 @@ namespace Saxon.Hej.expr {
             c.tunnelParameters = p.getTunnelParameters();
             c.last = prev.last;
             c.currentDestination = prev.currentDestination;
-            c.currentMode = p.getCurrentMode();
-            c.currentTemplate = p.getCurrentTemplateRule();
-            c.currentRegexIterator = p.getCurrentRegexIterator();
-            c.currentGroupIterator = p.getCurrentGroupIterator();
-            c.currentMergeGroupIterator = p.getCurrentMergeGroupIterator();
+            c.firstProperty = p.firstProperty;
             c.caller = prev;
             c.tailCallInfo = null;
-            c.threadManager = ((Saxon.Hej.expr.XPathContextMajor)(p)).threadManager;
-            c.currentComponent = ((Saxon.Hej.expr.XPathContextMajor)(p)).currentComponent;
-            c.errorReporter = ((Saxon.Hej.expr.XPathContextMajor)(p)).errorReporter;
-            c.resourceResolver = ((Saxon.Hej.expr.XPathContextMajor)(p)).resourceResolver;
+            c.threadManager = p.threadManager;
+            c.currentComponent = p.currentComponent;
             c.temporaryOutputState = prev.temporaryOutputState;
             return c;
         }
@@ -182,44 +159,84 @@ namespace Saxon.Hej.expr {
             stackFrame = new Saxon.Hej.expr.StackFrame(new Saxon.Hej.expr.instruct.SlotManager(numberOfVariables), Saxon.Hej.om.SequenceTool.makeSequenceArray(numberOfVariables));
         }
         public void setCurrentMode(Saxon.Hej.expr.Component.M mode) {
-            this.currentMode = mode;
+            if ((mode != getCurrentMode())) {
+                firstProperty = new Saxon.Hej.expr.XPathContextMajor.CurrentMode(mode, firstProperty);
+            }
         }
         public override Saxon.Hej.expr.Component.M getCurrentMode() {
-            Saxon.Hej.expr.Component.M m = currentMode;
-            if ((m == null)) {
-                Saxon.Hej.trans.rules.RuleManager rm = getController().getRuleManager();
-                if ((rm != null)) {
-                    return rm.getUnnamedMode().getDeclaringComponent();
-                } else {
-                    return null;
+            Saxon.Hej.expr.XPathContextMajor.ContextProperty p = firstProperty;
+            while ((p != null)) {
+                if ((p is Saxon.Hej.expr.XPathContextMajor.CurrentMode)) {
+                    return ((Saxon.Hej.expr.XPathContextMajor.CurrentMode)(p)).mode;
                 }
+                p = p.next;
+            }
+            Saxon.Hej.trans.rules.RuleManager rm = getController().getRuleManager();
+            if ((rm != null)) {
+                return rm.getUnnamedMode().getDeclaringComponent();
             } else {
-                return m;
+                return null;
             }
         }
         public void setCurrentTemplateRule(Saxon.Hej.trans.rules.Rule rule) {
-            this.currentTemplate = rule;
+            if ((rule != getCurrentTemplateRule())) {
+                firstProperty = new Saxon.Hej.expr.XPathContextMajor.CurrentTemplateRule(rule, firstProperty);
+            }
         }
         public override Saxon.Hej.trans.rules.Rule getCurrentTemplateRule() {
-            return currentTemplate;
+            Saxon.Hej.expr.XPathContextMajor.ContextProperty p = firstProperty;
+            while ((p != null)) {
+                if ((p is Saxon.Hej.expr.XPathContextMajor.CurrentTemplateRule)) {
+                    return ((Saxon.Hej.expr.XPathContextMajor.CurrentTemplateRule)(p)).currentRule;
+                }
+                p = p.next;
+            }
+            return null;
         }
         public void setCurrentGroupIterator(Saxon.Hej.expr.sort.GroupIterator iterator) {
-            this.currentGroupIterator = iterator;
+            if ((iterator != getCurrentGroupIterator())) {
+                firstProperty = new Saxon.Hej.expr.XPathContextMajor.CurrentGroupIterator(iterator, firstProperty);
+            }
         }
         public override Saxon.Hej.expr.sort.GroupIterator getCurrentGroupIterator() {
-            return currentGroupIterator;
+            Saxon.Hej.expr.XPathContextMajor.ContextProperty p = firstProperty;
+            while ((p != null)) {
+                if ((p is Saxon.Hej.expr.XPathContextMajor.CurrentGroupIterator)) {
+                    return ((Saxon.Hej.expr.XPathContextMajor.CurrentGroupIterator)(p)).iterator;
+                }
+                p = p.next;
+            }
+            return null;
         }
         public void setCurrentMergeGroupIterator(Saxon.Hej.expr.sort.GroupIterator iterator) {
-            this.currentMergeGroupIterator = iterator;
+            if ((iterator != getCurrentMergeGroupIterator())) {
+                firstProperty = new Saxon.Hej.expr.XPathContextMajor.CurrentMergeGroupIterator(iterator, firstProperty);
+            }
         }
         public override Saxon.Hej.expr.sort.GroupIterator getCurrentMergeGroupIterator() {
-            return currentMergeGroupIterator;
+            Saxon.Hej.expr.XPathContextMajor.ContextProperty p = firstProperty;
+            while ((p != null)) {
+                if ((p is Saxon.Hej.expr.XPathContextMajor.CurrentMergeGroupIterator)) {
+                    return ((Saxon.Hej.expr.XPathContextMajor.CurrentMergeGroupIterator)(p)).iterator;
+                }
+                p = p.next;
+            }
+            return null;
         }
         public void setCurrentRegexIterator(Saxon.Hej.regex.RegexIterator currentRegexIterator) {
-            this.currentRegexIterator = currentRegexIterator;
+            if ((currentRegexIterator != getCurrentRegexIterator())) {
+                firstProperty = new Saxon.Hej.expr.XPathContextMajor.CurrentRegexIterator(currentRegexIterator, firstProperty);
+            }
         }
         public override Saxon.Hej.regex.RegexIterator getCurrentRegexIterator() {
-            return currentRegexIterator;
+            Saxon.Hej.expr.XPathContextMajor.ContextProperty p = firstProperty;
+            while ((p != null)) {
+                if ((p is Saxon.Hej.expr.XPathContextMajor.CurrentRegexIterator)) {
+                    return ((Saxon.Hej.expr.XPathContextMajor.CurrentRegexIterator)(p)).iterator;
+                }
+                p = p.next;
+            }
+            return null;
         }
         public override int useLocalParameter(Saxon.Hej.om.StructuredQName paramName, int slotNumber, bool isTunnel) {
             Saxon.Hej.expr.instruct.ParameterSet @params = (isTunnel ? getTunnelParameters() : localParameters);
@@ -236,22 +253,49 @@ namespace Saxon.Hej.expr {
             return (@checked ? Saxon.Hej.expr.instruct.ParameterSet.SUPPLIED_AND_CHECKED : Saxon.Hej.expr.instruct.ParameterSet.SUPPLIED);
         }
         public void setResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver) {
-            this.resourceResolver = resolver;
+            if ((resolver != getResourceResolver())) {
+                firstProperty = new Saxon.Hej.expr.XPathContextMajor.CurrentResourceResolver(resolver, firstProperty);
+            }
         }
         public override Saxon.Hej.lib.JJ_ResourceResolver getResourceResolver() {
-            return ((resourceResolver == null) ? controller.getResourceResolver() : resourceResolver);
+            Saxon.Hej.expr.XPathContextMajor.ContextProperty p = firstProperty;
+            while ((p != null)) {
+                if ((p is Saxon.Hej.expr.XPathContextMajor.CurrentResourceResolver)) {
+                    return ((Saxon.Hej.expr.XPathContextMajor.CurrentResourceResolver)(p)).resolver;
+                }
+                p = p.next;
+            }
+            return controller.getResourceResolver();
         }
         public void setErrorReporter(Saxon.Hej.lib.ErrorReporter reporter) {
-            this.errorReporter = reporter;
+            if ((reporter != getErrorReporter())) {
+                firstProperty = new Saxon.Hej.expr.XPathContextMajor.CurrentErrorReporter(reporter, firstProperty);
+            }
         }
         public override Saxon.Hej.lib.ErrorReporter getErrorReporter() {
-            return ((errorReporter == null) ? controller.getErrorReporter() : errorReporter);
+            Saxon.Hej.expr.XPathContextMajor.ContextProperty p = firstProperty;
+            while ((p != null)) {
+                if ((p is Saxon.Hej.expr.XPathContextMajor.CurrentErrorReporter)) {
+                    return ((Saxon.Hej.expr.XPathContextMajor.CurrentErrorReporter)(p)).errorReporter;
+                }
+                p = p.next;
+            }
+            return controller.getErrorReporter();
         }
         public void setCurrentException(Saxon.Hej.trans.XPathException exception) {
-            currentException = exception;
+            if ((exception != getCurrentException())) {
+                this.firstProperty = new Saxon.Hej.expr.XPathContextMajor.CurrentException(exception, firstProperty);
+            }
         }
         public override Saxon.Hej.trans.XPathException getCurrentException() {
-            return currentException;
+            Saxon.Hej.expr.XPathContextMajor.ContextProperty p = firstProperty;
+            while ((p != null)) {
+                if ((p is Saxon.Hej.expr.XPathContextMajor.CurrentException)) {
+                    return ((Saxon.Hej.expr.XPathContextMajor.CurrentException)(p)).exception;
+                }
+                p = p.next;
+            }
+            return null;
         }
         public override Saxon.Hej.expr.Component getCurrentComponent() {
             return currentComponent;
@@ -270,6 +314,74 @@ namespace Saxon.Hej.expr {
                 System.Console.Error.WriteLine(e);
                 throw;
             }
+        }
+        private abstract class ContextProperty {
+            public Saxon.Hej.expr.XPathContextMajor.ContextProperty next;
+        
+        }
+        private class CurrentRegexIterator : Saxon.Hej.expr.XPathContextMajor.ContextProperty {
+            public Saxon.Hej.regex.RegexIterator iterator;
+            public CurrentRegexIterator(Saxon.Hej.regex.RegexIterator iterator, Saxon.Hej.expr.XPathContextMajor.ContextProperty next)  {
+                this.iterator = iterator;
+                this.next = next;
+            }
+        
+        }
+        private class CurrentGroupIterator : Saxon.Hej.expr.XPathContextMajor.ContextProperty {
+            public Saxon.Hej.expr.sort.GroupIterator iterator;
+            public CurrentGroupIterator(Saxon.Hej.expr.sort.GroupIterator iterator, Saxon.Hej.expr.XPathContextMajor.ContextProperty next)  {
+                this.iterator = iterator;
+                this.next = next;
+            }
+        
+        }
+        private class CurrentMergeGroupIterator : Saxon.Hej.expr.XPathContextMajor.ContextProperty {
+            public Saxon.Hej.expr.sort.GroupIterator iterator;
+            public CurrentMergeGroupIterator(Saxon.Hej.expr.sort.GroupIterator iterator, Saxon.Hej.expr.XPathContextMajor.ContextProperty next)  {
+                this.iterator = iterator;
+                this.next = next;
+            }
+        
+        }
+        private class CurrentTemplateRule : Saxon.Hej.expr.XPathContextMajor.ContextProperty {
+            public Saxon.Hej.trans.rules.Rule currentRule;
+            public CurrentTemplateRule(Saxon.Hej.trans.rules.Rule currentRule, Saxon.Hej.expr.XPathContextMajor.ContextProperty next)  {
+                this.currentRule = currentRule;
+                this.next = next;
+            }
+        
+        }
+        private class CurrentMode : Saxon.Hej.expr.XPathContextMajor.ContextProperty {
+            public Saxon.Hej.expr.Component.M mode;
+            public CurrentMode(Saxon.Hej.expr.Component.M mode, Saxon.Hej.expr.XPathContextMajor.ContextProperty next)  {
+                this.mode = mode;
+                this.next = next;
+            }
+        
+        }
+        private class CurrentException : Saxon.Hej.expr.XPathContextMajor.ContextProperty {
+            public Saxon.Hej.trans.XPathException exception;
+            public CurrentException(Saxon.Hej.trans.XPathException exception, Saxon.Hej.expr.XPathContextMajor.ContextProperty next)  {
+                this.exception = exception;
+                this.next = next;
+            }
+        
+        }
+        private class CurrentErrorReporter : Saxon.Hej.expr.XPathContextMajor.ContextProperty {
+            public Saxon.Hej.lib.ErrorReporter errorReporter;
+            public CurrentErrorReporter(Saxon.Hej.lib.ErrorReporter errorReporter, Saxon.Hej.expr.XPathContextMajor.ContextProperty next)  {
+                this.errorReporter = errorReporter;
+                this.next = next;
+            }
+        
+        }
+        private class CurrentResourceResolver : Saxon.Hej.expr.XPathContextMajor.ContextProperty {
+            public Saxon.Hej.lib.JJ_ResourceResolver resolver;
+            public CurrentResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resolver, Saxon.Hej.expr.XPathContextMajor.ContextProperty next)  {
+                this.resolver = resolver;
+                this.next = next;
+            }
+        
         }
     
     }

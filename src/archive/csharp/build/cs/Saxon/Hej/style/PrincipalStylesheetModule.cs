@@ -14,8 +14,8 @@ namespace Saxon.Hej.style {
         private Saxon.Hej.expr.accum.AccumulatorRegistry accumulatorManager = null;
         private int numberOfAliases = 0;
         private System.Collections.Generic.IList<Saxon.Hej.style.ComponentDeclaration> namespaceAliasList = new System.Collections.Generic.List<Saxon.Hej.style.ComponentDeclaration>(5);
-        private System.Collections.Generic.Dictionary<string,Saxon.Hej.om.NamespaceBinding> namespaceAliasMap;
-        private System.Collections.Generic.ISet<string> aliasResultUriSet;
+        private System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri,Saxon.Hej.om.NamespaceBinding> namespaceAliasMap;
+        private System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> aliasResultUriSet;
         private readonly System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,System.Collections.Generic.IList<Saxon.Hej.style.ComponentDeclaration>> attributeSetDeclarations = new System.Collections.Generic.Dictionary<Saxon.Hej.om.StructuredQName, System.Collections.Generic.IList<Saxon.Hej.style.ComponentDeclaration>>();
         private readonly System.Collections.Generic.Dictionary<Saxon.Hej.om.DocumentKey,Saxon.Hej.style.XSLModuleRoot> moduleCache = new System.Collections.Generic.Dictionary<Saxon.Hej.om.DocumentKey, Saxon.Hej.style.XSLModuleRoot>(4);
         private readonly Saxon.Hej.trans.TypeAliasManager typeAliasManager;
@@ -96,8 +96,7 @@ namespace Saxon.Hej.style {
         public Saxon.Hej.style.XSLModuleRoot getStylesheetDocument(Saxon.Hej.om.DocumentKey key) {
             Saxon.Hej.style.XSLModuleRoot sheet = Saxon.Impl.Helpers.MapUtils.Get(moduleCache, key);
             if ((sheet != null)) {
-                Saxon.Hej.trans.XPathException warning = new Saxon.Hej.trans.XPathException(((("Stylesheet module "+key)+" is included or imported more than once. ")+"This is permitted, but may lead to errors or unexpected behavior"));
-                sheet.issueWarning(warning);
+                sheet.issueWarning(((("Stylesheet module "+key)+" is included or imported more than once. ")+"This is permitted, but may lead to errors or unexpected behavior"), Saxon.Hej.trans.SaxonErrorCode.SXWN9019);
             }
             return sheet;
         }
@@ -150,7 +149,7 @@ namespace Saxon.Hej.style {
                 timer.report("validate");
             }
             Saxon.Ejava.util.Properties props = gatherOutputProperties(null);
-            props.setProperty(Saxon.Hej.lib.SaxonOutputKeys.STYLESHEET_VERSION, (getStylesheetPackage().getHostLanguageVersion()+""));
+            props.setProperty(Saxon.Hej.lib.SaxonOutputKeys.STYLESHEET_VERSION, (top.getEffectiveVersion()+""));
             getStylesheetPackage().setDefaultOutputProperties(props);
             System.Collections.Generic.HashSet<Saxon.Hej.om.StructuredQName> outputNames = new System.Collections.Generic.HashSet<Saxon.Hej.om.StructuredQName>(5);
             foreach (Saxon.Hej.style.ComponentDeclaration outputDecl in topLevel) {
@@ -212,9 +211,12 @@ namespace Saxon.Hej.style {
                     declarations.Add((Saxon.Hej.style.XSLUsePackage)(use));
                 } else {
                     if ((use is Saxon.Hej.style.XSLInclude)) {
-                        string href = Saxon.Hej.value.Whitespace.trim(use.getAttributeValue("", "href"));
+                        string href = Saxon.Hej.value.Whitespace.trim(use.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "href"));
                         Saxon.Hej.om.DocumentKey key = Saxon.Hej.functions.DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), false);
                         Saxon.Hej.om.TreeInfo includedTree = Saxon.Impl.Helpers.MapUtils.Get(compilation.getStylesheetModules(), key);
+                        if ((includedTree == null)) {
+                            throw new Saxon.Hej.trans.XPathException((("Internal problem: the included stylesheet module '"+href)+"' should be in the compiler's module store, but was not found"));
+                        }
                         Saxon.Hej.style.StyleElement incWrapper = (Saxon.Hej.style.StyleElement)(((Saxon.Hej.tree.linked.DocumentImpl)(includedTree.getRootNode())).getDocumentElement());
                         gatherUsePackageDeclarations(compilation, incWrapper, declarations);
                     }
@@ -266,36 +268,67 @@ namespace Saxon.Hej.style {
             Saxon.Hej.style.XSLFunction sourceFunction = (Saxon.Hej.style.XSLFunction)(decl.getSourceElement());
             Saxon.Hej.expr.instruct.UserFunction compiledFunction = sourceFunction.getCompiledFunction();
             Saxon.Hej.expr.Component declaringComponent = compiledFunction.obtainDeclaringComponent(sourceFunction);
-            Saxon.Hej.trans.SymbolicName.F sName = ((/*1430*/Saxon.Hej.trans.SymbolicName.F)sourceFunction.getSymbolicName());
-            if ((sName != null)) {
-                Saxon.Hej.expr.Component other = Saxon.Impl.Helpers.MapUtils.Get(componentIndex, sName);
-                if ((other == null)) {
-                    Saxon.Impl.Helpers.MapUtils.Put(componentIndex, sName, declaringComponent);
+            int maxArity = sourceFunction.getNumberOfParameters();
+            int minArity = (maxArity-sourceFunction.getNumberOfOptionalParameters());
+            for (int arity = minArity; (arity<=maxArity); arity++) {
+                Saxon.Hej.trans.SymbolicName.F sName = new Saxon.Hej.trans.SymbolicName.F(sourceFunction.getObjectName(), arity);
+                Saxon.Hej.style.ComponentDeclaration otherDecl = Saxon.Impl.Helpers.MapUtils.Get(functionIndex, sName);
+                Saxon.Hej.expr.Component otherComp = Saxon.Impl.Helpers.MapUtils.Get(componentIndex, sName);
+                if (((otherDecl == null) && (otherComp == null))) {
+                    if ((arity == maxArity)) {
+                        Saxon.Impl.Helpers.MapUtils.Put(componentIndex, sName, declaringComponent);
+                    }
                     Saxon.Impl.Helpers.MapUtils.Put(functionIndex, sName, decl);
                 } else {
-                    if ((other.getDeclaringPackage() == getStylesheetPackage())) {
+                    if ((otherDecl != null)) {
                         int thisPrecedence = decl.getPrecedence();
-                        Saxon.Hej.style.ComponentDeclaration otherFunction = Saxon.Impl.Helpers.MapUtils.Get(functionIndex, sName);
-                        int otherPrecedence = otherFunction.getPrecedence();
+                        int otherPrecedence = otherDecl.getPrecedence();
                         if ((thisPrecedence == otherPrecedence)) {
-                            sourceFunction.compileError((((("Duplicate named function (see line "+otherFunction.getSourceElement().getLineNumber())+" of ")+otherFunction.getSourceElement().getSystemId())+')'), "XTSE0770");
-                        } else {
-                            if ((thisPrecedence<otherPrecedence)) {
+                            Saxon.Hej.expr.instruct.UserFunction otherFunction = ((Saxon.Hej.style.XSLFunction)(otherDecl.getSourceElement())).getCompiledFunction();
+                            if (((minArity == maxArity) && (otherFunction.getMinimumArity() == otherFunction.getArity()))) {
+                                sourceFunction.compileError(((("Function "+sName.getShortName())+" is declared twice - see ")+Saxon.Hej.trans.Err.show(otherFunction.getLocation())), "XTSE0770");
                             } else {
-                                Saxon.Impl.Helpers.MapUtils.Put(componentIndex, sName, declaringComponent);
-                                Saxon.Impl.Helpers.MapUtils.Put(functionIndex, sName, decl);
+                                sourceFunction.compileError(((((("Function "+sName.getComponentName().getDisplayName())+" has overlapping arity range ")+showArityRanges(compiledFunction, otherFunction))+" with another function of the same name - see ")+Saxon.Hej.trans.Err.show(otherFunction.getLocation())), "XTSE0770");
                             }
                         }
+                        break ;
                     } else {
-                        if ((sourceFunction.findAncestorElement(Saxon.Hej.om.StandardNames.XSL_OVERRIDE) != null)) {
-                            Saxon.Impl.Helpers.MapUtils.Put(componentIndex, sName, declaringComponent);
-                            Saxon.Impl.Helpers.MapUtils.Put(functionIndex, sName, decl);
+                        Saxon.Hej.expr.Component other = Saxon.Impl.Helpers.MapUtils.Get(componentIndex, new Saxon.Hej.trans.SymbolicName.F(sourceFunction.getObjectName(), maxArity));
+                        if (((other != null) && (other.getDeclaringPackage() == getStylesheetPackage()))) {
+                            int thisPrecedence = decl.getPrecedence();
+                            Saxon.Hej.style.ComponentDeclaration otherFunction = Saxon.Impl.Helpers.MapUtils.Get(functionIndex, sName);
+                            int otherPrecedence = otherFunction.getPrecedence();
+                            if ((thisPrecedence == otherPrecedence)) {
+                                string message = (((("Duplicate named function (see line "+otherFunction.getSourceElement().getLineNumber())+" of ")+otherFunction.getSourceElement().getSystemId())+')');
+                                if ((maxArity != ((Saxon.Hej.expr.instruct.UserFunction)(other.getActor())).getNumberOfParameters())) {
+                                    message += ". The arity ranges of the two functions overlap";
+                                }
+                                sourceFunction.compileError(message, "XTSE0770");
+                                break ;
+                            } else {
+                                if ((thisPrecedence<otherPrecedence)) {
+                                } else {
+                                    Saxon.Impl.Helpers.MapUtils.Put(componentIndex, sName, declaringComponent);
+                                    Saxon.Impl.Helpers.MapUtils.Put(functionIndex, sName, decl);
+                                }
+                            }
                         } else {
-                            sourceFunction.compileError(((("Function "+sName.getShortName())+" conflicts with a public function in package ")+other.getDeclaringPackage().getPackageName()), "XTSE3050");
+                            if ((sourceFunction.findAncestorElement(Saxon.Hej.om.StandardNames.XSL_OVERRIDE) != null)) {
+                                Saxon.Impl.Helpers.MapUtils.Put(componentIndex, sName, declaringComponent);
+                                Saxon.Impl.Helpers.MapUtils.Put(functionIndex, sName, decl);
+                            } else {
+                                sourceFunction.compileError(((("Function "+sName.getShortName())+" conflicts with a public function in package ")+other.getDeclaringPackage().getPackageName()), "XTSE3050");
+                            }
                         }
                     }
                 }
             }
+        }
+        private static string showArityRanges(Saxon.Hej.expr.instruct.UserFunction fn1, Saxon.Hej.expr.instruct.UserFunction fn2) {
+            return (((("("+showArityRange(fn1))+"; ")+showArityRange(fn2))+")");
+        }
+        private static string showArityRange(Saxon.Hej.expr.instruct.UserFunction fn) {
+            return ((fn.getMinimumArity()+"-")+fn.getArity());
         }
         protected internal void indexVariableDeclaration(Saxon.Hej.style.ComponentDeclaration decl) {
             Saxon.Hej.style.XSLGlobalVariable varDecl = (Saxon.Hej.style.XSLGlobalVariable)(decl.getSourceElement());
@@ -319,7 +352,7 @@ namespace Saxon.Hej.style {
                             if ((v2 == varDecl)) {
                                 varDecl.compileError(((("Global variable or parameter $"+qName.getDisplayName())+" is declared more than once ")+"(caused by including the containing module more than once)"), "XTSE0630");
                             } else {
-                                varDecl.compileError((((("Duplicate global variable/parameter declaration (see line "+v2.getLineNumber())+" of ")+v2.getSystemId())+')'), "XTSE0630");
+                                varDecl.compileError((((((("Duplicate global variable/parameter $"+qName.getDisplayName())+" (see line ")+v2.getLineNumber())+" of ")+v2.getSystemId())+')'), "XTSE0630");
                             }
                         } else {
                             if (((thisPrecedence<otherPrecedence) && (varDecl != otherVarDecl.getSourceElement()))) {
@@ -371,7 +404,7 @@ namespace Saxon.Hej.style {
                         } else {
                             if ((thisPrecedence<otherPrecedence)) {
                             } else {
-                                Saxon.Hej.expr.instruct.NamedTemplate compiledTemplate = new Saxon.Hej.expr.instruct.NamedTemplate(sName.getComponentName());
+                                Saxon.Hej.expr.instruct.NamedTemplate compiledTemplate = new Saxon.Hej.expr.instruct.NamedTemplate(sName.getComponentName(), getConfiguration());
                                 Saxon.Hej.expr.Component declaringComponent = compiledTemplate.obtainDeclaringComponent(sourceTemplate);
                                 Saxon.Impl.Helpers.MapUtils.Put(componentIndex, sName, declaringComponent);
                                 Saxon.Impl.Helpers.MapUtils.Put(templateIndex, sName.getComponentName(), decl);
@@ -421,8 +454,8 @@ namespace Saxon.Hej.style {
                 entries = new System.Collections.Generic.List<Saxon.Hej.style.ComponentDeclaration>();
                 Saxon.Impl.Helpers.MapUtils.Put(attributeSetDeclarations, name, entries);
             } else {
-                string thisVis = Saxon.Hej.value.Whitespace.trim(sourceAttributeSet.getAttributeValue("", "visibility"));
-                string firstVis = Saxon.Hej.value.Whitespace.trim(entries[0].getSourceElement().getAttributeValue("", "visibility"));
+                string thisVis = Saxon.Hej.value.Whitespace.trim(sourceAttributeSet.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "visibility"));
+                string firstVis = Saxon.Hej.value.Whitespace.trim(entries[0].getSourceElement().getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "visibility"));
                 if (((thisVis == null) ? (firstVis != null) : !(thisVis.Equals(firstVis)))) {
                     throw new Saxon.Hej.trans.XPathException("Visibility attributes on attribute-sets sharing the same name must all be the same", "XTSE0010");
                 }
@@ -470,7 +503,7 @@ namespace Saxon.Hej.style {
                     src.compileDeclaration(compilation, decl);
                     Saxon.Impl.Helpers.ListUtils.AddAll(content, src.getContainedInstructions());
                     vis = src.getVisibility();
-                    explicitVisibility = (explicitVisibility || (src.getAttributeValue("", "visibility") != null));
+                    explicitVisibility = (explicitVisibility || (src.getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "visibility") != null));
                 }
                 Saxon.Hej.expr.instruct.AttributeSet aSet = Saxon.Impl.Helpers.MapUtils.Get(index, entry.Key);
                 aSet.setDeclaredStreamable(streamable);
@@ -567,21 +600,21 @@ namespace Saxon.Hej.style {
             namespaceAliasList.Add(node);
             numberOfAliases++;
         }
-        protected internal Saxon.Hej.om.NamespaceBinding getNamespaceAlias(string uri) {
+        protected internal Saxon.Hej.om.NamespaceBinding getNamespaceAlias(Saxon.Hej.om.NamespaceUri uri) {
             return Saxon.Impl.Helpers.MapUtils.Get(namespaceAliasMap, uri);
         }
-        protected internal bool isAliasResultNamespace(string uri) {
+        protected internal bool isAliasResultNamespace(Saxon.Hej.om.NamespaceUri uri) {
             return aliasResultUriSet.Contains(uri);
         }
         private void collectNamespaceAliases() {
-            namespaceAliasMap = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.NamespaceBinding>(numberOfAliases);
-            aliasResultUriSet = new System.Collections.Generic.HashSet<string>(numberOfAliases);
-            System.Collections.Generic.HashSet<string> aliasesAtThisPrecedence = new System.Collections.Generic.HashSet<string>();
+            namespaceAliasMap = new System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri, Saxon.Hej.om.NamespaceBinding>(numberOfAliases);
+            aliasResultUriSet = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>(numberOfAliases);
+            System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri> aliasesAtThisPrecedence = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>();
             int currentPrecedence = -1;
             for (int i = 0; (i<numberOfAliases); i++) {
                 Saxon.Hej.style.ComponentDeclaration decl = namespaceAliasList[i];
                 Saxon.Hej.style.XSLNamespaceAlias xna = (Saxon.Hej.style.XSLNamespaceAlias)(decl.getSourceElement());
-                string scode = xna.getStylesheetURI();
+                Saxon.Hej.om.NamespaceUri scode = xna.getStylesheetURI();
                 Saxon.Hej.om.NamespaceBinding resultBinding = xna.getResultNamespaceBinding();
                 int prec = decl.getPrecedence();
                 if ((currentPrecedence != prec)) {
@@ -589,13 +622,13 @@ namespace Saxon.Hej.style {
                     aliasesAtThisPrecedence.Clear();
                 }
                 if (aliasesAtThisPrecedence.Contains(scode)) {
-                    if (!(Saxon.Impl.Helpers.MapUtils.Get(namespaceAliasMap, scode).getURI().Equals(resultBinding.getURI()))) {
+                    if (!(Saxon.Impl.Helpers.MapUtils.Get(namespaceAliasMap, scode).getNamespaceUri().Equals(resultBinding.getNamespaceUri()))) {
                         xna.compileError("More than one alias is defined for the same namespace", "XTSE0810");
                     }
                 }
                 if ((Saxon.Impl.Helpers.MapUtils.Get(namespaceAliasMap, scode) == null)) {
                     Saxon.Impl.Helpers.MapUtils.Put(namespaceAliasMap, scode, resultBinding);
-                    aliasResultUriSet.Add(resultBinding.getURI());
+                    aliasResultUriSet.Add(resultBinding.getNamespaceUri());
                 }
                 aliasesAtThisPrecedence.Add(scode);
             }
@@ -716,7 +749,6 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.functions.ExecutableFunctionLibrary overriding = new Saxon.Hej.functions.ExecutableFunctionLibrary(config);
                 Saxon.Hej.functions.ExecutableFunctionLibrary underriding = new Saxon.Hej.functions.ExecutableFunctionLibrary(config);
                 foreach (Saxon.Hej.expr.Component decl in stylesheetPackage.getComponentIndex().Values) {
-                    Saxon.Hej.trans.Visibility vis = decl.getVisibility();
                     if ((decl.getActor() is Saxon.Hej.expr.instruct.UserFunction)) {
                         Saxon.Hej.expr.instruct.UserFunction f = (Saxon.Hej.expr.instruct.UserFunction)(decl.getActor());
                         if (f.isOverrideExtensionFunction()) {
@@ -771,22 +803,6 @@ namespace Saxon.Hej.style {
                 if (Saxon.Hej.style.Compilation.TIMING) {
                     timer.report("allocate binding slots to accumulators");
                 }
-                if ((compilation.getCompilerInfo().isGenerateByteCode() && !(config.isDeferredByteCode(Saxon.Api.HostLanguage.XSLT)))) {
-                    if (Saxon.Hej.style.Compilation.TIMING) {
-                        config.getLogger().info("Generating byte code...");
-                    }
-                    Saxon.Hej.expr.parser.Optimizer opt = config.obtainOptimizer();
-                    foreach (Saxon.Hej.style.ComponentDeclaration decl in topLevel) {
-                        Saxon.Hej.style.StyleElement inst = decl.getSourceElement();
-                        if ((inst is Saxon.Hej.style.StylesheetComponent)) {
-                            ((Saxon.Hej.style.StylesheetComponent)(inst)).generateByteCode(opt);
-                        }
-                    }
-                }
-                if (Saxon.Hej.style.Compilation.TIMING) {
-                    timer.report("inject byte code candidates");
-                    timer.reportCumulative("total compile time");
-                }
             } catch (System.Exception err) {
                 if ((compilation.getErrorCount() == 0)) {
                     throw;
@@ -835,13 +851,13 @@ namespace Saxon.Hej.style {
                 }
             }
         }
-        protected internal bool isImportedSchema(string targetNamespace) {
+        protected internal bool isImportedSchema(Saxon.Hej.om.NamespaceUri targetNamespace) {
             return stylesheetPackage.getSchemaNamespaces().Contains(targetNamespace);
         }
-        protected internal void addImportedSchema(string targetNamespace) {
+        protected internal void addImportedSchema(Saxon.Hej.om.NamespaceUri targetNamespace) {
             stylesheetPackage.getSchemaNamespaces().Add(targetNamespace);
         }
-        protected internal System.Collections.Generic.ISet<string> getImportedSchemaTable() {
+        protected internal System.Collections.Generic.ISet<Saxon.Hej.om.NamespaceUri> getImportedSchemaTable() {
             return stylesheetPackage.getSchemaNamespaces();
         }
         public Saxon.Hej.style.ComponentDeclaration getCharacterMap(Saxon.Hej.om.StructuredQName name) {
@@ -876,7 +892,7 @@ namespace Saxon.Hej.style {
                 Saxon.Hej.trans.ComponentTest exactNameTest = new Saxon.Hej.trans.ComponentTest(fp, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, new Saxon.Hej.om.FingerprintedQName(component.getActor().getComponentName(), pool), pool), -1);
                 Saxon.Hej.trans.ComponentTest exactFunctionTest = null;
                 if ((fp == Saxon.Hej.om.StandardNames.XSL_FUNCTION)) {
-                    Saxon.Hej.om.Function fn = (Saxon.Hej.om.Function)(component.getActor());
+                    Saxon.Hej.om.FunctionItem fn = (Saxon.Hej.om.FunctionItem)(component.getActor());
                     exactFunctionTest = new Saxon.Hej.trans.ComponentTest(fp, new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ELEMENT, new Saxon.Hej.om.FingerprintedQName(fn.getFunctionName(), pool), pool), fn.getArity());
                 }
                 bool matched = false;

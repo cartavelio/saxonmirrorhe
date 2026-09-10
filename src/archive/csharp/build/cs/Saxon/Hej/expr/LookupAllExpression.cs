@@ -34,7 +34,7 @@ namespace Saxon.Hej.expr {
             if ((!(isArrayLookup) && !(isMapLookup))) {
                 if (((th.relationship(containerType, Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE) == Saxon.Hej.type.Affinity.DISJOINT) && (th.relationship(containerType, Saxon.Hej.ma.arrays.ArrayItemType.getInstance()) == Saxon.Hej.type.Affinity.DISJOINT))) {
                     if (Saxon.Hej.value.Cardinality.allowsZero(getBaseExpression().getCardinality())) {
-                        visitor.issueWarning(("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "+containerType), getLocation());
+                        visitor.issueWarning(("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "+containerType), Saxon.Hej.trans.SaxonErrorCode.SXWN9026, getLocation());
                     } else {
                         Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("The left-hand operand of '?' must be a map or an array; the supplied expression is of type "+containerType), "XPTY0004");
                         err.setLocation(getLocation());
@@ -89,7 +89,7 @@ namespace Saxon.Hej.expr {
             return ("LookupAll".GetHashCode()^getBaseExpression().GetHashCode());
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            return new Inner_SequenceIterator_53(this, context);
+            return new Saxon.Hej.expr.LookupAllExpression.LookupAllIterator(this, getBaseExpression().iterate(context));
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter destination) {
             destination.startElement("lookupAll", this);
@@ -102,89 +102,90 @@ namespace Saxon.Hej.expr {
         public override string toShortString() {
             return (getBaseExpression().toShortString()+"?*");
         }
-    
-        private class Inner_SequenceIterator_53 : Saxon.Hej.om.SequenceIterator {
-            private readonly LookupAllExpression outerInstance;
-            public Inner_SequenceIterator_53(LookupAllExpression outerInstance, Saxon.Hej.expr.XPathContext context) {
-                this.outerInstance = outerInstance;
-                this.context = context;
-                level0 = /*guess*/outerInstance.getBaseExpression().iterate(/*extraParam*/context);
-                level1forArrays = null;
-                level1forMaps = null;
-                level2 = null;
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.LookupAllExpression.LookupAllElaborator();
+        }
+        public class LookupAllElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.LookupAllExpression expr = (Saxon.Hej.expr.LookupAllExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return (context) => new Saxon.Hej.expr.LookupAllExpression.LookupAllIterator(expr, /*Delegate.iterate()*/baseEval(context));
             }
-            private Saxon.Hej.expr.XPathContext context;
+        
+        }
+        private class LookupAllIterator : Saxon.Hej.om.SequenceIterator {
+            readonly Saxon.Hej.expr.LookupAllExpression expr;
             readonly Saxon.Hej.om.SequenceIterator level0;
             internal System.Collections.Generic.IEnumerator<Saxon.Hej.om.GroundedValue> level1forArrays;
             internal System.Collections.Generic.IEnumerator<Saxon.Hej.ma.map.KeyValuePair> level1forMaps;
             internal Saxon.Hej.om.SequenceIterator level2;
+            public LookupAllIterator(Saxon.Hej.expr.LookupAllExpression expr, Saxon.Hej.om.SequenceIterator baseIterator)  {
+                level0 = baseIterator;
+                level1forArrays = null;
+                level1forMaps = null;
+                level2 = null;
+                this.expr = expr;
+            }
             public Saxon.Hej.om.Item next() {
-                if ((/*field*/level2 == null)) {
-                    if (((/*field*/level1forArrays == null) && (/*field*/level1forMaps == null))) {
-                        Saxon.Hej.om.Item lhs = /*field*/level0.next();
-                        if ((/*localvar*/lhs == null)) {
+                if ((level2 == null)) {
+                    if (((level1forArrays == null) && (level1forMaps == null))) {
+                        Saxon.Hej.om.Item lhs = level0.next();
+                        if ((lhs == null)) {
                             return null;
                         } else {
-                            if ((/*localvar*/lhs is Saxon.Hej.ma.arrays.ArrayItem)) {
-                                /*field*/level1forArrays = ((Saxon.Hej.ma.arrays.ArrayItem)(/*localvar*/lhs)).members().GetEnumerator();
-                                return /*method*/next();
+                            if ((lhs is Saxon.Hej.ma.arrays.ArrayItem)) {
+                                level1forArrays = ((Saxon.Hej.ma.arrays.ArrayItem)(lhs)).members().GetEnumerator();
+                                return next();
                             } else {
-                                if ((/*localvar*/lhs is Saxon.Hej.ma.map.MapItem)) {
-                                    /*field*/level1forMaps = ((Saxon.Hej.ma.map.MapItem)(/*localvar*/lhs)).keyValuePairs().GetEnumerator();
-                                    return /*method*/next();
+                                if ((lhs is Saxon.Hej.ma.map.MapItem)) {
+                                    level1forMaps = ((Saxon.Hej.ma.map.MapItem)(lhs)).keyValuePairs().GetEnumerator();
+                                    return next();
                                 } else {
                                     try {
-                                        Saxon.Hej.expr.LookupExpression.mustBeArrayOrMap(this.outerInstance, /*localvar*/lhs);
+                                        Saxon.Hej.expr.LookupExpression.mustBeArrayOrMap(expr, lhs);
                                     } catch (Saxon.Hej.trans.XPathException e) {
-                                        throw new Saxon.Hej.trans.UncheckedXPathException(/*exception*/e);
+                                        throw new Saxon.Hej.trans.UncheckedXPathException(e);
                                     }
                                     return null;
                                 }
                             }
                         }
                     } else {
-                        if (((/*field*/level1forArrays != null) && /*field*/level1forArrays.MoveNext() /*UNSAFE CONVERSION*/)) {
-                            Saxon.Hej.om.GroundedValue nextEntry = /*field*/level1forArrays.Current;
-                            /*field*/level2 = /*localvar*/nextEntry.iterate();
+                        if (((level1forArrays != null) && level1forArrays.MoveNext() /*UNSAFE CONVERSION*/)) {
+                            Saxon.Hej.om.GroundedValue nextEntry = level1forArrays.Current;
+                            level2 = nextEntry.iterate();
                         } else {
-                            if (((/*field*/level1forMaps != null) && /*field*/level1forMaps.MoveNext() /*UNSAFE CONVERSION*/)) {
-                                Saxon.Hej.ma.map.KeyValuePair nextEntry = /*field*/level1forMaps.Current;
-                                Saxon.Hej.om.GroundedValue value = /*localvar*/nextEntry.value;
-                                /*field*/level2 = /*localvar*/value.iterate();
+                            if (((level1forMaps != null) && level1forMaps.MoveNext() /*UNSAFE CONVERSION*/)) {
+                                Saxon.Hej.ma.map.KeyValuePair nextEntry = level1forMaps.Current;
+                                Saxon.Hej.om.GroundedValue value = nextEntry.value;
+                                level2 = value.iterate();
                             } else {
-                                /*field*/level1forMaps = null;
-                                /*field*/level1forArrays = null;
+                                level1forMaps = null;
+                                level1forArrays = null;
                             }
                         }
                     }
-                    return /*method*/next();
+                    return next();
                 } else {
-                    Saxon.Hej.om.Item nextItem = /*field*/level2.next();
-                    if ((/*localvar*/nextItem == null)) {
-                        /*field*/level2 = null;
-                        return /*method*/next();
+                    Saxon.Hej.om.Item nextItem = level2.next();
+                    if ((nextItem == null)) {
+                        level2 = null;
+                        return next();
                     } else {
-                        return /*localvar*/nextItem;
+                        return nextItem;
                     }
                 }
             }
             public void close() {
-                if ((/*field*/level0 != null)) {
-                    /*field*/level0.close();
+                if ((level0 != null)) {
+                    level0.close();
                 }
-                if ((/*field*/level2 != null)) {
-                    /*field*/level2.close();
-                }
-            }
-            public void discharge() {
-                if ((/*field*/level0 != null)) {
-                    /*field*/level0.discharge();
-                }
-                if ((/*field*/level2 != null)) {
-                    /*field*/level2.discharge();
+                if ((level2 != null)) {
+                    level2.close();
                 }
             }
+        
         }
-
+    
     }
 }

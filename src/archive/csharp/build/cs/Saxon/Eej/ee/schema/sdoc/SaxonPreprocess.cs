@@ -11,31 +11,34 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.om.AttributeMap atts = attributes();
             string[] allowed = {"action", "id", "reverse", "xpathDefaultNamespace"};
             allowAttributes(atts, allowed);
-            string defaultNamespace = atts.getValue("", "xpathDefaultNamespace");
+            string defaultNamespace = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "xpathDefaultNamespace");
             if ((defaultNamespace == null)) {
                 defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
             }
+            Saxon.Hej.om.NamespaceUri defaultNamespaceUri;
             if (defaultNamespace.Equals("##defaultNamespace")) {
-                defaultNamespace = getURIForPrefix("", true);
+                defaultNamespaceUri = getURIForPrefix("", true);
             } else {
                 if (defaultNamespace.Equals("##targetNamespace")) {
-                    defaultNamespace = getXSDSchema().getTargetNamespace();
+                    defaultNamespaceUri = getXSDSchema().getTargetNamespace();
                 } else {
                     if (defaultNamespace.Equals("##local")) {
-                        defaultNamespace = "";
+                        defaultNamespaceUri = Saxon.Hej.om.NamespaceUri.NULL;
+                    } else {
+                        defaultNamespaceUri = Saxon.Hej.om.NamespaceUri.of(defaultNamespace);
                     }
                 }
             }
-            string xpath = atts.getValue("", "action");
+            string xpath = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "action");
             if ((xpath == null)) {
                 missingAttribute("action");
                 xpath = ".";
             }
             Saxon.Eej.ee.schema.sdoc.SchemaElement.XPathStaticContext env = new Saxon.Eej.ee.schema.sdoc.SchemaElement.XPathStaticContext(this);
-            env.setDefaultElementNamespace(defaultNamespace);
+            env.setDefaultElementNamespace(defaultNamespaceUri);
             env.setNamespaceResolver(makeNamespaceContext());
             env.setBaseURI(getBaseURI());
-            Saxon.Hej.sxpath.XPathVariable valueVariable = env.declareVariable("", "value");
+            Saxon.Hej.sxpath.XPathVariable valueVariable = env.declareVariable(Saxon.Hej.om.NamespaceUri.NULL, "value");
             Saxon.Hej.sxpath.XPathExpression expression;
             Saxon.Hej.sxpath.XPathEvaluator xpe = new Saxon.Hej.sxpath.XPathEvaluator(getSchema().getConfiguration());
             try {
@@ -51,7 +54,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
             action = new Saxon.Eej.ee.schema.Assertion(getSchema().getConfiguration(), expression, valueVariable, null, xpath);
             action.setStaticContext(env);
-            xpath = atts.getValue("", "reverse");
+            xpath = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "reverse");
             if ((xpath != null)) {
                 try {
                     expression = xpe.createExpression(xpath);

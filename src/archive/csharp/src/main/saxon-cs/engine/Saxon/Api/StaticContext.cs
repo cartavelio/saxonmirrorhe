@@ -41,10 +41,10 @@ namespace Saxon.Api {
 
         public string GetNamespaceForPrefix(string Prefix) {
             if (Prefix == "") {
-                return Implementation.getDefaultElementNamespace();
+                return Implementation.getDefaultElementNamespace().ToString();
             }
             try {
-                return Implementation.getNamespaceResolver().getURIForPrefix(Prefix, false);
+                return Implementation.getNamespaceResolver().getURIForPrefix(Prefix, false).ToString();
             } catch (XPathException) {
                 return null;
             }

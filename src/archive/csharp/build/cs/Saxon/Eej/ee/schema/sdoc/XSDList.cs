@@ -14,7 +14,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"id", "itemType"};
             allowAttributes(atts, allowed);
             processId();
-            string itemTypeName = atts.getValue("", "itemType");
+            string itemTypeName = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "itemType");
             if ((itemTypeName != null)) {
                 foundItemType = true;
                 int itemTypeFingerprint;
@@ -34,7 +34,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 Saxon.Eej.ee.schema.TypeReference typeRef = new Saxon.Eej.ee.schema.TypeReference(itemTypeFingerprint, (Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration()), this);
                 typeDefinition.setItemTypeReference(typeRef);
             }
-            string separator = atts.getValue(Saxon.Hej.lib.NamespaceConstant.SAXON, "separator");
+            string separator = atts.getValue(Saxon.Hej.om.NamespaceUri.SAXON, "separator");
             if ((separator != null)) {
                 System.Collections.Generic.IList<string> warnings = new System.Collections.Generic.List<string>();
                 try {

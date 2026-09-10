@@ -34,6 +34,9 @@ namespace Saxon.Hej.expr {
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
             cannotEvaluate();
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            throw new Saxon.Ejava.lang.UnsupportedOperationException();
+        }
     
     }
 }

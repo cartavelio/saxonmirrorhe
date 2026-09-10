@@ -6,7 +6,7 @@ namespace Saxon.Eej.config {
         public EvaluationNuisance(Saxon.Hej.@event.Receiver next) : base (next) {
         }
         public override void characters(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
-            Saxon.Hej.str.UnicodeBuilder fsb = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder fsb = new Saxon.Hej.str.UnicodeBuilder((chars.length32()+20));
             Saxon.Hej.z.IntIterator iter = chars.codePoints();
             int i = 0;
             while (iter.hasNext()) {

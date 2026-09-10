@@ -5,7 +5,7 @@ namespace Saxon.Hej.style {
     public class UseWhenFilter : Saxon.Hej.@event.ProxyReceiver {
         private int depthOfHole = 0;
         private bool emptyStylesheetElement = false;
-        private readonly System.Collections.Generic.Stack<string> defaultNamespaceStack = new System.Collections.Generic.Stack<string>();
+        private readonly System.Collections.Generic.Stack<Saxon.Hej.om.NamespaceUri> defaultNamespaceStack = new System.Collections.Generic.Stack<Saxon.Hej.om.NamespaceUri>();
         private readonly System.Collections.Generic.Stack<int> versionStack = new System.Collections.Generic.Stack<int>();
         private readonly Saxon.Hej.value.DateTimeValue currentDateTime = Saxon.Hej.value.DateTimeValue.getCurrentDateTime(null);
         private readonly Saxon.Hej.style.Compilation compilation;
@@ -39,143 +39,74 @@ namespace Saxon.Hej.style {
         }
         public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
             int fp = elemName.obtainFingerprint(getNamePool());
-            bool inXsltNamespace = elemName.hasURI(Saxon.Hej.lib.NamespaceConstant.XSLT);
-            bool inSaxonNamespace = elemName.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON);
-            string stdAttUri = (inXsltNamespace ? "" : Saxon.Hej.lib.NamespaceConstant.XSLT);
-            string xpathDefaultNamespaceAtt = null;
-            string versionAtt = null;
-            string xmlBaseAtt = null;
-            string useWhenAtt = null;
-            string staticAtt = null;
-            bool hasShadowAttributes = false;
+            bool inXsltNamespace = elemName.hasURI(Saxon.Hej.om.NamespaceUri.XSLT);
+            Saxon.Hej.om.NamespaceUri stdAttUri = (inXsltNamespace ? Saxon.Hej.om.NamespaceUri.NULL : Saxon.Hej.om.NamespaceUri.XSLT);
             Saxon.Hej.tree.linked.DocumentImpl includedDoc = null;
-            foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
-                Saxon.Hej.om.NodeName attName = att.getNodeName();
-                attName.obtainFingerprint(getNamePool());
-                string uri = attName.getURI();
-                if (uri.Equals(stdAttUri)) {
-                    string local = attName.getLocalPart();
-                    switch (local) {
-                      case "xpath-default-namespace":
-                        xpathDefaultNamespaceAtt = att.getValue();
-                        break ;
-                      case "version":
-                        versionAtt = att.getValue();
-                        break ;
-                      case "use-when":
-                        useWhenAtt = att.getValue();
-                        break ;
-                      case "static":
-                        staticAtt = att.getValue();
-                        break ;
-                    }
-                    if (((local.StartsWith("_") && uri.Equals("")) && ((inXsltNamespace || inSaxonNamespace)))) {
-                        hasShadowAttributes = true;
-                    }
-                } else {
-                    if ((inSaxonNamespace || uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON))) {
-                        if (attName.getLocalPart().StartsWith("_")) {
-                            hasShadowAttributes = true;
-                        }
-                    } else {
-                        if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XML)) {
-                            if (attName.getLocalPart().Equals("base")) {
-                                xmlBaseAtt = att.getValue();
-                            }
-                        }
-                    }
-                }
-            }
-            defaultNamespaceStack.Push(xpathDefaultNamespaceAtt);
+            Saxon.Hej.style.UseWhenFilter.ParsedAttributes pa = startElementProcessAttributes(elemName, attributes, inXsltNamespace, stdAttUri);
+            defaultNamespaceStack.Push(pa.xpathDefaultNamespaceAtt);
             if (emptyStylesheetElement) {
                 depthOfHole++;
                 return ;
             }
             if ((depthOfHole == 0)) {
-                System.Uri baseUri = processBaseUri(location, xmlBaseAtt);
+                System.Uri baseUri = processBaseUri(location, pa.xmlBaseAtt);
                 bool ignore = false;
-                int version = System.Int32.MinValue;
-                if (((versionAtt != null) && (fp != Saxon.Hej.om.StandardNames.XSL_OUTPUT))) {
-                    version = processVersionAttribute(versionAtt);
-                }
-                if ((version == System.Int32.MinValue)) {
-                    version = ((versionStack.Count==0) ? 30 : versionStack.Peek());
-                }
+                int version = getVersion(pa, fp);
                 versionStack.Push(version);
                 if ((((inXsltNamespace && (defaultNamespaceStack.Count == 2)) && (version>30)) && !(Saxon.Hej.functions.ElementAvailable.isXslt30Element(fp)))) {
                     ignore = true;
                 }
-                if ((hasShadowAttributes && !(ignore))) {
+                if ((pa.hasShadowAttributes && !(ignore))) {
                     attributes = processShadowAttributes(elemName, attributes, namespaces, location, baseUri);
                     string uw = attributes.getValue(stdAttUri, "use-when");
                     if ((uw != null)) {
-                        useWhenAtt = uw;
+                        pa.useWhenAtt = uw;
                     }
                 }
                 if (!(ignore)) {
-                    if ((useWhenAtt != null)) {
-                        Saxon.Hej.tree.AttributeLocation attLoc = new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), new Saxon.Hej.om.StructuredQName("", stdAttUri, "use-when"), location);
-                        bool use = evaluateUseWhen(useWhenAtt, attLoc, baseUri.ToString(), namespaces);
-                        ignore = !(use);
-                    }
-                    if (ignore) {
-                        if ((((fp == Saxon.Hej.om.StandardNames.XSL_STYLESHEET) || (fp == Saxon.Hej.om.StandardNames.XSL_TRANSFORM)) || (fp == Saxon.Hej.om.StandardNames.XSL_PACKAGE))) {
-                            emptyStylesheetElement = true;
-                        } else {
-                            depthOfHole = 1;
-                            return ;
-                        }
+                    if (checkUseEvaluateWhen(pa, fp, location, baseUri, namespaces, elemName, stdAttUri)) {
+                        return ;
                     }
                 }
                 if (inXsltNamespace) {
-                    if ((defaultNamespaceStack.Count == 2)) {
-                        switch (fp) {
-                          case Saxon.Hej.om.StandardNames.XSL_VARIABLE:
-                          case Saxon.Hej.om.StandardNames.XSL_PARAM:
-                            if (hasShadowAttributes) {
-                                staticAtt = attributes.getValue("", "static");
-                            }
-                            if ((staticAtt != null)) {
-                                string staticStr = Saxon.Hej.value.Whitespace.trim(staticAtt);
-                                if (Saxon.Hej.style.StyleElement.isYes(staticStr)) {
-                                    processStaticVariable(elemName, attributes, namespaces, location, baseUri, precedence);
-                                }
-                            }
-                            break ;
-                          case Saxon.Hej.om.StandardNames.XSL_INCLUDE:
-                          case Saxon.Hej.om.StandardNames.XSL_IMPORT:
-                            string href = attributes.getValue("", "href");
-                            includedDoc = processIncludeImport(elemName, location, baseUri, href, (fp == Saxon.Hej.om.StandardNames.XSL_IMPORT));
-                            break ;
-                          case Saxon.Hej.om.StandardNames.XSL_IMPORT_SCHEMA:
-                            compilation.setSchemaAware(true);
-                            break ;
-                          case Saxon.Hej.om.StandardNames.XSL_USE_PACKAGE:
-                            if ((precedence.getDepth()>1)) {
-                                throw new Saxon.Hej.trans.XPathException("xsl:use-package cannot appear in an imported stylesheet", "XTSE3008");
-                            }
-                            string name = attributes.getValue("", "name");
-                            string pversion = attributes.getValue("", "package-version");
-                            if ((name != null)) {
-                                try {
-                                    Saxon.Hej.trans.packages.UsePack use = new Saxon.Hej.trans.packages.UsePack(name, pversion, location.saveLocation());
-                                    compilation.registerPackageDependency(use);
-                                } catch (Saxon.Hej.trans.XPathException err) {
-                                }
-                            }
-                            break ;
-                        }
-                    }
+                    includedDoc = handleInXsltNamespace(elemName, baseUri, fp, pa, attributes, namespaces, location);
                 }
                 dropUnderscoredAttributes = inXsltNamespace;
                 nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
-                if ((includedDoc != null)) {
-                    Saxon.Hej.style.XSLGeneralIncorporate node = (Saxon.Hej.style.XSLGeneralIncorporate)(treeBuilder.getCurrentParentNode());
-                    node.setTargetDocument(includedDoc);
-                }
+                checkTargetDocument(includedDoc);
             } else {
                 depthOfHole++;
             }
+        }
+        private void checkTargetDocument(Saxon.Hej.tree.linked.DocumentImpl includedDoc) {
+            if ((includedDoc != null)) {
+                Saxon.Hej.style.XSLGeneralIncorporate node = (Saxon.Hej.style.XSLGeneralIncorporate)(treeBuilder.getCurrentParentNode());
+                node.setTargetDocument(includedDoc);
+            }
+        }
+        private bool checkUseEvaluateWhen(Saxon.Hej.style.UseWhenFilter.ParsedAttributes pa, int fp, Saxon.Hej.s9api.Location location, System.Uri baseUri, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.om.NodeName elemName, Saxon.Hej.om.NamespaceUri stdAttUri) {
+            if ((pa.useWhenAtt != null)) {
+                Saxon.Hej.tree.AttributeLocation attLoc = new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), new Saxon.Hej.om.StructuredQName("", stdAttUri, "use-when"), location);
+                if (!(evaluateUseWhen(pa.useWhenAtt, attLoc, baseUri.ToString(), namespaces))) {
+                    if ((((fp == Saxon.Hej.om.StandardNames.XSL_STYLESHEET) || (fp == Saxon.Hej.om.StandardNames.XSL_TRANSFORM)) || (fp == Saxon.Hej.om.StandardNames.XSL_PACKAGE))) {
+                        emptyStylesheetElement = true;
+                    } else {
+                        depthOfHole = 1;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        private int getVersion(Saxon.Hej.style.UseWhenFilter.ParsedAttributes pa, int fp) {
+            int version = System.Int32.MinValue;
+            if (((pa.versionAtt != null) && (fp != Saxon.Hej.om.StandardNames.XSL_OUTPUT))) {
+                version = processVersionAttribute(pa.versionAtt);
+            }
+            if ((version == System.Int32.MinValue)) {
+                version = ((versionStack.Count==0) ? 30 : versionStack.Peek());
+            }
+            return version;
         }
         private Saxon.Hej.tree.linked.DocumentImpl processIncludeImport(Saxon.Hej.om.NodeName elemName, Saxon.Hej.s9api.Location location, System.Uri baseUri, string href, bool isImport) {
             if ((href == null)) {
@@ -194,7 +125,7 @@ namespace Saxon.Hej.style {
                 request.baseUri = baseUriStr;
                 request.uri = key.getAbsoluteURI();
                 request.nature = Saxon.Hej.lib.JJ_ResourceRequest.XSLT_NATURE;
-                request.purpose = "stylesheet module";
+                request.purpose = Saxon.Hej.lib.JJ_ResourceRequest.ANY_PURPOSE;
                 Saxon.Ejavax.xml.transform.Source source = request.resolve(resolver, config.getResourceResolver(), new Saxon.Callbacks.DirectResourceResolver(config));
                 if ((source == null)) {
                     Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(((("Unable to resolve "+elemName.getDisplayName())+" stylesheet URI ")+href), "XTSE0165");
@@ -227,21 +158,118 @@ namespace Saxon.Hej.style {
                 }
             }
         }
+        private class ParsedAttributes {
+            internal Saxon.Hej.om.NamespaceUri xpathDefaultNamespaceAtt = null;
+            internal string versionAtt = null;
+            internal string xmlBaseAtt = null;
+            internal string useWhenAtt = null;
+            internal string staticAtt = null;
+            internal bool hasShadowAttributes = false;
+        
+        }
+        private Saxon.Hej.style.UseWhenFilter.ParsedAttributes startElementProcessAttributes(Saxon.Hej.om.NodeName elemName, Saxon.Hej.om.AttributeMap attributes, bool inXsltNamespace, Saxon.Hej.om.NamespaceUri stdAttUri) {
+            bool inSaxonNamespace = elemName.hasURI(Saxon.Hej.om.NamespaceUri.SAXON);
+            Saxon.Hej.style.UseWhenFilter.ParsedAttributes pa = new Saxon.Hej.style.UseWhenFilter.ParsedAttributes();
+            foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
+                Saxon.Hej.om.NodeName attName = att.getNodeName();
+                attName.obtainFingerprint(getNamePool());
+                Saxon.Hej.om.NamespaceUri uri = attName.getNamespaceUri();
+                string local = attName.getLocalPart();
+                if (uri.Equals(stdAttUri)) {
+                    processAttributeLocal(att, local, pa);
+                    if (((local.StartsWith("_") && uri.Equals(Saxon.Hej.om.NamespaceUri.NULL)) && ((inXsltNamespace || inSaxonNamespace)))) {
+                        pa.hasShadowAttributes = true;
+                    }
+                } else {
+                    if ((inSaxonNamespace || uri.Equals(Saxon.Hej.om.NamespaceUri.SAXON))) {
+                        if (local.StartsWith("_")) {
+                            pa.hasShadowAttributes = true;
+                        }
+                    } else {
+                        if (uri.Equals(Saxon.Hej.om.NamespaceUri.XML)) {
+                            if (local.Equals("base")) {
+                                pa.xmlBaseAtt = att.getValue();
+                            }
+                        }
+                    }
+                }
+            }
+            return pa;
+        }
+        private void processAttributeLocal(Saxon.Hej.om.AttributeInfo att, string local, Saxon.Hej.style.UseWhenFilter.ParsedAttributes pa) {
+            switch (local) {
+              case "xpath-default-namespace":
+                pa.xpathDefaultNamespaceAtt = Saxon.Hej.om.NamespaceUri.of(att.getValue());
+                break ;
+              case "version":
+                pa.versionAtt = att.getValue();
+                break ;
+              case "use-when":
+                pa.useWhenAtt = att.getValue();
+                break ;
+              case "static":
+                pa.staticAtt = att.getValue();
+                break ;
+            }
+        }
+        private Saxon.Hej.tree.linked.DocumentImpl handleInXsltNamespace(Saxon.Hej.om.NodeName elemName, System.Uri baseUri, int fp, Saxon.Hej.style.UseWhenFilter.ParsedAttributes pa, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location) {
+            Saxon.Hej.tree.linked.DocumentImpl includedDoc = null;
+            if ((defaultNamespaceStack.Count == 2)) {
+                switch (fp) {
+                  case Saxon.Hej.om.StandardNames.XSL_VARIABLE:
+                  case Saxon.Hej.om.StandardNames.XSL_PARAM:
+                    if (pa.hasShadowAttributes) {
+                        pa.staticAtt = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "static");
+                    }
+                    if ((pa.staticAtt != null)) {
+                        string staticStr = Saxon.Hej.value.Whitespace.trim(pa.staticAtt);
+                        if (Saxon.Hej.style.StyleElement.isYes(staticStr)) {
+                            processStaticVariable(elemName, attributes, namespaces, location, baseUri, precedence);
+                        }
+                    }
+                    break ;
+                  case Saxon.Hej.om.StandardNames.XSL_INCLUDE:
+                  case Saxon.Hej.om.StandardNames.XSL_IMPORT:
+                    string href = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "href");
+                    includedDoc = processIncludeImport(elemName, location, baseUri, href, (fp == Saxon.Hej.om.StandardNames.XSL_IMPORT));
+                    break ;
+                  case Saxon.Hej.om.StandardNames.XSL_IMPORT_SCHEMA:
+                    compilation.setSchemaAware(true);
+                    break ;
+                  case Saxon.Hej.om.StandardNames.XSL_USE_PACKAGE:
+                    if ((precedence.getDepth()>1)) {
+                        throw new Saxon.Hej.trans.XPathException("xsl:use-package cannot appear in an imported stylesheet", "XTSE3008");
+                    }
+                    string name = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+                    string pversion = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "package-version");
+                    if ((name != null)) {
+                        try {
+                            Saxon.Hej.trans.packages.UsePack use = new Saxon.Hej.trans.packages.UsePack(name, pversion, location.saveLocation());
+                            compilation.registerPackageDependency(use);
+                        } catch (Saxon.Hej.trans.XPathException err) {
+                        }
+                    }
+                    break ;
+                }
+            }
+            return includedDoc;
+        }
         private void processStaticVariable(Saxon.Hej.om.NodeName elemName, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceResolver nsResolver, Saxon.Hej.s9api.Location location, System.Uri baseUri, Saxon.Hej.value.NestedIntegerValue precedence) {
-            string nameStr = attributes.getValue("", "name");
-            string asStr = attributes.getValue("", "as");
-            string requiredStr = Saxon.Hej.value.Whitespace.trim(attributes.getValue("", "required"));
+            string nameStr = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
+            string asStr = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "as");
+            string requiredStr = Saxon.Hej.value.Whitespace.trim(attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "required"));
             bool isRequired = Saxon.Hej.style.StyleElement.isYes(requiredStr);
             Saxon.Hej.style.UseWhenStaticContext staticContext = new Saxon.Hej.style.UseWhenStaticContext(compilation, nsResolver);
             staticContext.setBaseURI(baseUri.ToString());
-            staticContext.setContainingLocation(new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), new Saxon.Hej.om.StructuredQName("", "", "as"), location));
+            staticContext.setContainingLocation(new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "as"), location));
             Saxon.Hej.value.SequenceType requiredType = Saxon.Hej.value.SequenceType.ANY_SEQUENCE;
             int languageLevel = compilation.getConfiguration().getConfigurationProperty(Saxon.Hej.lib.Feature<int>.XPATH_VERSION_FOR_XSLT);
             if ((languageLevel == 30)) {
                 languageLevel = 305;
             }
+            staticContext.setXPathLanguageLevel(languageLevel);
             if ((asStr != null)) {
-                Saxon.Hej.expr.parser.XPathParser parser = compilation.getConfiguration().newExpressionParser("XP", false, languageLevel);
+                Saxon.Hej.expr.parser.XPathParser parser = compilation.getConfiguration().newExpressionParser("XP", false);
                 requiredType = parser.parseSequenceType(asStr, staticContext);
             }
             Saxon.Hej.om.StructuredQName varName;
@@ -253,10 +281,10 @@ namespace Saxon.Hej.style {
             bool isVariable = elemName.getLocalPart().Equals("variable");
             bool isParam = elemName.getLocalPart().Equals("param");
             bool isSupplied = (isParam && compilation.getParameters().containsKey(varName));
-            Saxon.Hej.tree.AttributeLocation attLoc = new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), new Saxon.Hej.om.StructuredQName("", "", "select"), location);
+            Saxon.Hej.tree.AttributeLocation attLoc = new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), new Saxon.Hej.om.StructuredQName("", Saxon.Hej.om.NamespaceUri.NULL, "select"), location);
             if (isParam) {
                 if ((isRequired && !(isSupplied))) {
-                    string selectStr = attributes.getValue("", "select");
+                    string selectStr = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "select");
                     if ((selectStr != null)) {
                         throw createXPathException("Cannot supply a default value when required='yes'", "XTSE0010", attLoc);
                     } else {
@@ -269,7 +297,7 @@ namespace Saxon.Hej.style {
                 }
             }
             if ((isVariable || !(isSupplied))) {
-                string selectStr = attributes.getValue("", "select");
+                string selectStr = attributes.getValue(Saxon.Hej.om.NamespaceUri.NULL, "select");
                 Saxon.Hej.om.GroundedValue value;
                 if ((selectStr == null)) {
                     if (isVariable) {
@@ -295,8 +323,7 @@ namespace Saxon.Hej.style {
                         throw createXPathException(((("Error in "+elemName.getLocalPart())+" expression. ")+e.Message), e.getErrorCodeLocalPart(), attLoc);
                     }
                 }
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0);
-                role.setErrorCode("XTDE0050");
+                Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0, "XTDE0050");
                 Saxon.Hej.type.TypeHierarchy th = getConfiguration().getTypeHierarchy();
                 Saxon.Hej.om.Sequence seq = th.applyFunctionConversionRules(value, requiredType, role, attLoc);
                 value = seq.materialize();
@@ -316,17 +343,17 @@ namespace Saxon.Hej.style {
             foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                 Saxon.Hej.om.NodeName attName = att.getNodeName();
                 string local = attName.getLocalPart();
-                string uri = attName.getURI();
-                if (((local.StartsWith("_") && ((uri.Length==0 || uri.Equals(Saxon.Hej.lib.NamespaceConstant.SAXON)))) && (local.Length>=2))) {
+                Saxon.Hej.om.NamespaceUri uri = attName.getNamespaceUri();
+                if (((local.StartsWith("_") && ((uri.isEmpty() || uri.Equals(Saxon.Hej.om.NamespaceUri.SAXON)))) && (local.Length>=2))) {
                     string value = att.getValue();
                     Saxon.Hej.tree.AttributeLocation attLocation = new Saxon.Hej.tree.AttributeLocation(elemName.getStructuredQName(), attName.getStructuredQName(), location);
                     string newValue = processShadowAttribute(value, baseUri.ToString(), nsResolver, attLocation);
                     string plainName = local.Substring(1);
                     Saxon.Hej.om.NodeName newName;
-                    if (uri.Length==0) {
+                    if (uri.isEmpty()) {
                         newName = new Saxon.Hej.om.NoNamespaceName(plainName);
                     } else {
-                        newName = new Saxon.Hej.om.FingerprintedQName(attName.getPrefix(), Saxon.Hej.lib.NamespaceConstant.SAXON, plainName);
+                        newName = new Saxon.Hej.om.FingerprintedQName(attName.getPrefix(), Saxon.Hej.om.NamespaceUri.SAXON, plainName);
                     }
                     Saxon.Hej.om.AttributeInfo newAtt = new Saxon.Hej.om.AttributeInfo(newName, att.getType(), newValue, att.getLocation(), Saxon.Hej.@event.ReceiverOption.NONE);
                     Saxon.Impl.Helpers.MapUtils.Put(attMap, newName, newAtt);
@@ -439,8 +466,8 @@ namespace Saxon.Hej.style {
             return stackFrameMap;
         }
         private void setNamespaceBindings(Saxon.Hej.style.UseWhenStaticContext staticContext) {
-            staticContext.setDefaultElementNamespace(Saxon.Hej.lib.NamespaceConstant.NULL);
-            foreach (string uri in defaultNamespaceStack) {
+            staticContext.setDefaultElementNamespace(Saxon.Hej.om.NamespaceUri.NULL);
+            foreach (Saxon.Hej.om.NamespaceUri uri in defaultNamespaceStack) {
                 if ((uri != null)) {
                     staticContext.setDefaultElementNamespace(uri);
                     break ;

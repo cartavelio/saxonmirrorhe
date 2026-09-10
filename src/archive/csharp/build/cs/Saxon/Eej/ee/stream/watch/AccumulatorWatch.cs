@@ -108,7 +108,7 @@ namespace Saxon.Eej.ee.stream.watch {
             c2.setCurrentComponent(accumulator.getDeclaringComponent());
             c2.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_ACCUMULATOR_RULE);
             try {
-                return Saxon.Hej.expr.parser.Evaluator.EagerSequence.INSTANCE.evaluate(delta, c2);
+                return Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(delta, c2);
             } catch (Saxon.Hej.trans.XPathException e) {
                 return new Saxon.Hej.value.ObjectValue<Saxon.Hej.trans.XPathException>(e);
             }

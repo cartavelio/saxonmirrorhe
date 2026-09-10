@@ -104,6 +104,7 @@ namespace Saxon.Hej.tree.linked {
         }
         public override void copy(Saxon.Hej.@event.Receiver @out, int copyOptions, Saxon.Hej.s9api.Location location) {
             bool copyTypes = Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS);
+            bool copyForUpdate = Saxon.Hej.om.CopyOptions.includes(copyOptions, Saxon.Hej.om.CopyOptions.FOR_UPDATE);
             Saxon.Hej.type.SchemaType typeCode = (copyTypes ? getSchemaType() : Saxon.Hej.type.Untyped.getInstance());
             System.Func<Saxon.Hej.om.NodeInfo,System.Object> informee = @out.getPipelineConfiguration().getCopyInformee();
             if ((informee != null)) {
@@ -138,7 +139,11 @@ namespace Saxon.Hej.tree.linked {
                 }
                 atts.Add(new Saxon.Hej.om.AttributeInfo(att.getNodeName(), attributeType, att.getValue(), att.getLocation(), 0));
             }
-            @out.startElement(Saxon.Hej.om.NameOfNode.makeName(this), typeCode, Saxon.Hej.om.SequenceTool.attributeMapFromList(atts), ns, location, (Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY|Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK));
+            int receiverOptions = (Saxon.Hej.@event.ReceiverOption.BEQUEATH_INHERITED_NAMESPACES_ONLY|Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK);
+            if (copyForUpdate) {
+                receiverOptions |= Saxon.Hej.@event.ReceiverOption.MUTABLE_TREE;
+            }
+            @out.startElement(Saxon.Hej.om.NameOfNode.makeName(this), typeCode, Saxon.Hej.om.SequenceTool.attributeMapFromList(atts), ns, location, receiverOptions);
             Saxon.Hej.tree.linked.NodeImpl next = getFirstChild();
             while ((next != null)) {
                 next.copy(@out, copyOptions, location);
@@ -195,14 +200,14 @@ namespace Saxon.Hej.tree.linked {
         }
         public override void rename(Saxon.Hej.om.NodeName newName, bool inherit) {
             string prefix = newName.getPrefix();
-            string uri = newName.getURI();
+            Saxon.Hej.om.NamespaceUri uri = newName.getNamespaceUri();
             Saxon.Hej.om.NamespaceBinding ns = new Saxon.Hej.om.NamespaceBinding(prefix, uri);
-            string uc = getURIForPrefix(prefix, true);
+            Saxon.Hej.om.NamespaceUri uc = getURIForPrefix(prefix, true);
             if ((uc == null)) {
-                uc = "";
+                uc = Saxon.Hej.om.NamespaceUri.NULL;
             }
             if (!(uc.Equals(uri))) {
-                if (uc.Length==0) {
+                if (uc.isEmpty()) {
                     addNamespace(ns, inherit);
                 } else {
                     throw new Saxon.Ejava.lang.IllegalArgumentException("Namespace binding of new name conflicts with existing namespace binding");
@@ -211,17 +216,17 @@ namespace Saxon.Hej.tree.linked {
             nodeName = newName;
         }
         public override void addNamespace(Saxon.Hej.om.NamespaceBinding binding, bool inherit) {
-            if (binding.getURI().Length==0) {
+            if (binding.getNamespaceUri().isEmpty()) {
                 throw new Saxon.Ejava.lang.IllegalArgumentException("Cannot add a namespace undeclaration");
             }
-            string existing = namespaceMap.getURI(binding.getPrefix());
+            Saxon.Hej.om.NamespaceUri existing = namespaceMap.getNamespaceUri(binding.getPrefix());
             if ((existing != null)) {
-                if (!(existing.Equals(binding.getURI()))) {
+                if (!(existing.Equals(binding.getNamespaceUri()))) {
                     throw new Saxon.Ejava.lang.IllegalArgumentException("New namespace conflicts with existing namespace binding");
                 }
             } else {
                 Saxon.Hej.om.NamespaceMap oldMap = namespaceMap;
-                namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getURI());
+                namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getNamespaceUri());
                 if ((inherit && (namespaceMap != oldMap))) {
                     foreach (Saxon.Hej.om.NodeInfo child in children(Saxon.Hej.pattern.NodeKindTest.ELEMENT)) {
                         ((Saxon.Hej.tree.linked.ElementImpl)(child)).inheritParentNamespaces(binding, oldMap, namespaceMap);
@@ -235,7 +240,7 @@ namespace Saxon.Hej.tree.linked {
                 if ((namespaceMap == oldParentMap)) {
                     namespaceMap = newParentMap;
                 } else {
-                    namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getURI());
+                    namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getNamespaceUri());
                 }
                 foreach (Saxon.Hej.om.NodeInfo child in children(Saxon.Hej.pattern.NodeKindTest.ELEMENT)) {
                     ((Saxon.Hej.tree.linked.ElementImpl)(child)).inheritParentNamespaces(binding, oldMap, namespaceMap);
@@ -269,14 +274,14 @@ namespace Saxon.Hej.tree.linked {
             Saxon.Hej.tree.linked.AttributeMapWithIdentity atts = prepareAttributesForUpdate();
             atts = atts.add(new Saxon.Hej.om.AttributeInfo(nodeName, attType, value, Saxon.Hej.expr.parser.Loc.NONE, Saxon.Hej.@event.ReceiverOption.NONE));
             setAttributes(atts);
-            if (!(nodeName.hasURI(""))) {
+            if (!(nodeName.hasURI(Saxon.Hej.om.NamespaceUri.NULL))) {
                 Saxon.Hej.om.NamespaceBinding binding = nodeName.getNamespaceBinding();
                 string prefix = binding.getPrefix();
-                string uc = getURIForPrefix(prefix, false);
+                Saxon.Hej.om.NamespaceUri uc = getURIForPrefix(prefix, false);
                 if ((uc == null)) {
                     addNamespace(binding, inheritNamespaces);
                 } else {
-                    if (!(uc.Equals(binding.getURI()))) {
+                    if (!(uc.Equals(binding.getNamespaceUri()))) {
                         throw new Saxon.Ejava.lang.IllegalStateException("Namespace binding of new name conflicts with existing namespace binding");
                     }
                 }
@@ -315,8 +320,8 @@ namespace Saxon.Hej.tree.linked {
             }
             namespaceMap = namespaceMap.remove(prefix);
         }
-        public override void addNamespace(string prefix, string uri) {
-            string existingURI = namespaceMap.getURI(prefix);
+        public override void addNamespace(string prefix, Saxon.Hej.om.NamespaceUri uri) {
+            Saxon.Hej.om.NamespaceUri existingURI = namespaceMap.getNamespaceUri(prefix);
             if ((existingURI == null)) {
                 namespaceMap = namespaceMap.put(prefix, uri);
             } else {
@@ -334,23 +339,23 @@ namespace Saxon.Hej.tree.linked {
         public void setNamespaceMap(Saxon.Hej.om.NamespaceMap map) {
             namespaceMap = map;
         }
-        public string getURIForPrefix(string prefix, bool useDefault) {
+        public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {
             if (prefix.Length==0) {
                 if (useDefault) {
                     return namespaceMap.getDefaultNamespace();
                 } else {
-                    return Saxon.Hej.lib.NamespaceConstant.NULL;
+                    return Saxon.Hej.om.NamespaceUri.NULL;
                 }
             } else {
-                return namespaceMap.getURI(prefix);
+                return namespaceMap.getNamespaceUri(prefix);
             }
         }
         public System.Collections.Generic.IEnumerator<string> iteratePrefixes() {
             return namespaceMap.iteratePrefixes();
         }
-        public bool isInScopeNamespace(string uri) {
+        public bool isInScopeNamespace(Saxon.Hej.om.NamespaceUri uri) {
             foreach (Saxon.Hej.om.NamespaceBinding b in namespaceMap) {
-                if (b.getURI().Equals(uri)) {
+                if (b.getNamespaceUri().Equals(uri)) {
                     return true;
                 }
             }
@@ -376,8 +381,8 @@ namespace Saxon.Hej.tree.linked {
         private void deepAddNamespaces(Saxon.Hej.om.NamespaceMap inheritedNamespaces) {
             Saxon.Hej.om.NamespaceMap childNamespaces = namespaceMap;
             foreach (Saxon.Hej.om.NamespaceBinding binding in inheritedNamespaces) {
-                if ((childNamespaces.getURI(binding.getPrefix()) == null)) {
-                    childNamespaces = childNamespaces.put(binding.getPrefix(), binding.getURI());
+                if ((childNamespaces.getNamespaceUri(binding.getPrefix()) == null)) {
+                    childNamespaces = childNamespaces.put(binding.getPrefix(), binding.getNamespaceUri());
                 } else {
                     inheritedNamespaces = inheritedNamespaces.remove(binding.getPrefix());
                 }
@@ -390,7 +395,7 @@ namespace Saxon.Hej.tree.linked {
         public override Saxon.Hej.om.NamespaceMap getAllNamespaces() {
             return namespaceMap;
         }
-        public override string getAttributeValue(string uri, string localName) {
+        public override string getAttributeValue(Saxon.Hej.om.NamespaceUri uri, string localName) {
             return ((attributeMap == null) ? null : attributeMap.getValue(uri, localName));
         }
         public override bool isId() {

@@ -9,7 +9,7 @@ namespace Saxon.Hej.om {
         }
         private NamespaceDeltaMap()  {
             prefixes = new string[]{};
-            uris = new string[]{};
+            uris = new Saxon.Hej.om.NamespaceUri[]{};
         }
         protected internal override Saxon.Hej.om.NamespaceMap makeNamespaceMap() {
             return new Saxon.Hej.om.NamespaceDeltaMap();
@@ -17,7 +17,7 @@ namespace Saxon.Hej.om {
         public override bool allowsNamespaceUndeclarations() {
             return true;
         }
-        public override Saxon.Hej.om.NamespaceDeltaMap put(string prefix, string uri) {
+        public override Saxon.Hej.om.NamespaceDeltaMap put(string prefix, Saxon.Hej.om.NamespaceUri uri) {
             return (Saxon.Hej.om.NamespaceDeltaMap)(base.put(prefix, uri));
         }
         public override Saxon.Hej.om.NamespaceDeltaMap remove(string prefix) {

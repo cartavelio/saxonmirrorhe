@@ -13,43 +13,43 @@ namespace Saxon.Hej.functions {
             if (((startVal is Saxon.Hej.value.Int64Value) && (lengthVal is Saxon.Hej.value.Int64Value))) {
                 long lstart = startVal.longValue();
                 if ((lstart>System.Int32.MaxValue)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 long llength = lengthVal.longValue();
                 if ((llength>System.Int32.MaxValue)) {
                     llength = System.Int32.MaxValue;
                 }
                 if ((llength<1)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 long lend = ((lstart+llength)-1);
                 if ((lend<1)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 int start = ((lstart<1) ? 1 : (int)(lstart));
                 return Saxon.Hej.expr.SubsequenceIterator.make(seq, start, (int)(lend));
             } else {
                 if (startVal.isNaN()) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 if ((startVal.compareTo(Saxon.Hej.value.Int64Value.MAX_LONG)>0)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 startVal = startVal.round(0);
                 if (lengthVal.isNaN()) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 lengthVal = lengthVal.round(0);
                 if ((lengthVal.compareTo(Saxon.Hej.value.Int64Value.ZERO)<=0)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 Saxon.Hej.value.NumericValue rend = (Saxon.Hej.value.NumericValue)(Saxon.Hej.expr.ArithmeticExpression.compute(startVal, Saxon.Hej.expr.Calculator.PLUS, lengthVal, context));
                 if (rend.isNaN()) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 rend = (Saxon.Hej.value.NumericValue)(Saxon.Hej.expr.ArithmeticExpression.compute(rend, Saxon.Hej.expr.Calculator.MINUS, Saxon.Hej.value.Int64Value.PLUS_ONE, context));
                 if ((rend.compareTo(Saxon.Hej.value.Int64Value.ZERO)<=0)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 long lstart;
                 if ((startVal.compareTo(Saxon.Hej.value.Int64Value.PLUS_ONE)<=0)) {
@@ -58,7 +58,7 @@ namespace Saxon.Hej.functions {
                     lstart = startVal.longValue();
                 }
                 if ((lstart>System.Int32.MaxValue)) {
-                    return Saxon.Hej.tree.iter.EmptyIterator.emptyIterator();
+                    return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
                 }
                 long lend;
                 if ((rend.compareTo(Saxon.Hej.value.Int64Value.MAX_LONG)>=0)) {

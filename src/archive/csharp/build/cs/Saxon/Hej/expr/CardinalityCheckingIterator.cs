@@ -8,22 +8,24 @@ namespace Saxon.Hej.expr {
         private Saxon.Hej.om.Item first = null;
         private Saxon.Hej.om.Item second = null;
         private int position = 0;
-        public CardinalityCheckingIterator(Saxon.Hej.om.SequenceIterator @base, int requiredCardinality, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.s9api.Location locator)  {
+        public CardinalityCheckingIterator(Saxon.Hej.om.SequenceIterator @base, int requiredCardinality, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.s9api.Location locator)  {
             this.@base = @base;
             this.locator = locator;
             try {
                 first = @base.next();
                 if ((first == null)) {
+                    Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                     if (!(Saxon.Hej.value.Cardinality.allowsZero(requiredCardinality))) {
                         typeError(("An empty sequence is not allowed as the "+role.getMessage()), role.getErrorCode());
                     }
                 } else {
                     if ((requiredCardinality == Saxon.Hej.expr.StaticProperty.EMPTY)) {
+                        Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                         typeError((("The only value allowed for the "+role.getMessage())+" is an empty sequence"), role.getErrorCode());
                     }
                     second = @base.next();
                     if (((second != null) && !(Saxon.Hej.value.Cardinality.allowsMany(requiredCardinality)))) {
-                        Saxon.Hej.om.Item[] leaders = new Saxon.Hej.om.Item[]{first, second};
+                        Saxon.Hej.expr.parser.RoleDiagnostic role = roleSupplier();
                         typeError((("A sequence of more than one item is not allowed as the "+role.getMessage())+Saxon.Hej.expr.CardinalityChecker.depictSequenceStart(new Saxon.Hej.tree.iter.TwoItemIterator(first, second), 2)), role.getErrorCode());
                     }
                 }
@@ -57,9 +59,6 @@ namespace Saxon.Hej.expr {
         }
         public void close() {
             @base.close();
-        }
-        public void discharge() {
-            @base.discharge();
         }
         private void typeError(string message, string errorCode) {
             Saxon.Hej.trans.XPathException e = new Saxon.Hej.trans.XPathException(message, errorCode, locator);

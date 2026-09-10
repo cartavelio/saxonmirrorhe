@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr {
     public class StaticFunctionCall : Saxon.Hej.expr.FunctionCall, Saxon.Hej.expr.Callable {
-        private readonly Saxon.Hej.om.Function target;
-        public StaticFunctionCall(Saxon.Hej.om.Function target, Saxon.Hej.expr.Expression[] arguments)  {
+        private readonly Saxon.Hej.om.FunctionItem target;
+        public StaticFunctionCall(Saxon.Hej.om.FunctionItem target, Saxon.Hej.expr.Expression[] arguments)  {
             if ((target.getArity() != arguments.Length)) {
                 throw new Saxon.Ejava.lang.IllegalArgumentException((((("Function call to "+target.getFunctionName())+" with wrong number of arguments (")+arguments.Length)+")"));
             }
             this.target = target;
             setOperanda(arguments, target.getOperandRoles());
         }
-        public virtual Saxon.Hej.om.Function getTargetFunction() {
+        public virtual Saxon.Hej.om.FunctionItem getTargetFunction() {
             return target;
         }
-        public override Saxon.Hej.om.Function getTargetFunction(Saxon.Hej.expr.XPathContext context) {
+        public override Saxon.Hej.om.FunctionItem getTargetFunction(Saxon.Hej.expr.XPathContext context) {
             return getTargetFunction();
         }
         public override Saxon.Hej.om.StructuredQName getFunctionName() {
@@ -57,7 +57,7 @@ namespace Saxon.Hej.expr {
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter @out) {
             if ((target is Saxon.Hej.expr.instruct.OriginalFunction)) {
-                Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = (Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(@out.getOptions());
+                Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = @out.getOptions();
                 Saxon.Hej.expr.instruct.OriginalFunction pf = (Saxon.Hej.expr.instruct.OriginalFunction)(target);
                 @out.startElement("origFC", this);
                 @out.emitAttribute("name", pf.getFunctionName());
@@ -119,6 +119,20 @@ namespace Saxon.Hej.expr {
                     }
                 }
             }
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.StaticFunctionCall.StaticFunctionCallElaborator();
+        }
+        private class StaticFunctionCallElaborator : Saxon.Hej.expr.FunctionCall.FunctionCallElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.StaticFunctionCall expr = (Saxon.Hej.expr.StaticFunctionCall)(getExpression());
+                return context => expr.call(context, evaluateArguments(context)).iterate();
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.StaticFunctionCall expr = (Saxon.Hej.expr.StaticFunctionCall)(getExpression());
+                return context => expr.call(context, evaluateArguments(context)).head();
+            }
+        
         }
     
     }

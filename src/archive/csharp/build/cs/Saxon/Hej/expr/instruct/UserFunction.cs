@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr.instruct {
-    public class UserFunction : Saxon.Hej.expr.instruct.Actor, Saxon.Hej.om.Function, Saxon.Hej.expr.ContextOriginator, Saxon.Hej.trace.TraceableComponent {
+    public class UserFunction : Saxon.Hej.expr.instruct.Actor, Saxon.Hej.om.FunctionItem, Saxon.Hej.functions.registry.FunctionDefinition, Saxon.Hej.expr.ContextOriginator, Saxon.Hej.trace.TraceableComponent {
         public enum Determinism {
             DETERMINISTIC,
             PROACTIVE,
@@ -15,7 +15,7 @@ namespace Saxon.Hej.expr.instruct {
         private Saxon.Hej.expr.instruct.UserFunctionParameter[] parameterDefinitions;
         private Saxon.Hej.value.SequenceType resultType;
         private Saxon.Hej.value.SequenceType declaredResultType;
-        protected internal Saxon.Hej.expr.parser.Evaluator evaluator = null;
+        protected internal Saxon.Hej.expr.elab.SequenceEvaluator bodyEvaluator = null;
         private bool updating = false;
         private int inlineable = -1;
         private int inliningCount = 0;
@@ -24,6 +24,7 @@ namespace Saxon.Hej.expr.instruct {
         private Saxon.Hej.trans.FunctionStreamability declaredStreamability = Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED;
         private Saxon.Hej.expr.instruct.UserFunction.Determinism determinism = Saxon.Hej.expr.instruct.UserFunction.Determinism.PROACTIVE;
         private int refCount = 0;
+        private int minimumArity = 0;
         public UserFunction()  {
         }
         public void setFunctionName(Saxon.Hej.om.StructuredQName name) {
@@ -34,7 +35,7 @@ namespace Saxon.Hej.expr.instruct {
         }
         public string getDescription() {
             Saxon.Hej.om.StructuredQName name = getFunctionName();
-            if (name.hasURI(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS)) {
+            if (name.hasURI(Saxon.Hej.om.NamespaceUri.ANONYMOUS)) {
                 bool first = true;
                 Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder("function(");
                 foreach (Saxon.Hej.expr.instruct.UserFunctionParameter param in getParameterDefinitions()) {
@@ -141,10 +142,10 @@ namespace Saxon.Hej.expr.instruct {
             return determinism;
         }
         public virtual void computeEvaluationMode() {
-            if (tailRecursive) {
-                evaluator = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluator(getBody());
+            if ((tailRecursive || (declaredStreamability != Saxon.Hej.trans.FunctionStreamability.UNCLASSIFIED))) {
+                bodyEvaluator = getBody().makeElaborator().eagerly();
             } else {
-                evaluator = Saxon.Hej.expr.parser.ExpressionTool.lazyEvaluator(getBody(), true);
+                bodyEvaluator = getBody().makeElaborator().lazily(true);
             }
         }
         public Saxon.Ejava.util.Optional<bool> isInlineable() {
@@ -179,11 +180,27 @@ namespace Saxon.Hej.expr.instruct {
         public void markAsInlined() {
             inliningCount++;
         }
-        public void setParameterDefinitions(Saxon.Hej.expr.instruct.UserFunctionParameter[] @params) {
+        public virtual void setParameterDefinitions(Saxon.Hej.expr.instruct.UserFunctionParameter[] @params) {
             parameterDefinitions = @params;
+            minimumArity = 0;
+            foreach (Saxon.Hej.expr.instruct.UserFunctionParameter param in @params) {
+                if (param.isRequired()) {
+                    minimumArity++;
+                }
+            }
+        }
+        public void setMinimumArity(int minimumArity) {
+            this.minimumArity = minimumArity;
+        }
+        public void setArityRange(int min, int max) {
+            this.minimumArity = min;
+            this.parameterDefinitions = new Saxon.Hej.expr.instruct.UserFunctionParameter[max];
         }
         public Saxon.Hej.expr.instruct.UserFunctionParameter[] getParameterDefinitions() {
             return parameterDefinitions;
+        }
+        public int getMinimumArity() {
+            return minimumArity;
         }
         public void setResultType(Saxon.Hej.value.SequenceType resultType) {
             this.declaredResultType = resultType;
@@ -236,14 +253,14 @@ namespace Saxon.Hej.expr.instruct {
         public Saxon.Hej.value.SequenceType getArgumentType(int n) {
             return parameterDefinitions[n].getRequiredType();
         }
-        public Saxon.Hej.expr.parser.Evaluator getEvaluator() {
-            if ((evaluator == null)) {
+        public Saxon.Hej.expr.elab.SequenceEvaluator getBodyEvaluator() {
+            if ((bodyEvaluator == null)) {
                 computeEvaluationMode();
             }
-            return evaluator;
+            return bodyEvaluator;
         }
-        public void setEvaluator(Saxon.Hej.expr.parser.Evaluator mode) {
-            evaluator = mode;
+        public void setBodyEvaluator(Saxon.Hej.expr.elab.SequenceEvaluator mode) {
+            bodyEvaluator = mode;
         }
         public int getArity() {
             return parameterDefinitions.Length;
@@ -254,7 +271,7 @@ namespace Saxon.Hej.expr.instruct {
         public void typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             Saxon.Hej.expr.Expression exp = getBody();
             if (((((exp is Saxon.Hej.expr.instruct.ValueOf) && ((Saxon.Hej.expr.instruct.ValueOf)(exp)).getSelect().getItemType().isAtomicType()) && declaredResultType.getPrimaryType().isAtomicType()) && (declaredResultType.getPrimaryType() != Saxon.Hej.type.BuiltInAtomicType.STRING))) {
-                visitor.getStaticContext().issueWarning("A function that computes atomic values should use xsl:sequence rather than xsl:value-of", getLocation());
+                visitor.getStaticContext().issueWarning("A function that computes atomic values should use xsl:sequence rather than xsl:value-of", Saxon.Hej.trans.SaxonErrorCode.SXWN9032, getLocation());
             }
             Saxon.Hej.expr.parser.ExpressionTool.resetPropertiesWithinSubtree(exp);
             Saxon.Hej.expr.Expression exp2 = exp;
@@ -262,8 +279,7 @@ namespace Saxon.Hej.expr.instruct {
                 Saxon.Hej.expr.parser.ContextItemStaticInfo info = Saxon.Hej.expr.parser.ContextItemStaticInfo.ABSENT;
                 exp2 = exp.typeCheck(visitor, info);
                 if ((resultType != null)) {
-                    Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, ((functionName == null) ? "" : ((functionName.getDisplayName()+"#")+getArity())), 0);
-                    role.setErrorCode(((getPackageData().isXSLT() && (getFunctionName() != null)) ? "XTTE0780" : "XPTY0004"));
+                    Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.FUNCTION_RESULT, ((functionName == null) ? "" : ((functionName.getDisplayName()+"#")+getArity())), 0, ((getPackageData().isXSLT() && (getFunctionName() != null)) ? "XTTE0780" : "XPTY0004"));
                     exp2 = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(exp2, resultType, role, visitor);
                 }
             } catch (Saxon.Hej.trans.XPathException err) {
@@ -283,14 +299,14 @@ namespace Saxon.Hej.expr.instruct {
             return c2;
         }
         public virtual Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] actualArgs) {
-            if ((evaluator == null)) {
+            if ((bodyEvaluator == null)) {
                 computeEvaluationMode();
             }
             Saxon.Hej.expr.XPathContextMajor c2 = (Saxon.Hej.expr.XPathContextMajor)(context);
             c2.setStackFrame(getStackFrameMap(), actualArgs);
             Saxon.Hej.om.Sequence result;
             try {
-                result = evaluator.evaluate(getBody(), c2);
+                result = bodyEvaluator.evaluate(c2);
             } catch (Saxon.Hej.trans.XPathException err) {
                 err.maybeSetLocation(getLocation());
                 err.maybeSetContext(c2);
@@ -308,7 +324,8 @@ namespace Saxon.Hej.expr.instruct {
         }
         public void process(Saxon.Hej.expr.XPathContextMajor context, Saxon.Hej.om.Sequence[] actualArgs, Saxon.Hej.@event.Outputter output) {
             context.setStackFrame(getStackFrameMap(), actualArgs);
-            getBody().process(output, context);
+            Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/getBody().makeElaborator().elaborateForPush()(output, context);
+            Saxon.Hej.expr.Expression.dispatchTailCall(tc);
         }
         public Saxon.Hej.om.Sequence call(Saxon.Hej.om.Sequence[] actualArgs, Saxon.Hej.Controller controller) {
             return call(controller.newXPathContext(), actualArgs);
@@ -316,7 +333,7 @@ namespace Saxon.Hej.expr.instruct {
         public void callUpdating(Saxon.Hej.om.Sequence[] actualArgs, Saxon.Hej.expr.XPathContextMajor context, Saxon.Hej.expr.PendingUpdateList pul) {
             context.setStackFrame(getStackFrameMap(), actualArgs);
             try {
-                getBody().evaluatePendingUpdates(context, pul);
+                /*Delegate.registerUpdates()*/getBody().makeElaborator().elaborateForUpdate()(context, pul);
             } catch (Saxon.Hej.trans.XPathException err) {
                 err.maybeSetLocation(getLocation());
                 throw;
@@ -328,7 +345,6 @@ namespace Saxon.Hej.expr.instruct {
                 presenter.emitAttribute("name", getFunctionName());
                 presenter.emitAttribute("line", (getLineNumber()+""));
                 presenter.emitAttribute("module", getSystemId());
-                presenter.emitAttribute("eval", (getEvaluator().getCode()+""));
             }
             string flags = "";
             if ((determinism == Saxon.Hej.expr.instruct.UserFunction.Determinism.PROACTIVE)) {
@@ -391,7 +407,7 @@ namespace Saxon.Hej.expr.instruct {
         public bool isArray() {
             return false;
         }
-        public bool deepEquals(Saxon.Hej.om.Function other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
+        public bool deepEquals(Saxon.Hej.om.FunctionItem other, Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.sort.AtomicComparer comparer, int flags) {
             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("Cannot compare functions using deep-equal", "FOTY0015");
             err.setIsTypeError(true);
             err.setXPathContext(context);
@@ -429,15 +445,76 @@ namespace Saxon.Hej.expr.instruct {
         }
         public virtual void prepareForStreaming() {
         }
+        public int getNumberOfParameters() {
+            return getArity();
+        }
+        public Saxon.Hej.om.StructuredQName getParameterName(int i) {
+            return getParameterDefinitions()[i].getVariableQName();
+        }
+        public Saxon.Hej.expr.Expression getDefaultValueExpression(int i) {
+            return getParameterDefinitions()[i].getDefaultValueExpression();
+        }
+        public int getPositionOfParameter(Saxon.Hej.om.StructuredQName name) {
+            for (int i = 0; (i<parameterDefinitions.Length); i++) {
+                if (parameterDefinitions[i].getVariableQName().Equals(name)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        public static Saxon.Hej.expr.Expression[] makeExpandedArgumentArray(Saxon.Hej.expr.Expression[] arguments, System.Collections.Generic.IDictionary<Saxon.Hej.om.StructuredQName,int> keywords, Saxon.Hej.functions.registry.FunctionDefinition fd) {
+            Saxon.Hej.expr.Expression[] expandedArgs;
+            int maxArity = fd.getNumberOfParameters();
+            if ((keywords != null)) {
+                expandedArgs = new Saxon.Hej.expr.Expression[maxArity];
+                int positionalArgs = (arguments.Length-keywords.Count);
+                Saxon.Ejava.lang.System.arraycopy(arguments, 0, expandedArgs, 0, positionalArgs);
+                foreach (System.Collections.Generic.KeyValuePair<Saxon.Hej.om.StructuredQName,int> entry in keywords) {
+                    Saxon.Hej.om.StructuredQName key = entry.Key;
+                    int argPos = entry.Value;
+                    int paramPos = fd.getPositionOfParameter(key);
+                    if ((paramPos<0)) {
+                        throw new Saxon.Hej.trans.XPathException(((("Keyword "+key)+" does not match the name of any declared parameter of function ")+fd.getFunctionName()), "XPST0142");
+                    }
+                    if ((paramPos<positionalArgs)) {
+                        throw new Saxon.Hej.trans.XPathException((((("Parameter "+key)+" of function ")+fd.getFunctionName())+" is supplied both by position and by keyword"), "XPST0141");
+                    }
+                    Saxon.Hej.expr.Expression supplied = arguments[argPos];
+                    expandedArgs[paramPos] = supplied;
+                }
+            } else {
+                expandedArgs = Saxon.Ejava.util.Arrays.copyOf(arguments, maxArity);
+            }
+            for (int a = 0; (a<maxArity); a++) {
+                if ((expandedArgs[a] == null)) {
+                    Saxon.Hej.expr.Expression defaultVal = fd.getDefaultValueExpression(a);
+                    if ((defaultVal == null)) {
+                        defaultVal = new Saxon.Hej.expr.DefaultedArgumentExpression();
+                    }
+                    expandedArgs[a] = defaultVal;
+                }
+            }
+            return expandedArgs;
+        }
     
-        /* Expanding default method materialize from interface Sequence */
-        public virtual Saxon.Hej.om.GroundedValue materialize() {
-            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
+        /* Expanding default method isSequenceVariadic from interface FunctionItem */
+        public virtual bool isSequenceVariadic() {
+            return false;
         }
 
         /* Expanding default method toShortString from interface Item */
         public virtual string toShortString() {
             return ToString();
+        }
+
+        /* Expanding default method getGenre from interface FunctionItem */
+        public virtual Saxon.Hej.om.Genre getGenre() {
+            return Saxon.Hej.om.Genre.FUNCTION;
+        }
+
+        /* Expanding default method materialize from interface Sequence */
+        public virtual Saxon.Hej.om.GroundedValue materialize() {
+            return Saxon.Hej.om.SequenceTool.toGroundedValue(iterate());
         }
 
         /* Expanding default method asIterable from interface GroundedValue */
@@ -452,27 +529,17 @@ namespace Saxon.Hej.expr.instruct {
 
         /* Expanding default method concatenate from interface GroundedValue */
         public virtual Saxon.Hej.om.GroundedValue concatenate(params Saxon.Hej.om.GroundedValue[]  others) {
-            Saxon.Hej.ma.zeno.ZenoSequence chain = new Saxon.Hej.ma.zeno.ZenoSequence();
-            chain.appendSequence(this);
-            foreach (Saxon.Hej.om.GroundedValue seq in others) {
-                chain.appendSequence(seq);
+            Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item> chain = new Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.om.Item>();
+            chain = chain.addAll(asIterable());
+            foreach (Saxon.Hej.om.GroundedValue val in others) {
+                chain = chain.addAll(val.asIterable());
             }
-            return chain;
+            return new Saxon.Hej.ma.zeno.ZenoSequence(chain);
         }
 
         /* Expanding default method makeRepeatable from interface Sequence */
         public virtual Saxon.Hej.om.Sequence makeRepeatable() {
             return this;
-        }
-
-        /* Expanding default method isSequenceVariadic from interface Function */
-        public virtual bool isSequenceVariadic() {
-            return false;
-        }
-
-        /* Expanding default method getGenre from interface Function */
-        public virtual Saxon.Hej.om.Genre getGenre() {
-            return Saxon.Hej.om.Genre.FUNCTION;
         }
 
         /* Expanding default method getStringValue from interface Item */
@@ -482,7 +549,7 @@ namespace Saxon.Hej.expr.instruct {
 
         /* Expanding default method iterate from interface Item */
         public virtual Saxon.Hej.om.SequenceIterator iterate() {
-            return new Saxon.Hej.tree.iter.SingletonIterator(this);
+            return (Saxon.Hej.tree.iter.SingletonIterator)(Saxon.Hej.tree.iter.SingletonIterator.makeIterator(this));
         }
 
         /* Expanding default method isStreamed from interface Item */

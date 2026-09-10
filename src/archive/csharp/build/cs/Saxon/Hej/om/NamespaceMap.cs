@@ -4,24 +4,25 @@ using System.Linq;
 namespace Saxon.Hej.om {
     public class NamespaceMap : Saxon.Hej.om.NamespaceBindingSet, Saxon.Hej.om.NamespaceResolver {
         protected internal string[] prefixes;
-        protected internal string[] uris;
+        protected internal Saxon.Hej.om.NamespaceUri[] uris;
         private static readonly string[] emptyArray = new string[]{};
+        private static readonly Saxon.Hej.om.NamespaceUri[] emptyUriArray = new Saxon.Hej.om.NamespaceUri[]{};
         private static readonly Saxon.Hej.om.NamespaceMap EMPTY_MAP = new Saxon.Hej.om.NamespaceMap();
         public static Saxon.Hej.om.NamespaceMap emptyMap() {
             return EMPTY_MAP;
         }
-        public static Saxon.Hej.om.NamespaceMap of(string prefix, string uri) {
+        public static Saxon.Hej.om.NamespaceMap of(string prefix, Saxon.Hej.om.NamespaceUri uri) {
             Saxon.Hej.om.NamespaceMap map = new Saxon.Hej.om.NamespaceMap();
             if (map.isPointlessMapping(prefix, uri)) {
                 return EMPTY_MAP;
             }
             map.prefixes = new string[]{prefix};
-            map.uris = new string[]{uri};
+            map.uris = new Saxon.Hej.om.NamespaceUri[]{uri};
             return map;
         }
         protected internal NamespaceMap()  {
             prefixes = emptyArray;
-            uris = emptyArray;
+            uris = emptyUriArray;
         }
         protected internal virtual Saxon.Hej.om.NamespaceMap makeNamespaceMap() {
             return new Saxon.Hej.om.NamespaceMap();
@@ -31,17 +32,17 @@ namespace Saxon.Hej.om {
             sortByPrefix(bindingArray);
             bool bindsXmlNamespace = false;
             prefixes = new string[bindingArray.Length];
-            uris = new string[bindingArray.Length];
+            uris = new Saxon.Hej.om.NamespaceUri[bindingArray.Length];
             for (int i = 0; (i<bindingArray.Length); i++) {
                 prefixes[i] = bindingArray[i].getPrefix();
-                uris[i] = bindingArray[i].getURI();
+                uris[i] = bindingArray[i].getNamespaceUri();
                 if (prefixes[i].Equals("xml")) {
                     bindsXmlNamespace = true;
-                    if (!(uris[i].Equals(Saxon.Hej.lib.NamespaceConstant.XML))) {
+                    if (!(uris[i].Equals(Saxon.Hej.om.NamespaceUri.XML))) {
                         throw new Saxon.Ejava.lang.IllegalArgumentException("Binds xml prefix to the wrong namespace");
                     }
                 } else {
-                    if (uris[i].Equals(Saxon.Hej.lib.NamespaceConstant.XML)) {
+                    if (uris[i].Equals(Saxon.Hej.om.NamespaceUri.XML)) {
                         throw new Saxon.Ejava.lang.IllegalArgumentException("Binds xml namespace to the wrong prefix");
                     }
                 }
@@ -58,7 +59,7 @@ namespace Saxon.Hej.om {
             System.Collections.Generic.IList<Saxon.Hej.om.NamespaceBinding> bindings = new System.Collections.Generic.List<Saxon.Hej.om.NamespaceBinding>();
             while (iter.MoveNext()) {
                 string prefix = iter.Current;
-                string uri = resolver.getURIForPrefix(prefix, true);
+                Saxon.Hej.om.NamespaceUri uri = resolver.getURIForPrefix(prefix, true);
                 bindings.Add(new Saxon.Hej.om.NamespaceBinding(prefix, uri));
             }
             return new Saxon.Hej.om.NamespaceMap(bindings);
@@ -72,23 +73,23 @@ namespace Saxon.Hej.om {
         public bool isEmpty() {
             return (prefixes.Length == 0);
         }
-        public string getURI(string prefix) {
+        public Saxon.Hej.om.NamespaceUri getNamespaceUri(string prefix) {
             if (prefix.Equals("xml")) {
-                return Saxon.Hej.lib.NamespaceConstant.XML;
+                return Saxon.Hej.om.NamespaceUri.XML;
             }
             int position = Saxon.Ejava.util.Arrays.binarySearch(prefixes, prefix);
             return ((position>=0) ? uris[position] : null);
         }
-        public string getDefaultNamespace() {
+        public Saxon.Hej.om.NamespaceUri getDefaultNamespace() {
             if (((prefixes.Length>0) && prefixes[0].Length==0)) {
                 return uris[0];
             } else {
-                return "";
+                return Saxon.Hej.om.NamespaceUri.NULL;
             }
         }
-        public virtual Saxon.Hej.om.NamespaceMap put(string prefix, string uri) {
+        public virtual Saxon.Hej.om.NamespaceMap put(string prefix, Saxon.Hej.om.NamespaceUri uri) {
             if ((uri == null)) {
-                uri = "";
+                uri = Saxon.Hej.om.NamespaceUri.NULL;
             }
             if (isPointlessMapping(prefix, uri)) {
                 return this;
@@ -98,13 +99,13 @@ namespace Saxon.Hej.om {
                 if (uris[position].Equals(uri)) {
                     return this;
                 } else {
-                    if (uri.Length==0) {
+                    if ((uri == Saxon.Hej.om.NamespaceUri.NULL)) {
                         Saxon.Hej.om.NamespaceMap n2 = makeNamespaceMap();
                         if ((prefixes.Length>1)) {
                             n2.prefixes = new string[(prefixes.Length-1)];
                             Saxon.Ejava.lang.System.arraycopy(prefixes, 0, n2.prefixes, 0, position);
                             Saxon.Ejava.lang.System.arraycopy(prefixes, (position+1), n2.prefixes, position, ((prefixes.Length-position)-1));
-                            n2.uris = new string[(uris.Length-1)];
+                            n2.uris = new Saxon.Hej.om.NamespaceUri[(uris.Length-1)];
                             Saxon.Ejava.lang.System.arraycopy(uris, 0, n2.uris, 0, position);
                             Saxon.Ejava.lang.System.arraycopy(uris, (position+1), n2.uris, position, ((uris.Length-position)-1));
                         }
@@ -118,9 +119,19 @@ namespace Saxon.Hej.om {
                     }
                 }
             } else {
+                return putNoExistingEntry(position, prefix, uri);
+            }
+        }
+        private Saxon.Hej.om.NamespaceMap putNoExistingEntry(int position, string prefix, Saxon.Hej.om.NamespaceUri uri) {
+            if ((prefixes.Length == 0)) {
+                Saxon.Hej.om.NamespaceMap n2 = makeNamespaceMap();
+                n2.prefixes = new string[]{prefix};
+                n2.uris = new Saxon.Hej.om.NamespaceUri[]{uri};
+                return n2;
+            } else {
                 int insertionPoint = (-(position)-1);
                 string[] p2 = new string[(prefixes.Length+1)];
-                string[] u2 = new string[(uris.Length+1)];
+                Saxon.Hej.om.NamespaceUri[] u2 = new Saxon.Hej.om.NamespaceUri[(uris.Length+1)];
                 Saxon.Ejava.lang.System.arraycopy(prefixes, 0, p2, 0, insertionPoint);
                 Saxon.Ejava.lang.System.arraycopy(uris, 0, u2, 0, insertionPoint);
                 p2[insertionPoint] = prefix;
@@ -133,21 +144,21 @@ namespace Saxon.Hej.om {
                 return n2;
             }
         }
-        private bool isPointlessMapping(string prefix, string uri) {
+        private bool isPointlessMapping(string prefix, Saxon.Hej.om.NamespaceUri uri) {
             if (prefix.Equals("xml")) {
-                if (!(uri.Equals(Saxon.Hej.lib.NamespaceConstant.XML))) {
+                if (!(uri.Equals(Saxon.Hej.om.NamespaceUri.XML))) {
                     throw new Saxon.Ejava.lang.IllegalArgumentException("Invalid URI for xml prefix");
                 }
                 return true;
             } else {
-                if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XML)) {
+                if (uri.Equals(Saxon.Hej.om.NamespaceUri.XML)) {
                     throw new Saxon.Ejava.lang.IllegalArgumentException("Invalid prefix for XML namespace");
                 }
             }
             return false;
         }
-        public Saxon.Hej.om.NamespaceMap bind(string prefix, string uri) {
-            if (uri.Length==0) {
+        public Saxon.Hej.om.NamespaceMap bind(string prefix, Saxon.Hej.om.NamespaceUri uri) {
+            if ((uri == Saxon.Hej.om.NamespaceUri.NULL)) {
                 return remove(prefix);
             } else {
                 return put(prefix, uri);
@@ -157,7 +168,7 @@ namespace Saxon.Hej.om {
             int position = Saxon.Ejava.util.Arrays.binarySearch(prefixes, prefix);
             if ((position>=0)) {
                 string[] p2 = new string[(prefixes.Length-1)];
-                string[] u2 = new string[(uris.Length-1)];
+                Saxon.Hej.om.NamespaceUri[] u2 = new Saxon.Hej.om.NamespaceUri[(uris.Length-1)];
                 Saxon.Ejava.lang.System.arraycopy(prefixes, 0, p2, 0, position);
                 Saxon.Ejava.lang.System.arraycopy(uris, 0, u2, 0, position);
                 Saxon.Ejava.lang.System.arraycopy(prefixes, (position+1), p2, position, ((prefixes.Length-position)-1));
@@ -180,57 +191,65 @@ namespace Saxon.Hej.om {
                     if (delta.isEmpty()) {
                         return this;
                     } else {
-                        string[] p1 = prefixes;
-                        string[] u1 = uris;
-                        string[] p2 = delta.prefixes;
-                        string[] u2 = delta.uris;
-                        System.Collections.Generic.IList<string> p3 = new System.Collections.Generic.List<string>((p1.Length+p2.Length));
-                        System.Collections.Generic.IList<string> u3 = new System.Collections.Generic.List<string>((p1.Length+p2.Length));
-                        int i1 = 0;
-                        int i2 = 0;
-                        while (true) {
-                            int c = System.String.Compare(p1[i1], p2[i2], System.StringComparison.Ordinal);
-                            if ((c<0)) {
-                                p3.Add(p1[i1]);
-                                u3.Add(u1[i1]);
-                                if ((++i1>=p1.Length)) {
-                                    break ;
-                                }
-                            } else {
-                                if ((c>0)) {
-                                    p3.Add(p2[i2]);
-                                    u3.Add(u2[i2]);
-                                    if ((++i2>=p2.Length)) {
-                                        break ;
-                                    }
-                                } else {
-                                    p3.Add(p2[i2]);
-                                    u3.Add(u2[i2]);
-                                    i1++;
-                                    i2++;
-                                    if (((i1>=p1.Length) || (i2>=p2.Length))) {
-                                        break ;
-                                    }
-                                }
-                            }
-                        }
-                        while ((i1<p1.Length)) {
-                            p3.Add(p1[i1]);
-                            u3.Add(u1[i1]);
-                            i1++;
-                        }
-                        while ((i2<p2.Length)) {
-                            p3.Add(p2[i2]);
-                            u3.Add(u2[i2]);
-                            i2++;
-                        }
-                        Saxon.Hej.om.NamespaceMap n2 = new Saxon.Hej.om.NamespaceMap();
-                        n2.prefixes = p3.ToArray();
-                        n2.uris = u3.ToArray();
-                        return n2;
+                        return mergePutAll(delta);
                     }
                 }
             }
+        }
+        private Saxon.Hej.om.NamespaceMap mergePutAll(Saxon.Hej.om.NamespaceMap delta) {
+            string[] p1 = prefixes;
+            Saxon.Hej.om.NamespaceUri[] u1 = uris;
+            string[] p2 = delta.prefixes;
+            Saxon.Hej.om.NamespaceUri[] u2 = delta.uris;
+            int lengthSum = (p1.Length+p2.Length);
+            string[] p3 = new string[lengthSum];
+            Saxon.Hej.om.NamespaceUri[] u3 = new Saxon.Hej.om.NamespaceUri[lengthSum];
+            int i1 = 0;
+            int i2 = 0;
+            int writePos = 0;
+            while (true) {
+                int c = System.String.Compare(p1[i1], p2[i2], System.StringComparison.Ordinal);
+                if ((c<0)) {
+                    p3[writePos] = p1[i1];
+                    u3[writePos++] = u1[i1];
+                    if ((++i1>=p1.Length)) {
+                        break ;
+                    }
+                } else {
+                    if ((c>0)) {
+                        p3[writePos] = p2[i2];
+                        u3[writePos++] = u2[i2];
+                        if ((++i2>=p2.Length)) {
+                            break ;
+                        }
+                    } else {
+                        p3[writePos] = p2[i2];
+                        u3[writePos++] = u2[i2];
+                        i1++;
+                        i2++;
+                        if (((i1>=p1.Length) || (i2>=p2.Length))) {
+                            break ;
+                        }
+                    }
+                }
+            }
+            while ((i1<p1.Length)) {
+                p3[writePos] = p1[i1];
+                u3[writePos++] = u1[i1];
+                i1++;
+            }
+            while ((i2<p2.Length)) {
+                p3[writePos] = p2[i2];
+                u3[writePos++] = u2[i2];
+                i2++;
+            }
+            return createNewNamespaceMap(p3, u3, lengthSum, writePos);
+        }
+        private Saxon.Hej.om.NamespaceMap createNewNamespaceMap(string[] p3, Saxon.Hej.om.NamespaceUri[] u3, int lengthSum, int writePos) {
+            Saxon.Hej.om.NamespaceMap n2 = new Saxon.Hej.om.NamespaceMap();
+            n2.prefixes = ((writePos == lengthSum) ? p3 : Saxon.Ejava.util.Arrays.copyOf(p3, writePos));
+            n2.uris = ((writePos == lengthSum) ? u3 : Saxon.Ejava.util.Arrays.copyOf(u3, writePos));
+            return n2;
         }
         public Saxon.Hej.om.NamespaceMap addAll(Saxon.Hej.om.NamespaceBindingSet namespaces) {
             if ((namespaces is Saxon.Hej.om.NamespaceMap)) {
@@ -238,7 +257,7 @@ namespace Saxon.Hej.om {
             } else {
                 Saxon.Hej.om.NamespaceMap map = this;
                 foreach (Saxon.Hej.om.NamespaceBinding nb in namespaces) {
-                    map = map.put(nb.getPrefix(), nb.getURI());
+                    map = map.put(nb.getPrefix(), nb.getNamespaceUri());
                 }
                 return map;
             }
@@ -248,11 +267,11 @@ namespace Saxon.Hej.om {
                 return this;
             } else {
                 string[] p1 = prefixes;
-                string[] u1 = uris;
+                Saxon.Hej.om.NamespaceUri[] u1 = uris;
                 string[] p2 = delta.prefixes;
-                string[] u2 = delta.uris;
+                Saxon.Hej.om.NamespaceUri[] u2 = delta.uris;
                 System.Collections.Generic.IList<string> prefixList = new System.Collections.Generic.List<string>((p1.Length+p2.Length));
-                System.Collections.Generic.IList<string> uriList = new System.Collections.Generic.List<string>((p1.Length+p2.Length));
+                System.Collections.Generic.IList<Saxon.Hej.om.NamespaceUri> uriList = new System.Collections.Generic.List<Saxon.Hej.om.NamespaceUri>((p1.Length+p2.Length));
                 int i1 = 0;
                 int i2 = 0;
                 while (((i1<p1.Length) && (i2<p2.Length))) {
@@ -263,13 +282,13 @@ namespace Saxon.Hej.om {
                         i1++;
                     } else {
                         if ((c>0)) {
-                            if (!(u2[i2].Length==0)) {
+                            if ((u2[i2] != Saxon.Hej.om.NamespaceUri.NULL)) {
                                 prefixList.Add(p2[i2]);
                                 uriList.Add(u2[i2]);
                             }
                             i2++;
                         } else {
-                            if ((!(u2[i2].Length==0) || p2[i2].Length==0)) {
+                            if (((u2[i2] != Saxon.Hej.om.NamespaceUri.NULL) || p2[i2].Length==0)) {
                                 prefixList.Add(p2[i2]);
                                 uriList.Add(u2[i2]);
                             }
@@ -284,7 +303,7 @@ namespace Saxon.Hej.om {
                     i1++;
                 }
                 while ((i2<p2.Length)) {
-                    if (!(u2[i2].Length==0)) {
+                    if ((u2[i2] != Saxon.Hej.om.NamespaceUri.NULL)) {
                         prefixList.Add(p2[i2]);
                         uriList.Add(u2[i2]);
                     }
@@ -297,7 +316,7 @@ namespace Saxon.Hej.om {
             }
         }
         public System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceBinding> GetEnumerator() {
-            return new Inner_Iterator_169(this);
+            return new Inner_Iterator_180(this);
         }
         // Extra method to make the class IEnumerable as well as IEnumerable<T>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
@@ -328,8 +347,8 @@ namespace Saxon.Hej.om {
                             i++;
                             j++;
                         } else {
-                            if ((addUndeclarations || other.prefixes[i].Length==0)) {
-                                result.Add(new Saxon.Hej.om.NamespaceBinding(other.prefixes[j], ""));
+                            if ((addUndeclarations || other.prefixes[j].Length==0)) {
+                                result.Add(new Saxon.Hej.om.NamespaceBinding(other.prefixes[j], Saxon.Hej.om.NamespaceUri.NULL));
                             }
                             j++;
                         }
@@ -340,7 +359,7 @@ namespace Saxon.Hej.om {
                         i++;
                     } else {
                         if ((j<other.prefixes.Length)) {
-                            result.Add(new Saxon.Hej.om.NamespaceBinding(other.prefixes[j], ""));
+                            result.Add(new Saxon.Hej.om.NamespaceBinding(other.prefixes[j], Saxon.Hej.om.NamespaceUri.NULL));
                             j++;
                         } else {
                             return result.ToArray();
@@ -349,18 +368,18 @@ namespace Saxon.Hej.om {
                 }
             }
         }
-        public string getURIForPrefix(string prefix, bool useDefault) {
+        public Saxon.Hej.om.NamespaceUri getURIForPrefix(string prefix, bool useDefault) {
             if (prefix.Equals("xml")) {
-                return Saxon.Hej.lib.NamespaceConstant.XML;
+                return Saxon.Hej.om.NamespaceUri.XML;
             }
             if (prefix.Equals("")) {
                 if (useDefault) {
                     return getDefaultNamespace();
                 } else {
-                    return "";
+                    return Saxon.Hej.om.NamespaceUri.NULL;
                 }
             }
-            return getURI(prefix);
+            return getNamespaceUri(prefix);
         }
         public System.Collections.Generic.IEnumerator<string> iteratePrefixes() {
             System.Collections.Generic.IList<string> prefixList = new System.Collections.Generic.List<string>(Saxon.Ejava.util.Arrays.asList(prefixes));
@@ -370,13 +389,13 @@ namespace Saxon.Hej.om {
         public string[] getPrefixArray() {
             return prefixes;
         }
-        public string[] getURIsAsArray() {
+        public Saxon.Hej.om.NamespaceUri[] getURIsAsArray() {
             return uris;
         }
         public override string ToString() {
             Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder();
             foreach (Saxon.Hej.om.NamespaceBinding nb in this) {
-                sb.append(nb.getPrefix()).append("=").append(nb.getURI()).append(" ");
+                sb.append(nb.getPrefix()).append("=").append(nb.getNamespaceUri()).append(" ");
             }
             return sb.ToString();
         }
@@ -387,9 +406,9 @@ namespace Saxon.Hej.om {
             return ((this == obj) || ((((obj is Saxon.Hej.om.NamespaceMap) && Saxon.Ejava.util.Arrays.Equals(prefixes, ((Saxon.Hej.om.NamespaceMap)(obj)).prefixes)) && Saxon.Ejava.util.Arrays.Equals(uris, ((Saxon.Hej.om.NamespaceMap)(obj)).uris))));
         }
     
-        private class Inner_Iterator_169 : System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceBinding> {
+        private class Inner_Iterator_180 : System.Collections.Generic.IEnumerator<Saxon.Hej.om.NamespaceBinding> {
             private readonly NamespaceMap outerInstance;
-            public Inner_Iterator_169(NamespaceMap outerInstance) {
+            public Inner_Iterator_180(NamespaceMap outerInstance) {
                 this.outerInstance = outerInstance;
                 i = 0;
             }

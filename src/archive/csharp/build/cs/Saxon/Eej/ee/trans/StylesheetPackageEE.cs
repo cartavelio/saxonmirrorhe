@@ -36,8 +36,8 @@ namespace Saxon.Eej.ee.trans {
             if (!(config.isLicensedFeature(Saxon.Hej.Configuration.LicenseFeature.ENTERPRISE_XSLT))) {
                 throw new Saxon.Hej.trans.XPathException("Exporting a package requires a Saxon-EE license");
             }
-            presenter.setDefaultNamespace(Saxon.Hej.lib.NamespaceConstant.SAXON_XSLT_EXPORT);
-            Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = (Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(presenter.getOptions());
+            presenter.setDefaultNamespace(Saxon.Hej.om.NamespaceUri.SAXON_XSLT_EXPORT);
+            Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = presenter.getOptions();
             options.componentMap = new System.Collections.Generic.Dictionary<Saxon.Hej.expr.Component, int>();
             options.packageMap = new System.Collections.Generic.Dictionary<Saxon.Hej.style.StylesheetPackage, int>();
             Saxon.Impl.Helpers.MapUtils.Put(options.packageMap, this, 0);
@@ -52,17 +52,17 @@ namespace Saxon.Eej.ee.trans {
             if ((errorMessageOnExport != null)) {
                 throw new Saxon.Hej.trans.XPathException(("Stylesheet package cannot be exported: "+errorMessageOnExport), errorCodeOnExport);
             }
-            Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = (Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(presenter.getOptions());
+            Saxon.Hej.trace.ExpressionPresenter.ExportOptions options = presenter.getOptions();
             System.Collections.Generic.IDictionary<Saxon.Hej.expr.Component,int> componentIdMap = options.componentMap;
             System.Collections.Generic.IDictionary<Saxon.Hej.style.StylesheetPackage,int> packageIdMap = options.packageMap;
             presenter.startElement("package");
             int packageId = Saxon.Impl.Helpers.MapUtils.Get(packageIdMap, this);
             if (topLevel) {
                 presenter.emitAttribute("when", Saxon.Hej.value.DateTimeValue.now().getStringValue());
-                presenter.@namespace("fn", Saxon.Hej.lib.NamespaceConstant.FN);
-                presenter.@namespace("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA);
-                presenter.@namespace("vv", Saxon.Hej.lib.NamespaceConstant.SAXON_GENERATED_VARIABLE);
-                presenter.@namespace("java-type", Saxon.Hej.lib.NamespaceConstant.JAVA_TYPE);
+                presenter.@namespace("fn", Saxon.Hej.om.NamespaceUri.FN);
+                presenter.@namespace("xs", Saxon.Hej.om.NamespaceUri.SCHEMA);
+                presenter.@namespace("vv", Saxon.Hej.om.NamespaceUri.SAXON_GENERATED_VARIABLE);
+                presenter.@namespace("java-type", Saxon.Hej.om.NamespaceUri.JAVA_TYPE);
                 string dmk = getConfiguration().getLicenseFeature("DMK");
                 if ((dmk != null)) {
                     presenter.emitAttribute("dmk", dmk);
@@ -93,8 +93,8 @@ namespace Saxon.Eej.ee.trans {
             presenter.emitAttribute("saxonProduct", ((Saxon.Hej.Version.getProductName()+'-')+config.getEditionCode()));
             presenter.emitAttribute("saxonVersion", Saxon.Hej.Version.getProductVersion());
             presenter.emitAttribute("buildDateTime", Saxon.Hej.value.DateTimeValue.now().getStringValue());
-            presenter.emitAttribute("target", ((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(presenter.getOptions())).target);
-            presenter.emitAttribute("targetVersion", (((Saxon.Hej.trace.ExpressionPresenter.ExportOptions)(presenter.getOptions())).targetVersion+""));
+            presenter.emitAttribute("target", presenter.getOptions().target);
+            presenter.emitAttribute("targetVersion", (presenter.getOptions().targetVersion+""));
             presenter.emitAttribute("relocatable", (isRelocatable() ? "true" : "false"));
             presenter.emitAttribute("implicit", (isImplicitPackage() ? "true" : "false"));
             foreach (Saxon.Hej.style.StylesheetPackage used in getUsedPackages()) {
@@ -134,7 +134,7 @@ namespace Saxon.Eej.ee.trans {
         }
         private bool needToExport(Saxon.Hej.expr.Component c) {
             if ((c.getVisibility() == Saxon.Hej.trans.Visibility.HIDDEN)) {
-                return needToExport(c.getBaseComponent());
+                return ((c.getBaseComponent() != null) && needToExport(c.getBaseComponent()));
             } else {
                 if (overriddenComponents.ContainsKey(c.getActor().getSymbolicName())) {
                     return true;
@@ -148,9 +148,9 @@ namespace Saxon.Eej.ee.trans {
             }
         }
         private void exportSchemaNamespaces(Saxon.Hej.trace.ExpressionPresenter presenter) {
-            foreach (string ns in schemaIndex) {
+            foreach (Saxon.Hej.om.NamespaceUri ns in schemaIndex) {
                 presenter.startElement("schema");
-                presenter.emitAttribute("ns", ns);
+                presenter.emitAttribute("ns", ns.ToString());
                 presenter.endElement();
             }
         }

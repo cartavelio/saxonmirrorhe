@@ -5,16 +5,16 @@ namespace Saxon.Eej.functions.extfn {
     public class Leading : Saxon.Hej.functions.SystemFunction {
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             Saxon.Hej.expr.XPathContext c2 = context.newCleanContext();
-            Saxon.Hej.om.Function function = ((arguments.Length == 2) ? (Saxon.Hej.om.Function)(arguments[1].head()) : context.getConfiguration().makeSystemFunction("data", 1));
+            Saxon.Hej.om.FunctionItem function = ((arguments.Length == 2) ? (Saxon.Hej.om.FunctionItem)(arguments[1].head()) : context.getConfiguration().makeSystemFunction("data", 1));
             return Saxon.Hej.om.SequenceTool.toLazySequence(new Saxon.Eej.functions.extfn.Leading.LeadingIterator(arguments[0].iterate(), function, c2));
         }
         private class LeadingIterator : Saxon.Hej.om.SequenceIterator {
             private readonly Saxon.Hej.om.SequenceIterator @base;
-            private readonly Saxon.Hej.om.Function function;
+            private readonly Saxon.Hej.om.FunctionItem function;
             private readonly Saxon.Hej.expr.XPathContext context;
             private bool exhausted = false;
             private readonly Saxon.Hej.om.Sequence[] args = new Saxon.Hej.om.Sequence[1];
-            public LeadingIterator(Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.om.Function function, Saxon.Hej.expr.XPathContext context)  {
+            public LeadingIterator(Saxon.Hej.om.SequenceIterator @base, Saxon.Hej.om.FunctionItem function, Saxon.Hej.expr.XPathContext context)  {
                 this.@base = @base;
                 this.function = function;
                 this.context = context;
@@ -43,9 +43,6 @@ namespace Saxon.Eej.functions.extfn {
             }
             public void close() {
                 @base.close();
-            }
-            public void discharge() {
-                @base.discharge();
             }
         
         }

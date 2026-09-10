@@ -30,7 +30,7 @@ namespace Saxon.Hej.expr {
                 throw errNotEmpty;
             }
             Saxon.Hej.value.SequenceType sequenceType = Saxon.Hej.value.SequenceType.makeSequenceType(decl.getPrimaryType(), Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO_OR_MORE);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
             setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), sequenceType, role, visitor.getStaticContext()));
             Saxon.Hej.type.ItemType actualItemType = getSequence().getItemType();
             refineTypeInformation(actualItemType, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE, null, getSequence().getSpecialProperties(), this);
@@ -159,6 +159,30 @@ namespace Saxon.Hej.expr {
             getSequence().export(@out);
             getAction().export(@out);
             @out.endElement();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.QuantifiedExpression.QuantifiedExprElaborator();
+        }
+        public class QuantifiedExprElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.QuantifiedExpression expr = (Saxon.Hej.expr.QuantifiedExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForPull();
+                Saxon.Hej.expr.elab.BooleanEvaluator satisfiesEval = expr.getAction().makeElaborator().elaborateForBoolean();
+                bool some = (expr.getOperator() == Saxon.Hej.expr.parser.Token.SOME);
+                int slot = expr.getLocalSlotNumber();
+                return context => {
+                    Saxon.Hej.om.SequenceIterator @base = /*Delegate.iterate()*/selectEval(context);
+                    for (Saxon.Hej.om.Item it; ((it = @base.next()) != null); ) {
+                        context.setLocalVariable(slot, it);
+                        if ((some == /*Delegate.eval()*/satisfiesEval(context))) {
+                            @base.close();
+                            return some;
+                        }
+                    }
+                    return !(some);
+                } ;
+            }
+        
         }
     
     }

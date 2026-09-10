@@ -6,20 +6,29 @@ namespace Saxon.Hej.ma.arrays {
         public static readonly Saxon.Hej.ma.arrays.SimpleArrayItem EMPTY_ARRAY = new Saxon.Hej.ma.arrays.SimpleArrayItem(new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>());
         private readonly System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> _members;
         private bool knownToBeGrounded = false;
+        private Saxon.Hej.expr.elab.Pingable conversionPingable;
         public SimpleArrayItem(System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> members)  {
             this._members = members;
         }
         public static Saxon.Hej.ma.arrays.SimpleArrayItem makeSimpleArrayItem(Saxon.Hej.om.SequenceIterator input) {
             System.Collections.Generic.IList<Saxon.Hej.om.GroundedValue> members = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>();
-            Saxon.Hej.om.SequenceTool.supply(input, (Saxon.Hej.om.ItemConsumer<Saxon.Hej.om.Item>)((item => {
+            for (Saxon.Hej.om.Item item; ((item = input.next()) != null); ) {
                 members.Add(item);
-            } )));
+            }
             Saxon.Hej.ma.arrays.SimpleArrayItem result = new Saxon.Hej.ma.arrays.SimpleArrayItem(members);
             result.knownToBeGrounded = true;
             return result;
         }
         public override Saxon.Hej.expr.OperandRole[] getOperandRoles() {
             return new Saxon.Hej.expr.OperandRole[]{Saxon.Hej.expr.OperandRole.SINGLE_ATOMIC};
+        }
+        public void requestNotification(Saxon.Hej.expr.elab.Pingable informee) {
+            this.conversionPingable = informee;
+        }
+        public void notifyConversion() {
+            if ((conversionPingable != null)) {
+                conversionPingable.ping();
+            }
         }
         public void makeGrounded() {
             if (!(knownToBeGrounded)) {
@@ -38,6 +47,7 @@ namespace Saxon.Hej.ma.arrays {
             return _members[index];
         }
         public override Saxon.Hej.ma.arrays.ArrayItem put(int index, Saxon.Hej.om.GroundedValue newValue) {
+            notifyConversion();
             Saxon.Impl.DataModel.ImmArray a2 = new Saxon.Impl.DataModel.ImmArray(this);
             return a2.put(index, newValue);
         }
@@ -50,11 +60,16 @@ namespace Saxon.Hej.ma.arrays {
         public override System.Collections.Generic.IEnumerable<Saxon.Hej.om.GroundedValue> members() {
             return _members;
         }
+        public override Saxon.Hej.om.SequenceIterator parcels() {
+            return new Saxon.Hej.tree.iter.SequenceIteratorOverJavaIterator<Saxon.Hej.om.GroundedValue>(_members.GetEnumerator(), member => new Saxon.Hej.ma.Parcel(member));
+        }
         public override Saxon.Hej.ma.arrays.ArrayItem removeSeveral(Saxon.Hej.z.IntSet positions) {
+            notifyConversion();
             Saxon.Impl.DataModel.ImmArray a2 = new Saxon.Impl.DataModel.ImmArray(this);
             return a2.removeSeveral(positions);
         }
         public override Saxon.Hej.ma.arrays.ArrayItem remove(int pos) {
+            notifyConversion();
             Saxon.Impl.DataModel.ImmArray a2 = new Saxon.Impl.DataModel.ImmArray(this);
             return a2.remove(pos);
         }
@@ -62,10 +77,17 @@ namespace Saxon.Hej.ma.arrays {
             return new Saxon.Hej.ma.arrays.SimpleArrayItem(Saxon.Impl.Helpers.ListUtils.SubList(_members, start, end));
         }
         public override Saxon.Hej.ma.arrays.ArrayItem insert(int position, Saxon.Hej.om.GroundedValue member) {
+            notifyConversion();
             Saxon.Impl.DataModel.ImmArray a2 = new Saxon.Impl.DataModel.ImmArray(this);
             return a2.insert(position, member);
         }
+        public override Saxon.Hej.ma.arrays.ArrayItem append(Saxon.Hej.om.GroundedValue newMember) {
+            notifyConversion();
+            Saxon.Impl.DataModel.ImmArray a2 = new Saxon.Impl.DataModel.ImmArray(this);
+            return a2.append(newMember);
+        }
         public override Saxon.Hej.ma.arrays.ArrayItem concat(Saxon.Hej.ma.arrays.ArrayItem other) {
+            notifyConversion();
             Saxon.Impl.DataModel.ImmArray a2 = new Saxon.Impl.DataModel.ImmArray(this);
             return a2.concat(other);
         }

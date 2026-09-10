@@ -6,8 +6,8 @@ namespace Saxon.Hej.pattern {
         private readonly Saxon.Hej.om.NamePool namePool;
         private readonly int nodeKind;
         private readonly Saxon.Hej.type.UType uType;
-        private readonly string uri;
-        public NamespaceTest(Saxon.Hej.om.NamePool pool, int nodeKind, string uri)  {
+        private readonly Saxon.Hej.om.NamespaceUri uri;
+        public NamespaceTest(Saxon.Hej.om.NamePool pool, int nodeKind, Saxon.Hej.om.NamespaceUri uri)  {
             namePool = pool;
             this.nodeKind = nodeKind;
             this.uri = uri;
@@ -37,7 +37,7 @@ namespace Saxon.Hej.pattern {
             } );
         }
         public override bool test(Saxon.Hej.om.NodeInfo node) {
-            return ((node.getNodeKind() == nodeKind) && node.getURI().Equals(uri));
+            return ((node.getNodeKind() == nodeKind) && node.getNamespaceUri().Equals(uri));
         }
         public bool matches(Saxon.Hej.om.StructuredQName qname) {
             return qname.hasURI(uri);
@@ -48,7 +48,7 @@ namespace Saxon.Hej.pattern {
         public override int getPrimitiveType() {
             return nodeKind;
         }
-        public string getNamespaceURI() {
+        public Saxon.Hej.om.NamespaceUri getNamespaceURI() {
             return uri;
         }
         public override string ToString() {
@@ -71,7 +71,7 @@ namespace Saxon.Hej.pattern {
             return (("Q{"+uri)+"}*");
         }
         public string generateJavaScriptNameTest(int targetVersion) {
-            return (("q.uri==='"+Saxon.Hej.trace.ExpressionPresenter.jsEscape(uri))+"'");
+            return (("q.uri==='"+Saxon.Hej.trace.ExpressionPresenter.jsEscape(uri.ToString()))+"'");
         }
         public override Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
             Saxon.Ejava.util.Optional<string> explanation = base.explainMismatch(item, th);

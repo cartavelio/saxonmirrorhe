@@ -11,12 +11,12 @@ namespace Saxon.Hej.@event {
         }
         public override void startElement(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.om.AttributeMap attributes, Saxon.Hej.om.NamespaceMap namespaces, Saxon.Hej.s9api.Location location, int properties) {
             checkType(type);
-            int fp = newPool.allocateFingerprint(elemName.getURI(), elemName.getLocalPart());
+            int fp = newPool.allocateFingerprint(elemName.getNamespaceUri(), elemName.getLocalPart());
             Saxon.Hej.om.CodedName newElemName = new Saxon.Hej.om.CodedName(fp, elemName.getPrefix(), newPool);
             Saxon.Hej.om.AttributeMap newAtts = Saxon.Hej.om.EmptyAttributeMap.getInstance();
             foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                 checkType(att.getType());
-                int afp = newPool.allocateFingerprint(att.getNodeName().getURI(), att.getNodeName().getLocalPart());
+                int afp = newPool.allocateFingerprint(att.getNodeName().getNamespaceUri(), att.getNodeName().getLocalPart());
                 Saxon.Hej.om.NodeName newAttName = new Saxon.Hej.om.CodedName(afp, att.getNodeName().getPrefix(), newPool);
                 newAtts = newAtts.put(new Saxon.Hej.om.AttributeInfo(newAttName, att.getType(), att.getValue(), att.getLocation(), att.getProperties()));
             }

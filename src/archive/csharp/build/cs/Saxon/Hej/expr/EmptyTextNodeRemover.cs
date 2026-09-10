@@ -38,6 +38,17 @@ namespace Saxon.Hej.expr {
         public override string getExpressionName() {
             return "emptyTextNodeRemover";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.EmptyTextNodeRemover.EmptyTextNodeRemoverElaborator();
+        }
+        public class EmptyTextNodeRemoverElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.EmptyTextNodeRemover expr = (Saxon.Hej.expr.EmptyTextNodeRemover)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => new Saxon.Hej.expr.ItemMappingIterator(/*Delegate.iterate()*/baseEval(context), expr);
+            }
+        
+        }
     
     }
 }

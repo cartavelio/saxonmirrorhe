@@ -8,6 +8,7 @@ namespace Saxon.Hej.serialize {
         private Saxon.Ejava.util.Properties outputProperties;
         private string itemSeparator = "\n";
         private bool started = false;
+        private bool mustClose = true;
         public AdaptiveEmitter(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.str.UnicodeWriter writer) : base (pipe) {
             this.writer = writer;
         }
@@ -19,6 +20,9 @@ namespace Saxon.Hej.serialize {
             }
         }
         public void setNormalizationForm(Saxon.Ejava.text.Normalizer.Form normalizationForm) {
+        }
+        public void setMustClose(bool mustClose) {
+            this.mustClose = mustClose;
         }
         public void setCharacterMap(Saxon.Hej.serialize.CharacterMap map) {
             this.characterMap = map;
@@ -61,8 +65,8 @@ namespace Saxon.Hej.serialize {
                         if ((item is Saxon.Hej.ma.arrays.ArrayItem)) {
                             serializeArray((Saxon.Hej.ma.arrays.ArrayItem)(item));
                         } else {
-                            if ((item is Saxon.Hej.om.Function)) {
-                                serializeFunction((Saxon.Hej.om.Function)(item));
+                            if ((item is Saxon.Hej.om.FunctionItem)) {
+                                serializeFunction((Saxon.Hej.om.FunctionItem)(item));
                             }
                         }
                     }
@@ -113,24 +117,24 @@ namespace Saxon.Hej.serialize {
                 return "***";
             }
         }
-        private void serializeFunction(Saxon.Hej.om.Function fn) {
+        private void serializeFunction(Saxon.Hej.om.FunctionItem fn) {
             Saxon.Hej.om.StructuredQName fname = fn.getFunctionName();
-            if (((fname == null) || fname.hasURI(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS))) {
+            if (((fname == null) || fname.hasURI(Saxon.Hej.om.NamespaceUri.ANONYMOUS))) {
                 emit("(anonymous-function)");
             } else {
-                if (fname.hasURI(Saxon.Hej.lib.NamespaceConstant.FN)) {
+                if (fname.hasURI(Saxon.Hej.om.NamespaceUri.FN)) {
                     emit(("fn:"+fname.getLocalPart()));
                 } else {
-                    if (fname.hasURI(Saxon.Hej.lib.NamespaceConstant.MATH)) {
+                    if (fname.hasURI(Saxon.Hej.om.NamespaceUri.MATH)) {
                         emit(("math:"+fname.getLocalPart()));
                     } else {
-                        if (fname.hasURI(Saxon.Hej.lib.NamespaceConstant.MAP_FUNCTIONS)) {
+                        if (fname.hasURI(Saxon.Hej.om.NamespaceUri.MAP_FUNCTIONS)) {
                             emit(("map:"+fname.getLocalPart()));
                         } else {
-                            if (fname.hasURI(Saxon.Hej.lib.NamespaceConstant.ARRAY_FUNCTIONS)) {
+                            if (fname.hasURI(Saxon.Hej.om.NamespaceUri.ARRAY_FUNCTIONS)) {
                                 emit(("array:"+fname.getLocalPart()));
                             } else {
-                                if (fname.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA)) {
+                                if (fname.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
                                     emit(("xs:"+fname.getLocalPart()));
                                 } else {
                                     emit(fname.getEQName());
@@ -147,13 +151,13 @@ namespace Saxon.Hej.serialize {
               case Saxon.Hej.type.Type.ATTRIBUTE:
                 emit(node.getDisplayName());
                 emit("=\"");
-                emit(node.getUnicodeStringValue());
+                emit(escapeAttributeValue(node.getStringValue()));
                 emit("\"");
                 break ;
               case Saxon.Hej.type.Type.NAMESPACE:
                 emit((node.getLocalPart().Length==0 ? "xmlns" : ("xmlns:"+node.getLocalPart())));
                 emit("=\"");
-                emit(node.getUnicodeStringValue());
+                emit(escapeAttributeValue(node.getStringValue()));
                 emit("\"");
                 break ;
               default:
@@ -172,9 +176,42 @@ namespace Saxon.Hej.serialize {
                 }
                 Saxon.Hej.serialize.SerializationProperties sProps = new Saxon.Hej.serialize.SerializationProperties(props, cmi);
                 Saxon.Hej.query.QueryResult.serialize(node, new Saxon.Ejavax.xml.transform.stream.StreamResult(sw), sProps);
-                emit(sw.ToString().Trim());
+                emit(sw.ToString());
                 break ;
             }
+        }
+        private string escapeAttributeValue(string value) {
+            Saxon.Ejava.lang.StringBuilder sb = new Saxon.Ejava.lang.StringBuilder((value.Length*2));
+            for (int i = 0; (i<value.Length); i++) {
+                char c = value[i];
+                switch (c) {
+                  case '\r':
+                    sb.append("&#xD;");
+                    break ;
+                  case '\t':
+                    sb.append("&#x9;");
+                    break ;
+                  case '\n':
+                    sb.append("&#xA;");
+                    break ;
+                  case '&':
+                    sb.append("&amp;");
+                    break ;
+                  case '<':
+                    sb.append("&lt;");
+                    break ;
+                  case '>':
+                    sb.append("&gt;");
+                    break ;
+                  case '"':
+                    sb.append("&quot;");
+                    break ;
+                  default:
+                    sb.append(c);
+                    break ;
+                }
+            }
+            return sb.ToString();
         }
         private void serializeArray(Saxon.Hej.ma.arrays.ArrayItem array) {
             emit("[");
@@ -228,7 +265,11 @@ namespace Saxon.Hej.serialize {
             base.close();
             if ((writer != null)) {
                 try {
-                    writer.close();
+                    if (mustClose) {
+                        writer.close();
+                    } else {
+                        writer.flush();
+                    }
                 } catch (System.IO.IOException e) {
                     throw new Saxon.Hej.trans.XPathException(e);
                 }

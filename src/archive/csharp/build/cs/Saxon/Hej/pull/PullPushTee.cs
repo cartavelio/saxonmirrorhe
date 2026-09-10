@@ -35,8 +35,8 @@ namespace Saxon.Hej.pull {
                     if ((binding == null)) {
                         break ;
                     }
-                    if (!(((binding.getPrefix().Length==0 && binding.getURI().Equals(nsMap.getDefaultNamespace()))))) {
-                        nsMap = nsMap.put(binding.getPrefix(), binding.getURI());
+                    if (!(((binding.getPrefix().Length==0 && binding.getNamespaceUri().Equals(nsMap.getDefaultNamespace()))))) {
+                        nsMap = nsMap.put(binding.getPrefix(), binding.getNamespaceUri());
                     }
                 }
                 nsStack.Push(nsMap);

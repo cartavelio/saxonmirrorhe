@@ -60,8 +60,7 @@ namespace Saxon.Hej.expr {
                         }
                         Saxon.Hej.expr.ContextItemExpression exp = new Saxon.Hej.expr.ContextItemExpression();
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, exp);
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.AXIS_STEP, "", axis);
-                        role.setErrorCode("XPTY0020");
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.AXIS_STEP, "", axis, "XPTY0020");
                         Saxon.Hej.expr.ItemChecker checker = new Saxon.Hej.expr.ItemChecker(exp, Saxon.Hej.pattern.AnyNodeTest.getInstance(), role);
                         Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, checker);
                         Saxon.Hej.expr.SimpleStepExpression step = new Saxon.Hej.expr.SimpleStepExpression(checker, thisExp);
@@ -85,13 +84,13 @@ namespace Saxon.Hej.expr {
             }
             if (((test != null) && !(Saxon.Hej.om.AxisInfo.getTargetUType(Saxon.Hej.type.UType.ANY_NODE, axis).overlaps(test.getUType())))) {
                 if (warnings) {
-                    visitor.issueWarning(((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select ")+test.getUType().toStringWithIndefiniteArticle()), getLocation());
+                    visitor.issueWarning(((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select ")+test.getUType().toStringWithIndefiniteArticle()), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                 }
                 return Saxon.Hej.expr.Literal.makeEmptySequence();
             }
-            if ((((test is Saxon.Hej.pattern.NameTest) && (axis == Saxon.Hej.om.AxisInfo.NAMESPACE)) && !(((Saxon.Hej.pattern.NameTest)(test)).getNamespaceURI().Length==0))) {
+            if ((((test is Saxon.Hej.pattern.NameTest) && (axis == Saxon.Hej.om.AxisInfo.NAMESPACE)) && !(((Saxon.Hej.pattern.NameTest)(test)).getNamespaceURI().isEmpty()))) {
                 if (warnings) {
-                    visitor.issueWarning("The names of namespace nodes are never prefixed, so this axis step will never select anything", getLocation());
+                    visitor.issueWarning("The names of namespace nodes are never prefixed, so this axis step will never select anything", Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                 }
                 return Saxon.Hej.expr.Literal.makeEmptySequence();
             }
@@ -100,19 +99,19 @@ namespace Saxon.Hej.expr {
             Saxon.Hej.type.UType testUType = ((test == null) ? Saxon.Hej.type.UType.ANY_NODE : test.getUType());
             if (targetUType.Equals(Saxon.Hej.type.UType.VOID)) {
                 if (warnings) {
-                    visitor.issueWarning((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis starting at ")+originUType.toStringWithIndefiniteArticle())+" will never select anything"), getLocation());
+                    visitor.issueWarning((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis starting at ")+originUType.toStringWithIndefiniteArticle())+" will never select anything"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                 }
                 return Saxon.Hej.expr.Literal.makeEmptySequence();
             }
             if ((contextInfo.isParentless() && (((axis == Saxon.Hej.om.AxisInfo.PARENT) || (axis == Saxon.Hej.om.AxisInfo.ANCESTOR))))) {
                 if (warnings) {
-                    visitor.issueWarning((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select anything because the context item is parentless"), getLocation());
+                    visitor.issueWarning((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select anything because the context item is parentless"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                 }
                 return Saxon.Hej.expr.Literal.makeEmptySequence();
             }
             if (!(targetUType.overlaps(testUType))) {
                 if (warnings) {
-                    visitor.issueWarning(((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis starting at ")+originUType.toStringWithIndefiniteArticle())+" will never select ")+test.getUType().toStringWithIndefiniteArticle()), getLocation());
+                    visitor.issueWarning(((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis starting at ")+originUType.toStringWithIndefiniteArticle())+" will never select ")+test.getUType().toStringWithIndefiniteArticle()), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                 }
                 return Saxon.Hej.expr.Literal.makeEmptySequence();
             }
@@ -146,7 +145,7 @@ namespace Saxon.Hej.expr {
                             if ((axis == Saxon.Hej.om.AxisInfo.CHILD)) {
                                 if (selectedElementNames.get().intersect(outermostElementNames.get()).isEmpty()) {
                                     if (warnings) {
-                                        visitor.issueWarning(("Starting at a document node, the step is selecting an element whose name "+"is not among the names of child elements permitted for this document node type"), getLocation());
+                                        visitor.issueWarning(("Starting at a document node, the step is selecting an element whose name "+"is not among the names of child elements permitted for this document node type"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                                     }
                                     return Saxon.Hej.expr.Literal.makeEmptySequence();
                                 }
@@ -156,7 +155,7 @@ namespace Saxon.Hej.expr {
                                     Saxon.Hej.type.SchemaDeclaration decl = config.getElementDeclaration(outermostElementName);
                                     if ((decl == null)) {
                                         if (warnings) {
-                                            visitor.issueWarning((("Element "+config.getNamePool().getEQName(outermostElementName))+" is not declared in the schema"), getLocation());
+                                            visitor.issueWarning((("Element "+config.getNamePool().getEQName(outermostElementName))+" is not declared in the schema"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                                         }
                                         itemType = elementTest;
                                     } else {
@@ -187,7 +186,7 @@ namespace Saxon.Hej.expr {
                     Saxon.Hej.type.SchemaType ct = test.getContentType();
                     if (!((((((((ct == Saxon.Hej.type.AnyType.getInstance()) || (ct == Saxon.Hej.type.Untyped.getInstance())) || (ct == Saxon.Hej.type.AnySimpleType.getInstance())) || (ct == Saxon.Hej.type.BuiltInAtomicType.ANY_ATOMIC)) || (ct == Saxon.Hej.type.BuiltInAtomicType.UNTYPED_ATOMIC)) || (ct == Saxon.Hej.type.BuiltInAtomicType.STRING))))) {
                         if (warnings) {
-                            visitor.issueWarning(((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select any typed nodes, ")+"because the expression is being compiled in an environment that is not schema-aware"), getLocation());
+                            visitor.issueWarning(((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select any typed nodes, ")+"because the expression is being compiled in an environment that is not schema-aware"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                         }
                         return Saxon.Hej.expr.Literal.makeEmptySequence();
                     }
@@ -197,10 +196,10 @@ namespace Saxon.Hej.expr {
                 if (contentType.isSimpleType()) {
                     if (warnings) {
                         if ((((((axis == Saxon.Hej.om.AxisInfo.CHILD) || (axis == Saxon.Hej.om.AxisInfo.DESCENDANT)) || (axis == Saxon.Hej.om.AxisInfo.DESCENDANT_OR_SELF))) && Saxon.Hej.type.UType.PARENT_NODE_KINDS.union(Saxon.Hej.type.UType.ATTRIBUTE).subsumes(kind))) {
-                            visitor.issueWarning(((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select any ")+kind)+" nodes when starting at ")+(((origin == Saxon.Hej.type.Type.ATTRIBUTE) ? "an attribute node" : getStartingNodeDescription(contentType)))), getLocation());
+                            visitor.issueWarning(((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select any ")+kind)+" nodes when starting at ")+(((origin == Saxon.Hej.type.Type.ATTRIBUTE) ? "an attribute node" : getStartingNodeDescription(contentType)))), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                         } else {
                             if ((((axis == Saxon.Hej.om.AxisInfo.CHILD) && kind.Equals(Saxon.Hej.type.UType.TEXT)) && ((getParentExpression() is Saxon.Hej.expr.Atomizer)))) {
-                                visitor.issueWarning((("Selecting the text nodes of an element with simple content may give the "+"wrong answer in the presence of comments or processing instructions. It is usually ")+"better to omit the '/text()' step"), getLocation());
+                                visitor.issueWarning((("Selecting the text nodes of an element with simple content may give the "+"wrong answer in the presence of comments or processing instructions. It is usually ")+"better to omit the '/text()' step"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                             } else {
                                 if ((axis == Saxon.Hej.om.AxisInfo.ATTRIBUTE)) {
                                     bool found = false;
@@ -223,7 +222,7 @@ namespace Saxon.Hej.expr {
                                         }
                                     }
                                     if (!(found)) {
-                                        visitor.issueWarning(((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select ")+(((targetName == null) ? "any attribute nodes" : ("an attribute node named "+getDiagnosticName(targetName, env)))))+" when starting at ")+getStartingNodeDescription(contentType)), getLocation());
+                                        visitor.issueWarning(((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select ")+(((targetName == null) ? "any attribute nodes" : ("an attribute node named "+getDiagnosticName(targetName, env)))))+" when starting at ")+getStartingNodeDescription(contentType)), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                                     }
                                 }
                             }
@@ -232,7 +231,7 @@ namespace Saxon.Hej.expr {
                 } else {
                     if (((((Saxon.Hej.type.ComplexType)(contentType)).isSimpleContent() && ((((axis == Saxon.Hej.om.AxisInfo.CHILD) || (axis == Saxon.Hej.om.AxisInfo.DESCENDANT)) || (axis == Saxon.Hej.om.AxisInfo.DESCENDANT_OR_SELF)))) && Saxon.Hej.type.UType.PARENT_NODE_KINDS.subsumes(kind))) {
                         if (warnings) {
-                            visitor.issueWarning((((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select any ")+kind)+" nodes when starting at ")+getStartingNodeDescription(contentType))+", as this type requires simple content"), getLocation());
+                            visitor.issueWarning((((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select any ")+kind)+" nodes when starting at ")+getStartingNodeDescription(contentType))+", as this type requires simple content"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                         }
                         return Saxon.Hej.expr.Literal.makeEmptySequence();
                     } else {
@@ -243,7 +242,7 @@ namespace Saxon.Hej.expr {
                                 }
                             }
                             if (warnings) {
-                                visitor.issueWarning(((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select any")+" nodes when starting at ")+getStartingNodeDescription(contentType))+", as this type requires empty content"), getLocation());
+                                visitor.issueWarning(((((("The "+Saxon.Hej.om.AxisInfo.axisName[axis])+" axis will never select any")+" nodes when starting at ")+getStartingNodeDescription(contentType))+", as this type requires empty content"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                             }
                             return Saxon.Hej.expr.Literal.makeEmptySequence();
                         } else {
@@ -251,7 +250,7 @@ namespace Saxon.Hej.expr {
                                 if ((targetfp == -1)) {
                                     if (warnings) {
                                         if (!(((Saxon.Hej.type.ComplexType)(contentType)).allowsAttributes())) {
-                                            visitor.issueWarning((("The complex type "+contentType.getDescription())+" allows no attributes other than the standard attributes in the xsi namespace"), getLocation());
+                                            visitor.issueWarning((("The complex type "+contentType.getDescription())+" allows no attributes other than the standard attributes in the xsi namespace"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                                         }
                                     }
                                 } else {
@@ -276,7 +275,7 @@ namespace Saxon.Hej.expr {
                                         }
                                         if ((schemaType == null)) {
                                             if (warnings) {
-                                                visitor.issueWarning(((("The complex type "+contentType.getDescription())+" does not allow an attribute named ")+getDiagnosticName(targetName, env)), getLocation());
+                                                visitor.issueWarning(((("The complex type "+contentType.getDescription())+" does not allow an attribute named ")+getDiagnosticName(targetName, env)), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                                                 return Saxon.Hej.expr.Literal.makeEmptySequence();
                                             }
                                         } else {
@@ -297,7 +296,7 @@ namespace Saxon.Hej.expr {
                                             ((Saxon.Hej.type.ComplexType)(contentType)).gatherAllPermittedChildren(children, false);
                                             if (children.isEmpty()) {
                                                 if (warnings) {
-                                                    visitor.issueWarning((("The complex type "+contentType.getDescription())+" does not allow children"), getLocation());
+                                                    visitor.issueWarning((("The complex type "+contentType.getDescription())+" does not allow children"), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                                                 }
                                                 return Saxon.Hej.expr.Literal.makeEmptySequence();
                                             }
@@ -323,12 +322,12 @@ namespace Saxon.Hej.expr {
                                                         int kid = kids.next();
                                                         Saxon.Hej.om.StructuredQName sq = getConfiguration().getNamePool().getStructuredQName(kid);
                                                         if ((sq.getLocalPart().Equals(childElement.getLocalPart()) && (kid != childfp))) {
-                                                            message += ((((". Perhaps the namespace is "+((childElement.hasURI("") ? "missing" : "wrong")))+", and ")+sq.getEQName())+" was intended?");
+                                                            message += ((((". Perhaps the namespace is "+((childElement.hasURI(Saxon.Hej.om.NamespaceUri.NULL) ? "missing" : "wrong")))+", and ")+sq.getEQName())+" was intended?");
                                                             break ;
                                                         }
                                                     }
                                                 }
-                                                visitor.issueWarning(message, getLocation());
+                                                visitor.issueWarning(message, Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                                             }
                                             return Saxon.Hej.expr.Literal.makeEmptySequence();
                                         } else {
@@ -337,7 +336,7 @@ namespace Saxon.Hej.expr {
                                             Saxon.Hej.expr.parser.ExpressionTool.resetStaticProperties(this);
                                             if ((computedCardinality == Saxon.Hej.expr.StaticProperty.ALLOWS_ZERO)) {
                                                 Saxon.Hej.om.StructuredQName childElement = getConfiguration().getNamePool().getStructuredQName(childfp);
-                                                visitor.issueWarning(((("The complex type "+contentType.getDescription())+" appears not to allow a child element named ")+getDiagnosticName(childElement, env)), getLocation());
+                                                visitor.issueWarning(((("The complex type "+contentType.getDescription())+" appears not to allow a child element named ")+getDiagnosticName(childElement, env)), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                                                 return Saxon.Hej.expr.Literal.makeEmptySequence();
                                             }
                                             if (((!(Saxon.Hej.value.Cardinality.allowsMany(computedCardinality)) && !(((getParentExpression() is Saxon.Hej.expr.FirstItemExpression)))) && !(visitor.isOptimizeForPatternMatching()))) {
@@ -405,7 +404,7 @@ namespace Saxon.Hej.expr {
                                                 }
                                             } else {
                                                 if (warnings) {
-                                                    visitor.issueWarning(((("The complex type "+contentType.getDescription())+" does not allow a descendant element named ")+getDiagnosticName(targetName, env)), getLocation());
+                                                    visitor.issueWarning(((("The complex type "+contentType.getDescription())+" does not allow a descendant element named ")+getDiagnosticName(targetName, env)), Saxon.Hej.trans.SaxonErrorCode.SXWN9037, getLocation());
                                                 }
                                             }
                                         } catch (Saxon.Hej.type.SchemaException e) {
@@ -421,8 +420,8 @@ namespace Saxon.Hej.expr {
             return this;
         }
         private static string getDiagnosticName(Saxon.Hej.om.StructuredQName name, Saxon.Hej.expr.StaticContext env) {
-            string uri = name.getURI();
-            if (uri.Equals("")) {
+            Saxon.Hej.om.NamespaceUri uri = name.getNamespaceUri();
+            if (uri.isEmpty()) {
                 return name.getLocalPart();
             } else {
                 Saxon.Hej.om.NamespaceResolver resolver = env.getNamespaceResolver();
@@ -768,6 +767,60 @@ namespace Saxon.Hej.expr {
             a.setRetainedStaticContext(getRetainedStaticContext());
             pre.Add(a);
             return pre;
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.AxisExpression.AxisExpressionElaborator();
+        }
+        public class AxisExpressionElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            private void reportDoesNotExist(Saxon.Hej.expr.Expression expression, Saxon.Hej.expr.XPathContext context) {
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The context item for axis step "+expression)+" is absent"));
+                err.setErrorCode("XPDY0002");
+                err.setXPathContext(context);
+                err.setLocation(expression.getLocation());
+                err.setIsTypeError(true);
+                throw err;
+            }
+            private void reportIsNotNode(Saxon.Hej.expr.Expression expression, Saxon.Hej.expr.XPathContext context) {
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("The context item for axis step "+expression)+" is not a node"));
+                err.setErrorCode("XPTY0020");
+                err.setXPathContext(context);
+                err.setLocation(expression.getLocation());
+                err.setIsTypeError(true);
+                throw err;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.AxisExpression axisExpression = (Saxon.Hej.expr.AxisExpression)(getExpression());
+                Saxon.Hej.pattern.NodeTest test = axisExpression.getNodeTest();
+                int axis = axisExpression.getAxis();
+                bool checkContextItemExists = axisExpression.isContextPossiblyUndefined();
+                bool checkContextItemIsNode = (axisExpression.getContextItemType().getGenre() != Saxon.Hej.om.Genre.NODE);
+                if (((test == null) || (test is Saxon.Hej.pattern.AnyNodeTest))) {
+                    return context => {
+                        Saxon.Hej.om.Item item = context.getContextItem();
+                        if ((checkContextItemExists && (item == null))) {
+                            reportDoesNotExist(axisExpression, context);
+                        }
+                        if ((checkContextItemIsNode && !(((item is Saxon.Hej.om.NodeInfo))))) {
+                            reportIsNotNode(axisExpression, context);
+                        }
+                        System.Diagnostics.Debug.Assert((item != null));
+                        return ((Saxon.Hej.om.NodeInfo)(item)).iterateAxis(axis);
+                    } ;
+                } else {
+                    return context => {
+                        Saxon.Hej.om.Item item = context.getContextItem();
+                        if ((checkContextItemExists && (item == null))) {
+                            reportDoesNotExist(axisExpression, context);
+                        }
+                        if ((checkContextItemIsNode && !(((item is Saxon.Hej.om.NodeInfo))))) {
+                            reportIsNotNode(axisExpression, context);
+                        }
+                        System.Diagnostics.Debug.Assert((item != null));
+                        return ((Saxon.Hej.om.NodeInfo)(item)).iterateAxis(axis, test);
+                    } ;
+                }
+            }
+        
         }
     
     }

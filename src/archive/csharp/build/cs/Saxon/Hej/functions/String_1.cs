@@ -6,8 +6,8 @@ namespace Saxon.Hej.functions {
         public override Saxon.Hej.value.AtomicValue evaluate(Saxon.Hej.om.Item arg, Saxon.Hej.expr.XPathContext context) {
             try {
                 return new Saxon.Hej.value.StringValue(arg.getUnicodeStringValue());
-            } catch (Saxon.Ejava.lang.UnsupportedOperationException err) {
-                throw new Saxon.Hej.trans.XPathException(err.Message, "FOTY0014");
+            } catch (Saxon.Hej.trans.UncheckedXPathException err) {
+                throw err.getXPathException();
             }
         }
         public override Saxon.Hej.om.Sequence resultWhenEmpty() {
@@ -29,6 +29,36 @@ namespace Saxon.Hej.functions {
         }
         public override string getStreamerName() {
             return "StringFn";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.String_1.StringFnElaborator();
+        }
+        public class StringFnElaborator : Saxon.Hej.expr.elab.StringElaborator {
+            public override Saxon.Hej.expr.elab.UnicodeStringEvaluator elaborateForUnicodeString(bool zeroLengthWhenAbsent) {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.Expression arg = fnc.getArg(0);
+                Saxon.Hej.expr.elab.UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(true);
+                return context => {
+                    try {
+                        return /*Delegate.eval()*/argEval(context);
+                    } catch (Saxon.Hej.trans.UncheckedXPathException err) {
+                        throw err.getXPathException();
+                    }
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.StringEvaluator elaborateForString(bool zeroLengthWhenAbsent) {
+                Saxon.Hej.expr.SystemFunctionCall fnc = (Saxon.Hej.expr.SystemFunctionCall)(getExpression());
+                Saxon.Hej.expr.Expression arg = fnc.getArg(0);
+                Saxon.Hej.expr.elab.StringEvaluator argEval = arg.makeElaborator().elaborateForString(true);
+                return context => {
+                    try {
+                        return /*Delegate.eval()*/argEval(context);
+                    } catch (Saxon.Hej.trans.UncheckedXPathException err) {
+                        throw err.getXPathException();
+                    }
+                } ;
+            }
+        
         }
     
     }

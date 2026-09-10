@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.validate {
     public class XSIAttributeHandler : Saxon.Eej.ee.validate.ValidatingFilter {
-        private readonly System.Collections.Generic.HashSet<string> namespacesEncountered;
-        private readonly System.Collections.Generic.Dictionary<string,System.Uri> schemaDocumentsRead;
-        private bool useXsiSchemaLocation = true;
+        private readonly System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri> namespacesEncountered;
+        private readonly System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri,System.Uri> schemaDocumentsRead;
+        private bool useXsiSchemaLocation;
         private readonly System.Collections.Generic.IList<Saxon.Hej.type.ValidationFailure> xsiValidationErrors = new System.Collections.Generic.List<Saxon.Hej.type.ValidationFailure>(4);
         public XSIAttributeHandler(Saxon.Eej.ee.validate.ValidationStack @out) : base (@out) {
-            namespacesEncountered = new System.Collections.Generic.HashSet<string>(10);
-            schemaDocumentsRead = new System.Collections.Generic.Dictionary<string, System.Uri>(10);
+            namespacesEncountered = new System.Collections.Generic.HashSet<Saxon.Hej.om.NamespaceUri>(10);
+            schemaDocumentsRead = new System.Collections.Generic.Dictionary<Saxon.Hej.om.NamespaceUri, System.Uri>(10);
             useXsiSchemaLocation = getPipelineConfiguration().getParseOptions().isUseXsiSchemaLocation();
         }
         public override void setPipelineConfiguration(Saxon.Hej.@event.PipelineConfiguration pipe) {
@@ -22,8 +22,7 @@ namespace Saxon.Eej.ee.validate {
             Saxon.Hej.type.SchemaType xsiType = null;
             bool hasXsiAttributes = false;
             foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
-                string uri = att.getNodeName().getURI();
-                if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)) {
+                if (att.getNodeName().hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE)) {
                     hasXsiAttributes = true;
                     break ;
                 }
@@ -34,8 +33,7 @@ namespace Saxon.Eej.ee.validate {
                 foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                     Saxon.Hej.om.NodeName attName = att.getNodeName();
                     Saxon.Hej.type.SimpleType attType = att.getType();
-                    string uri = attName.getURI();
-                    if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)) {
+                    if (attName.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE)) {
                         string value = att.getValue();
                         int fp = attName.obtainFingerprint(getNamePool());
                         if ((fp == Saxon.Hej.om.StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION)) {
@@ -73,9 +71,9 @@ namespace Saxon.Eej.ee.validate {
                 ((Saxon.Eej.ee.validate.ValidationStack)(nextReceiver)).setIsNilled(nilled);
                 ((Saxon.Eej.ee.validate.ValidationStack)(nextReceiver)).setXsiValidationErrors(xsiValidationErrors);
             }
-            namespacesEncountered.Add(elemName.getURI());
+            namespacesEncountered.Add(elemName.getNamespaceUri());
             foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
-                string uri = att.getNodeName().getURI();
+                Saxon.Hej.om.NamespaceUri uri = att.getNodeName().getNamespaceUri();
                 namespacesEncountered.Add(uri);
             }
             getValidationContext().setXSIType(xsiType);
@@ -83,11 +81,11 @@ namespace Saxon.Eej.ee.validate {
         }
         private void processXsiSchemaLocation(string value, Saxon.Hej.s9api.Location locationId) {
             Saxon.Ejava.util.StringTokenizer tokenizer = new Saxon.Ejava.util.StringTokenizer(value, " \t\n\r", false);
-            string targetNS = null;
+            Saxon.Hej.om.NamespaceUri targetNS = null;
             while (tokenizer.hasMoreTokens()) {
                 string tok = tokenizer.nextToken();
                 if ((targetNS == null)) {
-                    targetNS = tok;
+                    targetNS = Saxon.Hej.om.NamespaceUri.of(tok);
                 } else {
                     bool ignore;
                     System.Uri absoluteLocation = null;
@@ -102,7 +100,7 @@ namespace Saxon.Eej.ee.validate {
                         if (namespacesEncountered.Contains(targetNS)) {
                             if ((getConfiguration().getXsdVersion() == Saxon.Hej.Configuration.XSD11)) {
                             } else {
-                                string message = (("xsi:schemaLocation namespace "+Saxon.Hej.trans.Err.wrap(targetNS))+" has already appeared earlier in the instance document");
+                                string message = (("xsi:schemaLocation namespace "+Saxon.Hej.trans.Err.wrap(targetNS.toUnicodeString()))+" has already appeared earlier in the instance document");
                                 Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure(message);
                                 ve.setConstraintReference(1, "schema-loc", "4");
                                 reportValidationError(ve, false, locationId);
@@ -123,7 +121,7 @@ namespace Saxon.Eej.ee.validate {
             while (tokenizer.hasMoreTokens()) {
                 string tok = tokenizer.nextToken();
                 if ((targetNS == null)) {
-                    targetNS = tok;
+                    targetNS = Saxon.Hej.om.NamespaceUri.of(tok);
                 } else {
                     getConfiguration().sealNamespace(targetNS);
                     targetNS = null;
@@ -135,19 +133,19 @@ namespace Saxon.Eej.ee.validate {
             System.Uri absoluteLocation = null;
             try {
                 absoluteLocation = Saxon.Hej.functions.ResolveURI.makeAbsolute(value, locationId.getSystemId());
-                ignore = absoluteLocation.Equals(Saxon.Impl.Helpers.MapUtils.Get(schemaDocumentsRead, ""));
-                Saxon.Impl.Helpers.MapUtils.Put(schemaDocumentsRead, "", absoluteLocation);
+                ignore = absoluteLocation.Equals(Saxon.Impl.Helpers.MapUtils.Get(schemaDocumentsRead, Saxon.Hej.om.NamespaceUri.NULL));
+                Saxon.Impl.Helpers.MapUtils.Put(schemaDocumentsRead, Saxon.Hej.om.NamespaceUri.NULL, absoluteLocation);
             } catch (System.UriFormatException err) {
                 ignore = false;
             }
             if (!(ignore)) {
-                if (namespacesEncountered.Contains("")) {
+                if (namespacesEncountered.Contains(Saxon.Hej.om.NamespaceUri.NULL)) {
                     string message = ("xsi:noNamespaceSchemaLocation cannot appear after the "+"first no-namespace element or attribute");
                     Saxon.Hej.type.ValidationFailure ve = new Saxon.Hej.type.ValidationFailure(message);
                     ve.setConstraintReference(1, "schema-loc", "4");
                     reportValidationError(ve, false, locationId);
                 }
-                loadSchema(absoluteLocation, "");
+                loadSchema(absoluteLocation, Saxon.Hej.om.NamespaceUri.NULL);
             }
         }
         private bool processXsiNil(string value) {
@@ -191,7 +189,7 @@ namespace Saxon.Eej.ee.validate {
             base.endDocument();
             reportIfInvalid();
         }
-        private void loadSchema(System.Uri value, string targetNS) {
+        private void loadSchema(System.Uri value, Saxon.Hej.om.NamespaceUri targetNS) {
             int status = ((Saxon.Eej.config.EnterpriseConfiguration)(getConfiguration())).getNamespaceStatus(targetNS);
             if (((status != Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNKNOWN) && (status != Saxon.Eej.ee.schema.PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION))) {
                 return ;

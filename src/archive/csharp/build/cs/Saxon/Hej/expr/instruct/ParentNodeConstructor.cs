@@ -15,6 +15,9 @@ namespace Saxon.Hej.expr.instruct {
         public Saxon.Hej.lib.ParseOptions getValidationOptions() {
             return validationOptions;
         }
+        public void setValidationOptions(Saxon.Hej.lib.ParseOptions options) {
+            this.validationOptions = options;
+        }
         public void setValidationAction(int mode, Saxon.Hej.type.SchemaType schemaType) {
             preservingTypes = ((mode == Saxon.Hej.lib.Validation.PRESERVE) && (schemaType == null));
             if (!(preservingTypes)) {
@@ -22,10 +25,9 @@ namespace Saxon.Hej.expr.instruct {
                     validationOptions = new Saxon.Hej.lib.ParseOptions();
                 }
                 if ((schemaType == Saxon.Hej.type.Untyped.getInstance())) {
-                    validationOptions.setSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
+                    validationOptions = validationOptions.withSchemaValidationMode(Saxon.Hej.lib.Validation.SKIP);
                 } else {
-                    validationOptions.setSchemaValidationMode(mode);
-                    validationOptions.setTopLevelType(schemaType);
+                    validationOptions = validationOptions.withSchemaValidationMode(mode).withTopLevelType(schemaType);
                 }
             }
         }

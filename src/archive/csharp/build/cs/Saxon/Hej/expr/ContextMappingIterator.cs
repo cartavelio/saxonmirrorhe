@@ -7,7 +7,6 @@ namespace Saxon.Hej.expr {
         private readonly Saxon.Hej.expr.ContextMappingFunction action;
         private readonly Saxon.Hej.expr.XPathContext context;
         private Saxon.Hej.om.SequenceIterator stepIterator = null;
-        private bool discharged;
         public ContextMappingIterator(Saxon.Hej.expr.ContextMappingFunction action, Saxon.Hej.expr.XPathContext context)  {
             @base = context.getCurrentIterator();
             this.action = action;
@@ -27,9 +26,6 @@ namespace Saxon.Hej.expr {
                 if ((@base.next() != null)) {
                     try {
                         stepIterator = /*Delegate.map()*/action(context);
-                        if (discharged) {
-                            stepIterator.discharge();
-                        }
                     } catch (Saxon.Hej.trans.XPathException e) {
                         throw new Saxon.Hej.trans.UncheckedXPathException(e);
                     }
@@ -51,13 +47,6 @@ namespace Saxon.Hej.expr {
             if ((stepIterator != null)) {
                 stepIterator.close();
             }
-        }
-        public void discharge() {
-            @base.discharge();
-            if ((stepIterator != null)) {
-                stepIterator.discharge();
-            }
-            discharged = true;
         }
     
     }

@@ -17,7 +17,7 @@ namespace Saxon.Eej.ee.schema {
         private bool nillable = false;
         private System.Collections.Generic.IList<Saxon.Eej.ee.schema.SimpleComponentReference> substitutionGroupOwners = null;
         private System.Collections.Generic.ICollection<Saxon.Eej.ee.schema.ElementDecl> substitutionGroupMembers = new System.Collections.Generic.List<Saxon.Eej.ee.schema.ElementDecl>();
-        private string targetNamespace;
+        private Saxon.Hej.om.NamespaceUri targetNamespace;
         private Saxon.Eej.ee.schema.TypeReference typeReference = null;
         private System.Collections.Generic.ICollection<Saxon.Eej.ee.schema.UserComplexType> complexTypesUsingThisElement = new System.Collections.Generic.List<Saxon.Eej.ee.schema.UserComplexType>();
         private System.Collections.Generic.IList<Saxon.Eej.ee.schema.TypeAlternative> typeAlternatives = null;
@@ -84,7 +84,7 @@ namespace Saxon.Eej.ee.schema {
         public string getName() {
             return elementName.getLocalPart();
         }
-        public string getTargetNamespace() {
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
             return targetNamespace;
         }
         public int getTypeFingerprint() {
@@ -150,7 +150,7 @@ namespace Saxon.Eej.ee.schema {
                             compiler.error(msg, member);
                             throw new Saxon.Hej.type.SchemaException("Disallowed substitution group membership");
                         } else {
-                            compiler.warning(msg, member);
+                            compiler.warning(msg, Saxon.Hej.trans.SaxonErrorCode.SXSD1002, member);
                         }
                         return ;
                     }
@@ -207,13 +207,13 @@ namespace Saxon.Eej.ee.schema {
         public void setElementName(Saxon.Hej.om.StructuredQName elementName, int fingerprint) {
             this.elementName = elementName;
             this.fingerprint = fingerprint;
-            this.targetNamespace = elementName.getURI();
+            this.targetNamespace = elementName.getNamespaceUri();
             substitutionGroupMembers.Add(this);
         }
         public void setElementName(Saxon.Hej.om.StructuredQName elementName) {
             this.elementName = elementName;
-            this.fingerprint = getConfiguration().getNamePool().allocateFingerprint(elementName.getURI(), elementName.getLocalPart());
-            this.targetNamespace = elementName.getURI();
+            this.fingerprint = getConfiguration().getNamePool().allocateFingerprint(elementName.getNamespaceUri(), elementName.getLocalPart());
+            this.targetNamespace = elementName.getNamespaceUri();
             substitutionGroupMembers.Add(this);
         }
         public Saxon.Hej.om.StructuredQName getComponentName() {
@@ -518,7 +518,7 @@ namespace Saxon.Eej.ee.schema {
                     Saxon.Eej.ee.schema.ElementDecl head = (Saxon.Eej.ee.schema.ElementDecl)(/*134*/Saxon.Eej.ee.schema.PreparedSchema.validateReference(headRef, compiler, false));
                     if ((head == null)) {
                         string err = (((("Element "+Saxon.Hej.trans.Err.wrap(headRef.getTargetComponentName().getDisplayName(), Saxon.Hej.trans.Err.ELEMENT))+" is referenced as head of a substitution group for ")+Saxon.Hej.trans.Err.wrap(getDisplayName()))+", but is not declared in the schema");
-                        compiler.warning(err, this);
+                        compiler.warning(err, Saxon.Hej.trans.SaxonErrorCode.SXSD1003, this);
                     }
                 }
                 lookForCycles(new System.Collections.Generic.Stack<Saxon.Hej.type.SchemaComponent>(), compiler);
@@ -612,8 +612,8 @@ namespace Saxon.Eej.ee.schema {
             serializer.emitAttribute("id", id);
             if ((getName() != null)) {
                 serializer.emitAttribute("name", getName());
-                if (!(getTargetNamespace().Length==0)) {
-                    serializer.emitAttribute("targetNamespace", getTargetNamespace());
+                if (!(getTargetNamespace().isEmpty())) {
+                    serializer.emitAttribute("targetNamespace", getTargetNamespace().ToString());
                 }
             }
             serializer.emitAttribute("type", serializer.getTypeLink(getType()));
@@ -671,7 +671,7 @@ namespace Saxon.Eej.ee.schema {
             }
             serializer.endElement();
         }
-        public override Saxon.Hej.om.Function getComponentAsFunction() {
+        public override Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             Saxon.Eej.ee.schema.ElementDecl thisDecl = this;
             Saxon.Hej.expr.CallableDelegate callable = new Saxon.Hej.expr.CallableDelegate((context, arguments) => {
                 string key = arguments[0].head().getStringValue();
@@ -683,7 +683,7 @@ namespace Saxon.Eej.ee.schema {
                   case "name":
                     return new Saxon.Hej.value.StringValue(getName(), Saxon.Hej.type.BuiltInAtomicType.NCNAME);
                   case "target namespace":
-                    return new Saxon.Hej.value.AnyURIValue(getTargetNamespace());
+                    return new Saxon.Hej.value.AnyURIValue(getTargetNamespace().toUnicodeString());
                   case "type definition":
                     return getType().getComponentAsFunction();
                   case "type table":

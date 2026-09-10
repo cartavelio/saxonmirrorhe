@@ -5,10 +5,10 @@ namespace Saxon.Hej.functions.hof {
     #pragma warning disable 659
     public sealed class FunctionSequenceCoercer : Saxon.Hej.expr.UnaryExpression {
         private readonly Saxon.Hej.type.SpecificFunctionType requiredItemType;
-        private readonly Saxon.Hej.expr.parser.RoleDiagnostic role;
-        public FunctionSequenceCoercer(Saxon.Hej.expr.Expression sequence, Saxon.Hej.type.SpecificFunctionType requiredItemType, Saxon.Hej.expr.parser.RoleDiagnostic role) : base (sequence) {
+        private readonly Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier;
+        public FunctionSequenceCoercer(Saxon.Hej.expr.Expression sequence, Saxon.Hej.type.SpecificFunctionType requiredItemType, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role) : base (sequence) {
             this.requiredItemType = requiredItemType;
-            this.role = role;
+            this.roleSupplier = role;
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(sequence, this);
         }
         protected internal override Saxon.Hej.expr.OperandRole getOperandRole() {
@@ -36,7 +36,7 @@ namespace Saxon.Hej.functions.hof {
             return (p|Saxon.Hej.expr.StaticProperty.NO_NODES_NEWLY_CREATED);
         }
         public override Saxon.Hej.expr.Expression copy(Saxon.Hej.expr.parser.RebindingMap rebindings) {
-            Saxon.Hej.functions.hof.FunctionSequenceCoercer fsc2 = new Saxon.Hej.functions.hof.FunctionSequenceCoercer(getBaseExpression().copy(rebindings), requiredItemType, role);
+            Saxon.Hej.functions.hof.FunctionSequenceCoercer fsc2 = new Saxon.Hej.functions.hof.FunctionSequenceCoercer(getBaseExpression().copy(rebindings), requiredItemType, roleSupplier);
             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(this, fsc2);
             return fsc2;
         }
@@ -44,27 +44,10 @@ namespace Saxon.Hej.functions.hof {
             return ITERATE_METHOD;
         }
         public override Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.SequenceIterator @base = getBaseExpression().iterate(context);
-            Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer coercer = new Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer(requiredItemType, context.getConfiguration(), getLocation());
-            return new Saxon.Hej.expr.ItemMappingIterator(@base, coercer, true);
+            return /*Delegate.iterate()*/makeElaborator().elaborateForPull()(context);
         }
-        public override Saxon.Hej.om.Function evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.Item item = getBaseExpression().evaluateItem(context);
-            if ((item == null)) {
-                return null;
-            }
-            if (!(((item is Saxon.Hej.om.Function)))) {
-                Saxon.Hej.type.UType itemType = Saxon.Hej.type.UType.getUType(item);
-                throw new Saxon.Hej.trans.XPathException(role.composeErrorMessage(requiredItemType, itemType), "XPTY0004");
-            }
-            try {
-                checkAnnotations((Saxon.Hej.om.Function)(item), requiredItemType, context.getConfiguration());
-            } catch (Saxon.Hej.trans.XPathException err) {
-                err.maybeSetLocation(getLocation());
-                err.maybeSetContext(context);
-                throw;
-            }
-            return new Saxon.Hej.functions.hof.CoercedFunction((Saxon.Hej.om.Function)(item), requiredItemType);
+        public override Saxon.Hej.om.FunctionItem evaluateItem(Saxon.Hej.expr.XPathContext context) {
+            return (Saxon.Hej.om.FunctionItem)(/*Delegate.eval()*/makeElaborator().elaborateForItem()(context));
         }
         public override Saxon.Hej.type.SpecificFunctionType getItemType() {
             return requiredItemType;
@@ -72,8 +55,8 @@ namespace Saxon.Hej.functions.hof {
         protected internal override int computeCardinality() {
             return getBaseExpression().getCardinality();
         }
-        public Saxon.Hej.expr.parser.RoleDiagnostic getRole() {
-            return role;
+        public Saxon.Hej.expr.parser.RoleDiagnostic getRoleSupplier() {
+            return roleSupplier();
         }
         public override bool Equals(System.Object other) {
             return (base.Equals(other) && requiredItemType.Equals(((Saxon.Hej.functions.hof.FunctionSequenceCoercer)(other)).requiredItemType));
@@ -88,13 +71,16 @@ namespace Saxon.Hej.functions.hof {
             destination.startElement("fnCoercer", this);
             Saxon.Hej.value.SequenceType st = Saxon.Hej.value.SequenceType.makeSequenceType(requiredItemType, Saxon.Hej.expr.StaticProperty.EXACTLY_ONE);
             destination.emitAttribute("to", st.toAlphaCode());
-            destination.emitAttribute("diag", role.save());
+            destination.emitAttribute("diag", roleSupplier().save());
             getBaseExpression().export(destination);
             destination.endElement();
         }
-        private static void checkAnnotations(Saxon.Hej.om.Function item, Saxon.Hej.type.FunctionItemType requiredItemType, Saxon.Hej.Configuration config) {
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.functions.hof.FunctionSequenceCoercer.FunctionSequenceCoercerElaborator();
+        }
+        private static void checkAnnotations(Saxon.Hej.om.FunctionItem item, Saxon.Hej.type.FunctionItemType requiredItemType, Saxon.Hej.Configuration config) {
             foreach (Saxon.Hej.query.Annotation ann in requiredItemType.getAnnotationAssertions()) {
-                Saxon.Hej.lib.FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getURI());
+                Saxon.Hej.lib.FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getNamespaceUri());
                 if (((handler != null) && !(handler.satisfiesAssertion(ann, item.getAnnotations())))) {
                     throw new Saxon.Hej.trans.XPathException("Supplied function does not satisfy the annotation assertions of the required function type", "XPTY0004");
                 }
@@ -110,16 +96,37 @@ namespace Saxon.Hej.functions.hof {
                 this.locator = locator;
             }
             public Saxon.Hej.om.Item mapItem(Saxon.Hej.om.Item item) {
-                if (!(((item is Saxon.Hej.om.Function)))) {
+                if (!(((item is Saxon.Hej.om.FunctionItem)))) {
                     throw new Saxon.Hej.trans.XPathException((("Function coercion attempted on an item ("+item.toShortString())+") which is not a function"), "XPTY0004", locator);
                 }
                 try {
-                    checkAnnotations((Saxon.Hej.om.Function)(item), requiredItemType, config);
-                    return new Saxon.Hej.functions.hof.CoercedFunction((Saxon.Hej.om.Function)(item), requiredItemType);
+                    checkAnnotations((Saxon.Hej.om.FunctionItem)(item), requiredItemType, config);
+                    return new Saxon.Hej.functions.hof.CoercedFunction((Saxon.Hej.om.FunctionItem)(item), requiredItemType);
                 } catch (Saxon.Hej.trans.XPathException err) {
                     err.maybeSetLocation(locator);
                     throw;
                 }
+            }
+        
+        }
+        private class FunctionSequenceCoercerElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.functions.hof.FunctionSequenceCoercer expr = (Saxon.Hej.functions.hof.FunctionSequenceCoercer)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator @base = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer coercer = new Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer(expr.requiredItemType, expr.getConfiguration(), expr.getLocation());
+                return context => new Saxon.Hej.expr.ItemMappingIterator(/*Delegate.iterate()*/@base(context), coercer, true);
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.functions.hof.FunctionSequenceCoercer expr = (Saxon.Hej.functions.hof.FunctionSequenceCoercer)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator @base = expr.getBaseExpression().makeElaborator().elaborateForItem();
+                Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer coercer = new Saxon.Hej.functions.hof.FunctionSequenceCoercer.Coercer(expr.requiredItemType, expr.getConfiguration(), expr.getLocation());
+                return context => {
+                    Saxon.Hej.om.Item item = /*Delegate.eval()*/@base(context);
+                    if ((item == null)) {
+                        return null;
+                    }
+                    return ((/*1430*/Saxon.Hej.om.FunctionItem)coercer.mapItem(item));
+                } ;
             }
         
         }

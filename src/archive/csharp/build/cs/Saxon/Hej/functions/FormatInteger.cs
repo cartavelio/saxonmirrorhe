@@ -71,6 +71,7 @@ namespace Saxon.Hej.functions {
                 primaryToken = pic;
                 modifier = "";
             }
+            bool cardinal = modifier.StartsWith("c");
             bool ordinal = modifier.StartsWith("o");
             bool alphabetic = modifier.EndsWith("a");
             int leftParen = modifier.IndexOf('(');
@@ -78,6 +79,7 @@ namespace Saxon.Hej.functions {
             parenthetical = ((leftParen<0) ? "" : modifier.Substring((leftParen+1), rightParen - (leftParen+1)));
             string letterValue = (alphabetic ? "alphabetic" : "traditional");
             string ordinalValue = (ordinal ? ("".Equals(parenthetical) ? "yes" : parenthetical) : "");
+            string cardinalValue = (cardinal ? ("".Equals(parenthetical) ? "yes" : parenthetical) : "");
             Saxon.Hej.str.UnicodeString primary = Saxon.Hej.str.StringView.tidy(primaryToken);
             Saxon.Hej.regex.charclass.Categories.Category isDecimalDigit = Saxon.Hej.regex.charclass.Categories.getCategory("Nd");
             bool isDecimalDigitPattern = false;
@@ -96,7 +98,7 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.str.UnicodeString adjustedPicture = picGroupFormat.getAdjustedPicture();
                 return num => {
                     try {
-                        string s = numb.format(num.abs().longValue(), adjustedPicture, picGroupFormat, letterValue, ordinalValue);
+                        string s = numb.format(num.abs().longValue(), adjustedPicture, picGroupFormat, letterValue, "", ordinalValue);
                         return ((num.signum()<0) ? (("-"+s)) : s);
                     } catch (Saxon.Hej.trans.XPathException e) {
                         throw new Saxon.Hej.trans.UncheckedXPathException(e);
@@ -106,7 +108,7 @@ namespace Saxon.Hej.functions {
                 Saxon.Hej.str.UnicodeString token = Saxon.Hej.str.StringView.tidy(primaryToken);
                 return num => {
                     try {
-                        string s = numb.format(num.abs().longValue(), token, null, letterValue, ordinalValue);
+                        string s = numb.format(num.abs().longValue(), token, null, letterValue, cardinalValue, ordinalValue);
                         return ((num.signum()<0) ? (("-"+s)) : s);
                     } catch (Saxon.Hej.trans.XPathException e) {
                         throw new Saxon.Hej.trans.UncheckedXPathException(e);
@@ -210,7 +212,7 @@ namespace Saxon.Hej.functions {
             }
         }
         private static Saxon.Hej.str.UnicodeString extractSeparators(Saxon.Hej.str.UnicodeString arr, Saxon.Hej.z.IntSet excludePositions) {
-            Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder();
+            Saxon.Hej.str.UnicodeBuilder ub = new Saxon.Hej.str.UnicodeBuilder(arr.length32());
             Saxon.Hej.z.IntIterator iter = arr.codePoints();
             while (iter.hasNext()) {
                 int c = iter.next();

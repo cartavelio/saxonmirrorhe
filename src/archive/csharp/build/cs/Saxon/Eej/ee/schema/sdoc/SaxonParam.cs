@@ -13,16 +13,16 @@ namespace Saxon.Eej.ee.schema.sdoc {
             string[] allowed = {"as", "name", "select"};
             allowAttributes(atts, allowed);
             requireAttribute(atts, "name");
-            string name = atts.getValue("", "name");
+            string name = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
             Saxon.Hej.om.StructuredQName qName = makeQName(name);
-            if ((qName.hasURI("") && qName.getLocalPart().Equals("value"))) {
+            if ((qName.hasURI(Saxon.Hej.om.NamespaceUri.NULL) && qName.getLocalPart().Equals("value"))) {
                 error("The variable name $value is reserved for system use");
             }
-            string @as = atts.getValue("", "as");
+            string @as = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "as");
             if ((@as == null)) {
                 @as = "item()*";
             }
-            string select = atts.getValue("", "select");
+            string select = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "select");
             if ((select == null)) {
                 select = "()";
             }
@@ -34,11 +34,10 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.om.GroundedValue defaultValue = Saxon.Hej.value.EmptySequence.getInstance();
             try {
                 Saxon.Hej.expr.Expression expr = Saxon.Hej.expr.parser.ExpressionTool.make(select, env, 0, Saxon.Hej.expr.parser.Token.EOF, null);
-                Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.PARAM, name, 0);
                 Saxon.Hej.expr.parser.ExpressionVisitor visitor = Saxon.Hej.expr.parser.ExpressionVisitor.make(env);
                 Saxon.Hej.type.ItemType contextItemType = Saxon.Hej.type.Type.ITEM_TYPE;
                 expr = expr.typeCheck(visitor, config.makeContextItemStaticInfo(contextItemType, true));
-                expr = config.getTypeChecker(false).staticTypeCheck(expr, requiredType, role, visitor);
+                expr = config.getTypeChecker(false).staticTypeCheck(expr, requiredType, () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.PARAM, name, 0), visitor);
                 Saxon.Hej.expr.instruct.SlotManager stackFrameMap = config.makeSlotManager();
                 Saxon.Hej.expr.parser.ExpressionTool.allocateSlots(expr, stackFrameMap.getNumberOfVariables(), stackFrameMap);
                 Saxon.Hej.Controller controller = new Saxon.Hej.Controller(config);
@@ -62,7 +61,6 @@ namespace Saxon.Eej.ee.schema.sdoc {
         public Saxon.Hej.value.SequenceType makeSequenceType(string sequenceType, Saxon.Hej.expr.StaticContext env) {
             try {
                 Saxon.Hej.expr.parser.XPathParser parser = new Saxon.Hej.expr.parser.XPathParser();
-                parser.setLanguage(Saxon.Hej.expr.parser.XPathParser.ParsedLanguage.XPATH, 31);
                 return parser.parseSequenceType(sequenceType, env);
             } catch (Saxon.Hej.trans.XPathException err) {
                 error(err.Message);

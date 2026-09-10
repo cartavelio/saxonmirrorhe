@@ -52,10 +52,10 @@ namespace Saxon.Hej.serialize {
         public XHTMLURIEscaper(Saxon.Hej.@event.Receiver next) : base (next) {
         }
         private static bool isURLAttribute(Saxon.Hej.om.NodeName elcode, Saxon.Hej.om.NodeName atcode) {
-            if (!(elcode.hasURI(Saxon.Hej.lib.NamespaceConstant.XHTML))) {
+            if (!(elcode.hasURI(Saxon.Hej.om.NamespaceUri.XHTML))) {
                 return false;
             }
-            if (!(atcode.hasURI(""))) {
+            if (!(atcode.hasURI(Saxon.Hej.om.NamespaceUri.NULL))) {
                 return false;
             }
             string attName = atcode.getLocalPart();
@@ -73,7 +73,7 @@ namespace Saxon.Hej.serialize {
                                 string value = att.getValue();
                                 try {
                                     string normalized = ((isAllAscii(value) ? value : Saxon.Ejava.text.Normalizer.normalize(value, Saxon.Ejava.text.Normalizer.Form.NFC)));
-                                    return new Saxon.Hej.om.AttributeInfo(attName, att.getType(), escapeURL(Saxon.Hej.str.StringView.tidy(normalized), true, getConfiguration()).ToString(), att.getLocation(), (att.getProperties()|Saxon.Hej.@event.ReceiverOption.DISABLE_CHARACTER_MAPS));
+                                    return new Saxon.Hej.om.AttributeInfo(attName, att.getType(), escapeURL(normalized, true, getConfiguration()), att.getLocation(), (att.getProperties()|Saxon.Hej.@event.ReceiverOption.DISABLE_CHARACTER_MAPS));
                                 } catch (Saxon.Hej.trans.XPathException e) {
                                     throw new Saxon.Hej.trans.UncheckedXPathException(e);
                                 }

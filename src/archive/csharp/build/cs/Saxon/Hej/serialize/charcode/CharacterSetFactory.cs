@@ -39,7 +39,7 @@ namespace Saxon.Hej.serialize.charcode {
                 if ((cs != null)) {
                     return cs;
                 }
-                return unknownEncoding(encoding);
+                return Saxon.Helpers.DotNetCharacterSet.GetCharacterSet(encoding);
             }
         }
         public Saxon.Hej.serialize.charcode.CharacterSet unknownEncoding(string encoding) {

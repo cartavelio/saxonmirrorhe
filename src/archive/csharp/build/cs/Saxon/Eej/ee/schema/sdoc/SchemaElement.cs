@@ -34,19 +34,19 @@ namespace Saxon.Eej.ee.schema.sdoc {
         public void allowAttributes(Saxon.Hej.om.AttributeMap atts, string[] allowed) {
             foreach (Saxon.Hej.om.AttributeInfo att in atts) {
                 Saxon.Hej.om.NodeName attName = att.getNodeName();
-                if (attName.hasURI("")) {
+                if (attName.hasURI(Saxon.Hej.om.NamespaceUri.NULL)) {
                     if ((Saxon.Ejava.util.Arrays.binarySearch(allowed, attName.getLocalPart())<0)) {
                         error(((("Attribute "+Saxon.Hej.trans.Err.wrap(attName.getLocalPart(), Saxon.Hej.trans.Err.ATTRIBUTE))+" is not allowed on element ")+Saxon.Hej.trans.Err.wrap(getDisplayName(), Saxon.Hej.trans.Err.ELEMENT)));
                     }
                 } else {
-                    if (attName.hasURI(Saxon.Hej.lib.NamespaceConstant.SCHEMA)) {
+                    if (attName.hasURI(Saxon.Hej.om.NamespaceUri.SCHEMA)) {
                         error("Attributes in the XML Schema namespace are not allowed");
                     }
                 }
             }
         }
         public void requireAttribute(Saxon.Hej.om.AttributeMap atts, string required) {
-            if ((atts.getValue("", required) == null)) {
+            if ((atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, required) == null)) {
                 missingAttribute(required);
             }
         }
@@ -162,7 +162,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 throw new Saxon.Ejava.lang.IllegalStateException((("Schema document contains no xs:schema element. "+"Problem occurred while reporting error: ")+e2.Message));
             }
             if ((reporter != null)) {
-                reporter.report(new Saxon.Hej.trans.XmlProcessingIncident(err, Saxon.Hej.trans.SaxonErrorCode.SXSQ0001, this));
+                Saxon.Hej.trans.XmlProcessingIncident incident = new Saxon.Hej.trans.XmlProcessingIncident(err, Saxon.Hej.trans.SaxonErrorCode.SXSQ0001, this);
+                reporter.report(incident);
+                if ((incident.getTerminationMessage() != null)) {
+                    throw new Saxon.Hej.type.SchemaException(incident.getTerminationMessage());
+                }
             }
         }
         protected internal void error(Saxon.Hej.type.SchemaException exception) {
@@ -173,7 +177,11 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 throw new Saxon.Ejava.lang.IllegalStateException((("Schema document contains no xs:schema element. "+"Problem occurred while reporting error: ")+exception.Message));
             }
             if ((reporter != null)) {
-                reporter.report(new Saxon.Hej.trans.XmlProcessingException(exception));
+                Saxon.Hej.trans.XmlProcessingException incident = new Saxon.Hej.trans.XmlProcessingException(exception);
+                reporter.report(incident);
+                if ((incident.getTerminationMessage() != null)) {
+                    throw new Saxon.Hej.type.SchemaException(incident.getTerminationMessage());
+                }
             } else {
                 throw exception;
             }
@@ -182,31 +190,36 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.trans.XmlProcessingIncident exception = ((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(err, Saxon.Hej.trans.SaxonErrorCode.SXWN9018, this).asWarning());
             Saxon.Hej.lib.ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
             reporter.report(exception);
+            if ((exception.getTerminationMessage() != null)) {
+                throw new Saxon.Hej.type.SchemaException(exception.getTerminationMessage());
+            }
         }
         protected internal int getFingerprint(string name, int option) {
             Saxon.Hej.om.StructuredQName qname = getComponentName(name, option);
-            return getNamePool().allocateFingerprint(qname.getURI(), qname.getLocalPart());
+            return getNamePool().allocateFingerprint(qname.getNamespaceUri(), qname.getLocalPart());
         }
         protected internal Saxon.Hej.om.StructuredQName getComponentName(string name, int option) {
             try {
                 Saxon.Eej.ee.schema.sdoc.XSDSchema root = getXSDSchema();
                 string[] parts = Saxon.Hej.om.NameChecker.getQNameParts(Saxon.Hej.value.Whitespace.trim(name));
-                string uri = null;
+                Saxon.Hej.om.NamespaceUri uri = null;
                 if (parts[0].Length==0) {
                     if (((option == USE_DEFAULT_NS) || (option == USE_DEFAULT_NS_WITHOUT_IMPORT))) {
                         uri = getURIForPrefix("", true);
-                        if (("".Equals(uri) && root.isChameleon())) {
+                        if (((uri == Saxon.Hej.om.NamespaceUri.NULL) && root.isChameleon())) {
                             uri = root.getTargetNamespace();
                         }
                     } else {
                         if ((option == REQUIRE_TARGET_NS)) {
-                            uri = getAttributeValue("", "targetNamespace");
-                            if ((uri == null)) {
+                            string target = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "targetNamespace");
+                            if ((target == null)) {
                                 uri = root.getTargetNamespace();
+                            } else {
+                                uri = Saxon.Hej.om.NamespaceUri.of(target);
                             }
                         } else {
                             if ((option == REQUIRE_NULL_NS)) {
-                                uri = "";
+                                uri = Saxon.Hej.om.NamespaceUri.NULL;
                             }
                         }
                     }
@@ -219,8 +232,8 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 if ((uri == null)) {
                     throw new Saxon.Hej.type.SchemaException(("Undeclared namespace prefix in "+Saxon.Hej.trans.Err.wrap(name)));
                 }
-                if ((((((option == USE_DEFAULT_NS) && !(root.getTargetNamespace().Equals(uri))) && !(root.isImportedNamespace(uri))) && !(uri.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA))) && !(uri.Equals(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE)))) {
-                    throw new Saxon.Hej.type.SchemaException((("Cannot reference schema components in "+(("".Equals(uri) ? "the null namespace" : ("namespace "+uri))))+" as it has not been imported"));
+                if ((((((option == USE_DEFAULT_NS) && !(root.getTargetNamespace().Equals(uri))) && !(root.isImportedNamespace(uri))) && !(uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA))) && !(uri.Equals(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE)))) {
+                    throw new Saxon.Hej.type.SchemaException((("Cannot reference schema components in "+((uri.isEmpty() ? "the null namespace" : ("namespace "+uri))))+" as it has not been imported"));
                 }
                 return new Saxon.Hej.om.StructuredQName(parts[0], uri, parts[1]);
             } catch (Saxon.Hej.om.QNameException err) {
@@ -276,7 +289,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         protected internal void checkMutuallyExclusiveAttributes(string name1, string name2) {
             Saxon.Hej.om.AttributeMap atts = attributes();
-            if (((atts.getValue("", name1) != null) && (atts.getValue("", name2) != null))) {
+            if (((atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, name1) != null) && (atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, name2) != null))) {
                 mutuallyExclusiveAttributes(name1, name2);
             }
         }
@@ -353,7 +366,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
             }
         }
         public void processId() {
-            string id = attributes().getValue("", "id");
+            string id = attributes().getValue(Saxon.Hej.om.NamespaceUri.NULL, "id");
             if ((id != null)) {
                 Saxon.Hej.type.SchemaException err = getSchemaNodeFactory().registerId(id, this);
                 if ((err != null)) {
@@ -390,7 +403,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 }
                 if (node.isTopLevel()) {
                     Saxon.Hej.om.AttributeMap atts = node.attributes();
-                    topname = atts.getValue("", "name");
+                    topname = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                     if ((topname == null)) {
                         topname = "";
                     }
@@ -401,12 +414,12 @@ namespace Saxon.Eej.ee.schema.sdoc {
             Saxon.Hej.om.NamePool pool = getNamePool();
             string baseName = ((((((topname+"_anonymous_type_")+count)+"_at_line_")+getLineNumber())+"_of_")+moduleName);
             string name = baseName;
-            while ((pool.getFingerprint(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, name) != -1)) {
+            while ((pool.getFingerprint(Saxon.Hej.om.NamespaceUri.ANONYMOUS, name) != -1)) {
                 tries++;
                 name = ((baseName+"_")+tries);
             }
-            int fp = getNamePool().allocateFingerprint(Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, name);
-            return new Saxon.Hej.om.FingerprintedQName("anon", Saxon.Hej.lib.NamespaceConstant.ANONYMOUS, name, fp);
+            int fp = getNamePool().allocateFingerprint(Saxon.Hej.om.NamespaceUri.ANONYMOUS, name);
+            return new Saxon.Hej.om.FingerprintedQName("anon", Saxon.Hej.om.NamespaceUri.ANONYMOUS, name, fp);
         }
         public int processMaxOccurs(string attValue) {
             attValue = Saxon.Hej.value.Whitespace.trim(attValue);
@@ -476,7 +489,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 if (continueOuter) {
                     continue ;
                 }
-                if ((allowWildcards && !(Saxon.Hej.lib.NamespaceConstant.SCHEMA.Equals(child.getURI())))) {
+                if ((allowWildcards && !(Saxon.Hej.om.NamespaceUri.SCHEMA.Equals(child.getNamespaceUri())))) {
                     for (int i = 0; (i<terms.Length); i++) {
                         if ((terms[i] == -1)) {
                             state = targets[i];
@@ -539,10 +552,10 @@ namespace Saxon.Eej.ee.schema.sdoc {
                         wildcard.addAllowedNamespace(getXSDSchema().getTargetNamespace());
                     } else {
                         if (ns.Equals(NAMESPACE_LOCAL)) {
-                            wildcard.addAllowedNamespace("");
+                            wildcard.addAllowedNamespace(Saxon.Hej.om.NamespaceUri.NULL);
                         } else {
                             if (ns.Equals(NAMESPACE_OTHER)) {
-                                wildcard.addDisallowedNamespace("");
+                                wildcard.addDisallowedNamespace(Saxon.Hej.om.NamespaceUri.NULL);
                                 wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
                             } else {
                                 if (ns.Equals(NAMESPACE_ANY)) {
@@ -550,7 +563,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                                     if (ns.Contains("##")) {
                                         error(("Invalid namespace URI "+Saxon.Hej.trans.Err.wrap(ns)));
                                     } else {
-                                        wildcard.addAllowedNamespace(ns);
+                                        wildcard.addAllowedNamespace(Saxon.Hej.om.NamespaceUri.of(ns));
                                     }
                                 }
                             }
@@ -567,12 +580,12 @@ namespace Saxon.Eej.ee.schema.sdoc {
                     wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
                 } else {
                     if (ns.Equals(Saxon.Eej.ee.schema.sdoc.XSDAny.NAMESPACE_LOCAL)) {
-                        wildcard.addDisallowedNamespace("");
+                        wildcard.addDisallowedNamespace(Saxon.Hej.om.NamespaceUri.NULL);
                     } else {
                         if (ns.Contains("##")) {
                             error(("Invalid namespace URI "+Saxon.Hej.trans.Err.wrap(ns)));
                         } else {
-                            wildcard.addDisallowedNamespace(ns);
+                            wildcard.addDisallowedNamespace(Saxon.Hej.om.NamespaceUri.of(ns));
                         }
                     }
                 }
@@ -595,7 +608,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                             error(e.Message);
                             continue ;
                         }
-                        string uri = getNamePool().getURI(fp);
+                        Saxon.Hej.om.NamespaceUri uri = getNamePool().getURI(fp);
                         if (!(wildcard.matches(uri))) {
                             error((("QName "+Saxon.Hej.trans.Err.wrap(qname, Saxon.Hej.trans.Err.GENERAL))+" is in a namespace that is not allowed by the wildcard"));
                         }
@@ -630,7 +643,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
                 getPackageData().setSchemaAware(true);
                 Saxon.Hej.functions.FunctionLibraryList lib = new Saxon.Hej.functions.FunctionLibraryList();
                 lib.addFunctionLibrary(Saxon.Hej.functions.registry.XPath20FunctionSet.getInstance());
-                lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList());
+                lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(31));
                 lib.addFunctionLibrary(new Saxon.Hej.functions.registry.ConstructorFunctionLibrary(getConfiguration()));
                 lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
                 config.addExtensionBinders(lib);

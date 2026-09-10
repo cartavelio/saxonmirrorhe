@@ -15,8 +15,8 @@ namespace Saxon.Hej.type {
         public string getName() {
             return "error";
         }
-        public string getTargetNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.SCHEMA;
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return Saxon.Hej.om.NamespaceUri.SCHEMA;
         }
         public string getEQName() {
             return (("Q{"+Saxon.Hej.lib.NamespaceConstant.SCHEMA)+"}error");
@@ -61,7 +61,7 @@ namespace Saxon.Hej.type {
             return Saxon.Hej.om.StandardNames.getStructuredQName(Saxon.Hej.om.StandardNames.XS_ERROR);
         }
         public Saxon.Hej.om.StructuredQName getTypeName() {
-            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, "error");
+            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, "error");
         }
         public string getDescription() {
             return "xs:error";
@@ -184,7 +184,7 @@ namespace Saxon.Hej.type {
             return false;
         }
         public Saxon.Hej.om.StructuredQName getStructuredQName() {
-            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, "error");
+            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, "error");
         }
         public Saxon.Hej.type.ValidationFailure checkAgainstFacets(Saxon.Hej.value.AtomicValue value, Saxon.Hej.lib.ConversionRules rules) {
             return null;
@@ -192,7 +192,7 @@ namespace Saxon.Hej.type {
         public override Saxon.Ejava.util.Optional<string> explainMismatch(Saxon.Hej.om.Item item, Saxon.Hej.type.TypeHierarchy th) {
             return Saxon.Ejava.util.Optional<string>.of("Evaluation of the supplied expression will always fail");
         }
-        public Saxon.Hej.om.Function getComponentAsFunction() {
+        public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     

@@ -12,7 +12,7 @@ namespace Saxon.Hej.ma.json {
         private bool indenting = false;
         private bool escaped = false;
         private readonly System.Collections.Generic.Stack<System.Collections.Generic.ISet<string>> keyChecker = new System.Collections.Generic.Stack<System.Collections.Generic.ISet<string>>();
-        private Saxon.Hej.om.Function numberFormatter = null;
+        private Saxon.Hej.om.FunctionItem numberFormatter = null;
         private const string ERR_INPUT = "FOJS0006";
         public JsonReceiver(Saxon.Hej.@event.PipelineConfiguration pipe, Saxon.Hej.expr.XPathContext context, Saxon.Hej.str.UniStringConsumer output)  {
             Saxon.Ejava.util.Objects.requireNonNull(pipe);
@@ -35,11 +35,11 @@ namespace Saxon.Hej.ma.json {
         public bool isIndenting() {
             return indenting;
         }
-        public void setNumberFormatter(Saxon.Hej.om.Function formatter) {
+        public void setNumberFormatter(Saxon.Hej.om.FunctionItem formatter) {
             System.Diagnostics.Debug.Assert((formatter.getArity() == 1));
             this.numberFormatter = formatter;
         }
-        public Saxon.Hej.om.Function getNumberFormatter() {
+        public Saxon.Hej.om.FunctionItem getNumberFormatter() {
             return this.numberFormatter;
         }
         public void open() {
@@ -55,7 +55,7 @@ namespace Saxon.Hej.ma.json {
             string parent = ((stack.Count==0) ? null : stack.Peek().getLocalPart());
             bool inMap = ("map".Equals(parent) || (stack.Count==0));
             stack.Push(elemName);
-            if (!(elemName.hasURI(Saxon.Hej.lib.NamespaceConstant.FN))) {
+            if (!(elemName.hasURI(Saxon.Hej.om.NamespaceUri.FN))) {
                 throw new Saxon.Hej.trans.XPathException(("xml-to-json: element found in wrong namespace: "+elemName.getStructuredQName().getEQName()), ERR_INPUT);
             }
             string key = null;
@@ -63,7 +63,7 @@ namespace Saxon.Hej.ma.json {
             string escapedKey = null;
             foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
                 Saxon.Hej.om.NodeName attName = att.getNodeName();
-                if (attName.hasURI("")) {
+                if (attName.hasURI(Saxon.Hej.om.NamespaceUri.NULL)) {
                     switch (attName.getLocalPart()) {
                       case "key":
                         if (!(inMap)) {
@@ -88,7 +88,7 @@ namespace Saxon.Hej.ma.json {
                         throw new Saxon.Hej.trans.XPathException(("xml-to-json: Disallowed attribute in input: "+attName.getDisplayName()), ERR_INPUT);
                     }
                 } else {
-                    if (attName.hasURI(Saxon.Hej.lib.NamespaceConstant.FN)) {
+                    if (attName.hasURI(Saxon.Hej.om.NamespaceUri.FN)) {
                         throw new Saxon.Hej.trans.XPathException(("xml-to-json: Disallowed attribute in input: "+attName.getDisplayName()), ERR_INPUT);
                     }
                 }
@@ -121,6 +121,7 @@ namespace Saxon.Hej.ma.json {
                 output.accept(Saxon.Hej.str.BMPString.of("\"")).accept(Saxon.Hej.str.StringView.of(key)).accept(Saxon.Hej.str.BMPString.of("\"")).accept(Saxon.Hej.str.BMPString.of(@base));
             }
             string local = elemName.getLocalPart();
+            checkParent(local, parent);
             switch (local) {
               case "array":
                 if (indenting) {
@@ -142,7 +143,6 @@ namespace Saxon.Hej.ma.json {
                 keyChecker.Push(new System.Collections.Generic.HashSet<string>());
                 break ;
               case "null":
-                checkParent(local, parent);
                 output.accept(Saxon.Hej.str.BMPString.of("null"));
                 atStart = false;
                 break ;
@@ -154,12 +154,10 @@ namespace Saxon.Hej.ma.json {
                         throw new Saxon.Hej.trans.XPathException((("xml-to-json: value of escaped attribute ("+escaped)+") is not a valid xs:boolean"), ERR_INPUT);
                     }
                 }
-                checkParent(local, parent);
                 atStart = false;
                 break ;
               case "boolean":
               case "number":
-                checkParent(local, parent);
                 atStart = false;
                 break ;
               default:
@@ -169,7 +167,7 @@ namespace Saxon.Hej.ma.json {
         }
         private void checkParent(string child, string parent) {
             if (((("null".Equals(parent) || "string".Equals(parent)) || "number".Equals(parent)) || "boolean".Equals(parent))) {
-                throw new Saxon.Hej.trans.XPathException(((("xml-to-json: A "+Saxon.Hej.trans.Err.wrap(child, Saxon.Hej.trans.Err.ELEMENT))+" element cannot appear as a child of ")+Saxon.Hej.trans.Err.wrap(parent, Saxon.Hej.trans.Err.ELEMENT)), ERR_INPUT);
+                throw new Saxon.Hej.trans.XPathException(((((("xml-to-json: "+Saxon.Hej.trans.Err.indefiniteArticleFor(child, true))+" ")+Saxon.Hej.trans.Err.wrap(child, Saxon.Hej.trans.Err.ELEMENT))+" element cannot appear as a child of ")+Saxon.Hej.trans.Err.wrap(parent, Saxon.Hej.trans.Err.ELEMENT)), ERR_INPUT);
             }
         }
         public void endElement() {
@@ -204,7 +202,6 @@ namespace Saxon.Hej.ma.json {
                 } else {
                     if (local.Equals("string")) {
                         output.accept(Saxon.Hej.str.BMPString.of("\""));
-                        string str = textBuffer.ToString();
                         if (escaped) {
                             output.accept(Saxon.Hej.str.StringView.of(handleEscapedString(content)));
                         } else {

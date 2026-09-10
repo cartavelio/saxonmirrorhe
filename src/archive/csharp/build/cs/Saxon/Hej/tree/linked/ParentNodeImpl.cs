@@ -240,7 +240,7 @@ namespace Saxon.Hej.tree.linked {
                   case Saxon.Hej.type.Type.ELEMENT:
                     Saxon.Hej.@event.Builder builder = null;
                     try {
-                        builder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(getConfiguration().makePipelineConfiguration());
+                        builder = new Saxon.Hej.tree.linked.LinkedTreeBuilder(getConfiguration().makePipelineConfiguration(), Saxon.Hej.om.Durability.MUTABLE);
                         builder.open();
                         source.copy(builder, Saxon.Hej.om.CopyOptions.ALL_NAMESPACES, Saxon.Hej.expr.parser.Loc.NONE);
                         builder.close();

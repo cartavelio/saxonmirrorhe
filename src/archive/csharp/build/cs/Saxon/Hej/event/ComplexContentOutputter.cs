@@ -121,7 +121,7 @@ namespace Saxon.Hej.@event {
             currentLevelIsDocument[level] = false;
             state = /*explicit enum*/ Saxon.Hej.@event.RegularSequenceChecker.State.START_TAG;
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             Saxon.Ejava.util.Objects.requireNonNull(prefix);
             Saxon.Ejava.util.Objects.requireNonNull(namespaceUri);
             if (Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK)) {
@@ -131,9 +131,8 @@ namespace Saxon.Hej.@event {
                     if ((state != /*explicit enum*/ Saxon.Hej.@event.RegularSequenceChecker.State.START_TAG)) {
                         throw Saxon.Hej.@event.NoOpenStartTagException.makeNoOpenStartTagException(Saxon.Hej.type.Type.NAMESPACE, prefix, hostLanguage, currentLevelIsDocument[level], startElementLocationId);
                     }
-                    bool elementIsInNullNamespace = pendingStartTag.hasURI("");
-                    if ((prefix.Length==0 && !(namespaceUri.Length==0))) {
-                        if (elementIsInNullNamespace) {
+                    if ((prefix.Length==0 && !(namespaceUri.isEmpty()))) {
+                        if (pendingStartTag.hasURI(Saxon.Hej.om.NamespaceUri.NULL)) {
                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Cannot output a namespace node for the default namespace ("+namespaceUri)+") when the element is in no namespace"));
                             err.setErrorCode(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTDE0440" : "XQDY0102"));
                             throw err;
@@ -141,7 +140,7 @@ namespace Saxon.Hej.@event {
                     }
                     bool rejectDuplicates = Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.REJECT_DUPLICATES);
                     if (rejectDuplicates) {
-                        string uri = pendingNSMap.getURI(prefix);
+                        Saxon.Hej.om.NamespaceUri uri = pendingNSMap.getNamespaceUri(prefix);
                         if (((uri != null) && !(uri.Equals(namespaceUri)))) {
                             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(((((((("Cannot create two namespace nodes with the same prefix "+"mapped to different URIs (prefix=\"")+prefix)+"\", URIs=(")+uri)+"\", \"")+namespaceUri)+"\")"));
                             err.setErrorCode(((hostLanguage == Saxon.Api.HostLanguage.XSLT) ? "XTDE0430" : "XQDY0102"));
@@ -153,7 +152,7 @@ namespace Saxon.Hej.@event {
                     Saxon.Hej.tree.util.Orphan orphan = new Saxon.Hej.tree.util.Orphan(getConfiguration());
                     orphan.setNodeKind(Saxon.Hej.type.Type.NAMESPACE);
                     orphan.setNodeName(new Saxon.Hej.om.NoNamespaceName(prefix));
-                    orphan.setStringValue(Saxon.Hej.str.StringView.tidy(namespaceUri));
+                    orphan.setStringValue(namespaceUri.toUnicodeString());
                     nextReceiver.append(orphan, Saxon.Hej.expr.parser.Loc.NONE, properties);
                 }
             }
@@ -196,6 +195,7 @@ namespace Saxon.Hej.@event {
             }
             if ((level<0)) {
                 Saxon.Hej.tree.util.Orphan orphan = new Saxon.Hej.tree.util.Orphan(getConfiguration());
+                ((Saxon.Hej.om.GenericTreeInfo)(orphan.getTreeInfo())).setDurability(Saxon.Hej.om.Durability.MUTABLE);
                 orphan.setNodeKind(Saxon.Hej.type.Type.ATTRIBUTE);
                 orphan.setNodeName(attName);
                 orphan.setTypeAnnotation(typeCode);
@@ -215,14 +215,14 @@ namespace Saxon.Hej.@event {
                 currentLevelIsDocument = Saxon.Ejava.util.Arrays.copyOf(currentLevelIsDocument, (level*2));
             }
             currentLevelIsDocument[level] = false;
-            if ((elemName.hasURI("") && !(namespaces.getDefaultNamespace().Length==0))) {
+            if ((elemName.hasURI(Saxon.Hej.om.NamespaceUri.NULL) && !(namespaces.getDefaultNamespace().isEmpty()))) {
                 namespaces = namespaces.remove("");
             }
             bool inherit = !(Saxon.Hej.@event.ReceiverOption.contains(properties, Saxon.Hej.@event.ReceiverOption.DISINHERIT_NAMESPACES));
             Saxon.Hej.om.NamespaceMap ns2;
             if (inherit) {
                 Saxon.Hej.om.NamespaceMap inherited = inheritedNamespaces.Peek();
-                if ((!(inherited.getDefaultNamespace().Length==0) && elemName.getURI().Length==0)) {
+                if ((!(inherited.getDefaultNamespace().isEmpty()) && elemName.getNamespaceUri().isEmpty())) {
                     inherited = inherited.remove("");
                 }
                 ns2 = inherited.putAll(namespaces);
@@ -242,11 +242,11 @@ namespace Saxon.Hej.@event {
         }
         private Saxon.Hej.om.NodeName checkProposedPrefix(Saxon.Hej.om.NodeName nodeName, int seq) {
             string nodePrefix = nodeName.getPrefix();
-            string nodeURI = nodeName.getURI();
-            if (nodeURI.Length==0) {
+            Saxon.Hej.om.NamespaceUri nodeURI = nodeName.getNamespaceUri();
+            if (nodeURI.isEmpty()) {
                 return nodeName;
             } else {
-                string uri = pendingNSMap.getURI(nodePrefix);
+                Saxon.Hej.om.NamespaceUri uri = pendingNSMap.getNamespaceUri(nodePrefix);
                 if ((uri == null)) {
                     pendingNSMap = pendingNSMap.put(nodePrefix, nodeURI);
                     return nodeName;
@@ -262,8 +262,8 @@ namespace Saxon.Hej.@event {
                 }
             }
         }
-        private string getSubstitutePrefix(string prefix, string uri, int seq) {
-            if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.XML)) {
+        private string getSubstitutePrefix(string prefix, Saxon.Hej.om.NamespaceUri uri, int seq) {
+            if (uri.Equals(Saxon.Hej.om.NamespaceUri.XML)) {
                 return "xml";
             }
             return ((prefix+'_')+seq);
@@ -354,7 +354,7 @@ namespace Saxon.Hej.@event {
             int props = (startElementProperties|Saxon.Hej.@event.ReceiverOption.NAMESPACE_OK);
             for (int a = 0; (a<pendingAttributes.Count); a++) {
                 Saxon.Hej.om.NodeName oldName = pendingAttributes[a].getNodeName();
-                if (!(oldName.hasURI(""))) {
+                if (!(oldName.hasURI(Saxon.Hej.om.NamespaceUri.NULL))) {
                     Saxon.Hej.om.NodeName newName = checkProposedPrefix(oldName, (a+1));
                     if ((newName != oldName)) {
                         Saxon.Hej.om.AttributeInfo newInfo = pendingAttributes[a].withNodeName(newName);
@@ -366,11 +366,14 @@ namespace Saxon.Hej.@event {
             if (!(Saxon.Hej.@event.ReceiverOption.contains(startElementProperties, Saxon.Hej.@event.ReceiverOption.REFUSE_NAMESPACES))) {
                 pendingNSMap = inherited.putAll(pendingNSMap);
             }
-            if ((pendingStartTag.hasURI("") && !(pendingNSMap.getDefaultNamespace().Length==0))) {
+            if ((pendingStartTag.hasURI(Saxon.Hej.om.NamespaceUri.NULL) && !(pendingNSMap.getDefaultNamespace().isEmpty()))) {
                 pendingNSMap = pendingNSMap.remove("");
             }
             Saxon.Hej.om.AttributeMap attributes = Saxon.Hej.om.SequenceTool.attributeMapFromList(pendingAttributes);
             nextReceiver.startElement(elcode, currentSimpleType, attributes, pendingNSMap, startElementLocationId, props);
+            finishStartContent(inherited);
+        }
+        private void finishStartContent(Saxon.Hej.om.NamespaceMap inherited) {
             bool inherit = !(Saxon.Hej.@event.ReceiverOption.contains(startElementProperties, Saxon.Hej.@event.ReceiverOption.DISINHERIT_NAMESPACES));
             inheritedNamespaces.Push((inherit ? pendingNSMap : inherited));
             pendingAttributes.Clear();
@@ -408,49 +411,56 @@ namespace Saxon.Hej.@event {
                     if (errorCode.StartsWith("SENR")) {
                         throw new Saxon.Hej.trans.XPathException((("Cannot serialize a "+thing)+" using this output method"), errorCode, locationId);
                     } else {
-                        throw new Saxon.Hej.trans.XPathException((("Cannot add a "+thing)+" to an XDM node tree"), errorCode, locationId);
+                        string msg = (((("Cannot add a "+thing)+" (")+Saxon.Hej.trans.Err.depict(item))+") to an XDM node tree");
+                        if ((pendingStartTag != null)) {
+                            msg += ((" (currently writing element "+pendingStartTag.getDisplayName())+")");
+                        }
+                        throw new Saxon.Hej.trans.XPathException(msg, errorCode, locationId);
                     }
                   case Saxon.Hej.om.Genre.NODE:
                   default:
-                    Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(item);
-                    switch (node.getNodeKind()) {
-                      case Saxon.Hej.type.Type.TEXT:
-                        int options = Saxon.Hej.@event.ReceiverOption.NONE;
-                        if (((node is Saxon.Hej.tree.util.Orphan) && ((Saxon.Hej.tree.util.Orphan)(node)).isDisableOutputEscaping())) {
-                            options = Saxon.Hej.@event.ReceiverOption.DISABLE_ESCAPING;
-                        }
-                        characters(item.getUnicodeStringValue(), locationId, options);
-                        break ;
-                      case Saxon.Hej.type.Type.ATTRIBUTE:
-                        if (((Saxon.Hej.type.SimpleType)(node.getSchemaType())).isNamespaceSensitive()) {
-                            Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): "+Saxon.Hej.trans.Err.wrap(node.getDisplayName(), Saxon.Hej.trans.Err.ATTRIBUTE)));
-                            err.setErrorCode((getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
-                            throw err;
-                        }
-                        attribute(Saxon.Hej.om.NameOfNode.makeName(node), (Saxon.Hej.type.SimpleType)(node.getSchemaType()), node.getStringValue(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
-                        break ;
-                      case Saxon.Hej.type.Type.NAMESPACE:
-                        @namespace(node.getLocalPart(), node.getStringValue(), Saxon.Hej.@event.ReceiverOption.NONE);
-                        break ;
-                      case Saxon.Hej.type.Type.DOCUMENT:
-                        startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
-                        foreach (Saxon.Hej.om.NodeInfo child in node.children()) {
-                            append(child, locationId, copyNamespaces);
-                        }
-                        endDocument();
-                        break ;
-                      default:
-                        int copyOptions = Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS;
-                        if (Saxon.Hej.@event.ReceiverOption.contains(copyNamespaces, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES)) {
-                            copyOptions |= Saxon.Hej.om.CopyOptions.ALL_NAMESPACES;
-                        }
-                        ((Saxon.Hej.om.NodeInfo)(item)).copy(this, copyOptions, locationId);
-                        break ;
-                    }
-                    previousAtomic = false;
+                    decomposeNodeOrDefault(item, locationId, copyNamespaces);
                     break ;
                 }
             }
+        }
+        private void decomposeNodeOrDefault(Saxon.Hej.om.Item item, Saxon.Hej.s9api.Location locationId, int copyNamespaces) {
+            Saxon.Hej.om.NodeInfo node = (Saxon.Hej.om.NodeInfo)(item);
+            switch (node.getNodeKind()) {
+              case Saxon.Hej.type.Type.TEXT:
+                int options = Saxon.Hej.@event.ReceiverOption.NONE;
+                if (((node is Saxon.Hej.tree.util.Orphan) && ((Saxon.Hej.tree.util.Orphan)(node)).isDisableOutputEscaping())) {
+                    options = Saxon.Hej.@event.ReceiverOption.DISABLE_ESCAPING;
+                }
+                characters(item.getUnicodeStringValue(), locationId, options);
+                break ;
+              case Saxon.Hej.type.Type.ATTRIBUTE:
+                if (((Saxon.Hej.type.SimpleType)(node.getSchemaType())).isNamespaceSensitive()) {
+                    Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): "+Saxon.Hej.trans.Err.wrap(node.getDisplayName(), Saxon.Hej.trans.Err.ATTRIBUTE)));
+                    err.setErrorCode((getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086"));
+                    throw err;
+                }
+                attribute(Saxon.Hej.om.NameOfNode.makeName(node), (Saxon.Hej.type.SimpleType)(node.getSchemaType()), node.getStringValue(), locationId, Saxon.Hej.@event.ReceiverOption.NONE);
+                break ;
+              case Saxon.Hej.type.Type.NAMESPACE:
+                @namespace(node.getLocalPart(), Saxon.Hej.om.NamespaceUri.of(node.getStringValue()), Saxon.Hej.@event.ReceiverOption.NONE);
+                break ;
+              case Saxon.Hej.type.Type.DOCUMENT:
+                startDocument(Saxon.Hej.@event.ReceiverOption.NONE);
+                foreach (Saxon.Hej.om.NodeInfo child in node.children()) {
+                    append(child, locationId, copyNamespaces);
+                }
+                endDocument();
+                break ;
+              default:
+                int copyOptions = Saxon.Hej.om.CopyOptions.TYPE_ANNOTATIONS;
+                if (Saxon.Hej.@event.ReceiverOption.contains(copyNamespaces, Saxon.Hej.@event.ReceiverOption.ALL_NAMESPACES)) {
+                    copyOptions |= Saxon.Hej.om.CopyOptions.ALL_NAMESPACES;
+                }
+                ((Saxon.Hej.om.NodeInfo)(item)).copy(this, copyOptions, locationId);
+                break ;
+            }
+            previousAtomic = false;
         }
         private string getErrorCodeForDecomposingFunctionItems() {
             return (getPipelineConfiguration().isXSLT() ? "XTDE0450" : "XQTY0105");

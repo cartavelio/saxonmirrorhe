@@ -114,7 +114,7 @@ namespace Saxon.Hej.expr {
                 if ((actor is Saxon.Hej.expr.instruct.GlobalVariable)) {
                     return Saxon.Hej.om.StandardNames.XSL_VARIABLE;
                 } else {
-                    if ((actor is Saxon.Hej.om.Function)) {
+                    if ((actor is Saxon.Hej.om.FunctionItem)) {
                         return Saxon.Hej.om.StandardNames.XSL_FUNCTION;
                     } else {
                         if ((actor is Saxon.Hej.expr.instruct.AttributeSet)) {

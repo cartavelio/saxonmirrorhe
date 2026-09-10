@@ -37,7 +37,7 @@ namespace TestRunner {
         static bool checkResults = false;
         static bool val = false;
         static int test = -1;
-        static string programPath = "//home//ond1//work//development//xmark//";
+        static string programPath = Environment.CurrentDirectory;
         static string dataPath = "";
 
         private static TreeModel treeModel = TreeModel.TinyTree;
@@ -233,6 +233,7 @@ namespace TestRunner {
                     continue;
                 }
                 Processor proc = new Processor(true);
+                proc.SetProperty(Feature.OPTIMIZATION_LEVEL, "-b");
                 XQueryCompiler comp = proc.NewXQueryCompiler();
                 
                 foreach (string test1 in tests) {
@@ -320,12 +321,12 @@ namespace TestRunner {
                             long medianValue = median(measures);
                             double avg = (double) (totalTime) / runs;
                             println("    <query q='" + q +
-                                    "' avg='" + avg / TimeSpan.TicksPerMillisecond +
-                                    "' median='" + (double) medianValue / TimeSpan.TicksPerMillisecond +
+                                    "' avg='" + Math.Round(avg / TimeSpan.TicksPerMillisecond, 3) +
+                                    "' median='" + Math.Round((double) medianValue / TimeSpan.TicksPerMillisecond, 3) +
                                     "' runs='" + runs +
                                     //"' totalTime='" + ((double) totalTime / per_millisecs) +
-                                    "' min='" + ((double) min / TimeSpan.TicksPerMillisecond) +
-                                    "' max='" + ((double) max / TimeSpan.TicksPerMillisecond) + "'/>");
+                                    "' min='" + Math.Round(((double) min / TimeSpan.TicksPerMillisecond), 3) +
+                                    "' max='" + Math.Round(((double) max / TimeSpan.TicksPerMillisecond), 3) + "'/>");
                             if (threadStop) {
                                 break;
                             }

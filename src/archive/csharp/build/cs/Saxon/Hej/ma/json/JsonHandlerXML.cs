@@ -11,7 +11,7 @@ namespace Saxon.Hej.ma.json {
         public bool validate;
         private bool checkForDuplicates;
         private const string SCHEMA_URI = "http://www.w3.org/2005/xpath-functions.xsd";
-        private static readonly string JSON_NS = Saxon.Hej.lib.NamespaceConstant.FN;
+        private static readonly Saxon.Hej.om.NamespaceUri JSON_NS = Saxon.Hej.om.NamespaceUri.FN;
         public const string PREFIX = "";
         private Saxon.Hej.om.NamePool namePool;
         private Saxon.Hej.om.FingerprintedQName mapQN;
@@ -29,7 +29,7 @@ namespace Saxon.Hej.ma.json {
         public System.Collections.Generic.Dictionary<string,Saxon.Hej.type.SchemaType> types;
         private readonly System.Collections.Generic.Stack<System.Collections.Generic.HashSet<string>> mapKeys = new System.Collections.Generic.Stack<System.Collections.Generic.HashSet<string>>();
         private Saxon.Hej.om.FingerprintedQName qname(string s) {
-            Saxon.Hej.om.FingerprintedQName fp = new Saxon.Hej.om.FingerprintedQName("", "", s);
+            Saxon.Hej.om.FingerprintedQName fp = new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.NULL, s);
             fp.obtainFingerprint(namePool);
             return fp;
         }
@@ -43,6 +43,7 @@ namespace Saxon.Hej.ma.json {
             builder = context.getController().makeBuilder();
             builder.setSystemId(staticBaseUri);
             builder.setTiming(false);
+            builder.setDurability(Saxon.Hej.om.Durability.TEMPORARY);
             @out = new Saxon.Hej.@event.ComplexContentOutputter(builder);
             @out.open();
             @out.startDocument(Saxon.Hej.@event.ReceiverOption.NONE);

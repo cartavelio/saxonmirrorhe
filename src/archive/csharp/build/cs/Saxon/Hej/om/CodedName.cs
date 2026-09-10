@@ -14,7 +14,7 @@ namespace Saxon.Hej.om {
         public string getPrefix() {
             return prefix;
         }
-        public string getURI() {
+        public Saxon.Hej.om.NamespaceUri getNamespaceUri() {
             return pool.getURI(fingerprint);
         }
         public string getLocalPart() {
@@ -28,11 +28,11 @@ namespace Saxon.Hej.om {
             if (prefix.Length==0) {
                 return qn;
             } else {
-                return new Saxon.Hej.om.StructuredQName(prefix, qn.getURI(), qn.getLocalPart());
+                return new Saxon.Hej.om.StructuredQName(prefix, qn.getNamespaceUri(), qn.getLocalPart());
             }
         }
-        public bool hasURI(string ns) {
-            return getURI().Equals(ns);
+        public bool hasURI(Saxon.Hej.om.NamespaceUri ns) {
+            return pool.getStructuredQName(fingerprint).hasURI(ns);
         }
         public Saxon.Hej.om.NamespaceBinding getNamespaceBinding() {
             return new Saxon.Hej.om.NamespaceBinding(prefix, pool.getURI(fingerprint));
@@ -47,7 +47,7 @@ namespace Saxon.Hej.om {
             return fingerprint;
         }
         public override int GetHashCode() {
-            return Saxon.Hej.om.StructuredQName.computeHashCode(getURI(), getLocalPart());
+            return Saxon.Hej.om.StructuredQName.computeHashCode(getNamespaceUri(), getLocalPart());
         }
         public override bool Equals(System.Object obj) {
             if ((obj is Saxon.Hej.om.NodeName)) {
@@ -55,7 +55,7 @@ namespace Saxon.Hej.om {
                 if (n.hasFingerprint()) {
                     return (getFingerprint() == n.getFingerprint());
                 } else {
-                    return (n.getLocalPart().Equals(getLocalPart()) && n.hasURI(getURI()));
+                    return (n.getLocalPart().Equals(getLocalPart()) && n.hasURI(getNamespaceUri()));
                 }
             } else {
                 return false;
@@ -71,5 +71,10 @@ namespace Saxon.Hej.om {
             return getDisplayName();
         }
     
+        /* Expanding default method getURI from interface NodeName */
+        public virtual string getURI() {
+            return getNamespaceUri().ToString();
+        }
+
     }
 }

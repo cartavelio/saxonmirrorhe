@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.tree.iter {
-    public abstract class ListIterator : Saxon.Hej.om.SequenceIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.LookaheadIterator, Saxon.Hej.tree.iter.GroundedIterator, Saxon.Hej.tree.iter.ReversibleIterator {
+    public abstract class ListIterator : Saxon.Hej.om.SequenceIterator, Saxon.Hej.om.FocusIterator, Saxon.Hej.expr.LastPositionFinder, Saxon.Hej.tree.iter.LookaheadIterator, Saxon.Hej.tree.iter.GroundedIterator, Saxon.Hej.tree.iter.ReversibleIterator {
         public bool supportsHasNext() {
             return true;
         }
@@ -27,6 +27,12 @@ namespace Saxon.Hej.tree.iter {
             }
             public override int getLength() {
                 return list.Count;
+            }
+            public override Saxon.Hej.om.Item current() {
+                return list[(index-1)];
+            }
+            public override int position() {
+                return index;
             }
             public override bool isActuallyGrounded() {
                 return true;
@@ -64,10 +70,6 @@ namespace Saxon.Hej.tree.iter {
         public virtual void close() {
         }
 
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
-        }
-
         /* Creating stub method hasNext to satisfy interface LookaheadIterator */
         public virtual bool hasNext() {
             throw new System.NotImplementedException();
@@ -88,6 +90,22 @@ namespace Saxon.Hej.tree.iter {
             throw new System.NotImplementedException();
         }
 
+        /* Creating stub method current to satisfy interface FocusIterator */
+        public virtual Saxon.Hej.om.Item current() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method position to satisfy interface FocusIterator */
+        public virtual int position() {
+            throw new System.NotImplementedException();
+        }
+
+        /* Creating stub method getLength to satisfy interface FocusIterator */
+        /* (Also inherited from LastPositionFinder) */
+        public virtual int getLength() {
+            throw new System.NotImplementedException();
+        }
+
         /* Creating stub method next to satisfy interface SequenceIterator */
         public virtual Saxon.Hej.om.Item next() {
             throw new System.NotImplementedException();
@@ -95,11 +113,6 @@ namespace Saxon.Hej.tree.iter {
 
         /* Creating stub method supportsGetLength to satisfy interface LastPositionFinder */
         public virtual bool supportsGetLength() {
-            throw new System.NotImplementedException();
-        }
-
-        /* Creating stub method getLength to satisfy interface LastPositionFinder */
-        public virtual int getLength() {
             throw new System.NotImplementedException();
         }
 

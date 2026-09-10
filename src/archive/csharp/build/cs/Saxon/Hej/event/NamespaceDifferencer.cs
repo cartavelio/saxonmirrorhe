@@ -14,7 +14,7 @@ namespace Saxon.Hej.@event {
             currentElement = elemName;
             Saxon.Hej.om.NamespaceMap parentMap = namespaceStack.Peek();
             namespaceStack.Push(namespaces);
-            Saxon.Hej.om.NamespaceMap delta = getDifferences(namespaces, parentMap, currentElement.hasURI(""));
+            Saxon.Hej.om.NamespaceMap delta = getDifferences(namespaces, parentMap, currentElement.hasURI(Saxon.Hej.om.NamespaceUri.NULL));
             nextReceiver.startElement(elemName, type, attributes, delta, location, properties);
         }
         public override void endElement() {
@@ -25,24 +25,24 @@ namespace Saxon.Hej.@event {
             if ((thisMap != parentMap)) {
                 Saxon.Hej.om.NamespaceMap delta = Saxon.Hej.om.NamespaceDeltaMap.emptyMap();
                 foreach (Saxon.Hej.om.NamespaceBinding nb in thisMap) {
-                    string parentUri = parentMap.getURI(nb.getPrefix());
+                    Saxon.Hej.om.NamespaceUri parentUri = parentMap.getNamespaceUri(nb.getPrefix());
                     if ((parentUri == null)) {
-                        delta = delta.put(nb.getPrefix(), nb.getURI());
+                        delta = delta.put(nb.getPrefix(), nb.getNamespaceUri());
                     } else {
-                        if (!(parentUri.Equals(nb.getURI()))) {
-                            delta = delta.put(nb.getPrefix(), nb.getURI());
+                        if (!(parentUri.Equals(nb.getNamespaceUri()))) {
+                            delta = delta.put(nb.getPrefix(), nb.getNamespaceUri());
                         }
                     }
                 }
                 if (undeclareNamespaces) {
                     foreach (Saxon.Hej.om.NamespaceBinding nb in parentMap) {
-                        if ((thisMap.getURI(nb.getPrefix()) == null)) {
-                            delta = delta.put(nb.getPrefix(), "");
+                        if ((thisMap.getNamespaceUri(nb.getPrefix()) == null)) {
+                            delta = delta.put(nb.getPrefix(), Saxon.Hej.om.NamespaceUri.NULL);
                         }
                     }
                 } else {
-                    if ((!(parentMap.getDefaultNamespace().Length==0) && thisMap.getDefaultNamespace().Length==0)) {
-                        delta = delta.put("", "");
+                    if ((!(parentMap.getDefaultNamespace().isEmpty()) && thisMap.getDefaultNamespace().isEmpty())) {
+                        delta = delta.put("", Saxon.Hej.om.NamespaceUri.NULL);
                     }
                 }
                 return delta;

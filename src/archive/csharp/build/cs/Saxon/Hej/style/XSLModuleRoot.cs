@@ -23,7 +23,7 @@ namespace Saxon.Hej.style {
             compileError((getDisplayName()+" can appear only as the outermost element"), "XTSE0010");
         }
         public int getInputTypeAnnotationsAttribute() {
-            string inputTypeAnnotationsAtt = getAttributeValue("", "input-type-annotations");
+            string inputTypeAnnotationsAtt = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "input-type-annotations");
             if ((inputTypeAnnotationsAtt != null)) {
                 switch (inputTypeAnnotationsAtt) {
                   case "strip":

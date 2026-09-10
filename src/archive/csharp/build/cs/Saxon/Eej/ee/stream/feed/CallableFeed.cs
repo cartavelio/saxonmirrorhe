@@ -14,8 +14,8 @@ namespace Saxon.Eej.ee.stream.feed {
             if (!(hasFailed())) {
                 if (done) {
                     string msg = "A sequence of more than one item must not be supplied as the streaming argument";
-                    if ((function is Saxon.Hej.om.Function)) {
-                        Saxon.Hej.om.StructuredQName fName = ((Saxon.Hej.om.Function)(function)).getFunctionName();
+                    if ((function is Saxon.Hej.om.FunctionItem)) {
+                        Saxon.Hej.om.StructuredQName fName = ((Saxon.Hej.om.FunctionItem)(function)).getFunctionName();
                         if ((fName != null)) {
                             msg += (" of function "+fName.getDisplayName());
                         }

@@ -141,7 +141,7 @@ namespace Saxon.Hej.style {
                     return null;
                 }
                 if ((@namespace == null)) {
-                    string nsuri = "";
+                    Saxon.Hej.om.NamespaceUri nsuri = Saxon.Hej.om.NamespaceUri.NULL;
                     if (!(parts[0].Equals(""))) {
                         nsuri = getURIForPrefix(parts[0], false);
                         if ((nsuri == null)) {
@@ -158,21 +158,19 @@ namespace Saxon.Hej.style {
                     return instruction;
                 } else {
                     if ((@namespace is Saxon.Hej.expr.StringLiteral)) {
-                        string nsuri = ((Saxon.Hej.expr.StringLiteral)(@namespace)).stringify();
-                        if (nsuri.Equals("")) {
+                        Saxon.Hej.str.UnicodeString nsuri = ((Saxon.Hej.expr.StringLiteral)(@namespace)).getString();
+                        if (nsuri.isEmpty()) {
                             parts[0] = "";
                         } else {
                             if (parts[0].Equals("")) {
-                                Saxon.Hej.tree.iter.AxisIterator iter = iterateAxis(Saxon.Hej.om.AxisInfo.NAMESPACE);
-                                Saxon.Hej.om.NodeInfo ns;
-                                while (((ns = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next())) != null)) {
-                                    if (ns.getUnicodeStringValue().Equals(nsuri)) {
-                                        parts[0] = ns.getLocalPart();
+                                foreach (Saxon.Hej.om.NamespaceBinding nb in getAllNamespaces()) {
+                                    if (nb.getNamespaceUri().toUnicodeString().Equals(nsuri)) {
+                                        parts[0] = nb.getPrefix();
                                         break ;
                                     }
                                 }
                                 if (parts[0].Equals("")) {
-                                    string p = getNamePool().suggestPrefixForURI(((Saxon.Hej.expr.StringLiteral)(@namespace)).stringify());
+                                    string p = getNamePool().suggestPrefixForURI(Saxon.Hej.om.NamespaceUri.of(((Saxon.Hej.expr.StringLiteral)(@namespace)).stringify()));
                                     if ((p != null)) {
                                         parts[0] = p;
                                     }
@@ -182,7 +180,7 @@ namespace Saxon.Hej.style {
                                 }
                             }
                         }
-                        Saxon.Hej.om.NodeName nodeName = new Saxon.Hej.om.FingerprintedQName(parts[0], nsuri, parts[1]);
+                        Saxon.Hej.om.NodeName nodeName = new Saxon.Hej.om.FingerprintedQName(parts[0], Saxon.Hej.om.NamespaceUri.of(nsuri.ToString()), parts[1]);
                         nodeName.obtainFingerprint(getNamePool());
                         Saxon.Hej.expr.instruct.FixedAttribute fixedAtt = new Saxon.Hej.expr.instruct.FixedAttribute(nodeName, validationAction, schemaType);
                         fixedAtt.setInstruction(true);
@@ -195,7 +193,7 @@ namespace Saxon.Hej.style {
                     nsContext = getAllNamespaces();
                 }
             }
-            Saxon.Hej.expr.instruct.ComputedAttribute inst = new Saxon.Hej.expr.instruct.ComputedAttribute(attributeName, @namespace, nsContext, validationAction, schemaType, false);
+            Saxon.Hej.expr.instruct.ComputedAttribute inst = new Saxon.Hej.expr.instruct.ComputedAttribute(attributeName, @namespace, validationAction, schemaType, false);
             inst.setInstruction(true);
             inst.setLocation(allocateLocation());
             compileContent(compilation, decl, inst, separator);

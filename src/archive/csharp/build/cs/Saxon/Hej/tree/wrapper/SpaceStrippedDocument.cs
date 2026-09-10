@@ -44,7 +44,7 @@ namespace Saxon.Hej.tree.wrapper {
                 Saxon.Hej.tree.iter.AxisIterator iter = doc.getRootNode().iterateAxis(Saxon.Hej.om.AxisInfo.DESCENDANT, Saxon.Hej.pattern.NodeKindTest.ELEMENT);
                 Saxon.Hej.om.NodeInfo node;
                 while (((node = ((/*1430*/Saxon.Hej.om.NodeInfo)iter.next())) != null)) {
-                    string val = node.getAttributeValue(Saxon.Hej.lib.NamespaceConstant.XML, "space");
+                    string val = node.getAttributeValue(Saxon.Hej.om.NamespaceUri.XML, "space");
                     if ("preserve".Equals(val)) {
                         return true;
                     }

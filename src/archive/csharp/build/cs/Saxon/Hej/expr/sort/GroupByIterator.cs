@@ -110,8 +110,8 @@ namespace Saxon.Hej.expr.sort {
                 return val;
             }
         }}
-        public Saxon.Hej.om.SequenceIterator iterateCurrentGroup() {
-            return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.Item>(groups[(position-1)]);
+        public Saxon.Hej.om.GroundedValue currentGroup() {
+            return Saxon.Hej.value.SequenceExtent.makeSequenceExtent(groups[(position-1)]);
         }
         public System.Collections.Generic.IList<Saxon.Hej.om.Item> getCurrentGroup() {
             return groups[(position-1)];
@@ -144,36 +144,15 @@ namespace Saxon.Hej.expr.sort {
             return groups.Count;
         }
         public Saxon.Eej.ee.stream.ManualGroupIterator getSnapShot(Saxon.Hej.expr.XPathContext context) {
-            return new Saxon.Hej.expr.sort.GroupByIterator.ManualGroupByIterator(groups, groupKeys, position);
-        }
-        public class ManualGroupByIterator : Saxon.Eej.ee.stream.ManualGroupIterator {
-            private readonly System.Collections.Generic.IList<System.Collections.Generic.IList<Saxon.Hej.om.Item>> groups;
-            private readonly System.Collections.Generic.IList<Saxon.Hej.om.Item> currentGroup;
-            private readonly Saxon.Hej.om.AtomicSequence currentGroupingKey;
-            public ManualGroupByIterator(System.Collections.Generic.IList<System.Collections.Generic.IList<Saxon.Hej.om.Item>> groups, System.Collections.Generic.IList<Saxon.Hej.om.AtomicSequence> groupKeys, int position) : base (groups[(position-1)][0], position) {
-                this.groups = groups;
-                currentGroup = groups[(position-1)];
-                currentGroupingKey = groupKeys[(position-1)];
-                setLengthFinder(() => groups.Count);
-            }
-            public override Saxon.Hej.om.SequenceIterator iterateCurrentGroup() {
-                return new Saxon.Hej.tree.iter.ListIterator.Of<Saxon.Hej.om.Item>(currentGroup);
-            }
-            public override Saxon.Hej.om.AtomicSequence getCurrentGroupingKey() {
-                return currentGroupingKey;
-            }
-            public override int getLength() {
-                return groups.Count;
-            }
-        
+            Saxon.Eej.ee.stream.ManualGroupIterator iter = new Saxon.Eej.ee.stream.ManualGroupIterator(groups[(position-1)][0], position);
+            iter.setCurrentGroup(Saxon.Hej.value.SequenceExtent.makeSequenceExtent(groups[(position-1)]));
+            iter.setCurrentGroupingKey(groupKeys[(position-1)]);
+            iter.setLengthFinder(() => groups.Count);
+            return iter;
         }
     
         /* Expanding default method close from interface SequenceIterator */
         public virtual void close() {
-        }
-
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
         }
 
     }

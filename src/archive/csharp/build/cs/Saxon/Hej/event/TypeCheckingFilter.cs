@@ -5,7 +5,7 @@ namespace Saxon.Hej.@event {
     public class TypeCheckingFilter : Saxon.Hej.@event.ProxyOutputter {
         private Saxon.Hej.type.ItemType itemType;
         private int cardinality;
-        private Saxon.Hej.expr.parser.RoleDiagnostic role;
+        private Saxon.Hej.expr.parser.RoleDiagnostic roleDiagnostic;
         private Saxon.Hej.s9api.Location locator;
         private int count = 0;
         private int level = 0;
@@ -14,13 +14,13 @@ namespace Saxon.Hej.@event {
         public TypeCheckingFilter(Saxon.Hej.@event.Outputter next) : base (next) {
             typeHierarchy = getConfiguration().getTypeHierarchy();
         }
-        public void setRequiredType(Saxon.Hej.type.ItemType type, int cardinality, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.s9api.Location locator) {
+        public void setRequiredType(Saxon.Hej.type.ItemType type, int cardinality, Saxon.Hej.expr.parser.RoleDiagnostic roleDiagnostic, Saxon.Hej.s9api.Location locator) {
             itemType = type;
             this.cardinality = cardinality;
-            this.role = role;
+            this.roleDiagnostic = roleDiagnostic;
             this.locator = locator;
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             if ((level == 0)) {
                 if ((++count == 2)) {
                     checkAllowsMany(Saxon.Hej.expr.parser.Loc.NONE);
@@ -119,8 +119,8 @@ namespace Saxon.Hej.@event {
         }
         public void finalCheck() {
             if (((count == 0) && !(Saxon.Hej.value.Cardinality.allowsZero(cardinality)))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+role.getMessage()));
-                string errorCode = role.getErrorCode();
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("An empty sequence is not allowed as the "+roleDiagnostic.getMessage()));
+                string errorCode = roleDiagnostic.getErrorCode();
                 err.setErrorCode(errorCode);
                 if (!("XPDY0050".Equals(errorCode))) {
                     err.setIsTypeError(true);
@@ -181,11 +181,11 @@ namespace Saxon.Hej.@event {
         private void throwTypeError(Saxon.Hej.type.ItemType suppliedType, Saxon.Hej.om.Item item, Saxon.Hej.s9api.Location locationId) {
             string message;
             if ((item == null)) {
-                message = role.composeErrorMessage(itemType, suppliedType);
+                message = roleDiagnostic.composeErrorMessage(itemType, suppliedType);
             } else {
-                message = role.composeErrorMessage(itemType, item, typeHierarchy);
+                message = roleDiagnostic.composeErrorMessage(itemType, item, typeHierarchy);
             }
-            string errorCode = role.getErrorCode();
+            string errorCode = roleDiagnostic.getErrorCode();
             Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(message);
             err.setErrorCode(errorCode);
             if (!("XPDY0050".Equals(errorCode))) {
@@ -200,8 +200,8 @@ namespace Saxon.Hej.@event {
         }
         private void checkAllowsMany(Saxon.Hej.s9api.Location locationId) {
             if (!(Saxon.Hej.value.Cardinality.allowsMany(cardinality))) {
-                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("A sequence of more than one item is not allowed as the "+role.getMessage()));
-                string errorCode = role.getErrorCode();
+                Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException(("A sequence of more than one item is not allowed as the "+roleDiagnostic.getMessage()));
+                string errorCode = roleDiagnostic.getErrorCode();
                 err.setErrorCode(errorCode);
                 if (!("XPDY0050".Equals(errorCode))) {
                     err.setIsTypeError(true);

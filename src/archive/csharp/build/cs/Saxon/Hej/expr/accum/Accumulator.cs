@@ -14,8 +14,8 @@ namespace Saxon.Hej.expr.accum {
         private bool tracing;
         private Saxon.Hej.expr.instruct.SlotManager slotManagerForInitialValueExpression;
         public Accumulator()  {
-            preDescentRules = new Saxon.Hej.trans.SimpleMode(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "preDescent"));
-            postDescentRules = new Saxon.Hej.trans.SimpleMode(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.lib.NamespaceConstant.SAXON, "postDescent"));
+            preDescentRules = new Saxon.Hej.trans.SimpleMode(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "preDescent"));
+            postDescentRules = new Saxon.Hej.trans.SimpleMode(new Saxon.Hej.om.StructuredQName("saxon", Saxon.Hej.om.NamespaceUri.SAXON, "postDescent"));
             body = Saxon.Hej.expr.Literal.makeEmptySequence();
         }
         public override Saxon.Hej.trans.SymbolicName getSymbolicName() {

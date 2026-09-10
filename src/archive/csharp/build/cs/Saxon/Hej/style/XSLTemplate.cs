@@ -67,7 +67,7 @@ namespace Saxon.Hej.style {
         }
         public Saxon.Hej.om.StructuredQName getTemplateName() {
             if ((getObjectName() == null)) {
-                string nameAtt = getAttributeValue("", "name");
+                string nameAtt = getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "name");
                 if ((nameAtt != null)) {
                     setObjectName(makeQName(nameAtt, null, "name"));
                 }
@@ -163,7 +163,7 @@ namespace Saxon.Hej.style {
                                     if (f.Equals("visibility")) {
                                         visibilityAtt = Saxon.Hej.value.Whitespace.trim(att.getValue());
                                     } else {
-                                        if (name.hasURI(Saxon.Hej.lib.NamespaceConstant.SAXON)) {
+                                        if (name.hasURI(Saxon.Hej.om.NamespaceUri.SAXON)) {
                                             isExtensionAttributeAllowed(name.getDisplayName());
                                             if (name.getLocalPart().Equals("as")) {
                                                 extraAsAtt = att.getValue();
@@ -225,7 +225,7 @@ namespace Saxon.Hej.style {
                     if (!(Saxon.Hej.value.BigDecimalValue.castableAsDecimal(priorityAtt))) {
                         compileError((("Invalid numeric value for priority ("+priority)+')'), "XTSE0530");
                     }
-                    priority = System.Double.Parse(priorityAtt);
+                    priority = Saxon.Impl.Helpers.Utils.ParseDouble(priorityAtt);
                 } catch (Saxon.Ejava.lang.NumberFormatException err) {
                     compileError((("Invalid numeric value for priority ("+priority)+')'), "XTSE0530");
                 }
@@ -365,7 +365,7 @@ namespace Saxon.Hej.style {
             if ((match != null)) {
                 match = typeCheck("match", match);
                 if ((match.getItemType() is Saxon.Hej.type.ErrorType)) {
-                    issueWarning(new Saxon.Hej.trans.XPathException("Pattern will never match anything", Saxon.Hej.trans.SaxonErrorCode.SXWN9015, this));
+                    issueWarning("Pattern will never match anything", Saxon.Hej.trans.SaxonErrorCode.SXWN9015);
                 }
                 if (getPrincipalStylesheetModule().isDeclaredModes()) {
                     Saxon.Hej.trans.rules.RuleManager manager = getPrincipalStylesheetModule().getRuleManager();
@@ -419,7 +419,7 @@ namespace Saxon.Hej.style {
         public override void index(Saxon.Hej.style.ComponentDeclaration decl, Saxon.Hej.style.PrincipalStylesheetModule top) {
             if ((getTemplateName() != null)) {
                 if ((compiledNamedTemplate == null)) {
-                    compiledNamedTemplate = new Saxon.Hej.expr.instruct.NamedTemplate(getTemplateName());
+                    compiledNamedTemplate = new Saxon.Hej.expr.instruct.NamedTemplate(getTemplateName(), getConfiguration());
                 }
                 top.indexNamedTemplate(decl);
             }
@@ -495,8 +495,7 @@ namespace Saxon.Hej.style {
             if ((visibility != Saxon.Hej.trans.Visibility.ABSTRACT)) {
                 try {
                     if (((requiredType != null) && (requiredType != Saxon.Hej.value.SequenceType.ANY_SEQUENCE))) {
-                        Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.TEMPLATE_RESULT, diagnosticId, 0);
-                        role.setErrorCode("XTTE0505");
+                        Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.TEMPLATE_RESULT, diagnosticId, 0, "XTTE0505");
                         body = config.getTypeChecker(false).staticTypeCheck(body, requiredType, role, makeExpressionVisitor());
                     }
                 } catch (Saxon.Hej.trans.XPathException err) {
@@ -526,7 +525,7 @@ namespace Saxon.Hej.style {
             if (contextItemType.Equals(Saxon.Hej.type.ErrorType.getInstance())) {
                 contextItemType = Saxon.Hej.type.AnyItemType.getInstance();
             }
-            cisi = config.makeContextItemStaticInfo(contextItemType, false);
+            cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
             body = refineTemplateBody(body, cisi);
             bool first = true;
             foreach (System.Collections.Generic.KeyValuePair<Saxon.Hej.om.StructuredQName,Saxon.Hej.expr.instruct.TemplateRule> kvp in compiledTemplateRules) {
@@ -637,7 +636,7 @@ namespace Saxon.Hej.style {
                             throw;
                         }
                         if ((match2 != match1)) {
-                            Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.AnyItemType.getInstance(), false);
+                            Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(Saxon.Hej.type.AnyItemType.getInstance(), mayOmitContextItem);
                             Saxon.Hej.expr.parser.ExpressionTool.copyLocationInfo(match, match2);
                             match2.setOriginalText(match.ToString());
                             match2 = match2.typeCheck(visitor, info);
@@ -661,7 +660,7 @@ namespace Saxon.Hej.style {
                             string message = "Template rule is declared streamable but the match pattern is not motionless";
                             if (fallback) {
                                 message += "\n  * Falling back to non-streaming implementation";
-                                getStaticContext().issueWarning(message, this);
+                                getStaticContext().issueWarning(message, Saxon.Hej.trans.SaxonErrorCode.SXWN9024, this);
                                 rule.setDeclaredStreamable(false);
                                 getCompilation().setFallbackToNonStreaming(true);
                             } else {
@@ -740,15 +739,10 @@ namespace Saxon.Hej.style {
                     body.explain(err);
                 }
                 body.restoreParentPointers();
-                if ((config.isDeferredByteCode(Saxon.Api.HostLanguage.XSLT) && !(isTailRecursive))) {
-                    Saxon.Hej.expr.parser.Optimizer opt = config.obtainOptimizer();
-                    int evaluationModes = (Saxon.Hej.expr.Expression.ITERATE_METHOD|Saxon.Hej.expr.Expression.PROCESS_METHOD);
-                    compiledNamedTemplate.setBody(opt.makeByteCodeCandidate(compiledNamedTemplate, body, diagnosticId, evaluationModes));
-                }
             }
             if ((match != null)) {
                 Saxon.Hej.type.ItemType contextItemType = getContextItemTypeForTemplateRule();
-                Saxon.Hej.expr.parser.ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, false);
+                Saxon.Hej.expr.parser.ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
                 cisi.setContextPostureStriding();
                 Saxon.Hej.expr.parser.ExpressionVisitor visitor = makeExpressionVisitor();
                 match.resetLocalStaticProperties();
@@ -768,7 +762,7 @@ namespace Saxon.Hej.style {
                                 allocateLocalSlots(templateRuleBody);
                                 foreach (Saxon.Hej.trans.rules.Rule r in compiledTemplateRule.getRules()) {
                                     Saxon.Hej.pattern.Pattern match = r.getPattern();
-                                    Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(match.getItemType(), false);
+                                    Saxon.Hej.expr.parser.ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(match.getItemType(), mayOmitContextItem);
                                     info.setContextPostureStriding();
                                     Saxon.Hej.pattern.Pattern m2 = match.optimize(visitor, info);
                                     if ((compiledTemplateRules.Count>1)) {
@@ -777,10 +771,6 @@ namespace Saxon.Hej.style {
                                     if ((m2 != match)) {
                                         r.setPattern(m2);
                                     }
-                                }
-                                if ((visitor.getConfiguration().isDeferredByteCode(Saxon.Api.HostLanguage.XSLT) && !(isTailRecursive))) {
-                                    int evaluationModes = (Saxon.Hej.expr.Expression.ITERATE_METHOD|Saxon.Hej.expr.Expression.PROCESS_METHOD);
-                                    compiledTemplateRule.setBody(opt.makeByteCodeCandidate(compiledTemplateRule, templateRuleBody, diagnosticId, evaluationModes));
                                 }
                                 if (explaining) {
                                     Saxon.Hej.lib.Logger err = getConfiguration().getLogger();
@@ -819,8 +809,6 @@ namespace Saxon.Hej.style {
                 }
             }
             return contextItemType;
-        }
-        public void generateByteCode(Saxon.Hej.expr.parser.Optimizer opt) {
         }
         public Saxon.Hej.expr.instruct.SlotManager getSlotManager() {
             return stackFrameMap;

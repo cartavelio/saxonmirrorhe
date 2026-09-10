@@ -30,7 +30,7 @@ namespace Saxon.Hej.expr {
         public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.str.UnicodeString s = getLhsExpression().evaluateItem(context).getUnicodeStringValue();
             int c = Saxon.Hej.expr.sort.CodepointCollator.getInstance().compareStrings(s, comparand);
-            return interpretComparisonResult(c);
+            return interpretComparisonResult(@operator, c);
         }
         protected internal override int computeCardinality() {
             return Saxon.Hej.expr.StaticProperty.EXACTLY_ONE;
@@ -53,6 +53,31 @@ namespace Saxon.Hej.expr {
         }
         public override Saxon.Hej.expr.sort.AtomicComparer getAtomicComparer() {
             return Saxon.Hej.expr.sort.CodepointCollatingComparer.getInstance();
+        }
+        public override Saxon.Hej.lib.StringCollator getStringCollator() {
+            return Saxon.Hej.expr.sort.CodepointCollator.getInstance();
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.CompareToStringConstant.CompareToStringConstantElaborator();
+        }
+        public class CompareToStringConstantElaborator : Saxon.Hej.expr.elab.BooleanElaborator {
+            public override Saxon.Hej.expr.elab.BooleanEvaluator elaborateForBoolean() {
+                Saxon.Hej.expr.CompareToStringConstant expression = (Saxon.Hej.expr.CompareToStringConstant)(getExpression());
+                Saxon.Hej.expr.Expression arg = expression.getBaseExpression();
+                Saxon.Hej.expr.elab.UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(false);
+                bool nullable = Saxon.Hej.value.Cardinality.allowsZero(expression.getCardinality());
+                int @operator = expression.getComparisonOperator();
+                Saxon.Hej.str.UnicodeString comparand = expression.getComparand();
+                return context => {
+                    Saxon.Hej.str.UnicodeString value = /*Delegate.eval()*/argEval(context);
+                    if ((nullable && (value == null))) {
+                        return false;
+                    }
+                    int c = value.compareTo(comparand);
+                    return interpretComparisonResult(@operator, c);
+                } ;
+            }
+        
         }
     
     }

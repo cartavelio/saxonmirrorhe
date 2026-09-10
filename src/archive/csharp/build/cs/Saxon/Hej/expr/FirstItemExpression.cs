@@ -49,6 +49,22 @@ namespace Saxon.Hej.expr {
         public override string getStreamerName() {
             return "FirstItemExpression";
         }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.FirstItemExpression.FirstItemExprElaborator();
+        }
+        public class FirstItemExprElaborator : Saxon.Hej.expr.elab.ItemElaborator {
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.FirstItemExpression expr = (Saxon.Hej.expr.FirstItemExpression)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => {
+                    Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/baseEval(context);
+                    Saxon.Hej.om.Item result = iter.next();
+                    iter.close();
+                    return result;
+                } ;
+            }
+        
+        }
     
     }
 }

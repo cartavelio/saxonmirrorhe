@@ -11,7 +11,8 @@ namespace Saxon.Hej.expr.instruct {
         private bool mayOmitContextItem = true;
         private bool absentFocus = false;
         private System.Collections.Generic.IList<Saxon.Hej.expr.instruct.NamedTemplate.LocalParamInfo> localParamDetails = new System.Collections.Generic.List<Saxon.Hej.expr.instruct.NamedTemplate.LocalParamInfo>(4);
-        public NamedTemplate(Saxon.Hej.om.StructuredQName templateName)  {
+        private Saxon.Hej.expr.elab.PushEvaluator bodyEvaluator;
+        public NamedTemplate(Saxon.Hej.om.StructuredQName templateName, Saxon.Hej.Configuration config)  {
             setTemplateName(templateName);
         }
         public void setTemplateName(Saxon.Hej.om.StructuredQName templateName) {
@@ -37,7 +38,6 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override void setBody(Saxon.Hej.expr.Expression body) {
             base.setBody(body);
-            bodyIsTailCallReturner = ((body is Saxon.Hej.expr.instruct.TailCallReturner));
         }
         public Saxon.Hej.om.StructuredQName getTemplateName() {
             return templateName;
@@ -103,14 +103,12 @@ namespace Saxon.Hej.expr.instruct {
                     context.setCurrentIterator(null);
                 }
             }
-            if (bodyIsTailCallReturner) {
-                return ((Saxon.Hej.expr.instruct.TailCallReturner)(body)).processLeavingTail(output, context);
-            } else {
-                if ((body != null)) {
-                    body.process(output, context);
+            lock (this) {
+                if ((bodyEvaluator == null)) {
+                    bodyEvaluator = getBody().makeElaborator().elaborateForPush();
                 }
             }
-            return null;
+            return /*Delegate.processLeavingTail()*/bodyEvaluator(output, context);
         }
         public override void export(Saxon.Hej.trace.ExpressionPresenter presenter) {
             presenter.startElement("template");

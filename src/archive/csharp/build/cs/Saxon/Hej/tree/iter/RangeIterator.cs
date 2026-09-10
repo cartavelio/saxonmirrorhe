@@ -17,7 +17,11 @@ namespace Saxon.Hej.tree.iter {
                 if (!(val.isWholeNumber())) {
                     return false;
                 }
-                intVal = Saxon.Hej.type.Converter.DecimalToInteger.INSTANCE.convert(val);
+                try {
+                    intVal = (Saxon.Hej.value.IntegerValue)(Saxon.Hej.type.Converter.NumericToInteger.INSTANCE.convert(val).asAtomic());
+                } catch (Saxon.Hej.type.ValidationException e) {
+                    return false;
+                }
             }
             try {
                 return (((intVal.compareTo(getMin())>=0) && (intVal.compareTo(getMax())<=0)) && intVal.minus(getFirst()).mod(getStep()).Equals(Saxon.Hej.value.Int64Value.ZERO));
@@ -33,10 +37,6 @@ namespace Saxon.Hej.tree.iter {
 
         /* Expanding default method close from interface SequenceIterator */
         public virtual void close() {
-        }
-
-        /* Expanding default method discharge from interface SequenceIterator */
-        public virtual void discharge() {
         }
 
         /* Creating stub method isActuallyGrounded to satisfy interface GroundedIterator */

@@ -24,8 +24,7 @@ namespace Saxon.Hej.expr.instruct {
             return new Saxon.Hej.expr.ItemMappingIterator(getBaseExpression().iterate(context), this);
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.@event.WherePopulatedOutputter filter = new Saxon.Hej.@event.WherePopulatedOutputter(output);
-            getBaseExpression().process(filter, context);
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         public Saxon.Hej.om.Item mapItem(Saxon.Hej.om.Item item) {
             return (isDeemedEmpty(item) ? null : item);
@@ -47,7 +46,18 @@ namespace Saxon.Hej.expr.instruct {
                     if ((item is Saxon.Hej.ma.map.MapItem)) {
                         return ((Saxon.Hej.ma.map.MapItem)(item)).isEmpty();
                     } else {
-                        return false;
+                        if ((item is Saxon.Hej.ma.arrays.ArrayItem)) {
+                            foreach (Saxon.Hej.om.GroundedValue value in ((Saxon.Hej.ma.arrays.ArrayItem)(item)).members()) {
+                                foreach (Saxon.Hej.om.Item it in value.asIterable()) {
+                                    if (!(isDeemedEmpty(it))) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
                 }
             }
@@ -62,6 +72,27 @@ namespace Saxon.Hej.expr.instruct {
         }
         public override string getStreamerName() {
             return "WherePopulated";
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.instruct.WherePopulated.WherePopulatedElaborator();
+        }
+        private class WherePopulatedElaborator : Saxon.Hej.expr.elab.PushElaborator {
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.instruct.WherePopulated expr = (Saxon.Hej.expr.instruct.WherePopulated)(getExpression());
+                Saxon.Hej.expr.elab.PushEvaluator basePush = expr.getBaseExpression().makeElaborator().elaborateForPush();
+                return (output, context) => {
+                    Saxon.Hej.@event.WherePopulatedOutputter filter = new Saxon.Hej.@event.WherePopulatedOutputter(output);
+                    Saxon.Hej.expr.instruct.TailCall tc = /*Delegate.processLeavingTail()*/basePush(filter, context);
+                    dispatchTailCall(tc);
+                    return null;
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.instruct.WherePopulated expr = (Saxon.Hej.expr.instruct.WherePopulated)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator basePull = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => new Saxon.Hej.expr.ItemMappingIterator(/*Delegate.iterate()*/basePull(context), expr);
+            }
+        
         }
     
     }

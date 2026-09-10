@@ -3,40 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.value {
     public class QNameValue : Saxon.Hej.value.QualifiedNameValue {
-        public QNameValue(string prefix, string uri, string localName) : this (prefix, uri, localName, Saxon.Hej.type.BuiltInAtomicType.QNAME) {
+        public QNameValue(Saxon.Hej.om.StructuredQName qName, Saxon.Hej.type.AtomicType typeLabel) : base (qName, typeLabel) {
         }
-        public QNameValue(string prefix, string uri, string localName, Saxon.Hej.type.AtomicType type)  {
-            qName = new Saxon.Hej.om.StructuredQName(prefix, uri, localName);
-            if ((type == null)) {
-                type = Saxon.Hej.type.BuiltInAtomicType.QNAME;
-            }
-            typeLabel = type;
+        public QNameValue(string prefix, Saxon.Hej.om.NamespaceUri uri, string localName) : this (prefix, uri, localName, Saxon.Hej.type.BuiltInAtomicType.QNAME) {
         }
-        public QNameValue(string prefix, string uri, string localName, Saxon.Hej.type.AtomicType type, bool check)  {
-            if (!(Saxon.Hej.om.NameChecker.isValidNCName(localName))) {
+        public QNameValue(string prefix, Saxon.Hej.om.NamespaceUri uri, string localName, Saxon.Hej.type.AtomicType type) : base (new Saxon.Hej.om.StructuredQName(prefix, uri, localName), type) {
+        }
+        public QNameValue(string prefix, Saxon.Hej.om.NamespaceUri uri, string localName, Saxon.Hej.type.AtomicType type, bool check) : this (buildStructuredQName(prefix, uri, localName, check), type) {
+        }
+        private static Saxon.Hej.om.StructuredQName buildStructuredQName(string prefix, Saxon.Hej.om.NamespaceUri uri, string localName, bool check) {
+            if ((check && !(Saxon.Hej.om.NameChecker.isValidNCName(localName)))) {
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException((("Malformed local name in QName: '"+localName)+'\''));
                 err.setErrorCode("FORG0001");
                 throw err;
             }
             prefix = ((prefix == null) ? "" : prefix);
-            uri = ("".Equals(uri) ? null : uri);
-            if (((check && (uri == null)) && (prefix.Length != 0))) {
+            if (((check && uri.isEmpty()) && (prefix.Length != 0))) {
                 Saxon.Hej.trans.XPathException err = new Saxon.Hej.trans.XPathException("QName has null namespace but non-empty prefix");
                 err.setErrorCode("FOCA0002");
                 throw err;
             }
-            qName = new Saxon.Hej.om.StructuredQName(prefix, uri, localName);
-            typeLabel = type;
-        }
-        public QNameValue(Saxon.Hej.om.StructuredQName qName, Saxon.Hej.type.AtomicType typeLabel)  {
-            if ((qName == null)) {
-                throw new Saxon.Ejava.lang.NullPointerException("qName");
-            }
-            if ((typeLabel == null)) {
-                throw new Saxon.Ejava.lang.NullPointerException("typeLabel");
-            }
-            this.qName = qName;
-            this.typeLabel = typeLabel;
+            return new Saxon.Hej.om.StructuredQName(prefix, uri, localName);
         }
         public override Saxon.Hej.value.AtomicValue copyAsSubType(Saxon.Hej.type.AtomicType typeLabel) {
             return new Saxon.Hej.value.QNameValue(qName, typeLabel);
@@ -49,7 +36,7 @@ namespace Saxon.Hej.value {
               case Saxon.Hej.functions.AccessorFn.Component.LOCALNAME:
                 return new Saxon.Hej.value.StringValue(getLocalName(), Saxon.Hej.type.BuiltInAtomicType.NCNAME);
               case Saxon.Hej.functions.AccessorFn.Component.NAMESPACE:
-                return new Saxon.Hej.value.AnyURIValue((getNamespaceURI()));
+                return new Saxon.Hej.value.AnyURIValue((getNamespaceURI().toUnicodeString()));
               case Saxon.Hej.functions.AccessorFn.Component.PREFIX:
                 string prefix = getPrefix();
                 if (prefix.Length==0) {

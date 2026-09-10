@@ -15,8 +15,8 @@ namespace Saxon.Eej.functions.extfn {
             }
             Saxon.Hej.value.StringValue first = (Saxon.Hej.value.StringValue)(arguments[1].head());
             string value = ((first == null) ? "" : first.getStringValue());
-            value = System.Text.RegularExpressions.Regex.Replace(value, "\\?>", "? >");
-            orphan.setNodeName(new Saxon.Hej.om.FingerprintedQName("", "", name));
+            value = value.Replace("?>", "? >");
+            orphan.setNodeName(new Saxon.Hej.om.FingerprintedQName("", Saxon.Hej.om.NamespaceUri.NULL, name));
             orphan.setStringValue(Saxon.Hej.str.StringView.tidy(value));
             return orphan;
         }

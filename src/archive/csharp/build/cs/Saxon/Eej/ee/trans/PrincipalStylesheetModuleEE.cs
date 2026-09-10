@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Eej.ee.trans {
     public class PrincipalStylesheetModuleEE : Saxon.Hej.style.PrincipalStylesheetModule {
-        private readonly System.Collections.Generic.IDictionary<Saxon.Hej.expr.Expression,Saxon.Hej.expr.instruct.GlobalVariable> indexOfVariablesByInitializer = new System.Collections.Generic.Dictionary<Saxon.Hej.expr.Expression,Saxon.Hej.expr.instruct.GlobalVariable>();
+        private readonly System.Collections.Generic.IDictionary<Saxon.Hej.expr.Expression,Saxon.Hej.expr.instruct.GlobalVariable> indexOfVariablesByInitializer = new System.Collections.Generic.Dictionary<Saxon.Hej.expr.Expression, Saxon.Hej.expr.instruct.GlobalVariable>();
         public PrincipalStylesheetModuleEE(Saxon.Hej.style.XSLPackage node) : base (node) {
         }
         protected internal override void importSchemata() {
             bool importsSchemas = false;
-            for (int i = (topLevel.Count-1); (i>=0); i--) {
-                Saxon.Hej.style.ComponentDeclaration decl = topLevel[i];
+            foreach (Saxon.Hej.style.ComponentDeclaration decl in topLevel) {
                 if ((decl.getSourceElement() is Saxon.Hej.style.XSLImportSchema)) {
                     importsSchemas = true;
+                    break ;
                 }
             }
             if (importsSchemas) {
@@ -26,7 +26,7 @@ namespace Saxon.Eej.ee.trans {
                         }
                     }
                     Saxon.Hej.Configuration config = getConfiguration();
-                    foreach (string ns in getStylesheetPackage().getSchemaNamespaces()) {
+                    foreach (Saxon.Hej.om.NamespaceUri ns in getStylesheetPackage().getSchemaNamespaces()) {
                         config.sealNamespace(ns);
                     }
                 }

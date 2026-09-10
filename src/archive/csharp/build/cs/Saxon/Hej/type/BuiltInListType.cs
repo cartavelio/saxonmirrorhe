@@ -4,10 +4,10 @@ using System.Linq;
 namespace Saxon.Hej.type {
     public class BuiltInListType : Saxon.Hej.type.ListType {
         private readonly int fingerprint;
-        public static Saxon.Hej.type.BuiltInListType ENTITIES = makeListType(Saxon.Hej.lib.NamespaceConstant.SCHEMA, "ENTITIES");
-        public static Saxon.Hej.type.BuiltInListType IDREFS = makeListType(Saxon.Hej.lib.NamespaceConstant.SCHEMA, "IDREFS");
-        public static Saxon.Hej.type.BuiltInListType NMTOKENS = makeListType(Saxon.Hej.lib.NamespaceConstant.SCHEMA, "NMTOKENS");
-        public static Saxon.Hej.type.BuiltInListType ANY_URIS = makeListType(Saxon.Hej.lib.NamespaceConstant.SCHEMA_INSTANCE, "anonymous_schemaLocationType");
+        public static Saxon.Hej.type.BuiltInListType ENTITIES = makeListType(Saxon.Hej.om.NamespaceUri.SCHEMA, "ENTITIES");
+        public static Saxon.Hej.type.BuiltInListType IDREFS = makeListType(Saxon.Hej.om.NamespaceUri.SCHEMA, "IDREFS");
+        public static Saxon.Hej.type.BuiltInListType NMTOKENS = makeListType(Saxon.Hej.om.NamespaceUri.SCHEMA, "NMTOKENS");
+        public static Saxon.Hej.type.BuiltInListType ANY_URIS = makeListType(Saxon.Hej.om.NamespaceUri.SCHEMA_INSTANCE, "anonymous_schemaLocationType");
         public bool isBuiltInType() {
             return true;
         }
@@ -71,8 +71,8 @@ namespace Saxon.Hej.type {
         public string getName() {
             return Saxon.Hej.om.StandardNames.getLocalName(fingerprint);
         }
-        public string getTargetNamespace() {
-            return Saxon.Hej.lib.NamespaceConstant.SCHEMA;
+        public Saxon.Hej.om.NamespaceUri getTargetNamespace() {
+            return Saxon.Hej.om.NamespaceUri.SCHEMA;
         }
         public string getEQName() {
             return ((("Q{"+Saxon.Hej.lib.NamespaceConstant.SCHEMA)+"}")+getName());
@@ -123,7 +123,7 @@ namespace Saxon.Hej.type {
             return Saxon.Hej.om.StandardNames.getLocalName(fingerprint);
         }
         public Saxon.Hej.om.StructuredQName getStructuredQName() {
-            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.lib.NamespaceConstant.SCHEMA, getLocalName());
+            return new Saxon.Hej.om.StructuredQName("xs", Saxon.Hej.om.NamespaceUri.SCHEMA, getLocalName());
         }
         public Saxon.Hej.type.SimpleType getItemType() {
             return itemType;
@@ -157,7 +157,7 @@ namespace Saxon.Hej.type {
                 throw new Saxon.Hej.type.ValidationException(err);
             }
         }
-        private static Saxon.Hej.type.BuiltInListType makeListType(string @namespace, string lname) {
+        private static Saxon.Hej.type.BuiltInListType makeListType(Saxon.Hej.om.NamespaceUri @namespace, string lname) {
             Saxon.Hej.type.BuiltInListType t = new Saxon.Hej.type.BuiltInListType(Saxon.Hej.om.StandardNames.getFingerprint(@namespace, lname));
             Saxon.Hej.type.BuiltInType.register(t.getFingerprint(), t);
             return t;
@@ -168,7 +168,7 @@ namespace Saxon.Hej.type {
         public Saxon.Hej.str.UnicodeString postprocess(Saxon.Hej.str.UnicodeString input) {
             return input;
         }
-        public Saxon.Hej.om.Function getComponentAsFunction() {
+        public Saxon.Hej.om.FunctionItem getComponentAsFunction() {
             return /*134*/Saxon.Eej.ee.schema.UserSimpleType.getComponentAsFunction(this);
         }
     

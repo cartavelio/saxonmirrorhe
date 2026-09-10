@@ -48,6 +48,7 @@ namespace Saxon.Hej.tree.tiny {
                 }
                 uniformBaseURI = true;
                 tree.setUniformBaseUri(baseURI);
+                tree.setDurability(getDurability());
             }
             if (useEventLocation) {
                 System.Object copier = getPipelineConfiguration().getComponent(typeof(Saxon.Hej.@event.CopyInformee).Name);
@@ -114,6 +115,22 @@ namespace Saxon.Hej.tree.tiny {
             Saxon.Hej.tree.tiny.TinyTree tt = tree;
             System.Diagnostics.Debug.Assert((tt != null));
             textualElementEligibilityState = Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.INELIGIBLE;
+            startElementSetupNamespaces(namespaces);
+            startElementSetupSiblings(tt);
+            startElementAddNode(elemName, type, tt, properties);
+            startElementCalculateDepth(tt);
+            startElementLocalSystemId(tt, location);
+            if (lineNumbering) {
+                tt.setLineNumber(nodeNr, location.getLineNumber(), location.getColumnNumber());
+            }
+            foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
+                attribute2(att.getNodeName(), att.getType(), getAttValue(att), location, att.getProperties());
+            }
+            textualElementEligibilityState = (noNewNamespaces ? Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.PRIMED : Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.INELIGIBLE);
+            tree.addNamespaces(nodeNr, namespaceStack.Peek());
+            nodeNr++;
+        }
+        private void startElementSetupNamespaces(Saxon.Hej.om.NamespaceMap namespaces) {
             noNewNamespaces = true;
             if ((namespaceStack.Count==0)) {
                 noNewNamespaces = false;
@@ -122,6 +139,8 @@ namespace Saxon.Hej.tree.tiny {
                 noNewNamespaces = (namespaces == namespaceStack.Peek());
                 namespaceStack.Push(namespaces);
             }
+        }
+        private void startElementSetupSiblings(Saxon.Hej.tree.tiny.TinyTree tt) {
             if ((siblingsAtDepth[currentDepth]>PARENT_POINTER_INTERVAL)) {
                 nodeNr = tt.addNode(Saxon.Hej.type.Type.PARENT_POINTER, currentDepth, prevAtDepth[(currentDepth-1)], 0, 0);
                 int prev = prevAtDepth[currentDepth];
@@ -132,6 +151,8 @@ namespace Saxon.Hej.tree.tiny {
                 prevAtDepth[currentDepth] = nodeNr;
                 siblingsAtDepth[currentDepth] = 0;
             }
+        }
+        private void startElementAddNode(Saxon.Hej.om.NodeName elemName, Saxon.Hej.type.SchemaType type, Saxon.Hej.tree.tiny.TinyTree tt, int properties) {
             int fp = elemName.obtainFingerprint(namePool);
             int prefixCode = tree.prefixPool.obtainPrefixCode(elemName.getPrefix());
             int nameCode = (((prefixCode<<20))|fp);
@@ -147,6 +168,8 @@ namespace Saxon.Hej.tree.tiny {
                     isIDElement = true;
                 }
             }
+        }
+        private void startElementCalculateDepth(Saxon.Hej.tree.tiny.TinyTree tt) {
             if ((currentDepth == 0)) {
                 prevAtDepth[0] = nodeNr;
                 prevAtDepth[1] = -1;
@@ -167,6 +190,8 @@ namespace Saxon.Hej.tree.tiny {
             }
             prevAtDepth[currentDepth] = -1;
             siblingsAtDepth[currentDepth] = 0;
+        }
+        private void startElementLocalSystemId(Saxon.Hej.tree.tiny.TinyTree tt, Saxon.Hej.s9api.Location location) {
             string localSystemId = location.getSystemId();
             if ((isUseEventLocation() && (localSystemId != null))) {
                 tt.setSystemId(nodeNr, localSystemId);
@@ -179,15 +204,6 @@ namespace Saxon.Hej.tree.tiny {
                 uniformBaseURI = false;
                 tt.setUniformBaseUri(null);
             }
-            if (lineNumbering) {
-                tt.setLineNumber(nodeNr, location.getLineNumber(), location.getColumnNumber());
-            }
-            foreach (Saxon.Hej.om.AttributeInfo att in attributes) {
-                attribute2(att.getNodeName(), att.getType(), getAttValue(att), location, att.getProperties());
-            }
-            textualElementEligibilityState = (noNewNamespaces ? Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.PRIMED : Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.INELIGIBLE);
-            tree.addNamespaces(nodeNr, namespaceStack.Peek());
-            nodeNr++;
         }
         protected internal virtual string getAttValue(Saxon.Hej.om.AttributeInfo att) {
             return att.getValue();
@@ -292,8 +308,8 @@ namespace Saxon.Hej.tree.tiny {
             textualElementEligibilityState = Saxon.Hej.tree.tiny.TinyBuilder.Eligibility.INELIGIBLE;
             int s = (int)(commentBuilder.length());
             commentBuilder.accept(remainder);
-            int nameCode = namePool.allocateFingerprint("", piname);
-            nodeNr = tt.addNode(Saxon.Hej.type.Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.tidy().length32(), nameCode);
+            int nameCode = namePool.allocateFingerprint(Saxon.Hej.om.NamespaceUri.NULL, piname);
+            nodeNr = tt.addNode(Saxon.Hej.type.Type.PROCESSING_INSTRUCTION, currentDepth, s, remainder.length32(), nameCode);
             int prev = prevAtDepth[currentDepth];
             if ((prev>0)) {
                 tt.next[prev] = nodeNr;
@@ -302,7 +318,13 @@ namespace Saxon.Hej.tree.tiny {
             prevAtDepth[currentDepth] = nodeNr;
             siblingsAtDepth[currentDepth]++;
             string localLocation = locationId.getSystemId();
-            tt.setSystemId(nodeNr, localLocation);
+            if ((isUseEventLocation() && (localLocation != null))) {
+                tt.setSystemId(nodeNr, localLocation);
+            } else {
+                if ((currentDepth == 1)) {
+                    tt.setSystemId(nodeNr, systemId);
+                }
+            }
             if (((localLocation != null) && !(localLocation.Equals(baseURI)))) {
                 uniformBaseURI = false;
                 tree.setUniformBaseUri(null);

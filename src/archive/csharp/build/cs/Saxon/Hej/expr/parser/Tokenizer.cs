@@ -102,120 +102,151 @@ namespace Saxon.Hej.expr.parser {
                 if ((oldPrecedingToken == Saxon.Hej.expr.parser.Token.DOLLAR)) {
                     return ;
                 }
-                switch (nextToken) {
-                  case Saxon.Hej.expr.parser.Token.LPAR:
-                    int op = getBinaryOp(currentTokenValue);
-                    if (((op == Saxon.Hej.expr.parser.Token.UNKNOWN) || followsOperator(oldPrecedingToken))) {
-                        currentToken = getFunctionType(currentTokenValue);
-                        lookAhead();
-                    } else {
-                        currentToken = op;
-                    }
-                    break ;
-                  case Saxon.Hej.expr.parser.Token.LCURLY:
-                    if (!(((state == SEQUENCE_TYPE_STATE)))) {
-                        currentToken = Saxon.Hej.expr.parser.Token.KEYWORD_CURLY;
-                        lookAhead();
-                    }
-                    break ;
-                  case Saxon.Hej.expr.parser.Token.COLONCOLON:
+                handleNextToken(oldPrecedingToken);
+            }
+        }
+        private void handleNextToken(int oldPrecedingToken) {
+            switch (nextToken) {
+              case Saxon.Hej.expr.parser.Token.LPAR:
+                handleLPAR(oldPrecedingToken);
+                break ;
+              case Saxon.Hej.expr.parser.Token.LCURLY:
+                handleLCURLY();
+                break ;
+              case Saxon.Hej.expr.parser.Token.COLONCOLON:
+                handleCOLONCOLON();
+                break ;
+              case Saxon.Hej.expr.parser.Token.HASH:
+                handleHASH();
+                break ;
+              case Saxon.Hej.expr.parser.Token.COLONSTAR:
+                handleCOLONSTAR();
+                break ;
+              case Saxon.Hej.expr.parser.Token.DOLLAR:
+                handleDOLLAR();
+                break ;
+              case Saxon.Hej.expr.parser.Token.PERCENT:
+                handlePERCENT();
+                break ;
+              case Saxon.Hej.expr.parser.Token.NAME:
+                int candidate = getCandidate();
+                if ((candidate != -1)) {
+                    string qname = nextTokenValue;
+                    string saveTokenValue = currentTokenValue;
+                    int savePosition = inputOffset;
                     lookAhead();
-                    currentToken = Saxon.Hej.expr.parser.Token.AXIS;
-                    break ;
-                  case Saxon.Hej.expr.parser.Token.HASH:
-                    lookAhead();
-                    currentToken = Saxon.Hej.expr.parser.Token.NAMED_FUNCTION_REF;
-                    break ;
-                  case Saxon.Hej.expr.parser.Token.COLONSTAR:
-                    lookAhead();
-                    currentToken = Saxon.Hej.expr.parser.Token.PREFIX;
-                    break ;
-                  case Saxon.Hej.expr.parser.Token.DOLLAR:
-                    switch (currentTokenValue) {
-                      case "for":
-                        currentToken = Saxon.Hej.expr.parser.Token.FOR;
-                        break ;
-                      case "some":
-                        currentToken = Saxon.Hej.expr.parser.Token.SOME;
-                        break ;
-                      case "every":
-                        currentToken = Saxon.Hej.expr.parser.Token.EVERY;
-                        break ;
-                      case "let":
-                        currentToken = Saxon.Hej.expr.parser.Token.LET;
-                        break ;
-                      case "count":
-                        currentToken = Saxon.Hej.expr.parser.Token.COUNT;
-                        break ;
-                      case "copy":
-                        currentToken = Saxon.Hej.expr.parser.Token.COPY;
-                        break ;
-                    }
-                    break ;
-                  case Saxon.Hej.expr.parser.Token.PERCENT:
-                    if (currentTokenValue.Equals("declare")) {
-                        currentToken = Saxon.Hej.expr.parser.Token.DECLARE_ANNOTATED;
-                    }
-                    break ;
-                  case Saxon.Hej.expr.parser.Token.NAME:
-                    int candidate = -1;
-                    switch (currentTokenValue) {
-                      case "element":
-                        candidate = Saxon.Hej.expr.parser.Token.ELEMENT_QNAME;
-                        break ;
-                      case "attribute":
-                        candidate = Saxon.Hej.expr.parser.Token.ATTRIBUTE_QNAME;
-                        break ;
-                      case "processing-instruction":
-                        candidate = Saxon.Hej.expr.parser.Token.PI_QNAME;
-                        break ;
-                      case "namespace":
-                        candidate = Saxon.Hej.expr.parser.Token.NAMESPACE_QNAME;
-                        break ;
-                    }
-                    if ((candidate != -1)) {
-                        string qname = nextTokenValue;
-                        string saveTokenValue = currentTokenValue;
-                        int savePosition = inputOffset;
-                        lookAhead();
-                        if ((nextToken == Saxon.Hej.expr.parser.Token.LCURLY)) {
-                            currentToken = candidate;
-                            currentTokenValue = qname;
-                            lookAhead();
-                            return ;
-                        } else {
-                            currentToken = Saxon.Hej.expr.parser.Token.NAME;
-                            currentTokenValue = saveTokenValue;
-                            inputOffset = savePosition;
-                            nextToken = Saxon.Hej.expr.parser.Token.NAME;
-                            nextTokenValue = qname;
-                        }
-                    }
-                    string composite = ((currentTokenValue+' ')+nextTokenValue);
-                    int possibleToken = Saxon.Impl.Helpers.MapUtils.GetOrDefault(Saxon.Hej.expr.parser.Token.doubleKeywords, composite, Saxon.Hej.expr.parser.Token.UNKNOWN);
-                    if ((possibleToken == Saxon.Hej.expr.parser.Token.UNKNOWN)) {
-                        break ;
-                    } else {
-                        currentToken = possibleToken;
-                        currentTokenValue = composite;
-                        if ((currentToken == Saxon.Hej.expr.parser.Token.REPLACE_VALUE)) {
-                            lookAhead();
-                            if (((nextToken != Saxon.Hej.expr.parser.Token.NAME) || !(nextTokenValue.Equals("of")))) {
-                                throw new Saxon.Hej.trans.XPathException((("After '"+composite)+"', expected 'of'"));
-                            }
-                            lookAhead();
-                            if (((nextToken != Saxon.Hej.expr.parser.Token.NAME) || !(nextTokenValue.Equals("node")))) {
-                                throw new Saxon.Hej.trans.XPathException("After 'replace value of', expected 'node'");
-                            }
-                            nextToken = currentToken;
-                        }
+                    if ((nextToken == Saxon.Hej.expr.parser.Token.LCURLY)) {
+                        currentToken = candidate;
+                        currentTokenValue = qname;
                         lookAhead();
                         return ;
+                    } else {
+                        currentToken = Saxon.Hej.expr.parser.Token.NAME;
+                        currentTokenValue = saveTokenValue;
+                        inputOffset = savePosition;
+                        nextToken = Saxon.Hej.expr.parser.Token.NAME;
+                        nextTokenValue = qname;
                     }
-                  default:
-                    break;
                 }
+                string composite = ((currentTokenValue+' ')+nextTokenValue);
+                int possibleToken = Saxon.Impl.Helpers.MapUtils.GetOrDefault(Saxon.Hej.expr.parser.Token.doubleKeywords, composite, Saxon.Hej.expr.parser.Token.UNKNOWN);
+                if ((possibleToken == Saxon.Hej.expr.parser.Token.UNKNOWN)) {
+                    break ;
+                } else {
+                    handleNotUnknown(composite, possibleToken);
+                    return ;
+                }
+              default:
+                break;
             }
+        }
+        private void handleLPAR(int oldPrecedingToken) {
+            int op = getBinaryOp(currentTokenValue);
+            if (((op == Saxon.Hej.expr.parser.Token.UNKNOWN) || followsOperator(oldPrecedingToken))) {
+                currentToken = getFunctionType(currentTokenValue);
+                lookAhead();
+            } else {
+                currentToken = op;
+            }
+        }
+        private void handleLCURLY() {
+            if (!(((state == SEQUENCE_TYPE_STATE)))) {
+                currentToken = Saxon.Hej.expr.parser.Token.KEYWORD_CURLY;
+                lookAhead();
+            }
+        }
+        private void handleCOLONCOLON() {
+            lookAhead();
+            currentToken = Saxon.Hej.expr.parser.Token.AXIS;
+        }
+        private void handleHASH() {
+            lookAhead();
+            currentToken = Saxon.Hej.expr.parser.Token.NAMED_FUNCTION_REF;
+        }
+        private void handleCOLONSTAR() {
+            lookAhead();
+            currentToken = Saxon.Hej.expr.parser.Token.PREFIX;
+        }
+        private void handleDOLLAR() {
+            switch (currentTokenValue) {
+              case "for":
+                currentToken = Saxon.Hej.expr.parser.Token.FOR;
+                break ;
+              case "some":
+                currentToken = Saxon.Hej.expr.parser.Token.SOME;
+                break ;
+              case "every":
+                currentToken = Saxon.Hej.expr.parser.Token.EVERY;
+                break ;
+              case "let":
+                currentToken = Saxon.Hej.expr.parser.Token.LET;
+                break ;
+              case "count":
+                currentToken = Saxon.Hej.expr.parser.Token.COUNT;
+                break ;
+              case "copy":
+                currentToken = Saxon.Hej.expr.parser.Token.COPY;
+                break ;
+            }
+        }
+        private void handlePERCENT() {
+            if (currentTokenValue.Equals("declare")) {
+                currentToken = Saxon.Hej.expr.parser.Token.DECLARE_ANNOTATED;
+            }
+        }
+        private int getCandidate() {
+            int candidate = -1;
+            switch (currentTokenValue) {
+              case "element":
+                candidate = Saxon.Hej.expr.parser.Token.ELEMENT_QNAME;
+                break ;
+              case "attribute":
+                candidate = Saxon.Hej.expr.parser.Token.ATTRIBUTE_QNAME;
+                break ;
+              case "processing-instruction":
+                candidate = Saxon.Hej.expr.parser.Token.PI_QNAME;
+                break ;
+              case "namespace":
+                candidate = Saxon.Hej.expr.parser.Token.NAMESPACE_QNAME;
+                break ;
+            }
+            return candidate;
+        }
+        private void handleNotUnknown(string composite, int possibleToken) {
+            currentToken = possibleToken;
+            currentTokenValue = composite;
+            if ((currentToken == Saxon.Hej.expr.parser.Token.REPLACE_VALUE)) {
+                lookAhead();
+                if (((nextToken != Saxon.Hej.expr.parser.Token.NAME) || !(nextTokenValue.Equals("of")))) {
+                    throw new Saxon.Hej.trans.XPathException((("After '"+composite)+"', expected 'of'"));
+                }
+                lookAhead();
+                if (((nextToken != Saxon.Hej.expr.parser.Token.NAME) || !(nextTokenValue.Equals("node")))) {
+                    throw new Saxon.Hej.trans.XPathException("After 'replace value of', expected 'node'");
+                }
+                nextToken = currentToken;
+            }
+            lookAhead();
         }
         internal int peekAhead() {
             return nextToken;

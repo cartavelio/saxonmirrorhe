@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace Saxon.Hej.expr {
-    public class LetExpression : Saxon.Hej.expr.Assignation, Saxon.Hej.expr.instruct.TailCallReturner {
-        private Saxon.Hej.expr.parser.Evaluator evaluator = null;
+    public class LetExpression : Saxon.Hej.expr.Assignation {
+        private Saxon.Hej.expr.elab.SequenceEvaluator evaluator = null;
         private bool needsEagerEvaluation = false;
         private bool needsLazyEvaluation = false;
         private bool _isInstruction;
@@ -32,20 +32,22 @@ namespace Saxon.Hej.expr {
         public bool isNeedsLazyEvaluation() {
             return needsLazyEvaluation;
         }
+        public bool isNeedsEagerEvaluation() {
+            return needsEagerEvaluation;
+        }
+        public override bool supportsLazyEvaluation() {
+            return !(needsEagerEvaluation);
+        }
         public override bool isLiftable(bool forStreaming) {
             return (base.isLiftable(forStreaming) && !(needsEagerEvaluation));
         }
         public override void resetLocalStaticProperties() {
             base.resetLocalStaticProperties();
             references = new System.Collections.Generic.List<Saxon.Hej.expr.VariableReference>();
-            if (((evaluator == Saxon.Hej.expr.parser.Evaluator.Variable.INSTANCE) && !(((getSequence() is Saxon.Hej.expr.VariableReference))))) {
-                evaluator = null;
-                setEvaluator();
-            }
         }
         public override Saxon.Hej.expr.Expression typeCheck(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo) {
             getSequenceOp().typeCheck(visitor, contextInfo);
-            Saxon.Hej.expr.parser.RoleDiagnostic role = new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
+            Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> role = () => new Saxon.Hej.expr.parser.RoleDiagnostic(Saxon.Hej.expr.parser.RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
             setSequence(Saxon.Hej.expr.parser.TypeChecker.strictTypeCheck(getSequence(), requiredType, role, visitor.getStaticContext()));
             Saxon.Hej.type.ItemType actualItemType = getSequence().getItemType();
             refineTypeInformation(actualItemType, getSequence().getCardinality(), ((getSequence() is Saxon.Hej.expr.Literal) ? ((Saxon.Hej.expr.Literal)(getSequence())).getGroundedValue() : null), getSequence().getSpecialProperties(), this);
@@ -55,9 +57,9 @@ namespace Saxon.Hej.expr {
         public override bool implementsStaticTypeCheck() {
             return true;
         }
-        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Hej.expr.parser.RoleDiagnostic role, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
+        public override Saxon.Hej.expr.Expression staticTypeCheck(Saxon.Hej.value.SequenceType req, bool backwardsCompatible, Saxon.Ejava.util.function.Supplier<Saxon.Hej.expr.parser.RoleDiagnostic> roleSupplier, Saxon.Hej.expr.parser.ExpressionVisitor visitor) {
             Saxon.Hej.expr.parser.TypeChecker tc = visitor.getConfiguration().getTypeChecker(backwardsCompatible);
-            setAction(tc.staticTypeCheck(getAction(), req, role, visitor));
+            setAction(tc.staticTypeCheck(getAction(), req, roleSupplier, visitor));
             return this;
         }
         public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {
@@ -167,18 +169,22 @@ namespace Saxon.Hej.expr {
                     }
                 }
             }
-            setEvaluator();
             return this;
         }
         public void setEvaluator() {
-            if (needsEagerEvaluation) {
-                setEvaluator(Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluator(getSequence()));
+            if (isIndexedVariable()) {
+                Saxon.Hej.expr.elab.PullEvaluator pullEval = getSequence().makeElaborator().elaborateForPull();
+                setEvaluator(new Saxon.Hej.expr.elab.IndexedVariableEvaluator(pullEval));
             } else {
-                if (isIndexedVariable()) {
-                    setEvaluator(Saxon.Hej.expr.parser.Evaluator.MakeIndexedVariable.INSTANCE);
+                if ((needsEagerEvaluation || !(getSequence().supportsLazyEvaluation()))) {
+                    setEvaluator(getSequence().makeElaborator().eagerly());
                 } else {
-                    if ((evaluator == null)) {
-                        setEvaluator(Saxon.Hej.expr.parser.ExpressionTool.lazyEvaluator(getSequence(), (getNominalReferenceCount()>1)));
+                    if (needsLazyEvaluation) {
+                        setEvaluator(getSequence().makeElaborator().lazily((getNominalReferenceCount()>1)));
+                    } else {
+                        if ((evaluator == null)) {
+                            setEvaluator(new Saxon.Hej.expr.elab.LearningEvaluator(getSequence(), getSequence().makeElaborator().lazily((getNominalReferenceCount()>1))));
+                        }
                     }
                 }
             }
@@ -239,35 +245,29 @@ namespace Saxon.Hej.expr {
         }
         public Saxon.Hej.om.Sequence eval(Saxon.Hej.expr.XPathContext context) {
             if ((evaluator == null)) {
-                setEvaluator(Saxon.Hej.expr.parser.ExpressionTool.lazyEvaluator(getSequence(), (getNominalReferenceCount()>1)));
+                if (needsEagerEvaluation) {
+                    setEvaluator(getSequence().makeElaborator().eagerly());
+                } else {
+                    setEvaluator(new Saxon.Hej.expr.elab.LearningEvaluator(getSequence(), getSequence().makeElaborator().lazily((getNominalReferenceCount()>1))));
+                }
             }
             try {
                 int savedOutputState = context.getTemporaryOutputState();
                 context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
-                Saxon.Hej.om.Sequence result = evaluator.evaluate(getSequence(), context);
+                Saxon.Hej.om.Sequence result = evaluator.evaluate(context);
                 context.setTemporaryOutputState(savedOutputState);
                 return result;
             } catch (System.InvalidCastException e) {
                 System.Diagnostics.Debug.Assert(false);
                 int savedOutputState = context.getTemporaryOutputState();
                 context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
-                Saxon.Hej.om.Sequence result = Saxon.Hej.expr.parser.Evaluator.EagerSequence.INSTANCE.evaluate(getSequence(), context);
+                Saxon.Hej.om.Sequence result = Saxon.Hej.expr.parser.ExpressionTool.eagerEvaluate(getSequence(), context);
                 context.setTemporaryOutputState(savedOutputState);
                 return result;
             }
         }
         public override Saxon.Hej.om.Item evaluateItem(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.LetExpression let = this;
-            while (true) {
-                Saxon.Hej.om.Sequence val = let.eval(context);
-                context.setLocalVariable(let.getLocalSlotNumber(), val);
-                if ((let.getAction() is Saxon.Hej.expr.LetExpression)) {
-                    let = (Saxon.Hej.expr.LetExpression)(let.getAction());
-                } else {
-                    break ;
-                }
-            }
-            return let.getAction().evaluateItem(context);
+            return /*Delegate.eval()*/makeElaborator().elaborateForItem()(context);
         }
         public override bool effectiveBooleanValue(Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.expr.LetExpression let = this;
@@ -283,17 +283,7 @@ namespace Saxon.Hej.expr {
             return let.getAction().effectiveBooleanValue(context);
         }
         public override void process(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.LetExpression let = this;
-            while (true) {
-                Saxon.Hej.om.Sequence val = let.eval(context);
-                context.setLocalVariable(let.getLocalSlotNumber(), val);
-                if ((let.getAction() is Saxon.Hej.expr.LetExpression)) {
-                    let = (Saxon.Hej.expr.LetExpression)(let.getAction());
-                } else {
-                    break ;
-                }
-            }
-            let.getAction().process(output, context);
+            dispatchTailCall(/*Delegate.processLeavingTail()*/makeElaborator().elaborateForPush()(output, context));
         }
         public override Saxon.Hej.type.ItemType getItemType() {
             return getAction().getItemType();
@@ -334,37 +324,6 @@ namespace Saxon.Hej.expr {
             let.setAction(newAction);
             return let;
         }
-        public Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.expr.LetExpression let = this;
-            while (true) {
-                Saxon.Hej.om.Sequence val = let.eval(context);
-                context.setLocalVariable(let.getLocalSlotNumber(), val);
-                if ((let.getAction() is Saxon.Hej.expr.LetExpression)) {
-                    let = (Saxon.Hej.expr.LetExpression)(let.getAction());
-                } else {
-                    break ;
-                }
-            }
-            if ((let.getAction() is Saxon.Hej.expr.instruct.TailCallReturner)) {
-                return ((Saxon.Hej.expr.instruct.TailCallReturner)(let.getAction())).processLeavingTail(output, context);
-            } else {
-                let.getAction().process(output, context);
-                return null;
-            }
-        }
-        public override void evaluatePendingUpdates(Saxon.Hej.expr.XPathContext context, Saxon.Hej.expr.PendingUpdateList pul) {
-            Saxon.Hej.expr.LetExpression let = this;
-            while (true) {
-                Saxon.Hej.om.Sequence val = let.eval(context);
-                context.setLocalVariable(let.getLocalSlotNumber(), val);
-                if ((let.getAction() is Saxon.Hej.expr.LetExpression)) {
-                    let = (Saxon.Hej.expr.LetExpression)(let.getAction());
-                } else {
-                    break ;
-                }
-            }
-            let.getAction().evaluatePendingUpdates(context, pul);
-        }
         public override string ToString() {
             return ((((("let $"+getVariableEQName())+" := ")+getSequence())+" return ")+Saxon.Hej.expr.parser.ExpressionTool.parenthesize(getAction()));
         }
@@ -381,19 +340,192 @@ namespace Saxon.Hej.expr {
                 @out.emitAttribute("indexable", "true");
             }
             @out.emitAttribute("slot", (getLocalSlotNumber()+""));
-            if ((evaluator == null)) {
-                setEvaluator(Saxon.Hej.expr.parser.ExpressionTool.lazyEvaluator(getSequence(), (getNominalReferenceCount()>1)));
+            if ((needsEagerEvaluation || needsLazyEvaluation)) {
+                string flags = (((needsEagerEvaluation ? "e" : ""))+((needsLazyEvaluation ? "l" : "")));
+                @out.emitAttribute("flags", flags);
             }
-            @out.emitAttribute("eval", (getEvaluator().getCode()+""));
             getSequence().export(@out);
             getAction().export(@out);
             @out.endElement();
         }
-        public void setEvaluator(Saxon.Hej.expr.parser.Evaluator evaluator) {
+        public void setEvaluator(Saxon.Hej.expr.elab.SequenceEvaluator evaluator) {
             this.evaluator = evaluator;
         }
-        public Saxon.Hej.expr.parser.Evaluator getEvaluator() {
+        public Saxon.Hej.expr.elab.SequenceEvaluator getEvaluator() {
             return evaluator;
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.LetExpression.LetExprElaborator();
+        }
+        public class LetExprElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            private Saxon.Hej.expr.Expression finalAction;
+            private bool repeatable(Saxon.Hej.expr.LetExpression let) {
+                return (let.getNominalReferenceCount()>1);
+            }
+            private Saxon.Hej.expr.elab.SequenceEvaluator makeSequenceEvaluator(Saxon.Hej.expr.LetExpression let) {
+                if ((let.evaluator != null)) {
+                    return let.evaluator;
+                }
+                let.setEvaluator();
+                return let.evaluator;
+            }
+            private Saxon.Hej.expr.elab.ItemEvaluator setAllVariables(Saxon.Hej.expr.LetExpression start) {
+                System.Collections.Generic.IList<Saxon.Hej.expr.LetExpression> setters = new System.Collections.Generic.List<Saxon.Hej.expr.LetExpression>();
+                setters.Add(start);
+                Saxon.Hej.expr.Expression next = start.getAction();
+                while ((next is Saxon.Hej.expr.LetExpression)) {
+                    setters.Add((Saxon.Hej.expr.LetExpression)(next));
+                    next = ((Saxon.Hej.expr.LetExpression)(next)).getAction();
+                }
+                finalAction = next;
+                switch (setters.Count) {
+                  case 1:
+                    {
+                        Saxon.Hej.expr.LetExpression let = setters[0];
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator = makeSequenceEvaluator(let);
+                        int slot = setters[0].slotNumber;
+                        return context => {
+                            context.setLocalVariable(slot, evaluator.evaluate(context));
+                            return null;
+                        } ;
+                    }
+                  case 2:
+                    {
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator0 = makeSequenceEvaluator(setters[0]);
+                        int slot0 = setters[0].slotNumber;
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator1 = makeSequenceEvaluator(setters[1]);
+                        int slot1 = setters[1].slotNumber;
+                        return context => {
+                            context.setLocalVariable(slot0, evaluator0.evaluate(context));
+                            context.setLocalVariable(slot1, evaluator1.evaluate(context));
+                            return null;
+                        } ;
+                    }
+                  case 3:
+                    {
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator0 = makeSequenceEvaluator(setters[0]);
+                        int slot0 = setters[0].slotNumber;
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator1 = makeSequenceEvaluator(setters[1]);
+                        int slot1 = setters[1].slotNumber;
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator2 = makeSequenceEvaluator(setters[2]);
+                        int slot2 = setters[2].slotNumber;
+                        return context => {
+                            context.setLocalVariable(slot0, evaluator0.evaluate(context));
+                            context.setLocalVariable(slot1, evaluator1.evaluate(context));
+                            context.setLocalVariable(slot2, evaluator2.evaluate(context));
+                            return null;
+                        } ;
+                    }
+                  case 4:
+                    {
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator0 = makeSequenceEvaluator(setters[0]);
+                        int slot0 = setters[0].slotNumber;
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator1 = makeSequenceEvaluator(setters[1]);
+                        int slot1 = setters[1].slotNumber;
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator2 = makeSequenceEvaluator(setters[2]);
+                        int slot2 = setters[2].slotNumber;
+                        Saxon.Hej.expr.elab.SequenceEvaluator evaluator3 = makeSequenceEvaluator(setters[3]);
+                        int slot3 = setters[3].slotNumber;
+                        return context => {
+                            context.setLocalVariable(slot0, evaluator0.evaluate(context));
+                            context.setLocalVariable(slot1, evaluator1.evaluate(context));
+                            context.setLocalVariable(slot2, evaluator2.evaluate(context));
+                            context.setLocalVariable(slot3, evaluator3.evaluate(context));
+                            return null;
+                        } ;
+                    }
+                  default:
+                    {
+                        Saxon.Hej.expr.elab.SequenceEvaluator[] evaluators = new Saxon.Hej.expr.elab.SequenceEvaluator[setters.Count];
+                        int[] slots = new int[setters.Count];
+                        for (int i = 0; (i<setters.Count); i++) {
+                            evaluators[i] = makeSequenceEvaluator(setters[i]);
+                            slots[i] = setters[i].slotNumber;
+                        }
+                        return context => {
+                            for (int i = 0; (i<slots.Length); i++) {
+                                context.setLocalVariable(slots[i], evaluators[i].evaluate(context));
+                            }
+                            return null;
+                        } ;
+                    }
+                }
+            }
+            public override Saxon.Hej.expr.elab.SequenceEvaluator eagerly() {
+                Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
+                Saxon.Hej.expr.elab.SequenceEvaluator selectEval = expr.getSequence().makeElaborator().eagerly();
+                Saxon.Hej.expr.elab.SequenceEvaluator actionEval = expr.getAction().makeElaborator().eagerly();
+                int slot = expr.getLocalSlotNumber();
+                return new Saxon.Hej.expr.LetExpression.EagerLocalVariableEvaluator(slot, selectEval, actionEval);
+            }
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr);
+                Saxon.Hej.expr.elab.PullEvaluator actionPull = finalAction.makeElaborator().elaborateForPull();
+                return context => {
+                    int savedOutputState = context.getTemporaryOutputState();
+                    context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
+                    /*Delegate.eval()*/setter(context);
+                    context.setTemporaryOutputState(savedOutputState);
+                    return /*Delegate.iterate()*/actionPull(context);
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.PushEvaluator elaborateForPush() {
+                Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr);
+                Saxon.Hej.expr.elab.PushEvaluator actionPush = finalAction.makeElaborator().elaborateForPush();
+                return (@out, context) => {
+                    int savedOutputState = context.getTemporaryOutputState();
+                    context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
+                    /*Delegate.eval()*/setter(context);
+                    context.setTemporaryOutputState(savedOutputState);
+                    return /*Delegate.processLeavingTail()*/actionPush(@out, context);
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.ItemEvaluator elaborateForItem() {
+                Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr);
+                Saxon.Hej.expr.elab.ItemEvaluator actionEval = finalAction.makeElaborator().elaborateForItem();
+                return context => {
+                    int savedOutputState = context.getTemporaryOutputState();
+                    context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
+                    /*Delegate.eval()*/setter(context);
+                    context.setTemporaryOutputState(savedOutputState);
+                    return /*Delegate.eval()*/actionEval(context);
+                } ;
+            }
+            public override Saxon.Hej.expr.elab.UpdateEvaluator elaborateForUpdate() {
+                Saxon.Hej.expr.LetExpression expr = (Saxon.Hej.expr.LetExpression)(getExpression());
+                Saxon.Hej.expr.elab.ItemEvaluator setter = setAllVariables(expr);
+                Saxon.Hej.expr.elab.UpdateEvaluator actionEval = finalAction.makeElaborator().elaborateForUpdate();
+                return (context, pul) => {
+                    int savedOutputState = context.getTemporaryOutputState();
+                    context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
+                    /*Delegate.eval()*/setter(context);
+                    context.setTemporaryOutputState(savedOutputState);
+                    /*Delegate.registerUpdates()*/actionEval(context, pul);
+                } ;
+            }
+        
+        }
+        private class EagerLocalVariableEvaluator : Saxon.Hej.expr.elab.SequenceEvaluator {
+            private readonly int slot;
+            private readonly Saxon.Hej.expr.elab.SequenceEvaluator selectEval;
+            private readonly Saxon.Hej.expr.elab.SequenceEvaluator actionEval;
+            public EagerLocalVariableEvaluator(int slot, Saxon.Hej.expr.elab.SequenceEvaluator selectEval, Saxon.Hej.expr.elab.SequenceEvaluator actionEval)  {
+                this.slot = slot;
+                this.selectEval = selectEval;
+                this.actionEval = actionEval;
+            }
+            public Saxon.Hej.om.Sequence evaluate(Saxon.Hej.expr.XPathContext context) {
+                int savedOutputState = context.getTemporaryOutputState();
+                context.setTemporaryOutputState(Saxon.Hej.om.StandardNames.XSL_VARIABLE);
+                Saxon.Hej.om.Sequence value = selectEval.evaluate(context);
+                context.setLocalVariable(slot, value);
+                context.setTemporaryOutputState(savedOutputState);
+                return actionEval.evaluate(context);
+            }
+        
         }
     
     }

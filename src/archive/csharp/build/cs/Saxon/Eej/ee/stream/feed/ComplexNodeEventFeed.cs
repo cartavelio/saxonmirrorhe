@@ -121,7 +121,7 @@ namespace Saxon.Eej.ee.stream.feed {
             }
             previousAtomic = false;
         }
-        public override void @namespace(string prefix, string namespaceUri, int properties) {
+        public override void @namespace(string prefix, Saxon.Hej.om.NamespaceUri namespaceUri, int properties) {
             if (!(hasFailed())) {
                 try {
                     next.@namespace(prefix, namespaceUri, properties);

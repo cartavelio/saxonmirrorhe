@@ -10,7 +10,7 @@ namespace Saxon.Hej.expr.flwor {
             this.forClause = forClause;
         }
         public override void processTuple(Saxon.Hej.expr.XPathContext context) {
-            Saxon.Hej.om.SequenceIterator iter = forClause.getSequence().iterate(context);
+            Saxon.Hej.om.SequenceIterator iter = /*Delegate.iterate()*/forClause.getSequence().makeElaborator().elaborateForPull()(context);
             int pos = 0;
             Saxon.Hej.om.Item next = iter.next();
             if ((next == null)) {
@@ -20,17 +20,14 @@ namespace Saxon.Hej.expr.flwor {
                 }
                 destination.processTuple(context);
             } else {
-                while (true) {
+                do {
                     context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(), next);
                     if ((forClause.getPositionVariable() != null)) {
                         context.setLocalVariable(forClause.getPositionVariable().getLocalSlotNumber(), new Saxon.Hej.value.Int64Value(++pos));
                     }
                     destination.processTuple(context);
                     next = iter.next();
-                    if ((next == null)) {
-                        break ;
-                    }
-                }
+                } while ((next != null));
             }
         }
         public override void close() {

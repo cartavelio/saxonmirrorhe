@@ -62,7 +62,7 @@ namespace Saxon.Hej.expr {
                             maybeEmpty = true;
                         }
                     } else {
-                        maybetext = (th.relationship(action.getItemType(), Saxon.Hej.pattern.NodeKindTest.TEXT) != Saxon.Hej.type.Affinity.DISJOINT);
+                        maybetext = action.getStaticUType(contextInfo.getContextItemUType()).overlaps(Saxon.Hej.type.UType.TEXT);
                         maybeEmpty |= maybetext;
                     }
                     if ((prevtext && maybetext)) {
@@ -113,6 +113,17 @@ namespace Saxon.Hej.expr {
         }
         public static bool isTextNode(Saxon.Hej.om.Item item) {
             return ((item is Saxon.Hej.om.NodeInfo) && (((Saxon.Hej.om.NodeInfo)(item)).getNodeKind() == Saxon.Hej.type.Type.TEXT));
+        }
+        public override Saxon.Hej.expr.elab.Elaborator getElaborator() {
+            return new Saxon.Hej.expr.AdjacentTextNodeMerger.AdjacentTextNodeMergerElaborator();
+        }
+        public class AdjacentTextNodeMergerElaborator : Saxon.Hej.expr.elab.PullElaborator {
+            public override Saxon.Hej.expr.elab.PullEvaluator elaborateForPull() {
+                Saxon.Hej.expr.AdjacentTextNodeMerger expr = (Saxon.Hej.expr.AdjacentTextNodeMerger)(getExpression());
+                Saxon.Hej.expr.elab.PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+                return context => new Saxon.Hej.tree.iter.AdjacentTextNodeMergingIterator(/*Delegate.iterate()*/baseEval(context));
+            }
+        
         }
     
     }

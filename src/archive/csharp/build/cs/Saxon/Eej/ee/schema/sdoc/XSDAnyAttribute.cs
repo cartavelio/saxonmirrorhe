@@ -14,19 +14,19 @@ namespace Saxon.Eej.ee.schema.sdoc {
             allowAttributes(atts, allowed);
             checkMutuallyExclusiveAttributes("namespace", "notNamespace");
             string attValue;
-            attValue = atts.getValue("", "namespace");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "namespace");
             if ((attValue != null)) {
                 processAllowedNamespaces(attValue, wildcard.getWildcard());
             }
-            attValue = atts.getValue("", "notNamespace");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "notNamespace");
             if ((attValue != null)) {
                 processDisallowedNamespaces(attValue, wildcard.getWildcard());
             }
-            attValue = atts.getValue("", "notQName");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "notQName");
             if ((attValue != null)) {
                 processDisallowedQNames(attValue, wildcard.getWildcard());
             }
-            attValue = atts.getValue("", "processContents");
+            attValue = atts.getValue(Saxon.Hej.om.NamespaceUri.NULL, "processContents");
             if ((attValue != null)) {
                 if (/*134*/Saxon.Eej.ee.schema.sdoc.XSDAny.isProcessName(attValue)) {
                     wildcard.getWildcard().setProcessContents(attValue);
@@ -38,7 +38,7 @@ namespace Saxon.Eej.ee.schema.sdoc {
         }
         public override void validate(Saxon.Eej.ee.schema.SchemaCompiler compiler) {
             base.validate(compiler);
-            if (((getAttributeValue("", "notNamespace") != null) && (compiler.getLanguageVersion() != Saxon.Hej.Configuration.XSD11))) {
+            if (((getAttributeValue(Saxon.Hej.om.NamespaceUri.NULL, "notNamespace") != null) && (compiler.getLanguageVersion() != Saxon.Hej.Configuration.XSD11))) {
                 error("The notNamespace attribute requires XSD 1.1 to be enabled");
             }
         }

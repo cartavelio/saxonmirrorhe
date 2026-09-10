@@ -6,8 +6,10 @@ using Org.XmlResolver;
 using Org.XmlResolver.Features;
 using Org.XmlResolver.Utils;
 using Saxon.Api;
+using Saxon.Ejava.io;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej.resource;
 using Saxon.Hej.trans;
 
 namespace Saxon.Callbacks {
@@ -53,7 +55,14 @@ namespace Saxon.Callbacks {
                 try {
                     ResolvedResource rr;
                     if (request.uriIsNamespace) {
-                        rr = catalogBasedResolver.CatalogResolver.ResolveNamespace(
+                        CatalogResolver cat = catalogBasedResolver.CatalogResolver;
+                        IResolverConfiguration catConfig = cat.GetConfiguration();
+                        CatalogManager catalog = (CatalogManager) catConfig.GetFeature(ResolverFeature.CATALOG_MANAGER);
+                        Uri attempt = catalog.LookupNamespaceUri(request.uri, request.nature, request.purpose);
+                        if (attempt == null) {
+                            return null;
+                        }
+                        rr = cat.ResolveNamespace(
                             request.uri, null, request.nature, request.purpose);
                     }
                     else if (request.nature == Saxon.Hej.lib.JJ_ResourceRequest.DTD_NATURE || request.nature == Saxon.Hej.lib.JJ_ResourceRequest.EXTERNAL_ENTITY_NATURE) {
@@ -64,15 +73,19 @@ namespace Saxon.Callbacks {
                     }
                     else {
                         string href = request.relativeUri ?? request.uri;
-                        string baseUri = request.baseUri ?? request.uri;
+                        string baseUri = request.baseUri;
                         if (string.IsNullOrEmpty(baseUri)) {
-                            baseUri = System.IO.Directory.GetCurrentDirectory();
+                            baseUri = Saxon.Ejava.io.File.CurrentDirectoryUri().AbsoluteUri;
                         }
                         rr = catalogBasedResolver.CatalogResolver.ResolveUri(href, baseUri);
                         
                     }
                     if (rr != null) {
-                        return new StreamSource(rr.GetInputStream(), rr.GetResolvedUri().ToString());
+                        TypedStreamSource result = new TypedStreamSource();
+                        result.setSystemId(rr.GetResolvedUri().ToString());
+                        result.setInputStream(rr.GetInputStream());
+                        result.setContentType(rr.GetContentType());
+                        return result;
                     }
                 }
 

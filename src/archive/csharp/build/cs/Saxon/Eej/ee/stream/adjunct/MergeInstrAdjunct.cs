@@ -38,7 +38,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                     foreach (string s in reasons) {
                         buffer.append((s+". "));
                     }
-                    config.makeErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(buffer.ToString()).asWarning()));
+                    config.makeErrorReporter().report(((/*1430*/Saxon.Hej.trans.XmlProcessingIncident)new Saxon.Hej.trans.XmlProcessingIncident(buffer.ToString(), Saxon.Hej.trans.SaxonErrorCode.SXWN9024).asWarning()));
                     mergeSource.streamable = false;
                 } else {
                     Saxon.Ejava.lang.StringBuilder buffer = new Saxon.Ejava.lang.StringBuilder(120);
@@ -75,22 +75,22 @@ namespace Saxon.Eej.ee.stream.adjunct {
             Saxon.Hej.om.SequenceIterator uriIter = ms.getForEachSource().iterate(c1);
             Saxon.Hej.om.Item uri;
             while (((uri = uriIter.next()) != null)) {
-                Saxon.Hej.lib.ParseOptions options = new Saxon.Hej.lib.ParseOptions(c1.getConfiguration().getParseOptions());
-                options.setSchemaValidationMode(ms.validation);
-                options.setTopLevelType(ms.schemaType);
-                options.setApplicableAccumulators(ms.accumulators);
+                Saxon.Hej.lib.ParseOptions options = c1.getConfiguration().getParseOptions().withSchemaValidationMode(ms.validation).withTopLevelType(ms.schemaType).withApplicableAccumulators(ms.accumulators);
                 string href = uri.getStringValue();
-                Saxon.Eej.ee.parallel.Pusher pusher = new Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.MergePusher(ms, pd, href, options);
-                Saxon.Hej.om.SequenceIterator iter = new Saxon.Impl.Parallel.PushToPull(pusher, c1).getIterator();
+                Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.MergePusher pusher = new Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.MergePusher(ms, pd, href, options);
+                Saxon.Hej.om.SequenceIterator iter = pushToPull(pusher, c1);
                 Saxon.Hej.expr.XPathContext c2 = c1.newMinorContext();
                 c2.trackFocus(iter);
                 Saxon.Hej.expr.sort.MergeInstr.MergeKeyMappingFunction addMergeKeys = new Saxon.Hej.expr.sort.MergeInstr.MergeKeyMappingFunction(c2, ms);
-                Saxon.Hej.expr.ContextMappingIterator iter3 = new Saxon.Hej.expr.ContextMappingIterator(it => addMergeKeys.map(it) /* converted from instance method reference */, c2);
+                Saxon.Hej.expr.ContextMappingIterator iter3 = new Saxon.Hej.expr.ContextMappingIterator(/* Unresolved method reference */addMergeKeys.map, c2);
                 result.Add(iter3);
             }
             return result;
         }
-        public class MergePusher : Saxon.Eej.ee.parallel.Pusher {
+        private static Saxon.Hej.om.SequenceIterator pushToPull(Saxon.Eej.ee.stream.adjunct.MergeInstrAdjunct.MergePusher pusher, Saxon.Hej.expr.XPathContext c1) {
+            return new Saxon.Impl.Parallel.PushToPull((o,c) => pusher.processLeavingTail(o,c), c1).getIterator();
+        }
+        public class MergePusher {
             private readonly Saxon.Hej.expr.sort.MergeInstr.MergeSource ms;
             private readonly Saxon.Hej.expr.PackageData pd;
             private readonly string href;
@@ -101,7 +101,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 this.href = href;
                 this.options = options;
             }
-            public void push(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
+            public Saxon.Hej.expr.instruct.TailCall processLeavingTail(Saxon.Hej.@event.Outputter output, Saxon.Hej.expr.XPathContext context) {
                 Saxon.Hej.Controller controller = context.getController();
                 Saxon.Hej.expr.XPathContextMajor c2 = context.newContext();
                 c2.setCurrentTemplateRule(null);
@@ -120,6 +120,7 @@ namespace Saxon.Eej.ee.stream.adjunct {
                 }
                 wm.addWatch(new Saxon.Eej.ee.stream.watch.StreamWatch((Saxon.Eej.ee.stream.Inversion)(ms.invertedAction), wm, c2), true);
                 Saxon.Hej.functions.DocumentFn.sendDoc(href, ms.baseURI, pd, context, ms.location, @out, options);
+                return null;
             }
         
         }
