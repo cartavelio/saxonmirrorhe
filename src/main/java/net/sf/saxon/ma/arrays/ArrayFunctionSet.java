@@ -63,7 +63,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR | NAV, null));
 
         ItemType buildFunctionType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
+                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
                 SequenceType.ANY_SEQUENCE);
 
         register("build", 2, e -> e.populate(ArrayBuild::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
@@ -913,13 +913,45 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 }
             } else {
                 FunctionItem fn = (FunctionItem) arguments[1].head();
-                try {
-                    for (Item it; (it = iter.next()) != null; ) {
-                        members.add(dynamicCall(fn, context, new GroundedValue[]{it}).materialize());
+                switch (fn.getArity()) {
+                    case 0: {
+                        try {
+                            for (Item it; (it = iter.next()) != null; ) {
+                                Sequence seq = dynamicCall(fn, context);
+                                members.add(seq.materialize());
+                            }
+                        } catch (UncheckedXPathException e) {
+                            iter.close();
+                            throw e.getXPathException();
+                        }
+                        return makeArray(members);
                     }
-                } catch (UncheckedXPathException e) {
-                    iter.close();
-                    throw e.getXPathException();
+                    case 1: {
+                        try {
+                            for (Item it; (it = iter.next()) != null; ) {
+                                Sequence seq = dynamicCall(fn, context, it);
+                                members.add(seq.materialize());
+                            }
+                        } catch (UncheckedXPathException e) {
+                            iter.close();
+                            throw e.getXPathException();
+                        }
+                        return makeArray(members);
+                    }
+                    case 2:
+                        int position = 1;
+                        try {
+                            for (Item it; (it = iter.next()) != null; ) {
+                                Sequence seq = dynamicCall(fn, context, it, new Int64Value(position++));
+                                members.add(seq.materialize());
+                            }
+                        } catch (UncheckedXPathException e) {
+                            iter.close();
+                            throw e.getXPathException();
+                        }
+                        return makeArray(members);
+                    default:
+                        throw new XPathException("Wrong arity for array:filter callback function");
                 }
             }
             return makeArray(members);

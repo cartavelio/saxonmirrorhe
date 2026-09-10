@@ -308,7 +308,7 @@ public abstract class Token {
     /**
      * `name(` for a reserved function name, e.g. "node(" or "comment(" or "function(" or "union("
      */
-    public static final int KEYWORD_LBRA = 69;
+    //public static final int KEYWORD_LBRA = 69;
     /**
      * "*:" token
      */
@@ -799,13 +799,13 @@ public abstract class Token {
         tokens[NUMBER] = "<numeric-literal>";
         tokens[HEX_INTEGER] = "<hex-integer>";
         tokens[BINARY_INTEGER] = "<binary-integer>";
-        tokens[KEYWORD_LBRA] = "<node-type>()";
+        //tokens[KEYWORD_LBRA] = "<node-type>()";
         tokens[FOR] = "for";
         tokens[SUFFIX] = "<*:local-name>";
         tokens[QMARK] = "?";
         tokens[QMARK_LSQB] = "?[";
         tokens[LCURLY] = "{";
-        tokens[KEYWORD_CURLY] = "<keyword> {";
+        //tokens[KEYWORD_CURLY] = "<keyword> {";
         tokens[RCURLY] = "}";
         tokens[LET] = "let";
         tokens[WHERE] = "where";

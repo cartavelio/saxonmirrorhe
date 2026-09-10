@@ -281,7 +281,13 @@ public class LookupExpression extends BinaryExpression {
             if (isArrayLookup) {
                 ItemType arrayType = getLhsExpression().getItemType();
                 if (arrayType instanceof ArrayItemType) {
-                    return ((ArrayItemType) arrayType).getMemberType().getCardinality();
+                    int memberCard = ((ArrayItemType) arrayType).getMemberType().getCardinality();
+                    if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40) {
+                        return (Cardinality.union(memberCard,
+                                                  StaticProperty.ALLOWS_ZERO));
+                    } else {
+                        return memberCard;
+                    }
                 }
             } else if (isMapLookup) {
                 ItemType mapType = getLhsExpression().getItemType();

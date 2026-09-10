@@ -251,8 +251,8 @@ public class PatternParser extends XPathParser {
                 expr = parsePredicate(expr).toPattern(env.getConfiguration());
             }
             return expr;
-        } else if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA &&
-                (t.currentTokenValue.equals("atomic"))) {
+        } else if (allowXPath40Syntax && t.currentToken == Token.NAME && t.peekAhead() == Token.LPAREN &&
+                t.currentTokenValue.equals("atomic")) {
             nextToken();
             expect(Token.NAME);
             StructuredQName typeName =
@@ -308,7 +308,7 @@ public class PatternParser extends XPathParser {
                 case Token.NUMBER:
                 case Token.HEX_INTEGER:
                 case Token.BINARY_INTEGER:
-                case Token.KEYWORD_CURLY:
+                //case Token.KEYWORD_CURLY:
                 case Token.ELEMENT_QNAME:
                 case Token.ATTRIBUTE_QNAME:
                 case Token.NAMESPACE_QNAME:
@@ -336,6 +336,9 @@ public class PatternParser extends XPathParser {
                             default:
                                 return super.parseBasicStep(firstInPattern);
                         }
+                    } else if (t.peekAhead() == Token.LCURLY) {
+                        grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
+                        return null;
                     } else {
                         return super.parseBasicStep(firstInPattern);
                     }

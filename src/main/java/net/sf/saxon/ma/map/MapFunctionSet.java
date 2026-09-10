@@ -151,17 +151,17 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(2, fallbackType, ONE | INS, null));
 
             SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.SINGLE_ITEM},
+                    new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
                     SequenceType.ATOMIC_SEQUENCE);
 
             SpecificFunctionType mapBuildValueArg = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.SINGLE_ITEM},
+                    new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
                     SequenceType.ANY_SEQUENCE);
 
-            register("index", 2, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                    // TODO: deprecate/drop this
-                    .arg(0, AnyItemType.getInstance(), STAR, null)
-                    .arg(1, mapBuildKeyArg, ONE, null));
+//            register("index", 2, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
+//                    // TODO: deprecate/drop this
+//                    .arg(0, AnyItemType.getInstance(), STAR, null)
+//                    .arg(1, mapBuildKeyArg, ONE, null));
 
 //            Expression identityFunction;
 //            try {
@@ -172,9 +172,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             FunctionItemType opFnType = new SpecificFunctionType(
                     new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
                     SequenceType.ANY_SEQUENCE);
-//            Callable concatCallable = new CallableDelegate(
-//                    (cxt, args) -> SequenceExtent.from(new InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
-//            //CallableFunction concatSeq = new CallableFunction(2, concatCallable, opFnType);
             register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
                     .arg(0, AnyItemType.getInstance(), STAR, null)
                     .arg(1, mapBuildKeyArg, ONE, null)
@@ -628,11 +625,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             FunctionItem valueFunction = (FunctionItem) arguments[2].head();
             FunctionItem combineFunction = (FunctionItem) arguments[3].head();
             SequenceIterator iter = arguments[0].iterate();
+            int position = 1;
             for (Item item; (item = iter.next()) != null; ) {
-                SequenceIterator keys = dynamicCall(keyFunction, context, item).iterate();
+                IntegerValue posValue = Int64Value.makeIntegerValue(position++);
+                SequenceIterator keys = dynamicCall(keyFunction, context, item, posValue).iterate();
                 AtomicValue key;
                 while ((key = (AtomicValue)keys.next()) != null) {
-                    GroundedValue value = dynamicCall(valueFunction, context, item).materialize();
+                    GroundedValue value = dynamicCall(valueFunction, context, item, posValue).materialize();
                     GroundedValue existing = map.get(key);
                     if (existing != null) {
                         value = dynamicCall(combineFunction, context, existing, value).materialize();

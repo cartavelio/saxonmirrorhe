@@ -291,9 +291,9 @@ public final class Tokenizer {
 //            handleLPAR(oldPrecedingToken);
 //            break;
 
-        case Token.LCURLY:
-            handleLCURLY();
-            break;
+//        case Token.LCURLY:
+//            handleLCURLY();
+//            break;
 
         case Token.COLONCOLON:
             handleCOLONCOLON();
@@ -760,14 +760,6 @@ public final class Tokenizer {
                             && input.charAt(inputOffset) == '.') {
                         inputOffset++;
                         nextToken = Token.DOTDOT;
-                        return;
-                    }
-                    // TODO: drop this experimental syntax (.{expr} becomes ->{expr})
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '{') {
-                        inputOffset++;
-                        nextTokenValue = ".";
-                        nextToken = Token.KEYWORD_CURLY;
                         return;
                     }
                     if (inputOffset == inputLength

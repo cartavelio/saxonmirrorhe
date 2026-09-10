@@ -853,10 +853,10 @@ public class XQueryParser extends XPathParser {
         ArrayList<Annotation> annotations = new ArrayList<>();
         int options = 0;
         while (true) {
-            t.setState(Tokenizer.BARE_NAME_STATE);
+            //t.setState(Tokenizer.BARE_NAME_STATE);
             nextToken();
             expect(Token.NAME);
-            t.setState(Tokenizer.DEFAULT_STATE);
+            //t.setState(Tokenizer.DEFAULT_STATE);
             StructuredQName qName;
             NamespaceUri uri;
 //            if (t.currentTokenValue.indexOf(':') < 0) {
@@ -914,7 +914,7 @@ public class XQueryParser extends XPathParser {
                             arg = (Literal) parseBinaryLiteral(false);
                             break;
 
-                        case Token.FUNCTION_CALL:
+                        case Token.NAME:
                             // true() and folse() allowed in 4.0
                             if (t.currentTokenValue.equals("true")) {
                                 arg = Literal.makeLiteral(BooleanValue.TRUE);
@@ -928,6 +928,8 @@ public class XQueryParser extends XPathParser {
                                 grumble("Annotation values true() and false() require 4.0 to be enabled");
                                 return null;
                             }
+                            nextToken();
+                            expect(Token.LPAREN);
                             nextToken();
                             expect(Token.RPAREN);
                             nextToken();
@@ -3366,7 +3368,7 @@ public class XQueryParser extends XPathParser {
             operand = parseExpression();
             expect(Token.RPAREN);
             nextToken();
-        } else if (t.currentToken == Token.KEYWORD_CURLY) {
+        } else if (t.currentToken == Token.LCURLY) {
             checkLanguageVersion40();
             operand = Literal.makeLiteral(BooleanValue.TRUE);
             braced = true;
@@ -3496,7 +3498,7 @@ public class XQueryParser extends XPathParser {
 //                }
                 mode = Validation.BY_TYPE;
                 nextToken();
-                expect(Token.KEYWORD_CURLY);
+                expect(Token.NAME);
                 if (!NameChecker.isQName(StringTool.codePoints(t.currentTokenValue))) {
                     grumble("Schema type name expected after 'validate type");
                 }
@@ -3505,10 +3507,13 @@ public class XQueryParser extends XPathParser {
                 if (requiredType == null) {
                     grumble("Unknown schema type " + t.currentTokenValue, "XQST0104");
                 }
+                nextToken();
+                expect(Token.LCURLY);
                 foundCurly = true;
                 break;
-            case Token.KEYWORD_CURLY:
-                if (t.currentTokenValue.equals("validate")) {
+            case Token.NAME:
+                if (t.currentTokenValue.equals("validate") && t.peekAhead() == Token.LCURLY) {
+                    nextToken();
                     mode = Validation.STRICT;
                 } else {
                     throw new AssertionError("shouldn't be parsing a validate expression");
@@ -3680,58 +3685,63 @@ public class XQueryParser extends XPathParser {
                 t.setState(Tokenizer.OPERATOR_STATE);
                 nextToken();
                 return tag;
-            case Token.KEYWORD_CURLY:
-                String keyword = t.currentTokenValue;
-                switch (keyword) {
-                    case "validate":
-                        grumble("A validate expression is not allowed within a path expression");
+            case Token.NAME:
+                if (t.peekAhead() == Token.LCURLY) {
+                    String keyword = t.currentTokenValue;
+                    nextToken();
+                    switch (keyword) {
+                        case "validate":
+                            grumble("A validate expression is not allowed within a path expression");
 
-                        //if (nodeKind.equals("validate")) {
-                        // this allows a validate{} expression to appear as an operand of '/', which the grammar does not allow
-                        // return parseValidateExpression();
-                        break;
-                    case "ordered":
-                    case "unordered":
-                        // these are currently no-ops in Saxon
-                        nextToken();
-                        Expression content;
-                        if (t.currentToken == Token.RCURLY && allowXPath31Syntax) {
-                            content = Literal.makeEmptySequence();
-                        } else {
-                            content = parseExpression();
-                        }
-                        expect(Token.RCURLY);
-                        lookAhead();  // must be done manually after an RCURLY
+                            //if (nodeKind.equals("validate")) {
+                            // this allows a validate{} expression to appear as an operand of '/', which the grammar does not allow
+                            // return parseValidateExpression();
+                            break;
+                        case "ordered":
+                        case "unordered":
+                            // these are currently no-ops in Saxon
+                            nextToken();
+                            Expression content;
+                            if (t.currentToken == Token.RCURLY && allowXPath31Syntax) {
+                                content = Literal.makeEmptySequence();
+                            } else {
+                                content = parseExpression();
+                            }
+                            expect(Token.RCURLY);
+                            lookAhead();  // must be done manually after an RCURLY
 
-                        nextToken();
-                        return content;
-                    case "document":
-                        return parseDocumentConstructor(offset);
+                            nextToken();
+                            return content;
+                        case "document":
+                            return parseDocumentConstructor(offset);
 
-                    case "element":
-                        return parseComputedElementConstructor(offset);
+                        case "element":
+                            return parseComputedElementConstructor(offset);
 
-                    case "attribute":
-                        return parseComputedAttributeConstructor(offset);
+                        case "attribute":
+                            return parseComputedAttributeConstructor(offset);
 
-                    case "text":
-                        return parseTextNodeConstructor(offset);
+                        case "text":
+                            return parseTextNodeConstructor(offset);
 
-                    case "comment":
-                        return parseCommentConstructor(offset);
+                        case "comment":
+                            return parseCommentConstructor(offset);
 
-                    case "processing-instruction":
-                        return parseProcessingInstructionConstructor(offset);
+                        case "processing-instruction":
+                            return parseProcessingInstructionConstructor(offset);
 
-                    case "namespace":
-                        return parseNamespaceConstructor(offset);
+                        case "namespace":
+                            return parseNamespaceConstructor(offset);
 
-                    case "switch":
-                        return parseSwitchExpression();
+                        case "switch":
+                            return parseSwitchExpression();
 
-                    default:
-                        grumble("Unrecognized keyword '" + t.currentTokenValue + "' before {...} ");
-                        break;
+                        default:
+                            grumble("Unrecognized keyword '" + t.currentTokenValue + "' before {...} ");
+                            break;
+                    }
+                } else {
+                    return new ErrorExpression();
                 }
                 break;
             case Token.ELEMENT_QNAME:
@@ -4179,15 +4189,19 @@ public class XQueryParser extends XPathParser {
                 String tokv = t.currentTokenValue;
                 switch (t.currentToken) {
                     case Token.NAME:
+                        if (t.peekAhead() == Token.LCURLY) {
+                            nextToken();
+                            seenCurly = true;
+                        }
                         nextToken();
                         tests.add(makeQNameTest(Type.ELEMENT, tokv));
                         break;
 
-                    case Token.KEYWORD_CURLY:
-                        nextToken();
-                        tests.add(makeQNameTest(Type.ELEMENT, tokv));
-                        seenCurly = true;
-                        break;
+//                    case Token.KEYWORD_CURLY:
+//                        nextToken();
+//                        tests.add(makeQNameTest(Type.ELEMENT, tokv));
+//                        seenCurly = true;
+//                        break;
 
                     case Token.PREFIX:
                         nextToken();
@@ -4198,10 +4212,14 @@ public class XQueryParser extends XPathParser {
                         nextToken();
                         tokv = t.currentTokenValue;
                         if (t.currentToken == Token.NAME) {
+                            if (t.peekAhead() == Token.LCURLY) {
+                                nextToken();
+                                seenCurly = true;
+                            }
                             // OK
-                        } else if (t.currentToken == Token.KEYWORD_CURLY) {
-                            // OK
-                            seenCurly = true;
+//                        } else if (t.currentToken == Token.KEYWORD_CURLY) {
+//                            // OK
+//                            seenCurly = true;
                         } else {
                             grumble("Expected name after '*:'");
                         }

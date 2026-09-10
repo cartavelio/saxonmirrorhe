@@ -863,8 +863,9 @@ public class XPathParser {
                 return parseDeepUpdateExpression();
             case Token.PRAGMA:
                 return parseExtensionExpression();  // XQuery only
-            case Token.KEYWORD_CURLY:
-                if (t.currentTokenValue.equals("try")) {
+            case Token.NAME:
+                if (t.peekAhead() == Token.LCURLY && t.currentTokenValue.equals("try")) {
+                    nextToken();
                     return parseTryCatchExpression();
                 }
                 // else drop through
@@ -1730,18 +1731,23 @@ public class XPathParser {
         List<Expression> actions = new ArrayList<>();
         conditions.add(condition);
         nextToken();
-        Expression thenExp = parseExpression();
+        Expression thenExp;
+        if (t.currentToken == Token.RCURLY) {
+            thenExp = Literal.makeEmptySequence();
+        } else {
+            thenExp = parseExpression();
+            expect(Token.RCURLY);
+        }
         actions.add(thenExp);
-        expect(Token.RCURLY);
         t.lookAhead();
         nextToken();
-        while (t.currentToken == Token.ELSE) {
+        while (t.currentToken == Token.ELSE || isKeyword("else")) {
             nextToken();
-            if (t.currentToken == Token.IF) {
-//                nextToken();
-//                expect(Token.LPAR);
+            if (t.currentToken == Token.IF || isKeyword("if")) {
                 nextToken();
+                expect(Token.LPAREN);
                 condition = parseExpression();
+                nextToken();
                 expect(Token.RPAREN);
                 nextToken();
                 expect(Token.LCURLY);
@@ -1755,8 +1761,13 @@ public class XPathParser {
             } else {
                 expect(Token.LCURLY);
                 nextToken();
-                Expression elseExp = parseExpression();
-                expect(Token.RCURLY);
+                Expression elseExp;
+                if (t.currentToken == Token.RCURLY) {
+                    elseExp = Literal.makeEmptySequence();
+                } else {
+                    elseExp = parseExpression();
+                    expect(Token.RCURLY);
+                }
                 t.lookAhead();
                 nextToken();
                 conditions.add(Literal.makeLiteral(BooleanValue.TRUE));
@@ -2059,10 +2070,11 @@ public class XPathParser {
 //            return parseKeywordItemType(t.currentTokenValue);
         } else if (t.currentToken == Token.PERCENT) {
             AnnotationList annotations = parseAnnotationsList();
-            if (t.currentTokenValue.equals("function")) {
+            if (t.currentTokenValue.equals("function") && t.peekAhead() == Token.LPAREN) {
+                nextToken();
                 primaryType = parseFunctionItemType(annotations);
             } else {
-                grumble("Expected 'function' to follow annotation assertions, found " + Token.tokens[t.currentToken]);
+                grumble("Expected 'function(...)' to follow annotation assertions, found " + Token.tokens[t.currentToken]);
                 return null;
             }
         } else if (language == ParsedLanguage.EXTENDED_ITEM_TYPE && t.currentToken == Token.PREFIX) {
@@ -2546,8 +2558,9 @@ public class XPathParser {
                 exp = parseExtensionExpression();
                 break;
 
-            case Token.KEYWORD_CURLY:
-                if (t.currentTokenValue.equals("validate")) {
+            case Token.NAME:
+                if (t.peekAhead() == Token.LCURLY && t.currentTokenValue.equals("validate")) {
+                    nextToken();
                     exp = parseValidateExpression();
                     break;
                 }
@@ -2587,11 +2600,9 @@ public class XPathParser {
         switch (t.currentToken) {
             case Token.AXIS:
             case Token.AT:
-            case Token.NAME:
             case Token.PREFIX:
             case Token.SUFFIX:
             case Token.STAR:
-            //case Token.KEYWORD_LBRA:
             case Token.DOT:
             case Token.DOTDOT:
             case Token.FUNCTION_CALL:
@@ -2608,8 +2619,12 @@ public class XPathParser {
             case Token.NAMESPACE_QNAME:
             case Token.NAMED_FUNCTION_REF:
                 return true;
-            case Token.KEYWORD_CURLY:
-                return t.currentTokenValue.equals("ordered") || t.currentTokenValue.equals("unordered");
+            case Token.NAME:
+                if (t.peekAhead() == Token.LCURLY) {
+                    return t.currentTokenValue.equals("ordered") || t.currentTokenValue.equals("unordered");
+                } else {
+                    return true;
+                }
             default:
                 return false;
         }
@@ -2886,6 +2901,17 @@ public class XPathParser {
         nextToken();
         int token = getTokenizer().currentToken;
         if (token == Token.NAME) {
+            if (t.peekAhead() == Token.LCURLY) {
+                if (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn")) {
+                    nextToken();
+                    Expression fn = parseFocusFunction(AnnotationList.EMPTY);
+                    expect(Token.LPAREN);
+                    return parseDynamicFunctionCall(fn, lhs);
+                } else {
+                    grumble("Unexpected " + Token.tokens[token] + " after '=>'");
+                    return null;
+                }
+            }
             String fname = t.currentTokenValue;
             nextToken();
             expect(Token.LPAREN);
@@ -2900,14 +2926,14 @@ public class XPathParser {
             Expression var = parseParenthesizedExpression();
             expect(Token.LPAREN);
             return parseDynamicFunctionCall(var, lhs);
-        } else if (token == Token.KEYWORD_LBRA && t.currentTokenValue.equals("function")) {
-            Expression fn = parseInlineFunction(AnnotationList.EMPTY);
-            expect(Token.LPAREN);
-            return parseDynamicFunctionCall(fn, lhs);
-        } else if (token == Token.KEYWORD_CURLY && (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
-            Expression fn = parseFocusFunction(AnnotationList.EMPTY);
-            expect(Token.LPAREN);
-            return parseDynamicFunctionCall(fn, lhs);
+//        } else if (token == Token.KEYWORD_LBRA && t.currentTokenValue.equals("function")) {
+//            Expression fn = parseInlineFunction(AnnotationList.EMPTY);
+//            expect(Token.LPAREN);
+//            return parseDynamicFunctionCall(fn, lhs);
+//        } else if (token == Token.KEYWORD_CURLY && (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
+//            Expression fn = parseFocusFunction(AnnotationList.EMPTY);
+//            expect(Token.LPAREN);
+//            return parseDynamicFunctionCall(fn, lhs);
         } else {
             grumble("Unexpected " + Token.tokens[token] + " after '=>'");
             return null;
@@ -2936,15 +2962,36 @@ public class XPathParser {
         int token = getTokenizer().currentToken;
         Expression rhs;
         if (token == Token.NAME) {
-            String fname = t.currentTokenValue;
-            nextToken();
-            expect(Token.LPAREN);
-            if (fname.equals("function") || fname.equals("fn")) {
-                Expression fn = parseInlineFunction(AnnotationList.EMPTY);
-                expect(Token.LPAREN);
-                rhs = parseDynamicFunctionCall(fn, varRef);
+            if (t.peekAhead() == Token.LCURLY) {
+                if (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn")) {
+                    nextToken();
+                    Expression fn = parseFocusFunction(AnnotationList.EMPTY);
+                    expect(Token.LPAREN);
+                    rhs = parseDynamicFunctionCall(fn, varRef);
+                } else {
+                    grumble("Unexpected " + Token.tokens[token] + " after '=!>'");
+                    return null;
+                }
             } else {
-                rhs = parseFunctionCall(fname, varRef);
+                String fname = t.currentTokenValue;
+//                nextToken();
+//                expect(Token.LPAREN);
+                if (fname.equals("function") || fname.equals("fn")) {
+                    Expression fn;
+                    if (t.peekAhead() == Token.LPAREN) {
+                        fn = parseInlineFunction(AnnotationList.EMPTY);
+//                    } else if (t.peekAhead() == Token.LCURLY) {
+//                        fn = parseFocusFunction(AnnotationList.EMPTY);
+                    } else {
+                        grumble("Unexpected " + Token.tokens[t.peekAhead()] + " after 'function'");
+                        return null;
+                    }
+                    rhs = parseDynamicFunctionCall(fn, varRef);
+                } else {
+                    nextToken();
+                    expect(Token.LPAREN);
+                    rhs = parseFunctionCall(fname, varRef);
+                }
             }
         } else if (token == Token.DOLLAR) {
             int offset = t.currentTokenStartOffset;
@@ -2956,10 +3003,10 @@ public class XPathParser {
             Expression var = parseParenthesizedExpression();
             expect(Token.LPAREN);
             rhs = parseDynamicFunctionCall(var, varRef);
-        } else if (token == Token.KEYWORD_CURLY && (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
-            Expression fn = parseFocusFunction(AnnotationList.EMPTY);
-            expect(Token.LPAREN);
-            rhs = parseDynamicFunctionCall(fn, varRef);
+//        } else if (token == Token.KEYWORD_CURLY && (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
+//            Expression fn = parseFocusFunction(AnnotationList.EMPTY);
+//            expect(Token.LPAREN);
+//            rhs = parseDynamicFunctionCall(fn, varRef);
         } else {
             grumble("Unexpected " + Token.tokens[token] + " after '=!>'");
             return null;
@@ -3053,7 +3100,8 @@ public class XPathParser {
                     grumble("Expected 'function' to follow the annotation assertion");
                 }
                 annotations.check(env.getConfiguration(), "IF");
-                if (t.currentToken == Token.KEYWORD_CURLY) {
+                if (t.peekAhead() == Token.LCURLY) {
+                    nextToken();
                     return parseFocusFunction(annotations);
                 } else {
                     return parseInlineFunction(annotations);
@@ -3096,12 +3144,26 @@ public class XPathParser {
                             nextToken();
                             return parseNodeTestExpression(category, firstInPattern);
                         case Token.FUNCTION_LPAREN:
-                            nextToken();
                             return parseInlineFunction(AnnotationList.EMPTY);
                         default:
                             grumble("'" + name + "' cannot be used as a function name");
                             return null;
                     }
+                } else if (t.peekAhead() == Token.LCURLY) {
+                    String name = t.currentTokenValue;
+                    switch (name) {
+                        case "map":
+                            nextToken();
+                            return parseMapExpression();
+                        case "array":
+                            nextToken();
+                            return parseArrayCurlyConstructor();
+                        case "function":
+                        case "fn":
+                            nextToken();
+                            return parseFocusFunction(null);
+                    }
+                    return parseConstructor();
                 }
                 CSharp.emitCode("goto case Saxon.Hej.expr.parser.Token.PREFIX;");
                 // fall through!
@@ -3109,23 +3171,23 @@ public class XPathParser {
             case Token.SUFFIX:
             case Token.STAR:
                 byte defaultAxis = AxisInfo.CHILD;
-                if (t.currentToken == Token.KEYWORD_LBRA &&
-                        (t.currentTokenValue.equals("attribute") || t.currentTokenValue.equals("schema-attribute"))) {
-                    defaultAxis = AxisInfo.ATTRIBUTE;
-                } else if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("namespace-node")) {
-                    defaultAxis = AxisInfo.NAMESPACE;
-                    testPermittedAxis(AxisInfo.NAMESPACE, "XQST0134");
-                } else if (firstInPattern && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("document-node")) {
-                    defaultAxis = AxisInfo.SELF;
-                }
+//                if (t.currentToken == Token.KEYWORD_LBRA &&
+//                        (t.currentTokenValue.equals("attribute") || t.currentTokenValue.equals("schema-attribute"))) {
+//                    defaultAxis = AxisInfo.ATTRIBUTE;
+//                } else if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("namespace-node")) {
+//                    defaultAxis = AxisInfo.NAMESPACE;
+//                    testPermittedAxis(AxisInfo.NAMESPACE, "XQST0134");
+//                } else if (firstInPattern && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("document-node")) {
+//                    defaultAxis = AxisInfo.SELF;
+//                }
                 NodeTest test = parseNodeTest(Type.ELEMENT);
                 if (test instanceof AnyNodeTest) {
                     // handles patterns of the form match="node()"
-                    if (defaultAxis == AxisInfo.CHILD) {
+//                    if (defaultAxis == AxisInfo.CHILD) {
                         test = MultipleNodeKindTest.CHILD_NODE;
-                    } else {
-                        test = NodeKindTest.ATTRIBUTE;
-                    }
+//                    } else {
+//                        test = NodeKindTest.ATTRIBUTE;
+//                    }
                 }
                 AxisExpression ae = new AxisExpression(defaultAxis, test);
                 setLocation(ae);
@@ -3139,7 +3201,7 @@ public class XPathParser {
                     case Token.PREFIX:
                     case Token.SUFFIX:
                     case Token.STAR:
-                    case Token.KEYWORD_LBRA:
+                    //case Token.KEYWORD_LBRA:
                     case Token.LPAREN:
                         AxisExpression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, parseNodeTest(Type.ATTRIBUTE));
                         setLocation(ae2);
@@ -3183,18 +3245,18 @@ public class XPathParser {
                 checkLanguageVersion40();
                 return parseMapExpression();
 
-            case Token.KEYWORD_CURLY:
-                switch (t.currentTokenValue) {
-                    case "map":
-                        return parseMapExpression();
-                    case "array":
-                        return parseArrayCurlyConstructor();
-                    case "function":
-                    case "fn":
-                        return parseFocusFunction(null);
-                }
-                CSharp.emitCode("goto case Saxon.Hej.expr.parser.Token.ELEMENT_QNAME;");
-                // else fall through
+//            case Token.KEYWORD_CURLY:
+//                switch (t.currentTokenValue) {
+//                    case "map":
+//                        return parseMapExpression();
+//                    case "array":
+//                        return parseArrayCurlyConstructor();
+//                    case "function":
+//                    case "fn":
+//                        return parseFocusFunction(null);
+//                }
+//                CSharp.emitCode("goto case Saxon.Hej.expr.parser.Token.ELEMENT_QNAME;");
+//                // else fall through
             case Token.ELEMENT_QNAME:
             case Token.ATTRIBUTE_QNAME:
             case Token.NAMESPACE_QNAME:
@@ -4836,6 +4898,8 @@ public class XPathParser {
     }
 
     protected Expression parseInlineFunction(AnnotationList annotations) throws XPathException {
+        nextToken();
+        expect(Token.LPAREN);
         nextToken();
         List<UserFunctionParameter> params = new ArrayList<>(8);
         SequenceType resultType = SequenceType.ANY_SEQUENCE;

@@ -58,7 +58,7 @@ public class ParamKeywords {
         arrayParamNames.put("size", "array");
         arrayParamNames.put("slice", "input|start|end|step");
         arrayParamNames.put("split", "array");
-        arrayParamNames.put("sort", "array|collation|key");
+        arrayParamNames.put("sort", "array|collations|keys|orders");
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
         arrayParamNames.put("trunk", "array");
@@ -106,6 +106,7 @@ public class ParamKeywords {
         fnParamNames.put("default-collation", "");
         fnParamNames.put("decode-from-uri", "value");
         fnParamNames.put("default-language", "");
+        fnParamNames.put("distinct-ordered-nodes", "nodes");
         fnParamNames.put("distinct-values", "values|collation");
         fnParamNames.put("do-until", "input|action|predicate");
         fnParamNames.put("doc", "href");
@@ -141,6 +142,7 @@ public class ParamKeywords {
         fnParamNames.put("function-lookup", "name|arity");
         fnParamNames.put("function-name", "function");
         fnParamNames.put("generate-id", "node");
+        fnParamNames.put("graphemes", "value");
         fnParamNames.put("has-children", "node");
         fnParamNames.put("hash", "value|options");
         fnParamNames.put("head", "input");
@@ -207,8 +209,8 @@ public class ParamKeywords {
         fnParamNames.put("parse-html", "html|options");
         fnParamNames.put("parse-QName", "value");
         fnParamNames.put("parse-uri", "uri|options");
-        fnParamNames.put("parse-xml", "value");
-        fnParamNames.put("parse-xml-fragment", "value");
+        fnParamNames.put("parse-xml", "value|options");
+        fnParamNames.put("parse-xml-fragment", "value|options");
         fnParamNames.put("partition", "input|split-when");
         fnParamNames.put("parts", "");
         fnParamNames.put("path", "node");
@@ -223,7 +225,7 @@ public class ParamKeywords {
         fnParamNames.put("resolve-uri", "href|base");
         fnParamNames.put("reverse", "input");
         fnParamNames.put("root", "node");
-        fnParamNames.put("round", "value|precision");
+        fnParamNames.put("round", "value|precision|rounding-mode");
         fnParamNames.put("round-half-to-even", "value|precision");
         fnParamNames.put("scan-left", "input|zero|action");
         fnParamNames.put("scan-right", "input|zero|action");
@@ -263,9 +265,9 @@ public class ParamKeywords {
         fnParamNames.put("true", "");
         fnParamNames.put("trunk", "input");
         fnParamNames.put("unordered", "input");
-        fnParamNames.put("unparsed-text", "href|encoding");
-        fnParamNames.put("unparsed-text-available", "href|encoding");
-        fnParamNames.put("unparsed-text-lines", "href|encoding");
+        fnParamNames.put("unparsed-text", "href|options");
+        fnParamNames.put("unparsed-text-available", "href|options");
+        fnParamNames.put("unparsed-text-lines", "href|options");
         fnParamNames.put("upper-case", "value");
         fnParamNames.put("uri-collection", "uri");
         fnParamNames.put("xml-to-json", "node|options");
@@ -298,6 +300,7 @@ public class ParamKeywords {
         mathParamNames.put("atan", "value");
         mathParamNames.put("atan2", "y|x");
         mathParamNames.put("cos", "radians");
+        mathParamNames.put("cosh", "value");
         mathParamNames.put("exp", "value");
         mathParamNames.put("exp10", "value");
         mathParamNames.put("log", "value");
@@ -305,8 +308,10 @@ public class ParamKeywords {
         mathParamNames.put("pi", "");
         mathParamNames.put("pow", "x|y");
         mathParamNames.put("sin", "radians");
+        mathParamNames.put("sinh", "value");
         mathParamNames.put("sqrt", "value");
         mathParamNames.put("tan", "radians");
+        mathParamNames.put("tanh", "value");
     }
 }
 
