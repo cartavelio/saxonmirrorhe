@@ -2095,6 +2095,9 @@ public class UserComplexType extends UserDefinedType
     //@Override
     public SchemaType getElementParticleType(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException {
         CompiledComplexType compiledType = ((PreparedSchema)schema).getCompiledComplexType(this);
+        if (compiledType == null) {
+            throw new IllegalStateException("Complex type " + getDescription() + " has not been compiled");
+        }
         return compiledType.getElementParticleType(elementName, schema, considerExtensions);
     }
 

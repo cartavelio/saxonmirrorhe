@@ -2,6 +2,7 @@
 package com.saxonica.ee.trans;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.CachedSchemaSource;
 import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.stream.Posture;
@@ -63,6 +64,9 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
         if (importsSchemas) {
             EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
             List<Source> sources = new ArrayList<>();
+            if (preloadedSchema != null) {
+                sources.add(new CachedSchemaSource(preloadedSchema));
+            }
             SchemaCompiler schemaCompiler = new SchemaCompiler(config);
 
             // Scan the declarations in reverse order, that is, highest precedence first
@@ -82,9 +86,9 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
             }
             if (!sources.isEmpty()) {
                 PreparedSchema assembledSchema = schemaCompiler.loadSources(sources);
-                if (preloadedSchema != null) {
-                    preloadedSchema.copyTo(assembledSchema, schemaCompiler);
-                }
+//                if (preloadedSchema != null) {
+//                    preloadedSchema.copyTo(assembledSchema, schemaCompiler);
+//                }
                 getStylesheetPackage().setImportedSchema(assembledSchema);
             }
             // Now seal all the schemas that have been imported to guarantee consistency with instance documents

@@ -410,12 +410,12 @@ public class CompiledComplexType {
             return attType;
         }
 
-        AttributeWildcard awild = ag.getAttributeWildcard(null);
+        AttributeWildcard awild = ag.getAttributeWildcard(new Stack<>());
         if (awild == null) {
             return null;
         }
         Wildcard wild = awild.getWildcard();
-        if (wild.matches(attributeName, false, (PreparedSchema) schema, null)) {
+        if (wild.matches(attributeName, false, schema, null)) {
             switch (wild.getProcessContents()) {
                 case "skip":
                     return AnySimpleType.getInstance();
