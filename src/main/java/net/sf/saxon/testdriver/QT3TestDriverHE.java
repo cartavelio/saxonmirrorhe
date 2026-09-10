@@ -284,6 +284,8 @@ public class QT3TestDriverHE extends TestDriver {
             String edition = env.processor.getSaxonEdition();
             if ("namespace-axis".equals(value)) {
                 return !inverse;
+            } else if ("binary".equals(value)) {
+                return !inverse;
             } else if ("arbitraryPrecisionDecimal".equals(value)) {
                 return !inverse;
             } else if ("collection-stability".equals(value)) {
