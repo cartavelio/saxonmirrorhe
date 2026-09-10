@@ -713,7 +713,11 @@ public final class Navigator {
                     nsMap = node.getAllNamespaces();
                 } else {
                     // Bug #5861 - we need to ensure the namespaces used in element and attribute names are declared
-                    nsMap = NamespaceMap.of(elementName.getPrefix(), elementName.getNamespaceUri());
+                    if (elementName.getPrefix().isEmpty() && elementName.hasURI(NamespaceUri.NULL)) {
+                        nsMap = NamespaceMap.emptyMap();   // Bug 6866
+                    } else {
+                        nsMap = NamespaceMap.of(elementName.getPrefix(), elementName.getNamespaceUri());
+                    }
                     for (AttributeInfo att : node.attributes()) {
                         NodeName attName = att.getNodeName();
                         if (!attName.getPrefix().isEmpty()) {

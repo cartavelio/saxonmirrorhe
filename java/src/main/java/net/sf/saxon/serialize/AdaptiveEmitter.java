@@ -261,6 +261,9 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 props.setProperty(SaxonOutputKeys.UNFAILING, "yes");
                 CharacterMapIndex cmi = null;
                 if (characterMap != null) {
+                    // If several character maps have been combined, this name will have been generated.
+                    // If only a single map was provided in the first place, this will be the name of that map.
+                    props.setProperty("use-character-maps", characterMap.getName().getClarkName());
                     cmi = new CharacterMapIndex();
                     cmi.putCharacterMap(characterMap.getName(), characterMap);
                 }
