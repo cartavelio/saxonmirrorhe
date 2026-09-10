@@ -83,8 +83,8 @@ task run_config_samples(
     workingDir = "${buildDir}/saxon-resources/samples"
 
     classpath = configurations.samples \
-        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
-        + files(saxonLicenseDir)
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
+
     mainClass = "com.saxonica.Validate"
     args "-t",
             "-s:${buildDir}/saxon-resources/samples/config/${configFile}.xml",
@@ -138,8 +138,8 @@ task run_cmd_books_sample_tests(
       }
 
       classpath = configurations.samples \
-        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
-        + files(saxonLicenseDir)
+        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar")
+
       mainClass = jclass
       def testargs = booksSampleArgs[test]
       if ((test == "Transform_1") || (test == "Transform_2")) {
@@ -187,8 +187,8 @@ task run_cmd_tour_sample_tests(
       }
 
       classpath = configurations.samples \
-        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
-        + files(saxonLicenseDir)
+        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar")
+
       mainClass = jclass
       def testargs = tourSampleArgs[test]
       testargs += ["-o:${resdir}/${outputfile}"]
@@ -217,8 +217,8 @@ task run_cmd_shakespeare_sample_tests(
     workingDir = "${buildDir}/output/${edition}/resources/samples"
 
     classpath = configurations.samples \
-        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
-        + files(saxonLicenseDir)
+        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar")
+
     mainClass = "net.sf.saxon.Transform"
     args "-s:data/othello.xml", "-xsl:styles/play.xsl", "dir=file:///${resdir}/playhtml"
 
@@ -243,8 +243,8 @@ task run_cmd_bible_sample_tests(
     workingDir = "${buildDir}/output/${edition}/resources/samples"
 
     classpath = configurations.samples \
-        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
-        + files(saxonLicenseDir)
+        + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar")
+
     mainClass = "net.sf.saxon.Transform"
     args "-s:${projectDir}/src/test/testdata/bible/nt/nt.xml", "-xsl:styles/bible.xsl", "dir=${resdir}/biblehtml"
 
@@ -386,8 +386,8 @@ def heSampleArgs = ["JAXPExamples": ["all"],
 
             classpath = configurations.samples \
             + files("${buildDir}/samples/classes/${tver}/${edition}") \
-            + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
-            + files(saxonLicenseDir)
+            + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar")
+
           } else {
             dependsOn "${tver}_${edition}j_samples_he", "compileJava"
             description "Debug test of HE ${sample} with ${edition}"
@@ -395,8 +395,7 @@ def heSampleArgs = ["JAXPExamples": ["all"],
             classpath = configurations.samples \
             + files("${buildDir}/samples/classes/${tver}/${edition}") \
             + project.files("${buildDir}/classes/java/main") \
-            + files("${projectDir}/src/main/resources") \
-            + files(saxonLicenseDir)
+            + files("${projectDir}/src/main/resources")
           }
 
           inputs.files fileTree(dir: "${buildDir}/samples/classes/${tver}/${edition}")
@@ -495,7 +494,7 @@ def eeSampleArgs = ["JDOM2Example": ["data/books.xml", "styles/books.xsl"],
       classpath = configurations.samples \
       + files("${buildDir}/samples/classes/${tver}/ee") \
       + project.files("${buildDir}/classes/java/main") \
-      + files("${projectDir}/src/main/resources") \
+      + files("${projectDir}/src/main/resources")
     }
 
     source = "${buildDir}/samples/java/ee"
@@ -524,8 +523,7 @@ def eeSampleArgs = ["JDOM2Example": ["data/books.xml", "styles/books.xsl"],
 
         classpath = configurations.samples \
         + files("${buildDir}/samples/classes/${tver}/ee") \
-        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
-        + files(saxonLicenseDir)
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
       } else {
         dependsOn "${tver}_eej_samples_ee", "${tver}_eej_samples_he", "compileJava"
         description "Debug test of EE ${sample} with EE"
@@ -533,8 +531,7 @@ def eeSampleArgs = ["JDOM2Example": ["data/books.xml", "styles/books.xsl"],
         classpath = configurations.samples \
         + files("${buildDir}/samples/classes/${tver}/ee") \
         + project.files("${buildDir}/classes/java/main") \
-        + files("${projectDir}/src/main/resources") \
-        + files(saxonLicenseDir)
+        + files("${projectDir}/src/main/resources")
       }
 
       inputs.files fileTree(dir: "${buildDir}/samples/java/ee/classes")
