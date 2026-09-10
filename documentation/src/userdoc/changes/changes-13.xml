@@ -835,6 +835,11 @@ TODO: rethink redefines and override
         represents an array member as a zero-arity function item. The code in Saxon attempts to resolve this by accepting
         both representations and converting where appropriate; however, this situation is unstable and the specification
         can be expected to change in this area.</p>
+        
+        <p>Saxon's implementation of the coercion rules (formerly known as the "function conversion rules") differs from
+        the current 4.0 specification in the case where the required type is a GNode or JNode. In this situation Saxon will automatically
+        wrap a supplied map or array in a root JNode. The specification requires this implicit conversion only for the
+        left-hand operand of the "/" operator.</p>
     
     </category>
     
