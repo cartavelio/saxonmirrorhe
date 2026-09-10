@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform;
@@ -37,6 +38,7 @@ namespace Saxon.Api {
         private QName topLevelElement;
         private XQueryExecutable projectionQuery;
         private ResourceResolver resourceResolver;
+        private ErrorReporter _errorReporter;
 
         private Saxon.Hej.s9api.DocumentBuilder s9Builder;
         
@@ -74,6 +76,16 @@ namespace Saxon.Api {
         /// </remarks>
 
         public XmlResolver.XmlResolver XmlResolver { get; set; }
+        
+        /// <summary>Set the <c>ErrorReporter</c> to be used when building a document.</summary>
+
+        public ErrorReporter ErrorReporter {
+            get => this._errorReporter;
+            set {
+                this._errorReporter = null;
+                s9Builder.setErrorReporter(new ErrorReporterWrapper(value));
+            }
+        }
 
         /// <summary>
         /// Determines whether line numbering is enabled for documents loaded using this
