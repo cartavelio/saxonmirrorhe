@@ -757,31 +757,55 @@ public class ProfessionalConfiguration extends Configuration {
         }
     }
 
-    @Override
     public FunctionLibraryList getBuiltInExtensionLibraryList() {
         if (!isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
             return super.getBuiltInExtensionLibraryList();
         }
         if (builtInExtensionLibraryList == null) {
-            vendorFunctionSet = new VendorFunctionSetPE(this);
-            builtInExtensionLibraryList = new FunctionLibraryList();
-            builtInExtensionLibraryList.addFunctionLibrary(vendorFunctionSet);
-            builtInExtensionLibraryList.addFunctionLibrary(MathFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(MapFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(ArrayFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(EXPathBinaryFunctionSet.getInstance());
-            if (getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
-                builtInExtensionLibraryList.addFunctionLibrary(EXPathFileFunctionSet.getInstance());
-                //#if CSHARP==false
-                OnDemandFunctionSet sql = new OnDemandFunctionSet(
-                        this, NamespaceConstant.SQL, "com.saxonica.functions.sql.SQLFunctionSet");
-                builtInExtensionLibraryList.addFunctionLibrary(sql);
-                //#endif
-            }
+            builtInExtensionLibraryList = makeBuiltInExtensionLibraryList();
         }
         return builtInExtensionLibraryList;
     }
+
+    private synchronized FunctionLibraryList makeBuiltInExtensionLibraryList() {
+        vendorFunctionSet = makeVendorFunctionSet();
+        FunctionLibraryList result = new FunctionLibraryList();
+        result.addFunctionLibrary(vendorFunctionSet);
+        result.addFunctionLibrary(MathFunctionSet.getInstance());
+        result.addFunctionLibrary(MapFunctionSet.getInstance());
+        result.addFunctionLibrary(ArrayFunctionSet.getInstance());
+        result.addFunctionLibrary(EXPathBinaryFunctionSet.getInstance());
+        result.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
+        if (getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
+            result.addFunctionLibrary(EXPathFileFunctionSet.getInstance());
+            OnDemandFunctionSet sql = new OnDemandFunctionSet(
+                    this, NamespaceConstant.SQL, "com.saxonica.functions.sql.SQLFunctionSet");
+            result.addFunctionLibrary(sql);
+        }
+        return result;
+    }
+
+    /**
+     * Create a function library for Saxon-defined extension functions available in Professional Edition
+     *
+     * @return the new function library
+     */
+
+
+    protected BuiltInFunctionSet makeVendorFunctionSet() {
+        if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
+            return new VendorFunctionSetPE(this);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the function library for Saxon-defined extension functions available in this Saxon Edition
+     *
+     * @return the new function library
+     */
+
 
     public BuiltInFunctionSet getVendorFunctionSet() {
         return vendorFunctionSet;

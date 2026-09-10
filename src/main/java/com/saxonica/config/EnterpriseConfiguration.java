@@ -25,8 +25,6 @@ import com.saxonica.ee.update.PendingUpdateListImpl;
 import com.saxonica.ee.update.XQueryParserExtensionEE;
 import com.saxonica.ee.validate.*;
 import com.saxonica.expr.XQueryParserExtensionPE;
-import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
-import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.trans.ModePE;
 import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import net.sf.saxon.Configuration;
@@ -40,13 +38,8 @@ import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.GroupIterator;
-import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.functions.MathFunctionSet;
-import net.sf.saxon.functions.registry.ExsltCommonFunctionSet;
-import net.sf.saxon.functions.registry.OnDemandFunctionSet;
+import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.ma.arrays.ArrayFunctionSet;
-import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTestPattern;
@@ -427,30 +420,17 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return new AccumulatorRegistryEE();
     }
 
-
-    @Override
-    public FunctionLibraryList getBuiltInExtensionLibraryList() {
-        if (!isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
-            return super.getBuiltInExtensionLibraryList();
+    /**
+     * Create a function library for Saxon-defined extension functions available in Enterprise Edition
+     *
+     * @return the new function library
+     */
+    protected BuiltInFunctionSet makeVendorFunctionSet() {
+        if (isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
+            return new VendorFunctionSetEE(this);
+        } else {
+            return null;
         }
-        if (builtInExtensionLibraryList == null) {
-            vendorFunctionSet = new VendorFunctionSetEE(this);
-            builtInExtensionLibraryList = new FunctionLibraryList();
-            builtInExtensionLibraryList.addFunctionLibrary(vendorFunctionSet);
-            builtInExtensionLibraryList.addFunctionLibrary(MathFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(MapFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(ArrayFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
-            builtInExtensionLibraryList.addFunctionLibrary(EXPathBinaryFunctionSet.getInstance());
-            if (getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
-                builtInExtensionLibraryList.addFunctionLibrary(EXPathFileFunctionSet.getInstance());
-                //#if CSHARP==false
-                OnDemandFunctionSet sql = new OnDemandFunctionSet(this, NamespaceConstant.SQL, "com.saxonica.functions.sql.SQLFunctionSet");
-                builtInExtensionLibraryList.addFunctionLibrary(sql);
-                //#endif
-            }
-        }
-        return builtInExtensionLibraryList;
     }
 
     /**
