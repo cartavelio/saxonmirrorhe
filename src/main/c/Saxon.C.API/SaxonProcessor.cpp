@@ -408,20 +408,13 @@ SaxonProcessor::~SaxonProcessor() {
 
 void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, const char * functionName, void * func, const char * signature, bool useNativeTypes)
 {
- fprintf(stderr, "We are in a C++ registerUserFunctionForPython\n");
 
-
-    fflush(stdout);
-
-//    c_userFunctionCall1(func);
-
-    //func(nullptr);
-    if(func != nullptr) {
+    /* if(func != nullptr) {
         fprintf(stderr, "We are in a C++ registerUserFunction pointer= %p\n", func);
         fprintf(stderr, "We are in a C++ registerUserFunction pointer= %p\n", (void *)func);
-    }
+        fflush(stdout);
+    } */
 
-    fflush(stdout);
 
 
     //userFunctionRegister[functionName] =userFunctionDescriptor1;
@@ -943,17 +936,14 @@ void SaxonProcessor::setCatalogFiles(const char **catalogFiles, int length) {
 
 XdmValue *SaxonProcessor::parseJsonFromString(const char *source,
                                               const char *encoding) {
-  std::cerr<<"We are in a C++ parseJsonFromString cp0"<<std::endl;
   if (source == nullptr) {
     throw SaxonApiException("JSON source string is null");
   }
 
   applyConfigurationProperties();
-  std::cerr<<"We are in a C++ parseJsonFromString cp1"<<std::endl;
   int64_t xdmValueRef = parseJsonString(sxn_environ->thread, (void *)procRef,
                                         (char *)source, (char *)encoding);
 
-    std::cerr<<"We are in a C++ parseJsonFromString cp2"<<std::endl;
   if (xdmValueRef >= 0) {
     XdmValue *value = new XdmValue(xdmValueRef);
 

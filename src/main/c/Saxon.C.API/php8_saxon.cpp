@@ -1337,7 +1337,6 @@ PHP_METHOD(SaxonProcessor, registerUserFunction)
     char * signature = nullptr;
     bool useNativeTypes = true;
     size_t len1, len2, len3;
- std::cerr<<"checkpoint in registerPHPFunction start"<<std::endl;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "sssb", &namespacei, &len1, &functionName, &len2, &signature, &len3, &useNativeTypes) ==
 FAILURE) { RETURN_NULL();
@@ -1349,17 +1348,10 @@ XtOffsetOf(saxonProcessor_object, std));
 
   if(signature == nullptr) {
        zend_throw_exception(zend_ce_exception, "Method signature is null", 0);
-   } else {
-        std::cerr<<"Signature ="<<signature<<std::endl;
    }
 
     saxonProcessor = obj->saxonProcessor;
                  try {
-
-                 if(useNativeTypes) {
-                     std::cerr<<"useNativeTypes is True"<<std::endl;
-                 }
-
 
                     saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, functionName, (void *)nullptr, (const char *)signature, useNativeTypes);
                 } catch (SaxonApiException &e) {
@@ -1378,6 +1370,115 @@ XtOffsetOf(saxonProcessor_object, std));
         enumBool,
         enumArrXdmValue
 };*/
+
+zval makePHPValue(XdmItem * item){
+
+  zval retval;
+
+    std::map<std::string, saxonTypeEnum> typeMap;
+    typeMap["node"] = enumNode;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}string"] = enumString;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}duration"] = enumString;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}dateTime"] = enumString;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}date"] = enumString;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}gYearMonth"] = enumString;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}gYear"] = enumString;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}gMonthDay"] = enumString;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}time"] = enumString;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}integer"] = enumInteger;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}double"] = enumDouble;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}decimal"] = enumDouble;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}float"] = enumFloat;
+    typeMap["Q{http://www.w3.org/2001/XMLSchema}boolean"] = enumBool;
+
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}gDay"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}gMonth"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}hexBinary"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}base64Binary"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}anyURI"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}QName"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}NOTATION"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}numeric"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}nonPositiveInteger"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}negativeInteger"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}long"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}int"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}short"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}byte"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}nonNegativeInteger"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}positiveInteger"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}unsignedLong"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}unsignedInt"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}unsignedShort"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}unsignedByte"] = enumInteger;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}normalizedString"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}token"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}anyType"] = enumString;
+  typeMap["Q{http://www.w3.org/2001/XMLSchema}anySimpleType"] = enumString;
+
+    typeMap["[xdmvalue"] = enumArrXdmValue;
+
+  int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue());
+
+
+
+  XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
+
+  std::cerr<<"Xdm typeRef = "<< typeRef<<std::endl;
+
+  if (typeRef == SXN_EXCEPTION) {
+
+    //throw SaxonApiException();
+
+    zend_throw_exception(zend_ce_exception, "Error found in converting arguments", 0);
+  }
+
+  if (xdm_type == XDM_ATOMIC_VALUE) {
+    XdmAtomicValue * aitem = (XdmAtomicValue *) item;
+    const char * primType = aitem->getPrimitiveTypeName();
+
+    std::cerr<<"Primitive type = "<< primType<<std::endl;
+
+    saxonTypeEnum typeValue = typeMap[primType];
+    bool bvalue;
+    long lnumber;
+    double dvalue;
+    const char * astri = nullptr;
+
+    switch (typeValue) {
+      case saxonTypeEnum::enumBool:
+        std::cerr<<"PHP internal: Integer type found"<< std::endl;
+      bvalue = aitem->getBooleanValue();
+      ZVAL_BOOL(&retval, bvalue);
+      break;
+      case saxonTypeEnum::enumInteger:
+        std::cerr<<"PHP internal: Integer type found"<< std::endl;
+      lnumber = aitem->getLongValue();
+      ZVAL_LONG(&retval, lnumber);
+      break;
+      case saxonTypeEnum::enumString:
+        astri = item->getStringValue();
+      ZVAL_STRING(&retval, astri);
+      break;
+      case saxonTypeEnum::enumDouble:
+      case saxonTypeEnum::enumFloat:
+        dvalue = aitem->getDoubleValue();
+      ZVAL_DOUBLE(&retval, dvalue);
+      break;
+
+      default:
+        std::cerr<<"PHP internal: type not found"<< std::endl;
+      astri = aitem->getStringValue();
+      ZVAL_STRING(&retval, astri);
+      break;
+
+
+    }
+
+  return retval;
+}
+}
+
 
 
 void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
@@ -1407,14 +1508,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
     } else {
         params = NULL;
     }
-    std::map<std::string, saxonTypeEnum> typeMap;
-    typeMap["node"] = enumNode;
-    typeMap["string"] = enumString;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}integer"] = enumInteger;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}double"] = enumDouble;
-    typeMap["Q{http://www.w3.org/2001/XMLSchema}float"] = enumFloat;
-    typeMap["boolean"] = enumBool;
-    typeMap["[xdmvalue"] = enumArrXdmValue;
+
     sxnc_value* sresult = (sxnc_value *)malloc(sizeof(sxnc_value));
 
 
@@ -1443,34 +1537,88 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
               zend_throw_exception(zend_ce_exception, "Error found in converting arguments", 0);
             }
             if (xdm_type == XDM_ATOMIC_VALUE) {
-              XdmAtomicValue * axdmItem = (XdmAtomicValue *)((arguments[i])->getHead());
-              const char * primType = axdmItem->getPrimitiveTypeName();
+              params[i] = makePHPValue((arguments[i])->getHead());
 
-              std::cerr<<"Primitive type = "<< primType<<std::endl;
+            } else if (xdm_type == XDM_NODE) {
+              XdmNode * nxdmItem = (XdmNode *)((arguments[i])->getHead());
+              if (object_init_ex(&params[i], xdmNode_ce) != SUCCESS) {
+                //error
 
-              saxonTypeEnum typeValue = typeMap[primType];
+                php_error(E_WARNING,"error phpNative xdmNode creation failed");
+              }
 
-              switch (typeValue) {
-                  case saxonTypeEnum::enumInteger:
-                      std::cerr<<"PHP internal: Integer type found"<< std::endl;
-                      long lnumber = axdmItem->getLongValue();
-                      ZVAL_LONG(&params[i], lnumber);
-                      break;
+              struct xdmNode_object* vobj;
+              zend_object* zend_vobj;
+
+              //MAKE_STD_ZVAL(php_argv[i]._val);
+              zend_vobj = Z_OBJ_P(&params[i]);
+              vobj = (xdmNode_object *)((char *)zend_vobj - XtOffsetOf(xdmNode_object, std));
+              assert (vobj != NULL);
+
+              vobj->xdmNode = nxdmItem;
+
+            } else if (xdm_type == XDM_MAP) {
+              std::cerr<<"XDMMap found"<<std::endl;
+
+            } else if (xdm_type == XDM_ARRAY) {
+              std::cerr<<"XDMArray found"<<std::endl;
+
+              XdmArray * arrxdmItem = (XdmArray *)((arguments[i])->getHead());
+
+              int count = arrxdmItem->arrayLength();
+
+              std::cerr<<"XDMArray size="<<count<<std::endl;
+
+              ///// creating PHP array
+              zend_array *ret = zend_new_array(count);
+              zend_ulong idx = 0;
+
+              struct xdmArray_object* aavobj;
+              zend_object* zend_avobj;
+
+              bool arrayContainsNonSingletons = false;
+
+              for (int j = 0; j < count; j++) {
+                XdmValue *valuei = arrxdmItem->get(j);
+                //itemi->incrementRefCount();
+                zval retvali;
+
+                if(valuei->size() == 1) {
+                  retvali = makePHPValue(valuei->getHead());
+
+                  zend_hash_index_add(ret, idx, &retvali);
+
+                  idx++;
+
+                } else {
+                  if (object_init_ex(&params[i], xdmArray_ce) != SUCCESS) {
+                    //error
+
+                    php_error(E_WARNING,"error phpNative xdmArray creation failed");
+                  }
+
+
+                  //MAKE_STD_ZVAL(php_argv[i]._val);
+                  zend_avobj = Z_OBJ_P(&params[i]);
+                  aavobj = (xdmArray_object *)((char *)zend_avobj - XtOffsetOf(xdmArray_object, std));
+                  assert (vobj != NULL);
+
+                  aavobj->xdmArray = arrxdmItem;
+                  arrayContainsNonSingletons = true;
+                  break;
+
+                }
+
 
               }
 
-
-
-            } else if (xdm_type == XDM_NODE) {
-             //we have a node that cannot be converted to native type
-
-            } else if (xdm_type == XDM_MAP) {
-
-
-            } else if (xdm_type == XDM_ARRAY) {
-
+              if(!arrayContainsNonSingletons) {
+                ZVAL_ARR(&params[i], ret);
+              }
 
             } else if (xdm_type == XDM_FUNCTION_ITEM) {
+
+              std::cerr<<"XDMFunctionItem found"<<std::endl;
 
             } else if (xdm_type == XDM_EMPTY) {
               // Empty Sequence detected.
@@ -1478,17 +1626,116 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
               return nullptr;
 
+            } else if (xdm_type == XDM_VALUE) {
+              std::cerr<<"XDMValue foundx"<<std::endl;
+
+              int count = arguments[i]->size();
+
+              std::cerr<<"XDMValue size="<<count<<std::endl;
+
+              ///// creating PHP array
+              zend_array *ret = zend_new_array(count);
+              zend_ulong idx = 0;
+
+              for (int j = 0; j < count; j++) {
+                XdmItem *itemi = arguments[i]->itemAt(j);
+                //itemi->incrementRefCount();
+
+                zval retvali = makePHPValue(itemi);
+
+                zend_hash_index_add(ret, idx, &retvali);
+
+                idx++;
+              }
+              ZVAL_ARR(&params[i], ret);
+
+
+
             } else {
               zend_throw_exception(zend_ce_exception, "Internal Error: Cannot create XdmItem from reference", 0);
             }
-
-
-
         }
 
 
-        //MAKE_STD_ZVAL(function_name);
-        //nativeString[nativeStrLen] = '\0';
+
+
+
+
+
+    } else {
+      std::cerr<<"Error: phpNativeCall - using Xdmtypes"<<std::endl;
+
+      zval * oth = nullptr;
+      for(int i=0; i<argLength;i++){
+        int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
+                                 (void *)(arguments[i])->getUnderlyingValue());
+
+        XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
+
+        if (typeRef == SXN_EXCEPTION) {
+
+          //throw SaxonApiException();
+
+          zend_throw_exception(zend_ce_exception, "Error found in converting arguments", 0);
+        }
+
+        std::cerr<<"Error: phpNativeCall - checking for param type"<<std::endl;
+        if (xdm_type == XDM_ATOMIC_VALUE) {
+          XdmAtomicValue * axdmItem = (XdmAtomicValue *)((arguments[i])->getHead());
+
+          if (object_init_ex(&params[i], xdmAtomicValue_ce) != SUCCESS) {
+            return nullptr;
+          }
+
+          std::cerr<<"Error: phpNativeCall - atomicValue param found"<<std::endl;
+
+          zend_object *zavobj = Z_OBJ_P(&params[i]);
+          xdmAtomicValue_object *avobj =
+              (xdmAtomicValue_object *)((char *)zavobj -
+                                        XtOffsetOf(xdmAtomicValue_object, std));
+
+          assert(avobj != nullptr);
+          avobj->xdmAtomicValue = axdmItem;
+
+          continue;
+
+
+        } else if (xdm_type == XDM_NODE) {
+          XdmNode * nodeItem = (XdmNode *)((arguments[i])->getHead());
+
+          if (object_init_ex(&params[i], xdmNode_ce) != SUCCESS) {
+            return nullptr;
+          }
+
+          zend_object *znvobj = Z_OBJ_P(&params[i]);
+          xdmNode_object *nvobj =
+              (xdmNode_object *)((char *)znvobj -
+                                        XtOffsetOf(xdmNode_object, std));
+
+          assert(nvobj != nullptr);
+          nvobj->xdmNode = nodeItem;
+
+        } else if (xdm_type == XDM_MAP) {
+
+
+        } else if (xdm_type == XDM_ARRAY) {
+
+
+        } else if (xdm_type == XDM_FUNCTION_ITEM) {
+
+        } else if (xdm_type == XDM_EMPTY) {
+          // Empty Sequence detected.
+
+
+          return nullptr;
+
+        } else {
+          zend_throw_exception(zend_ce_exception, "Internal Error: Cannot create XdmItem from reference", 0);
+        }
+      }
+
+
+    }
 
         const char * objName = NULL;
 
@@ -1506,15 +1753,19 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
             zend_error(E_ERROR, "Function call failed");
         }
 
+  std::cerr<<"Error: phpNativeCall - after function called"<<std::endl;
+
         if(Z_TYPE(retval) ==0){
             //zend_error(E_ERROR, "Function returned null");
             zend_throw_exception(zend_ce_exception, "Function returned null", 0);
         }
-
+  std::cerr<<"Error: phpNativeCall - after function called cp0"<<std::endl;
         XdmValue * resultValue = nullptr;
 
         char * sVal = NULL;
         int len = 0;
+
+  std::cerr<<"Error: phpNativeCall - after function called cp1"<<std::endl;
 
         switch (Z_TYPE_P(&retval)) {
             case IS_FALSE:
@@ -1535,7 +1786,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
                 break;
             case IS_NULL:
 
-                break;
+                return (void *)nullptr;
             case IS_DOUBLE:
                 resultValue = nprocessor->makeDoubleValue((double)Z_DVAL_P(&retval));
                 break;
@@ -1562,18 +1813,10 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
                 zend_throw_exception(zend_ce_exception, "Unknown type specified in extension function", 0);
         }
 
-
-        return (void *)resultValue->getUnderlyingValue();
-
-
-
-
-    } else {
-                     std::cerr<<"Error: phpNativeCall - not using nativeTypes"<<std::endl;
-
-    }
-
-    return nullptr;
+      if(resultValue == nullptr){
+        return (void *)nullptr;
+      }
+      return (void *)resultValue->getUnderlyingValue();
   /*  for(int i=0; i<argLength;i++){
  
 

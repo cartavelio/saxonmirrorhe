@@ -6,6 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 package net.sf.saxon.option.cpp;
 
+import com.oracle.svm.core.jni.headers.JNIFunctionPointerTypes;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.*;
 
@@ -221,16 +222,24 @@ public class SaxonCAPI {
                     if (paramValue != null && paramValue instanceof XdmArray) {
                          if(SaxonCAPI.debug) {
                              System.out.println("param = " + ((XdmArray) paramValue).toString());
+                             System.out.println("param length= " + ((XdmArray) paramValue).arrayLength());
                          }
                         XdmArray paramArray = (XdmArray) paramValue;
                         sequenceTypes = new SequenceType[paramArray.arrayLength()];
+
                         for (int i =0; i< paramArray.arrayLength(); i++) {
+                            if(SaxonCAPI.debug) {
+                                System.out.println("param-loop i=" + i);
+                            }
                             XdmValue val = paramArray.get(i);
                             if(SaxonCAPI.debug) {
                                 System.out.println("param item= " + val.toString());
                             }
                             sequenceTypes[i] = SaxonCAPI.parseSequenceType(processor, val.toString());
-                            i++;
+
+                        }
+                        if(SaxonCAPI.debug && sequenceTypes == null) {
+                            System.err.println("No sequence types");
                         }
 
                     }
