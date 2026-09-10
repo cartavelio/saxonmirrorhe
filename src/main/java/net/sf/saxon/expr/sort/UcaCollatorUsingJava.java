@@ -142,8 +142,10 @@ public class UcaCollatorUsingJava implements SubstringMatcher {
                 case "no":
                     if (config.getEditionCode().equals("HE")) {
                         error("fallback=no is not supported in Saxon-HE");
+//#if EE==true || PE==true
                     } else if (!ICULibrary.isICUCollatorAvailable()) {
                         error("fallback=no is not available because ICU4J is not available");
+//#endif
                     } else {
                         error("fallback=no is not available with JDK-based collations");
                     }
