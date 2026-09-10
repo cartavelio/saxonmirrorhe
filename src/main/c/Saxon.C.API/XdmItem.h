@@ -22,7 +22,7 @@ class SaxonProcessor;
  * an <tt>XdmItem</tt>. It is quite possible for an <tt>XdmValue</tt> that is not an <tt>XdmItem</tt> to hold
  * a singleton sequence.</p>
  * <p>Saxon provides two concrete subclasses of <code>XdmItem</code>, namely
- * {@link XdmNode} and {@link XdmAtomicValue}. Users must not attempt to create
+ * XdmNode and XdmAtomicValue. Users must not attempt to create
  * additional subclasses.</p>
  */
 class XdmItem : public XdmValue

@@ -206,7 +206,9 @@ public:
 
      //! compile a stylesheet file.
     /**
-     * The compiled stylesheet is cached and available for execution later.
+     * Note: the term "compile" here indicates that the stylesheet is converted into an executable
+     * form. The compilation uses a snapshot of the properties of the <code>Xslt30Processor</code> at the
+     * time this method is invoked.
      * @param stylesheet  - The file name of the stylesheet document.
      * @return an XsltExecutable, which represents the compiled stylesheet. The XsltExecutable
      * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
@@ -216,7 +218,9 @@ public:
      //!compile a stylesheet received as a string.
     /**
      * 
-     * The compiled stylesheet is cached and available for execution later.
+     * Note: the term "compile" here indicates that the stylesheet is converted into an executable
+     * form. The compilation uses a snapshot of the properties of the <code>Xslt30Processor</code> at the
+     * time this method is invoked.
      * @param stylesheet as a lexical string representation
      * @return an XsltExecutable, which represents the compiled stylesheet. The XsltExecutable
      * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
@@ -234,7 +238,9 @@ public:
      * a synthesized stylesheet module that imports all the referenced
      * stylesheet module.*/
     /**
-     * The compiled stylesheet is cached and available for execution later.
+     * Note: the term "compile" here indicates that the stylesheet is converted into an executable
+     * form. The compilation uses a snapshot of the properties of the <code>Xslt30Processor</code> at the
+     * time this method is invoked.
      * @param sourceFile  - The file name of the XML document.
      * @return an XsltExecutable, which represents the compiled stylesheet. The XsltExecutable
      * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
@@ -272,7 +278,9 @@ public:
 
      //!compile a stylesheet received as an XdmNode.
     /**
-     * The compiled stylesheet is cached and available for execution later.
+     * Note: the term "compile" here indicates that the stylesheet is converted into an executable
+     * form. The compilation uses a snapshot of the properties of the <code>Xslt30Processor</code> at the
+     * time this method is invoked.
      * @param stylesheet as a lexical string representation
      * @return an XsltExecutable, which represents the compiled stylesheet. The XsltExecutable
      * is immutable and thread-safe; it may be used to run multiple transformations, in series or concurrently.
