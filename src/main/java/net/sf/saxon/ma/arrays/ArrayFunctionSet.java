@@ -999,7 +999,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 }
             }
             for (int i = 0; i < array1.arrayLength(); i++) {
-                boolean ok = compare(array1.get(i), search);
+                boolean ok = compareValues(array1.get(i), search);
                 if (ok) {
                     result.add(new Int64Value(i + 1));
                 }
@@ -1007,7 +1007,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             return SequenceExtent.makeSequenceExtent(result);
         }
 
-        public boolean compare(GroundedValue a, GroundedValue b) {
+        private boolean compareValues(GroundedValue a, GroundedValue b) {
 
             if (a.getLength() != b.getLength()) {
                 return false;
