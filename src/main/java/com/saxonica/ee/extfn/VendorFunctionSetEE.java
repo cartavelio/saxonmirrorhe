@@ -5,7 +5,6 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.AnyNodeTest;
-import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -53,19 +52,6 @@ public class VendorFunctionSetEE extends BuiltInFunctionSet {
                 .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY)
                 .arg(1, MapType.getInstance(), ONE, null)
                 .arg(2, MapType.getInstance(), ONE, null));
-
-        register("compile-XPath", 3, e -> e.populate(CompileXPath::new, AnyItemType.getInstance(), ONE, BuiltInFunctionSet.LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)
-                .arg(1, AnyItemType.getInstance(), OPT, null)
-                .arg(2, AnyItemType.getInstance(), OPT, null));
-
-        register("marshal-type", 1, e -> e.populate(CompileXPath::new, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY));
-
-        register("parse-sequence-type", 3, e -> e.populate(CompileXPath::new, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)
-                .arg(1, NodeKindTest.ELEMENT, ONE, EMPTY)
-                .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
         register("type", 1, e -> e.populate(SchemaTypeFn::new, SpecificFunctionType.COMPONENT_FUNCTION_TYPE, OPT, 0)
                 .arg(0, AnyItemType.getInstance(), OPT, null));
