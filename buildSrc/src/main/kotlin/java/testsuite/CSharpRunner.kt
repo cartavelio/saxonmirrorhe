@@ -7,6 +7,7 @@ import java.io.PrintStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.*
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -46,7 +47,7 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   @get:Internal
   abstract val platform: Property<String>
   @get:Internal
-  abstract val options: MapProperty<String,String>
+  abstract val testargs: ListProperty<String>
 
   @get:Internal
   val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
@@ -103,29 +104,19 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
       "${name}.xml"
     }
 
-    val testargs = mutableListOf<String>("${dotnet.get()}",
-                                         "${testDrivers.get().asFile}",
-                                         "${suiteDir.get()}",
-                                         "-catalog:${catalog}",
-                                         "-exceptions:${exceptionsFile.get()}",
-                                         "-reportfilename:${reportName}",
-                                         "-o:${reportDir.get()}",
-                                         "-lang:${language.get()}")
+    val driverargs = mutableListOf<String>("${dotnet.get()}",
+                                           "${testDrivers.get().asFile}",
+                                           "${suiteDir.get()}",
+                                           "-catalog:${catalog}",
+                                           "-exceptions:${exceptionsFile.get()}",
+                                           "-reportfilename:${reportName}",
+                                           "-o:${reportDir.get()}",
+                                           "-lang:${language.get()}")
+    driverargs.addAll(testargs.get())
 
-
-    for ((optname, optvalue) in options.get()) {
-      if (optvalue == "") {
-        testargs.add("-${optname}")
-      } else {
-        testargs.add("-${optname}:${optvalue}")
-      }
-    }
-
-    //testargs.add("-s:expath-file")
-    //testargs.add("-t:EXPath-file-exists-001")
     //testargs.add("-debug")
 
-    //println(listOf(testargs))
+    println(listOf(driverargs))
 
     ex.exec {
       if (!showOutput) {
@@ -136,13 +127,13 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
 
       workingDir = suiteDir.get().asFile
 
-      commandLine = testargs
+      commandLine = driverargs
     }
 
     if (!showOutput) {
       println("==> ${reportDir.get()}/stderr.txt")
       var outputStream = PrintStream(File("${reportDir.get()}/stderr.txt"))
-      outputStream.println(testargs.joinToString(" "))
+      outputStream.println(driverargs.joinToString(" "))
       var lines = errOutput.toString("utf-8")
       outputStream.print(lines)
       outputStream.close()

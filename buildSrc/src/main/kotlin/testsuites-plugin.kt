@@ -5,6 +5,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.util.Date
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -28,7 +29,8 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
 
 abstract class TestSuitesExtension
-  @Inject constructor(private val layout: ProjectLayout,
+  @Inject constructor(private val fs: FileSystemOperations,
+                      private val layout: ProjectLayout,
                       private val tasks: TaskContainer) {
 
   abstract val testclasspath: Property<FileCollection>
@@ -67,17 +69,26 @@ abstract class TestSuitesExtension
       "test_suite_${taskName}"
     }
 
+    val testargs = mutableListOf<String>()
+    for((optname, optvalue) in propertyOptions.get()) {
+      if (optvalue == "") {
+        testargs.add("-${optname}")
+      } else {
+        testargs.add("-${optname}:${optvalue}")
+      }
+    }
+
     return when (product.get()) {
       "java" -> if (suite.startsWith("xsd")) {
-        configureJavaXsd(suite, language, options, name)
+        configureJavaXsd(suite, language, testargs, name)
       } else {
-        configureJava(suite, language, options, name)
+        configureJava(suite, language, testargs, name)
       }
 
       "csharp" -> if (suite.startsWith("xsd")) {
-        configureCsharpXsd(suite, language, options, name)
+        configureCsharpXsd(suite, language, testargs, name)
       } else {
-        configureCsharp(suite, language, options, name)
+        configureCsharp(suite, language, testargs, name)
       }
 
       else -> throw GradleException("Unexpected test product: ${product.get()}")
@@ -115,7 +126,7 @@ abstract class TestSuitesExtension
   }
   
   fun configureJava(suite: String, language: String,
-                    @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
+                    testargs: List<String>,
                     taskName: String): TaskProvider<DefaultTask> {
     val plugin = this
 
@@ -133,11 +144,20 @@ abstract class TestSuitesExtension
       this.suite = suite
       this.language = language
       this.suiteDir = actualSuiteDir
-      this.options = options
+      this.testargs = testargs
       this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
       exceptionsFile = exceptions(suite)
       reportingRootDir = layout.buildDirectory.dir("test-results")
       classpath.from(testclasspath)
+
+      doFirst {
+        println("HERE ${taskName}")
+        testclasspath.get().forEach {
+                        println("IT: ${it}")
+                      }
+      }
+
+
     }
 
     if (suite == "expath") {
@@ -147,7 +167,7 @@ abstract class TestSuitesExtension
         inputs.files(submodulesDir.dir("expath/tests/qt3"))
         outputs.dir(layout.buildDirectory.dir("suite/expath/${taskName}"))
         doLast {
-          project.copy {
+          fs.copy {
             into(layout.buildDirectory.dir("suite/expath/${taskName}"))
             from(submodulesDir.dir("expath/tests/qt3")) {
               exclude("archive/sandpit2/**")
@@ -158,7 +178,7 @@ abstract class TestSuitesExtension
         doLast {
           // Also, make sure that the file "test.bin" exists
           // or some tests will fail.
-          project.copy {
+          fs.copy {
             into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
             from(submodulesDir.dir("expath/tests/qt3")) {
               include("catalog.xml")
@@ -193,7 +213,10 @@ abstract class TestSuitesExtension
     return thisSuite as TaskProvider<DefaultTask>
   }
 
-  fun configureJavaXsd(suite: String, language: String, options: Map<String,String>, taskName: String): TaskProvider<DefaultTask> {
+  fun configureJavaXsd(suite: String,
+                       language: String,
+                       testargs: List<String>,
+                       taskName: String): TaskProvider<DefaultTask> {
     val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
 
     val xsdVersion = "1.1"
@@ -213,24 +236,22 @@ abstract class TestSuitesExtension
 
     val summarizeResults = submodulesDir.file("extra/tools/summarize-results.xsl").get()
 
-    val testargs = mutableListOf<String>("${directory.get()}",
-                                         "${catalog}",
-                                         "-exceptions:${exceptionsFile.get()}",
-                                         "-reportfilename:${reportFn}",
-                                         "-errorfilename:${errorFn}",
-                                         "-local:${reportDir}",
-                                         "-summarizeresults:${summarizeResults}",
-                                         "-v:${xsdVersion}")
-    for ((optname, optvalue) in options) {
-      testargs.add("-${optname}:${optvalue}")
-    }
+    val driverargs = mutableListOf<String>("${directory.get()}",
+                                           "${catalog}",
+                                           "-exceptions:${exceptionsFile.get()}",
+                                           "-reportfilename:${reportFn}",
+                                           "-errorfilename:${errorFn}",
+                                           "-local:${reportDir}",
+                                           "-summarizeresults:${summarizeResults}",
+                                           "-v:${xsdVersion}")
+    driverargs.addAll(testargs)
 
     val thisSuite = tasks.register<JavaExec>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       mainClass.set(driverClass)
       workingDir = directory.get().asFile
       classpath = testclasspath.get()
-      args(testargs)
+      args(driverargs)
 
       doFirst {
         Files.createDirectories(Paths.get(reportDir.toString()))
@@ -249,7 +270,7 @@ abstract class TestSuitesExtension
   }
 
   fun configureCsharp(suite: String, language: String,
-                      @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
+                      testargs: List<String>,
                       taskName: String): TaskProvider<DefaultTask> {
     val plugin = this
 
@@ -274,7 +295,7 @@ abstract class TestSuitesExtension
       this.dotnet = plugin.dotnet
       this.dotnetBuildType = plugin.dotnetBuildType
       this.platform = plugin.platform
-      this.options = options
+      this.testargs = testargs
       exceptionsFile = exceptions(suite)
       reportingRootDir = layout.buildDirectory.dir("test-results")
     }
@@ -291,7 +312,7 @@ abstract class TestSuitesExtension
         doLast {
           // Also, make sure that the file "test.bin" exists
           // or some tests will fail.
-          project.copy {
+          fs.copy {
             into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
             from(submodulesDir.dir("expath/tests/qt3")) {
               include("catalog.xml")
@@ -328,8 +349,9 @@ abstract class TestSuitesExtension
   }
 
   fun configureCsharpXsd(suite: String,
-                         @Suppress("UNUSED_PARAMETER") language: String,
-                         options: Map<String,String>, taskName: String): TaskProvider<DefaultTask> {
+                         language: String,
+                         testargs: List<String>,
+                         taskName: String): TaskProvider<DefaultTask> {
     val allSuites = tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME).get()
     val build = tasks.named("dotnetBuildTestDrivers").get()
 
@@ -347,29 +369,20 @@ abstract class TestSuitesExtension
 
     val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}")
 
-    val testargs = mutableListOf<String>("${dotnet.get()}",
-                                         "${testDrivers.get().asFile}",
-                                         "${directory.get()}",
-                                         "-o:${reportDir}",
-                                         "-lang:XSD${xsdVersion}",
-                                         "-debug",
-                                         "-exceptions:${exceptionsFile.get()}")
-    for ((optname, optvalue) in options) {
-      testargs.add("-${optname}:${optvalue}")
-    }
-    for((optname, optvalue) in propertyOptions.get()) {
-      if (optvalue == "") {
-        testargs.add("-${optname}")
-      } else {
-        testargs.add("-${optname}:${optvalue}")
-      }
-    }
+    val driverargs = mutableListOf<String>("${dotnet.get()}",
+                                           "${testDrivers.get().asFile}",
+                                           "${directory.get()}",
+                                           "-o:${reportDir}",
+                                           "-lang:XSD${xsdVersion}",
+                                           "-debug",
+                                           "-exceptions:${exceptionsFile.get()}")
+    driverargs.addAll(testargs)
 
     val thisSuite = tasks.register<Exec>(taskName) {
       dependsOn(build)
 
       workingDir = directory.get().asFile
-      commandLine = testargs
+      commandLine = driverargs
       //ignoreExitValue = true
 
       doFirst {

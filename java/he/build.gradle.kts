@@ -158,6 +158,10 @@ val xqjSourceMavenJar by configurations.resolvable("xqjSourceMavenJar") {
   extendsFrom(xqjSourceMavenJarBucket)
 }
 
+val testsuiteExtra by configurations.resolvable("testsuiteExtraConfiguration") {
+  extendsFrom(configurations["testImplementation"])
+}
+
 val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
   extendsFrom(configurations["testImplementation"])
 }
@@ -180,6 +184,12 @@ dependencies {
   xqjDownloadJarBucket(project(path = ":java", configuration = "xqjDownloadJarArtifact"))
   xqjMavenJarBucket(project(path = ":java", configuration = "xqjMavenJarArtifact"))
   xqjSourceMavenJarBucket(project(path = ":java", configuration = "xqjSourceMavenJarArtifact"))
+
+  testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
+  testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
+  testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
+  testImplementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
+  testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 }
 
 tasks.named("compileJava") {
@@ -282,6 +292,7 @@ tasks.register<Exec>("samples") {
 val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers")
 val testSuitesClasspath = files(sourceSets["edition"].output)
     .from(configurations.testDrivers)
+    .from(testsuiteExtra)
     .from(compile_testdrivers)
 testSuites {
   product = "java"

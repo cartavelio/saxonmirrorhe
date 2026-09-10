@@ -8,6 +8,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.*
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
@@ -40,7 +41,7 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
   @get:InputFiles
   abstract val classpath: ConfigurableFileCollection
   @get:Internal
-  abstract val options: MapProperty<String,String>
+  abstract val testargs: ListProperty<String>
 
   @get:Internal
   val EDITION: String by lazy { edition.get().uppercase() }
@@ -74,6 +75,7 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
   @OutputDirectory
   val reportDir = reportingRootDir.map { it.dir("${suite.get()}/${dateStamp}") }
 
+/*
   @get:Internal
   val testOpts = mutableMapOf<String, String>()
 
@@ -88,6 +90,7 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
     testOpts["t"] = arg
     return this;
   }
+*/
 
   @TaskAction
   fun execute() {
@@ -114,17 +117,13 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
                         "-lang:${language.get()}"
                     ))
 
-    options.get().forEach { (opt, arg) -> 
-              if (arg == "") {
-                javaArgs.add("-${opt}")
-              } else {
-                javaArgs.add("-${opt}:${arg}")
-              }
-            }
+    javaArgs.addAll(testargs.get())
 
+/*
     testOpts.forEach { (opt, arg) ->
       javaArgs.add("-${opt}:${arg}")
     }
+*/
 
     println("JARG: ${javaArgs}")
 

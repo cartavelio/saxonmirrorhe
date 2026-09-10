@@ -14,7 +14,6 @@ java_*.hprof
 # Ephemeral artefacts
 out/
 build/
-bin/
 target/
 .gradle/
 .kotlin/
@@ -23,11 +22,11 @@ __pycache__
 temp/
 sandpit/
 /extra/lib/
-csharp/ee/bin/Debug/
-csharp/ee/obj/
 *.log
 documentation/tools/qt4/**/*.ods
 .~lock.*
+csharp/**/bin/
+csharp/**/obj/
 
 
 # Created by running the unit tests :-(

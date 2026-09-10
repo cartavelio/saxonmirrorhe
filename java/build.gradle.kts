@@ -33,6 +33,10 @@ sourceSets.named("editionTest") {
   }
 }
 
+val testsuiteExtra by configurations.resolvable("testsuiteExtraConfiguration") {
+  extendsFrom(configurations["testImplementation"])
+}
+
 val downloadReleaseBundled by configurations.getting
 val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
   extendsFrom(configurations["testImplementation"])
@@ -296,6 +300,7 @@ val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers") {
 }
 val testSuitesClasspath = files(sourceSets["edition"].output)
     .from(configurations.testDrivers)
+    .from(testsuiteExtra)
     .from(compile_testdrivers)
 testSuites {
   product = "java"
