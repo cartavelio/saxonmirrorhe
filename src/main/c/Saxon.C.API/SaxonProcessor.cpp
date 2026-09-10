@@ -267,6 +267,10 @@ void SaxonProcessor::initialize(bool l) {
 
 }
 
+void SaxonProcessor::setExtensionLibrary(const char * libraryName){
+    j_setLibrary(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwd.c_str(), (char *)libraryName);
+}
+
 void SaxonProcessor::attachCurrentThread() {
 #ifdef DEBUG
   std::cerr << "attachCurrentThread called" << std::endl;

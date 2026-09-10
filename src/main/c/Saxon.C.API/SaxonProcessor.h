@@ -231,6 +231,9 @@ public:
    */
   SchemaValidator *newSchemaValidator();
 
+
+  void setExtensionLibrary(const char * libraryName);
+
   //! Factory method. Unlike the constructor, this avoids creating a new
   //! StringValue in the case
   /*!
