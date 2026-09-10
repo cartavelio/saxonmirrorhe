@@ -66,7 +66,7 @@ public class PullExamples {
         EnterpriseConfiguration config = new EnterpriseConfiguration();
         PipelineConfiguration pipe = in.getPipelineConfiguration();
         pipe.setConfiguration(config);
-        pipe.setSchemaURIResolver(config.getSchemaURIResolver());
+        //pipe.setSchemaURIResolver(config.getSchemaURIResolver());
         Receiver sink = new Sink(pipe);
         ParseOptions options = new ParseOptions();
         options.setSchemaValidationMode(Validation.STRICT);

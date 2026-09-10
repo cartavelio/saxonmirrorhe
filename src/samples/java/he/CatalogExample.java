@@ -22,8 +22,8 @@ public class CatalogExample {
 
         String catalog = datapath + "/catalog.xml";
 
-        config.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, Collections.singletonList(catalog));
-        System.err.println(config.getCommonResourceResolver().getFeature(ResolverFeature.CATALOG_FILES));
+        config.getResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, Collections.singletonList(catalog));
+        System.err.println(config.getResourceResolver().getFeature(ResolverFeature.CATALOG_FILES));
 
         InputSource docsrc = new InputSource(datapath + "/input.xml");
         InputSource xslsrc = new InputSource(datapath + "/stylesheet.xsl");
