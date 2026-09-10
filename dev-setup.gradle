@@ -1,0 +1,7 @@
+tasks.register('setup_gitHooks', Copy) {
+    description "Add git pre-commit hook to local .git directory"
+    from layout.projectDirectory.dir("hooks")
+    into layout.projectDirectory.dir(".git/hooks")
+}
+
+check.dependsOn 'setup_gitHooks'

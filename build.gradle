@@ -444,6 +444,7 @@ apply from: "build-doc.gradle"
 apply from: "test-suites.gradle"
 apply from: "build-resources.gradle"
 apply from: "run-samples.gradle"
+apply from: "dev-setup.gradle"
 
 // ============================================================
 // One of the features of Gradle is that you can construct tasks
