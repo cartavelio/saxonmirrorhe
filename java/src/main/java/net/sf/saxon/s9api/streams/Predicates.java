@@ -244,9 +244,24 @@ public class Predicates {
      * @return a predicate that returns true if and only if the supplied item is an element having an attribute
      * with the given local name, in no namespace
      */
-
     public static Predicate<XdmNode> hasAttribute(String local) {
         return item -> item.attribute(local) != null;
+    }
+
+    /**
+     * Obtain a predicate that tests whether an item is an element node with a given attribute (whose
+     * name is in the specified namespace)
+     *
+     * @param uri the namespace URI
+     * @param local the required attribute name
+     * @return a predicate that returns true if and only if the supplied item is an element having an attribute
+     * with the given local name, in no namespace
+     */
+    public static Predicate<XdmNode> hasAttribute(String uri, String local) {
+        return item -> {
+            QName name = new QName(NamespaceUri.of(uri), local);
+            return item.getAttributeValue(name) != null;
+        };
     }
 
     /**
@@ -261,6 +276,24 @@ public class Predicates {
 
     public static Predicate<XdmNode> attributeEq(String local, String value) {
         return item -> value.equals(item.attribute(local));
+    }
+
+    /**
+     * Obtain a predicate that tests whether an item is an element node with a given attribute (whose
+     * name is in the specified namespace) whose string value is equal to a given value
+     *
+     * @param uri the namespace URI
+     * @param local the required attribute name
+     * @param value the required attribute value
+     * @return a predicate that returns true if and only if the supplied item is an element having an attribute
+     * with the given local name, in no namespace, whose string value is equal to the given value
+     */
+
+    public static Predicate<XdmNode> attributeEq(String uri, String local, String value) {
+        return item -> {
+            QName name = new QName(NamespaceUri.of(uri), local);
+            return value != null && value.equals(item.getAttributeValue(name));
+        };
     }
 
     /**

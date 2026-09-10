@@ -1,0 +1,37 @@
+<book xmlns:ex="http://example.org/ns/ex">
+  <front>
+    <preface>
+      <title>Preface</title>
+      <para>Preferatory paragraph.</para>
+    </preface>
+  </front>
+  <body>
+    <chapter>
+      <title>First Chapter</title>
+      <para>Introductory paragraph.</para>
+    </chapter>
+    <ex:chapter>
+      <ex:title>Second Chapter</ex:title>
+      <ex:para>Main paragraph.</ex:para>
+    </ex:chapter>
+    <chapter id="third">
+      <title>Third Chapter</title>
+      <para>Desultory paragraph.</para>
+      <para>Ultimate paragraph.</para>
+    </chapter>
+  </body>
+  <back>
+    <appendix label="A" status="draft">
+      <title>First Appendix</title>
+      <para>AAA</para>
+    </appendix>
+    <ex:appendix label="B" ex:id="spoon">
+      <ex:title>Second Appendix</ex:title>
+      <ex:para>BBB</ex:para>
+    </ex:appendix>
+    <appendix label="C">
+      <title>Third Appendix</title>
+      <para>CCC</para>
+    </appendix>
+  </back>
+</book>

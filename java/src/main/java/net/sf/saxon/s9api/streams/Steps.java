@@ -163,31 +163,56 @@ public class Steps {
      */
 
     private final static Step<XdmNode> FOLLOWING = new AxisStep(Axis.FOLLOWING);
+
+    /**
+     * A Step to navigate from a node to its following siblings, which are returned in document order,
+     * preceded by the node itself.
+     */
+    private final static Step<XdmNode> FOLLOWING_OR_SELF = new AxisStep(Axis.FOLLOWING_OR_SELF);
+
     /**
      * A Step to navigate from a node to its following siblings, which are returned in document order
      */
-
     private final static Step<XdmNode> FOLLOWING_SIBLING = new AxisStep(Axis.FOLLOWING_SIBLING);
+
+    /**
+     * A Step to navigate from a node to its following siblings, which are returned in document order,
+     * preceded by the node itself.
+     */
+    private final static Step<XdmNode> FOLLOWING_SIBLING_OR_SELF = new AxisStep(Axis.FOLLOWING_SIBLING_OR_SELF);
+
     /**
      * A {@code Step} to navigate from a node to its namespace nodes
      */
-
     private final static Step<XdmNode> NAMESPACE = new AxisStep(Axis.NAMESPACE);
     /**
      * A Step to navigate from a node to its parent
      */
 
     private final static Step<XdmNode> PARENT = new AxisStep(Axis.PARENT);
+
     /**
      * A Step to navigate from a node to its preceding siblings, which are returned in reverse document order
      */
-
     private final static Step<XdmNode> PRECEDING_SIBLING = new AxisStep(Axis.PRECEDING_SIBLING);
+
+    /**
+     * A Step to navigate from a node to its preceding sibling nodes, which are returned in reverse document order
+     * preceded by the origin node itself.
+     */
+    private final static Step<XdmNode> PRECEDING_SIBLING_OR_SELF = new AxisStep(Axis.PRECEDING_SIBLING_OR_SELF);
+
     /**
      * A Step to navigate from a node to its preceding nodes (excluding ancestors), which are returned in reverse document order
      */
-
     private final static Step<XdmNode> PRECEDING = new AxisStep(Axis.PRECEDING);
+
+    /**
+     * A Step to navigate from a node to its preceding nodes (excluding ancestors), which are returned in reverse document order
+     * preceded by the origin node itself.
+     */
+    private final static Step<XdmNode> PRECEDING_OR_SELF = new AxisStep(Axis.PRECEDING_OR_SELF);
+
     /**
      * A Step to navigate from a node to itself (useful only if applying a predicate)
      */
@@ -656,6 +681,86 @@ public class Steps {
     }
 
     /**
+     * Obtain a {@link Step} to navigate from a node to its following nodes (excluding ancestors),
+     * which are returned in document order, preceded by the origin node itself
+     * @return a Step that selects all nodes on the following-or-self axis
+     */
+    public static Step<XdmNode> followingOrSelf() {
+        return FOLLOWING_OR_SELF;
+    }
+
+    /**
+     * Obtain a {@code Step} that navigates from a node to the following elements having a specified
+     * local name. These are returned in document order, preceded by the origin node itself
+     * if it has the requested name.
+     *
+     * @param localName the local name of the preceding elements to be selected by the {@code Step},
+     *                  or "*" to select all preceding-or-self nodes that are element nodes
+     * @return a {@code Step}, which selects the preceding elements of a supplied node that have the
+     * required local name.
+     */
+
+    public static Step<XdmNode> followingOrSelf(String localName) {
+        return followingOrSelf().where(localNamePredicate(localName));
+    }
+
+    /**
+     * Obtain a {@code Step} that navigates from a node to the following elements having a specified
+     * namespace URI and local name. These are returned in document order, preceded by the origin
+     * node itself if it has the requested name.
+     *
+     * @param uri       the namespace URI of the preceding elements to be selected by the {@code Step}:
+     *                  supply a zero-length string to indicate the null namespace
+     * @param localName the local name of the preceding sibling elements to be selected by the {@code Step}
+     * @return a {@code Step}, which selects the preceding sibling elements of a supplied node that have the
+     * required local name and namespace URI.
+     */
+
+    public static Step<XdmNode> followingOrSelf(String uri, String localName) {
+        return followingOrSelf().where(expandedNamePredicate(uri, localName));
+    }
+
+    /**
+     * Obtain a {@link Step} to navigate from a node to its following sibling nodes
+     * which are returned in document order, preceded by the origin node itself
+     * @return a Step that selects all nodes on the preceding-or-self axis
+     */
+    public static Step<XdmNode> followingSiblingOrSelf() {
+        return FOLLOWING_SIBLING_OR_SELF;
+    }
+
+    /**
+     * Obtain a {@code Step} that navigates from a node to the following sibling elements having a specified
+     * local name. These are returned in document order, preceded by the origin node itself
+     * if it has the requested name.
+     *
+     * @param localName the local name of the preceding elements to be selected by the {@code Step},
+     *                  or "*" to select all preceding-or-self nodes that are element nodes
+     * @return a {@code Step}, which selects the preceding elements of a supplied node that have the
+     * required local name.
+     */
+
+    public static Step<XdmNode> followingSiblingOrSelf(String localName) {
+        return followingSiblingOrSelf().where(localNamePredicate(localName));
+    }
+
+    /**
+     * Obtain a {@code Step} that navigates from a node to the following sibling elements having a specified
+     * namespace URI and local name. These are returned in document order, preceded by the origin
+     * node itself if it has the requested name.
+     *
+     * @param uri       the namespace URI of the preceding elements to be selected by the {@code Step}:
+     *                  supply a zero-length string to indicate the null namespace
+     * @param localName the local name of the preceding sibling elements to be selected by the {@code Step}
+     * @return a {@code Step}, which selects the preceding sibling elements of a supplied node that have the
+     * required local name and namespace URI.
+     */
+
+    public static Step<XdmNode> followingSiblingOrSelf(String uri, String localName) {
+        return precedingSiblingOrSelf().where(expandedNamePredicate(uri, localName));
+    }
+
+    /**
      * Obtain a {@link Step} to navigate from a node to its namespace nodes
      * @return a Step that selects all nodes on the namespace axis
      */
@@ -848,6 +953,86 @@ public class Steps {
 
     public static Step<XdmNode> preceding(Predicate<? super XdmNode> filter) {
         return preceding().where(filter);
+    }
+
+    /**
+     * Obtain a {@link Step} to navigate from a node to its preceding nodes (excluding ancestors),
+     * which are returned in reverse document order, preceded by the origin node itself
+     * @return a Step that selects all nodes on the preceding-or-self axis
+     */
+    public static Step<XdmNode> precedingOrSelf() {
+        return PRECEDING_OR_SELF;
+    }
+
+    /**
+     * Obtain a {@code Step} that navigates from a node to the preceding elements having a specified
+     * local name. These are returned in reverse document order, preceded by the origin node itself
+     * if it has the requested name.
+     *
+     * @param localName the local name of the preceding elements to be selected by the {@code Step},
+     *                  or "*" to select all preceding-or-self nodes that are element nodes
+     * @return a {@code Step}, which selects the preceding elements of a supplied node that have the
+     * required local name.
+     */
+
+    public static Step<XdmNode> precedingOrSelf(String localName) {
+        return precedingOrSelf().where(localNamePredicate(localName));
+    }
+
+    /**
+     * Obtain a {@code Step} that navigates from a node to the preceding elements having a specified
+     * namespace URI and local name. These are returned in reverse document order, preceded by the origin
+     * node itself if it has the requested name.
+     *
+     * @param uri       the namespace URI of the preceding elements to be selected by the {@code Step}:
+     *                  supply a zero-length string to indicate the null namespace
+     * @param localName the local name of the preceding sibling elements to be selected by the {@code Step}
+     * @return a {@code Step}, which selects the preceding sibling elements of a supplied node that have the
+     * required local name and namespace URI.
+     */
+
+    public static Step<XdmNode> precedingOrSelf(String uri, String localName) {
+        return precedingOrSelf().where(expandedNamePredicate(uri, localName));
+    }
+
+    /**
+     * Obtain a {@link Step} to navigate from a node to its preceding sibling nodes
+     * which are returned in reverse document order, preceded by the origin node itself
+     * @return a Step that selects all nodes on the preceding-or-self axis
+     */
+    public static Step<XdmNode> precedingSiblingOrSelf() {
+        return PRECEDING_SIBLING_OR_SELF;
+    }
+
+    /**
+     * Obtain a {@code Step} that navigates from a node to the preceding sibling elements having a specified
+     * local name. These are returned in reverse document order, preceded by the origin node itself
+     * if it has the requested name.
+     *
+     * @param localName the local name of the preceding elements to be selected by the {@code Step},
+     *                  or "*" to select all preceding-or-self nodes that are element nodes
+     * @return a {@code Step}, which selects the preceding elements of a supplied node that have the
+     * required local name.
+     */
+
+    public static Step<XdmNode> precedingSiblingOrSelf(String localName) {
+        return precedingSiblingOrSelf().where(localNamePredicate(localName));
+    }
+
+    /**
+     * Obtain a {@code Step} that navigates from a node to the preceding sibling elements having a specified
+     * namespace URI and local name. These are returned in reverse document order, preceded by the origin
+     * node itself if it has the requested name.
+     *
+     * @param uri       the namespace URI of the preceding elements to be selected by the {@code Step}:
+     *                  supply a zero-length string to indicate the null namespace
+     * @param localName the local name of the preceding sibling elements to be selected by the {@code Step}
+     * @return a {@code Step}, which selects the preceding sibling elements of a supplied node that have the
+     * required local name and namespace URI.
+     */
+
+    public static Step<XdmNode> precedingSiblingOrSelf(String uri, String localName) {
+        return precedingSiblingOrSelf().where(expandedNamePredicate(uri, localName));
     }
 
     /**
