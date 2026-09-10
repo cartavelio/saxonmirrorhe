@@ -73,7 +73,11 @@ public class XPathCompiler {
     protected XPathCompiler(Processor processor) {
         this.processor = processor;
         this.evaluator = new XPathEvaluator(processor.getUnderlyingConfiguration());
-        env = (IndependentContext) this.evaluator.getStaticContext();
+        env = this.evaluator.getStaticContext();
+        XsdSchema legacySchema = processor.getLegacySchema();
+        if (legacySchema != null) {
+            useSchema(legacySchema);
+        }
     }
 
     /**

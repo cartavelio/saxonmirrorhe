@@ -20,28 +20,32 @@ import java.io.File;
 /**
  * The {@code SchemaManager} is used to load schema documents, and to set options for the way in which they are loaded.
  *
- * <p>The {@code SchemaManager} is deprecated from Saxon 13, and an {@link XsdCompiler} should be used instead.</p>
+ * <p>The {@code SchemaManager} is deprecated from Saxon 13, and an {@link XsdCompiler} should be used instead.
+ * The class is retained to provide a measure of backwards compatibility, but some changes may be needed. In particular:</p>
+ *
+ * <ul>
+ *     <li>The schema must now be loaded (using {@link #load(File)}, {@link #load(Source...)},
+ *     or {@link #importComponents(Source)}) before calling {@link #newSchemaValidator()} to
+ *     construct a validator.</li>
+ *     <li>The schema must be loaded in a single call of {@link #load(File)}, {@link #load(Source...)},
+ *     or {@link #importComponents(Source)}; it can no longer be built incrementally.</li>
+ *     <li>The schema is made available automatically to any {@link XsltCompiler}, {@link XQueryCompiler},
+ *     or {@link XPathCompiler} that is created after the schema is loaded, but it has no effect on
+ *     any pre-existing compilers.</li>
+ *     <li></li>
+ * </ul>
  *
  * <p><i>A note on terminology: a <b>schema</b> is a collection of schema components, such as type definitions,
  * constructed by compiling a set of <b>schema documents</b>.</i></p>
- *
- * <p>The {@code SchemaManager} can be used to build a schema incrementally, by successive calls on {@link #load}.
- * It is more efficient, however, to build it using a single call on {@link #load} supplying multiple {@link Source}
- * objects. The schema that has been built at any point can be extracted using the method {@link #getXsdSchema()};
- * alternatively it can be used to construct a {@link SchemaValidator} which can be used to validate source
- * documents.</p>
- *
+
  * <p>In earlier Saxon releases the schema built using the {@code SchemaManager} was held globally at the level
  * of the {@link Processor} or {@link Configuration}, and new schema components were also added to this schema
  * as a side effect of other actions that load schemas, for example <code>xsl:import-schema</code> in XSLT,
  * <code>import schema</code> declarations in XQuery, and <code>xsi:schemaLocation</code> attributes in source
- * documents undergoing validation. This is no longer the case. The schema built using this class is not implicitly
- * available to queries and stylesheets compiled under this {@link Processor}, and it is not modified when
- * queries and stylesheets import additional schema documents. To make the schema available to stylesheets
- * and queries, extract the schema using {@link #getXsdSchema} and pass it to a method such as
- * {@link XsltCompiler#useSchema(XsdSchema)} or {@link XQueryCompiler#useSchema(XsdSchema)}.</p>
+ * documents undergoing validation. This is no longer the case. The schema built using this class is not modified when
+ * queries and stylesheets import additional schema documents.</p>
  *
- * <p>The {@code SchemaManager} is obtained using the call {@link Processor#getSaxonEdition()}. Repeated calls
+ * <p>The {@code SchemaManager} is obtained using the call {@link Processor#getSchemaManager()}. Repeated calls
  * deliver the same {@code SchemaManager} each time. The {@code SchemaManager} is not thread-safe; in particular,
  * calls on {@link #load(Source...)} should not be made in multiple threads concurrently.</p>
  *

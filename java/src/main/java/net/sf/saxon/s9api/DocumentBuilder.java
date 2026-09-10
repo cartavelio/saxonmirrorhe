@@ -182,6 +182,7 @@ public class DocumentBuilder {
      * how schema validation is performed by the <code>DocumentBuilder</code>. The particular properties
      * that take effect include:</p>
      * <ul>
+     *     <li>The schema itself</li>
      *     <li>The validation mode (strict or lax)</li>
      *     <li>The required top-level element declaration (see {@link SchemaValidator#setDocumentElementName(QName)}</li>
      *     <li>The required type of the top-level element (see {@link SchemaValidator#setDocumentElementTypeName(QName)}</li>

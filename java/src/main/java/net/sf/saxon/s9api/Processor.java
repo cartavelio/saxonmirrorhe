@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import com.saxonica.ee.s9api.SchemaManagerImpl;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.*;
@@ -787,6 +788,17 @@ public class Processor implements Configuration.ApiProvider {
         manager = new com.saxonica.ee.s9api.SchemaManagerImpl(this);
         //#endif
         return manager;
+    }
+
+    /**
+     * Get any schema that has been created using the now-deprecated SchemaManager API
+     * @return any schema that has been created using the SchemaManager API, or null if absent
+     */
+    protected XsdSchema getLegacySchema() {
+        if (schemaManager != null && ((SchemaManagerImpl)schemaManager).hasLoadedSchema) {
+            return schemaManager.getXsdSchema();
+        }
+        return null;
     }
 
 

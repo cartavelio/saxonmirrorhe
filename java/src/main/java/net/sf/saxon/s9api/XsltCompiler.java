@@ -95,6 +95,10 @@ public class XsltCompiler {
         compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());
         compilerInfo.setTargetEdition(config.getEditionCode());
         compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
+        XsdSchema legacySchema = processor.getLegacySchema();
+        if (legacySchema != null) {
+            useSchema(legacySchema);
+        }
     }
 
     /**

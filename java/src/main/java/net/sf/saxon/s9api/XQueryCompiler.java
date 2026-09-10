@@ -62,6 +62,10 @@ public class XQueryCompiler {
     protected XQueryCompiler(Processor processor) {
         this.processor = processor;
         this.staticQueryContext = processor.getUnderlyingConfiguration().newStaticQueryContext();
+        XsdSchema legacySchema = processor.getLegacySchema();
+        if (legacySchema != null) {
+            useSchema(legacySchema);
+        }
     }
 
     /**
