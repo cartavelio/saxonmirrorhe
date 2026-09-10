@@ -3049,34 +3049,7 @@ public class XPathParser {
     protected boolean isReservedInQuery(NamespaceUri uri) {
         return NamespaceUri.isReservedInQuery31(uri);
     }
-
-    protected boolean isReservedUnprefixedFunctionName(String fName) {
-        // TODO: this is the 4.0 list. Make it version-dependent.
-        switch (fName) {
-            case "attribute":
-            case "comment":
-            case "document-node":
-            case "element":
-            case "gnode":
-            case "namespace-node":
-            case "node":
-            case "schema-attribute":
-            case "schema-element":
-            case "processing-instruction":
-            case "text":
-            case "fn":
-            case "function":
-            case "if":
-            case "item":
-            case "jnode":
-            case "switch":
-            case "typeswitch":
-                return true;
-            default:
-                return false;
-        }
-    }
-
+    
     /**
      * Parse a basic step expression (without the predicates).
      * Specifically, we are looking for either a PrimaryExpr, that is:
@@ -3145,7 +3118,9 @@ public class XPathParser {
                         return ae;
                     }
                     case "jnode": {
-                        checkLanguageVersion40("nodeTest " + name);
+                        if (!allowXPath40Syntax) {
+                            return parseFunctionCall(name, null);
+                        }
                         JNodeType jType;
                         if (t.currentToken == Token.RPAREN) {
                             jType = AnyJNodeType.getInstance();
@@ -3160,7 +3135,9 @@ public class XPathParser {
                         return ae;
                     }
                     case "gnode": {
-                        checkLanguageVersion40("nodeTest " + name);
+                        if (!allowXPath40Syntax) {
+                            return parseFunctionCall(name, null);
+                        }
                         nextToken();
                         readToken(Token.LPAREN);
                         readToken(Token.RPAREN);
@@ -3179,7 +3156,9 @@ public class XPathParser {
                         return ae;
                     }
                     case "get": {
-                        checkLanguageVersion40("nodeTest get()");
+                        if (!allowXPath40Syntax) {
+                            return parseFunctionCall(name, null);
+                        }
                         nextToken();
                         readToken(Token.LPAREN);
                         Expression selector = parseExprSingle();
@@ -3189,7 +3168,9 @@ public class XPathParser {
                         return getExpr;
                     }
                     case "type": {
-                        checkLanguageVersion40("nodeTest type()");
+                        if (!allowXPath40Syntax) {
+                            return parseFunctionCall(name, null);
+                        }
                         nextToken();
                         readToken(Token.LPAREN);
                         SequenceType type = parseSequenceType();
@@ -3201,7 +3182,9 @@ public class XPathParser {
                         return typeExpr;
                     }
                     case "record": {
-                        checkLanguageVersion40("nodeTest record(...)");
+                        if (!allowXPath40Syntax) {
+                            return parseFunctionCall(name, null);
+                        }
                         ItemType type = parseRecordTest(this);
                         AxisExpression recordExpr = new AxisExpression(
                                 AxisInfo.CHILD,
@@ -3214,7 +3197,9 @@ public class XPathParser {
                     case "map":
                     case "enum":
                     case "item": {
-                        checkLanguageVersion40("nodeTest " + name + "()");
+                        if (!allowXPath40Syntax) {
+                            return parseFunctionCall(name, null);
+                        }
                         ItemType type = parseItemType();
                         AxisExpression axisExpr = new AxisExpression(
                                 AxisInfo.CHILD,
