@@ -283,8 +283,6 @@ TODO: rethink redefines and override
         found. More questionable is "one hundred and ten" (common in the UK) versus "one hundred ten"
         (common in the US). By adopting ICU4J, we now delegate responsibility for such decisions.</p>
         
-        <p>TODO: check what's in the saxon-resources download.</p>
-        
     </category>
     
     <category name="spi">
