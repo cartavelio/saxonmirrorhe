@@ -435,12 +435,12 @@ public class BuiltInListType implements ListType {
      * @param expression the expression that delivers the content
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
      *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
-     * @throws net.sf.saxon.trans.XPathException
-     *          if the expression will never deliver a value of the correct type
+     * @param schema
+     * @throws net.sf.saxon.trans.XPathException if the expression will never deliver a value of the correct type
      */
 
     @Override
-    public void analyzeContentExpression(/*@NotNull*/ Expression expression, int kind) throws XPathException {
+    public void analyzeContentExpression(/*@NotNull*/ Expression expression, int kind, Schema schema) throws XPathException {
         BuiltInAtomicType.analyzeContentExpression(this, expression, kind);
     }
 

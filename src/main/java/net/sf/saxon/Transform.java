@@ -7,6 +7,7 @@
 
 package net.sf.saxon;
 
+//import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.lib.*;
@@ -26,6 +27,7 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.DateTimeValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -715,7 +717,9 @@ public class Transform {
 
             value = options.getOptionValue("scmin");
             if (value != null) {
-                config.importComponents(new StreamSource(value));
+//                PreparedSchema ps = PreparedSchema.fromScm(config, new StreamSource(value));
+//                compiler.useSchema(null);
+                throw new UnsupportedOperationException();   // TODO: implement me
             }
 
             value = options.getOptionValue("stublib");

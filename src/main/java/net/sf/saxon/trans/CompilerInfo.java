@@ -19,6 +19,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryLibrary;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.packages.PackageLibrary;
+import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
@@ -58,6 +59,7 @@ public class CompilerInfo {
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private int languageVersion = 30;
+    private Schema preLoadedSchema;
 
     private FunctionLibrary stubFunctionLibrary = null;
 
@@ -115,7 +117,9 @@ public class CompilerInfo {
         defaultNamespaceForElementsAndTypes = info.defaultNamespaceForElementsAndTypes;
         unprefixedElementMatchingPolicy = info.unprefixedElementMatchingPolicy;
         languageVersion = info.languageVersion;
+        preLoadedSchema = info.preLoadedSchema;
         stubFunctionLibrary = info.stubFunctionLibrary;
+
 
         //#if CSHARP==false
         outputURIResolver = info.outputURIResolver;
@@ -649,6 +653,16 @@ public class CompilerInfo {
         return queryLibraries;
     }
 
+    public void preLoadSchema(Schema schema) {
+        preLoadedSchema = schema;
+    }
+
+    public Schema getPreLoadedSchema() {
+        return preLoadedSchema;
+    }
+
+
+
     /**
      * Import a set of stub functions (names and signatures) from a JSON file.
      * These functions will be added to the static context of the stylesheet, but any attempt to
@@ -673,6 +687,7 @@ public class CompilerInfo {
     public FunctionLibrary getStubFunctionLibrary() {
         return stubFunctionLibrary;
     }
+
 
 }
 

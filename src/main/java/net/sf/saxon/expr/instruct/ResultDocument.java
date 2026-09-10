@@ -34,6 +34,7 @@ import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
 
@@ -441,12 +442,13 @@ public class ResultDocument extends Instruction
         // which can then be injected at an appropriate point into the output pipeline
 
         if (validationOptions != null && validationOptions.getSchemaValidationMode() != Validation.PRESERVE) {
+            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
             serParams.setValidationFactory(
                     output -> {
                         // Validation can add redundant namespace declarations so we
                         // need to follow it with a namespace reducer
                         NamespaceReducer reducer = new NamespaceReducer(output);
-                        return config.getDocumentValidator(
+                        return schema.getDocumentValidator(
                                 reducer, output.getSystemId(), validationOptions, getLocation());
                     }
             );

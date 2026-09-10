@@ -18,7 +18,6 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.om.Action;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryFunctionLibrary;
@@ -65,9 +64,6 @@ public class StylesheetPackage extends PackageData {
     private StructuredQName defaultMode;
     private boolean declaredModes;
     protected Map<StructuredQName, Properties> namedOutputProperties = new HashMap<>(4);
-
-    // table of imported schemas. The members of this set are strings holding the target namespace.
-    protected Set<NamespaceUri> schemaIndex = new HashSet<>(10);
 
     private FunctionLibraryList functionLibrary;
     private XQueryFunctionLibrary queryFunctions;
@@ -409,16 +405,7 @@ public class StylesheetPackage extends PackageData {
     public Properties getNamedOutputProperties(StructuredQName name) {
         return namedOutputProperties.get(name);
     }
-
-    /**
-     * Get the set of namespaces of schema declarations imported into this package
-     * @return the set of imported namespaces
-     */
-
-    public Set<NamespaceUri> getSchemaNamespaces() {
-        return schemaIndex;
-    }
-
+    
     /**
      * Set the required context item type. Used when there is an xsl:global-context-item child element
      * @param requirement details of the requirement for the global context item
@@ -987,7 +974,7 @@ public class StylesheetPackage extends PackageData {
         }
 
         pss.setTopLevelPackage(this);
-        if (isSchemaAware() || !schemaIndex.isEmpty()) {
+        if (isSchemaAware()) {
             pss.setSchemaAware(true);
         }
         pss.setHostLanguage(HostLanguage.XSLT);

@@ -76,14 +76,18 @@ public class Doc_2 extends SystemFunction implements Callable {
             if (v == Validation.INVALID) {
                throw new XPathException("Invalid validation value " + valStr, "SXZZ0002");
             }
-            result = result.withSchemaValidationMode(v);
+            result = result
+                    .withSchemaValidationMode(v)
+                    .withSchema(rsc.getPackageData().getImportedSchema());
         }
         value = checkedOptions.get("type");
         if (value != null) {
             QNameValue qval = (QNameValue) value.head();
+            StructuredQName name = qval.getStructuredQName();
             result = result
-                    .withTopLevelType(context.getConfiguration().getSchemaType(qval.getStructuredQName()))
-                    .withSchemaValidationMode(Validation.BY_TYPE);
+                    .withTopLevelType(rsc.getPackageData().getImportedSchema().getSchemaType(name))
+                    .withSchemaValidationMode(Validation.BY_TYPE)
+                    .withSchema(rsc.getPackageData().getImportedSchema());
         }
         value = checkedOptions.get("strip-space");
         if (value != null) {

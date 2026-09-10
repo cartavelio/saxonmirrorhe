@@ -7,7 +7,6 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
@@ -23,10 +22,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.type.Type;
+import net.sf.saxon.type.*;
 
 import javax.xml.transform.Result;
 import java.util.*;
@@ -132,8 +128,10 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         // add a validator to the pipeline if required
 
         if (validate) {
-            Configuration config = receiver.getPipelineConfiguration().getConfiguration();
-            receiver = config.getDocumentValidator(receiver, systemId, options, null);
+            Schema schema = options.getSchema();
+            if (schema != null) {
+                receiver = schema.getDocumentValidator(receiver, systemId, options, null);
+            }
         }
 
         ComplexContentOutputter result = new ComplexContentOutputter(receiver);

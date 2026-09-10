@@ -774,6 +774,7 @@ public abstract class TestDriver {
         for (NamespaceUri s : config.getImportedNamespaces()) {
             testXpc.importSchemaNamespace(s.toString());
         }
+
     }
 
 }

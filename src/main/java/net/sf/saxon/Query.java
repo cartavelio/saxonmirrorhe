@@ -7,6 +7,8 @@
 
 package net.sf.saxon;
 
+//import com.saxonica.ee.schema.PreparedSchema;
+
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.lib.*;
@@ -760,7 +762,9 @@ public class Query {
 
         String scmInput = options.getOptionValue("scmin");
         if (scmInput != null) {
-            config.importComponents(new StreamSource(scmInput));
+//            PreparedSchema ps = PreparedSchema.fromScm(config, new StreamSource(value));
+//            //compiler.useSchema(null);
+            throw new UnsupportedOperationException(); // TODO: implement me
         }
 
         if (additionalSchemas != null) {

@@ -254,10 +254,12 @@ public class PatternParser extends XPathParser {
         } else if (allowXPath40Syntax && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
                 isKeyword("atomic")) {
             nextToken();
+
             String name = readName();
             StructuredQName typeName = makeStructuredQName(name, env.getDefaultElementNamespace());
             readToken(Token.RPAREN);
-            SchemaType type = env.getConfiguration().getSchemaType(typeName);
+            SchemaType type = schema.getSchemaType(typeName);
+
             if (type == null || !type.isAtomicType()) {
                 grumble("Unknown atomic type " + typeName);
             }

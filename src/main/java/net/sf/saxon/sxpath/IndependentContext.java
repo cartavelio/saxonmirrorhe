@@ -468,22 +468,6 @@ public class IndependentContext extends AbstractStaticContext
     }
 
 
-    @Override
-    public boolean isImportedSchema(NamespaceUri namespace) {
-        return importedSchemaNamespaces.contains(namespace);
-    }
-
-    /**
-     * Get the set of imported schemas
-     *
-     * @return a Set, the set of URIs representing the names of imported schemas
-     */
-
-    @Override
-    public Set<NamespaceUri> getImportedSchemaNamespaces() {
-        return importedSchemaNamespaces;
-    }
-
     /**
      * Register the set of imported schema namespaces
      *

@@ -30,8 +30,6 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 
-import java.util.Set;
-
 /**
  * An ExpressionContext represents the context for an XPath expression written
  * in the stylesheet.
@@ -379,33 +377,6 @@ public class ExpressionContext implements StaticContext {
 //        } else {
             return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
 //        }
-    }
-
-    /**
-     * Test whether a schema has been imported for a given namespace
-     *
-     * @param namespace the target namespace of the required schema
-     * @return true if a schema for this namespace has been imported
-     */
-
-    @Override
-    public boolean isImportedSchema(NamespaceUri namespace) {
-        //if (Configuration.USE_PACKAGE_BINDING) {
-        return element.getPrincipalStylesheetModule().isImportedSchema(namespace);
-        //} else {
-        //    return getConfiguration().
-        //}
-    }
-
-    /**
-     * Get the set of imported schemas
-     *
-     * @return a Set, the set of URIs representing the names of imported schemas
-     */
-
-    @Override
-    public Set<NamespaceUri> getImportedSchemaNamespaces() {
-        return element.getPrincipalStylesheetModule().getImportedSchemaTable();
     }
 
     /**

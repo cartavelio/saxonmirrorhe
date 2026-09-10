@@ -182,7 +182,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
     public void suppressValidation(int parentValidationMode) {
         if (getValidationAction() == parentValidationMode && getSchemaType() == null) {
             // TODO: is this safe? e.g. if the child has validation=strict but matches a skip wildcard in the parent
-            setValidationAction(Validation.PRESERVE, null);
+            setValidationAction(null, Validation.PRESERVE, null);
         }
     }
 

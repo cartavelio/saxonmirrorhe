@@ -201,6 +201,14 @@ public class ExpressionPresenter {
         }
     }
 
+    public Receiver getReceiver() {
+        return receiver;
+    }
+
+    public ComplexContentOutputter getComplexContentOutputter() {
+        return cco;
+    }
+
     /**
      * Set the default namespace, used for subsequent calls on startElement.
      * Must be consistent throughout the whole document
@@ -408,10 +416,10 @@ public class ExpressionPresenter {
     private int _startElement(String name) {
         //System.err.println("start " + name + " at " + new XPathException("").getStackTrace().length);
         try {
-            if (inStartTag) {
-                cco.startContent();
-                inStartTag = false;
-            }
+//            if (inStartTag) {
+//                cco.startContent();
+//                inStartTag = false;
+//            }
             NodeName nodeName;
             if (defaultNamespace == null) {
                 nodeName = new NoNamespaceName(name);
@@ -427,7 +435,7 @@ public class ExpressionPresenter {
             err.printStackTrace();
             throw new InternalError(err.getMessage());
         }
-        inStartTag = true;
+//        inStartTag = true;
         return depth++;
     }
 
@@ -507,11 +515,11 @@ public class ExpressionPresenter {
     public int endElement() {
         //System.err.println("end at " + new XPathException("").getStackTrace().length);
         try {
-            if (inStartTag) {
-                cco.startContent();
-                inStartTag = false;
-            }
-            cco.endElement();
+//            if (inStartTag) {
+//                cco.startContent();
+//                inStartTag = false;
+//            }
+              cco.endElement();
         } catch (XPathException err) {
             err.printStackTrace();
             throw new InternalError(err.getMessage());

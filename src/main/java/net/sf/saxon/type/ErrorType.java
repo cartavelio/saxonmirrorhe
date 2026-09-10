@@ -514,11 +514,12 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
      *
      * @param expression the expression that delivers the content
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
-*                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
+     *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
+     * @param schema
      */
 
     @Override
-    public void analyzeContentExpression(Expression expression, int kind) throws XPathException {
+    public void analyzeContentExpression(Expression expression, int kind, Schema schema) throws XPathException {
         throw new XPathException("No expression can ever return a value of type xs:error");
     }
 

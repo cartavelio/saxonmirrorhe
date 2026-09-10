@@ -16,6 +16,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 
 import java.util.List;
 import java.util.Map;
@@ -83,9 +84,9 @@ public class OnDemandFunctionSet implements FunctionLibrary {
     }
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
         boolean match = load(functionName, null);
-        return match && library.isAvailable(functionName, languageLevel);
+        return match && library.isAvailable(functionName, schema, languageLevel);
     }
 
     @Override

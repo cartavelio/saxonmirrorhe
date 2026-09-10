@@ -132,6 +132,18 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             staticQueryContext.setBaseURI(getStaticBaseUriString());
         }
 
+        staticQueryContext.setModuleURIResolver(moduleURIResolver);
+        String baseURI = getRetainedStaticContext().getStaticBaseUriString();
+        staticQueryContext.setBaseURI(baseURI);
+        staticQueryContext.preLoadSchema(getRetainedStaticContext().getPackageData().getImportedSchema());
+        StreamSource[] streamSources;
+        try {
+            String[] hints = locationHints.toArray(new String[0]);
+            streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri.toString(), baseURI, hints);
+            if (streamSources == null) {
+                streamSources = new StandardModuleURIResolver(config).resolve(moduleUri.toString(), baseURI, hints);
+
+
 
         if (content == null) {
             List<String> locationHints = new ArrayList<>(); // location hints are currently ignored by QT3TestDriver?

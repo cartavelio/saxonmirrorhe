@@ -78,6 +78,8 @@ public class ConversionRules {
         cr.converterCache.clear();
     }
 
+
+
     public void setTypeHierarchy(TypeHierarchy typeHierarchy) {
         this.typeHierarchy = typeHierarchy;
     }

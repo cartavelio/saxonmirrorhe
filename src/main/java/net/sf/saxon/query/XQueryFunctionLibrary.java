@@ -26,7 +26,11 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+
+import net.sf.saxon.type.Schema;
+
 import net.sf.saxon.transpile.CSharpReplaceBody;
+
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
@@ -217,13 +221,19 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
      * Test whether a function with a given name and arity is available
      * <p>This supports the function-available() function in XSLT.</p>
      *
-     * @param functionName the qualified name of the function being called
+     * @param functionName  the qualified name of the function being called
+     * @param schema
      * @param languageLevel the XPath language level times 10 (31 = XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
-        return getDeclarationByKey(functionName) != null;
+
+    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
+        return functions.get(functionName) != null;
+//=======
+//    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+//        return getDeclarationByKey(functionName) != null;
+//>>>>>>> main
     }
 
     public Iterable<NamespaceUri> getNamespaces() {

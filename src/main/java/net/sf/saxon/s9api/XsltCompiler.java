@@ -79,6 +79,7 @@ public class XsltCompiler {
     private final Processor processor;
     private final Configuration config;
     private final CompilerInfo compilerInfo;
+    private XsdSchema usedSchema;
 
 
     /**
@@ -94,6 +95,39 @@ public class XsltCompiler {
         compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());
         compilerInfo.setTargetEdition(config.getEditionCode());
         compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
+    }
+
+    /**
+     * Set the {@link XsdSchema} to be used with this {@code XsltCompiler}.
+     *
+     * <p>If this method is called, then any <code>xsl:import-schema</code> declaration
+     * for a target namespace that is present in the supplied schema (other than an
+     * <code>xsl:import-schema</code> with an inline <code>xs:schema</code>) is satisfied
+     * by schema components in this schema; the <code>schema-location</code> attribute
+     * on the declaration is ignored.</p>
+     *
+     * <p>However, this does not make <code>xsl:import-schema</code> declarations redundant;
+     * they are still needed in order to permit reference to schema components by name (that is,
+     * to make the names of element and attribute declarations and schema types visible in the
+     * static context).</p>
+     *
+     * <p>When validation is invoked within the XSLT code (using a validation or type attribute),
+     * all the schema components supplied in this schema are available for use during the validation
+     * episode, whether or not they have been imported into the static context by means of an
+     * <code>xsl:import-schema</code> declaration.</p>
+     *
+     * @param schema the schema to be imported
+     * @since 13.0
+     */
+
+    public void useSchema(XsdSchema schema) {
+        compilerInfo.setSchemaAware(true);
+        compilerInfo.preLoadSchema(schema.getUnderlyingSchema());
+        usedSchema = schema;
+    }
+
+    public XsdSchema getUsedSchema() {
+        return usedSchema;
     }
 
     /**

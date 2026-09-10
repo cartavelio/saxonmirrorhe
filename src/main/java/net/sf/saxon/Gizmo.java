@@ -38,6 +38,7 @@ import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
@@ -70,6 +71,7 @@ public class Gizmo {
     private boolean typed = false;
     private final List<DocumentImpl> undoBuffer = new LinkedList<>();
     private PrintStream sysOut = System.out;
+    private Schema currentSchema = null;
 
     private static class SubCommand {
         String name;
@@ -880,7 +882,7 @@ public class Gizmo {
         }
         String fileName = buffer.toString();
         fileName = fileName.replaceFirst("^~", System.getProperty("user.home"));
-        config.loadSchema(new File(fileName).getAbsoluteFile().toURI().toString());
+        currentSchema = config.loadSchema(new File(fileName).getAbsoluteFile().toURI().toString());
     }
 
     private void set(StringBuilder buffer) throws XPathException {
@@ -933,13 +935,16 @@ public class Gizmo {
         if (!config.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION)) {
             throw new XPathException("Schema processing is not supported in this Saxon configuration");
         }
+        if (currentSchema == null) {
+            currentSchema = config.emptySchema();
+        }
         needCurrentDoc();
         saveCurrentDoc();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         Builder builder = new LinkedTreeBuilder(pipe, Durability.MUTABLE);
         builder.open();
         ParseOptions options = new ParseOptions().withSchemaValidationMode(Validation.STRICT);
-        Receiver val = config.getDocumentValidator(builder, currentDoc.getSystemId(), options, Loc.NONE);
+        Receiver val = currentSchema.getDocumentValidator(builder, currentDoc.getSystemId(), options, Loc.NONE);
         currentDoc.copy(val, CopyOptions.ALL_NAMESPACES, Loc.NONE);
         builder.close();
         currentDoc = (DocumentImpl)builder.getCurrentRoot();

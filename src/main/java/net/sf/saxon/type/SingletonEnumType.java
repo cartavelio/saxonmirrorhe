@@ -593,11 +593,12 @@ public class SingletonEnumType implements AtomicType {
      * @param expression the expression that delivers the content
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
      *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
+     * @param schema
      * @throws XPathException if the expression will never deliver a value of the correct type
      */
     @Override
-    public void analyzeContentExpression(Expression expression, int kind) throws XPathException {
-        BuiltInAtomicType.STRING.analyzeContentExpression(expression, kind);
+    public void analyzeContentExpression(Expression expression, int kind, Schema schema) throws XPathException {
+        BuiltInAtomicType.STRING.analyzeContentExpression(expression, kind, schema);
     }
 
     /**

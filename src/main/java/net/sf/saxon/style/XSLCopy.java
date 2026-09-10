@@ -16,6 +16,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
@@ -178,12 +179,13 @@ public class XSLCopy extends StyleElement {
             content = Literal.makeEmptySequence();
         }
 
+        Schema schema = getContainingPackage().getImportedSchema();
         Copy inst = new Copy(//select,
-                //selectSpecified,
-                copyNamespaces,
-                inheritNamespaces,
-                schemaType,
-                validationAction);
+                             //selectSpecified,
+                             copyNamespaces,
+                             inheritNamespaces,
+                             schema, schemaType,
+                             validationAction);
 
         inst.setLocation(saveLocation());
         inst.setContentExpression(content);

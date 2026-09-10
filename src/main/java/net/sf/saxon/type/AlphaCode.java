@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -680,17 +679,17 @@ public class AlphaCode {
      * Convert an AlphaCode to a SequenceType
      *
      * @param input  the input alphacode
-     * @param config the Saxon Configuration (which must contain any user-defined types that are
+     * @param schema the schema (which must contain any user-defined types that are
      *               referenced in the Alphacode)
      * @return the corresponding SequenceType
      * @throws IllegalArgumentException if the input is not a valid AlphaCode
      */
 
-    public static SequenceType toSequenceType(String input, Configuration config) {
+    public static SequenceType toSequenceType(String input, Schema schema) {
         TreeCallBack callBack = new TreeCallBack();
         AlphaCodeParser<AlphaCodeTree> parser = new AlphaCodeParser<>(input, callBack);
         AlphaCodeTree tree = parser.parseType(null);
-        return sequenceTypeFromTree(tree, config);
+        return sequenceTypeFromTree(tree, schema);
     }
 
     /**
@@ -698,14 +697,14 @@ public class AlphaCode {
      * may be omitted, or may be "1": any other value is treated as an error.
      *
      * @param input  the input alphacode
-     * @param config the Saxon Configuration (which must contain any user-defined types that are
+     * @param schema the imported schema (which must contain any user-defined types that are
      *               referenced in the Alphacode)
      * @return the corresponding SequenceType
      * @throws IllegalArgumentException if the input is not a valid AlphaCode
      */
 
-    public static ItemType toItemType(String input, Configuration config) {
-        SequenceType st = toSequenceType(input, config);
+    public static ItemType toItemType(String input, Schema schema) {
+        SequenceType st = toSequenceType(input, schema);
         if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
             throw new IllegalArgumentException("Supplied alphacode has a cardinality other than 1");
         }
@@ -716,12 +715,13 @@ public class AlphaCode {
      * Convert a tree (that results from parsing an AlphaCode) to a corresponding SequenceType
      *
      * @param tree   the tree resulting from parsing
-     * @param config the Saxon Configuration (which must contain any user-defined types that are
+     * @param schema the imported schema (which must contain any user-defined types that are
      *               referenced in the Alphacode)
      * @return the corresponding SequenceType
      */
 
-    private static SequenceType sequenceTypeFromTree(AlphaCodeTree tree, Configuration config) {
+    private static SequenceType sequenceTypeFromTree(AlphaCodeTree tree, Schema schema) {
+        NamePool namePool = schema.getConfiguration().getNamePool();
         String principal = tree.principal;
         ItemType itemType = null;
         if (principal.isEmpty()) {
@@ -733,7 +733,8 @@ public class AlphaCode {
             }
             itemType = builtIn;
             if (tree.name != null) {
-                SchemaType type = config.getSchemaType(StructuredQName.fromEQName(tree.name));
+                StructuredQName name = StructuredQName.fromEQName(tree.name);
+                SchemaType type = schema.getSchemaType(name);
                 if (!(type instanceof PlainType)) {
                     throw new IllegalArgumentException("Schema type " + tree.name + " is not known");
                 }
@@ -741,7 +742,7 @@ public class AlphaCode {
             } else if (builtIn == BuiltInAtomicType.ANY_ATOMIC && tree.members != null) {
                 List<ItemType> members = new ArrayList<>();
                 for (AlphaCodeTree m : tree.members) {
-                    SequenceType st = sequenceTypeFromTree(m, config);
+                    SequenceType st = sequenceTypeFromTree(m, schema);
                     if (st.getPrimaryType().isAtomicType()) {
                         final AtomicType primaryType = (AtomicType) st.getPrimaryType();
                         members.add(primaryType);
@@ -758,24 +759,25 @@ public class AlphaCode {
             boolean nillable = tree.nillable;
             if (contentName != null) {
                 contentQName = StructuredQName.fromEQName(contentName);
-                contentType = config.getSchemaType(contentQName);
+                SchemaType contentType = schema.getSchemaType(contentQName);
                 if (contentType == null) {
                     throw new IllegalArgumentException("Unknown type " + contentName);
                 }
-//                contentTest = new ContentTypeTest(principal.equals("NE") ? Type.ELEMENT : Type.ATTRIBUTE,
-//                                                  AnyNodeTest.getInstance(), contentType, nillable, config);
+                contentTest = new ContentTypeTest(principal.equals("NE") ? Type.ELEMENT : Type.ATTRIBUTE,
+                                                  contentType, schema.getConfiguration(), nillable);
+
             }
             if (tree.vennOperands != null) {
                 if (tree.vennOperands.length == 2) {
-                    NodeTest nt0 = (NodeTest) sequenceTypeFromTree(tree.vennOperands[0], config).getPrimaryType();
-                    NodeTest nt1 = (NodeTest) sequenceTypeFromTree(tree.vennOperands[1], config).getPrimaryType();
+                    NodeTest nt0 = (NodeTest) sequenceTypeFromTree(tree.vennOperands[0], schema).getPrimaryType();
+                    NodeTest nt1 = (NodeTest) sequenceTypeFromTree(tree.vennOperands[1], schema).getPrimaryType();
                     itemType = new CombinedNodeTest(nt0, tree.vennOperator, nt1);
                 } else {
                     // Dangerous short-cut here - we know this will be a union of node kind tests
                     assert tree.vennOperator == OperatorSymbol.UNION;
                     UType u = UType.VOID;
                     for (int i = 0; i < tree.vennOperands.length; i++) {
-                        ItemType it = sequenceTypeFromTree(tree.vennOperands[i], config).getPrimaryType();
+                        ItemType it = sequenceTypeFromTree(tree.vennOperands[i], schema).getPrimaryType();
                         assert it instanceof NodeKindTest;
                         u = u.union(it.getUType());
                     }
@@ -837,14 +839,14 @@ public class AlphaCode {
                             if (name == null) {
                                 itemType = NodeKindTest.NAMESPACE;
                             } else {
-                                itemType = new NameTest(Type.NAMESPACE, NamespaceUri.NULL, qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.NAMESPACE, NamespaceUri.NULL, qName.getLocalPart(), namePool);
                             }
                             break;
                         case "NP":
                             if (name == null) {
                                 itemType = NodeKindTest.PROCESSING_INSTRUCTION;
                             } else {
-                                itemType = new NameTest(Type.PROCESSING_INSTRUCTION, NamespaceUri.NULL, qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.PROCESSING_INSTRUCTION, NamespaceUri.NULL, qName.getLocalPart(), namePool);
                             }
                             break;
                         case "ND":
@@ -852,7 +854,7 @@ public class AlphaCode {
                             if (elementType == null) {
                                 itemType = NodeKindTest.DOCUMENT;
                             } else {
-                                ItemType e = sequenceTypeFromTree(elementType, config).getPrimaryType();
+                                ItemType e = sequenceTypeFromTree(elementType, schema).getPrimaryType();
                                 itemType = new DocumentNodeTest((NodeTest) e);
                             }
                             break;
@@ -885,31 +887,35 @@ public class AlphaCode {
                             break;
                         case "NES": {
                             assert qName != null;
-                            SchemaDeclaration decl = config.getElementDeclaration(qName);
+                            SchemaDeclaration decl = schema.getElementDecl(qName);
                             if (decl != null) {
                                 try {
-                                    itemType = decl.makeSchemaNodeTest();
+                                    itemType = schema.makeSchemaElementTest(decl.getFingerprint());
                                 } catch (MissingComponentException e) {
                                     //
+                                } catch (SchemaException e) {
+                                    throw new IllegalArgumentException(e);
                                 }
                             }
                             if (itemType == null) {
-                                itemType = new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), namePool);
                             }
                             break;
                         }
                         case "NAS": {
                             assert qName != null;
-                            SchemaDeclaration decl = config.getAttributeDeclaration(qName);
+                            SchemaDeclaration decl = schema.getAttributeDecl(qName);
                             if (decl != null) {
                                 try {
-                                    itemType = decl.makeSchemaNodeTest();
+                                    itemType = schema.makeSchemaAttributeTest(decl.getFingerprint());
                                 } catch (MissingComponentException e) {
                                     //
+                                } catch (SchemaException e) {
+                                    throw new IllegalArgumentException(e);
                                 }
                             }
                             if (itemType == null) {
-                                itemType = new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
+                                itemType = new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), namePool);
                             }
                             break;
                         }
@@ -925,15 +931,15 @@ public class AlphaCode {
                 if (valueType == null) {
                     itemType = ArrayItemType.ANY_ARRAY_TYPE;
                 } else {
-                    itemType = new ArrayItemType(sequenceTypeFromTree(valueType, config));
+                    itemType = new ArrayItemType(sequenceTypeFromTree(valueType, schema));
                 }
             } else if (principal.equals("FM")) {
                 if (tree.fieldNames == null) {
                     AlphaCodeTree keyType = tree.keyType;
                     AlphaCodeTree valueType = tree.valueType;
                     if (keyType != null && valueType != null) {
-                        AtomicType a = (AtomicType) sequenceTypeFromTree(keyType, config).getPrimaryType();
-                        SequenceType v = sequenceTypeFromTree(valueType, config);
+                        AtomicType a = (AtomicType) sequenceTypeFromTree(keyType, schema).getPrimaryType();
+                        SequenceType v = sequenceTypeFromTree(valueType, schema);
                         itemType = new MapType(a, v);
                     } else {
                         itemType = MapType.ANY_MAP_TYPE;
@@ -947,7 +953,7 @@ public class AlphaCode {
                             int xcardinality = Cardinality.fromOccurrenceIndicator(tree.cardinality);
                             fieldTypes.add(SequenceType.makeSequenceType(selfie, xcardinality));
                         } else {
-                            fieldTypes.add(sequenceTypeFromTree(t, config));
+                            fieldTypes.add(sequenceTypeFromTree(t, schema));
                         }
                     }
                     recordTest.setDetails(tree.fieldNames, fieldTypes, tree.optionalFieldNames, tree.extensibleTupleType);
@@ -963,11 +969,11 @@ public class AlphaCode {
                     if (returnType == null) {
                         r = SequenceType.ANY_SEQUENCE;
                     } else {
-                        r = sequenceTypeFromTree(returnType, config);
+                        r = sequenceTypeFromTree(returnType, schema);
                     }
                     SequenceType[] a = new SequenceType[argTypes.size()];
                     for (int i = 0; i < a.length; i++) {
-                        a[i] = sequenceTypeFromTree(argTypes.get(i), config);
+                        a[i] = sequenceTypeFromTree(argTypes.get(i), schema);
                     }
                     itemType = new SpecificFunctionType(a, r);
                 }

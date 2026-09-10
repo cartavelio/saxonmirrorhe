@@ -708,7 +708,9 @@ public class SaxonCAPI {
      * @return  Pointer to the C char array held in the C/C++ memory space. It is the caller's responsibility yo delete the associated memory
      */
     static CCharPointer stringToNative2(net.sf.saxon.option.cpp.SaxonCAPI.AllocatorCCharFn alloc, String string) {
-
+        /*if(string.isEmpty()) {
+            return WordFactory.nullPointer();
+        }*/
         byte[] b = string.getBytes(StandardCharsets.UTF_8);
         CCharPointer a = alloc.call(b.length + 1);
         for (int i = 0; i < b.length; i++) {

@@ -10,6 +10,7 @@ package net.sf.saxon.expr.parser;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.style.SourceBinding;
@@ -17,6 +18,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
+
+import java.util.List;
 
 /**
  * Dummy Parser extension for syntax in XPath that is accepted only in particular product variants.
@@ -185,9 +188,14 @@ public class ParserExtension {
         return null;
     }
 
+
+    public void processSchemaImports(QueryModule module, List<XQueryParser.Import> schemaImports) throws XPathException {
+        throw new XPathException("Import schema requires Saxon-EE");
+    }
     public Expression parseDeepUpdateExpression(XQueryParser parser) throws XPathException {
         parser.grumble("update map/array expressions are not allowed in SaxonHE");
         return new ErrorExpression();
+
     }
 
 

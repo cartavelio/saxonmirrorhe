@@ -73,6 +73,7 @@ public class Environment implements ResourceResolver {
     public XQueryCompiler xqueryCompiler;
     public XsltCompiler xsltCompiler;
     public XsltExecutable xsltExecutable;
+    public XsdSchema xsdSchema;
     public File exportedStylesheet;
     public XdmItem contextItem;
     public HashMap<QName, XdmValue> params = new HashMap<>();
@@ -83,11 +84,12 @@ public class Environment implements ResourceResolver {
     public StringBuilder paramDecimalDeclarations = new StringBuilder(256);
     public UnparsedTextURIResolver unparsedTextResolver;
     public List<ResetAction> resetActions = new ArrayList<>();
-    public boolean schemaAvailable = false;
     public boolean outputTree = true;
     public boolean outputSerialize = false;
     public Map<String, CatalogResource> catalogResources = new HashMap<>();
     public Map<String, List<String>> jsCollections;
+    public boolean schemaAware = false;
+    public boolean validateSources = false;
 
 
     /**
@@ -250,12 +252,12 @@ public class Environment implements ResourceResolver {
 
         // load the requested schema documents
 
-        SchemaManager manager = environment.processor.getSchemaManager();
-        boolean validateSources = loadSchemaDocuments(driver, xpc, env, environment, manager);
+        XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
+        environment.xsdSchema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
 
         // load the requested source documents
 
-        loadSourceDocuments(driver, xpc, env, environment, builder, manager, validateSources);
+        loadSourceDocuments(driver, xpc, env, environment, builder, environment.xsdSchema);
 
         // create a collection URI resolver to handle the requested collections
 
@@ -412,36 +414,39 @@ public class Environment implements ResourceResolver {
         }
     }
 
-    private static boolean loadSchemaDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, SchemaManager manager) throws SaxonApiException {
-        boolean validateSources = false;
+    private static XsdSchema loadSchemaDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, XsdCompiler compiler) throws SaxonApiException {
+        environment.validateSources = false;
+        List<Source> sourceList = new ArrayList<>();
         for (XdmNode schema : env.children("schema")) {
+            environment.schemaAware = true;
             String role = schema.attribute("role");
             String xsdVersion = schema.attribute("xsd-version");
-            if (manager == null) {
+            if (compiler == null) {
                 driver.println("*** Processor is not schema aware");
                 environment.usable = false;
-                return false;
+                return null;
             }
             if (!driver.treeModel.isSchemaAware()) {
                 driver.println("*** Tree model is not schema aware");
                 environment.usable = false;
-                return false;
+                return null;
             }
             if (xsdVersion != null) {
-                manager.setXsdVersion(xsdVersion);
+                compiler.setXsdVersion(xsdVersion);
             } else {
-                manager.setXsdVersion("1.0");
+                compiler.setXsdVersion("1.0");
             }
             if (!"secondary".equals(role)) {
                 String href = schema.attribute("file");
                 String ns = schema.attribute("uri");
                 if (NamespaceConstant.FN.equals(ns)) {
-                    manager.setXsdVersion("1.1");
+                    compiler.setXsdVersion("1.1");
                 }
                 if (href == null) {
                     try {
-                        Source[] sources = manager.getSchemaURIResolver().resolve(ns, null, new String[0]);
-                        manager.load(sources[0]);
+                        Source[] sources = compiler.getSchemaURIResolver().resolve(ns, null, new String[0]);
+                        sourceList.add(sources[0]);
+                        //manager.load(sources[0]);
                     } catch (Exception e) {
                         driver.println("*** Failed to load schema by URI: " + ns + " - " + e.getMessage());
                         e.printStackTrace();
@@ -449,9 +454,10 @@ public class Environment implements ResourceResolver {
                 } else {
                     File file = new File(env.getBaseURI().resolve(href));
                     try {
-                        manager.load(file);
-                    } catch (SaxonApiException err) {
-                        driver.println("*** Failed to load schema: " + href + " - " + err.getMessage());
+                        sourceList.add(new StreamSource(file));
+                        //manager.load(file);
+//                    } catch (SaxonApiException err) {
+//                        driver.println("*** Failed to load schema: " + href + " - " + err.getMessage());
                     } catch (NullPointerException err) {
                         err.printStackTrace();
                         driver.println("*** NPE: Failed to load schema: " + href + " - " + err.getMessage());
@@ -460,14 +466,28 @@ public class Environment implements ResourceResolver {
                 xpc.importSchemaNamespace(ns);
                 environment.xpathCompiler.importSchemaNamespace(ns);
                 if ("source-reference".equals(role)) {
-                    validateSources = true;
+                    environment.validateSources = true;
                 }
                 if ("stylesheet-import".equals(role)) {
                     environment.xsltCompiler.setSchemaAware(true);
                 }
             }
         }
-        return validateSources;
+        XsdSchema schema = null;
+        if (!sourceList.isEmpty()) {
+            try {
+                schema = compiler.compile(sourceList.toArray(new Source[0]));
+                if (environment.xqueryCompiler != null) {
+                    environment.xqueryCompiler.useSchema(schema);
+                }
+                if (environment.xsltCompiler != null) {
+                    environment.xsltCompiler.useSchema(schema);
+                }
+            } catch (SaxonApiException err) {
+                driver.println("*** Failed to load schema: " + err.getMessage());
+            }
+        }
+        return schema;
     }
 
     private static void declareExternalVariables(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment) throws SaxonApiException {
@@ -819,7 +839,7 @@ public class Environment implements ResourceResolver {
         }
     }
 
-    private static void loadSourceDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, DocumentBuilder builder, SchemaManager manager, boolean validateSources) throws SaxonApiException {
+    private static void loadSourceDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, DocumentBuilder builder, XsdSchema schema) throws SaxonApiException {
         for (XdmNode source : env.children("source")) {
 
             CatalogResource res = new CatalogResource();
@@ -847,15 +867,15 @@ public class Environment implements ResourceResolver {
                 selectedTreeModel = TreeModel.LINKED_TREE;
                 builder.setTreeModel(selectedTreeModel);
             }
-            if (!validateSources && validation.equals("skip")) {
+            if (!environment.validateSources && validation.equals("skip")) {
                 builder.setSchemaValidator(null);
-            } else if (manager == null) {
+            } else if (schema == null) {
                 environment.usable = false;
             } else {
                 if (!selectedTreeModel.isSchemaAware()) {
                     builder.setTreeModel(TreeModel.TINY_TREE);
                 }
-                SchemaValidator validator = manager.newSchemaValidator();
+                SchemaValidator validator = schema.newValidator();
                 validator.setLax("lax".equals(validation));
                 builder.setSchemaValidator(validator);
                 environment.xpathCompiler.setSchemaAware(true);

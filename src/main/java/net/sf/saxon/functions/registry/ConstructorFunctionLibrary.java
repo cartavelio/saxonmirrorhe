@@ -65,12 +65,13 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         if (arity == 0 && staticContext.getPackageData().getHostLanguageVersion() < 40) {
             return null;
         }
+        Schema schema = staticContext.getPackageData().getImportedSchema();
         final NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
         if (uri.equals(NamespaceUri.ANONYMOUS)) {
             return null;
         }
         final String localName = functionName.getComponentName().getLocalPart();
-        final SchemaType type = config.getSchemaType(new StructuredQName("", uri, localName));
+        final SchemaType type = schema.getSchemaType(new StructuredQName("", uri, localName));
         if (type == null || type.isComplexType()) {
             return null;
         }
@@ -102,11 +103,12 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
     }
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
         if (functionName.getArity() != 1) {
             return false;
         }
-        final SchemaType type = config.getSchemaType(functionName.getComponentName());
+        StructuredQName name = functionName.getComponentName();
+        final SchemaType type = schema.getSchemaType(name);
         if (type == null || type.isComplexType()) {
             return false;
         }
@@ -203,7 +205,8 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         // Now see if it's a constructor function for a user-defined type
 
         if (arguments.length == 1) {
-            SchemaType st = config.getSchemaType(new StructuredQName("", uri, localName));
+            Schema schema = env.getPackageData().getImportedSchema();
+            SchemaType st = schema.getSchemaType(new StructuredQName("", uri, localName));
             if (st instanceof SimpleType) {
                 if (st instanceof AtomicType) {
                     return new CastExpression(arguments[0], (AtomicType) st, true);

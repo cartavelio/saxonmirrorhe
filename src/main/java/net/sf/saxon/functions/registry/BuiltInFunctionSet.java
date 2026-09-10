@@ -291,13 +291,14 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * Test whether a function with a given name and arity is available
      * <p>This supports the function-available() function in XSLT.</p>
      *
-     * @param symbolicName the qualified name of the function being called, together with its arity.
-     *                     For legacy reasons, the arity may be set to -1 to mean any arity will do
+     * @param symbolicName  the qualified name of the function being called, together with its arity.
+     *                      For legacy reasons, the arity may be set to -1 to mean any arity will do
+     * @param schema
      * @param languageLevel the XPath language level (times 10, e.g. 31 for XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
     @Override
-    public boolean isAvailable(SymbolicName.F symbolicName, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F symbolicName, Schema schema, int languageLevel) {
         StructuredQName qn = symbolicName.getComponentName();
         if (!qn.hasURI(getNamespace())) {
             return false;

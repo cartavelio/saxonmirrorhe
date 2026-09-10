@@ -8,7 +8,6 @@
 package net.sf.saxon.query;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.*;
 import net.sf.saxon.expr.instruct.*;
@@ -79,7 +78,6 @@ public class XQueryParser extends XPathParser {
     private boolean preambleProcessed = false;
 
     public final Set<NamespaceUri> importedModules = new HashSet<>(5);
-    final List<NamespaceUri> namespacesToBeSealed = new ArrayList<>(10);
     final List<Import> schemaImports = new ArrayList<>(5);
     final List<Import> moduleImports = new ArrayList<>(5);
 
@@ -598,7 +596,6 @@ public class XQueryParser extends XPathParser {
                         // we have read "declare %"
                         processPreamble();
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         AnnotationList annotationList = parseAnnotationsList();
@@ -700,21 +697,18 @@ public class XQueryParser extends XPathParser {
                     } else if (isKeyword("variable")) {
                         //allowSetters = false;
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
                         parseVariableDeclaration(AnnotationList.EMPTY);
                     } else if (tryKeyword("context")) {
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
                         parseContextItemDeclaration();
                     } else if (isKeyword("function")) {
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
@@ -722,21 +716,18 @@ public class XQueryParser extends XPathParser {
                     } else if (tryKeyword("updating")) {
                         expectKeyword("function");
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
                         parserExtension.parseUpdatingFunctionDeclaration(this);
                     } else if (tryKeyword("option")) {
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         parseOptionDeclaration();
                     } else if (tryKeyword("item-type")) {
                         checkSyntaxExtensions("declare item-type");
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         parseItemTypeDeclaration(AnnotationList.EMPTY);
@@ -899,13 +890,6 @@ public class XQueryParser extends XPathParser {
         }
     }
 
-
-    private void sealNamespaces(/*@NotNull*/ List<NamespaceUri> namespacesToBeSealed, /*@NotNull*/ Configuration config) {
-        for (NamespaceUri ns : namespacesToBeSealed) {
-            config.sealNamespace(ns);
-        }
-    }
-
     /**
      * Method called once the setters have been read to do tidying up that can't be done until we've got
      * to the end
@@ -938,16 +922,13 @@ public class XQueryParser extends XPathParser {
             }
             ((QueryModule) env).setDefaultCollationName(collationName);
         }
-        for (Import imp : schemaImports) {
-            try {
-                applySchemaImport(imp);
-            } catch (XPathException err) {
-                if (!err.hasBeenReported()) {
-                    throw err.maybeWithLocation(makeLocation(imp.offset));
-                }
-            }
+
+        if (!schemaImports.isEmpty()) {
+            applySchemaImports(schemaImports);
         }
+
         boolean reuseFunctionLibrary = !foundFunctionDeclaration && moduleImports.size() == 1;
+
         for (Import imp : moduleImports) {
             try {
                 applyModuleImport(imp, reuseFunctionLibrary);
@@ -1194,32 +1175,28 @@ public class XQueryParser extends XPathParser {
         getStaticContext().getPackageData().setSchemaAware(true);
     }
 
-    private void applySchemaImport(/*@NotNull*/ Import sImport) throws XPathException {
+//    private void applySchemaImport(/*@NotNull*/ Import sImport) throws XPathException {
+//
+//        // Do the importing
+//
+//        Configuration config = env.getConfiguration();
+//        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+//        synchronized(config) {
+//            PackageData pack = env.getPackageData();
+//            if (pack.getImportedSchema().includesTargetNamespace(sImport.namespaceURI)) {
+//                // Schema was preloaded
+//                ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
+//                return;
+//            }
+//            parserExtension.processSchemaImports(sImport.namespaceURI, sImport.locationURIs, env.getStaticBaseURI(), (QueryModule)env);
+//
+//            ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
+//        }
+//    }
 
-        // Do the importing
 
-        Configuration config = env.getConfiguration();
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized(config) {
-            if (!config.isSchemaAvailable(sImport.namespaceURI)) {
-                if (!sImport.locationURIs.isEmpty()) {
-                    try {
-                        PipelineConfiguration pipe = config.makePipelineConfiguration();
-                        config.readMultipleSchemas(pipe, env.getStaticBaseURI(), sImport.locationURIs, sImport.namespaceURI);
-                        namespacesToBeSealed.add(sImport.namespaceURI);
-                    } catch (SchemaException err) {
-                        grumble("Error in schema " + sImport.namespaceURI + ": " + err.getMessage(), "XQST0059", sImport.offset);
-                    }
-                } else if (sImport.namespaceURI.equals(NamespaceUri.XML) ||
-                        sImport.namespaceURI.equals(NamespaceUri.FN) ||
-                        sImport.namespaceURI.equals(NamespaceUri.SCHEMA_INSTANCE)) {
-                    config.addSchemaForBuiltInNamespace(sImport.namespaceURI);
-                } else {
-                    grumble("Unable to locate requested schema " + sImport.namespaceURI, "XQST0059", sImport.offset);
-                }
-            }
-            ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
-        }
+    public void applySchemaImports(List<Import> schemaImports) throws XPathException {
+        parserExtension.processSchemaImports((QueryModule)env, schemaImports);
     }
 
     /**
@@ -3217,7 +3194,10 @@ public class XQueryParser extends XPathParser {
 
         Expression exp = parseExpression();
         if (exp instanceof ParentNodeConstructor) {
-            ((ParentNodeConstructor) exp).setValidationAction(mode, mode == Validation.BY_TYPE ? requiredType : null);
+            ((ParentNodeConstructor) exp).setValidationAction(
+                    env.getPackageData().getImportedSchema(),
+                    mode,
+                    mode == Validation.BY_TYPE ? requiredType : null);
         } else {
             // the expression must return a single element or document node. The type-
             // checking machinery can't handle a union type, so we just check that it's
@@ -3294,8 +3274,9 @@ public class XQueryParser extends XPathParser {
                     if (!NameChecker.isQName(StringTool.codePoints(typeName))) {
                         grumble("Schema type name expected in saxon:validate-type pragma: found " + Err.wrap(typeName));
                     }
-                    requiredType = env.getConfiguration().getSchemaType(
-                            makeStructuredQName(typeName, env.getDefaultElementNamespace()));
+                    StructuredQName name = makeStructuredQName(typeName, env.getDefaultElementNamespace());
+                    Schema schema = env.getPackageData().getImportedSchema();
+                    requiredType = schema.getSchemaType(name);
                     if (requiredType == null) {
                         grumble("Unknown schema type " + typeName);
                     }
@@ -3322,7 +3303,8 @@ public class XQueryParser extends XPathParser {
         }
         if (validateType) {
             if (expr instanceof ParentNodeConstructor) {
-                ((ParentNodeConstructor) expr).setValidationAction(Validation.BY_TYPE, requiredType);
+                ((ParentNodeConstructor) expr).setValidationAction(
+                        env.getPackageData().getImportedSchema(), Validation.BY_TYPE, requiredType);
                 return expr;
             } else if (expr instanceof AttributeCreator) {
                 if (!(requiredType instanceof SimpleType)) {
@@ -3478,7 +3460,8 @@ public class XQueryParser extends XPathParser {
         if (!((QueryModule) env).isPreserveNamespaces()) {
             content = new CopyOf(content, false, Validation.PRESERVE, null, true);
         }
-        doc.setValidationAction(((QueryModule) env).getConstructionMode(), null);
+        doc.setValidationAction(env.getPackageData().getImportedSchema(),
+                                ((QueryModule) env).getConstructionMode(), null);
         doc.setContentExpression(content);
         setLocation(doc, offset);
         return doc;
@@ -3507,7 +3490,9 @@ public class XQueryParser extends XPathParser {
             // if the child expression creates another element,
             // suppress validation, as the parent already takes care of it
             if (content instanceof ElementCreator && ((ElementCreator) content).getSchemaType() == null) {
-                ((ElementCreator) content).setValidationAction(Validation.PRESERVE, null);
+                ((ElementCreator) content).setValidationAction(
+                        env.getPackageData().getImportedSchema(),
+                        Validation.PRESERVE, null);
             }
             expect(Token.RCURLY);
         }
@@ -3546,10 +3531,11 @@ public class XQueryParser extends XPathParser {
                 grumble("Element name must be either a string or a QName", "XPTY0004", offset);
                 return new ErrorExpression();
             }
+            Schema schema = env.getPackageData().getImportedSchema();
             inst = new FixedElement(elemName,
                                     ((QueryModule) env).getActiveNamespaceBindings(),
                                     ((QueryModule) env).isInheritNamespaces(),
-                                    true, null,
+                                    true, schema, null,
                                     ((QueryModule) env).getConstructionMode());
             if (content == null) {
                 content = Literal.makeEmptySequence();
@@ -3566,7 +3552,8 @@ public class XQueryParser extends XPathParser {
             NamespaceResolver ns = new NamespaceResolverWithDefault(
                     env.getNamespaceResolver(),
                     env.getDefaultElementNamespace());
-            inst = new ComputedElement(name, null, null,
+            Schema schema = env.getPackageData().getImportedSchema();
+            inst = new ComputedElement(name, null, schema, null,
                                        ((QueryModule) env).getConstructionMode(),
                                        ((QueryModule) env).isInheritNamespaces(),
                                        true);
@@ -3603,10 +3590,11 @@ public class XQueryParser extends XPathParser {
             expect(Token.RCURLY);
         }
         nextToken();
+        Schema schema = env.getPackageData().getImportedSchema();
         FixedElement el2 = new FixedElement(nodeName,
                                             ((QueryModule) env).getActiveNamespaceBindings(),
                                             ((QueryModule) env).isInheritNamespaces(),
-                                            true, null,
+                                            true, schema, null,
                                             ((QueryModule) env).getConstructionMode());
         setLocation(el2, offset);
         if (content == null) {
@@ -4276,11 +4264,12 @@ public class XQueryParser extends XPathParser {
         int validationMode = ((QueryModule) env).getConstructionMode();
         FingerprintedQName fqn = new FingerprintedQName(
                 qName.getPrefix(), qName.getNamespaceUri(), qName.getLocalPart(), pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart()));
+        Schema schema = env.getPackageData().getImportedSchema();
         FixedElement elInst = new FixedElement(fqn,
                                                ((QueryModule) env).getActiveNamespaceBindings(),
                                                ((QueryModule) env).isInheritNamespaces(),
                                                !isNested,
-                                               null,
+                                               schema, null,
                                                validationMode);
 
         setLocation(elInst, offset);
@@ -5245,10 +5234,10 @@ public class XQueryParser extends XPathParser {
         int endOffset;
     }
 
-    private static class Import {
-        NamespaceUri namespaceURI;
-        List<String> locationURIs;
-        int offset;
+    public static class Import {
+        public NamespaceUri namespaceURI;
+        public List<String> locationURIs;
+        public int offset;
     }
 }
 
