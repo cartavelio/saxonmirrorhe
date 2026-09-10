@@ -1,6 +1,12 @@
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2026 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.option.cpp;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
 import org.graalvm.nativeimage.IsolateThread;
@@ -10,9 +16,7 @@ import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
 import java.io.File;
-import java.io.StringReader;
 
 public class XsdSchemaWrapperForCpp  extends SaxonCAPI {
 

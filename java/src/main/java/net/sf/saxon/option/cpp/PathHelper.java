@@ -1,17 +1,20 @@
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2026 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.option.cpp;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.DirectResourceResolver;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -1,11 +1,18 @@
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2026 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.option.cpp;
+
+import org.graalvm.nativeimage.c.CContext;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-
-import org.graalvm.nativeimage.c.CContext;
 
 public final class SaxonCHeaders implements CContext.Directives {
     private List<String> headerFileNames = List.of("saxonc/saxon_error.h");
