@@ -14,6 +14,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.*;
+import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.BMPString;
@@ -29,6 +30,9 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
+
+import javax.xml.transform.stream.StreamResult;
+import java.util.Properties;
 
 /**
  * An xsl:message element in the stylesheet.
@@ -190,6 +194,13 @@ public class Message extends Instruction {
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
+        if (!(context.getController() instanceof XsltController)) {
+            // fallback code allowing xsl:message to do something useful when called from
+            // the XSLT function library within free-standing XPath or XQuery, typically when debugging
+            SequenceIterator iter = getSelect().iterate(context);
+            QueryResult.serializeSequence(iter, context.getConfiguration(), new StreamResult(System.err), new Properties());
+            return null;
+        }
         XsltController controller = (XsltController)context.getController();
         if (isAssert && !controller.isAssertionsEnabled()) {
             return null;
