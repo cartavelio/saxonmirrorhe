@@ -659,7 +659,7 @@ task hec_jar(
 
 task pec_jar(
   type: Jar,
-  dependsOn: ["pecCompile", "pej_MetaInf", "rejar_Xerces"],
+  dependsOn: ["pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar"],
   description: "Build the PE jar file for SaxonC"
 ) {
   archiveBaseName = "saxon9pe"
@@ -695,6 +695,12 @@ task pec_jar(
       include "**/*.class"
       include "**/*.properties"
       exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("${buildDir}/icu") {
+      include "**/*.class"
+      include "**/*.*"
+      include "**/*.properties"
       exclude "META-INF/MANIFEST.MF"
     }
   doFirst {
