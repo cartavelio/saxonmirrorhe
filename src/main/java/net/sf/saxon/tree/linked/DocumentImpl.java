@@ -218,6 +218,12 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
         lineNumberMap = original.lineNumberMap;
     }
 
+    @Override
+    public synchronized void compact(int size) {
+        super.compact(size);
+        lineNumberMap.condense();
+    }
+
     /**
      * Set the system id (base URI) of this node
      */

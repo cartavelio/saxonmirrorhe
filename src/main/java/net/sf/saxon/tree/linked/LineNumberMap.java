@@ -62,9 +62,6 @@ public class LineNumberMap {
      */
 
     public int getLineNumber(int sequence) {
-        if (sequenceNumbers.length > allocated) {
-            condense();
-        }
         int index = Arrays.binarySearch(sequenceNumbers, sequence);
         if (index < 0) {
             index = -index - 1;
@@ -83,9 +80,6 @@ public class LineNumberMap {
      */
 
     public int getColumnNumber(int sequence) {
-        if (sequenceNumbers.length > allocated) {
-            condense();
-        }
         int index = Arrays.binarySearch(sequenceNumbers, sequence);
         if (index < 0) {
             index = -index - 1;
@@ -96,7 +90,7 @@ public class LineNumberMap {
         return columnNumbers[index];
     }
 
-    private synchronized void condense() {
+    public synchronized void condense() {
         sequenceNumbers = Arrays.copyOf(sequenceNumbers, allocated);
         lineNumbers = Arrays.copyOf(lineNumbers, allocated);
         columnNumbers = Arrays.copyOf(columnNumbers, allocated);
