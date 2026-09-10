@@ -301,17 +301,11 @@ namespace TestDriver {
 
         private void processCatalog(string catalogFile) {
             DocumentBuilder catBuilder = driverProc.NewDocumentBuilder();
-            switch (treeModel) {
-                case "linked": 
-                    catBuilder.TreeModel = Saxon.Api.TreeModel.LinkedTree;
-                    break;
-                case "condensed": 
-                    catBuilder.TreeModel = Saxon.Api.TreeModel.TinyTreeCondensed;
-                    break;
-                default: 
-                    catBuilder.TreeModel = Saxon.Api.TreeModel.TinyTree;
-                    break;
-            }
+            catBuilder.TreeModel = treeModel switch {
+                "linked" => Saxon.Api.TreeModel.LinkedTree,
+                "condensed" => Saxon.Api.TreeModel.TinyTreeCondensed,
+                _ => Saxon.Api.TreeModel.TinyTree
+            };
             XdmNode catalog = catBuilder.Build(new Uri(Path.GetFullPath(catalogFile)));
             XPathCompiler xpc = driverProc.NewXPathCompiler();
 
