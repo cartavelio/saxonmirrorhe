@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  */
 public class TestXQueryStreaming {
-    private ConfigTest configTest = new ConfigTest();
+    private final ConfigTest configTest = new ConfigTest();
 
     public final static int limit = 100000;
 
