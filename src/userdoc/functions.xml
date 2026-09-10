@@ -5910,8 +5910,8 @@
       </description>
       <signatures>
         <proto return-type="xs:integer"/>
-        <proto return-type="xs:integer">
-          <arg name="node" type="node()" desc="The node whose column number is required"/>
+        <proto return-type="xs:integer?">
+          <arg name="node" type="node()?" desc="The node whose column number is required"/>
         </proto>
       </signatures>
       <status>
@@ -5925,6 +5925,8 @@
             if the argument is omitted, the context item is used, in which case the context item
             must be a node. If line and column numbers are not maintained for the current document,
             the function returns -1.</p>
+          
+          <p>The function returns an empty sequence if the argument value is an empty sequence.</p>
 
           <p>To ensure that line and column numbers are maintained, use the <code>-l</code> (letter
             ell) option on the command line.</p>
@@ -7464,8 +7466,8 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       </description>
       <signatures>
         <proto return-type="xs:integer"/>
-        <proto return-type="xs:integer">
-          <arg name="node" type="node()" desc="The node whose line number is required"/>
+        <proto return-type="xs:integer?">
+          <arg name="node?" type="node()" desc="The node whose line number is required"/>
         </proto>
       </signatures>
       <status>
@@ -7479,6 +7481,8 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
             the argument is omitted, the context item is used, in which case the context item must
             be a node. If line numbers are not maintained for the current document, the function
             returns -1.</p>
+          
+          <p>The function returns an empty sequence if the argument value is an empty sequence.</p>
 
           <p>To ensure that line numbers are maintained, use the <code>-l</code> (letter ell) option
             on the command line.</p>
