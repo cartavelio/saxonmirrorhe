@@ -226,7 +226,8 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
                 final String regex = ((StringLiteral) this.getRegex()).stringify();
                 final String flagstr = ((StringLiteral) getFlags()).stringify();
 
-                String hostLang = "XP30";
+                int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                String hostLang = version >= 40 ? "XP40" : "XP31";
                 pattern = config.compileRegularExpression(StringView.tidy(regex), flagstr, hostLang, warnings);
 
             } catch (XPathException err) {
@@ -501,13 +502,15 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
                 regexSupplier = context -> pattern;
             } else {
                 // regex or flags is dynamic
+                int languageVersion = expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                String regexLang = languageVersion >= 40 ? "XP40" : "XP31";
                 StringEvaluator flagsEval = expr.getFlags().makeElaborator().elaborateForString(true);
                 UnicodeStringEvaluator regexEval = expr.getRegex().makeElaborator().elaborateForUnicodeString(false);
                 regexSupplier = context -> {
                     String flagsStr = flagsEval.eval(context);
                     UnicodeString regexStr = regexEval.eval(context);
                     return context.getConfiguration().compileRegularExpression(
-                            regexStr, flagsStr, "XP31", null);
+                            regexStr, flagsStr, regexLang, null);
                 };
             }
             return regexSupplier;

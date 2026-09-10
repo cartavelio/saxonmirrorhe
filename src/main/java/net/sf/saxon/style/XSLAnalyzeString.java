@@ -109,9 +109,14 @@ public class XSLAnalyzeString extends StyleElement {
                 final UnicodeString regex = ((StringLiteral) this.regex).getString();
                 final String flagstr = ((StringLiteral) flags).stringify();
 
+                String regexDialect = getEffectiveVersion() >= 30 ? "XP31" : "XP20";
+                if (getCompilation().getCompilerInfo().getXsltVersion() >= 40) {
+                    regexDialect = "XP40";
+                }
+
                 List<String> warnings = new ArrayList<>();
                 pattern = getConfiguration().compileRegularExpression(
-                        regex, flagstr, getEffectiveVersion() >= 30 ? "XP30" : "XP20", warnings);
+                        regex, flagstr, regexDialect, warnings);
                 for (String w : warnings) {
                     issueWarning(w, SaxonErrorCode.SXWN9022);
                 }
