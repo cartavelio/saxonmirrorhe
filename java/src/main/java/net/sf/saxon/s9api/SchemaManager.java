@@ -56,6 +56,8 @@ import java.io.File;
 @Deprecated
 public abstract class SchemaManager {
 
+    protected boolean hasLoadedSchema;
+
     public SchemaManager() {
     }
 
