@@ -10,6 +10,7 @@ package net.sf.saxon.pattern.nodetest;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.type.AlphaCode;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
@@ -42,7 +43,7 @@ public interface NodeTest extends NodePredicate {
      * @return the default priority for the pattern
      */
 
-    public abstract double getDefaultPriority();
+    double getDefaultPriority();
 
     /**
      * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
@@ -50,29 +51,21 @@ public interface NodeTest extends NodePredicate {
      * @return the strongest possible QNameTest
      */
 
-    public abstract QNameTest getQNameTest();
+    QNameTest getQNameTest();
 
     /**
      * Get an item type that all matching nodes must satisfy
      * @return an item type
      */
 
-    public ItemType getItemType();
-//    {
-//        return AnyGNodeType.getInstance();
-//    }
-
-
+    ItemType getItemType();
 
     /**
      * Get a UType that all matching nodes must satisfy
      * @return a UType
      */
 
-    public UType getUType();
-//    {
-//        return getItemType().getUType();
-//    }
+    UType getUType();
 
     /**
      * Test whether this node test is satisfied by a given node. This alternative
@@ -82,8 +75,7 @@ public interface NodeTest extends NodePredicate {
      * @return true if the node test is satisfied by the supplied node, false otherwise
      */
     
-    public boolean test(GNode node);
-
+    boolean test(GNode node);
 
     /**
      * Determine whether the content type (if present) is nillable
@@ -91,7 +83,7 @@ public interface NodeTest extends NodePredicate {
      * @return true if the content test (when present) can match nodes that are nilled
      */
 
-    public boolean isNillable();
+    boolean isNillable();
 
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this
@@ -103,27 +95,18 @@ public interface NodeTest extends NodePredicate {
      * @return optionally, a message explaining why the item does not match the type
      */
 
-    public Optional<String> explainMismatch(Item item, TypeHierarchy th);
-//    {
-//        if (item instanceof NodeInfo) {
-//            UType actualKind = UType.getUType(item);
-//            if (!getUType().overlaps(actualKind)) {
-//                return Optional.of("The supplied value is " + actualKind.toStringWithIndefiniteArticle());
-//            }
-//            return Optional.empty();
-//        } else {
-//            return Optional.of("The supplied value is " + Err.describeGenre(item.getGenre()));
-//        }
-//    }
+    Optional<String> explainMismatch(Item item, TypeHierarchy th);
 
     /**
      * Get a concise string representation of this node test for use in diagnostics
      * @return a suitably abbreviated respresention of the node test
      */
-    public String toShortString();
-//    {
-//        return toString();
-//    }
+
+    String toShortString();
+
+    default String export() {
+        return AlphaCode.fromItemType(getItemType());
+    }
 
 
 }

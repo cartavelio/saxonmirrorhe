@@ -31,6 +31,7 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.map.AbstractFixedMap;
 import net.sf.saxon.ma.map.GeneralMapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
@@ -38,6 +39,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTestStar;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.regex.ARegularExpression;
@@ -65,6 +67,7 @@ import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.SequenceCoercer;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.*;
@@ -346,6 +349,7 @@ public class PackageLoaderHE implements IPackageLoader {
         }
         if (importedSchema != null) {
             pack.setImportedSchema("", importedSchema);
+            rsc.setImportedSchema(importedSchema);
         }
         readKeys(packageElement);
         readComponents(packageElement, false);
@@ -873,7 +877,7 @@ public class PackageLoaderHE implements IPackageLoader {
             template.setPackageData(pack);
             template.setRequiredType(parseAlphaCode(templateRuleElement, "as"));
             template.setDeclaredStreamable(streamable);
-            template.setContextItemRequirements(contextItemType, tflags.contains("s") ? Optionality.PROHIBITED : Optionality.OPTIONAL);
+            template.setContextItemRequirements(contextItemType, tflags.contains("s") ? Optionality.OPTIONAL : Optionality.PROHIBITED);
             NodeInfo bodyElement = getChildWithRole(templateRuleElement, "action");
             if (bodyElement == null) {
                 template.setBody(Literal.makeEmptySequence());
@@ -1375,7 +1379,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     public ItemType parseAlphaCodeForItemType(NodeInfo element, String name) throws XPathException {
-        String attValue = element.getAttributeValue(NamespaceUri.NULL,name);
+        String attValue = element.getAttributeValue(NamespaceUri.NULL, name);
         if (attValue == null) {
             return AnyItemType.INSTANCE;
         } else {
@@ -1385,6 +1389,55 @@ public class PackageLoaderHE implements IPackageLoader {
                 throw new XPathException("Invalid alpha code " + element.getDisplayName() + "/@" + name + "='" + attValue + "': " + e.getMessage());
             }
         }
+    }
+
+    public NodeTest parseAlphaCodeForNodeTest(NodeInfo element, String name, int axis) throws XPathException {
+        String attValue = element.getAttributeValue(NamespaceUri.NULL, name);
+        if (attValue == null) {
+            return AnyGNodeType.getInstance();
+        } else if (attValue.startsWith("$ST(")) {
+            // This is a SelectorTest
+            int firstComma = attValue.indexOf(',');
+            int secondComma = attValue.indexOf(',', firstComma + 1);
+            int closeParen = attValue.indexOf(')', secondComma + 1);
+            String names = attValue.substring(4, firstComma);
+            String asNCName = attValue.substring(firstComma + 1, secondComma);
+            String kind = attValue.substring(secondComma + 1, closeParen);
+            return new SelectorTest(
+                    parseQNameTestList(names, getConfiguration().getNamePool()),
+                    asNCName.equals("true"),
+                    Integer.parseInt(kind));
+
+        } else {
+            try {
+               ItemType it = AlphaCode.toItemType(attValue, importedSchema);
+               if (it instanceof NodeTest nt) {
+                   return nt;
+               }
+               if (it instanceof ChoiceItemType cit) {
+                    MultipleNodeKindTest test = cit.toMultipleNodeKindTest();
+                    if (test != null) {
+                        return test;
+                    }
+                    List<? extends ItemType> memberTypes = cit.getMemberTypes();
+                    if (memberTypes.size() == 2 && memberTypes.get(0) == AnyJNodeType.getInstance() && memberTypes.get(1) == NodeKindType.ELEMENT) {
+                        return new NodeTestStar(AxisInfo.principalNodeType[axis]);
+                    }
+                    if (memberTypes.size() == 2 && memberTypes.get(1) == AnyJNodeType.getInstance() && memberTypes.get(0) == NodeKindType.ELEMENT) {
+                        return new NodeTestStar(AxisInfo.principalNodeType[axis]);
+                    }
+                   if (memberTypes.size() == 2 && memberTypes.get(0) == AnyJNodeType.getInstance() && memberTypes.get(1) == NodeKindType.ATTRIBUTE) {
+                       return new NodeTestStar(AxisInfo.principalNodeType[axis]);
+                   }
+                   if (memberTypes.size() == 2 && memberTypes.get(1) == AnyJNodeType.getInstance() && memberTypes.get(0) == NodeKindType.ATTRIBUTE) {
+                       return new NodeTestStar(AxisInfo.principalNodeType[axis]);
+                   }
+                }
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                throw new XPathException("Invalid alpha code " + element.getDisplayName() + "/@" + name + "='" + attValue + "': " + e.getMessage());
+            }
+        }
+        throw new IllegalStateException();
     }
 
     private IndependentContext makeStaticContext(NodeInfo element) {
@@ -1739,9 +1792,9 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         eMap.put("axis", (loader, element) -> {
-            String axisName = element.getAttributeValue(NamespaceUri.NULL,"name");
+            String axisName = element.getAttributeValue(NamespaceUri.NULL, "name");
             int axis = AxisInfo.getAxisNumber(axisName);
-            NodeTest nt = (NodeTest) loader.parseAlphaCodeForItemType(element, "nodeTest");
+            NodeTest nt = loader.parseAlphaCodeForNodeTest(element, "nodeTest", axis);
             return new AxisExpression(axis, nt);
         });
 
@@ -3323,26 +3376,7 @@ public class PackageLoaderHE implements IPackageLoader {
             NamePool pool = loader.getConfiguration().getNamePool();
             while ((catchElement = (NodeInfo)iter.next()) != null) {
                 String errAtt = catchElement.getAttributeValue(NamespaceUri.NULL,"errors");
-                String[] tests = errAtt.split(" ");
-                List<QNameTest> list = new ArrayList<>();
-                for (String t : tests) {
-                    if (t.equals("*")) {
-                        list.add(AnyQNameTest.getInstance());
-                    } else if (t.startsWith("*:")) {
-                        list.add(new LocalQNameTest(t.substring(2)));
-                    } else if (t.endsWith("}*")) {
-                        list.add(new NamespaceQNameTest(NamespaceUri.of(t.substring(2, t.length()-2))));
-                    } else {
-                        StructuredQName qName = StructuredQName.fromEQName40((t));
-                        list.add(new SpecificQNameTest(qName, pool));
-                    }
-                }
-                QNameTest test;
-                if (list.size() == 1) {
-                    test = list.get(0);
-                } else {
-                    test = new UnionQNameTest(list);
-                }
+                final QNameTest test = parseQNameTestList(errAtt, pool);
                 Expression catchExpr = loader.getFirstChildExpression(catchElement);
                 tryCatch.addCatchExpression(test, catchExpr);
             }
@@ -3434,6 +3468,30 @@ public class PackageLoaderHE implements IPackageLoader {
             return vc;
         });
 
+    }
+
+    private static QNameTest parseQNameTestList(String value, NamePool pool) {
+        String[] tests = value.split(" ");
+        List<QNameTest> list = new ArrayList<>();
+        for (String t : tests) {
+            if (t.equals("*")) {
+                list.add(AnyQNameTest.getInstance());
+            } else if (t.startsWith("*:")) {
+                list.add(new LocalQNameTest(t.substring(2)));
+            } else if (t.endsWith("}*")) {
+                list.add(new NamespaceQNameTest(NamespaceUri.of(t.substring(2, t.length()-2))));
+            } else {
+                StructuredQName qName = StructuredQName.fromEQName40((t));
+                list.add(new SpecificQNameTest(qName, pool));
+            }
+        }
+        QNameTest test;
+        if (list.size() == 1) {
+            test = list.get(0);
+        } else {
+            test = new UnionQNameTest(list);
+        }
+        return test;
     }
 
     protected SystemFunction makeEXPathBinaryFunction(StructuredQName qName, int arity) throws XPathException {

@@ -124,6 +124,15 @@ public class RetainedStaticContext implements NamespaceResolver {
     }
 
     /**
+     * Set the imported schema for this context
+     * @param schema the imported schema
+     */
+
+    public void setImportedSchema(Schema schema) {
+        this.importedSchema = schema;
+    }
+
+    /**
      * Get the static base URI as a URI.
      *
      * @return the static base URI as a URI if it is known and valid. Return null if the base URI is

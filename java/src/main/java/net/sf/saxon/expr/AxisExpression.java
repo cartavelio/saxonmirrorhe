@@ -192,7 +192,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             }
         }
 
-        if (contextItemType instanceof XNodeType) {
+        if (th.isSubType(contextItemType, AnyXNodeType.getInstance())) {
             // An axis step starting at an XNode will always return XNodes
             if (test == null) {
                 return new AxisExpression(axis, AnyXNodeType.getInstance());
@@ -858,9 +858,13 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("axis", this);
         destination.emitAttribute("name", AxisInfo.axisName[axis]);
-        destination.emitAttribute("nodeTest", AlphaCode.fromItemType(test == null
-                                                                             ? AnyXNodeType.getInstance()
-                                                                             : test.getItemType()));
+        if (test == null) {
+            destination.emitAttribute("nodeTest", AlphaCode.fromItemType(AnyXNodeType.getInstance()));
+        } else if (test instanceof ItemType) {
+            destination.emitAttribute("nodeTest", AlphaCode.fromItemType((ItemType) test));
+        } else {
+            destination.emitAttribute("nodeTest", test.export());
+        }
         destination.endElement();
     }
 

@@ -25,6 +25,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.gnode.NamedXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -114,7 +115,7 @@ public class SelectedElementsSpaceStrippingRule implements SpaceStrippingRule {
         int prio = priority == 0 ? 2 : priority == -0.25 ? 1 : 0;
         newRule.setRank((precedence << 18) + (prio << 16) + sequence);
         ItemType type = pattern.getItemType();
-        QNameTest test = ((NamedXNodeType)type).getAllowedNodeNames();
+        QNameTest test = type == NodeKindType.ELEMENT ? AnyQNameTest.getInstance() : ((NamedXNodeType)type).getAllowedNodeNames();
         if (test instanceof AnyQNameTest) {
             newRule.setAlwaysMatches(true);
             anyElementRule = addRuleToList(newRule, anyElementRule, true);

@@ -13,8 +13,15 @@ import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.map.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
+import net.sf.saxon.ma.map.KeyValuePair;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.str.UnicodeChar;
 import net.sf.saxon.type.gnode.*;
@@ -468,9 +475,9 @@ public class AlphaCode {
             }
             String primary = nextToken();
             callBack.setStringProperty(container, "p", primary);
-            if (primary.equals("..")) {
-                callBack.setTypeProperty(container, "selfReference", parent);
-            }
+//            if (primary.equals("..")) {
+//                callBack.setTypeProperty(container, "selfReference", parent);
+//            }
             while (position < input.length()) {
                 char c = input.charAt(position);
                 switch (c) {
@@ -723,7 +730,6 @@ public class AlphaCode {
 
     private static SequenceType sequenceTypeFromTree(AlphaCodeTree tree, Schema schema) {
         Configuration config = schema.getConfiguration();
-        NamePool namePool = config.getNamePool();
         String principal = tree.principal;
         ItemType itemType = null;
         if (principal.isEmpty()) {
@@ -788,30 +794,16 @@ public class AlphaCode {
             } else {
                 int kind = Type.XNODE;
                 if (principal.length() >= 2) {
-                    switch (principal.substring(0, 2)) {
-                        case "NT":
-                            kind = Type.TEXT;
-                            break;
-                        case "NC":
-                            kind = Type.COMMENT;
-                            break;
-                        case "NN":
-                            kind = Type.NAMESPACE;
-                            break;
-                        case "NP":
-                            kind = Type.PROCESSING_INSTRUCTION;
-                            break;
-                        case "ND":
-                            kind = Type.DOCUMENT;
-                            break;
-                        case "NE":
-                            kind = Type.ELEMENT;
-                            break;
-                        case "NA":
-                            kind = Type.ATTRIBUTE;
-                            break;
-
-                    }
+                    kind = switch (principal.substring(0, 2)) {
+                        case "NT" -> Type.TEXT;
+                        case "NC" -> Type.COMMENT;
+                        case "NN" -> Type.NAMESPACE;
+                        case "NP" -> Type.PROCESSING_INSTRUCTION;
+                        case "ND" -> Type.DOCUMENT;
+                        case "NE" -> Type.ELEMENT;
+                        case "NA" -> Type.ATTRIBUTE;
+                        default -> kind;
+                    };
                 }
                 String name = tree.name;
                 QNameTest partialNameTest = null;
@@ -936,6 +928,10 @@ public class AlphaCode {
                     }
                 }
             }
+        } else if (principal.startsWith("G")) {
+            itemType = AnyGNodeType.getInstance();
+        } else if (principal.startsWith("J")) {
+            itemType = AnyJNodeType.getInstance();
         } else if (principal.startsWith("F")) {
             if (principal.equals("FA")) {
                 AlphaCodeTree valueType = tree.valueType;
@@ -1167,9 +1163,12 @@ public class AlphaCode {
             sb.append(" n").append(abbreviateEQName(tree.name));
         }
         if (tree.content != null) {
-            sb.append(" c").append(abbreviateEQName(tree.content));
-            if (tree.nillable) {
-                sb.append("?");
+            String display = abbreviateEQName(tree.content) + (tree.nillable ? "?" : "");
+            if (!display.equals("~anyType?")) {
+                sb.append(" c").append(abbreviateEQName(tree.content));
+                if (tree.nillable) {
+                    sb.append("?");
+                }
             }
         }
         if (tree.keyType != null) {

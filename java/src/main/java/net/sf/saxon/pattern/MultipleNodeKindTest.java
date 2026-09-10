@@ -16,9 +16,7 @@ import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpUsing;
 import net.sf.saxon.type.*;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -84,11 +82,7 @@ public final class MultipleNodeKindTest implements NodeTest {
      */
     @Override
     public ItemType getItemType() {
-        List<ItemType> memberTypes = new ArrayList<>();
-        for (PrimitiveUType u : uType.decompose()) {
-            memberTypes.add(UType.toItemType(u));
-        }
-        return new ChoiceItemType(memberTypes);
+        return ChoiceItemType.of(uType);
     }
 
     /**

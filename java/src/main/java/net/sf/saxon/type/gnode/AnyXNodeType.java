@@ -70,7 +70,7 @@ public final class AnyXNodeType extends XNodeType {
      */
     @Override
     public String getBasicAlphaCode() {
-        return null;
+        return "N";
     }
 
     /**

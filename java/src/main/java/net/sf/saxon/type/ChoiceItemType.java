@@ -9,9 +9,11 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.type.coercion.ChoiceCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.type.gnode.XNodeType;
 
 import java.util.*;
@@ -244,6 +246,22 @@ public class ChoiceItemType implements ItemType, ChoiceType {
             return AnyXNodeType.getInstance();
         }
         return AnyItemType.INSTANCE;
+    }
+
+    /**
+     * Convert, if possible, to a multiple node kind test
+     * @return the equivalent {@link MultipleNodeKindTest} or null if there is no equivalent
+     */
+    public MultipleNodeKindTest toMultipleNodeKindTest() {
+        UType combined = UType.VOID;
+        for (ItemType member : memberTypes) {
+            if (member instanceof NodeKindType kind) {
+                combined = combined.union(kind.getUType());
+            } else {
+                return null;
+            }
+        }
+        return new MultipleNodeKindTest(combined);
     }
 
     /**

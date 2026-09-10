@@ -392,6 +392,9 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         if (schemaType != AnyType.INSTANCE && schemaType != Untyped.INSTANCE && schemaType != BuiltInAtomicType.UNTYPED_ATOMIC) {
             displayedType = ", " + schemaType.getEQName();
         }
+        if (nillable) {
+            displayedType += "?";
+        }
         return switch (kind) {
             case Type.ELEMENT
                     -> "element(" + nameTest.toString() + displayedType + ')';
@@ -418,7 +421,8 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     public String toExportString() {
         return (kind == Type.ELEMENT ? "element(" : "attribute(") +
                 nameTest.toString() + ',' +
-                TypeHierarchy.getNearestNamedType(schemaType).getEQName() + ')';
+                TypeHierarchy.getNearestNamedType(schemaType).getEQName() +
+                (nillable? "?" : "") + ')';
     }
 
     /**

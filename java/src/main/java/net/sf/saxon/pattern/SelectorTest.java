@@ -89,16 +89,12 @@ public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodeP
      */
     @Override
     public UType getUType() {
-        switch (nodeKind) {
-            case Type.ELEMENT:
-                return UType.JNODE.union(UType.ELEMENT);
-            case Type.ATTRIBUTE:
-                return UType.ATTRIBUTE;
-            case Type.NAMESPACE:
-                return UType.NAMESPACE;
-            default:
-                return UType.GNODE;
-        }
+        return switch (nodeKind) {
+            case Type.ELEMENT -> UType.JNODE.union(UType.ELEMENT);
+            case Type.ATTRIBUTE -> UType.ATTRIBUTE;
+            case Type.NAMESPACE -> UType.NAMESPACE;
+            default -> UType.GNODE;
+        };
     }
 
 
@@ -156,7 +152,8 @@ public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodeP
      */
     @Override
     public ItemType getItemType() {
-        return ChoiceItemType.of(AnyJNodeType.getInstance(), NodeKindType.of(this.nodeKind));
+        return ChoiceItemType.of(
+                AnyJNodeType.getInstance(), NodeKindType.of(this.nodeKind));
     }
 
     /**
@@ -277,6 +274,11 @@ public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodeP
     @Override
     public boolean isNillable() {
         return true;
+    }
+
+    @Override
+    public String export() {
+        return "$ST(" + key.exportQNameTest() + "," + asNCName + "," + nodeKind + ")";
     }
 }
 

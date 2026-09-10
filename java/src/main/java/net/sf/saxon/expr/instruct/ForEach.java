@@ -315,7 +315,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             return Literal.makeEmptySequence();
         }
 
-        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getSelect().getItemType())
+        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(selectType)
                 .withContextSetter(getSelect());
         actionOp.typeCheck(visitor, cit);
 
