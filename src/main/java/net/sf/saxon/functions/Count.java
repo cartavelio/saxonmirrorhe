@@ -7,7 +7,12 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
@@ -109,8 +114,28 @@ public class Count extends SystemFunction {
         return "Count";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new CountFnElaborator();
+    }
 
 
+    public static class CountFnElaborator extends ItemElaborator {
 
+        public ItemEvaluator elaborateForItem() {
+            SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            Expression arg = fnc.getArg(0);
+            PullEvaluator puller = makeElaborator(arg).elaborateForPull();
+            return context -> Int64Value.makeIntegerValue(count(puller.eval(context)));
+        }
+
+
+    }
 }
 

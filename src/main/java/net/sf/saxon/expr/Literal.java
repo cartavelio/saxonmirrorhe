@@ -8,9 +8,7 @@
 package net.sf.saxon.expr;
 
 
-import com.saxonica.ee.elab.eval.*;
-import com.saxonica.ee.elab.gen.Elaborator;
-import com.saxonica.ee.elab.gen.PullElaborator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;

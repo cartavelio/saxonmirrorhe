@@ -7,7 +7,12 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -68,5 +73,28 @@ public class StringLength_1 extends ScalarSystemFunction {
         return "StringLengthCompiler";
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new StringLengthFnElaborator();
+    }
+
+    public static class StringLengthFnElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            Expression arg = fnc.getArg(0);
+            UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(true);
+            return context -> {
+                UnicodeString str = argEval.eval(context);
+                return Int64Value.makeIntegerValue(str.length());
+            };
+        }
+
+    }
 }
 

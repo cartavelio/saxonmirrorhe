@@ -9,6 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.OperandElaborator;
 import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.om.NamespaceUri;
@@ -311,7 +312,8 @@ public abstract class Actor implements ExpressionOwner, Location {
 
     protected TailCall process(Outputter out, XPathContext context) throws XPathException {
         if (bodyEvaluator == null) {
-            bodyEvaluator = context.getConfiguration().obtainOperandEvaluator(body);
+            context.getConfiguration();
+            bodyEvaluator = new OperandElaborator(body);
         }
         return bodyEvaluator.processLeavingTail(out, context);
     }

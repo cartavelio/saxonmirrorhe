@@ -7,10 +7,10 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StringLiteral;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
@@ -178,5 +178,47 @@ public class Translate extends SystemFunction implements Callable, StatefulSyste
         return copy;
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new TranslateFnElaborator();
+    }
+
+    public static class TranslateFnElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            final Translate fn = (Translate) fnc.getTargetFunction();
+            final ItemEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            final ItemEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForItem();
+            final ItemEvaluator arg2Eval = makeElaborator(fnc.getArg(2)).elaborateForItem();
+            final IntToIntMap staticMap = fn.getStaticMap();
+
+            if (staticMap != null) {
+                return context -> {
+                    StringValue s0 = (StringValue)arg0Eval.eval(context);
+                    if (s0 == null || s0.isEmpty()) {
+                        return StringValue.EMPTY_STRING;
+                    }
+                    return translateUsingMap(s0, staticMap);
+                };
+            } else {
+                return context -> {
+                    StringValue s0 = (StringValue) arg0Eval.eval(context);
+                    if (s0 == null || s0.isEmpty()) {
+                        return StringValue.EMPTY_STRING;
+                    }
+                    StringValue s1 = (StringValue) arg1Eval.eval(context);
+                    StringValue s2 = (StringValue) arg2Eval.eval(context);
+                    return translate(s0, s1, s2);
+                };
+            }
+        }
+
+    }
 }
 

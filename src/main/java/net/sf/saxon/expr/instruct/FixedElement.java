@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.ComplexNodePushElaborator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
@@ -22,6 +25,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.type.*;
 
 import java.util.function.BiConsumer;
@@ -642,6 +646,57 @@ public class FixedElement extends ElementCreator {
     @Override
     public String getExpressionName() {
         return "element";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new FixedElementElaborator();
+    }
+
+    /**
+     * Elaborator for a FixedElement (literal result element) expression.
+     */
+
+    public static class FixedElementElaborator extends ComplexNodePushElaborator {
+
+        @Override
+        @CSharpInnerClass(outer = false, extra = {"Saxon.Hej.expr.instruct.FixedElement instr", "Saxon.Eej.ee.elab.eval.PushEvaluator contentPusher"})
+        public PushEvaluator elaborateForPush() {
+            final FixedElement instr = (FixedElement) getExpression();
+            final PushEvaluator contentPusher =
+                    Elaborator.makeElaborator(instr.getContentExpression()).elaborateForPush();
+            final ElementCreationDetails details = new ElementCreationDetails() {
+                @Override
+                public NodeName getNodeName(XPathContext context) {
+                    return instr.getFixedElementName();
+                }
+
+                @Override
+                public String getSystemId(XPathContext context) {
+                    return instr.getStaticBaseURIString();
+                }
+
+                @Override
+                public void processContent(Outputter output, XPathContext context) throws XPathException {
+                    TailCall tc = contentPusher.process(output, context);
+                    dispatchTailCall(tc);
+                }
+            };
+
+            return (out, context) -> {
+                instr.specificProcess(out, context, details);
+                return null;
+            };
+        }
+
+
+
     }
 }
 

@@ -7,6 +7,10 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NamespaceUri;
@@ -75,5 +79,25 @@ public class QNameFn extends SystemFunction {
         return "QNameFnCompiler";
     }
 
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new QNameFnElaborator();
+    }
+
+    public static class QNameFnElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            SystemFunctionCall sfc = (SystemFunctionCall) getExpression();
+            ItemEvaluator arg0eval = makeElaborator(sfc.getArg(0)).elaborateForItem();
+            ItemEvaluator arg1eval = makeElaborator(sfc.getArg(1)).elaborateForItem();
+            return context -> expandedQName((StringValue)arg0eval.eval(context), (StringValue)arg1eval.eval(context));
+        }
+
+    }
 }
 

@@ -7,10 +7,10 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.FocusIterator;
@@ -148,6 +148,39 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
             return "PositionCompiler";
         }
 
+        /**
+         * Make an elaborator for a system function call on this function
+         *
+         * @return a suitable elaborator; or null if no custom elaborator is available
+         */
+        @Override
+        public Elaborator getElaborator() {
+            return new PositionFnElaborator();
+        }
+
+        public static class PositionFnElaborator extends ItemElaborator {
+
+            public ItemEvaluator elaborateForItem() {
+                SystemFunctionCall sfc = (SystemFunctionCall) getExpression();
+                Position fn = (Position) sfc.getTargetFunction();
+                if (fn.isContextPossiblyUndefined()) {
+                    return context -> {
+                        FocusIterator focus = context.getCurrentIterator();
+                        if (focus == null) {
+                            XPathException e = new XPathException("The context item is absent, so position() is undefined");
+                            e.setXPathContext(context);
+                            e.setLocation(sfc.getLocation());
+                            e.setErrorCode("XPDY0002");
+                            throw e;
+                        }
+                        return Int64Value.makeIntegerValue(focus.position());
+                    };
+                } else {
+                    return context -> Int64Value.makeIntegerValue(context.getCurrentIterator().position());
+                }
+            }
+
+        }
     }
 
     public static class Last extends PositionAndLast {
@@ -168,6 +201,40 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
         @Override
         public String getStreamerName() {
             return "Last";
+        }
+
+        /**
+         * Make an elaborator for a system function call on this function
+         *
+         * @return a suitable elaborator; or null if no custom elaborator is available
+         */
+        @Override
+        public Elaborator getElaborator() {
+            return new LastFnElaborator();
+        }
+
+        public static class LastFnElaborator extends ItemElaborator {
+
+            public ItemEvaluator elaborateForItem() {
+                SystemFunctionCall sfc = (SystemFunctionCall) getExpression();
+                Last fn = (Last) sfc.getTargetFunction();
+                if (fn.isContextPossiblyUndefined()) {
+                    return context -> {
+                        FocusIterator focus = context.getCurrentIterator();
+                        if (focus == null) {
+                            XPathException e = new XPathException("The context item is absent, so last() is undefined");
+                            e.setXPathContext(context);
+                            e.setLocation(sfc.getLocation());
+                            e.setErrorCode("XPDY0002");
+                            throw e;
+                        }
+                        return Int64Value.makeIntegerValue(context.getLast());
+                    };
+                } else {
+                    return context -> Int64Value.makeIntegerValue(context.getLast());
+                }
+            }
+
         }
     }
 }

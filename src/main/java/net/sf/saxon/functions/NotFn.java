@@ -7,6 +7,9 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Negatable;
 import net.sf.saxon.expr.SystemFunctionCall;
@@ -112,6 +115,28 @@ public class NotFn extends SystemFunction {
     @Override
     public String getStreamerName() {
         return "NotFn";
+    }
+
+    /**
+     * Make an elaborator for a system function call on this function
+     *
+     * @return a suitable elaborator; or null if no custom elaborator is available
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new NotFnElaborator();
+    }
+
+    public static class NotFnElaborator extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+            SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+            Expression arg = fnc.getArg(0);
+            BooleanEvaluator argEval = makeElaborator(arg).elaborateForBoolean();
+            return context -> !argEval.eval(context);
+        }
+
+
     }
 }
 

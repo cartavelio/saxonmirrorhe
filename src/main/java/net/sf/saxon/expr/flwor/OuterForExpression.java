@@ -7,6 +7,8 @@
 
 package net.sf.saxon.expr.flwor;
 
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.FallbackElaborator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -145,6 +147,10 @@ public class OuterForExpression extends ForExpression {
         return "outerFor";
     }
 
+    protected String allowingEmptyString() {
+        return " allowing empty";
+    }
+
     /**
      * Evaluate an updating expression, adding the results to a Pending Update List.
      * The default implementation of this method, which is used for non-updating expressions,
@@ -162,7 +168,9 @@ public class OuterForExpression extends ForExpression {
         if (ahead.hasNext()) {
             while (true) {
                 Item item = ahead.next();
-                if (item == null) break;
+                if (item == null) {
+                    break;
+                }
                 context.setLocalVariable(slot, item);
                 getAction().evaluatePendingUpdates(context, pul);
             }
@@ -176,6 +184,17 @@ public class OuterForExpression extends ForExpression {
     @Override
     protected void explainSpecializedAttributes(ExpressionPresenter out) {
         out.emitAttribute("outer", "true");
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new FallbackElaborator();
     }
 
 

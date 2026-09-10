@@ -7,9 +7,9 @@
 
 package net.sf.saxon.expr;
 
-import com.saxonica.ee.elab.eval.BooleanEvaluator;
-import com.saxonica.ee.elab.gen.BooleanElaborator;
-import com.saxonica.ee.elab.gen.Elaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.trans.XPathException;

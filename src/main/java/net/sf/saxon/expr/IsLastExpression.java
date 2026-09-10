@@ -7,9 +7,9 @@
 
 package net.sf.saxon.expr;
 
-import com.saxonica.ee.elab.eval.BooleanEvaluator;
-import com.saxonica.ee.elab.gen.BooleanElaborator;
-import com.saxonica.ee.elab.gen.Elaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
