@@ -5,11 +5,27 @@ namespace Saxon.Api {
     /// a <c>ResourceResolver</c>. Any of its properties may be absent.
     /// </summary>
     public class ResourceRequest {
-        
+        /// <summary>
+        /// <c>TEXT_NATURE</c> represents plain text resources (media type = "text/plain"), for example
+        /// unparsed text files
+        /// </summary>
         public const string TEXT_NATURE = "https://www.iana.org/assignments/media-types/text/plain";
+        /// <summary>
+        /// <c>XQUERY_NATURE</c> represents XQuery modules (main modules or library modules)
+        /// </summary>
         public const string XQUERY_NATURE = "https://www.iana.org/assignments/media-types/application/xquery";
+        /// <summary>
+        /// <c>XSLT_NATURE</c> represents XSLT stylesheet modules
+        /// </summary>
         public const string XSLT_NATURE = NamespaceConstant.XSLT;
+        /// <summary>
+        /// <c>XSD_NATURE</c> represents XSD schema documents
+        /// </summary>
         public const string XSD_NATURE = NamespaceConstant.SCHEMA;
+        /// <summary>
+        /// <c>XML_NATURE</c> represents XML documents with no specific known vocabulary (for example, documents
+        /// requested using the <c>doc()</c> function)
+        /// </summary>
         public const string XML_NATURE = "https://www.iana.org/assignments/media-types/application/xml";
         
         /// <summary>

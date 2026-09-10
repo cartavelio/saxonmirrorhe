@@ -713,7 +713,11 @@ namespace Saxon.Api {
             return new WrappedTextResolver(value);
         }
         
-        public class WrappedTextResolver : UnparsedTextURIResolver {
+        /// <summary>
+        /// An implementation of <c>UnparsedTextURIResolver</c> that wraps (and delegates to)
+        /// a supplied <c>Saxon.Api.ResourceResolver</c>
+        /// </summary>
+        private class WrappedTextResolver : UnparsedTextURIResolver {
             
             private readonly Saxon.Api.ResourceResolver resolver;
 

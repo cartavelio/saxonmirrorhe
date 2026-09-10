@@ -19,13 +19,27 @@ namespace Saxon.Api {
             this.node = node;
             this.ResourceUri = node.DocumentUri;
         }
+        
+        /// <summary>
+        /// The <c>ResourceUri</c> of a <c>NodeResource<c> is the document URI of the node, if it exists
+        /// </summary>
+        /// <remarks>
+        /// <para>For many nodes, (including all non-document nodes) the <c>ResourceUri</c> will be null.</para> 
+        /// </remarks>
 
         public Uri ResourceUri { get; }
         
+        /// <summary>
+        /// Get the item representing the value of the resource
+        /// </summary>
+        /// <returns>The contained XDM node</returns>
         public XdmItem GetXdmItem() {
             return node;
         }
 
+        /// <summary>
+        /// The content type of the resource: for a <c>NodeResource</c> this is "application/xml".
+        /// </summary>
         public string ContentType => "application/xml";
     }
 }
