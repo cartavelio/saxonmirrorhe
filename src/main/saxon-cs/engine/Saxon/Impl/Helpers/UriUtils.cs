@@ -2,6 +2,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Primitives;
 using Saxon.Ejava.net;
+using Saxon.Hej.str;
+using Saxon.Hej.z;
 using Sys = System;
 namespace Saxon.Impl.Helpers {
     public class UriUtils {
@@ -57,10 +59,8 @@ namespace Saxon.Impl.Helpers {
             if (uri.IsWellFormedOriginalString()) {
                 return true;
             }
-            if (new System.Uri(new System.Uri("http://www.w3.org/"), uri).IsWellFormedOriginalString()) {
-                return true;
-            }
             
+            // Check that any % characters are followed by two hex digits
             string original = uri.OriginalString;
             int index = 0;
             while (index >= 0) {
@@ -75,6 +75,30 @@ namespace Saxon.Impl.Helpers {
 
                 index += 3;
             }
+            
+            // Test to see if it's valid as an IRI. In principle, we could configure .NET to make System.Uri accept
+            // IRIs, but it's a global switch, and we don't really want that. Instead, we check if it's well-formed
+            // after replacing all non-ascii characters with ASCII alphabetics, and removing '%' characters
+            
+            UnicodeBuilder ub = new UnicodeBuilder();
+            IntIterator chars = StringView.of(original).codePoints();
+            while (chars.hasNext()) {
+                int ch = chars.next();
+                if (ch != '%') {
+                    ub.append(ch < 127 ? ch : 'z');
+                }
+            }
+
+            try {
+                if (new Uri(ub.ToString(), UriKind.RelativeOrAbsolute).IsWellFormedOriginalString()) {
+                    return true;
+                }
+            }
+            catch (Exception e) {
+                // ignore invalid URI failure
+            }
+
+            
 
 
             
