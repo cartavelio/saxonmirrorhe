@@ -323,15 +323,24 @@
    
    <xsl:template match="*[@nodeType='FieldDeclaration']">
       <xsl:call-template name="indent"/>
-      <xsl:variable name="isConstant" select="
-         count(variables/variable)=1 
-         and variables/variable/initializer 
-         and f:isConstantExpression(variables/variable/initializer)
-         and modifiers/modifier[@keyword='STATIC']
-         and modifiers/modifier[@keyword='FINAL']"/>
-      <xsl:call-template name="modifiers">
-         <xsl:with-param name="isConstant" select="$isConstant" tunnel="yes"/>
-      </xsl:call-template>
+      
+      <xsl:choose>
+         <xsl:when test="annotations/annotation[name/@identifier='CSharpModifiers']">
+            <xsl:value-of select="annotations/annotation[name/@identifier='CSharpModifiers']//@value ! string()" separator=" "/>
+            <xsl:text> </xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:variable name="isConstant" select="
+               count(variables/variable)=1 
+               and variables/variable/initializer 
+               and f:isConstantExpression(variables/variable/initializer)
+               and modifiers/modifier[@keyword='STATIC']
+               and modifiers/modifier[@keyword='FINAL']"/>
+            <xsl:call-template name="modifiers">
+               <xsl:with-param name="isConstant" select="$isConstant" tunnel="yes"/>
+            </xsl:call-template>
+         </xsl:otherwise>
+      </xsl:choose>    
       <xsl:apply-templates select="variables"/>
       <xsl:text>;{$NL}</xsl:text>
    </xsl:template>
@@ -406,12 +415,24 @@
       <!--<xsl:message>Method {name/@identifier} = {$full-name}</xsl:message>-->
       <xsl:variable name="digestMethod" select="key('digestMethodKey', $full-name, $digest)[1]"/>
       
+      <xsl:if test="$digestMethod/@hidden='1' and not($expandingDefaults)">        
+         <xsl:text>/* implicit ====={$NL}</xsl:text>
+         <xsl:call-template name="indent"/>
+      </xsl:if>
+      
       <!-- Modifiers -->
       
       <xsl:choose>
+         
          <xsl:when test="annotations/annotation[name/@identifier='CSharpModifiers']">
             <xsl:value-of select="annotations/annotation[name/@identifier='CSharpModifiers']//@value ! string()" separator=" "/>
             <xsl:text> </xsl:text>
+            <xsl:text> /* REPLACING </xsl:text>
+            <xsl:if test="body and $expandingDefaults and not(modifiers/modifier/@keyword[. = 'PUBLIC'])">public </xsl:if>
+            <xsl:call-template name="modifiers">
+               <xsl:with-param name="digestMethod" select="$digestMethod"/>
+            </xsl:call-template>
+            <xsl:text>*/ </xsl:text>
          </xsl:when>
          <xsl:when test="self::anonymousClassBod">
             <!-- Detect need for "override" modifier on methods in anonymous inner classes (not in digest)-->
@@ -520,6 +541,10 @@
          </xsl:when>
          <xsl:otherwise>;{$NL}</xsl:otherwise>
       </xsl:choose>
+      <xsl:if test="$digestMethod/@hidden='1' and not($expandingDefaults)">
+         <xsl:call-template name="indent"/>
+         <xsl:text>===== implicit */{$NL}</xsl:text>
+      </xsl:if>
    </xsl:template>
    
    <xsl:template match="*[@nodeType=('MethodDeclaration', 'ConstructorDeclaration', 'FieldDeclaration')]
@@ -843,6 +868,14 @@
       <xsl:text>;{$NL}</xsl:text>
    </xsl:template>
    
+   <xsl:template match="*[@nodeType='ExpressionStmt'][expression[@nodeType='MethodCallExpr'][@RESOLVED_TYPE='net.sf.saxon.transpile.CSharp']]" 
+      priority="20">
+      <!-- No semicolon for CSharp.emitCode() -->
+      <xsl:call-template name="indent"/>
+      <xsl:apply-templates select="*"/>
+      <xsl:text>{$NL}</xsl:text>
+   </xsl:template>
+   
    <xsl:template match="*[@nodeType='ForStmt']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:call-template name="indent"/>
@@ -998,7 +1031,7 @@
       <xsl:apply-templates select="tryBlock/statements">
          <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
       </xsl:apply-templates>
-      <xsl:for-each select="catchClauses/catchClause">
+      <xsl:for-each select="catchClauses/catchClause">         
          <xsl:call-template name="indent"/>
          <xsl:text>}} catch (</xsl:text>
          <xsl:choose>
@@ -1015,7 +1048,7 @@
                </xsl:for-each>
             </xsl:when>
             <xsl:otherwise>
-               <xsl:apply-templates select="parameter/type"/>
+               <xsl:apply-templates select="parameter/type" mode="exception-class"/>
                <xsl:text> </xsl:text>
                <xsl:apply-templates select="parameter/name"/>
             </xsl:otherwise>
@@ -1035,6 +1068,65 @@
       <xsl:call-template name="indent"/>
       <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
+   
+   <xsl:template match="type" mode="exception-class">
+      <xsl:apply-templates select="."/>
+   </xsl:template>
+   
+ <!--  
+   <parameter nodeType="Parameter" isVarArgs="false">
+      <name nodeType="SimpleName" identifier="e"/>
+      <type nodeType="ClassOrInterfaceType"
+         RESOLVED_TYPE="java.io.UnsupportedEncodingException">
+         <name nodeType="SimpleName"
+            identifier="UnsupportedEncodingException"/>
+      </type>
+   </parameter>
+   -->
+   
+   <!-- Replace exception name based on CSharpReplaceException annotation on containing method -->
+   <xsl:template match="type[ancestor::member[1]/annotations/annotation[name/@identifier='CSharpReplaceException']]"
+      mode="exception-class">
+      <xsl:variable name="class" select="@RESOLVED_TYPE"/>     
+      <xsl:variable name="annotations" select="ancestor::member[1]/annotations/annotation[name/@identifier='CSharpReplaceException']"/>
+      <xsl:variable name="matching-annotation" select="$annotations[pairs/pair[name/@identifier='from'][value/@value=$class]]"/>
+      <xsl:choose>
+         <xsl:when test="$matching-annotation">
+            <xsl:text>/* substitute exception */ </xsl:text>
+            <xsl:value-of select="$matching-annotation/pairs/pair[name/@identifier='to']/value/@value"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>/* no matching annotation */ </xsl:text>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+      
+   </xsl:template>
+   <!--<xsl:template match="type[@RESOLVED_TYPE = ancestor::member[1]/annotations/annotation
+               [name/@identifier='CSharpReplaceException']
+               [pairs/pair[name/@identifier='from']]/value/@value]" 
+               mode="exception-class">
+      <xsl:value-of select="ancestor::member[1]/annotations/annotation
+         [name/@identifier='CSharpReplaceException']
+         /pairs[pair[name/@identifier='from'][value/@value=current()/@RESOLVED_TYPE]]
+         /pair[name/@identifier='from']/value/@value"/>
+   </xsl:template>-->
+   
+   <!--<annotation nodeType="NormalAnnotationExpr">
+      <name nodeType="Name" identifier="CSharpReplaceException"/>
+      <pairs>
+         <pair nodeType="MemberValuePair">
+            <name nodeType="SimpleName" identifier="from"/>
+            <value nodeType="StringLiteralExpr"
+               value="java.io.UnsupportedEncodingException"/>
+         </pair>
+         <pair nodeType="MemberValuePair">
+            <name nodeType="SimpleName" identifier="to"/>
+            <value nodeType="StringLiteralExpr"
+               value="System.ArgumentException"/>
+         </pair>
+      </pairs>
+   </annotation>-->
    
    <xsl:template match="*[@nodeType='WhileStmt']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
@@ -1186,6 +1278,7 @@
             or (@name='toString' and not(@sig)))">override </xsl:when>
          <xsl:when test="($digestMethod[@virtual='1' and not(@abstract='1')] or $expandingDefaults)
             and not($classIsFinal)">virtual </xsl:when>
+         <xsl:when test="($digestMethod[@new='1'])">new </xsl:when>
       </xsl:choose>
       
     

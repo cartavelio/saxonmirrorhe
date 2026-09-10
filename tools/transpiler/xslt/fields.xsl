@@ -161,17 +161,17 @@
    </xsl:template>
    
    <!-- Identify static field accessors in java.math.RoundingMode -->
-   <!-- Complication here is that different .NET versions support different sets of rounding modes? -->
+   <!-- Assume that we're using these in the context of BigDecimal arithmetic -->
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.math.RoundingMode']" priority="20">
       <xsl:choose>
-         <xsl:when test="name/@identifier='CEILING'">System.MidpointRounding.ToPositiveInfinity</xsl:when>
-         <xsl:when test="name/@identifier='DOWN'">System.MidpointRounding.ToZero</xsl:when>
-         <xsl:when test="name/@identifier='FLOOR'">System.MidpointRounding.ToNegativeInfinity</xsl:when>
-         <xsl:when test="name/@identifier='HALF_DOWN'">System.MidpointRounding.ToZero</xsl:when>
-         <xsl:when test="name/@identifier='HALF_EVEN'">System.MidpointRounding.ToEven</xsl:when>
-         <xsl:when test="name/@identifier='HALF_UP'">System.MidpointRounding.AwayFromZero</xsl:when>
-         <xsl:when test="name/@identifier='UNNECESSARY'">System.MidpointRounding.ToZero</xsl:when>
-         <xsl:when test="name/@identifier='UP'">System.MidpointRounding.AwayFromZero</xsl:when>
+         <xsl:when test="name/@identifier='CEILING'">Singulink.Numerics.RoundingMode.ToPositiveInfinity</xsl:when>
+         <xsl:when test="name/@identifier='DOWN'">Singulink.Numerics.RoundingMode.ToZero</xsl:when>
+         <xsl:when test="name/@identifier='FLOOR'">Singulink.Numerics.RoundingMode.ToNegativeInfinity</xsl:when>
+         <xsl:when test="name/@identifier='HALF_DOWN'">Singulink.Numerics.RoundingMode.MidpointToZero</xsl:when>
+         <xsl:when test="name/@identifier='HALF_EVEN'">Singulink.Numerics.RoundingMode.MidpointToEven</xsl:when>
+         <xsl:when test="name/@identifier='HALF_UP'">Singulink.Numerics.RoundingMode.MidpointAwayFromZero</xsl:when>
+         <xsl:when test="name/@identifier='UNNECESSARY'">Singulink.Numerics.RoundingMode.ToZero</xsl:when>
+         <xsl:when test="name/@identifier='UP'">Singulink.Numerics.RoundingMode.AwayFromZero</xsl:when>
          <xsl:otherwise>
             <xsl:next-match/>
          </xsl:otherwise>
