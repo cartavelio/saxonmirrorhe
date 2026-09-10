@@ -130,7 +130,7 @@ public class JsonParser {
 
         if (options.asBoolean("escape", false)) {
             flags |= ESCAPE;
-            if (options.get("fallback") != null) {
+            if (options.containsKey("fallback")) {
                 throw new XPathException("Cannot specify a fallback function when escape=true", "FOJS0005");
             }
         }
