@@ -454,6 +454,15 @@
         for a function that expects a predicate (a function of arity one), you can now supply the value <code>fn:true#0</code>
         which has arity zero: this has the effect that the predicate will always be true.</p>
         
+        <p>From 12.3, the syntax for "focus functions" is changed from <code>->{EXPR}</code> to <code>function{EXPR}</code>.
+            At the same time, the abbreviated syntax for inline functions with named parameters (known as lambda expressions) is 
+            changed from <code>->($x, $y){$x + $y}</code> to <code>($x, $y)->{$x + $y}</code>. In both cases, 
+            Saxon continues to support the older format for the time being.</p>
+        
+        <p>From 12.3, <code>for</code> and <code>let</code> expressions can use the keyword repeatedly, rather than using a comma:
+        <code>for $i in 1 to 10 for $j in 1 to 10 return $i * $j</code>, or <code>let $i := 10 let $j := 20 return $i + $j</code>.
+        This syntax was already valid in XQuery.</p>
+        
         
         <h2>XQuery 4.0 extensions</h2>
         
