@@ -11,6 +11,7 @@ import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
 import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.functions.extfn.ObjectMap;
 import com.saxonica.functions.extfn.VendorFunctionSetPE;
+import com.saxonica.functions.registry.UseWhen40FunctionSet;
 import com.saxonica.functions.registry.XPath40FunctionSet;
 import com.saxonica.functions.registry.XQUpdate10FunctionSet;
 import com.saxonica.functions.registry.XSLT40FunctionSet;
@@ -797,7 +798,9 @@ public class ProfessionalConfiguration extends Configuration {
     }
 
 
-
+    public synchronized UseWhen30FunctionSet getUseWhenFunctionLibrary(int version) {
+        return UseWhen40FunctionSet.getInstance(version);
+    }
     @Override
     protected synchronized FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
         FunctionLibraryList result = new FunctionLibraryList();

@@ -63,7 +63,7 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
         setXPathLanguageLevel(version == 40 ? 40 : 31);
 
         FunctionLibraryList lib = new FunctionLibraryList();
-        lib.addFunctionLibrary(UseWhen30FunctionSet.getInstance(version));
+        lib.addFunctionLibrary(getConfiguration().getUseWhenFunctionLibrary(version));
         lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(version));
         lib.addFunctionLibrary(new ConstructorFunctionLibrary(getConfiguration()));
         lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());

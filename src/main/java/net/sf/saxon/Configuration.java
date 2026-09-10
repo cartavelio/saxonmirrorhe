@@ -1466,6 +1466,10 @@ public class Configuration implements SourceResolver, NotationSet {
         return result;
     }
 
+    public synchronized UseWhen30FunctionSet getUseWhenFunctionLibrary(int version) {
+        return UseWhen30FunctionSet.getInstance(version);
+    }
+
     protected FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
         FunctionLibraryList result = new FunctionLibraryList();
         result.addFunctionLibrary(VendorFunctionSetHE.getInstance());
