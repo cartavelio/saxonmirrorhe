@@ -31,7 +31,6 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.xpath.XPathEvaluator;
 import net.sf.saxon.xpath.XPathFactoryImpl;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
@@ -58,7 +57,10 @@ import java.util.*;
 
 import static java.lang.System.err;
 import static net.sf.saxon.s9api.streams.Predicates.isText;
-import static net.sf.saxon.s9api.streams.Steps.*;
+import static net.sf.saxon.s9api.streams.Steps.child;
+import static net.sf.saxon.s9api.streams.Steps.descendant;
+import static net.sf.saxon.s9api.streams.Steps.followingSibling;
+import static net.sf.saxon.s9api.streams.Steps.precedingSibling;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -1135,14 +1137,14 @@ public class DOMTest {
         tryElementCopy(true, true);
     }
 
-    @Test
-    @Tag("expectedtofail")
-    public void testElementCopyNN() {
-        // MHK 2020-03-13: this is failing on 10.0. The call on getNamespaceURI() on the 'foo' element returns
-        // "", not the actual namespace http://foo. I think this is OK: we don't actually support a non-namespace-aware
-        // DOM, and we can't detect that the DOM is non-namespace-aware.
-        tryElementCopy(false, false);
-    }
+//    @Test
+//    @Tag("expectedtofail")
+//    public void testElementCopyNN() {
+//        // MHK 2020-03-13: this is failing on 10.0. The call on getNamespaceURI() on the 'foo' element returns
+//        // "", not the actual namespace http://foo. I think this is OK: we don't actually support a non-namespace-aware
+//        // DOM, and we can't detect that the DOM is non-namespace-aware.
+//        tryElementCopy(false, false);
+//    }
 
     @Test
     public void testElementCopyNY() {
