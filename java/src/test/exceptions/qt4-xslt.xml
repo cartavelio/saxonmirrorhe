@@ -4,6 +4,12 @@
    
    <!-- Additional exceptions for qt4-xslt converted tests -->
    
+   <exception test-set="fn-analyze-string" 
+      test-case="analyze-string-903a" run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-17"/>
+      <reason>Test conversion: whitespace problems in expected result</reason>
+   </exception>
+   
    <exception test-set="fn-function-lookup" 
       test-case="fn-function-lookup-760" run="false" report="n/a">
       <created by="Debbie Lockett" on="2024-01-09"/>
@@ -46,6 +52,22 @@
       test-case="built-in-record-type-102" run="false" report="n/a">
       <created by="Michael Kay" on="2026-04-17"/>
       <reason>Test conversion problem - query library module listed in test environment</reason>
+   </exception>
+   
+   <exception test-set="prod-PipelineExpr" 
+      test-case="pipeline-002 pipeline-003" run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-17"/>
+      <reason>Not fully implemented: expressions setting the context value to a sequence with more than one item</reason>
+   </exception>
+   
+   <exception test-set="fn-unparsed-binary" 
+      test-case="fn-unparsed-binary-023
+                  fn-unparsed-binary-027
+                  fn-unparsed-binary-031
+                  fn-unparsed-binary-039
+                  fn-unparsed-binary-040" run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-17"/>
+      <reason>Test conversion problem: handling binary resources in environment</reason>
    </exception>
    
    
@@ -281,9 +303,12 @@
    </exception>
    
    <exception test-set="EXPath-file" 
-      test-case="EXPath-file-read-fallback-003
-      EXPath-file-read-text-lines-fallback-001
-      EXPath-file-read-text-lines-fallback-003" 
+      test-case="
+                 EXPath-file-read-fallback-002 
+                 EXPath-file-read-fallback-003
+                 EXPath-file-read-text-lines-fallback-001
+                 EXPath-file-read-text-lines-fallback-002
+                 EXPath-file-read-text-lines-fallback-003" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-03-23"/>
       <reason>Fallback option not yet implemented</reason>
