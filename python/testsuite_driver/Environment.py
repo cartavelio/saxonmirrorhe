@@ -170,8 +170,9 @@ class Environment:
 
 
 def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spec: Spec, environments_i: dict,
-                        environment: Environment):
-
+                        environmentDefault: Environment):
+    environment = Environment()
+    environment.create_processors()
     name = env.get_attribute_value("name")
     if name is not None:
         print("Loading environment " + name)
@@ -206,7 +207,7 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
         Environment.remove_temp_files.append(cwd_from_base_uri(base_uri)+"/"+resource_filename)
 
 
-    environment.create_processors()
+    '''environment.create_processors()'''
     xpc.set_context(xdm_item=env)
 
 
@@ -509,7 +510,25 @@ def load_source_documents(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, e
                         else:
                             environment.context_item = environment.source_docs[href]
 
-                    '''else:'''
+                    elif role.startswith("$"):
+                        var_name = role[1:]
+
+                        environment.params[var_name] =content
+                        environment.xpath_proc.declare_variable(var_name)
+
+                        declared = source.get_attribute_value("declared")
+                        is_declared = (
+                                declared is not None and
+                                declared.lower() in ("true", "yes", "1")
+                        )
+
+                        if not is_declared:
+                            if environment.param_declarations is None:
+                                environment.param_declarations = ""
+
+                            environment.param_declarations += (
+                                f"declare variable ${var_name} external; "
+                            )
 
             except saxonc.PySaxonApiError as ex:
                 print("Failed loading source raw_uri = ", raw_uri)
