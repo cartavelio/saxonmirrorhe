@@ -79,14 +79,14 @@ public class XQueryEngine extends SaxonCAPI {
 
 
 
-    @CEntryPoint(name = "createXQueryEngine", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_createXQueryEngine", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXQueryEngine(IsolateThread thread) {
             ObjectHandle handle = objectHandles.create(new net.sf.saxon.option.cpp.XQueryEngine(false));
             return handle.rawValue();
     }
 
-    @CEntryPoint(name = "createXQueryEngineWithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long createXQueryEngine(IsolateThread thread, ObjectHandle processorRef) {
+    @CEntryPoint(name = "j_createXQueryEngineWithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_createXQueryEngine(IsolateThread thread, ObjectHandle processorRef) {
             Processor processor = objectHandles.get(processorRef);
             if(processor == null) {
                 return 0;
@@ -318,7 +318,6 @@ public class XQueryEngine extends SaxonCAPI {
             if (serializer != null) {
 
                 eval.run(serializer);
-                return SaxonCAPI.STATUS_OK;
             } else {
                 eval.run();
             }

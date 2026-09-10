@@ -106,7 +106,7 @@ public class XPathProcessor extends SaxonCAPI {
      *               is in no namespace.
      * @throws NullPointerException if either the prefix or uri is null.
      */
-    @CEntryPoint(name = "j_declareNamespace")
+    @CEntryPoint(name = "j_xp_declareNamespace")
     public static void declareNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_prefix, CCharPointer c_uri) {
         String prefix = CTypeConversion.toJavaString(c_prefix);
         String uri = CTypeConversion.toJavaString(c_uri);
@@ -124,7 +124,7 @@ public class XPathProcessor extends SaxonCAPI {
      *
      * @param c_qname The name of the variable, expressions as a clark name string
      */
-    @CEntryPoint(name = "j_declareVariable")
+    @CEntryPoint(name = "j_xp_declareVariable")
     public static void declareVariable(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_qname) {
         String qname = CTypeConversion.toJavaString(c_qname);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
@@ -148,7 +148,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param c_uri The schema namespace to be imported. To import declarations in a no-namespace schema,
      *            supply a zero-length string.
      */
-    @CEntryPoint(name = "j_importSchemaNamespace")
+    @CEntryPoint(name = "j_xp_importSchemaNamespace")
     public static void importSchemaNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_uri) {
         String uri = CTypeConversion.toJavaString(c_uri);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
@@ -158,7 +158,7 @@ public class XPathProcessor extends SaxonCAPI {
         }
     }
 
-    @CEntryPoint(name = "j_setAllowUndeclaredVariables")
+    @CEntryPoint(name = "j_xp_setAllowUndeclaredVariables")
     public static void setAllowUndeclaredVariables(IsolateThread thread, ObjectHandle xpathProcessorRef, int c_allow) {
         boolean allow = CTypeConversion.toBoolean(c_allow);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
@@ -177,7 +177,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param c_option true if XPath 1.0 backwards compatibility is to be enabled, false if it is to
      *               be disabled.
      */
-    @CEntryPoint(name = "j_setBackwardsCompatible")
+    @CEntryPoint(name = "j_xp_setBackwardsCompatible")
     public static void setBackwardsCompatible(IsolateThread thread, ObjectHandle xpathProcessorRef, int c_option) {
         boolean option = CTypeConversion.toBoolean(c_option);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
@@ -194,7 +194,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param c_uriStr
      * @throws SaxonApiException
      */
-    @CEntryPoint(name = "j_setBaseURI")
+    @CEntryPoint(name = "j_xp_setBaseURI")
     public static void setBaseURI(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_uriStr) throws SaxonApiException {
         String uriStr = CTypeConversion.toJavaString(c_uriStr);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);

@@ -13,7 +13,7 @@ import org.graalvm.word.WordFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class DocumentBuilderForCpp {
+public class DocumentBuilderForCpp extends SaxonCAPI {
 
     @CEntryPoint(name = "createDocumentBuilder", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef) throws SaxonApiException {
@@ -27,7 +27,7 @@ public class DocumentBuilderForCpp {
     }
 
 
-    @CEntryPoint(name = "j_setBaseURI", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_db_setBaseURI", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long setBaseURI(IsolateThread thread, ObjectHandle documentBuilderRef, CCharPointer baseUri) throws SaxonApiException {
 
             DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);
@@ -44,7 +44,7 @@ public class DocumentBuilderForCpp {
 
 
 
-    @CEntryPoint(name = "j_setDTDValidation", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_db_setDTDValidation", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long setDTDValidation(IsolateThread thread, ObjectHandle documentBuilderRef, int dtdVal) throws SaxonApiException {
 
             DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);

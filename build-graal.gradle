@@ -71,14 +71,15 @@ task graalImage(
     exec {
       commandLine "${graalHome}/native-image",
         "-jar", "${buildDir}/libs/graalvm-ee-${saxonVersion}.jar",
-        "--no-fallback", "--allow-incomplete-classpath", "-H:Path=${buildDir}/c",
+        "--no-fallback", "-H:Path=${buildDir}/c",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
         "-H:+ReportExceptionStackTraces",
         "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
         "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
         "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
-        "--shared"
+        "--shared", "-g",
+        "--verbose"
     }
   }
 }
