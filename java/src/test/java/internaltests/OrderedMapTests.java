@@ -37,7 +37,7 @@ public class OrderedMapTests {
             Configuration config = new Configuration();
             MapType stringToDouble = new MapType(BuiltInAtomicType.STRING,BuiltInAtomicType.DOUBLE.one());
             testKeys("a-b-c-d-", initial);
-            assertTrue(stringToDouble.matches(initial, config.getTypeHierarchy()));
+            assertTrue(stringToDouble.matches(initial));
             assertEquals(1, ((NumericValue) initial.get(new StringValue("a"))).getDoubleValue());
             assertEquals(2, ((NumericValue) initial.get(new StringValue("b"))).getDoubleValue());
             assertEquals(3, ((NumericValue) initial.get(new StringValue("c"))).getDoubleValue());
@@ -53,7 +53,7 @@ public class OrderedMapTests {
             assertNull(minus3.get(new StringValue("c")));
             assertNull(minus3.get(new StringValue("#")));
             assertEquals(3, minus3.size());
-            assertTrue(stringToDouble.matches(minus3, config.getTypeHierarchy()));
+            assertTrue(stringToDouble.matches(minus3));
             assertEquals(stringToDouble, minus3.getItemType(config.getTypeHierarchy()));
             testKeys("a-b-d-", minus3);
 
@@ -65,7 +65,7 @@ public class OrderedMapTests {
             assertEquals(5, ((NumericValue) plus5.get(new StringValue("*"))).getDoubleValue());
             assertNull(plus5.get(new StringValue("#")));
             assertEquals(5, plus5.size());
-            assertTrue(stringToDouble.matches(plus5, config.getTypeHierarchy()));
+            assertTrue(stringToDouble.matches(plus5));
             testKeys("a-b-c-d-*-", plus5);
             assertEquals(stringToDouble, plus5.getItemType(config.getTypeHierarchy()));
 
@@ -93,7 +93,7 @@ public class OrderedMapTests {
             plus20 = plus20.put(new StringValue("wraths"), new DoubleValue(5));
             plus20 = plus20.put(new StringValue("outgrabe"), new DoubleValue(5));
             testKeys("a-b-c-d-twas-brillig-and-the-slithy-toves-did-gyre-gimble-in-wabe-all-mimsy-were-borogroves-nome-wraths-outgrabe-", plus20);
-            assertTrue(stringToDouble.matches(plus20, config.getTypeHierarchy()));
+            assertTrue(stringToDouble.matches(plus20));
 
             MapItem replace2 = plus5.put(new StringValue("b"), new DoubleValue(81));
             assertEquals(1, ((NumericValue) replace2.get(new StringValue("a"))).getDoubleValue());
@@ -104,13 +104,13 @@ public class OrderedMapTests {
             assertNull(replace2.get(new StringValue("#")));
             assertEquals(5, replace2.size());
             testKeys("a-b-c-d-*-", plus5);
-            assertTrue(stringToDouble.matches(plus5, config.getTypeHierarchy()));
+            assertTrue(stringToDouble.matches(plus5));
 
             MapItem nonInteger = plus5.put(new StringValue("z"), new StringValue("banana"));
-            assertFalse(stringToDouble.matches(nonInteger, config.getTypeHierarchy()));
-            assertTrue(stringToDouble.matches(plus5, config.getTypeHierarchy()));
+            assertFalse(stringToDouble.matches(nonInteger));
+            assertTrue(stringToDouble.matches(plus5));
             MapItem allInteger = nonInteger.remove(new StringValue("z"));
-            assertTrue(stringToDouble.matches(allInteger, config.getTypeHierarchy()));
+            assertTrue(stringToDouble.matches(allInteger));
 
             MapItem empty=initial.remove(new StringValue("a"))
                     .remove(new StringValue("b"))
@@ -120,7 +120,7 @@ public class OrderedMapTests {
             assertEquals(0, empty.size());
             MapType intToString = new MapType(BuiltInAtomicType.INTEGER, BuiltInAtomicType.STRING.one());
             // empty map matches anything
-            assertTrue(intToString.matches(empty, config.getTypeHierarchy()));
+            assertTrue(intToString.matches(empty));
             
         } catch (Exception e) {
             fail(e);
