@@ -34,7 +34,7 @@ import java.util.Properties;
  * Abstract superclass for calls to functions in the standard function library
  */
 
-public abstract class SystemFunction extends AbstractFunction {
+public abstract class SystemFunction extends AbstractFunction implements IFunctionWithRetainedParameterNames {
 
     private int arity;
     private BuiltInFunctionSet.Entry details;
@@ -382,6 +382,19 @@ public abstract class SystemFunction extends AbstractFunction {
             paramTypes = Arrays.copyOf(paramTypes, arity);
         }
         return new SpecificFunctionType(paramTypes, resultType);
+    }
+
+    /**
+     * Get the names of the parameters in the underlying function definition
+     *
+     * @return the names of the parameters, in order
+     */
+    @Override
+    public StructuredQName[] getParameterNames() {
+        String[] rawNames = details.paramNames;
+        StructuredQName[] qNames = new StructuredQName[rawNames.length];
+        Arrays.setAll(qNames, i -> new StructuredQName("", "", rawNames[i]));
+        return qNames;
     }
 
     /**

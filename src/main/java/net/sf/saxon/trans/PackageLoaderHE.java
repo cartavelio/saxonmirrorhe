@@ -2045,7 +2045,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     argValues[count++] = ((Literal) arg).getGroundedValue();
                 }
             }
-            FunctionItem f = new CurriedFunction(targetFn, argValues);
+            FunctionItem f = new CurriedFunction(targetFn, argValues, null); // TODO: FIXME
             return Literal.makeLiteral(f);
         });
 

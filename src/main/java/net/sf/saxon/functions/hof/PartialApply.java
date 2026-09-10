@@ -43,8 +43,12 @@ public class PartialApply extends Expression {
      * Create a partial function application expression
      *
      * @param base           the expression that returns the function to be called
-     * @param boundArguments an array in which each element is either an expression to be bound to the corresponding
-     *                       argument, or null to represent a placeholder ("?" in the source syntax)
+     * @param boundArguments an array corresponding to the declared arguments of the base function. Each entry
+     *                       in the array is either an expression which is evaluated and bound to the corresponding
+     *                       argument of the base function, or a {@link PlaceHolder} pseudo-expression wrapping
+     *                       in integer N which denotes the (0-based) Nth argument supplied to the actual
+     *                       call of the partially-applied function. Note that in 4.0, placeHolders can be
+     *                       used to change the order of arguments.
      */
 
     public PartialApply(Expression base, Expression[] boundArguments) {
@@ -52,10 +56,8 @@ public class PartialApply extends Expression {
         adoptChildExpression(base);
         boundArgumentsOp = new Operand[boundArguments.length];
         for (int i=0; i<boundArguments.length; i++) {
-            if (boundArguments[i] != null) {
-                boundArgumentsOp[i] = new Operand(this, boundArguments[i], OperandRole.NAVIGATE);
-                adoptChildExpression(boundArguments[i]);
-            }
+            boundArgumentsOp[i] = new Operand(this, boundArguments[i], OperandRole.NAVIGATE);
+            adoptChildExpression(boundArguments[i]);
         }
     }
 
@@ -70,7 +72,7 @@ public class PartialApply extends Expression {
     public int getNumberOfPlaceHolders() {
         int n = 0;
         for (Operand o : boundArgumentsOp) {
-            if (o == null) {
+            if (o.getChildExpression() instanceof PlaceHolder) {
                 n++;
             }
         }
@@ -96,8 +98,8 @@ public class PartialApply extends Expression {
         final String diagnosticName = baseName;
         for (int i = 0; i < boundArgumentsOp.length; i++) {
             final Operand op = boundArgumentsOp[i];
-            if (op != null) {
-                Expression arg = op.getChildExpression();
+            Expression arg = op.getChildExpression();
+            if (!(arg instanceof PlaceHolder)) {
                 if (baseType instanceof SpecificFunctionType && i < ((SpecificFunctionType) baseType).getArity()) {
                     final int pos = i;
                     Supplier<RoleDiagnostic> argRole =
@@ -133,7 +135,9 @@ public class PartialApply extends Expression {
         SequenceType[] argTypes = new SequenceType[placeholders];
         if (baseItemType instanceof SpecificFunctionType) {
             for (int i = 0, j = 0; i < boundArgumentsOp.length; i++) {
-                if (boundArgumentsOp[i] == null) {
+                Expression bound = boundArgumentsOp[i].getChildExpression();
+                if (bound instanceof PlaceHolder) {
+                    // TODO: FIXME
                     argTypes[j++] = ((SpecificFunctionType) baseItemType).getArgumentTypes()[i];
                 }
             }
@@ -161,20 +165,11 @@ public class PartialApply extends Expression {
         List<Operand> operanda = new ArrayList<>(boundArgumentsOp.length + 1);
         operanda.add(baseOp);
         for (Operand o : boundArgumentsOp) {
-            if (o != null) {
+            if (!(o.getChildExpression() instanceof PlaceHolder)) {
                 operanda.add(o);
             }
         }
         return operanda;
-    }
-
-    public int getNumberOfArguments() {
-        return boundArgumentsOp.length;
-    }
-
-    public Expression getArgument(int n) {
-        Operand o = boundArgumentsOp[n];
-        return o==null ? null : o.getChildExpression();
     }
 
     @Override
@@ -201,6 +196,7 @@ public class PartialApply extends Expression {
                 return false;
             }
             for (int i=0; i<boundArgumentsOp.length; i++) {
+                // TODO: FIXME
                 if ((boundArgumentsOp[i] == null) != (pa2.boundArgumentsOp[i] == null)) {
                     return false;
                 }
@@ -221,7 +217,8 @@ public class PartialApply extends Expression {
         int h = 0x236b92a0;
         int i = 0;
         for (Operand o : operands()) {
-            h ^= o == null ? i++ : o.getChildExpression().hashCode();
+            Expression e = o.getChildExpression();
+            h ^= (e instanceof PlaceHolder) ? i++ : e.hashCode();
         }
         return h;
     }
@@ -231,11 +228,13 @@ public class PartialApply extends Expression {
         out.startElement("partialApply", this);
         getBaseExpression().export(out);
         for (Operand o : boundArgumentsOp) {
-            if (o == null) {
+            Expression e = o.getChildExpression();
+            if (e instanceof PlaceHolder) {
                 out.startElement("null", this);
+                out.emitAttribute("at", "" + ((PlaceHolder)e).getNewPosition());
                 out.endElement();
             } else {
-                o.getChildExpression().export(out);
+                e.export(out);
             }
         }
         out.endElement();
@@ -251,11 +250,7 @@ public class PartialApply extends Expression {
     public Expression copy(RebindingMap rebindings) {
         Expression[] boundArgumentsCopy = new Expression[boundArgumentsOp.length];
         for (int i = 0; i < boundArgumentsOp.length; i++) {
-            if (boundArgumentsOp[i] == null) {
-                boundArgumentsCopy[i] = null;
-            } else {
-                boundArgumentsCopy[i] = boundArgumentsOp[i].getChildExpression().copy(rebindings);
-            }
+            boundArgumentsCopy[i] = boundArgumentsOp[i].getChildExpression().copy(rebindings);
         }
         PartialApply exp = new PartialApply(getBaseExpression().copy(rebindings), boundArgumentsCopy);
         ExpressionTool.copyLocationInfo(this, exp);
@@ -344,11 +339,15 @@ public class PartialApply extends Expression {
             ItemEvaluator functionEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
             final int len = expr.boundArgumentsOp.length;
             SequenceEvaluator[] boundArgumentsEvaluators = new SequenceEvaluator[len];
+            int[] unboundArgumentMap = new int[expr.getNumberOfPlaceHolders()];
+            int j = 0;
             for (int i = 0; i < len; i++) {
-                if (expr.boundArgumentsOp[i] == null) {
+                Expression boundArg = expr.boundArgumentsOp[i].getChildExpression();
+                if (boundArg instanceof PlaceHolder) {
                     boundArgumentsEvaluators[i] = null;
+                    unboundArgumentMap[j++] = ((PlaceHolder)boundArg).getNewPosition();
                 } else {
-                    boundArgumentsEvaluators[i] = expr.boundArgumentsOp[i].getChildExpression().makeElaborator().eagerly();
+                    boundArgumentsEvaluators[i] = boundArg.makeElaborator().eagerly();
                 }
             }
 
@@ -366,7 +365,7 @@ public class PartialApply extends Expression {
                         values[i] = boundArgumentsEvaluators[i].evaluate(context);
                     }
                 }
-                return new CurriedFunction(f, values);
+                return new CurriedFunction(f, values, unboundArgumentMap);
             };
         }
     }

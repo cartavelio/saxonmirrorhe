@@ -33,6 +33,7 @@ public class CurriedFunction extends AbstractFunction {
 
     private final FunctionItem targetFunction;
     private final Sequence[] boundValues;
+    private final int[] unboundArgumentMap;
     private FunctionItemType functionType;
 
     /**
@@ -41,11 +42,15 @@ public class CurriedFunction extends AbstractFunction {
      * @param targetFunction the function to be curried
      * @param boundValues    the values to which the arguments are to be bound, representing
      *                       unbound values (placeholders) by null
+     * @param unboundArgMap  for unbound arguments (placeholders), mapping from
+     *                       argument positions in the curried function to argument
+     *                       positions in the target function
      */
 
-    public CurriedFunction(FunctionItem targetFunction, Sequence[] boundValues) {
+    public CurriedFunction(FunctionItem targetFunction, Sequence[] boundValues, int[] unboundArgMap) {
         this.targetFunction = Objects.requireNonNull(targetFunction);
         this.boundValues = boundValues;
+        this.unboundArgumentMap = unboundArgMap;
     }
 
     /**
@@ -68,7 +73,7 @@ public class CurriedFunction extends AbstractFunction {
                     placeholders++;
                 }
             }
-            SequenceType[] argTypes = new SequenceType[placeholders];
+            SequenceType[] argTypes = new SequenceType[getArity()];
             if (baseItemType instanceof SpecificFunctionType) {
                 for (int i = 0, j = 0; i < boundValues.length; i++) {
                     if (boundValues[i] == null) {
@@ -116,13 +121,7 @@ public class CurriedFunction extends AbstractFunction {
 
     @Override
     public int getArity() {
-        int count = 0;
-        for (Sequence v : boundValues) {
-            if (v == null) {
-                count++;
-            }
-        }
-        return count;
+        return unboundArgumentMap.length;
     }
 
     /**
@@ -150,13 +149,15 @@ public class CurriedFunction extends AbstractFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
+        assert args.length == unboundArgumentMap.length;
         Sequence[] newArgs = new Sequence[boundValues.length];
-        for (int i = 0, j = 0; i < newArgs.length; i++) {
-            if (boundValues[i] == null) {
-                newArgs[i] = args[j++];
-            } else {
+        for (int i = 0; i < newArgs.length; i++) {
+            if (boundValues[i] != null) {
                 newArgs[i] = boundValues[i];
             }
+        }
+        for (int i = 0; i < args.length; i++) {
+            newArgs[unboundArgumentMap[i]] = args[i];
         }
         XPathContext c2 = targetFunction.makeNewContext(context, null);
         if (targetFunction instanceof UserFunction) {

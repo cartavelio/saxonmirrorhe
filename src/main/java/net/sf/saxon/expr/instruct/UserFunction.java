@@ -1022,7 +1022,8 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
      */
     @Override
     public UnicodeString getUnicodeStringValue() {
-        throw new UnsupportedOperationException("A function has no string value");
+        throw new UncheckedXPathException(
+                new XPathException("The string value of a function is not defined", "FOTY0014"));
     }
 
     /**

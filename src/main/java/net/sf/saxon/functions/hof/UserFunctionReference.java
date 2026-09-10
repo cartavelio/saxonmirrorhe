@@ -20,6 +20,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.AbstractFunction;
+import net.sf.saxon.functions.IFunctionWithRetainedParameterNames;
 import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
@@ -42,7 +43,7 @@ import java.util.Arrays;
  */
 
 public class UserFunctionReference extends Expression
-        implements ComponentInvocation, UserFunctionResolvable, Callable {
+        implements ComponentInvocation, UserFunctionResolvable, IFunctionWithRetainedParameterNames, Callable {
 
     private final SymbolicName.F functionName;
     private UserFunction nominalTarget;
@@ -183,6 +184,20 @@ public class UserFunctionReference extends Expression
 
     public UserFunction getNominalTarget() {
         return nominalTarget;
+    }
+
+    /**
+     * Get the names of the parameters in the underlying function definition
+     *
+     * @return the names of the parameters, in order
+     */
+    @Override
+    public StructuredQName[] getParameterNames() {
+        UserFunction uf = getNominalTarget();
+        UserFunctionParameter[] params = uf.getParameterDefinitions();
+        StructuredQName[] paramNames = new StructuredQName[params.length];
+        Arrays.setAll(paramNames, i -> params[i].getVariableQName());
+        return paramNames;
     }
 
     /**

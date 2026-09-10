@@ -3243,7 +3243,7 @@ public class XPathParser {
         if (prefixArgument != null) {
             args.add(prefixArgument);
         }
-        IntSet placeMarkers = null;
+        List<Object> placeMarkers = null;
 
         // the "(" has already been read by the Tokenizer: now parse the arguments
         nextToken();
@@ -3255,7 +3255,7 @@ public class XPathParser {
                     nextToken();
                     // this is a "?" placemarker
                     if (placeMarkers == null) {
-                        placeMarkers = new IntArraySet();
+                        placeMarkers = new ArrayList<>();
                     }
                     placeMarkers.add(args.size());
                     arg = Literal.makeEmptySequence(); // a convenient fiction
@@ -3971,14 +3971,20 @@ public class XPathParser {
         }
 
         StructuredQName functionName = resolveFunctionName(fname);
-        IntSet placeMarkers = null;
-        Set<StructuredQName> keywordPlaceMarkers = null;
+
+        // placeMarkerArgs holds details of the arguments that were set to "?", indicating
+        // a partially applied function. The list is in the order that the placeMarkers appear,
+        // and each Object in the list is either the 0-based position of the placeMarker if given
+        // positionally, or the StructuredQName representing the associated keyword if given by keyword.
+        List<Object> placeMarkerArgs = null;
+        //Set<StructuredQName> keywordPlaceMarkers = null;
 
         // the "(" has already been read by the Tokenizer: now parse the arguments
 
         Map<StructuredQName, Integer> keywordArgs = null;
         nextToken();
         if (t.currentToken != Token.RPAR) {
+            int position = 0;
             while (true) {
                 int peek = t.peekAhead();
                 Expression arg;
@@ -3991,10 +3997,10 @@ public class XPathParser {
                     if (t.currentToken == Token.QMARK && (peek == Token.COMMA || peek == Token.RPAR)) {
                         // keyword := ?
                         nextToken();
-                        if (keywordPlaceMarkers == null) {
-                            keywordPlaceMarkers = new HashSet<>();
+                        if (placeMarkerArgs == null) {
+                            placeMarkerArgs = new ArrayList<>();
                         }
-                        keywordPlaceMarkers.add(paramName);
+                        placeMarkerArgs.add(paramName);
                         arg = Literal.makeEmptySequence(); // a convenient fiction
                     } else {
                         arg = parseExprSingle();
@@ -4013,10 +4019,10 @@ public class XPathParser {
                     if (t.currentToken == Token.QMARK && (peek == Token.COMMA || peek == Token.RPAR)) {
                         nextToken();
                         // this is a "?" placemarker
-                        if (placeMarkers == null) {
-                            placeMarkers = new IntArraySet();
+                        if (placeMarkerArgs == null) {
+                            placeMarkerArgs = new ArrayList<>();
                         }
-                        placeMarkers.add(args.size());
+                        placeMarkerArgs.add(position);
                         arg = Literal.makeEmptySequence(); // a convenient fiction
                     } else {
                         arg = parseExprSingle();
@@ -4028,6 +4034,7 @@ public class XPathParser {
                 } else {
                     break;
                 }
+                position++;
             }
             expect(Token.RPAR);
         }
@@ -4040,8 +4047,8 @@ public class XPathParser {
         Expression[] arguments = new Expression[args.size()];
         arguments = args.toArray(arguments);
 
-        if (placeMarkers != null || keywordPlaceMarkers != null) {
-            return makeCurriedFunction(this, offset, functionName, arguments, placeMarkers, keywordPlaceMarkers);
+        if (placeMarkerArgs != null) {
+            return makeCurriedFunction(this, offset, functionName, arguments, placeMarkerArgs);
         }
 
         Expression fcall;
@@ -4102,11 +4109,11 @@ public class XPathParser {
      * Process a function call in which one or more of the argument positions are
      * represented as "?" placemarkers (indicating partial application or currying)
      *
-     * @param parser       the XPath parser
-     * @param offset       offset in the query source of the start of the expression
-     * @param name         the function call (as if there were no currying)
-     * @param args         the arguments (with EmptySequence in the placemarker positions)
-     * @param placeMarkers the positions of the placemarkers    @return the curried function
+     * @param parser           the XPath parser
+     * @param offset           offset in the query source of the start of the expression
+     * @param name             the function call (as if there were no currying)
+     * @param args             the arguments (with EmptySequence in the placemarker positions)
+     * @param placeMarkerArgs  the positions or keywords of the placemarkers, in order
      * @return the curried function
      * @throws XPathException if a dynamic error occurs
      */
@@ -4114,7 +4121,7 @@ public class XPathParser {
     public Expression makeCurriedFunction(
             XPathParser parser, int offset,
             StructuredQName name, Expression[] args,
-            IntSet placeMarkers, Set<StructuredQName> keywordPlaceMarkers) throws XPathException {
+            List<Object> placeMarkerArgs) throws XPathException {
         StaticContext env = parser.getStaticContext();
         FunctionLibrary lib = env.getFunctionLibrary();
         SymbolicName.F sn = new SymbolicName.F(name, args.length);
@@ -4127,58 +4134,57 @@ public class XPathParser {
         }
         Expression targetExp = makeNamedFunctionReference(name, target);
         parser.setLocation(targetExp, offset);
-        return curryFunction(targetExp, args, placeMarkers, keywordPlaceMarkers);
+        return curryFunction(targetExp, args, placeMarkerArgs);
     }
 
     /**
      * Process a function expression in which one or more of the argument positions are
      * represented as "?" placemarkers (indicating partial application or currying)
      *
-     * @param functionExp  an expression that returns the function to be curried
-     * @param args         the arguments (with EmptySequence in the placemarker positions)
-     * @param placeMarkers the positions of the placemarkers
+     * @param functionExp     an expression that returns the function to be curried
+     * @param args            the arguments (with EmptySequence in the placemarker positions)
+     * @param placeMarkerArgs the positions or keywords of the placemarkers, in order
      * @return the curried function
      */
 
     public static Expression curryFunction(
-            Expression functionExp, Expression[] args,
-            IntSet placeMarkers, Set<StructuredQName> keywordPlaceMarkers) throws XPathException {
-        int maxPlaceMarker = 0;
-        if (placeMarkers != null) {
-            IntIterator ii = placeMarkers.iterator();
-            while (ii.hasNext()) {
-                maxPlaceMarker = ii.next();
-                args[maxPlaceMarker] = null;
+            Expression functionExp,
+            Expression[] args,
+            List<Object> placeMarkerArgs) throws XPathException {
+
+        boolean hasKeywordPlaceMarkers = false;
+        for (Object o : placeMarkerArgs) {
+            if (o instanceof Integer) {
+                args[(Integer)o] = new PlaceHolder((Integer) o);
+            } else {
+                hasKeywordPlaceMarkers = true;
+                break;
             }
         }
-        if (keywordPlaceMarkers != null) {
-            // It must be a static function call so the function expression must be a function literal
-            if (functionExp instanceof UserFunctionReference) {
-                UserFunction ufn = ((UserFunctionReference)functionExp).getNominalTarget();
-                UserFunctionParameter[] params = ufn.getParameterDefinitions();
-                for (int i=0; i<params.length; i++) {
-                    StructuredQName paramName = params[i].getVariableQName();
-                    if (keywordPlaceMarkers.contains(paramName)) {
-                        if (i < maxPlaceMarker) {
-                            throw new XPathException("Saxon restriction: Placemarkers must currently be in the correct order");
+
+        if (hasKeywordPlaceMarkers) {
+            // Map the declared parameter names to their 0-based numeric positions
+            // It must be a function item that knows the original parameter names
+            if (functionExp instanceof IFunctionWithRetainedParameterNames) {
+                StructuredQName[] paramNames = ((IFunctionWithRetainedParameterNames)functionExp).getParameterNames();
+                Map<StructuredQName, Integer> paramNameMap = new HashMap<>();
+                for (int i = 0; i< paramNames.length; i++) {
+                    paramNameMap.put(paramNames[i], i);
+                }
+                for (int pm = 0; pm < placeMarkerArgs.size(); pm++) {
+                    Object pmId = placeMarkerArgs.get(pm);
+                    if (pmId instanceof StructuredQName) {
+                        Integer pos = paramNameMap.get((StructuredQName) pmId);
+                        if (pos == null) {
+                            throw new XPathException("Keyword " + ((StructuredQName) pmId).getEQName()
+                                                             + " does not identify any parameter in the function being partially applied",
+                                                     "XPST9999");
                         }
-                        maxPlaceMarker = i;
-                        args[i] = null;
+                        args[pos] = new PlaceHolder(pm);
                     }
                 }
             } else {
-                FunctionItem fit = ((FunctionLiteral) functionExp).getGroundedValue();
-                if (fit instanceof SystemFunction) {
-                    BuiltInFunctionSet.Entry details = ((SystemFunction)fit).getDetails();
-                    String[] params = details.paramNames;
-                    for (int i = 0; i < params.length; i++) {
-                        if (keywordPlaceMarkers.contains(new StructuredQName("", "", params[i]))) {
-                            args[i] = null;
-                        }
-                    }
-                } else {
-                    throw new XPathException("Keyword placemarkers not supported on " + fit.getClass());
-                }
+                throw new XPathException("Keyword placemarkers not supported on " + functionExp.toShortString());
             }
         }
         return new PartialApply(functionExp, args);
@@ -4186,10 +4192,10 @@ public class XPathParser {
 
 
     public Expression createDynamicCurriedFunction(
-            XPathParser p, Expression functionItem, ArrayList<Expression> args, IntSet placeMarkers) throws XPathException {
+            XPathParser p, Expression functionItem, ArrayList<Expression> args, List<Object> placeMarkers) throws XPathException {
         Expression[] arguments = new Expression[args.size()];
         arguments = args.toArray(arguments);
-        Expression result = curryFunction(functionItem, arguments, placeMarkers, null);
+        Expression result = curryFunction(functionItem, arguments, placeMarkers);
         p.setLocation(result, p.getTokenizer().currentTokenStartOffset);
         return result;
     }
@@ -4609,7 +4615,7 @@ public class XPathParser {
 
             Expression[] partialArgs = new Expression[expandedArity];
             for (int i = 0; i < arity; i++) {
-                partialArgs[i] = null;
+                partialArgs[i] = new PlaceHolder(i);
             }
             for (int ip = 0; ip < implicitParams.size(); ip++) {
                 UserFunctionParameter ufp = implicitParams.get(ip);
