@@ -86,7 +86,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
 
 
 
-    public static class UnderscoreFunctionDetails extends InlineFunctionDetails {
+    public static class UnderscoreFunctionDetails extends XPathParser.InlineFunctionDetails {
         List<UserFunctionParameter> numberedParams = new ArrayList<>();
     }
 
@@ -98,14 +98,14 @@ public class SaxonSyntaxExtension extends ParserExtension {
         Tokenizer t = p.getTokenizer();
         int offset = t.currentTokenStartOffset;
 
-        InlineFunctionDetails details = new InlineFunctionDetails();
+        XPathParser.InlineFunctionDetails details = new XPathParser.InlineFunctionDetails();
         details.outerVariables = new Stack<>();
         for (LocalBinding lb : p.getRangeVariables()) {
             details.outerVariables.push(lb);
         }
         details.outerVariablesUsed = new ArrayList<>(4);
         details.implicitParams = new ArrayList<>(4);
-        inlineFunctionStack.push(details);
+        p.inlineFunctionStack.push(details);
         p.setRangeVariables(new Stack<>());
         p.nextToken();
         List<UserFunctionParameter> params = new ArrayList<>(1);
@@ -127,12 +127,12 @@ public class SaxonSyntaxExtension extends ParserExtension {
 
         LocalVariableReference ref = new LocalVariableReference(arg);
         body = new ForEach(ref, body);
-        Expression result = makeInlineFunctionValue(p, AnnotationList.EMPTY, details, params, resultType, body);
+        Expression result = XPathParser.makeInlineFunctionValue(p, AnnotationList.EMPTY, details, params, resultType, body);
 
         p.setLocation(result, offset);
         // restore the previous stack of range variables
         p.setRangeVariables(details.outerVariables);
-        inlineFunctionStack.pop();
+        p.inlineFunctionStack.pop();
         return result;
     }
 
@@ -156,7 +156,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
         }
         details.outerVariablesUsed = new ArrayList<>(4);
         details.implicitParams = new ArrayList<>(4);
-        inlineFunctionStack.push(details);
+        p.inlineFunctionStack.push(details);
         p.setRangeVariables(new Stack<>());
         p.nextToken();
         SequenceType resultType = SequenceType.ANY_SEQUENCE;
@@ -168,12 +168,12 @@ public class SaxonSyntaxExtension extends ParserExtension {
         body.setRetainedStaticContext(p.getStaticContext().makeRetainedStaticContext());
 
         List<UserFunctionParameter> params = details.numberedParams;
-        Expression result = makeInlineFunctionValue(p, AnnotationList.EMPTY, details, params, resultType, body);
+        Expression result = p.makeInlineFunctionValue(p, AnnotationList.EMPTY, details, params, resultType, body);
 
         p.setLocation(result, offset);
         // restore the previous stack of range variables
         p.setRangeVariables(details.outerVariables);
-        inlineFunctionStack.pop();
+        p.inlineFunctionStack.pop();
         return result;
     }
 
@@ -190,10 +190,10 @@ public class SaxonSyntaxExtension extends ParserExtension {
         if (n <= 0) {
             p.grumble("Numeric parameter reference must be a positive integer");
         }
-        if (inlineFunctionStack.isEmpty() || !(inlineFunctionStack.peek() instanceof UnderscoreFunctionDetails)) {
+        if (p.inlineFunctionStack.isEmpty() || !(p.inlineFunctionStack.peek() instanceof UnderscoreFunctionDetails)) {
             p.grumble("Numeric parameter reference must be contained directly in an underscore function");
         }
-        UnderscoreFunctionDetails fn = (UnderscoreFunctionDetails)inlineFunctionStack.peek();
+        UnderscoreFunctionDetails fn = (UnderscoreFunctionDetails)p.inlineFunctionStack.peek();
         if (n > fn.numberedParams.size()) {
             for (int k=fn.numberedParams.size(); k < n; k++) {
                 UserFunctionParameter arg = new UserFunctionParameter();
