@@ -21,15 +21,19 @@ public class ParamKeywords {
     static {
 
         arrayParamNames.put("append", "array|add");
+        arrayParamNames.put("empty", "array");
+        arrayParamNames.put("exists", "array");
         arrayParamNames.put("filter", "array|predicate");
         arrayParamNames.put("flatten", "input");
         arrayParamNames.put("fold-left", "array|zero|action");
         arrayParamNames.put("fold-right", "array|zero|action");
+        arrayParamNames.put("foot", "array");
         arrayParamNames.put("for-each", "array|action");
         arrayParamNames.put("for-each-pair", "array1|array2|action");
         arrayParamNames.put("from-sequence", "input|action");
         arrayParamNames.put("get", "array|position");
         arrayParamNames.put("head", "array");
+        arrayParamNames.put("index-where", "array|predicate");
         arrayParamNames.put("insert-before", "array|position|member");
         arrayParamNames.put("join", "arrays");
         arrayParamNames.put("members", "input");
@@ -44,6 +48,7 @@ public class ParamKeywords {
         arrayParamNames.put("sort", "array|collation|key");
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
+        arrayParamNames.put("trunk", "array");
         fnParamNames.put("QName", "uri|qname");
         fnParamNames.put("abs", "value");
         fnParamNames.put("adjust-date-to-timezone", "value|timezone");
@@ -134,6 +139,7 @@ public class ParamKeywords {
         fnParamNames.put("iri-to-uri", "value");
         fnParamNames.put("is-NaN", "value");
         fnParamNames.put("items-after", "input|predicate");
+        fnParamNames.put("items-at", "input|at");
         fnParamNames.put("items-before", "input|predicate");
         fnParamNames.put("items-ending-where", "input|predicate");
         fnParamNames.put("items-starting-where", "input|predicate");
@@ -219,7 +225,7 @@ public class ParamKeywords {
         fnParamNames.put("transform", "options");
         fnParamNames.put("translate", "value|replace|with");
         fnParamNames.put("true", "");
-        fnParamNames.put("truncate", "input");
+        fnParamNames.put("trunk", "input");
         fnParamNames.put("unordered", "input");
         fnParamNames.put("unparsed-text", "href|encoding");
         fnParamNames.put("unparsed-text-available", "href|encoding");
