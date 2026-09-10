@@ -403,6 +403,18 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             return ax2;
         }
 
+        if (getBase() instanceof AxisExpression
+                && ((AxisExpression) getBase()).getNodeTest() == NodeKindType.ELEMENT
+                && getFilter() instanceof CompareToStringConstant
+                && ((CompareToStringConstant) getFilter()).getSingletonOperator() == OperatorSymbol.FEQ
+                && ((CompareToStringConstant) getFilter()).getLhsExpression().isCallOn(LocalName_1.class)
+                && ((SystemFunctionCall) ((CompareToStringConstant) getFilter()).getLhsExpression()).getArg(0) instanceof ContextItemExpression) {
+            AxisExpression ax2 = new AxisExpression(((AxisExpression) getBase()).getAxis(),
+                                                    new NamedXNodeType(Type.ELEMENT, new LocalQNameTest(((CompareToStringConstant) getFilter()).getComparand().toString()), config));
+            ExpressionTool.copyLocationInfo(this, ax2);
+            return ax2;
+        }
+
         // if the result of evaluating the filter cannot include numeric values, then we can use
         // its effective boolean value
 

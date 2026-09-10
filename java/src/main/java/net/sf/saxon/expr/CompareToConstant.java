@@ -15,6 +15,8 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.BooleanValue;
 
+import java.util.function.Predicate;
+
 /**
  * This class implements a comparison of a computed value to a literal constant using one of the operators
  * eq, ne, lt, gt, le, ge. The semantics are identical to ValueComparison, but this is a fast path for an
@@ -183,6 +185,18 @@ public abstract class CompareToConstant extends UnaryExpression implements Compa
             case FLT -> c < 0;
             case FGE -> c >= 0;
             case FLE -> c <= 0;
+            default -> throw new UnsupportedOperationException("Unknown operator " + operator);
+        };
+    }
+
+    public static Predicate<Integer> comparisonResultInterpreter(OperatorSymbol operator) {
+        return switch (operator) {
+            case FEQ -> c -> c == 0;
+            case FNE -> c -> c != 0;
+            case FGT -> c -> c > 0;
+            case FLT -> c -> c < 0;
+            case FGE -> c -> c >= 0;
+            case FLE -> c -> c <= 0;
             default -> throw new UnsupportedOperationException("Unknown operator " + operator);
         };
     }

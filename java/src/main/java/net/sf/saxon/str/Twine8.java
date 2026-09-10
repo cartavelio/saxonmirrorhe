@@ -334,19 +334,8 @@ public class Twine8 extends UnicodeString {
 
     @Override
     public int compareTo(UnicodeString other) {
-        if (other instanceof Twine8) {
-            // TODO: for Java9, use Arrays.compareUnsigned(bytes, o.bytes);
-            Twine8 o = (Twine8) other;
-            byte[] a = bytes;
-            byte[] b = o.bytes;
-            int len = Math.min(a.length, b.length);
-            for (int i = 0; i < len; i++) {
-                int diff = (a[i] & 0xff) - (b[i] & 0xff);
-                if (diff != 0) {
-                    return diff;
-                }
-            }
-            return Integer.compare(a.length, b.length);
+        if (other instanceof Twine8 o) {
+            return Arrays.compareUnsigned(bytes, o.bytes);
         } else {
             return super.compareTo(other);
         }

@@ -7,10 +7,10 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -28,6 +28,7 @@ import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
 
 import java.math.BigDecimal;
+import java.util.function.Predicate;
 
 /**
  * This class implements a comparison of a numeric value to an integer constant using one of the operators
@@ -244,12 +245,13 @@ public class CompareToIntegerConstant extends CompareToConstant {
             boolean isInteger = th.isSubType(operandType, BuiltInAtomicType.INTEGER);
             boolean isDecimal = (!isInteger) && th.isSubType(operandType, BuiltInAtomicType.DECIMAL);
 
+            Predicate<Integer> predicate = comparisonResultInterpreter(operator);
             if (isInteger) {
-                return context -> {
-                    IntegerValue val = (IntegerValue) argEval.eval(context);
-                    return interpretComparisonResult(operator, val.compareTo(comparand));
-                };
-
+                if (operator == OperatorSymbol.FEQ) {
+                    return context -> ((IntegerValue)argEval.eval(context)).compareTo(comparand) == 0;
+                }
+                return context ->
+                        predicate.test(((IntegerValue) argEval.eval(context)).compareTo(comparand));
             }
 
             if (isDouble || isFloat) {
@@ -260,7 +262,7 @@ public class CompareToIntegerConstant extends CompareToConstant {
                     if (Double.isNaN(val)) {
                         return operator == OperatorSymbol.FNE;
                     }
-                    return interpretComparisonResult(operator, Double.compare(val, constant));
+                    return predicate.test(Double.compare(val, constant));
                 };
             }
 
@@ -269,7 +271,7 @@ public class CompareToIntegerConstant extends CompareToConstant {
                 final BigDecimal deci = BigDecimal.valueOf(comparand);
                 return context -> {
                     BigDecimal val = ((NumericValue) argEval.eval(context)).getDecimalValue();
-                    return interpretComparisonResult(operator, val.compareTo(deci));
+                    return predicate.test(val.compareTo(deci));
                 };
             }
 
@@ -281,7 +283,7 @@ public class CompareToIntegerConstant extends CompareToConstant {
                     return operator == OperatorSymbol.FNE;
                 }
                 int c = num.compareTo(comparand);
-                return interpretComparisonResult(operator, c);
+                return predicate.test(c);
             };
 
         }

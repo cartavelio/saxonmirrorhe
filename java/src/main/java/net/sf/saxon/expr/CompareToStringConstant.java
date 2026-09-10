@@ -7,14 +7,13 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
 import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
@@ -23,6 +22,8 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Cardinality;
+
+import java.util.function.Predicate;
 
 /**
  * This class implements a comparison of a computed value to a string constant using one of the operators
@@ -231,15 +232,20 @@ public class CompareToStringConstant extends CompareToConstant {
             final boolean nullable = Cardinality.allowsZero(expression.getCardinality());
             final OperatorSymbol operator = expression.getComparisonOperator();
             final UnicodeString comparand = expression.getComparand();
-
-            return context -> {
-                UnicodeString value = argEval.eval(context);
-                if (nullable && value == null) {
-                    return false;
-                }
-                int c = value.compareTo(comparand);
-                return interpretComparisonResult(operator, c);
-            };
+            if (operator == OperatorSymbol.FEQ) {
+                return context -> comparand.equals(argEval.eval(context));
+            } else if (operator == OperatorSymbol.FNE) {
+                return context -> !comparand.equals(argEval.eval(context));
+            }
+            final Predicate<Integer> predicate = comparisonResultInterpreter(operator);
+            if (nullable) {
+                return context -> {
+                    UnicodeString value = argEval.eval(context);
+                    return value != null && predicate.test(value.compareTo(comparand));
+                };
+            } else {
+                return context -> predicate.test(argEval.eval(context).compareTo(comparand));
+            }
 
         }
 
