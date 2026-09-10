@@ -3331,7 +3331,7 @@ cdef class PyXPathProcessor:
             encoding (str): The encoding of the XPath string. Argument can be omitted or None.
                 If not specified then the platform default encoding is used.
         Returns:
-            PyXdmValue: the result of evaluating the XPath expression
+            PyXdmValue: the result of evaluating the XPath expression. Returns None if the expression returns an empty sequence.
         Raises:
             PySaxonApiError: Error if failure to evaluate XPath expression
         """

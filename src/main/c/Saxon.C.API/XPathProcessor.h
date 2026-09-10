@@ -106,7 +106,8 @@ public:
    *  @param xpathStr - supplied as a character string
    * @param encoding -  the encoding of the string. If not specified then the
    * platform default encoding is used.
-   *  @return XdmValue - representing the results of the expression.
+   *  @return XdmValue - representing the results of the expression or nullptr if
+   *  the expression returns an empty sequence.
    *  The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException
    */
