@@ -563,11 +563,10 @@ class TestSuite {
 
       def testargs = [options["dotnet"],
                       "${project.buildDir}/testdrivers/bin/Release/net5.0/TestDrivers.dll",
-                      directory,
-                      "-exceptions:${options['exceptions']}",
-                      "-reportfilename:${options['reportFilename']}.xml",
                       "-o:${options['reportDirectory']}",
-                      "-lang:${options['language']}"]
+                      "-lang:${options['language']}",
+                      '-debug',
+                      "-exceptions:${options['exceptions']}"]
       optionMap.keySet().each { name ->
         if (name in options) {
           def argform = optionMap[name]
@@ -597,7 +596,7 @@ class TestSuite {
 
         doFirst {
           println("Redirecting output to .../${options['reportFilename']}.{out,err}")
-          stderr.write("${options['class']} ${testargs.join(' ')}\n"
+          stderr.write("${testargs.join(' ')}\n"
                        .getBytes(StandardCharsets.UTF_8))
         }
 
@@ -631,7 +630,7 @@ class TestSuite {
             def arcpath = "${this.testReportArchive}/${options['product']}/"
             arcpath += "${project.ext.saxonVersion}/"
             arcpath += "${options['suite']}/${project.ext.DSTAMP}"
-            saveTheResults(options, arcpath)
+            saveTheXsdResults(options, arcpath)
           }
         }
       }
@@ -730,8 +729,13 @@ class TestSuite {
 
     parts = options['reportFilename'].split("_")
     def psuite = parts[2];
-
     def reportfn = "${options['reportDirectory']}/SaxonResults${pver}-${psuite}.xml";
+
+    // N.B. The eej and eedotnet patterns are different!
+    def eedotnet = (parts[0] == "eedotnet")
+    if (eedotnet) {
+      reportfn = "${options['reportDirectory']}/SaxonResults${pver}n.xml";
+    }
 
     String mostRecent = null
     File compare = null
@@ -777,11 +781,13 @@ class TestSuite {
     Files.copy(Paths.get(reportfn), Paths.get(arcfn),
                StandardCopyOption.REPLACE_EXISTING)
 
-    reportfn = "${options['reportDirectory']}/SaxonFailures${pver}-${psuite}-errors.xml";
-    arcfn = "${arcpath}/${options['reportFilename']}-errors.xml"
+    if (!eedotnet) {
+      reportfn = "${options['reportDirectory']}/SaxonFailures${pver}-${psuite}-errors.xml";
+      arcfn = "${arcpath}/${options['reportFilename']}-errors.xml"
 
-    Files.copy(Paths.get(reportfn), Paths.get(arcfn),
-               StandardCopyOption.REPLACE_EXISTING)
+      Files.copy(Paths.get(reportfn), Paths.get(arcfn),
+                 StandardCopyOption.REPLACE_EXISTING)
+    }
   }
 
   private HashMap findTests(GPathResult root) {
