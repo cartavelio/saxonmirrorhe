@@ -371,9 +371,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             for (KeyValuePair pair : map.keyValuePairs()) {
                 Sequence seq = dynamicCall(fn, context, new Sequence[]{pair.key, pair.value});
                 GroundedValue val = seq.materialize();
-                //if (val.getLength() > 0) {
+                if (val.getLength() > 0) {
                     results.add(val);
-                //}
+                }
             }
             return new Chain(results);
         }
