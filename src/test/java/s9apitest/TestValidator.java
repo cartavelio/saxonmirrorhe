@@ -56,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class TestValidator {
     private final ConfigTest configTest = new ConfigTest();
-    
+
     @Test
     public void testReportMultipleErrors() {
 
@@ -86,7 +86,7 @@ public class TestValidator {
 
             ErrorListener listener = new ErrorListener() {
                 @Override
-                public void error(TransformerException exception)  {
+                public void error(TransformerException exception) {
                     errorList.add(exception);
                 }
 
@@ -96,7 +96,7 @@ public class TestValidator {
                 }
 
                 @Override
-                public void warning(TransformerException exception)  {
+                public void warning(TransformerException exception) {
                     errorList.add(exception);
                 }
             };
@@ -187,7 +187,7 @@ public class TestValidator {
             assertEquals(NamespaceUri.ANONYMOUS, books.getTypeAnnotationName().getNamespaceUri());
             XdmNode price = books.select(Steps.path("ITEM", "PRICE")).firstItem();
             assertEquals(new QName("moneyType"), price.getTypeAnnotationName());
-            assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "decimal"), ((XdmAtomicValue)price.getTypedValue()).getPrimitiveTypeName());
+            assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "decimal"), ((XdmAtomicValue) price.getTypedValue()).getPrimitiveTypeName());
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -1178,6 +1178,7 @@ public class TestValidator {
         public int warnings = 0;
         public int errors = 0;
         public int fatals = 0;
+
         @Override
         public void warning(SAXParseException we) {
             warnings++;
@@ -1191,7 +1192,7 @@ public class TestValidator {
         }
 
         @Override
-        public void error(SAXParseException ee)  {
+        public void error(SAXParseException ee) {
             errors++;
             System.out.println("Error: " + ee);
         }
@@ -1418,7 +1419,7 @@ public class TestValidator {
 
         } catch (SaxonApiException sapie) {
             assertEquals(4, errors.size(), "No of errors"); // 3 validation errors plus one summary fatal error
-            assertEquals("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
+            assertEquals("/doc[1]/request[1]/d1[2]", ((ValidationException) errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
 
         } catch (Exception e) {
             fail(e.getMessage());
@@ -1506,8 +1507,9 @@ public class TestValidator {
             StringBuilder sb = new StringBuilder();
             sb.append("<doc xmlns='http://myexample/family'>");
             for (int i = 10; i < 200; i++) {
-                for (int j = 10; j <= 99; j++)
+                for (int j = 10; j <= 99; j++) {
                     sb.append("<d>").append(i).append('.').append(j).append("</d>");
+                }
             }
             sb.append("</doc>");
             val.validate(new StreamSource(new StringReader(sb.toString())));
@@ -1903,6 +1905,87 @@ public class TestValidator {
         }
     }
 
+    @Test
+    public void testKeyCardinalityInference() {   // Bug 6033
+        // Should not produce any warnings
+        String xsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<xs:schema\n"
+                + "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
+                + "  xmlns=\"http://erehwon.org/xsd/foo\"\n"
+                + "  xmlns:t=\"http://erehwon.org/xsd/foo\"\n"
+                + "  targetNamespace=\"http://erehwon.org/xsd/foo\"\n"
+                + "  elementFormDefault=\"qualified\"\n"
+                + "  attributeFormDefault=\"unqualified\">\n"
+                + "\n"
+                + "  <xs:element name=\"Docu\"\n"
+                + "              type=\"DocuType\">\n"
+                + "    <xs:key name=\"MassUnitKey\">\n"
+                + "      <xs:selector\n"
+                + "        xpath=\"t:FileUnits/t:MassUnit\"/>\n"
+                + "      <xs:field xpath=\"t:UnitName\"/>\n"
+                + "    </xs:key>\n"
+                + "    <xs:key name=\"LinearUnitKey\">\n"
+                + "      <xs:selector\n"
+                + "        xpath=\"t:FileUnits/t:LinearUnit\n"
+                + "\t     | t:FileUnits/t:PMILinearUnit\"/>\n"
+                + "      <xs:field xpath=\"t:UnitName\"/>\n"
+                + "    </xs:key>\n"
+                + "  </xs:element>\n"
+                + "\n"
+                + "  <xs:complexType name=\"DocuType\">\n"
+                + "    <xs:sequence>\n"
+                + "      <xs:element ref=\"FileUnits\"\n"
+                + "                  minOccurs=\"0\">\n"
+                + "      </xs:element>\n"
+                + "    </xs:sequence>\n"
+                + "  </xs:complexType>\n"
+                + "\n"
+                + "  <xs:complexType name=\"UnitsType\">\n"
+                + "    <xs:sequence>\n"
+                + "      <xs:element name=\"LinearUnit\"\n"
+                + "                  type=\"LinearUnitType\"\n"
+                + "                  minOccurs=\"0\"\n"
+                + "                  maxOccurs=\"unbounded\"/>\n"
+                + "      <xs:element name=\"MassUnit\"\n"
+                + "                  type=\"MassUnitType\"\n"
+                + "                  minOccurs=\"0\"\n"
+                + "                  maxOccurs=\"unbounded\"/>\n"
+                + "      <xs:element name=\"PMILinearUnit\"\n"
+                + "                  type=\"LinearUnitType\"\n"
+                + "                  minOccurs=\"0\"/>\n"
+                + "    </xs:sequence>\n"
+                + "  </xs:complexType>\n"
+                + "\n"
+                + "  <xs:complexType name=\"LinearUnitType\">\n"
+                + "    <xs:sequence>\n"
+                + "      <xs:element name=\"UnitName\"\n"
+                + "                  type=\"xs:token\"/>\n"
+                + "    </xs:sequence>\n"
+                + "  </xs:complexType>\n"
+                + "\n"
+                + "  <xs:complexType name=\"MassUnitType\">\n"
+                + "    <xs:sequence>\n"
+                + "      <xs:element name=\"UnitName\"\n"
+                + "                  type=\"xs:token\"/>\n"
+                + "    </xs:sequence>\n"
+                + "  </xs:complexType>\n"
+                + "\n"
+                + "  <xs:element name=\"FileUnits\"\n"
+                + "              type=\"UnitsType\">\n"
+                + "  </xs:element>\n"
+                + "\n"
+                + "\n"
+                + "</xs:schema>\n";
 
+        Processor proc = new Processor(true);
+        SchemaManager sm = proc.getSchemaManager();
+        sm.setErrorReporter(error -> fail(error.getMessage()));
+        try {
+            sm.load(new StreamSource(new StringReader(xsd)));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+
+    }
 }
 

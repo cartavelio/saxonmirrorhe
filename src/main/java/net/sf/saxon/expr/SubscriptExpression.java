@@ -132,17 +132,6 @@ public class SubscriptExpression extends SingleItemFilter {
     }
 
     /**
-     * Get the static cardinality: this implementation is appropriate for [1] and [last()] which will always
-     * return something if the input is non-empty
-     */
-
-    @Override
-    protected int computeCardinality() {
-        return StaticProperty.ALLOWS_ZERO_OR_ONE;
-    }
-
-
-    /**
      * Get the (partial) name of a class that supports streaming of this kind of expression
      *
      * @return the partial name of a class that can be instantiated to provide streaming support in Saxon-EE,
