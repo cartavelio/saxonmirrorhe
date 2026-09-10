@@ -48,6 +48,7 @@ public class HashFn extends SystemFunction {
     @Override
     @CSharpReplaceException(from="java.security.NoSuchAlgorithmException", to="Saxon.Hej.trans.UncheckedXPathException")
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        String algorithm = "MD5";
         try {
             AtomicValue input = (AtomicValue)arguments[0].head();
             if (input == null) {
@@ -59,7 +60,6 @@ public class HashFn extends SystemFunction {
             } else {
                 binaryInput = ((BinaryValue)input).getBinaryValue();
             }
-            String algorithm = "MD5";
             if (arguments.length > 1) {
                 StringValue algorithmArg = (StringValue)arguments[1].head();
                 if (algorithmArg != null) {
@@ -82,7 +82,7 @@ public class HashFn extends SystemFunction {
             byte[] hash = MessageDigest.getInstance(algorithm).digest(binaryInput);
             return new HexBinaryValue(hash);
         } catch (NoSuchAlgorithmException e) {
-            throw new XPathException(e.getMessage(), "FOHA0001");
+            throw new XPathException("Hash algorithm " + algorithm + " not available", "FOHA0001");
         }
     }
 
