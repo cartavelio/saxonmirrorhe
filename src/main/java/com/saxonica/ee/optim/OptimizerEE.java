@@ -1503,7 +1503,7 @@ public class OptimizerEE extends Optimizer {
         if (functionCall.isBeingInlined()) {
             return functionCall;
         }
-        //System.err.println("TryInline UFC " + System.identityHashCode(functionCall));
+        //System.err.println("TryInline UFC " + System.identityHashCode(functionCall) + " " + functionCall.toShortString());
         UserFunction function = functionCall.getFunction();
         Optional<Boolean> functionInlineable = function.isInlineable();
         boolean isInlineable;
@@ -1524,10 +1524,11 @@ public class OptimizerEE extends Optimizer {
             // TODO: the check on not calling other functions is probably unnecessary now
             // that we limit the number of times a function can be inlined; also the function
             // would gradually grow until it hits the size limit
+            int maxInlineSize = config.getConfigurationProperty(Feature.THRESHOLD_FOR_FUNCTION_INLINING);
             isInlineable =
                     calledFunctions.isEmpty() &&
                             !ExpressionTool.changesXsltContext(function.getBody()) &&
-                            ExpressionTool.expressionSize(function.getBody()) <= config.getConfigurationProperty(Feature.THRESHOLD_FOR_FUNCTION_INLINING) &&
+                            ExpressionTool.expressionSize(function.getBody()) <= maxInlineSize &&
                             !function.isMemoFunction() &&
                             !ExpressionTool.dependsOnFocus(function.getBody()) &&
                             functionCall.getRetainedStaticContext().getPackageData() == function.getPackageData();
