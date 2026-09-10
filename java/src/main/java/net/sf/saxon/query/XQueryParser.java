@@ -2614,7 +2614,7 @@ public class XQueryParser extends XPathParser {
         clause.setRepeated(containsLoopingClause(clauseList));
         clauseList.add(clause);
         nextToken();
-        clause.initSequence(flwor, parseExpression());
+        clause.initSequence(flwor, parseExprSingle());
     }
 
     /**

@@ -20,7 +20,7 @@ import java.util.List;
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.DIAG;
 
 /**
- * A "let" clause in a FLWOR expression
+ * A "trace" clause in a FLWOR expression
  */
 public class DiagnosticClause extends Clause {
 
