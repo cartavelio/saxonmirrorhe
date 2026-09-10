@@ -1655,8 +1655,8 @@ public class XPathParser {
             setLocation(v, offset);
 
 
-            if (isKeyword("as") && language == ParsedLanguage.XQUERY) {
-                // We use this path for quantified expressions in XQuery, which permit an "as" clause
+            if (isKeyword("as") && (language == ParsedLanguage.XQUERY || allowXPath40Syntax)) {
+                // We use this path for quantified expressions in XQuery and XPath 4.0, which permit an "as" clause
                 nextToken();
                 SequenceType type = parseSequenceType();
                 if (type.getCardinality() != StaticProperty.EXACTLY_ONE) {
@@ -1679,7 +1679,7 @@ public class XPathParser {
 
         } while (t.currentToken == Token.COMMA);
 
-        // process the "return/satisfies" expression (called the "action")
+        // process the "satisfies" expression (called the "action")
         readKeyword("satisfies");
         previous.setAction(parseExprSingle());
 
@@ -4063,15 +4063,6 @@ public class XPathParser {
                 if (!(value instanceof Literal)) {
                     allLiteralValues = false;
                 }
-//                Expression entry;
-//
-//                    entry = Literal.makeLiteral(
-//                            new SingleEntryMap((AtomicValue) ((Literal)key).getGroundedValue(),
-//                                             ((Literal)value).getGroundedValue()));
-//                } else {
-//                    entry = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, value);
-//                }
-//                entries.add(entry);
                 if (t.currentToken == Token.RCURLY) {
                     break;
                 } else {
@@ -4097,10 +4088,11 @@ public class XPathParser {
                 }
                 break;
             default:
-                if (allLiteralKeys) {
-                    // Check for duplicates now
-                    Set<AtomicMatchKey> matchKeys = new HashSet<>();
-                    for (Expression keyExp : keys) {
+
+                    // Check for duplicates now, among key values that are statically known
+                Set<AtomicMatchKey> matchKeys = new HashSet<>();
+                for (Expression keyExp : keys) {
+                    if (keyExp instanceof Literal) {
                         final AtomicValue keyValue = (AtomicValue) ((Literal) keyExp).getGroundedValue();
                         AtomicMatchKey key = keyValue.asMapKey();
                         boolean ok = matchKeys.add(key);
@@ -4110,6 +4102,7 @@ public class XPathParser {
                         }
                     }
                 }
+
                 if (allLiteralKeys && allLiteralValues) {
                     if (allStringKeys) {
                         DictionaryMap map = new DictionaryMap(keys.size());

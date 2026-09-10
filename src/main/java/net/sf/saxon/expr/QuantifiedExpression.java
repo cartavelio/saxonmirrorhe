@@ -107,19 +107,26 @@ public class QuantifiedExpression extends Assignation {
             throw new XPathException("Range variable will never satisfy the type empty-sequence()", "XPTY0004")
                     .asTypeError().withLocation(getLocation());
         }
+
         SequenceType sequenceType = SequenceType.makeSequenceType(decl.getPrimaryType(),
                 StaticProperty.ALLOWS_ZERO_OR_MORE);
         Supplier<RoleDiagnostic> role =
                 () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
-        setSequence(TypeChecker.strictTypeCheck(
-                getSequence(), sequenceType, role, visitor.getStaticContext()));
+
+        if (visitor.getStaticContext().getXPathVersion() < 40) {
+            setSequence(TypeChecker.strictTypeCheck(
+                    getSequence(), sequenceType, role, visitor.getStaticContext()));
+        } else {
+            // From 4.0, invoke type coercion
+            TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+            setSequence(tc.staticTypeCheck(getSequence(), sequenceType, role, visitor));
+        }
+        
         ItemType actualItemType = getSequence().getItemType();
         refineTypeInformation(actualItemType,
                               StaticProperty.EXACTLY_ONE,
                               null,
                               getSequence().getSpecialProperties(), this);
-
-        //declaration = null;     // let the garbage collector take it
 
         getActionOp().typeCheck(visitor, contextInfo);
         XPathException err = TypeChecker.ebvError(getAction(), visitor.getConfiguration().getTypeHierarchy());
