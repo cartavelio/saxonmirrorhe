@@ -1554,9 +1554,7 @@ any version number.</p>
          <p>For many years the <a href="https://www.mulberrytech.com/xsl/xsl-list/index.html"
                class="bodylink">xsl-list at MulberryTech</a> served the same purpose: 
             these days it is probably more useful for deeper questions about the design principles
-            of the various languages, which often lead to interesting discussion among the experts.
-            The archives of the list can be searched at <a
-               href="https://xsl-list.markmail.org" class="bodylink">MarkMail</a>.</p>
+            of the various languages, which often lead to interesting discussion among the experts.</p>
 
          <p>There used to be a similar help forum for XQuery: <a href="http://www.xquery.com/"
                class="bodylink">talk at xquery.com</a>. However, it has become largely dormant, and
@@ -1569,10 +1567,6 @@ any version number.</p>
             search for details of known bugs. Saxonica monitors these forums and tries to manage
             issues through to closure (though without any contractual commitment or
             guarantees). </p>
-         
-         <p>The Saxon help mailing list at SourceForge closed in February 2022. The archives of the
-            list are available at <a class="bodylink"
-               href="https://saxon.markmail.org">saxon.markmail.org</a>.</p>
          
          <p>Unless otherwise stated, any code snippets that are published on a public forum in the course 
             of a request for technical support are considered to be implicitly licensed for use in Saxonica's 
