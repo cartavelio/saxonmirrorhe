@@ -727,7 +727,8 @@ public class Serializer extends AbstractDestination {
 
     private void serializeNodeToResult(XdmNode node, Result res) throws SaxonApiException {
         try {
-            QueryResult.serialize(node.getUnderlyingNode(), res, getLocallyDefinedProperties());
+            SerializationProperties props = new SerializationProperties(getLocallyDefinedProperties(), characterMapIndex);
+            QueryResult.serialize(node.getUnderlyingNode(), res, props);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }

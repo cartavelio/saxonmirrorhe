@@ -13,7 +13,6 @@ import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.functions.FormatNumber;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
@@ -138,8 +137,6 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             emit(serializeAtomicValue((AtomicValue) item));
         } else if (item instanceof NodeInfo) {
             serializeNode((NodeInfo) item);
-        } else if (item instanceof JNode) {
-            serializeJNode((JNode) item);
         } else if (item instanceof MapItem) {
             serializeMap((MapItem) item);
         } else if (item instanceof ArrayItem) {
@@ -261,6 +258,9 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 props.setProperty(SaxonOutputKeys.UNFAILING, "yes");
                 CharacterMapIndex cmi = null;
                 if (characterMap != null) {
+                    // If several character maps have been combined, this name will have been generated.
+                    // If only a single map was provided in the first place, this will be the name of that map.
+                    props.setProperty("use-character-maps", characterMap.getName().getClarkName());
                     cmi = new CharacterMapIndex();
                     cmi.putCharacterMap(characterMap.getName(), characterMap);
                 }
@@ -363,24 +363,6 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         indent(--indentLevel);
         emit("}");
     }
-
-
-    private void serializeJNode(JNode jNode) throws XPathException {
-        if (afterColon) {
-            indentLevel++;
-        } else {
-            indent(indentLevel++);
-            afterColon = false;
-        }
-        emit("JNode(");
-        serializeItem(jNode.getSelector());
-        emit(":");
-        outputInternalSequence(jNode.getContent());
-        afterColon = false;
-        indent(--indentLevel);
-        emit(")");
-    }
-
 
     private void outputInternalSequence(Sequence value) throws XPathException {
         boolean first = true;

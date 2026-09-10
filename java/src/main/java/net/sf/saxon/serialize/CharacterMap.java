@@ -47,9 +47,11 @@ public class CharacterMap {
      * @param list the list of existing character maps. If the same character
      *             is mapped by more than one map in the list, the last mapping takes
      *             precedence
+     * @param combinedName the name for the combined character map.
      */
 
-    public CharacterMap(Iterable<CharacterMap> list) {
+    public CharacterMap(Iterable<CharacterMap> list, StructuredQName combinedName) {
+        name = combinedName;
         charMap = new IntHashMap<>(64);
         for (CharacterMap map : list) {
             IntIterator keys = map.charMap.keyIterator();
