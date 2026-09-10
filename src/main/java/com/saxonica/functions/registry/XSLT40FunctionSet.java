@@ -7,6 +7,7 @@ import net.sf.saxon.functions.FunctionAvailable;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
+import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapType;
@@ -54,6 +55,10 @@ public class XSLT40FunctionSet extends XSLT30FunctionSet {
         register("current-merge-group", 1, e -> e.populate(CurrentMergeGroup::new, AnyItemType.getInstance(),
                                                            STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
+
+        register("current-merge-key-array", 0, e -> e.populate(net.sf.saxon.functions.CurrentMergeKeyArray::new,
+                                                               new ArrayItemType(SequenceType.ATOMIC_SEQUENCE),
+                                                               STAR, LATE));
 
         register("document", 2, e -> e.populate(DocumentFn::new, Type.NODE_TYPE, STAR, BASE | LATE | UO)
                 .arg(0, Type.ITEM_TYPE, STAR, null)
