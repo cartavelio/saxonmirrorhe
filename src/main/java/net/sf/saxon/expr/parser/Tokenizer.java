@@ -368,14 +368,6 @@ public final class Tokenizer {
         }
     }
 
-    private void handleLCURLY() throws XPathException
-    {
-        if (state != SEQUENCE_TYPE_STATE) {
-            currentToken = Token.KEYWORD_CURLY;
-            lookAhead();        // swallow the "{"
-        }
-    }
-
     private void handleCOLONCOLON() throws XPathException
     {
         lookAhead();
@@ -474,6 +466,9 @@ public final class Tokenizer {
 
     /**
      * Peek ahead at the next token
+     * @return the identifier of the token that is next in the queue. Note that this is not
+     * always the token returned by a call on {@link #next()}, because that may return the
+     * next token in a context-dependent form.
      */
 
     public int peekAhead() {
@@ -639,11 +634,6 @@ public final class Tokenizer {
                     nextToken = Token.PLUS;
                     return;
                 case '-':
-                    if (inputOffset < inputLength && isGreaterThanChar(input.charAt(inputOffset))) {
-                        inputOffset++;
-                        nextToken = Token.THIN_ARROW;   // no longer used
-                        return;
-                    }
                     nextToken = Token.MINUS;   // not detected if part of a name
                     return;
                 case '=':
@@ -707,23 +697,37 @@ public final class Tokenizer {
                 case '$':
                     nextToken = Token.DOLLAR;
                     return;
-                case FULL_WIDTH_LT:
+
+                case FULL_WIDTH_GT:
                     if (languageLevel < 40) {
-                        throw new XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
+                        throw new XPathException("Operator character FULL_WIDTH_GREATER_THAN (xFF1E) requires XPath 4.0 to be enabled");
                     }
                     if (inputOffset < inputLength
                             && input.charAt(inputOffset) == '=') {
                         inputOffset++;
-                        nextToken = Token.LE;
+                        nextToken = Token.GE;
                         return;
                     }
-                    if (inputOffset < inputLength && input.charAt(inputOffset) == FULL_WIDTH_LT) {
+                    if (inputOffset < inputLength && input.charAt(inputOffset) == FULL_WIDTH_GT) {
                         inputOffset++;
-                        nextToken = Token.PRECEDES;
+                        nextToken = Token.FOLLOWS;
                         return;
                     }
-                    nextToken = Token.LT;
-                    nextTokenValue = c + "";  // The parser needs to know which character was used
+                    nextToken = Token.GT;
+                    return;
+                case '>':
+                    if (inputOffset < inputLength
+                            && input.charAt(inputOffset) == '=') {
+                        inputOffset++;
+                        nextToken = Token.GE;
+                        return;
+                    }
+                    if (inputOffset < inputLength && input.charAt(inputOffset) == '>') {
+                        inputOffset++;
+                        nextToken = Token.FOLLOWS;
+                        return;
+                    }
+                    nextToken = Token.GT;
                     return;
                 case '<':
                     if (inputOffset < inputLength) {
@@ -757,6 +761,24 @@ public final class Tokenizer {
                     nextToken = Token.LT;
                     nextTokenValue = c + "";  // The parser needs to know which character was used
                     return;
+                case FULL_WIDTH_LT:
+                    if (languageLevel < 40) {
+                        throw new XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
+                    }
+                    if (inputOffset < inputLength
+                            && input.charAt(inputOffset) == '=') {
+                        inputOffset++;
+                        nextToken = Token.LE;
+                        return;
+                    }
+                    if (inputOffset < inputLength && input.charAt(inputOffset) == FULL_WIDTH_LT) {
+                        inputOffset++;
+                        nextToken = Token.PRECEDES;
+                        return;
+                    }
+                    nextToken = Token.LT;
+                    nextTokenValue = c + "";  // The parser needs to know which character was used
+                    return;
                 case '|':
                     if (inputOffset < inputLength && input.charAt(inputOffset) == '|') {
                         inputOffset++;
@@ -767,25 +789,6 @@ public final class Tokenizer {
                     return;
                 case '#':
                     nextToken = Token.HASH;
-                    return;
-                case '>':
-                case FULL_WIDTH_GT:
-                    // TODO: disallow mixing symbols in '>>'
-                    if (c == FULL_WIDTH_GT && languageLevel < 40) {
-                        throw new XPathException("Operator character FULL_WIDTH_GREATER_THAN (xFF1E) requires XPath 4.0 to be enabled");
-                    }
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '=') {
-                        inputOffset++;
-                        nextToken = Token.GE;
-                        return;
-                    }
-                    if (inputOffset < inputLength && c == input.charAt(inputOffset)) {
-                        inputOffset++;
-                        nextToken = Token.FOLLOWS;
-                        return;
-                    }
-                    nextToken = Token.GT;
                     return;
                 case '.':
                     if (inputOffset < inputLength
@@ -1212,10 +1215,6 @@ public final class Tokenizer {
             default:
                 return Token.UNKNOWN;
         }
-    }
-
-    private boolean isLessThanChar(char c) {
-        return c == '<' || (languageLevel >= 40 && c == FULL_WIDTH_LT);
     }
 
     private boolean isGreaterThanChar(char c) {

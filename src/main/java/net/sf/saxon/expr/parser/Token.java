@@ -375,11 +375,6 @@ public abstract class Token {
     public static final int WHILE = 92;
 
     /**
-     * Thin arrow operator "-&gt;" (XQuery 4.0)
-     */
-    public static final int THIN_ARROW = 93;
-
-    /**
      * Mathematical multiply operator "×"
      */
 
@@ -787,7 +782,6 @@ public abstract class Token {
         tokens[COLON] = ":";
         tokens[FAT_ARROW] = "=>";
         tokens[MAPPING_ARROW] = "=!>";
-        tokens[THIN_ARROW] = "->";    // no longer used
         tokens[AND_ALSO] = "andAlso";
         tokens[OR_ELSE] = "orElse";
         tokens[STRING_CONSTRUCTOR_INITIAL] = "``[<string>`{";
@@ -806,13 +800,11 @@ public abstract class Token {
         tokens[NUMBER] = "<numeric-literal>";
         tokens[HEX_INTEGER] = "<hex-integer>";
         tokens[BINARY_INTEGER] = "<binary-integer>";
-        //tokens[KEYWORD_LBRA] = "<node-type>()";
         tokens[FOR] = "for";
         tokens[SUFFIX] = "<*:local-name>";
         tokens[QMARK] = "?";
         tokens[QMARK_LSQB] = "?[";
         tokens[LCURLY] = "{";
-        //tokens[KEYWORD_CURLY] = "<keyword> {";
         tokens[RCURLY] = "}";
         tokens[LET] = "let";
         tokens[WHERE] = "where";
