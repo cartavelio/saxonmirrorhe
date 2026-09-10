@@ -103,9 +103,9 @@
             <li>The <code>getXslMessages()</code> method is added back into the C++, Python and PHP APIs on the
                <code>XsltExecutable</code> class.</li>
             <li>Added the method <code>PyXPathProcessor.set_base_uri()</code> (see bug issue <a
-               href="https://saxonica.plan.io/issues/6064">#6064</a>).</li>
+               href="https://saxonica.plan.io/issues/6064" target="_blank">#6064</a>).</li>
             <li>Added the <code>PyXdmNode.local_name</code> property (see bug issue <a
-               href="https://saxonica.plan.io/issues/6065">#6065</a>).</li>
+               href="https://saxonica.plan.io/issues/6065" target="_blank">#6065</a>).</li>
             <li>Added the node axis feature to get the array of nodes reachable from the current node via a given axis. Axis options are as follows:
                <code>ANCESTOR = 0, ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3, DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
                   FOLLOWING_SIBLING = 7, NAMESPACE = 8, PARENT = 9, PRECEDING = 10, PRECEDING_SIBLING = 11,
@@ -147,8 +147,12 @@
             <li>PHP API: added the methods <code>XdmNode.getAttributeNodes()</code> and
                <code>XdmNode.getChildren()</code> which respectively return the attribute nodes, and
                child nodes, of the current node, as a PHP array of <code>XdmNode</code> objects.</li>
-            <li>We have thoroughly reviewed how we handle paths passed in by the user so that they are now getting properly resolved with the 'current working directory'.
-               (see bug issue <a href="https://saxonica.plan.io/issues/6273">#6273</a>)</li>
+            <li>We have thoroughly reviewed how we handle paths passed in by the user so that they
+               are now getting properly resolved with the 'current working directory'.
+               (see bug issue <a href="https://saxonica.plan.io/issues/6273" target="_blank">#6273</a>)</li>
+            <li>The build scripts for the command line programs for Linux, MacOS, and Windows have
+               been updated and renamed. For details see "Command line interface" at <a
+                  href="/starting/running">Running SaxonC</a>.</li>
          </ul>
       </category>
       
