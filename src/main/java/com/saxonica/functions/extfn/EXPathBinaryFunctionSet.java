@@ -239,6 +239,54 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
         return PREFIX;
     }
 
+    @NotNull
+    @CSharpReplaceBody(code = "return System.Text.Encoding.GetEncoding(encoding).GetBytes(s);")
+    public static byte[] encode(String s, String encoding) throws XPathException {
+        CharsetEncoder encoder = Charset.forName(encoding).newEncoder();
+        encoder.onMalformedInput(CodingErrorAction.REPORT);
+
+        CharBuffer in = CharBuffer.wrap(s);
+        ByteBuffer out = null;
+        try {
+            out = encoder.encode(in);
+        } catch (MalformedInputException e) {
+            error("Malformed input in encoding:" + e, ERROR_CONVERSION);
+        } catch (UnmappableCharacterException e) {
+            error("Unmappable input in encoding:" + e, ERROR_CONVERSION);
+        } catch (CharacterCodingException e) {
+            error("Character code problem in encoding:" + e, ERROR_CONVERSION);
+        }
+        byte[] data = new byte[out.limit()];
+        System.arraycopy(out.array(), 0, data, 0, out.limit());
+        return data;
+    }
+
+    @NotNull
+    public static String decode(byte[] value, String encoding) throws XPathException {
+        return decode(value, 0, value.length, encoding);
+    }
+
+    @NotNull
+    @CSharpReplaceBody(code = "return new String(System.Text.Encoding.GetEncoding(encoding).GetChars(value, offset, len));")
+    public static String decode(byte[] value, int offset, int len, String encoding) throws XPathException {
+        CharsetDecoder decoder = Charset.forName(encoding).newDecoder();
+        decoder.onMalformedInput(CodingErrorAction.REPORT);
+        ByteBuffer in = ByteBuffer.wrap(value, offset, len);
+        char[] outChars = new char[len];
+        CharBuffer out = CharBuffer.wrap(outChars);
+        CoderResult res = decoder.decode(in, out, true);
+        if (res.isError()) {
+            if (res.isMalformed())
+                error("Malformed input in decoding", ERROR_CONVERSION);
+            if (res.isUnmappable())
+                error("Unmappable input in decoding", ERROR_CONVERSION);
+            error("Other error in decoding", ERROR_CONVERSION);
+        }
+        char[] resChars = new char[out.position()];
+        System.arraycopy(outChars, 0, resChars, 0, out.position());
+        return new String(resChars);
+    }
+
 
     public static class BinaryAnd extends SystemFunction {
         @Override
@@ -307,26 +355,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
             return new StringValue(result);
         }
 
-        @NotNull
-        @CSharpReplaceBody(code="return new String(System.Text.Encoding.GetEncoding(encoding).GetChars(value, offset, len));")
-        private String decode(byte[] value, int offset, int len, String encoding) throws XPathException {
-            CharsetDecoder decoder = Charset.forName(encoding).newDecoder();
-            decoder.onMalformedInput(CodingErrorAction.REPORT);
-            ByteBuffer in = ByteBuffer.wrap(value, offset, len);
-            char[] outChars = new char[len];
-            CharBuffer out = CharBuffer.wrap(outChars);
-            CoderResult res = decoder.decode(in, out, true);
-            if (res.isError()) {
-                if (res.isMalformed())
-                    error("Malformed input in decoding", ERROR_CONVERSION);
-                if (res.isUnmappable())
-                    error("Unmappable input in decoding", ERROR_CONVERSION);
-                error("Other error in decoding", ERROR_CONVERSION);
-            }
-            char[] resChars = new char[out.position()];
-            System.arraycopy(outChars, 0, resChars, 0, out.position());
-            return new String(resChars);
-        }
+
     }
 
     public static class BinaryEncodeString extends SystemFunction {
@@ -348,27 +377,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
             return one(data);
         }
 
-        @NotNull
-        @CSharpReplaceBody(code = "return System.Text.Encoding.GetEncoding(encoding).GetBytes(s);")
-        private byte[] encode(String s, String encoding) throws XPathException {
-            CharsetEncoder encoder = Charset.forName(encoding).newEncoder();
-            encoder.onMalformedInput(CodingErrorAction.REPORT);
 
-            CharBuffer in = CharBuffer.wrap(s);
-            ByteBuffer out = null;
-            try {
-                out = encoder.encode(in);
-            } catch (MalformedInputException e) {
-                error("Malformed input in encoding:" + e, ERROR_CONVERSION);
-            } catch (UnmappableCharacterException e) {
-                error("Unmappable input in encoding:" + e, ERROR_CONVERSION);
-            } catch (CharacterCodingException e) {
-                error("Character code problem in encoding:" + e, ERROR_CONVERSION);
-            }
-            byte[] data = new byte[out.limit()];
-            System.arraycopy(out.array(), 0, data, 0, out.limit());
-            return data;
-        }
     }
 
 

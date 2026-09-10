@@ -4,6 +4,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.CompositeAtomicKey;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.AtomicSequence;
@@ -24,7 +25,7 @@ import java.util.List;
 
 public class GroupAdjacentTester extends GroupBoundaryTester {
 
-    private List<AtomicMatchKey> currentGroupingComparisonKey;
+    private CompositeAtomicKey currentGroupingComparisonKey;
     private final StringCollator collator;
     private AtomicSequence currentGroupingKey;
     private final int implicitTimezone;
@@ -46,14 +47,15 @@ public class GroupAdjacentTester extends GroupBoundaryTester {
     @Override
     public boolean notifyItem() throws XPathException {
         Expression groupingKey = getControllingExpression().getGroupingKey();
-        List<AtomicMatchKey> comparisonKey = new ArrayList<AtomicMatchKey>();
+        List<AtomicMatchKey> comparisonKeyList = new ArrayList<>();
         SequenceIterator iter = groupingKey.iterate(getLocalContext());
         AtomicArray key = new AtomicArray(iter);
         for (AtomicValue val : key) {
-            comparisonKey.add(val.getXPathMatchKey(collator, implicitTimezone));
+            comparisonKeyList.add(val.getXPathMatchKey(collator, implicitTimezone));
         }
-        boolean isNewGroup = currentGroupingComparisonKey == null || !currentGroupingComparisonKey.equals(comparisonKey);
-        currentGroupingComparisonKey = comparisonKey;
+        CompositeAtomicKey cak = new CompositeAtomicKey(comparisonKeyList);
+        boolean isNewGroup = currentGroupingComparisonKey == null || !currentGroupingComparisonKey.equals(cak);
+        currentGroupingComparisonKey = cak;
         if (isNewGroup) {
             currentGroupingKey = key;
         }

@@ -454,7 +454,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("string-to-utf8", 2, StringToUTF8.class, BuiltInAtomicType.INTEGER, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("system-id", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.STRING, OPT, CITEM | LATE);
+        register("system-id", 0, SystemId.class, BuiltInAtomicType.STRING, OPT, CITEM | LATE);
 
         register("system-id", 1, SystemId.class, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY);
@@ -932,7 +932,16 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
     public static class SystemId extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            NodeInfo node = (NodeInfo) arguments[0].head();
+            NodeInfo node;
+            if (arguments.length == 0) {
+                Item item = context.getContextItem();
+                if (!(item instanceof NodeInfo)) {
+                    throw new XPathException("Context item for saxon:system-id is not a node", "XPDY0002");
+                }
+                node = (NodeInfo)item;
+            } else {
+                node = (NodeInfo) arguments[0].head();
+            }
             return new StringValue(node.getSystemId());
         }
     }

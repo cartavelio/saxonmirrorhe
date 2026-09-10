@@ -679,7 +679,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         } else if (required.isAssignableFrom(AtomicValue.class)) {
             return 20;
         } else if (Cardinality.allowsMany(cardinality)) {
-            if (CollectionFn.class.isAssignableFrom(required)) {
+            if (CollectionFn.class.isAssignableFrom(required)) {  // TODO: surely nonsense! MHK 2021-05-29
                 return 30;
             } else if (required.isArray()) {
                 Class arrayMember = required.getComponentType();

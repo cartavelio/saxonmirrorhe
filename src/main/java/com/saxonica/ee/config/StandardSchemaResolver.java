@@ -101,7 +101,9 @@ public class StandardSchemaResolver implements SchemaURIResolver {
         if (config == null) {
             throw new NullPointerException("No configuration supplied to schema URI resolver");
         }
-        if (config.isSchemaAvailable(targetNamespace) && !config.getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
+        if (targetNamespace != null &&
+                config.isSchemaAvailable(targetNamespace) &&
+                !config.getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
             return EMPTY_SOURCE_ARRAY;
         }
         if (NamespaceConstant.XLINK.equals(targetNamespace)) {

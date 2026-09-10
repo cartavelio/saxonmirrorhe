@@ -135,7 +135,7 @@ public abstract class Verifier {
         }
     }
 
-    @CSharpReplaceBody(code="new System.Net.WebClient().OpenRead(uri)")
+    @CSharpReplaceBody(code="return new System.Net.WebClient().OpenRead(uri);")
     protected InputStream connectToURI(String uri) throws IOException {
         return new URL(uri).openStream();
     }
@@ -219,7 +219,7 @@ public abstract class Verifier {
 
     private License configure(Reader reader, boolean embedded) {
         License license;
-        BufferedReader bufferedReader = new BufferedReader(reader);
+        Reader lineReader = makeLineReader(reader);
         try {
             String line;
             String name;
@@ -228,7 +228,7 @@ public abstract class Verifier {
             Properties features = new Properties();
             license = new License(features);
             String signature = "";
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = readLine(lineReader)) != null) {
                 if (line.trim().indexOf('#') == 0 || line.trim().indexOf('!') == 0) {
                     continue;
                 }
@@ -308,6 +308,16 @@ public abstract class Verifier {
             throw new LicenseException("Invalid date in license file", LicenseException.INVALID);
         }
         return license;
+    }
+
+    @CSharpReplaceBody(code="return reader;")
+    private Reader makeLineReader(Reader reader) {
+        return new BufferedReader(reader);
+    }
+
+    @CSharpReplaceBody(code = "return reader.ReadLine();")
+    private static String readLine(Reader reader) throws IOException {
+        return ((BufferedReader)reader).readLine();
     }
 
     /**

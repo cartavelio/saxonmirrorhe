@@ -226,9 +226,8 @@ public abstract class SelectorWatch extends PatternWatch {
         }
 
         ValueEntry entry = ValueEntry.makeValueEntry(currentRow);
-        Integer existingInfo = table.get(entry);
-        if (existingInfo != null) {
-            int flags = existingInfo;
+        if (table.containsKey(entry)) {
+            int flags = table.get(entry);;
             if (isTarget) {
                 int count = flags >> 16;
                 count++;

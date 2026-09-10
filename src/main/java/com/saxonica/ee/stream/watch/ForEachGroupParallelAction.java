@@ -10,12 +10,10 @@ import com.saxonica.ee.stream.om.FleetingParentNode;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.TeeOutputter;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.XPathContextMajor;
-import net.sf.saxon.expr.XPathContextMinor;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.CompositeAtomicKey;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AncestorQualifiedPattern;
@@ -54,8 +52,8 @@ import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.SKIP;
 
 public class ForEachGroupParallelAction extends ForEachAction {
 
-    private final HashMap<List<AtomicMatchKey>, GroupInfo> groups = new HashMap<List<AtomicMatchKey>, GroupInfo>();
-    private final List<GroupInfo> groupList = new ArrayList<GroupInfo>(); // retains groups in order of first appearance
+    private final HashMap<CompositeAtomicKey, GroupInfo> groups = new HashMap<>();
+    private final List<GroupInfo> groupList = new ArrayList<>(); // retains groups in order of first appearance
     private int groupSequence = 1;
     private final XPathContext populationContext;
     private final StringCollator collator;
@@ -96,7 +94,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
      * @param comparisonKey caller supplies an empty list, which is populated with the list of match keys,
      *                      one for each key value
      * @return an AtomicArray holding the actual grouping keys as atomic values
-     * @throws XPathException
+     * @throws XPathException if anything goes wrong
      */
 
     private AtomicArray getGroupingKey(Item node, List<AtomicMatchKey> comparisonKey) throws XPathException {
@@ -129,24 +127,24 @@ public class ForEachGroupParallelAction extends ForEachAction {
     /*@Nullable*/
     @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
-        List<AtomicMatchKey> comparisonKey = new ArrayList<>();
-        AtomicArray key = getGroupingKey(node, comparisonKey);
+        List<AtomicMatchKey> comparisonKeyParts = new ArrayList<>();
+        AtomicArray key = getGroupingKey(node, comparisonKeyParts);
         anchorNode = node;
-        List<List<AtomicMatchKey>> separateKeys;
+        List<CompositeAtomicKey> separateKeys;
         List<AtomicValue> distinctKeys = null;
         if (compositeKeys) {
             separateKeys = new ArrayList<>(1);
-            separateKeys.add(comparisonKey);
+            separateKeys.add(new CompositeAtomicKey(comparisonKeyParts));
         } else {
-            separateKeys = new ArrayList<>(comparisonKey.size());
+            separateKeys = new ArrayList<>(comparisonKeyParts.size());
             distinctKeys = new ArrayList<>();
             Set<AtomicMatchKey> duplicates = new HashSet<>();
             int kk = 0;
-            for (AtomicMatchKey oneKey : comparisonKey) {
+            for (AtomicMatchKey oneKey : comparisonKeyParts) {
                 if (duplicates.add(oneKey)) {
                     List<AtomicMatchKey> singleKey = new ArrayList<>(1);
                     singleKey.add(oneKey);
-                    separateKeys.add(singleKey);
+                    separateKeys.add(new CompositeAtomicKey(singleKey));
                     distinctKeys.add(key.itemAt(kk));
                 }
                 kk++;
@@ -157,7 +155,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
         List<ItemFeed> groupFeeds = new ArrayList<>();
         int k = 0;
 
-        for (List<AtomicMatchKey> groupingKey : separateKeys) {
+        for (CompositeAtomicKey groupingKey : separateKeys) {
             AtomicSequence actualKey = compositeKeys ? key : distinctKeys.get(k++);
             GroupInfo gp = groups.get(groupingKey);
             boolean newGroup = gp == null;
@@ -230,7 +228,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
         return result;
     }
 
-    private GroupInfo makeNewGroup(Item node, List<AtomicMatchKey> comparisonKey, AtomicSequence key) {
+    private GroupInfo makeNewGroup(Item node, CompositeAtomicKey comparisonKey, AtomicSequence key) {
         GroupInfo gp = new GroupInfo();
         gp.outputter = new FeedToEventBuffer(getNextOutputter(), this, getContext());
         gp.outputter.setPipelineConfiguration(getPipelineConfiguration());
@@ -264,27 +262,27 @@ public class ForEachGroupParallelAction extends ForEachAction {
 
     @Override
     public void append(Item node) throws XPathException {
-        List<AtomicMatchKey> comparisonKey = new ArrayList<AtomicMatchKey>();
-        AtomicArray key = getGroupingKey(node, comparisonKey);
+        List<AtomicMatchKey> comparisonKeyParts = new ArrayList<>();
+        AtomicArray key = getGroupingKey(node, comparisonKeyParts);
 
-        List<List<AtomicMatchKey>> separateKeys;
+        List<CompositeAtomicKey> separateKeys;
         if (compositeKeys) {
             separateKeys = new ArrayList<>(1);
-            separateKeys.add(comparisonKey);
+            separateKeys.add(new CompositeAtomicKey(comparisonKeyParts));
         } else {
-            separateKeys = new ArrayList<>(comparisonKey.size());
-            Set<AtomicMatchKey> duplicates = new HashSet<AtomicMatchKey>(separateKeys.size());
-            for (AtomicMatchKey oneKey : comparisonKey) {
+            separateKeys = new ArrayList<>(comparisonKeyParts.size());
+            Set<AtomicMatchKey> duplicates = new HashSet<>();
+            for (AtomicMatchKey oneKey : comparisonKeyParts) {
                 if (duplicates.add(oneKey)) {
-                    List<AtomicMatchKey> singleKey = new ArrayList<AtomicMatchKey>(1);
+                    List<AtomicMatchKey> singleKey = new ArrayList<>(1);
                     singleKey.add(oneKey);
-                    separateKeys.add(singleKey);
+                    separateKeys.add(new CompositeAtomicKey(singleKey));
                 }
             }
         }
 
         int k = 0;
-        for (List<AtomicMatchKey> groupingKey : separateKeys) {
+        for (CompositeAtomicKey groupingKey : separateKeys) {
             AtomicSequence actualKey = compositeKeys ? key : key.itemAt(k++);
             GroupInfo gp = groups.get(groupingKey);
             boolean newGroup = gp == null;

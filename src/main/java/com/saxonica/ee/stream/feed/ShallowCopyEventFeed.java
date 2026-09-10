@@ -12,7 +12,9 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.AnyType;
+import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.Untyped;
 
 /**
  * This event feed implements an implicit xsl:copy instruction used in a built-in template. The events
@@ -42,8 +44,9 @@ public class ShallowCopyEventFeed extends ItemFeed {
             receiver.startDocument(ReceiverOption.NONE);
         } else {
             c2 = context.newContext();
-            receiver.startElement(NameOfNode.makeName(node), AnyType.getInstance(),
-                                  Loc.NONE, ReceiverOption.NONE);
+            SchemaType schemaType = node.getSchemaType() == Untyped.getInstance() ? Untyped.getInstance() : AnyType.getInstance();
+            // TODO: is this correct? See bug 5006
+            receiver.startElement(NameOfNode.makeName(node), schemaType, Loc.NONE, ReceiverOption.NONE);
             for (NamespaceBinding ns : node.getAllNamespaces()) {
                 receiver.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
             }

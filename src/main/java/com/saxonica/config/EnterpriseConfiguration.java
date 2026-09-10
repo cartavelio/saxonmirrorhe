@@ -1954,6 +1954,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return resultDocumentThreadsLimit;
     }
 
+    //#if CSHARP==false
     /**
      * Process an xsl:result-document instruction. The Saxon-HE version of this method simply executes the instruction.
      * The Saxon-EE submits the instruction for execution asynchronously in an ExecutorService.
@@ -2030,6 +2031,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         manager.getCompletionService().submit(task);
 
     }
+    //#endif
 
     /**
      * Get the factory class used to handle creation of objects that support multithreaded

@@ -48,6 +48,9 @@ public class StreamerMap {
     }
 
     public static StreamingAdjunct getStreamingAdjunct(String f) {
+        if (f == null) {
+            return null;
+        }
         try {
             Class<? extends StreamingAdjunct> theClass = map.get(f);
             return theClass == null ? null : theClass.newInstance();
