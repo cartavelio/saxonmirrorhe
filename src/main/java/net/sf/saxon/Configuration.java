@@ -191,6 +191,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private final TypeChecker typeChecker = new TypeChecker();
     private final TypeChecker10 typeChecker10 = new TypeChecker10();
 
+    private transient SaxonResourceResolver catalogResolver;
     private transient URIResolver uriResolver;
     protected FunctionLibraryList builtInExtensionLibraryList;
     protected int xsdVersion = XSD11;
@@ -382,6 +383,10 @@ public class Configuration implements SourceResolver, NotationSet {
         // Note that some initializations have been moved here because C# is more restrictive about
         // how fields can be initialized when first declared.
 
+        // There's a temptation to be lazy about instantiating the catalog resolver, but we want
+        // to make sure that if someone subsequently overrides, for example, the URIResolver,
+        // that their override wins.
+        catalogResolver = new CatalogResourceResolver();
         defaultXsltCompilerInfo = makeCompilerInfo();
         systemURIResolver = new StandardURIResolver(this);
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
@@ -736,6 +741,33 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public Predicate<URI> getAllowedUriTest() {
         return this.allowedUriTest;
+    }
+
+    /**
+     * Set the resource resolver to be used in this configuration. Setting the resource
+     * resolver automatically makes it the URI resolver for this configuration and the default
+     * resolver for parsers created from this configuration.
+     * @param resolver The resolver to use.
+     */
+
+    public void setSaxonResourceResolver(SaxonResourceResolver resolver) {
+        catalogResolver = resolver;
+        defaultXsltCompilerInfo.setSaxonResourceResolver(resolver);
+        setURIResolver(catalogResolver);
+    }
+
+    /**
+     * Returns the current resource resolver. If the configuration does
+     * not have a resolver when this method is called, a default CatalogResourceResolver
+     * will be constructed and returned.
+     * @return The resolver.
+     */
+
+    public SaxonResourceResolver getSaxonResourceResolver() {
+        if (catalogResolver == null) {
+            setSaxonResourceResolver(new CatalogResourceResolver());
+        }
+        return catalogResolver;
     }
 
     /**
@@ -2686,10 +2718,12 @@ public class Configuration implements SourceResolver, NotationSet {
         } else {
             parser = loadParser();
         }
+
+        SaxonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        parser.setEntityResolver(resolver);
+
         return parser;
-
     }
-
 
     /**
      * Get a parser for source documents. The parser is allocated from a pool if any are available
@@ -2718,6 +2752,10 @@ public class Configuration implements SourceResolver, NotationSet {
         } else {
             parser = loadParser();
         }
+
+        SaxonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        parser.setEntityResolver(resolver);
+
         if (isTiming()) {
             reportParserDetails(parser);
         }
@@ -2819,9 +2857,11 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = makeParser(getStyleParserClass());
         } else {
             parser = loadParser();
-            StandardEntityResolver resolver = new StandardEntityResolver(this);
-            parser.setEntityResolver(resolver);
         }
+
+        SaxonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        parser.setEntityResolver(resolver);
+
         try {
             parser.setFeature("http://xml.org/sax/features/namespaces", true);
             parser.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
@@ -4771,6 +4811,20 @@ public class Configuration implements SourceResolver, NotationSet {
                     //getDefaultXsltCompilerInfo().setXsltVersion(v);
                     break;
 
+                //#if CSHARP==false
+                case FeatureCode.SAXON_RESOURCE_RESOLVER:
+                    if (!(value instanceof SaxonResourceResolver)) {
+                        throw new IllegalArgumentException(
+                                "SAXON_RESOURCE_RESOLVER value must be an instance of net.sf.saxon.lib.SaxonResourceResolver");
+                    }
+                    setSaxonResourceResolver((SaxonResourceResolver) value);
+                    break;
+                case FeatureCode.SAXON_RESOURCE_RESOLVER_CLASS:
+                    SaxonResourceResolver rresolver = (SaxonResourceResolver) instantiateClassName(name, value, SaxonResourceResolver.class);
+                    setSaxonResourceResolver(rresolver);
+                    break;
+                //#endif
+
                 default:
                     throw new IllegalArgumentException("Unknown configuration property " + name);
             }
@@ -4920,8 +4974,6 @@ public class Configuration implements SourceResolver, NotationSet {
                     "Cannot use " + value + " as the value of " + propertyName + ". " + err.getMessage());
         }
     }
-
-
 
     static {
         booleanFeatures.add(FeatureCode.ALLOW_EXTERNAL_FUNCTIONS);
@@ -5274,6 +5326,13 @@ public class Configuration implements SourceResolver, NotationSet {
             case FeatureCode.XSLT_VERSION:
                 return 30;
 
+            //#if CSHARP==false
+            case FeatureCode.SAXON_RESOURCE_RESOLVER:
+                return getSaxonResourceResolver();
+
+            case FeatureCode.SAXON_RESOURCE_RESOLVER_CLASS:
+                return getSaxonResourceResolver().getClass().getName();
+            //#endif
         }
         throw new IllegalArgumentException("Unknown configuration property " );
     }

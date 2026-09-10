@@ -37,7 +37,10 @@ public class CompilerInfo {
 
     private Configuration config;
     private URIResolver uriResolver;
-    private ErrorReporter errorReporter;
+    //#if CSHARP==false
+    private CommonResourceResolver commonResourceResolver;
+    //#endif
+    private ErrorReporter errorReporter = new StandardErrorReporter();
     private CodeInjector codeInjector;
     private int recoveryPolicy = Mode.RECOVER_WITH_WARNINGS;
     private boolean schemaAware;
@@ -94,6 +97,7 @@ public class CompilerInfo {
     public void copyFrom(CompilerInfo info) {
         config = info.config;
         uriResolver = info.uriResolver;
+        saxonResourceResolver = info.saxonResourceResolver;
         errorReporter = info.errorReporter;
         codeInjector = info.codeInjector;
         recoveryPolicy = info.recoveryPolicy;
@@ -162,6 +166,18 @@ public class CompilerInfo {
 
     public void setURIResolver(URIResolver resolver) {
         uriResolver = resolver;
+    }
+
+    /**
+     * Set the resource resolver to be used when resolving external identifiers and URIs.
+     *
+     * @param resolver The {@link SaxonResourceResolver} to be used. This is used to resolve external identifiers
+     *                 and URIs.
+     * @since 11.0
+     */
+
+    public void setSaxonResourceResolver(SaxonResourceResolver resolver) {
+        saxonResourceResolver = resolver;
     }
 
     /**
@@ -361,6 +377,16 @@ public class CompilerInfo {
 
     public URIResolver getURIResolver() {
         return uriResolver;
+    }
+
+    /**
+     * Get the resource resolver being used.
+     *
+     * @return resolver The {@link SaxonResourceResolver} in use.
+     * @since 11.0
+     */
+    public SaxonResourceResolver getSaxonResourceResolver() {
+        return saxonResourceResolver;
     }
 
     //#if CSHARP==false

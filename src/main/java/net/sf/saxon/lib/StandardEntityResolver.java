@@ -8,11 +8,11 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.trans.XPathException;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
@@ -80,36 +80,9 @@ public class StandardEntityResolver implements EntityResolver {
      * @see org.xml.sax.InputSource
      */
     @Override
-    public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
-        // See if it's a known public ID
-        KnownResourceFinder.NamedInputStream input = null;
-        if (publicId != null) {
-            input = KnownResourceFinder.fetchPublicId(publicId, config);
-        }
-        // See if it's a known system ID
-        if (input == null) {
-            try {
-                input = KnownResourceFinder.fetchSystemId(systemId, config);
-            } catch (XPathException e) {
-                throw new SAXException(e);
-            }
-        }
-
-        if (input == null && systemId.startsWith("classpath:") && systemId.length() > 10) {
-            // If it's a classpath URI, handle it here
-            input = KnownResourceFinder.fetch(systemId.substring(10), config);
-        }
-
-        if (input != null) {
-            InputSource is = new InputSource(input.stream);
-            is.setSystemId("classpath:" + input.fileName);
-            return is;
-        }
-
-        // Otherwise, leave the parser to resolve the URI in the normal way
-        return null;
+    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+        return config.getSaxonResourceResolver().resolveEntity(publicId, systemId);
     }
-
 
     /**
      * Get a resource from the classpath. This method is called if the URI uses the (Spring-defined)

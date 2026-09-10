@@ -1394,9 +1394,6 @@ public class XQueryParser extends XPathParser {
             }
         }
         if (sources == null) {
-            if (hints.length == 0) {
-                grumble("Cannot locate module for namespace " + mImport.namespaceURI, "XQST0059", mImport.offset);
-            }
             resolver = env.getConfiguration().getStandardModuleURIResolver();
             sources = resolver.resolve(mImport.namespaceURI, env.getStaticBaseURI(), hints);
         }

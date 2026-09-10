@@ -29,6 +29,7 @@ import net.sf.saxon.trans.packages.VersionedPackageName;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
+import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -56,6 +57,7 @@ public class ConfigurationReader implements Receiver {
     private PipelineConfiguration pipe;
     private final Stack<String> localNameStack = new Stack<>();
     private String systemId = null;
+    private ArrayList<String> catalogFiles = null;
 
     public ConfigurationReader() {
     }
@@ -265,7 +267,8 @@ public class ConfigurationReader implements Receiver {
                 } else if ("xsd".equals(localName)) {
                     readXsdElement(atts);
                 } else if ("resources".equals(localName)) {
-                    // no action until later
+                    // Initialize the list of catalog files
+                    catalogFiles = new ArrayList<>();
                 } else if ("collations".equals(localName)) {
                     // no action until later
                 } else if ("localizations".equals(localName)) {
@@ -390,6 +393,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "treeModel", FeatureCode.TREE_MODEL_NAME, "JN");
         applyProperty(props, "unparsedTextUriResolver", FeatureCode.UNPARSED_TEXT_URI_RESOLVER_CLASS, "J");
         applyProperty(props, "uriResolver", FeatureCode.URI_RESOLVER_CLASS, "J");
+        applyProperty(props, "saxonResourceResolver", FeatureCode.SAXON_RESOURCE_RESOLVER_CLASS, "J");
         applyProperty(props, "usePiDisableOutputEscaping", FeatureCode.USE_PI_DISABLE_OUTPUT_ESCAPING, "JN");
         applyProperty(props, "useTypedValueCache", FeatureCode.USE_TYPED_VALUE_CACHE, "JN");
         applyProperty(props, "validationComments", FeatureCode.VALIDATION_COMMENTS, "JN");
@@ -795,6 +799,9 @@ public class ConfigurationReader implements Receiver {
                     } catch (XPathException e) {
                         errors.add(new XmlProcessingException(e));
                     }
+                } else if ("catalogFile".equals(localName)) {
+                    URI baseURI = URI.create(systemId);
+                    catalogFiles.add(baseURI.resolve(content).toString());
                 } else if ("fileExtension".equals(localName)) {
                     // already done at startElement time
                 } else {
@@ -802,6 +809,11 @@ public class ConfigurationReader implements Receiver {
                 }
             }
         }
+
+        if (level == 2 && "resources".equals(localName) && catalogFiles.size() != 0) {
+            targetConfig.getSaxonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, catalogFiles);
+        }
+
         level--;
         buffer.setLength(0);
     }

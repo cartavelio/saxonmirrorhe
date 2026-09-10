@@ -2958,7 +2958,39 @@
             
         </desc>
     </feature>
-    
- 
+
+    <feature>
+        <featureCode>128</featureCode>
+        <name>SAXON_RESOURCE_RESOLVER</name>
+        <type>Implementation of <link>net.sf.saxon.lib.SaxonResourceResolver</link></type>
+        <uri>http://saxon.sf.net/feature/saxon-resource-resolver</uri>
+        <editions>HE PE EE</editions>
+        <setter class="net.sf.saxon.Configuration">setSaxonResourceResolver</setter>
+        <getter class="net.sf.saxon.Configuration">getSaxonResourceResolver</getter>
+        <desc>
+            <p>The supplied implementation of <code>SaxonResourceResolver</code> is used to
+            resolve URIs. The default implementation uses XML Catalog files.
+            The Saxon resource resolver is used by the entity resolver, URI resolver,
+            unparsed text resolver, and other resolvers that resolve URIs to resources.</p>
+        </desc>
+    </feature>
+
+    <feature>
+        <featureCode>129</featureCode>
+        <name>SAXON_RESOURCE_RESOLVER_CLASS</name>
+        <type>Name of a class implementing <link>net.sf.saxon.lib.SaxonResourceResolver</link></type>
+        <uri>http://saxon.sf.net/feature/saxon-resource-resolver-class</uri>
+        <editions>HE PE EE</editions>
+        <setter class="net.sf.saxon.Configuration">setSaxonResourceResolver</setter>
+        <getter class="net.sf.saxon.Configuration">getSaxonResourceResolver</getter>
+        <configfile>global/@SaxonResourceResolver</configfile>
+        <configfiledesc>
+            <p>User-supplied class used to perform URI resolution.</p>
+        </configfiledesc>
+        <desc>
+            <p>The supplied class is instantiated and the resulting instance is used as the value of
+                the <link>net.sf.saxon.lib.Feature#SAXON_RESOURCE_RESOLVER</link> property.</p>
+        </desc>
+    </feature>
 
 </features>

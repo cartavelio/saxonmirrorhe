@@ -141,9 +141,11 @@ dependencies {
     [group: 'org.jdom', name: 'jdom', version: '1.1.3'],
     [group: 'org.jdom', name: 'jdom2', version: '2.0.6'],
     [group: 'dom4j', name: 'dom4j', version: '1.6.1'],
-    [group: 'xml-resolver', name: 'xml-resolver', version: '1.2' ],
     [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
     [group: 'jline', name: 'jline', version: jlineVersion ],
+    [group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30' ],
+    [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
+    [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion, classifier: 'data'],
     [group: 'com.github.javaparser', name: 'javaparser-symbol-solver-core', version: '3.17.0'],
     [group: 'com.github.javaparser', name: 'javaparser-core', version: '3.17.0'],
     // PE and EE
@@ -154,7 +156,9 @@ dependencies {
     fileTree(dir: "extra/MyDotNet/stubs"),
     fileTree(dir: "lib/asm-${asmVersion}"),
     files(saxonLicenseDir),
-    files("lib/Tidy.jar")
+    files("lib/Tidy.jar"),
+    files("lib/slf4j-simple-1.7.30.jar"),
+    fileTree(dir: 'extra/lib/', include: ['*.jar'])
   )
   jarjarAsm (
     fileTree(dir: "${buildDir}/lib/asm")
@@ -217,6 +221,21 @@ javadoc {
 test {
   useJUnitPlatform {
   }
+}
+
+ext {
+  systemOs = OperatingSystem.current()
+  icu4jJar = null
+  tagsoupJar = null
+  mailJar = null
+  resolverJar = null
+  resolverDataJar = null
+  jlineJar = null
+  version_h = saxonVersion.replace(".", "-")
+  fileSeparator = System.getProperty("file.separator")
+  DSTAMP=new Date().format("yyyyMMdd")
+  // Docker containers
+  c_sqlserver = "sqlserver"
 }
 
 docker_container.configure {
@@ -283,7 +302,8 @@ icu4jJar = "${fileSeparator}icu4j-${icu4jVersion}.jar"
 tagsoupJar = "${fileSeparator}tagsoup-${tagsoupVersion}.jar"
 mailJar = "${fileSeparator}javax.mail-${mailVersion}.jar"
 jlineJar = "${fileSeparator}jline-${jlineVersion}.jar"
-resolverJar = "${fileSeparator}xml-resolver-1.2.jar"
+resolverJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}.jar"
+resolverDataJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}-data.jar"
 configurations.compileClasspath.each { cp ->
   if (cp.toString().endsWith(icu4jJar)) {
     icu4jJar = cp.toString()
@@ -296,6 +316,9 @@ configurations.compileClasspath.each { cp ->
   }
   if (cp.toString().endsWith(resolverJar)) {
     resolverJar = cp.toString()
+  }
+  if (cp.toString().endsWith(resolverDataJar)) {
+    resolverDataJar = cp.toString()
   }
   if (cp.toString().endsWith(jlineJar)) {
     jlineJar = cp.toString()

@@ -9,13 +9,13 @@ import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.SchemaManager;
 import net.sf.saxon.s9api.SchemaValidator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XmlCatalogResolver;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xmlresolver.ResolverFeature;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,6 +28,8 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -293,7 +295,7 @@ public class SchemaTests {
             Processor proc = new Processor(true);
             SchemaManager mgr = proc.getSchemaManager();
             mgr.setXsdVersion("1.1");
-            XmlCatalogResolver.setCatalog(catalog, proc.getUnderlyingConfiguration(), true);
+            proc.getUnderlyingConfiguration().getSaxonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, Collections.singletonList(catalog));
 
             mgr.load(new StreamSource(new StringReader(over), "http://dummy/over"));
             SchemaValidator val = mgr.newSchemaValidator();
