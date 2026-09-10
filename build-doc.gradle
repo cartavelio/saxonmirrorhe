@@ -271,7 +271,7 @@ task product_jeljavadoc(
 }
 
 task product_xmljavadoc(
-  dependsOn: ["filter_sources_for_javadoc"],
+  dependsOn: ["filter_sources_for_javadoc", "eejRelease"],
   description: "Generate Javadoc XML files"
 ) {
   // If you can't do something the easy way, do it the hard way.
@@ -281,9 +281,17 @@ task product_xmljavadoc(
   inputs.files fileTree(dir: "${buildDir}/javadoc_src")
   outputs.files fileTree(dir: "${buildDir}/xmljavadoc")
 
+  def includedSaxon = false
   def cp = ""
   configurations.xmldoclet.resolve().each { path ->
-    cp = cp + System.getProperty("path.separator") + path
+    if (path.toString().contains("/Saxon-")) {
+      if (!includedSaxon) {
+        cp = cp + System.getProperty("path.separator") + "${buildDir}/releases/eej/saxon-ee-${saxonVersion}.jar"
+        includedSaxon = true
+      }
+    } else {
+      cp = cp + System.getProperty("path.separator") + path
+    }
   }
 
   def command = []
