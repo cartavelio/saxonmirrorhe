@@ -2,6 +2,7 @@ from tempfile import mkstemp
 import pytest
 from saxonc@@edition@@ import *
 import os
+from pathlib import Path
 from os.path import isfile
 from datetime import datetime as date
 import sys
@@ -1174,6 +1175,22 @@ def test_document_builder(saxonproc):
     node = builder.parse_xml(xml_text="<foo xmlns='http://one.uri/'><bar/></foo>")
     assert node is not None
     assert node.base_uri == "file:/tmp"
+
+def test_static_base_uri(saxonproc):
+    xquery1 = '"Static base uri : " || static-base-uri()'
+
+    xqueryProcessor = saxonproc.new_xquery_processor()
+    workingDirPath = str(Path.cwd().absolute())
+
+    assert workingDirPath is not None
+
+    xqueryProcessor.set_cwd(workingDirPath)
+
+    try:
+        result = xqueryProcessor.run_query_to_string(query_text=xquery1)
+        assert result is not None
+    except  Exception as err:
+        assert False
 
 def test_default_namespace2(saxonproc):
     query_proc = saxonproc.new_xquery_processor()
