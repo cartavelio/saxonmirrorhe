@@ -16,6 +16,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.MinimalSchema;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -119,12 +120,16 @@ public class XsltExecutable {
      * the stylesheet.</p>
      *
      * @param role the role-name of the schema: supply null or "" for the default/unnamed role
-     * @return the schema used by the top-level package of the stylesheet
+     * @return the schema used by the top-level package of the stylesheet, or null if there is no imported
+     * schema and no externally-supplied schema
      * @since 13.0
      */
 
     public XsdSchema getImportedSchema(String role) {
         Schema schema = preparedStylesheet.getTopLevelPackage().getImportedSchema(role);
+        if (schema == null || schema instanceof MinimalSchema) {
+            return null;
+        }
         return processor.newXsdCompiler().wrapInternalSchema(schema);
     }
 
