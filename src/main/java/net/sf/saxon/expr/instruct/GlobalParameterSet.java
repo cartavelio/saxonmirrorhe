@@ -108,8 +108,8 @@ public class GlobalParameterSet {
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, qName.getDisplayName(), -1);
                 Configuration config = context.getConfiguration();
-                CoercionRules coercionRules = CoercionRules.forVersion(coercion);
-                val = coercionRules.coerce(val, requiredType, config, role, Loc.NONE);
+                CoercionRules coercionRules = CoercionRules.forVersion(config, coercion);
+                val = coercionRules.coerce(val, requiredType, SequenceType.ANY_SEQUENCE, config, role, Loc.NONE);
             } else {
                 XPathException err = TypeChecker.testConformance(val, requiredType, context);
                 if (err != null) {

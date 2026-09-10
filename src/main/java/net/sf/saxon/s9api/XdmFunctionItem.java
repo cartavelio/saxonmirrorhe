@@ -12,13 +12,17 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.CoercionRules;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -170,7 +174,7 @@ public class XdmFunctionItem extends XdmItem {
             Sequence[] argVals = new Sequence[arguments.length];
             final Configuration config = processor.getUnderlyingConfiguration();
             TypeHierarchy th = config.getTypeHierarchy();
-            CoercionRules coercionRules = CoercionRules.forVersion(31);
+            CoercionRules coercionRules = CoercionRules.forVersion(config, 31);
             for (int i = 0; i < arguments.length; i++) {
                 net.sf.saxon.value.SequenceType required = type.getArgumentTypes()[i];
                 GroundedValue val = arguments[i].getUnderlyingValue();
@@ -178,7 +182,8 @@ public class XdmFunctionItem extends XdmItem {
                     final int pos = i;
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", pos);
-                    val = coercionRules.coerce(val, required, config, role, Loc.NONE);
+                    val = coercionRules.coerce(val, required, SequenceType.ANY_SEQUENCE, config, role, Loc.NONE)
+                            .materialize();
                 }
                 argVals[i] = val;
             }
@@ -193,7 +198,9 @@ public class XdmFunctionItem extends XdmItem {
                 if (!required.matches(groundedResult, th)) {
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
-                    groundedResult = coercionRules.coerce(groundedResult, required, config, role, Loc.NONE);
+                    groundedResult = coercionRules.coerce(
+                            groundedResult, required, SequenceType.ANY_SEQUENCE, config, role, Loc.NONE)
+                            .materialize();
                 }
             }
             return XdmValue.wrap(groundedResult);

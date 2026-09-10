@@ -111,7 +111,7 @@ public class OptionsParameter {
         Map<String, GroundedValue> result = new HashMap<>();
         Configuration config = context.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
-        CoercionRules coercionRules = CoercionRules.forVersion(languageVersion);
+        CoercionRules coercionRules = CoercionRules.forVersion(config, languageVersion);
 
         for (String req : requiredOptions) {
             if (supplied.get(new StringValue(req)) == null) {
@@ -145,7 +145,7 @@ public class OptionsParameter {
                         Supplier<RoleDiagnostic> role =
                                 () -> new RoleDiagnostic(RoleDiagnostic.OPTION, nominalKey, 0, "XPTY0004");
                         actual = coercionRules.coerce(
-                                actual, required, config, role, Loc.NONE);
+                                actual, required, SequenceType.ANY_SEQUENCE, config, role, Loc.NONE).materialize();
                     }
                 }
                 actual = actual.materialize();

@@ -27,6 +27,7 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.CoercionRules;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -726,14 +727,14 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                     " and arity " + arguments.length + " has been declared in the query");
         }
         int version = expression.getMainModule().getXPathVersion();
-        CoercionRules coercionRules = CoercionRules.forVersion(version);
+        Configuration config = processor.getUnderlyingConfiguration();
+        CoercionRules coercionRules = CoercionRules.forVersion(config, version);
         try {
             if (controller == null) {
                 controller = expression.newController(context);
             } else {
                 context.initializeController(controller);
             }
-            Configuration config = processor.getUnderlyingConfiguration();
             TypeHierarchy th = config.getTypeHierarchy();
             Sequence[] vr = SequenceTool.makeSequenceArray(arguments.length);
             for (int i = 0; i < arguments.length; i++) {
@@ -743,7 +744,8 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                     final int pos = i;
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, function.getStructuredQName().getDisplayName(), pos);
-                    gVal = coercionRules.coerce(gVal, type, config, role, Loc.NONE);
+                    gVal = coercionRules.coerce(gVal, type, SequenceType.ANY_SEQUENCE, config, role, Loc.NONE)
+                            .materialize();
                 }
                 vr[i] = gVal;
             }

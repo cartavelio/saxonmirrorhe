@@ -479,8 +479,9 @@ public class UseWhenFilter extends ProxyReceiver {
                 new AttributeLocation(elemName.getStructuredQName(), NamespaceUri.NULL.qName("as"), location));
         SequenceType requiredType = SequenceType.ANY_SEQUENCE;
 
-        int languageLevel = compilation.getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
-        CoercionRules coercionRules = CoercionRules.forVersion(languageLevel);
+        Configuration config = compilation.getConfiguration();
+        int languageLevel = config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
+        CoercionRules coercionRules = CoercionRules.forVersion(config, languageLevel);
         if (languageLevel == 30) {
             languageLevel = 305; // XPath 3.0 + XSLT extensions
         }
@@ -560,7 +561,9 @@ public class UseWhenFilter extends ProxyReceiver {
             }
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0, "XTDE0050");
-            value = coercionRules.coerce(value, requiredType, getConfiguration(), role, attLoc);
+            value = coercionRules.coerce(
+                    value, requiredType, SequenceType.ANY_SEQUENCE, getConfiguration(), role, attLoc)
+                    .materialize();
             try {
                 compilation.declareStaticVariable(varName, value, precedence, isParam);
             } catch (XPathException e) {

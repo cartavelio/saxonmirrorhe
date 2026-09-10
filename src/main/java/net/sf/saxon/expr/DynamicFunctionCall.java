@@ -309,17 +309,18 @@ public class DynamicFunctionCall extends Expression {
         public PullEvaluator elaborateForPull() {
             DynamicFunctionCall expr = (DynamicFunctionCall)getExpression();
             Configuration config = getConfiguration();
-            TypeHierarchy th = getConfiguration().getTypeHierarchy();
             SequenceEvaluator[] argEvaluators = new SequenceEvaluator[expr.getArity()];
+            SequenceType[] suppliedTypes = new SequenceType[expr.getArity()];
             for (int i=0; i<argEvaluators.length; i++) {
                 Expression arg = expr.suppliedArguments.getOperand(i).getChildExpression();
                 argEvaluators[i] = new LearningEvaluator(arg, arg.makeElaborator().lazily(true, false));
+                suppliedTypes[i] = SequenceType.makeSequenceType(arg.getItemType(), arg.getCardinality());
             }
             Expression body = expr.targetFunction.getChildExpression();
             ItemEvaluator functionEvaluator = body.makeElaborator().elaborateForItem();
             final int version = expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             final boolean is40 = version >= 40;
-            final CoercionRules coercionRules = CoercionRules.forVersion(version);
+            final CoercionRules coercionRules = CoercionRules.forVersion(config, version);
             return context -> {
                 FunctionItem fn = (FunctionItem) functionEvaluator.eval(context);
                 FunctionItemType fit = fn.getFunctionItemType();
@@ -347,7 +348,7 @@ public class DynamicFunctionCall extends Expression {
                             Supplier<RoleDiagnostic> role;
                             role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, fn.getDescription(), 0);
                             actual = coercionRules.coerce(
-                                    actual, expected, config, role, Loc.NONE);
+                                    actual, expected, suppliedTypes[i], config, role, Loc.NONE);
                         }
                         argValues[i] = actual;
                     }
@@ -369,7 +370,7 @@ public class DynamicFunctionCall extends Expression {
                     Supplier<RoleDiagnostic> resultRole =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
                     return coercionRules.coerce(
-                            rawResult, fit.getResultType(), config, resultRole, Loc.NONE).iterate();
+                            rawResult, fit.getResultType(), SequenceType.ANY_SEQUENCE, config, resultRole, Loc.NONE).iterate();
                 }
             };
         }

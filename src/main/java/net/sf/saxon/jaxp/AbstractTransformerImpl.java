@@ -24,6 +24,7 @@ import net.sf.saxon.type.CoercionRules;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 import org.w3c.dom.Node;
 import org.xml.sax.XMLFilter;
@@ -177,7 +178,7 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
         }
         Configuration config = getConfiguration();
         int version =  xsltExecutable.getXsltVersion();
-        CoercionRules coercionRules = CoercionRules.forVersion(version);
+        CoercionRules coercionRules = CoercionRules.forVersion(config, version);
         net.sf.saxon.value.SequenceType required = details.getUnderlyingDeclaredType();
         GroundedValue converted;
         try {
@@ -200,7 +201,7 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, qName.toString(), -1);
                 converted = coercionRules.coerce(
-                        converted, required, config, role, Loc.NONE);
+                        converted, required, SequenceType.ANY_SEQUENCE, config, role, Loc.NONE).materialize();
             }
         } catch (XPathException e) {
             throw new IllegalArgumentException(e);

@@ -411,7 +411,8 @@ public class SequenceTool {
     /**
      * Get the item type of the items in a sequence. If the sequence is heterogeneous,
      * the method returns the lowest common supertype. If the sequence is empty, it returns
-     * ErrorType (the type to which no instance can belong)
+     * ErrorType (the type to which no instance can belong). If the sequence is lazy,
+     * it is not consumed; instead {@link AnyItemType} is returned
      *
      * @param sequence the input sequence
      * @param th       the Type Hierarchy cache
@@ -475,7 +476,7 @@ public class SequenceTool {
 
 
     /**
-     * Get the cardinality of a sequence
+     * Get the cardinality of a sequence. Note: if the sequence is lazy, it is consumed.
      *
      * @param sequence the supplied sequence
      * @return the cardinality, as one of the constants {@link StaticProperty#ALLOWS_ZERO} (for an empty sequence)

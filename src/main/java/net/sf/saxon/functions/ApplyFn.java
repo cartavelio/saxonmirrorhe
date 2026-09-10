@@ -119,9 +119,10 @@ public class ApplyFn extends SystemFunction  {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         final FunctionItem function = (FunctionItem) arguments[0].head();
-        CoercionRules coercionRules = CoercionRules.forVersion(
-                getRetainedStaticContext().getPackageData().getHostLanguageVersion());
         Configuration config = context.getConfiguration();
+        CoercionRules coercionRules = CoercionRules.forVersion(
+                config,
+                getRetainedStaticContext().getPackageData().getHostLanguageVersion());
         FunctionItemType fit = function.getFunctionItemType();
 
         ArrayItem args = (ArrayItem) arguments[1].head();
@@ -145,7 +146,7 @@ public class ApplyFn extends SystemFunction  {
                 final int pos = i;
                 Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "fn:apply", pos + 1);
                 Sequence converted = coercionRules.coerce(
-                        args.get(i), expected, config, role, Loc.NONE);
+                        args.get(i), expected, SequenceType.ANY_SEQUENCE, config, role, Loc.NONE);
                 argArray[i] = converted.materialize();
             }
         }
@@ -172,7 +173,7 @@ public class ApplyFn extends SystemFunction  {
             Supplier<RoleDiagnostic> resultRole =
                     () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
             return coercionRules.coerce(
-                    rawResult, fit.getResultType(), config, resultRole, Loc.NONE);
+                    rawResult, fit.getResultType(), SequenceType.ANY_SEQUENCE, config, resultRole, Loc.NONE);
         }
     }
 

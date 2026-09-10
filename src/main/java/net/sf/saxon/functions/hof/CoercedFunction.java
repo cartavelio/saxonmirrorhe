@@ -22,10 +22,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.CoercionRules;
-import net.sf.saxon.type.FunctionItemType;
-import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
@@ -178,8 +175,8 @@ public class CoercedFunction extends AbstractFunction {
         SpecificFunctionType req = requiredType;
         SequenceType[] argTypes = targetFunction.getFunctionItemType().getArgumentTypes();
         int suppliedArity = Math.min(args.length, argTypes.length);
-        CoercionRules coercionRules = CoercionRules.forVersion(allow40 ? 40 : 31);
         Configuration config = context.getConfiguration();
+        CoercionRules coercionRules = CoercionRules.forVersion(config, allow40 ? 40 : 31);
         TypeHierarchy th = config.getTypeHierarchy();
         Sequence[] targetArgs = new Sequence[suppliedArity];
         for (int i = 0; i < suppliedArity; i++) {
@@ -190,7 +187,7 @@ public class CoercedFunction extends AbstractFunction {
                 final int pos = i;
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, targetFunction.getDescription(), pos);
-                targetArgs[i] = coercionRules.coerce(gVal, argTypes[i], config, role, Loc.NONE);
+                targetArgs[i] = coercionRules.coerce(gVal, argTypes[i], SequenceType.ANY_SEQUENCE, config, role, Loc.NONE);
             }
         }
         // TODO: don't materialize the result if static type checking tells us the result will be OK
@@ -200,7 +197,7 @@ public class CoercedFunction extends AbstractFunction {
         } else {
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, getDescription(), 0);
-            return coercionRules.coerce(rawResult, req.getResultType(), config, role, Loc.NONE);
+            return coercionRules.coerce(rawResult, req.getResultType(), SequenceType.ANY_SEQUENCE, config, role, Loc.NONE);
         }
     }
 
