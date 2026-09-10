@@ -30,6 +30,10 @@ public enum AnySimpleType implements SimpleType {
 
     INSTANCE;
 
+    public static AnySimpleType getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Get the local name of this type
      *

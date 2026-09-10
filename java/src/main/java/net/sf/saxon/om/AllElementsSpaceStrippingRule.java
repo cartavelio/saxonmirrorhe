@@ -23,6 +23,10 @@ public enum AllElementsSpaceStrippingRule implements SpaceStrippingRule {
 
     INSTANCE;
 
+    public static AllElementsSpaceStrippingRule getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Decide whether an element is in the set of white-space preserving element types
      *

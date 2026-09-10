@@ -26,6 +26,10 @@ public enum EmptyAtomicIterator implements AtomicIterator,
 
     INSTANCE;
 
+    public static EmptyAtomicIterator getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Get the next item.
      *

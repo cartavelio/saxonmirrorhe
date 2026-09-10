@@ -24,6 +24,10 @@ public enum DummyNamespaceResolver implements NamespaceResolver {
 
     INSTANCE;
 
+    public static DummyNamespaceResolver getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Get the namespace URI corresponding to a given prefix.
      *

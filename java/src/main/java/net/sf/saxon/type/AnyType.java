@@ -31,6 +31,10 @@ public enum AnyType implements ComplexType {
 
     INSTANCE;
 
+    public static AnyType getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Get the local name of this type
      *

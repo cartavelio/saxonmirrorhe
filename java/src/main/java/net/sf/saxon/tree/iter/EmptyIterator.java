@@ -23,6 +23,10 @@ public enum EmptyIterator implements SequenceIterator,
 
     INSTANCE;
 
+    public static EmptyIterator getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Deliver the atomic value that is next in the atomized result
      *

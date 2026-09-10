@@ -19,6 +19,10 @@ public enum EmptyAttributeMap implements AttributeMap {
 
     INSTANCE;
 
+    public static EmptyAttributeMap getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public int size() {
         return 0;

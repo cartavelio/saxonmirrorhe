@@ -18,7 +18,7 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import java.util.Collections;
 
 /**
- * An EmptySequence object represents a sequence containing no members.
+ * An EmptySequence object represents a sequence containing no items.
  * @since 9.5.  Generified in 9.9.  Generification reverted in 11.0.
  */
 
@@ -27,6 +27,10 @@ public enum EmptySequence implements GroundedValue {
 
     // This class has a single instance
     INSTANCE;
+
+    public static EmptySequence getInstance() {
+        return INSTANCE;
+    }
 
 
     @Override

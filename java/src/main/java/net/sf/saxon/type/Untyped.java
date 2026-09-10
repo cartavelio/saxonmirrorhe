@@ -30,6 +30,10 @@ public enum Untyped implements ComplexType {
 
     INSTANCE;
 
+    public static Untyped getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Get the validation status - always valid
      */
