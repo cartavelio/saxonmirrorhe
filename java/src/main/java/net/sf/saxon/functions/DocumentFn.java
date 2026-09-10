@@ -157,7 +157,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 baseURI = b.getStringValue();
             }
 
-            GroundedValue strip = checkedOptions.get("strip-space-2684"); // See issue 2684
+            GroundedValue strip = checkedOptions.get("strip-space-2684"); // See QT4 issue 2684
             if (strip != null) {
                 SpaceStrippingRule rule;
                 GroundedValue dtdVal = checkedOptions.get("dtd-validation");
