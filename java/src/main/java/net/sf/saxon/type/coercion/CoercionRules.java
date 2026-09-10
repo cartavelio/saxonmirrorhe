@@ -59,7 +59,11 @@ public class CoercionRules {
                            Supplier<RoleDiagnostic> roleSupplier,
                            Location locator)
             throws XPathException {
+
         CoercionPlan plan = requiredType.getPrimaryType().getCoercionPlan(version);
+        if (plan == null) {
+            return value;
+        }
         CoercionRequest request = new CoercionRequest(knownType, config, roleSupplier, locator);
 
         if (value instanceof Item it) {
