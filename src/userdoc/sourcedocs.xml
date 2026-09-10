@@ -2195,7 +2195,7 @@ documentBuilder.build(as);]]></samp>
         <li><p>Many of the external object models allow a document to contain adjacent text nodes, especially
           when the tree is constructed programmatically rather than as the result of XML parsing.</p> 
           <p>In the case
-        of DOM, the Saxon wrapper code creates a view of the tree in which multiple adjacent DOM text nodes
+        of DOM and JDOM2, the Saxon wrapper code creates a view of the tree in which multiple adjacent external text nodes
         are presented as a single composite XDM text node. But this logic is not implemented for other
         external models: in such cases the XDM tree may violate the constraint that adjacent text nodes
           are not allowed.</p>
