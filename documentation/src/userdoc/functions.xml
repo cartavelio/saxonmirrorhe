@@ -223,7 +223,7 @@
         <proto return-type="item()*">
           <arg name="select" type="item()*" desc="FIXME:"/>
           <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
-          <in-spec>xpath40</in-spec>
+          <in-spec>xslt40</in-spec>
         </proto>
 
       </signatures>
@@ -462,7 +462,7 @@
       <signatures>
         <proto return-type="map(xs:string, xs:string)?">
           <arg name="name" type="xs:QName" desc="FIXME:"/>
-          <in-spec>xpath40</in-spec>
+          <in-spec>xslt40</in-spec>
         </proto>
 
       </signatures>
@@ -1532,7 +1532,6 @@
             desc="The name of the extension element (a lexical QName)"/>
           <in-spec>xslt20</in-spec>
           <in-spec>xslt30</in-spec>
-          <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
@@ -3178,7 +3177,7 @@
         <proto return-type="map(xs:anyAtomicType, node()*)">
           <arg name="key-name" type="(xs:string | xs:QName)" desc="FIXME:"/>
           <arg name="top" type="(document-node() | element())" default="/" desc="FIXME:"/>
-          <in-spec>xpath40</in-spec>
+          <in-spec>xslt40</in-spec>
         </proto>
 
       </signatures>
@@ -4828,7 +4827,6 @@
         <proto return-type="xs:boolean">
           <arg name="uri" type="xs:string?" desc="The URI of the document"/>
           <in-spec>xslt30</in-spec>
-          <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
@@ -5454,7 +5452,6 @@
             desc="The name of the required type, as a lexical QName"/>
           <in-spec>xslt20</in-spec>
           <in-spec>xslt30</in-spec>
-          <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
