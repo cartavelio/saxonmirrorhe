@@ -10,7 +10,6 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
@@ -40,7 +39,7 @@ public class OptionalItemEvaluator implements SequenceEvaluator {
     public Sequence evaluate(XPathContext context) throws XPathException {
         try {
             Item result = evaluator.eval(context);
-            return SequenceTool.itemOrEmpty(result);
+            return result == null ? EmptySequence.getInstance() : result;
         } catch (UncheckedXPathException e) {
             throw e.getXPathException();
         }

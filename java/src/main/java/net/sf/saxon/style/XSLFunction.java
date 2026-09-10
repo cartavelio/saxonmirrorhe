@@ -20,7 +20,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.*;
-import net.sf.saxon.transpile.CSharpUsing;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.PlainType;
 import net.sf.saxon.type.SchemaType;
@@ -38,7 +37,6 @@ import java.util.List;
  * saxon:memo-function=yes|no indicates whether it acts as a memo function.
  */
 
-@CSharpUsing(code = "Saxon.Hej.trans")
 public class XSLFunction extends StyleElement implements StylesheetComponent {
 
     private boolean doneAttributes = false;
@@ -54,7 +52,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     private int numberOfOptionalParameters = -1;  // -1 means not yet known
     private UserFunction compiledFunction;
     private Visibility visibility = Visibility.UNDEFINED;
-    private FunctionStreamability streamability = FunctionStreamability.UNCLASSIFIED;
+    private FunctionStreamability streamability;
     private UserFunction.Determinism determinism = UserFunction.Determinism.PROACTIVE;
     private boolean explaining;
     private boolean updating = false;
@@ -226,7 +224,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             streamability = FunctionStreamability.UNCLASSIFIED;
         } else {
             streamability = getStreamabilityValue(streamabilityAtt);
-            if (FunctionStreamabilityHelper.isStreaming(streamability)) {
+            if (streamability.isStreaming()) {
                 boolean streamable = processStreamableAtt("yes");
                 if (!streamable) {
                     streamability = FunctionStreamability.UNCLASSIFIED;
@@ -260,10 +258,10 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             return FunctionStreamability.UNCLASSIFIED;
         }
         try {
-            return FunctionStreamabilityHelper.of(s);
+            return FunctionStreamability.of(s);
         } catch (IllegalArgumentException ill) {
             invalidAttribute("streamability", "unclassified|absorbing|inspection|filter|shallow-descent|deep-descent|ascent");
-            return FunctionStreamability.UNCLASSIFIED;
+            return null;
         }
     }
 
@@ -460,7 +458,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         ExpressionVisitor visitor = makeExpressionVisitor();
         Expression exp2 = exp.typeCheck(visitor, ContextItemStaticInfo.ABSENT);
 
-        if (FunctionStreamabilityHelper.isStreaming(streamability)) {
+        if (streamability.isStreaming()) {
             visitor.setOptimizeForStreaming(true);
         }
         exp2 = ExpressionTool.optimizeComponentBody(exp2, getCompilation(), visitor, ContextItemStaticInfo.ABSENT, true);
@@ -470,7 +468,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
         // Assess the streamability of the function body
         Optimizer optimizer = visitor.getConfiguration().obtainOptimizer();
-        if (FunctionStreamabilityHelper.isStreaming(streamability)) {
+        if (streamability.isStreaming()) {
             optimizer.assessFunctionStreamability(this, compiledFunction);
         }
 
@@ -480,7 +478,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         }
 
         OptimizerOptions options = getCompilation().getCompilerInfo().getOptimizerOptions();
-        if (options.isSet(OptimizerOptions.TAIL_CALLS) && !FunctionStreamabilityHelper.isStreaming(streamability)) {
+        if (options.isSet(OptimizerOptions.TAIL_CALLS) && !streamability.isStreaming()) {
             int tailCalls = ExpressionTool.markTailFunctionCalls(exp2, getObjectName(), getNumberOfParameters());
             if (tailCalls != 0) {
                 compiledFunction.setTailRecursive(tailCalls > 0, tailCalls > 1);
@@ -491,7 +489,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
         //compiledFunction.computeEvaluationMode();
 
-        if (FunctionStreamabilityHelper.isStreaming(streamability)) {
+        if (streamability.isStreaming()) {
             compiledFunction.prepareForStreaming();
         }
 

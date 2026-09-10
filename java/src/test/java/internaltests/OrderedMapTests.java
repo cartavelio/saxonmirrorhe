@@ -139,7 +139,7 @@ public class OrderedMapTests {
 
     @Test
     public void testExtensibleMapFromEmpty() {
-        MapItem o = new ExtensibleMap(40);
+        MapItem o = new ExtensibleMap();
         o = o.put(new StringValue("a"), new DoubleValue(1));
         o = o.put(new StringValue("b"), new DoubleValue(2));
         o = o.put(new StringValue("c"), new DoubleValue(3));
@@ -159,7 +159,7 @@ public class OrderedMapTests {
 
     @Test
     public void testBuildFromEmpty() {
-        MapItem o = EmptyMap.INSTANCE_40;
+        MapItem o = EmptyMap.getInstance(40);
         o = o.put(new StringValue("a"), new DoubleValue(1));
         o = o.put(new StringValue("b"), new DoubleValue(2));
         o = o.put(new StringValue("c"), new DoubleValue(3));
@@ -203,7 +203,7 @@ public class OrderedMapTests {
 
     @Test
     public void testFixedMap() {
-        GeneralMapBuilder builder = AbstractFixedMap.getBuilder(40);
+        GeneralMapBuilder builder = AbstractFixedMap.getBuilder();
         builder.put(new StringValue("a"), new DoubleValue(1));
         builder.put(new StringValue("b"), new DoubleValue(2));
         builder.put(new StringValue("c"), new DoubleValue(3));
@@ -213,7 +213,7 @@ public class OrderedMapTests {
 
     @Test
     public void testExtensibleMap() {
-        GeneralMapBuilder builder = AbstractFixedMap.getBuilder(40);
+        GeneralMapBuilder builder = AbstractFixedMap.getBuilder();
         builder.put(new StringValue("a"), new DoubleValue(1));
         builder.put(new StringValue("temp"), new DoubleValue(1));
         builder.put(new StringValue("b"), new DoubleValue(2));

@@ -133,7 +133,7 @@ public class BuiltInListType implements ListType {
     /*@NotNull*/
     @Override
     public SchemaType getBaseType() {
-        return AnySimpleType.INSTANCE;
+        return AnySimpleType.getInstance();
     }
 
     /**
@@ -309,7 +309,7 @@ public class BuiltInListType implements ListType {
 
     /*@NotNull*/
     public SchemaType getKnownBaseType() throws IllegalStateException {
-        return AnySimpleType.INSTANCE;
+        return AnySimpleType.getInstance();
     }
 
     /**

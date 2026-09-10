@@ -24,7 +24,6 @@ import net.sf.saxon.trans.CommandLineOptions;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.Source;
@@ -391,9 +390,14 @@ public class Processor implements Configuration.ApiProvider {
 
     public void setXmlVersion(/*@NotNull*/ String version) {
         switch (version) {
-            case "1.0" -> config.setXMLVersion(Configuration.XML10);
-            case "1.1" -> config.setXMLVersion(Configuration.XML11);
-            default -> throw new IllegalArgumentException("XmlVersion");
+            case "1.0":
+                config.setXMLVersion(Configuration.XML10);
+                break;
+            case "1.1":
+                config.setXMLVersion(Configuration.XML11);
+                break;
+            default:
+                throw new IllegalArgumentException("XmlVersion");
         }
     }
 
@@ -679,10 +683,9 @@ public class Processor implements Configuration.ApiProvider {
             net.sf.saxon.s9api.SequenceType[] declaredArgs = function.getArgumentTypes();
             net.sf.saxon.value.SequenceType[] types = new net.sf.saxon.value.SequenceType[declaredArgs.length];
             for (int i = 0; i < declaredArgs.length; i++) {
-                OccurrenceIndicator occurrenceIndicator = declaredArgs[i].getOccurrenceIndicator();
                 types[i] = net.sf.saxon.value.SequenceType.makeSequenceType(
                         declaredArgs[i].getItemType().getUnderlyingItemType(),
-                        Cardinality.staticPropertyFromOccurrenceIndicator(occurrenceIndicator));
+                        declaredArgs[i].getOccurrenceIndicator().getCardinality());
             }
             return types;
         }
@@ -699,10 +702,9 @@ public class Processor implements Configuration.ApiProvider {
         @Override
         public SequenceType getResultType(SequenceType[] suppliedArgumentTypes) {
             net.sf.saxon.s9api.SequenceType declaredResult = function.getResultType();
-            OccurrenceIndicator occurrenceIndicator = declaredResult.getOccurrenceIndicator();
             return net.sf.saxon.value.SequenceType.makeSequenceType(
                     declaredResult.getItemType().getUnderlyingItemType(),
-                    Cardinality.staticPropertyFromOccurrenceIndicator(occurrenceIndicator));
+                    declaredResult.getOccurrenceIndicator().getCardinality());
         }
 
         /**

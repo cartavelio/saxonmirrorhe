@@ -267,7 +267,7 @@ public final class Operand implements Iterable<Operand>, ExpressionOwner {
     public static OperandUsage typeDeterminedUsage(net.sf.saxon.type.ItemType type) {
         if (type.isPlainType()) {
             return OperandUsage.ABSORPTION;
-        } else if (type instanceof NodeTest || type == AnyItemType.INSTANCE) {
+        } else if (type instanceof NodeTest || type == AnyItemType.getInstance()) {
             return OperandUsage.NAVIGATION;
         } else {
             return OperandUsage.INSPECTION;

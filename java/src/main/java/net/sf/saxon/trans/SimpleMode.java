@@ -7,7 +7,6 @@
 
 package net.sf.saxon.trans;
 
-import net.sf.saxon.Controller;
 import net.sf.saxon.expr.ComponentBinding;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
@@ -680,7 +679,7 @@ public class SimpleMode extends Mode {
 
     protected Rule searchRuleChain(Item item, XPathContext context, /*@Nullable*/ Rule bestRule, RuleChain chain) throws XPathException {
 
-        XPathContextMajor contextMajor = context.getMajorContext();
+        context = context.getMajorContext();
 
         // Get the rule search state object - this could be reusable within a rule chain.
         RuleSearchState ruleSearchState = makeRuleSearchState(chain, context);
@@ -695,14 +694,12 @@ public class SimpleMode extends Mode {
                     break;
                 } else if (rank == 0) {
                     // this rule has the same precedence and priority as the matching rule already found
-                    if (ruleMatches(head, item, contextMajor, ruleSearchState)) {
-                        int headSequence = head.getSequence();
-                        int bestRuleSequence = bestRule.getSequence();
-                        if (headSequence != bestRuleSequence) {
-                            reportAmbiguity(item, bestRule, head, context.getController());
+                    if (ruleMatches(head, item, (XPathContextMajor) context, ruleSearchState)) {
+                        if (head.getSequence() != bestRule.getSequence()) {
+                            reportAmbiguity(item, bestRule, head, context);
                         }
                         // choose whichever one comes last (assuming the error wasn't fatal)
-                        int seqComp = Integer.compare(bestRuleSequence, headSequence);
+                        int seqComp = Integer.compare(bestRule.getSequence(), head.getSequence());
                         if (seqComp > 0) {
                             return bestRule;
                         } else if (seqComp < 0) {
@@ -717,7 +714,7 @@ public class SimpleMode extends Mode {
                     }
                 } else {
                     // this rule has higher rank than the matching rule already found
-                    if (ruleMatches(head, item, contextMajor, ruleSearchState)) {
+                    if (ruleMatches(head, item, (XPathContextMajor) context, ruleSearchState)) {
                         bestRule = head;
                     }
                 }
@@ -899,7 +896,7 @@ public class SimpleMode extends Mode {
                     } else if (rank == 0) {
                         // this rule has the same precedence and priority as the matching rule already found
                         if (ruleMatches(head, item, (XPathContextMajor) context, ruleSearchState)) {
-                            reportAmbiguity(item, bestRule, head, context.getController());
+                            reportAmbiguity(item, bestRule, head, context);
                             // choose whichever one comes last (assuming the error wasn't fatal)
                             bestRule = bestRule.getSequence() > head.getSequence() ? bestRule : head;
                             break;
@@ -932,12 +929,12 @@ public class SimpleMode extends Mode {
      * @param item The item that matches two or more rules
      * @param r1   The first rule that the node matches
      * @param r2   The second rule that the node matches
-     * @param controller    The context for the transformation
+     * @param c    The context for the transformation
      * @throws XPathException if the system is configured to treat ambiguous template matching as a
      *                        non-recoverable error
      */
 
-    protected void reportAmbiguity(Item item, Rule r1, Rule r2, Controller controller)
+    protected void reportAmbiguity(Item item, Rule r1, Rule r2, XPathContext c)
             throws XPathException {
 
         // Save the effort of constructing the message if it's not going to be reported anyway
@@ -978,7 +975,7 @@ public class SimpleMode extends Mode {
             case DO_NOT_RECOVER:
                 throw new XPathException(message, errorCode, getLocation());
             case RECOVER_WITH_WARNINGS:
-                controller.warning(message, errorCode, getLocation());
+                c.getController().warning(message, errorCode, getLocation());
                 break;
             case RECOVER_SILENTLY:
             default:

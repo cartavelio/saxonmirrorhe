@@ -239,7 +239,7 @@ public class UseWhenFilter extends ProxyReceiver {
         Configuration config = getConfiguration();
         ResourceResolver resolver = compilation.getCompilerInfo().getResourceResolver();
         String baseUriStr = baseUri.toString();
-        ParseOptions options = new ParseOptions().withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE);
+        ParseOptions options = new ParseOptions().withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
         DocumentKey key = DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), options);
         Map<DocumentKey, TreeInfo> map = compilation.getStylesheetModules();
         if (map.containsKey(key)) {
@@ -559,7 +559,7 @@ public class UseWhenFilter extends ProxyReceiver {
                     if (asStr == null) {
                         value = StringValue.EMPTY_STRING;
                     } else {
-                        value = EmptySequence.INSTANCE;
+                        value = EmptySequence.getInstance();
                     }
                     compilation.declareStaticVariable(varName, value, precedence, isParam);
                 }
@@ -619,7 +619,7 @@ public class UseWhenFilter extends ProxyReceiver {
                 attMap.remove(attName);
             }
         }
-        AttributeMap resultAtts = EmptyAttributeMap.INSTANCE;
+        AttributeMap resultAtts = EmptyAttributeMap.getInstance();
         for (AttributeInfo att : attMap.values()) {
             resultAtts = resultAtts.put(new AttributeInfo(
                     att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties()));
@@ -825,7 +825,7 @@ public class UseWhenFilter extends ProxyReceiver {
                     Configuration config = getConfiguration();
                     ResourceResolver resolver = compilation.getCompilerInfo().getResourceResolver();
                     String baseUriStr = baseUri.toString();
-                    ParseOptions options = new ParseOptions().withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE);
+                    ParseOptions options = new ParseOptions().withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                     DocumentKey key = DocumentFn.computeDocumentKey(s, baseUri.toString(), compilation.getPackageData(), options);
                     Map<DocumentKey, TreeInfo> map = compilation.getStylesheetModules();
                     if (map.containsKey(key)) {

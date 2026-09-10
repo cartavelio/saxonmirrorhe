@@ -40,9 +40,15 @@ public class XSLContextItem extends StyleElement {
                 String f = attName.getDisplayName();
                 String value = att.getValue();
             switch (f) {
-                case "as" -> asAtt = Whitespace.trim(value);
-                case "use" -> useAtt = Whitespace.trim(value);
-                default -> checkUnknownAttribute(attName);
+                case "as":
+                    asAtt = Whitespace.trim(value);
+                    break;
+                case "use":
+                    useAtt = Whitespace.trim(value);
+                    break;
+                default:
+                    checkUnknownAttribute(attName);
+                    break;
             }
         }
         if (asAtt != null) {

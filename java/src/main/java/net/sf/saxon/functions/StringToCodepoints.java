@@ -24,7 +24,7 @@ public class StringToCodepoints extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue val = (StringValue)arguments[0].head();
         if (val == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
         return SequenceTool.toLazySequence(val.iterateCharacters());
     }

@@ -19,9 +19,5 @@ namespace Saxon.Ejava.util {
                 return value;
             }
         }
-        
-        public static T requireNonNullElse<T>(T value, T defaultValue) {
-            return value ?? defaultValue;
-        }
     }
 }

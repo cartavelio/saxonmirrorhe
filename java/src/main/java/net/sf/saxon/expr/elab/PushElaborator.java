@@ -44,7 +44,7 @@ public abstract class PushElaborator extends Elaborator {
             ItemEvaluator itemEval = elaborateForItem();
             return context -> {
                 Item item = itemEval.eval(context);
-                return item == null ? EmptyIterator.INSTANCE : SingletonIterator.makeIterator(item);
+                return item == null ? EmptyIterator.getInstance() : SingletonIterator.makeIterator(item);
             };
         }
     }

@@ -145,7 +145,7 @@ public final class FixedAttribute extends AttributeCreator {
         if (Literal.isAtomic(getSelect()) && schemaType != null && !schemaType.isNamespaceSensitive()) {
             UnicodeString value = ((Literal) getSelect()).getGroundedValue().getUnicodeStringValue();
             ValidationFailure err = schemaType.validateContent(
-                    value, DummyNamespaceResolver.INSTANCE, rules);
+                    value, DummyNamespaceResolver.getInstance(), rules);
             if (err != null) {
                 throw new XPathException("Attribute value " + Err.wrap(value, Err.VALUE) +
                         " does not the match the required type " +

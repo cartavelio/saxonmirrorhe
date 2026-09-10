@@ -411,7 +411,7 @@ public class TestIntegratedFunctions {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             DoubleValue val = (DoubleValue)arguments[0].head();
             if (val == null) {
-                return EmptySequence.INSTANCE;
+                return EmptySequence.getInstance();
             }
             double sqrt = Math.sqrt(val.getDoubleValue());
             return new DoubleValue(sqrt);
@@ -700,12 +700,12 @@ public class TestIntegratedFunctions {
             } else {
                 StringValue val = (StringValue) arguments[0].head();
                 if (val == null) {
-                    return EmptySequence.INSTANCE;
+                    return EmptySequence.getInstance();
                 }
                 ns = nsContext.getURIForPrefix(val.getStringValue(), false);
             }
             if (ns == null) {
-                return EmptySequence.INSTANCE;
+                return EmptySequence.getInstance();
             }
             return new StringValue(ns.toUnicodeString());
         }
@@ -837,7 +837,7 @@ public class TestIntegratedFunctions {
             } else {
                 StringValue val = (StringValue) arguments[0].head();
                 if (val == null) {
-                    return EmptySequence.INSTANCE;
+                    return EmptySequence.getInstance();
                 }
                 return new StringValue(val.getStringValue() + "/" + val.getStringValue());
             }

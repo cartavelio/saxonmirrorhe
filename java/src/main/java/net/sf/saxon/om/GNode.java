@@ -51,7 +51,7 @@ public interface GNode extends Item {
      * @return the required iterator
      */
     default SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
-        return EmptyIterator.INSTANCE;
+        return EmptyIterator.getInstance();
     }
 
     /**
@@ -144,7 +144,7 @@ public interface GNode extends Item {
         if (getNodeKind() == Type.ELEMENT) {
             return NamespaceNode.makeIterator((NodeInfo)this, predicate);
         }
-        return EmptyIterator.INSTANCE;
+        return EmptyIterator.getInstance();
     }
 
     /**

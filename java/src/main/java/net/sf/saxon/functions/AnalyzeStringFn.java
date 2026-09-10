@@ -36,11 +36,11 @@ public class AnalyzeStringFn extends RegexFunction {
         public NodeName groupNrName;
         public NodeName positionName;
         public NodeName valueName;
-        public SchemaType resultType = Untyped.INSTANCE;
-        public SchemaType nonMatchType = Untyped.INSTANCE;
-        public SchemaType matchType = Untyped.INSTANCE;
-        public SchemaType groupType = Untyped.INSTANCE;
-        public SchemaType lookaheadGroupType = Untyped.INSTANCE;
+        public SchemaType resultType = Untyped.getInstance();
+        public SchemaType nonMatchType = Untyped.getInstance();
+        public SchemaType matchType = Untyped.getInstance();
+        public SchemaType groupType = Untyped.getInstance();
+        public SchemaType lookaheadGroupType = Untyped.getInstance();
         public SimpleType groupNrType = BuiltInAtomicType.UNTYPED_ATOMIC;
         public SimpleType positionType = BuiltInAtomicType.UNTYPED_ATOMIC;
         public SimpleType valueType = BuiltInAtomicType.UNTYPED_ATOMIC;

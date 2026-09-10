@@ -519,7 +519,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                     new ChildEnumeration(this, true, true),
                     nodeTest);
         } else {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
     }
 
@@ -539,7 +539,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             if (hasChildNodes()) {
                 return new SteppingNavigator.DescendantAxisIterator(this, false, predicate);
             } else {
-                return EmptyIterator.INSTANCE;
+                return EmptyIterator.getInstance();
             }
 
         }

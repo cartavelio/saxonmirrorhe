@@ -25,7 +25,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.query.QueryResult;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -146,9 +145,6 @@ public class Literal extends Expression {
         if (value instanceof IntegerRange) {
             return th.isSubType(BuiltInAtomicType.INTEGER, requiredType);
         }
-        if (value instanceof Item it) {
-            return requiredType.matches(it, th);
-        }
         for (Item item : value.asIterable()) {
             if (!requiredType.matches(item, th)) {
                 return false;
@@ -187,7 +183,7 @@ public class Literal extends Expression {
     protected int computeCardinality() {
         if (value.getLength() == 0) {
             return StaticProperty.EMPTY;
-        } else if (value instanceof Item) {
+        } else if (value instanceof AtomicValue) {
             return StaticProperty.EXACTLY_ONE;
         }
         SequenceIterator iter = value.iterate();
@@ -778,7 +774,7 @@ public class Literal extends Expression {
      */
 
     public static Literal makeEmptySequence() {
-        return new Literal(EmptySequence.INSTANCE);
+        return new Literal(EmptySequence.getInstance());
     }
 
 
@@ -791,8 +787,8 @@ public class Literal extends Expression {
 
     public static Literal makeLiteral(GroundedValue value) {
         value = value.reduce();
-        if (value instanceof StringValue sv) {
-            return new StringLiteral(sv);
+        if (value instanceof StringValue) {
+            return new StringLiteral((StringValue) value);
         } else if (value instanceof FunctionItem && !(value instanceof MapItem || value instanceof ArrayItem)) {
             return new FunctionLiteral((FunctionItem) value);
         } else {
@@ -870,16 +866,15 @@ public class Literal extends Expression {
         public PushEvaluator elaborateForPush() {
             Literal expr = (Literal)getExpression();
             GroundedValue value = ((Literal) getExpression()).getGroundedValue();
-            Location loc = expr.getLocation();
-            if (value instanceof Item it) {
+            if (value instanceof Item) {
                 return (out, context) -> {
-                    out.append(it, loc, ReceiverOption.ALL_NAMESPACES);
+                    out.append((Item)value, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
                     return null;
                 };
             } else {
                 return (out, context) -> {
                     for (Item item : value.asIterable()) {
-                         out.append(item, loc, ReceiverOption.ALL_NAMESPACES);
+                         out.append(item, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
                     }
                     return null;
                 };

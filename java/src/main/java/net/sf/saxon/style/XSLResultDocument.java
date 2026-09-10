@@ -335,7 +335,7 @@ public class XSLResultDocument extends StyleElement {
             content = compileSequenceConstructor(exec, decl, true);
         }
         if (content == null) {
-            content = Literal.makeLiteral(EmptySequence.INSTANCE);
+            content = Literal.makeLiteral(EmptySequence.getInstance());
         }
         inst.setContentExpression(content);
         inst.setAsynchronous(async);

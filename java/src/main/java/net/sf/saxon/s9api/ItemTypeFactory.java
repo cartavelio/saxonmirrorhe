@@ -336,7 +336,7 @@ public class ItemTypeFactory {
      */
 
     public ItemType getItemType(XdmNodeKind kind, QName name) {
-        int k = getNodeKindNumber(kind);
+        int k = kind.getNumber();
         if (k == Type.ELEMENT || k == Type.ATTRIBUTE || k == Type.PROCESSING_INSTRUCTION) {
             if (k == Type.PROCESSING_INSTRUCTION && name.getNamespaceUri().isEmpty()) {
                 throw new IllegalArgumentException("The name of a processing instruction must not be in a namespace");
@@ -346,18 +346,6 @@ public class ItemTypeFactory {
         } else {
             throw new IllegalArgumentException("Node kind must be element, attribute, or processing-instruction");
         }
-    }
-
-    private static int getNodeKindNumber(XdmNodeKind kind) {
-        return switch (kind) {
-            case DOCUMENT -> Type.DOCUMENT;
-            case ELEMENT -> Type.ELEMENT;
-            case ATTRIBUTE -> Type.ATTRIBUTE;
-            case TEXT -> Type.TEXT;
-            case COMMENT -> Type.COMMENT;
-            case PROCESSING_INSTRUCTION -> Type.PROCESSING_INSTRUCTION;
-            case NAMESPACE -> Type.NAMESPACE;
-        };
     }
 
     /**
@@ -462,7 +450,7 @@ public class ItemTypeFactory {
     private ItemType getElementOrAttributeTest(int nodeKind, QName name, QName schemaType, boolean nillable)
             throws SaxonApiException{
         QNameTest namePredicate = AnyQNameTest.getInstance();
-        SchemaType contentType = AnyType.INSTANCE;
+        SchemaType contentType = AnyType.getInstance();
         if (schemaType != null) {
             requireSchema();
             contentType = schema.getSchemaType(schemaType.getStructuredQName());

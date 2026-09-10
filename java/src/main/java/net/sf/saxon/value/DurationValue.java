@@ -12,7 +12,7 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.Latin1;
+import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -409,7 +409,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         // the duration is zero-length, in which case we output PT0S.
 
         if (_months == 0 && _seconds.signum() == 0) {
-            return U_ZERO_DURATION;
+            return BMPString.of("PT0S");
         }
 
         UnicodeBuilder sb = new UnicodeBuilder(16);
@@ -452,8 +452,6 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         return sb.toUnicodeString();
 
     }
-
-    private final static UnicodeString U_ZERO_DURATION = Latin1.of("PT0S");
 
     /**
      * Get a component of the normalized value

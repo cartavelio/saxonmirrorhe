@@ -129,6 +129,17 @@ public enum AnySimpleType implements SimpleType {
     }
 
     /**
+     * Get the singular instance of this class
+     *
+     * @return the singular object representing xs:anyType
+     */
+
+    /*@NotNull*/
+    public static AnySimpleType getInstance() {
+        return INSTANCE;
+    }
+
+    /**
      * Get the validation status - always valid
      */
     @Override
@@ -144,7 +155,7 @@ public enum AnySimpleType implements SimpleType {
 
     @Override
     public SchemaType getBaseType() {
-        return AnyType.INSTANCE;
+        return AnyType.getInstance();
     }
 
     /**

@@ -409,7 +409,7 @@ public class DocumentBuilder {
         if (whitespacePolicy != null && whitespacePolicy != WhitespaceStrippingPolicy.UNSPECIFIED) {
             int option = whitespacePolicy.ordinal();
             if (option == Whitespace.XSLT) {
-                options = options.withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE);
+                options = options.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                 options = options.withFilter(whitespacePolicy.makeStripper());
             } else {
                 options = options.withSpaceStrippingRule(whitespacePolicy.getSpaceStrippingRule());

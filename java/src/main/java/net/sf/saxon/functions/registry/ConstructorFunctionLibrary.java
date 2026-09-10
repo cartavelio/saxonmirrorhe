@@ -98,7 +98,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
      * and no resolver is supplied.
      */
     public static FunctionItem makeConstructorFunction(SimpleType type, ConversionRules rules, NamespaceResolver resolver) {
-        if (type == AnySimpleType.INSTANCE || type == BuiltInAtomicType.ANY_ATOMIC || type == BuiltInAtomicType.NOTATION) {
+        if (type == AnySimpleType.getInstance() || type == BuiltInAtomicType.ANY_ATOMIC || type == BuiltInAtomicType.NOTATION) {
             return null; // no constructor is defined for abstract types
         }
         if (resolver == null && type.isNamespaceSensitive()) {
@@ -115,7 +115,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
                 arg -> {
                     AtomicValue value = (AtomicValue) arg.head();
                     if (value == null) {
-                        return EmptySequence.INSTANCE;
+                        return EmptySequence.getInstance();
                     }
                     return UnionConstructorFunction.cast(value, (UnionType) type, resolver, rules);
                 },
@@ -138,7 +138,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         if (type.isAtomicType() && ((AtomicType) type).isAbstract()) {
             return false;
         }
-        return type != AnySimpleType.INSTANCE;
+        return type != AnySimpleType.getInstance();
     }
 
     /**

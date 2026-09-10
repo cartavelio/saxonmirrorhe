@@ -199,7 +199,7 @@ public class FilterExpressionAM extends BinaryExpression
         getLhsExpression().setFiltered(true);
 
         ContextItemStaticInfo baseItemType = visitor.getConfiguration().makeContextItemStaticInfo(
-                        AnyItemType.INSTANCE)      // TODO: improve this
+                AnyItemType.getInstance())      // TODO: improve this
                 .withContextSetter(getSelectExpression());
         getRhs().optimize(visitor, baseItemType);
         // TODO: recognize positional filters such as position() lt 5.

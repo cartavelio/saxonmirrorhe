@@ -217,7 +217,7 @@ namespace Saxon.Impl.XDoc {
                 return new ListIterator.Of<NodeInfo>(attList);
             }
 
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
             
         }
 
@@ -253,7 +253,7 @@ namespace Saxon.Impl.XDoc {
                 return axisIter;
             }
 
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
         
         protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {

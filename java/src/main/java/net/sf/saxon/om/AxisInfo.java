@@ -8,8 +8,6 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.transpile.CSharpUsing;
 import net.sf.saxon.type.PrimitiveUType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
@@ -21,7 +19,6 @@ import java.util.Set;
  * An axis, that is a direction of navigation in the document structure.
  */
 
-@CSharpUsing(code = "Saxon.Hej.type")
 public final class AxisInfo {
 
     /**
@@ -470,7 +467,6 @@ public final class AxisInfo {
         axisTransitions.put(makeKey(origin, axis), target);
     }
 
-    @CSharpReplaceBody(code=" return (((int)origin) << 16) | axis;")
     private static int makeKey(PrimitiveUType origin, int axis) {
         return origin.getBit()<<16 | axis;
     }

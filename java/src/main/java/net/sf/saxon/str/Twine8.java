@@ -317,11 +317,12 @@ public class Twine8 extends UnicodeString {
      */
 
     public boolean equals(Object o) {
-        if (o instanceof Twine8 other) {
+        if (o instanceof Twine8) {
+            Twine8 other = (Twine8) o;
             if (this.length32() != other.length32()) {
                 return false;
             }
-            if (this.cachedHash != 0 && other.cachedHash != 0 & this.cachedHash != other.cachedHash) {
+            if (this.hashCode() != other.hashCode()) {
                 return false;
             }
             return Arrays.equals(bytes, other.bytes);

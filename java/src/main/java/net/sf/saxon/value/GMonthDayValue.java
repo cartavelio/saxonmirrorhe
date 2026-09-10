@@ -47,10 +47,7 @@ public class GMonthDayValue extends GDateValue {
         String date = "2000-" + base + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_MONTH_DAY;
         setLexicalValue(g, BMPString.of(date), true);
-        if (g.error != null) {
-            return g.error;
-        }
-        return new GMonthDayValue(g);
+        return g.error == null ? new GMonthDayValue(g) : g.error;
     }
 
     public GMonthDayValue(byte month, byte day, int tz) {

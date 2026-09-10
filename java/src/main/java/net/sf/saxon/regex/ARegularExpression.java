@@ -9,7 +9,7 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -74,7 +74,7 @@ public class ARegularExpression implements RegularExpression {
 
     public static ARegularExpression compile(String pattern, String flags) {
         try {
-            return new ARegularExpression(StringTool.fromCharSequence(pattern), flags, "XP31", null, null);
+            return new ARegularExpression(BMPString.of(pattern), flags, "XP31", null, null);
         } catch (XPathException e) {
             throw new IllegalArgumentException(e);
         }

@@ -40,7 +40,7 @@ public class ForClauseOuterPush extends TuplePush {
         int pos = 0;
         Item next = iter.next();
         if (next == null) {
-            context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(), EmptySequence.INSTANCE);
+            context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(), EmptySequence.getInstance());
             if (forClause.getPositionVariable() != null) {
                 context.setLocalVariable(forClause.getPositionVariable().getLocalSlotNumber(), Int64Value.ZERO);
             }

@@ -156,7 +156,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the type function(*), that is, any function
      */
 
-    public static ItemType ANY_FUNCTION = new ItemType(AnyFunctionType.INSTANCE) {
+    public static ItemType ANY_FUNCTION = new ItemType(AnyFunctionType.getInstance()) {
 
         @Override
         public boolean matches(XdmItem item) {

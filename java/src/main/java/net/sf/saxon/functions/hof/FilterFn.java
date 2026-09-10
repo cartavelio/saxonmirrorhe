@@ -48,7 +48,7 @@ public class FilterFn extends SystemFunction {
                 if (head != null && head.getBooleanValue()) {
                     return basis;
                 } else {
-                    return EmptyIterator.INSTANCE;
+                    return EmptyIterator.getInstance();
                 }
             }
             case 1: {

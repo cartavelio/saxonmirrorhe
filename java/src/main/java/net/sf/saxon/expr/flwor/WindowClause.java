@@ -393,7 +393,7 @@ public class WindowClause extends Clause {
 
     protected static Sequence makeValue(/*@Nullable*/ Item item) {
         if (item == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         } else {
             return item;
         }

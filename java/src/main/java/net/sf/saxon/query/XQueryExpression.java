@@ -35,8 +35,6 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
-import net.sf.saxon.transpile.CSharpInjectMembers;
-import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.value.SequenceType;
@@ -58,8 +56,6 @@ import java.util.Set;
  * <p>Various methods are provided for evaluating the query, with different options for
  * delivery of the results.</p>
  */
-
-@CSharpInjectMembers(code={"private readonly object _lock = new();"})
 public class XQueryExpression implements Location, ExpressionOwner, TraceableComponent {
 
     protected Expression expression;
@@ -406,21 +402,12 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
     }
 
     protected SequenceIterator getExpressionIterator(XPathContext context) throws XPathException {
-        makePullEvaluator();
-        return pullEvaluator.iterate(context);
-    }
-
-    @CSharpReplaceBody(code="if (System.Threading.Volatile.Read(ref pullEvaluator) == null) {\n"
-            + "                lock (_lock) {\n"
-            + "                    pullEvaluator ??= expression.makeElaborator().elaborateForPull();\n"
-            + "                }\n"
-            + "            }")
-    private void makePullEvaluator() {
         synchronized(this) {
             if (pullEvaluator == null) {
                 pullEvaluator = expression.makeElaborator().elaborateForPull();
             }
         }
+        return pullEvaluator.iterate(context);
     }
 
     /**
@@ -513,24 +500,15 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
 
     protected void processQuery(Outputter dest, XPathContext context) throws XPathException {
         try {
-            makePushEvaluator();
+            synchronized(this) {
+                if (pushEvaluator == null) {
+                    pushEvaluator = expression.makeElaborator().elaborateForPush();
+                }
+            }
             Expression.dispatchTailCall(
                     pushEvaluator.processLeavingTail(dest, context));
         } catch (UncheckedXPathException e) {
             throw e.getXPathException();
-        }
-    }
-
-    @CSharpReplaceBody(code="if (System.Threading.Volatile.Read(ref pushEvaluator) == null) {\n"
-            + "                    lock (_lock) {\n"
-            + "                        pushEvaluator ??= expression.makeElaborator().elaborateForPush();\n"
-            + "                    }\n"
-            + "                }")
-    private void makePushEvaluator() {
-        synchronized(this) {
-            if (pushEvaluator == null) {
-                pushEvaluator = expression.makeElaborator().elaborateForPush();
-            }
         }
     }
 

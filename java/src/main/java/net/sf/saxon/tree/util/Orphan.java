@@ -259,7 +259,7 @@ public final class Orphan implements MutableNodeInfo {
             case Type.DOCUMENT:
                 return StringValue.makeUntypedAtomic(getUnicodeStringValue());
             default:
-                if (typeAnnotation == null || typeAnnotation == Untyped.INSTANCE ||
+                if (typeAnnotation == null || typeAnnotation == Untyped.getInstance() ||
                         typeAnnotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
                     return StringValue.makeUntypedAtomic(getUnicodeStringValue());
                 } else {
@@ -284,7 +284,7 @@ public final class Orphan implements MutableNodeInfo {
     public SchemaType getSchemaType() {
         if (typeAnnotation == null) {
             if (kind == Type.ELEMENT) {
-                return Untyped.INSTANCE;
+                return Untyped.getInstance();
             } else if (kind == Type.ATTRIBUTE) {
                 return BuiltInAtomicType.UNTYPED_ATOMIC;
             }
@@ -460,7 +460,7 @@ public final class Orphan implements MutableNodeInfo {
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        return EmptyIterator.INSTANCE;
+        return EmptyIterator.getInstance();
     }
 
     /**
@@ -472,7 +472,7 @@ public final class Orphan implements MutableNodeInfo {
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.INSTANCE;
+        return EmptyIterator.getInstance();
     }
 
     /**
@@ -484,7 +484,7 @@ public final class Orphan implements MutableNodeInfo {
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.INSTANCE;
+        return EmptyIterator.getInstance();
     }
 
     /**

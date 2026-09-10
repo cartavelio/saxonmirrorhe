@@ -259,7 +259,7 @@ public class ArrayItemType extends AnyFunctionType {
 
     @Override
     public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
-        if (other == INSTANCE) {
+        if (other == AnyFunctionType.getInstance()) {
             return Affinity.SUBSUMED_BY;
         } else if (equals(other)) {
             return Affinity.SAME_TYPE;

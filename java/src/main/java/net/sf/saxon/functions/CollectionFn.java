@@ -22,7 +22,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.ObjectValue;
@@ -173,7 +172,6 @@ public class CollectionFn extends SystemFunction implements Callable {
         //#endif
 
         @Override
-        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public Item next() {
             if (sources.hasNext()) {
                 return new ObjectValue<Resource>(sources.next(), Resource.class);
@@ -232,11 +230,11 @@ public class CollectionFn extends SystemFunction implements Callable {
         // See if the collection has been cached
 
         PackageData packageData = getRetainedStaticContext().getPackageData();
-        SpaceStrippingRule whitespaceRule = NoElementsSpaceStrippingRule.INSTANCE;
+        SpaceStrippingRule whitespaceRule = NoElementsSpaceStrippingRule.getInstance();
         String collectionKey = absoluteURI;
         if (packageData.isXSLT()) {
             whitespaceRule = ((StylesheetPackage) packageData).getSpaceStrippingRule();
-            if (whitespaceRule != NoElementsSpaceStrippingRule.INSTANCE) {
+            if (whitespaceRule != NoElementsSpaceStrippingRule.getInstance()) {
                 collectionKey = ((StylesheetPackage) packageData).getPackageName() +
                         ((StylesheetPackage) packageData).getPackageVersion() +
                         " " +
@@ -268,13 +266,11 @@ public class CollectionFn extends SystemFunction implements Callable {
 
         // In XSLT, worry about whitespace stripping
 
-        if (packageData instanceof StylesheetPackage) {
-            if (whitespaceRule != NoElementsSpaceStrippingRule.INSTANCE) {
-                if (collection instanceof AbstractResourceCollection) {
-                    boolean alreadyStripped = ((AbstractResourceCollection) collection).stripWhitespace(whitespaceRule);
-                    if (alreadyStripped) {
-                        whitespaceRule = null;
-                    }
+        if (packageData instanceof StylesheetPackage && whitespaceRule != NoElementsSpaceStrippingRule.getInstance()) {
+            if (collection instanceof AbstractResourceCollection) {
+                boolean alreadyStripped = ((AbstractResourceCollection)collection).stripWhitespace(whitespaceRule);
+                if (alreadyStripped) {
+                    whitespaceRule = null;
                 }
             }
         }

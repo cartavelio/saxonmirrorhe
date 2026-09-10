@@ -40,7 +40,7 @@ public class DateTimeConstructor extends SystemFunction {
         DateValue arg0 = (DateValue) arguments[0].head();
         TimeValue arg1 = (TimeValue) arguments[1].head();
         if (arg0 == null || arg1 == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
         return DateTimeValue.makeDateTimeValue(arg0, arg1);
     }

@@ -8,7 +8,6 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.s9api.OccurrenceIndicator;
 
 /**
  * This class contains static methods to manipulate the cardinality
@@ -284,60 +283,6 @@ public final class Cardinality {
             default:
                 return StaticProperty.ALLOWS_ZERO;
         }
-    }
-
-    /**
-     * Get the {@link OccurrenceIndicator} value corresponding to an internal cardinality property
-     *
-     * @param cardinality the internal cardinality property, for example {@link StaticProperty#ALLOWS_ONE_OR_MORE}.
-     * @return the corresponding {@link OccurrenceIndicator}
-     */
-
-    public static OccurrenceIndicator getOccurrenceIndicatorForCardinality(int cardinality) {
-        return switch (cardinality) {
-            case StaticProperty.EMPTY -> OccurrenceIndicator.ZERO;
-            case StaticProperty.ALLOWS_ZERO_OR_ONE -> OccurrenceIndicator.ZERO_OR_ONE;
-            case StaticProperty.ALLOWS_ZERO_OR_MORE -> OccurrenceIndicator.ZERO_OR_MORE;
-            case StaticProperty.ALLOWS_ONE -> OccurrenceIndicator.ONE;
-            case StaticProperty.ALLOWS_ONE_OR_MORE -> OccurrenceIndicator.ONE_OR_MORE;
-            default -> OccurrenceIndicator.ZERO_OR_MORE;
-        };
-    }
-
-    /**
-     * Ask whether a given occurrence indicator allows a value of a given size
-     * @param indicator the given occurrence indicator
-     * @param size the given size (number of items)
-     * @return true if the occurrence indicator matches a sequence of the given length
-     */
-    public static boolean occurrenceIndicatorAllows(OccurrenceIndicator indicator, int size) {
-        return switch (indicator) {
-            case ZERO -> size == 0;
-            case ZERO_OR_ONE -> size <= 1;
-            case ZERO_OR_MORE -> true;
-            case ONE -> size == 1;
-            case ONE_OR_MORE -> size > 0;
-            default -> false;
-        };
-    }
-
-    /**
-     * Get the internal StaticProperty value corresponding to an {@link OccurrenceIndicator}
-     *
-     * @param indicator {@link OccurrenceIndicator}
-     * @return the corresponding internal cardinality property, for example {@link StaticProperty#ALLOWS_ONE_OR_MORE}.
-     *
-     */
-
-    public static int staticPropertyFromOccurrenceIndicator(OccurrenceIndicator indicator) {
-        return switch (indicator) {
-            case ZERO -> StaticProperty.EMPTY;
-            case ZERO_OR_ONE -> StaticProperty.ALLOWS_ZERO_OR_ONE;
-            case ZERO_OR_MORE -> StaticProperty.ALLOWS_ZERO_OR_MORE;
-            case ONE -> StaticProperty.ALLOWS_ONE;
-            case ONE_OR_MORE -> StaticProperty.ALLOWS_ONE_OR_MORE;
-            default -> StaticProperty.EMPTY;
-        };
     }
 
 

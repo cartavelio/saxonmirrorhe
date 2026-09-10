@@ -43,7 +43,7 @@ import java.util.function.Supplier;
  */
 public abstract class BuiltInFunctionSet implements FunctionLibrary {
 
-    public static Sequence EMPTY = EmptySequence.INSTANCE;
+    public static Sequence EMPTY = EmptySequence.getInstance();
 
     /**
      * Local names used for cardinality values

@@ -73,7 +73,7 @@ public class NumberFormatter {
                 UnicodeString tok = uFormat.substring(t, i);
                 formatTokens.add(tok);
                 if (first) {
-                    punctuationTokens.add(StringConstants.DOT);
+                    punctuationTokens.add(BMPString.of("."));
                     startsWithPunctuation = false;
                     first = false;
                 }
@@ -94,7 +94,7 @@ public class NumberFormatter {
         }
 
         if (formatTokens.isEmpty()) {
-            formatTokens.add(StringConstants.ONE);
+            formatTokens.add(BMPString.of("1"));
             if (punctuationTokens.size() == 1) {
                 punctuationTokens.add(punctuationTokens.get(0));
             }

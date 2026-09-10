@@ -29,12 +29,13 @@ import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXParseException;
+import org.xml.sax.*;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -46,10 +47,10 @@ public class ParseXml extends SystemFunction implements Callable {
 
     public static OptionsParameter makeOptionsParameter(int version) {
         OptionsParameter options = new OptionsParameter(version);
-        //options.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        options.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         options.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
         options.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        //options.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.INSTANCE);
+        options.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.getInstance());
         options.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
@@ -78,7 +79,7 @@ public class ParseXml extends SystemFunction implements Callable {
             }
         }
         if (input == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
 
         ParseOptions parseOptions = context.getConfiguration().getParseOptions();
@@ -87,7 +88,7 @@ public class ParseXml extends SystemFunction implements Callable {
         if (pd instanceof StylesheetPackage) {
             parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
         } else {
-            parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
+            parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
         }
 
         GroundedValue val = checkedOptions.get("dtd-validation");
@@ -138,40 +139,40 @@ public class ParseXml extends SystemFunction implements Callable {
                 parseOptions = parseOptions.withUseXsiSchemaLocation(true);
             }
 
-//            val = checkedOptions.get("allow-external-entities");
-//            if (val != null && !val.effectiveBooleanValue()) {
-//                //#if CSHARP==false
-//                parseOptions = parseOptions.withEntityResolver(new EntityResolver() {
-//
-//                    @Override
-//                    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-//                        throw new SAXException(
-//                                new XPathException("The parse-xml input references '" + systemId +
-//                                                       "' but external entity expansion is disallowed", "FODC0006"));
-//                    }
-//                });
-//                //#endif
-//            }
+            val = checkedOptions.get("allow-external-entities");
+            if (val != null && !val.effectiveBooleanValue()) {
+                //#if CSHARP==false
+                parseOptions = parseOptions.withEntityResolver(new EntityResolver() {
 
-//            val = checkedOptions.get("entity-expansion-limit").head();
-//            if (val != null) {
-//                //#if CSHARP==false
-//                parseOptions = parseOptions
-//                        .withParserFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false)
-//                        .withParserFeature("http://xml.org/sax/features/external-general-entities", false)
-//                        .withParserFeature("http://xml.org/sax/features/external-parameter-entities", false)
-//                        .withParserFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-//                //#endif
-//            }
+                    @Override
+                    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                        throw new SAXException(
+                                new XPathException("The parse-xml input references '" + systemId +
+                                                       "' but external entity expansion is disallowed", "FODC0006"));
+                    }
+                });
+                //#endif
+            }
+
+            val = checkedOptions.get("entity-expansion-limit").head();
+            if (val != null) {
+                //#if CSHARP==false
+                parseOptions = parseOptions
+                        .withParserFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false)
+                        .withParserFeature("http://xml.org/sax/features/external-general-entities", false)
+                        .withParserFeature("http://xml.org/sax/features/external-parameter-entities", false)
+                        .withParserFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                //#endif
+            }
 
             val = checkedOptions.get("strip-space");
             if (val != null) {
                 parseOptions = parseOptions.withSpaceStrippingRule(
                         val.effectiveBooleanValue()
                                 ? validating
-                                    ? IgnorableSpaceStrippingRule.INSTANCE
-                                    : AllElementsSpaceStrippingRule.INSTANCE
-                                : NoElementsSpaceStrippingRule.INSTANCE);
+                                    ? IgnorableSpaceStrippingRule.getInstance()
+                                    : AllElementsSpaceStrippingRule.getInstance()
+                                : NoElementsSpaceStrippingRule.getInstance());
             }
 
             val = checkedOptions.get("xinclude");

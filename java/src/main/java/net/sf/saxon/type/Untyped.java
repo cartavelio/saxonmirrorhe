@@ -31,6 +31,17 @@ public enum Untyped implements ComplexType {
     INSTANCE;
 
     /**
+     * Get the singular instance of this class
+     *
+     * @return the singular object representing xs:anyType
+     */
+
+    /*@NotNull*/
+    public static Untyped getInstance() {
+        return INSTANCE;
+    }
+
+    /**
      * Get the validation status - always valid
      */
     @Override
@@ -242,7 +253,7 @@ public enum Untyped implements ComplexType {
 
     /*@NotNull*/
     public SchemaType getKnownBaseType() throws IllegalStateException {
-        return AnyType.INSTANCE;
+        return AnyType.getInstance();
     }
 
     /**
@@ -266,7 +277,7 @@ public enum Untyped implements ComplexType {
     /*@NotNull*/
     @Override
     public SchemaType getBaseType() {
-        return AnyType.INSTANCE;
+        return AnyType.getInstance();
     }
 
     /**

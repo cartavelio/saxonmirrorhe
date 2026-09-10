@@ -47,10 +47,7 @@ public class GMonthValue extends GDateValue {
         String date = "2000-" + base + "-01" + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_MONTH;
         setLexicalValue(g, BMPString.of(date), true);
-        if (g.error != null) {
-            return g.error;
-        }
-        return new GMonthValue(g);
+        return g.error == null ? new GMonthValue(g) : g.error;
     }
 
     public GMonthValue(byte month, int tz) {

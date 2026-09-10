@@ -102,13 +102,13 @@ public class WhitespaceStrippingPolicy {
         this.policy = policy;
         switch (policy) {
             case Whitespace.ALL:
-                stripperRules = AllElementsSpaceStrippingRule.INSTANCE;
+                stripperRules = AllElementsSpaceStrippingRule.getInstance();
                 break;
             case Whitespace.NONE:
-                stripperRules = NoElementsSpaceStrippingRule.INSTANCE;
+                stripperRules = NoElementsSpaceStrippingRule.getInstance();
                 break;
             case Whitespace.IGNORABLE:
-                stripperRules = IgnorableSpaceStrippingRule.INSTANCE;
+                stripperRules = IgnorableSpaceStrippingRule.getInstance();
                 break;
             default:
                 break;

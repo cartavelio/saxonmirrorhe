@@ -33,6 +33,7 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
 
     public SingletonIterator(Item value) {
         assert value != null;
+        //Instrumentation.count("SINGLETON ITERATOR");
         this.item = value;
     }
 
@@ -47,7 +48,7 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
     /*@NotNull*/
     public static SequenceIterator makeIterator(Item item) {
         if (item == null) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return new SingletonIterator(item);
         }
@@ -134,7 +135,7 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
 
     @Override
     public GroundedValue getResidue() {
-        return currentPosition < 0 ? item : EmptySequence.INSTANCE;
+        return currentPosition < 0 ? item : EmptySequence.getInstance();
     }
 
 }

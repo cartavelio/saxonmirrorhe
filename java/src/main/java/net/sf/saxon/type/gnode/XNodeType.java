@@ -76,7 +76,7 @@ public abstract class XNodeType extends GNodeType {
      */
 
     public SchemaType getContentType() {
-        return AnyType.INSTANCE;
+        return AnyType.getInstance();
     }
 
     /**

@@ -107,7 +107,7 @@ public class StaxBridge implements PullProvider {
     @Override
     public void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = new PipelineConfiguration(pipe);
-        ignoreIgnorable = pipe.getConfiguration().getParseOptions().getSpaceStrippingRule() != NoElementsSpaceStrippingRule.INSTANCE;
+        ignoreIgnorable = pipe.getConfiguration().getParseOptions().getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance();
     }
 
     /**
@@ -180,7 +180,7 @@ public class StaxBridge implements PullProvider {
 
                     int attCount = reader.getAttributeCount();
                     if (attCount == 0) {
-                        attributes = EmptyAttributeMap.INSTANCE;
+                        attributes = EmptyAttributeMap.getInstance();
                     } else {
                         List<AttributeInfo> attList = new ArrayList<>();
                         for (int i=0; i<attCount; i++) {
@@ -573,7 +573,7 @@ public class StaxBridge implements PullProvider {
     @Override
     public SchemaType getSchemaType() {
         if (currentEvent == PullEvent.START_ELEMENT) {
-            return Untyped.INSTANCE;
+            return Untyped.getInstance();
         } else if (currentEvent == PullEvent.ATTRIBUTE) {
             return BuiltInAtomicType.UNTYPED_ATOMIC;
         } else {

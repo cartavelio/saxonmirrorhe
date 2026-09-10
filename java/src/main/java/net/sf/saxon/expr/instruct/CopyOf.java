@@ -303,7 +303,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     TypeHierarchy th = config.getTypeHierarchy();
                     Affinity e = th.relationship(in, NodeKindType.ELEMENT);
                     if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.INSTANCE, false, config);
+                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
                     }
                     Affinity a = th.relationship(in, NodeKindType.ATTRIBUTE);
                     if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
@@ -314,7 +314,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         if (in instanceof NodeTest) {
                             return AnyXNodeType.getInstance();
                         } else {
-                            return AnyItemType.INSTANCE;
+                            return AnyItemType.getInstance();
                         }
                     } else {
                         // it can't be an element or attribute, so stripping type annotations can't affect it
@@ -336,11 +336,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                     try {
                                         return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), elem.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.INSTANCE, false, config);
+                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
                                     }
                                 } else {
                                     // Although there is no element declaration now, there might be one at run-time
-                                    return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.INSTANCE, false, config);
+                                    return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
                                 }
                             }
                             Affinity a = th.relationship(in, NodeKindType.ATTRIBUTE);
@@ -351,11 +351,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                     try {
                                         return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), attr.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.INSTANCE, false, config);
+                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
                                     }
                                 } else {
                                     // Although there is no attribute declaration now, there might be one at run-time
-                                    return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.INSTANCE, false, config);
+                                    return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
                                 }
                             }
                         } else {
@@ -372,7 +372,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     } else if (in instanceof AtomicType) {
                         return in;
                     } else {
-                        return AnyItemType.INSTANCE;
+                        return AnyItemType.getInstance();
                     }
             }
         }
@@ -627,7 +627,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             case Type.DOCUMENT: {
                 ParseOptions options = new ParseOptions()
                         .withSchemaValidationMode(validation)
-                        .withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE)
+                        .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance())
                         .withTopLevelType(schemaType)
                         .withErrorReporter(context.getErrorReporter());
                 config.prepareValidationReporting(context, options);
@@ -705,10 +705,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                               boolean rejectDuplicates)
             throws XPathException {
         int opt = rejectDuplicates ? ReceiverOption.REJECT_DUPLICATES : ReceiverOption.NONE;
+        UnicodeString value = source.getUnicodeStringValue();
         Schema schema = instruction.getRetainedStaticContext().getImportedSchema();
         SimpleType annotation = validateAttribute(schema, source, schemaType, validation, context);
         try {
-            output.attribute(NameOfNode.makeName(source), annotation, source.getStringValue(), instruction.getLocation(), opt);
+            output.attribute(NameOfNode.makeName(source), annotation, value.toString(), instruction.getLocation(), opt);
         } catch (XPathException e) {
             if (instruction.getPackageData().getHostLanguage() == HostLanguage.XQUERY && e.hasErrorCode("XTTE0950")) {
                 e.setErrorCode("XQTY0086");
@@ -732,7 +733,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
     public static SimpleType validateAttribute(
             Schema schema, NodeInfo source, SimpleType schemaType, int validation, XPathContext context) throws XPathException {
-
+        UnicodeString value = source.getUnicodeStringValue();
         SimpleType annotation = BuiltInAtomicType.UNTYPED_ATOMIC;
         if (schemaType != null) {
             if (schemaType.isNamespaceSensitive()) {
@@ -741,9 +742,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 nsErr.setErrorCode("XTTE1545");
                 throw nsErr;
             }
-            UnicodeString value = source.getUnicodeStringValue();
             ValidationFailure valErr = schemaType.validateContent(
-                    value, DummyNamespaceResolver.INSTANCE, context.getConfiguration().getConversionRules());
+                    value, DummyNamespaceResolver.getInstance(), context.getConfiguration().getConversionRules());
             if (valErr != null) {
                 valErr.setMessage("Attribute being copied does not match the required type. " +
                                        valErr.getMessage());
@@ -752,7 +752,6 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             }
             annotation = schemaType;
         } else if (validation == Validation.STRICT || validation == Validation.LAX) {
-            UnicodeString value = source.getUnicodeStringValue();
             try {
                 annotation = schema.validateAttribute(NameOfNode.makeName(source).getStructuredQName(), value, validation);
             } catch (ValidationException e) {

@@ -39,17 +39,13 @@ public class XSLT30FunctionSet extends BuiltInFunctionSet {
 
         importFunctionSet(correspondingXPathFunctionSet());
 
-        register("accumulator-after", 1, e -> {
-            return e.populate(AccumulatorFn.AccumulatorAfter::new, AnyItemType.getInstance(),
-                                  STAR, LATE | CITEM)
-                    .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        });
+        register("accumulator-after", 1, e -> e.populate( AccumulatorFn.AccumulatorAfter::new, AnyItemType.getInstance(),
+                 STAR, LATE | CITEM)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("accumulator-before", 1, e -> {
-            return e.populate(AccumulatorFn.AccumulatorBefore::new, AnyItemType.getInstance(),
-                                  STAR, LATE | CITEM)
-                    .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        });
+        register("accumulator-before", 1, e -> e.populate( AccumulatorFn.AccumulatorBefore::new, AnyItemType.getInstance(),
+                 STAR, LATE | CITEM)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         register("available-system-properties", 0, e -> e.populate( AvailableSystemProperties::new, BuiltInAtomicType.QNAME,
                  STAR, LATE));
@@ -60,16 +56,12 @@ public class XSLT30FunctionSet extends BuiltInFunctionSet {
 
         register("current-grouping-key", 0, e -> e.populate( CurrentGroupingKey::new, BuiltInAtomicType.ANY_ATOMIC, STAR, LATE));
 
-        register("current-merge-group", 0, e -> {
-            return e.populate(CurrentMergeGroup::new, AnyItemType.getInstance(),
-                                  STAR, LATE);
-        });
+        register("current-merge-group", 0, e -> e.populate( CurrentMergeGroup::new, AnyItemType.getInstance(),
+                 STAR, LATE));
 
-        register("current-merge-group", 1, e -> {
-            return e.populate(CurrentMergeGroup::new, AnyItemType.getInstance(),
-                                  STAR, LATE)
-                    .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        });
+        register("current-merge-group", 1, e -> e.populate( CurrentMergeGroup::new, AnyItemType.getInstance(),
+                 STAR, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         register("current-merge-key", 0, e -> e.populate( CurrentMergeKey::new, BuiltInAtomicType.ANY_ATOMIC,
                  STAR, LATE));

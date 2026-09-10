@@ -44,7 +44,7 @@ public abstract class ScalarSystemFunction extends SystemFunction {
      */
 
     public Sequence resultWhenEmpty() {
-        return EmptySequence.INSTANCE;
+        return EmptySequence.getInstance();
     }
 
     /**

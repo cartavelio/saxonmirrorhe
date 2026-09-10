@@ -70,7 +70,7 @@ public class SequenceTool {
 
     public static Sequence toMemoSequence(SequenceIterator iterator) throws XPathException {
         if (iterator instanceof EmptyIterator) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         } else if (iterator instanceof GroundedIterator && ((GroundedIterator) iterator).isActuallyGrounded()) {
             try {
                 return toGroundedValue(iterator);
@@ -435,16 +435,16 @@ public class SequenceTool {
                     } else {
                         type = Type.getCommonSuperType(type, Type.getItemType(item, th), th);
                     }
-                    if (type == AnyItemType.INSTANCE) {
+                    if (type == AnyItemType.getInstance()) {
                         break;
                     }
                 }
                 return type == null ? ErrorType.getInstance() : type;
             } catch (UncheckedXPathException err) {
-                return AnyItemType.INSTANCE;
+                return AnyItemType.getInstance();
             }
         } else {
-            return AnyItemType.INSTANCE;
+            return AnyItemType.getInstance();
         }
     }
 
@@ -578,7 +578,7 @@ public class SequenceTool {
     public static AttributeMap attributeMapFromList(List<AttributeInfo> list) {
         int n = list.size();
         if (n == 0) {
-            return EmptyAttributeMap.INSTANCE;
+            return EmptyAttributeMap.getInstance();
         } else if (n == 1) {
             return SingletonAttributeMap.of(list.get(0));
         } else if (n <= SmallAttributeMap.LIMIT) {
@@ -596,7 +596,7 @@ public class SequenceTool {
 
     public static GroundedValue itemOrEmpty(Item item) {
         if (item == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         } else {
             return item;
         }

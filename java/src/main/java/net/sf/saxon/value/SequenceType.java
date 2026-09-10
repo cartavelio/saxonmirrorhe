@@ -13,10 +13,10 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.type.*;
 
 import java.util.Optional;
 
@@ -37,19 +37,22 @@ public final class SequenceType {
      * A type that allows any sequence of items
      */
 
-    public static final SequenceType ANY_SEQUENCE = AnyItemType.getInstance().zeroOrMore();
+    public static final SequenceType ANY_SEQUENCE =
+            AnyItemType.getInstance().zeroOrMore();
 
     /**
      * A type that allows exactly one item, of any kind
      */
 
-    public static final SequenceType SINGLE_ITEM = AnyItemType.getInstance().one();
+    public static final SequenceType SINGLE_ITEM =
+            AnyItemType.getInstance().one();
 
     /**
      * A type that allows zero or one items, of any kind
      */
 
-    public static final SequenceType OPTIONAL_ITEM = AnyItemType.getInstance().zeroOrOne();
+    public static final SequenceType OPTIONAL_ITEM =
+            AnyItemType.getInstance().zeroOrOne();
 
     /**
      * A type that allows exactly one atomic value
@@ -398,17 +401,17 @@ public final class SequenceType {
      * A type that allows a single function item
      */
 
-    public static final SequenceType SINGLE_FUNCTION = one(AnyFunctionType.INSTANCE);
+    public static final SequenceType SINGLE_FUNCTION = one(AnyFunctionType.ANY_FUNCTION);
 
     /**
      * A type that allows a sequence of zero or one function items
      */
-    public static final SequenceType OPTIONAL_FUNCTION_ITEM = optional(AnyFunctionType.INSTANCE);
+    public static final SequenceType OPTIONAL_FUNCTION_ITEM = optional(AnyFunctionType.getInstance());
 
     /**
      * A type that allows a sequence of zero or mode function items
      */
-    public static final SequenceType FUNCTION_ITEM_SEQUENCE = zeroOrMore(AnyFunctionType.INSTANCE);
+    public static final SequenceType FUNCTION_ITEM_SEQUENCE = zeroOrMore(AnyFunctionType.getInstance());
 
     /**
      * A type that allows a single map item
@@ -429,7 +432,8 @@ public final class SequenceType {
      * A type that only permits a non-empty sequence
      */
 
-    public static final SequenceType NON_EMPTY_SEQUENCE = makeSequenceType(AnyItemType.INSTANCE, StaticProperty.ALLOWS_ONE_OR_MORE);
+    public static final SequenceType NON_EMPTY_SEQUENCE =
+            makeSequenceType(AnyItemType.getInstance(), StaticProperty.ALLOWS_ONE_OR_MORE);
 
     /**
      * A type that has no instances
@@ -465,22 +469,20 @@ public final class SequenceType {
 
     public static SequenceType makeSequenceType(ItemType primaryType, int cardinality) {
 
-        if (primaryType instanceof ItemTypeWithSequenceTypeCache bat) {
+        if (primaryType instanceof ItemTypeWithSequenceTypeCache) {
+            ItemTypeWithSequenceTypeCache bat = (ItemTypeWithSequenceTypeCache) primaryType;
             switch (cardinality) {
-                case StaticProperty.EXACTLY_ONE -> {
+                case StaticProperty.EXACTLY_ONE:
                     return bat.one();
-                }
-                case StaticProperty.ALLOWS_ZERO_OR_ONE -> {
+                case StaticProperty.ALLOWS_ZERO_OR_ONE:
                     return bat.zeroOrOne();
-                }
-                case StaticProperty.ALLOWS_ZERO_OR_MORE -> {
+                case StaticProperty.ALLOWS_ZERO_OR_MORE:
                     return bat.zeroOrMore();
-                }
-                case StaticProperty.ALLOWS_ONE_OR_MORE -> {
+                case StaticProperty.ALLOWS_ONE_OR_MORE:
                     return bat.oneOrMore();
-                }
-                default -> {
-                }
+                default:
+                    break;
+                    // fall through
             }
         }
         if (cardinality == StaticProperty.ALLOWS_ZERO) {
@@ -488,34 +490,6 @@ public final class SequenceType {
         }
         return new SequenceType(primaryType, cardinality);
     }
-
-//    /**
-//     * Construct an instance of SequenceType. This is a factory method: it maintains a
-//     * pool of SequenceType objects to reduce the amount of object creation.
-//     *
-//     * @param primaryType The item type
-//     * @param indicator The required cardinality.
-//     * @return the SequenceType (either a newly created object, or an existing one from the cache)
-//     */
-
-//    public static SequenceType makeSequenceType(ItemType primaryType, OccurrenceIndicator indicator) {
-//        int card = Cardinality.f
-//            return switch (indicator) {
-//                case ONE -> one(p);
-//                case ZERO_OR_ONE -> bat.zeroOrOne();
-//                }
-//                case ZERO_OR_MORE -> {
-//                    return bat.zeroOrMore();
-//                }
-//                case ONE_OR_MORE -> {
-//                    return bat.oneOrMore();
-//                }
-//                case ZERO -> {
-//                    return EMPTY_SEQUENCE;
-//                }
-//            }
-//        }
-//    }
 
     public static SequenceType one(ItemType itemType) {
         return new SequenceType(itemType, StaticProperty.EXACTLY_ONE);
@@ -527,10 +501,6 @@ public final class SequenceType {
 
     public static SequenceType zeroOrMore(ItemType itemType) {
         return new SequenceType(itemType, StaticProperty.ALLOWS_ZERO_OR_MORE);
-    }
-
-    public static SequenceType oneOrMore(ItemType itemType) {
-        return new SequenceType(itemType, StaticProperty.ALLOWS_ONE_OR_MORE);
     }
 
     /**
@@ -563,11 +533,6 @@ public final class SequenceType {
 
     public boolean matches(GroundedValue value, TypeHierarchy th) {
         int count = 0;
-
-        if (value instanceof Item it) {
-            return primaryType.matches(it, th);
-        }
-
         SequenceIterator iter = value.iterate();
         for (Item item; (item = iter.next()) != null; ) {
             count++;

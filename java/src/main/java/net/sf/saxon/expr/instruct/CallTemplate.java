@@ -300,7 +300,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
     @Override
     public ItemType getItemType() {
         if (template == null) {
-            return AnyItemType.INSTANCE;
+            return AnyItemType.getInstance();
         } else {
             return template.getRequiredType().getPrimaryType();
         }

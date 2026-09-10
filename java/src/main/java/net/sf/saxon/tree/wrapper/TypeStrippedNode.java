@@ -102,7 +102,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
     @Override
     public SchemaType getSchemaType() {
         if (getNodeKind() == Type.ELEMENT) {
-            return Untyped.INSTANCE;
+            return Untyped.getInstance();
         } else {
             return BuiltInAtomicType.UNTYPED_ATOMIC;
         }

@@ -56,7 +56,7 @@ public class DocAvailable extends SystemFunction  {
                 if (pd instanceof StylesheetPackage) {
                     parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
                 } else {
-                    parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
+                    parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
                 }
 
 

@@ -30,8 +30,6 @@ public class StringConstants {
     public static final UnicodeString ZERO = new UnicodeChar('0');
     public static final UnicodeString NULL = new Twine8(bytes("null"));
     public static final UnicodeString ZERO_TO_NINE = new Twine8(bytes("0123456789"));
-    public static final UnicodeString DOT = new UnicodeChar('.');
-    public static final UnicodeString COMMA = new UnicodeChar(',');
 
     public static final UnicodeString MIN_LONG = new Twine8(bytes("-9223372036854775808"));
     public static final UnicodeString POINT_ZERO = new Twine8(bytes(".0"));

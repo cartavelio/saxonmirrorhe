@@ -193,7 +193,7 @@ namespace Saxon.Impl.Dom {
 
         protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
             if (!node.HasChildNodes) {
-                return EmptyIterator.INSTANCE;
+                return EmptyIterator.getInstance();
             }
             List<NodeInfo> childList = new List<NodeInfo>();
             int indexPosition = 0;

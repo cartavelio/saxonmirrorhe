@@ -54,7 +54,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo xml = (NodeInfo) arguments[0].head();
         if (xml == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
 
         Options options = getOptions(context, arguments);
@@ -72,7 +72,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
         if (getArity() > 1) {
             MapItem suppliedOptions = (MapItem) arguments[1].head();
             if (suppliedOptions == null) {
-                suppliedOptions = EmptyMap.INSTANCE_40;
+                suppliedOptions = EmptyMap.getInstance(40);
             }
             int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             Map<String, GroundedValue> options =

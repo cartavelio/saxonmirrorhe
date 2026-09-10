@@ -14,7 +14,6 @@ import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.str.Latin1;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -85,12 +84,10 @@ public class JSONResource implements Resource {
         }
         Map<String, GroundedValue> options = new HashMap<>();
         options.put("liberal", BooleanValue.FALSE);
-        options.put("duplicates", SV_USE_FIRST);
+        options.put("duplicates", StringValue.bmp("use-first"));
         options.put("escape", BooleanValue.FALSE);
         return item = ParseJsonFn.parse(jsonStr.codePoints(), options, context);
     }
-
-    private final static StringValue SV_USE_FIRST = new StringValue(Latin1.of("use-first"));
 
     /**
      * Get the media type (MIME type) of the resource if known

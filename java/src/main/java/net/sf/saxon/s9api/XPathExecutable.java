@@ -14,7 +14,6 @@ import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.value.Cardinality;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -114,7 +113,7 @@ public class XPathExecutable {
 
     public OccurrenceIndicator getResultCardinality() {
         int card = exp.getInternalExpression().getCardinality();
-        return Cardinality.getOccurrenceIndicatorForCardinality(card);
+        return OccurrenceIndicator.getOccurrenceIndicator(card);
     }
 
     /**
@@ -172,15 +171,17 @@ public class XPathExecutable {
      *         <code>allowUndeclaredVariables</code> option is set), the returned type will be
      *         {@link OccurrenceIndicator#ZERO_OR_MORE}.</p>
      *         <p>If no variable with the specified QName has been declared either explicitly or implicitly,
-     *         the method returns {@link OccurrenceIndicator#ZERO_OR_MORE}.</p>
+     *         the method returns null.</p>
      * @since 9.2
      */
 
     public OccurrenceIndicator getRequiredCardinalityForVariable(QName variableName) {
         XPathVariable var = env.getExternalVariable(variableName.getStructuredQName());
-        return var == null
-                ? OccurrenceIndicator.ZERO_OR_MORE
-                : Cardinality.getOccurrenceIndicatorForCardinality(var.getRequiredType().getCardinality());
+        if (var == null) {
+            return null;
+        } else {
+            return OccurrenceIndicator.getOccurrenceIndicator(var.getRequiredType().getCardinality());
+        }
     }
 
     /**

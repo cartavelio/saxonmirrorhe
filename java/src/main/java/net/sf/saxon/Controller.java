@@ -882,7 +882,8 @@ public class Controller implements ContextOriginator {
     protected boolean isStylesheetContainingStripSpace() {
         SpaceStrippingRule rule;
         return executable instanceof PreparedStylesheet &&
-                (rule = ((PreparedStylesheet) executable).getTopLevelPackage().getSpaceStrippingRule()) != null && rule != NoElementsSpaceStrippingRule.INSTANCE;
+                (rule = ((PreparedStylesheet) executable).getTopLevelPackage().getSpaceStrippingRule()) != null &&
+                rule != NoElementsSpaceStrippingRule.getInstance();
     }
 
     /**
@@ -931,15 +932,15 @@ public class Controller implements ContextOriginator {
      */
 
     public SpaceStrippingRule getSpaceStrippingRule() {
-        if (config.getParseOptions().getSpaceStrippingRule() == AllElementsSpaceStrippingRule.INSTANCE) {
-            return AllElementsSpaceStrippingRule.INSTANCE;
+        if (config.getParseOptions().getSpaceStrippingRule() == AllElementsSpaceStrippingRule.getInstance()) {
+            return AllElementsSpaceStrippingRule.getInstance();
         } else if (executable instanceof PreparedStylesheet) {
             SpaceStrippingRule rule = ((PreparedStylesheet) executable).getTopLevelPackage().getSpaceStrippingRule();
             if (rule != null) {
                 return rule;
             }
         }
-        return NoElementsSpaceStrippingRule.INSTANCE;
+        return NoElementsSpaceStrippingRule.getInstance();
     }
 
     /**
@@ -954,23 +955,21 @@ public class Controller implements ContextOriginator {
      * @throws XPathException if an error occurs
      */
     public void registerDocument(TreeInfo doc, DocumentKey uri) throws XPathException {
-        if (!getExecutable().isSchemaAware()) {
-            if (!Untyped.INSTANCE.equals(doc.getRootNode().getSchemaType())) {
-                boolean isXSLT = getExecutable().getHostLanguage() == HostLanguage.XSLT;
-                String message;
-                if (isXSLT) {
-                    message = "The source document has been schema-validated, but" +
-                            " the stylesheet is not schema-aware. A stylesheet is schema-aware if" +
-                            " either (a) it contains an xsl:import-schema declaration, or (b) the stylesheet compiler" +
-                            " was configured to be schema-aware.";
-                } else {
-                    message = "The source document has been schema-validated, but" +
-                            " the query is not schema-aware. A query is schema-aware if" +
-                            " either (a) it contains an 'import schema' declaration, or (b) the query compiler" +
-                            " was configured to be schema-aware.";
-                }
-                throw new XPathException(message);
+        if (!getExecutable().isSchemaAware() && !Untyped.getInstance().equals(doc.getRootNode().getSchemaType())) {
+            boolean isXSLT = getExecutable().getHostLanguage() == HostLanguage.XSLT;
+            String message;
+            if (isXSLT) {
+                message = "The source document has been schema-validated, but" +
+                        " the stylesheet is not schema-aware. A stylesheet is schema-aware if" +
+                        " either (a) it contains an xsl:import-schema declaration, or (b) the stylesheet compiler" +
+                        " was configured to be schema-aware.";
+            } else {
+                message = "The source document has been schema-validated, but" +
+                        " the query is not schema-aware. A query is schema-aware if" +
+                        " either (a) it contains an 'import schema' declaration, or (b) the query compiler" +
+                        " was configured to be schema-aware.";
             }
+            throw new XPathException(message);
         }
         if (uri != null) {
             sourceDocumentPool.add(doc, uri);
@@ -1329,7 +1328,7 @@ public class Controller implements ContextOriginator {
             ((TinyBuilder) sourceBuilder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
         }
         Receiver r = sourceBuilder;
-        SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.INSTANCE;
+        SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.getInstance();
         if (config.isStripsAllWhiteSpace() || isStylesheetContainingStripSpace() ||
                 validationMode == Validation.STRICT || validationMode == Validation.LAX) {
             r = makeStripper(sourceBuilder);
@@ -1555,9 +1554,9 @@ public class Controller implements ContextOriginator {
      */
 
     public Function<SequenceIterator, FocusTrackingIterator> getFocusTrackerFactory(boolean multithreaded) {
-        return //multithreaded && multiThreadedFocusTrackerFactory != null ?
-                multiThreadedFocusTrackerFactory; //:
-                //focusTrackerFactory;
+        return multithreaded && multiThreadedFocusTrackerFactory != null ?
+                multiThreadedFocusTrackerFactory :
+                focusTrackerFactory;
     }
 
     /**

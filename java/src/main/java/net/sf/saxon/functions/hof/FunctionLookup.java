@@ -159,7 +159,7 @@ public class FunctionLookup extends ContextAccessorFunction {
         IntegerValue arity = (IntegerValue) arguments[1].head();
         FunctionItem fi = lookup(qname.getStructuredQName(), (int) arity.longValue(), c);
         if (fi == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
         Component target = fi instanceof UserFunction ? ((UserFunction) fi).getDeclaringComponent() : null;
         if (fi instanceof ContextAccessorFunction) {

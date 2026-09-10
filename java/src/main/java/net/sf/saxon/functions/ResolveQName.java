@@ -35,7 +35,7 @@ public class ResolveQName extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue lex = (AtomicValue) arguments[0].head();
         if (lex == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         } else {
             return resolveQName(lex.getStringValue(), (NodeInfo) arguments[1].head());
         }

@@ -109,7 +109,7 @@ public class Stripper extends ProxyReceiver {
         } else if (elementStrip == ALWAYS_STRIP) {
             preserve |= ALWAYS_STRIP;
         }
-        if (type != Untyped.INSTANCE) {
+        if (type != Untyped.getInstance()) {
             if (preserve == 0) {
                 // if the element has simple content, whitespace stripping is disabled
                 if (type.isSimpleType() || ((ComplexType) type).isSimpleContent()) {

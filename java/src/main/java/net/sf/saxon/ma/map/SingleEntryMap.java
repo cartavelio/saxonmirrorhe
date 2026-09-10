@@ -18,7 +18,8 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A map comprising a single key-value pair.
@@ -103,7 +104,9 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        return Collections.singleton(new KeyValuePair(key, value));
+        List<KeyValuePair> list = new ArrayList<>(1);
+        list.add(new KeyValuePair(key, value));
+        return list;
     }
 
     /**

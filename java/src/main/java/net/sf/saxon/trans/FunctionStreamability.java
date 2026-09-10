@@ -12,11 +12,47 @@ package net.sf.saxon.trans;
  */
 
 public enum FunctionStreamability {
-    UNCLASSIFIED,
-    ABSORBING,
-    INSPECTION,
-    FILTER,
-    SHALLOW_DESCENT,
-    DEEP_DESCENT,
-    ASCENT
+    UNCLASSIFIED("unclassified"),
+    ABSORBING("absorbing"),
+    INSPECTION("inspection"),
+    FILTER("filter"),
+    SHALLOW_DESCENT("shallow-descent"),
+    DEEP_DESCENT("deep-descent"),
+    ASCENT("ascent");
+
+    public String streamabilityStr;
+
+    public boolean isConsuming() {
+        return this == ABSORBING || this == SHALLOW_DESCENT || this == DEEP_DESCENT;
+    }
+
+    public boolean isStreaming() {
+        return this != UNCLASSIFIED;
+    }
+
+    FunctionStreamability(String v) {
+        streamabilityStr = v;
+    }
+
+    public static FunctionStreamability of(String v) {
+        switch (v) {
+            case "unclassified":
+                return UNCLASSIFIED;
+            case "absorbing":
+                return ABSORBING;
+            case "inspection":
+                return INSPECTION;
+            case "filter":
+                return FILTER;
+            case "shallow-descent":
+                return SHALLOW_DESCENT;
+            case "deep-descent":
+                return DEEP_DESCENT;
+            case "ascent":
+                return ASCENT;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
 }

@@ -1403,9 +1403,9 @@ public class DOMTest {
             domWriter.setPipelineConfiguration(config.makePipelineConfiguration());
             domWriter.open();
             domWriter.startDocument(ReceiverOption.NONE);
-            AttributeMap atts = EmptyAttributeMap.INSTANCE;
+            AttributeMap atts = EmptyAttributeMap.getInstance();
             atts = atts.put(new AttributeInfo(new NoNamespaceName("id"), BuiltInAtomicType.UNTYPED_ATOMIC, "iii", Loc.NONE, ReceiverOption.IS_ID));
-            domWriter.startElement(new NoNamespaceName("root"), Untyped.INSTANCE,
+            domWriter.startElement(new NoNamespaceName("root"), Untyped.getInstance(),
                                    atts, NamespaceMap.emptyMap(),
                                    Loc.NONE, ReceiverOption.NONE);
             domWriter.endElement();

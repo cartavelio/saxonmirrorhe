@@ -144,7 +144,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
         public GroundedValue call(XPathContext context, Sequence[] args) throws XPathException {
             DoubleValue in = (DoubleValue) args[0].head();
             if (in == null) {
-                return EmptySequence.INSTANCE;
+                return EmptySequence.getInstance();
             } else {
                 return new DoubleValue(method.apply(in.getDoubleValue()));
             }
@@ -170,7 +170,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
             DoubleValue x = (DoubleValue) args[0].head();
             DoubleValue result;
             if (x == null) {
-                return EmptySequence.INSTANCE;
+                return EmptySequence.getInstance();
             } else {
                 double dx = x.getDoubleValue();
                 if (dx == 1) {

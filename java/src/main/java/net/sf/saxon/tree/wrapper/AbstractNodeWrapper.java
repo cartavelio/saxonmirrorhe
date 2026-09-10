@@ -308,7 +308,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
             case Type.DOCUMENT:
             case Type.ATTRIBUTE:
             case Type.NAMESPACE:
-                return EmptyIterator.INSTANCE;
+                return EmptyIterator.getInstance();
             default:
                 return iterateSiblings(predicate, true);
         }
@@ -327,7 +327,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
             case Type.DOCUMENT:
             case Type.ATTRIBUTE:
             case Type.NAMESPACE:
-                return EmptyIterator.INSTANCE;
+                return EmptyIterator.getInstance();
             default:
                 return iterateSiblings(predicate, false);
         }

@@ -206,7 +206,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
         } else {
             useDefaultCollation = false;
             if (lang instanceof StringLiteral) {
-                UnicodeString s = ((StringLiteral) lang).getUnicodeString();
+                UnicodeString s = ((StringLiteral) lang).getString();
                 if (!s.isEmpty()) {
                     ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(s);
                     if (vf != null) {

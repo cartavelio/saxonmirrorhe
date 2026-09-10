@@ -13,7 +13,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.EmptyAtomicIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.UnparsedTextIterator;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -72,7 +72,7 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
 
     private SequenceIterator evalUnparsedTextLines(StringValue hrefVal, String encoding, XPathContext context) throws XPathException {
         if (hrefVal == null) {
-            return EmptyAtomicIterator.INSTANCE;
+            return EmptyIterator.ofAtomic();
         }
         String href = hrefVal.getStringValue();
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);

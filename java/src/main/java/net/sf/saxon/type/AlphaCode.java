@@ -16,7 +16,6 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.qname.*;
-import net.sf.saxon.str.UnicodeChar;
 import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -586,9 +585,6 @@ public class AlphaCode {
 //        return parser.parseType(null);
 //    }
 
-    private final static StringValue SV_O = new StringValue(new UnicodeChar('o'));
-    private final static StringValue SV_P = new StringValue(new UnicodeChar('p'));
-
     /**
      * Serialize the XDM map representation of an alphacode
      *
@@ -600,10 +596,10 @@ public class AlphaCode {
         // TODO: may need updating. Used when running the XX compiler under Saxon/J
         StringBuilder out = new StringBuilder();
 
-        StringValue indicator = (StringValue) map.get(SV_O);
+        StringValue indicator = (StringValue) map.get(StringValue.bmp("o"));
         out.append(indicator == null ? "1" : indicator.getStringValue());
 
-        StringValue alphaCode = (StringValue) map.get(SV_P);
+        StringValue alphaCode = (StringValue) map.get(StringValue.bmp("p"));
         out.append(alphaCode == null ? "" : alphaCode.getStringValue());
 
         out.append(" ");
@@ -730,7 +726,7 @@ public class AlphaCode {
         String principal = tree.principal;
         ItemType itemType = null;
         if (principal.isEmpty()) {
-            itemType = AnyItemType.INSTANCE;
+            itemType = AnyItemType.getInstance();
         } else if (principal.startsWith("A")) {
             BuiltInAtomicType builtIn = BuiltInAtomicType.fromAlphaCode(principal);
             if (builtIn == null) {
@@ -977,7 +973,7 @@ public class AlphaCode {
                 AlphaCodeTree returnType = tree.resultType;
                 List<AlphaCodeTree> argTypes = tree.argTypes;
                 if (argTypes == null) {
-                    itemType = AnyFunctionType.INSTANCE;
+                    itemType = AnyFunctionType.getInstance();
                 } else {
                     SequenceType r;
                     if (returnType == null) {

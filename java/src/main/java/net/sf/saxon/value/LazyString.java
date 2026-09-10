@@ -96,7 +96,7 @@ public class LazyString implements GroundedValue {
             build();
             return value;
         } else {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
     }
 

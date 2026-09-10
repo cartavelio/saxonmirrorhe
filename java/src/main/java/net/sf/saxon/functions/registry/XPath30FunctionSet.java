@@ -57,12 +57,10 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
-        register("apply", 2, e -> {
-            return e.populate(ApplyFn::new, AnyItemType.getInstance(),
-                                  STAR, LATE)
-                    .arg(0, AnyFunctionType.INSTANCE, ONE, null)
-                    .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
-        });
+        register("apply", 2, e -> e.populate( ApplyFn::new, AnyItemType.getInstance(),
+                 STAR, LATE)
+                .arg(0, AnyFunctionType.getInstance(), ONE, null)
+                .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
         register("available-environment-variables", 0, e -> e.populate( AvailableEnvironmentVariables::new, BuiltInAtomicType.STRING,
                  STAR, LATE));
@@ -87,56 +85,46 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 SequenceType.SINGLE_ITEM,
                 SequenceType.SINGLE_BOOLEAN);
 
-        register("filter", 2, e -> {
-            return e.populate(FilterFn::new, AnyItemType.getInstance(),
-                                  STAR, AS_ARG0 | LATE)
-                    .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
-                    .arg(1, predicate, ONE, null);
-        });
+        register("filter", 2, e -> e.populate( FilterFn::new, AnyItemType.getInstance(),
+                 STAR, AS_ARG0 | LATE)
+                .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
+                .arg(1, predicate, ONE, null));
 
         SpecificFunctionType foldLeftArg = new SpecificFunctionType(
                 SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM,
                 SequenceType.ANY_SEQUENCE);
-        register("fold-left", 3, e -> {
-            return e.populate(FoldLeftFn::new, AnyItemType.getInstance(),
-                                  STAR, LATE)
-                    .arg(0, AnyItemType.getInstance(), STAR, null)
-                    .arg(1, AnyItemType.getInstance(), STAR, null)
-                    .arg(2, foldLeftArg, ONE, null);
-        });
+        register("fold-left", 3, e -> e.populate( FoldLeftFn::new, AnyItemType.getInstance(),
+                 STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, null)
+                .arg(2, foldLeftArg, ONE, null));
 
         SpecificFunctionType foldRightArg = new SpecificFunctionType(
                 SequenceType.SINGLE_ITEM, SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE);
 
-        register("fold-right", 3, e -> {
-            return e.populate(FoldRightFn::new, AnyItemType.getInstance(),
-                                  STAR, LATE)
-                    .arg(0, AnyItemType.getInstance(), STAR, null)
-                    .arg(1, AnyItemType.getInstance(), STAR, null)
-                    .arg(2, foldRightArg, ONE, null);
-        });
+        register("fold-right", 3, e -> e.populate( FoldRightFn::new, AnyItemType.getInstance(),
+                 STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, null)
+                .arg(2, foldRightArg, ONE, null));
 
         SpecificFunctionType forEachArg = new SpecificFunctionType(
                 SequenceType.SINGLE_ITEM,
                 SequenceType.ANY_SEQUENCE);
-        register("for-each", 2, e -> {
-            return e.populate(ForEachFn::new, AnyItemType.INSTANCE,
-                              STAR, LATE)
-                    .arg(0, AnyItemType.INSTANCE, STAR, EMPTY)
-                    .arg(1, forEachArg, ONE, null);
-        });
+        register("for-each", 2, e -> e.populate( ForEachFn::new, AnyItemType.getInstance(),
+                 STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+                .arg(1, forEachArg, ONE, null));
 
         SpecificFunctionType forEachPairArg = new SpecificFunctionType(
                 SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM,
                 SequenceType.ANY_SEQUENCE);
-        register("for-each-pair", 3, e -> {
-            return e.populate(ForEachPairFn::new, AnyItemType.INSTANCE,
-                              STAR, LATE)
-                    .arg(0, AnyItemType.INSTANCE, STAR, EMPTY)
-                    .arg(1, AnyItemType.INSTANCE, STAR, EMPTY)
-                    .arg(2, forEachPairArg, ONE, null);
-        });
+        register("for-each-pair", 3, e -> e.populate( ForEachPairFn::new, AnyItemType.getInstance(),
+                 STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+                .arg(1, AnyItemType.getInstance(), STAR, EMPTY)
+                .arg(2, forEachPairArg, ONE, null));
 
 
         register("format-date", 2, e -> e.populate( FormatDate::new, BuiltInAtomicType.STRING,
@@ -196,25 +184,19 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null));
 
-        register("function-arity", 1, e -> {
-            return e.populate( FunctionArity::new, BuiltInAtomicType.INTEGER,
-                     ONE, 0)
-                    .arg(0, AnyFunctionType.INSTANCE, ONE, null);
-        });
+        register("function-arity", 1, e -> e.populate( FunctionArity::new, BuiltInAtomicType.INTEGER,
+                 ONE, 0)
+                .arg(0, AnyFunctionType.getInstance(), ONE, null));
 
-        register("function-lookup", 2, e -> {
-            return e.populate(FunctionLookup::new, AnyFunctionType.INSTANCE,
-                              OPT,
-                              FOCUS | DEPENDS_ON_STATIC_CONTEXT | LATE)
-                    .arg(0, BuiltInAtomicType.QNAME, ONE, null)
-                    .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
-        });
+        register("function-lookup", 2, e -> e.populate( FunctionLookup::new, AnyFunctionType.getInstance(),
+                 OPT,
+                 FOCUS | DEPENDS_ON_STATIC_CONTEXT | LATE)
+                .arg(0, BuiltInAtomicType.QNAME, ONE, null)
+                .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("function-name", 1, e -> {
-            return e.populate( FunctionName::new, BuiltInAtomicType.QNAME,
-                     OPT, 0)
-                    .arg(0, AnyFunctionType.INSTANCE, ONE, null);
-        });
+        register("function-name", 1, e -> e.populate( FunctionName::new, BuiltInAtomicType.QNAME,
+                 OPT, 0)
+                .arg(0, AnyFunctionType.getInstance(), ONE, null));
 
         register("generate-id", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
@@ -228,11 +210,9 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                  ONE, 0)
                 .arg(0, AnyXNodeType.getInstance(), OPT | INS, null));
 
-        register("head", 1, e -> {
-            return e.populate(HeadFn::new, AnyItemType.INSTANCE,
-                              OPT, FILTER)
-                    .arg(0, AnyItemType.INSTANCE, STAR | TRA, null);
-        });
+        register("head", 1, e -> e.populate( HeadFn::new, AnyItemType.getInstance(),
+                 OPT, FILTER)
+                .arg(0, AnyItemType.getInstance(), STAR | TRA, null));
 
         register("innermost", 1, e -> e.populate(Innermost::new, AnyXNodeType.getInstance(),
                                                  STAR, 0)
@@ -260,23 +240,17 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(0, NumericType.getInstance(), OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("serialize", 1, e -> {
-            return e.populate( Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
-                    .arg(0, AnyItemType.INSTANCE, STAR, null);
-        });
+        register("serialize", 1, e -> e.populate( Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("sort", 1, e -> {
-            return e.populate(Sort::new, AnyItemType.INSTANCE, STAR, 0)
-                    .arg(0, AnyItemType.INSTANCE, STAR, null);
-        });
+        register("sort", 1, e -> e.populate(Sort::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
 
         register("string-join", 1, e -> e.populate( StringJoin::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING));
 
-        register("tail", 1, e -> {
-            return e.populate(TailFn::new, AnyItemType.INSTANCE, STAR, AS_ARG0 | FILTER)
-                    .arg(0, AnyItemType.INSTANCE, STAR | TRA, null);
-        });
+        register("tail", 1, e -> e.populate( TailFn::new, AnyItemType.getInstance(), STAR, AS_ARG0 | FILTER)
+                .arg(0, AnyItemType.getInstance(), STAR | TRA, null));
 
         register("unparsed-text", 1, e -> e.populate( UnparsedText::new,
                  BuiltInAtomicType.STRING, OPT, BASE | LATE)

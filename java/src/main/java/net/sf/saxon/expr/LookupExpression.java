@@ -149,28 +149,27 @@ public class LookupExpression extends BinaryExpression {
 
         if (!isArrayLookup && !isMapLookup) {
             // TODO: improve error handling here
-            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT) {
-                if (th.relationship(containerType, AnyFunctionType.INSTANCE) == Affinity.DISJOINT &&
-                        th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == Affinity.DISJOINT) {
-                    if (visitor.getStaticContext().getXPathVersion() >= 40 &&
-                            th.relationship(containerType, AnyJNodeType.getInstance()) != Affinity.DISJOINT) {
-                        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
-                        setLhsExpression(SequenceCoercer.makeSequenceCoercer(
-                                getLhsExpression(),
-                                SequenceType.zeroOrMore(
-                                        ChoiceItemType.of(MapType.ANY_MAP_TYPE, AnyFunctionType.INSTANCE)),
-                                role0,
-                                true));
-                    } else if (Cardinality.allowsZero(getLhsExpression().getCardinality())) {
-                        visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " +
-                                                     containerType, SaxonErrorCode.SXWN9026, getLocation());
-                    } else {
-                        throw new XPathException("The left-hand operand of '?' must be a map or an array; "
-                                                         + "the supplied expression is of type " + containerType, "XPTY0004")
-                                .withLocation(getLocation())
-                                .asTypeError()
-                                .withFailingExpression(this);
-                    }
+            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT &&
+                    th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT &&
+                    th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == Affinity.DISJOINT) {
+                if (visitor.getStaticContext().getXPathVersion() >= 40 &&
+                        th.relationship(containerType, AnyJNodeType.getInstance()) != Affinity.DISJOINT) {
+                    Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
+                    setLhsExpression(SequenceCoercer.makeSequenceCoercer(
+                            getLhsExpression(),
+                            SequenceType.zeroOrMore(
+                                    ChoiceItemType.of(MapType.ANY_MAP_TYPE, ArrayItemType.getInstance())),
+                            role0,
+                            true));
+                } else if (Cardinality.allowsZero(getLhsExpression().getCardinality())) {
+                    visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " +
+                                                 containerType, SaxonErrorCode.SXWN9026, getLocation());
+                } else {
+                    throw new XPathException("The left-hand operand of '?' must be a map or an array; "
+                                                     + "the supplied expression is of type " + containerType, "XPTY0004")
+                            .withLocation(getLocation())
+                            .asTypeError()
+                            .withFailingExpression(this);
                 }
             }
         }
@@ -323,7 +322,7 @@ public class LookupExpression extends BinaryExpression {
 
     protected static SequenceIterator optionalGroundedValueIterator(GroundedValue value) {
         if (value == null) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return value.iterate();
         }
@@ -498,8 +497,8 @@ public class LookupExpression extends BinaryExpression {
                                         GroundedValue member = ((ArrayItem) baseItem).get(subscript);
                                         return member.iterate();
                                     }
-                                    return EmptyIterator.INSTANCE;
-                                    //                                            throw new XPathException(
+                                        return EmptyIterator.getInstance();
+//                                            throw new XPathException(
 //                                                    "An item on the LHS of the '?' operator (" + expr.getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
 //                                                            baseItem.toShortString() + ") is not an integer", "XPTY0004")
 //                                                    .asTypeError()

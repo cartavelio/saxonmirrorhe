@@ -11,8 +11,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.util.Navigator;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.z.IntPredicateProxy;
 
 /**
  * This class supports both the descendant:: and descendant-or-self:: axes, which are
@@ -26,7 +25,7 @@ final class DescendantIteratorSansText implements SequenceIterator {
 
     private final TinyTree tree;
     private final int startDepth;
-    private final IntPredicate matcher;
+    private final IntPredicateProxy matcher;
 
     private int nextNodeNr;
 

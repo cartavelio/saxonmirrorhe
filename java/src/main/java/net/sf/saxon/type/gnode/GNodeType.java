@@ -67,7 +67,7 @@ public abstract class GNodeType implements ItemTypeWithSequenceTypeCache, ItemTy
      */
 
     public SchemaType getContentType() {
-        return AnyType.INSTANCE;
+        return AnyType.getInstance();
     }
 
     /**

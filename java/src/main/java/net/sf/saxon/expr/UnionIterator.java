@@ -29,13 +29,15 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
     // as a Java TreeSet sorted by the document order of the next node to be
     // delivered.
 
-    private record Intake(SequenceIterator iter, GNode nextNode) {};
+    private static class Intake {
+        public SequenceIterator iter;
+        public GNode nextNode;
 
-//        public Intake(SequenceIterator iter, GNode nextNode) {
-//            this.iter = iter;
-//            this.nextNode = nextNode;
-//        }
-//    }
+        public Intake(SequenceIterator iter, GNode nextNode) {
+            this.iter = iter;
+            this.nextNode = nextNode;
+        }
+    }
 
     //@CSharpInjectMembers(code = "public override int Compare(net.sf.saxon.expr.UnionIterator.Intake a, net.sf.saxon.expr.UnionIterator.Intake b) { return compare(a, b); }")
     private static class IntakeComparer implements Comparator<Intake> {

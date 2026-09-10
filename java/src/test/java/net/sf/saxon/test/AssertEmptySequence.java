@@ -16,8 +16,7 @@ import java.util.function.Supplier;
  *
  */
 public class AssertEmptySequence {
-    private static final Sequence emptySequence = EmptySequence.INSTANCE;
-
+    private static final Sequence emptySequence = EmptySequence.getInstance();
     static void assertEmptySequence(Sequence actual) {
         assertEmptySequence(actual, (String) null);
     }

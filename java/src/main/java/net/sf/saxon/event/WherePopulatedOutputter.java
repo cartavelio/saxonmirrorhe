@@ -80,7 +80,7 @@ public class WherePopulatedOutputter extends ProxyOutputter {
             pendingSchemaType = type;
             pendingLocationId = location.saveLocation();
             pendingProperties = properties;
-            pendingAttributes = EmptyAttributeMap.INSTANCE;
+            pendingAttributes = EmptyAttributeMap.getInstance();
             pendingNamespaces = NamespaceMap.emptyMap();
 
         } else {

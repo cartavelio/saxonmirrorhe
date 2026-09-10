@@ -14,7 +14,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.iter.EmptyAtomicIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
 
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
@@ -155,7 +155,7 @@ public class JavaRegularExpression implements RegularExpression {
     @Override
     public AtomicIterator tokenize(UnicodeString input) {
         if (input.isEmpty()) {
-            return EmptyAtomicIterator.INSTANCE;
+            return EmptyIterator.ofAtomic();
         }
         return new JTokenIterator(input.toString(), pattern);
     }

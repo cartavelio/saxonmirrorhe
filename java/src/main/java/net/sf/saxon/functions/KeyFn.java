@@ -207,13 +207,13 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
             if (sought instanceof AtomicValue) {
                 SequenceIterator results = keyManager.selectByKey(selectedKeySet, doc.getTreeInfo(), (AtomicValue)sought, context);
                 if (results instanceof EmptyIterator) {
-                    return EmptySequence.INSTANCE;
+                    return EmptySequence.getInstance();
                 } else if (results instanceof SingletonIterator) {
                     NodeInfo result = (NodeInfo)results.next();
                     if (doc.equals(origin) || Navigator.isAncestorOrSelf(origin, result)) {
                         return result;
                     } else {
-                        return EmptySequence.INSTANCE;
+                        return EmptySequence.getInstance();
                     }
                 } else {
                     if (doc.equals(origin)) {
@@ -233,7 +233,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
                 allKeyIterators.add(someResults);
             }
             if (allKeyIterators.isEmpty()) {
-                return EmptySequence.INSTANCE;
+                return EmptySequence.getInstance();
             } else if (allKeyIterators.size() == 1) {
                 allResults = allKeyIterators.get(0);
             } else {

@@ -287,7 +287,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                     options = b.getPipelineConfiguration().getParseOptions();
                     if (packageData instanceof StylesheetPackage) {
                         SpaceStrippingRule rule = ((StylesheetPackage)packageData).getSpaceStrippingRule();
-                        if (rule != NoElementsSpaceStrippingRule.INSTANCE) {
+                        if (rule != NoElementsSpaceStrippingRule.getInstance()) {
                             options = options.withSpaceStrippingRule(rule);
                         }
                     }
@@ -498,20 +498,19 @@ public class DocumentFn extends SystemFunction implements Callable {
             rule = ((StylesheetPackage)packageData).getSpaceStrippingRule();
         }
 
-        if (rule == AllElementsSpaceStrippingRule.INSTANCE) {
+        if (rule == AllElementsSpaceStrippingRule.getInstance()) {
             absURI = absURI + "?StripAll";
-        } else if (rule == NoElementsSpaceStrippingRule.INSTANCE) {
+        } else if (rule == NoElementsSpaceStrippingRule.getInstance()) {
             absURI = absURI + "?StripNone";
         }
 
         // TODO: reflect schema-validation options in document key
 
-        if (strip && packageData instanceof StylesheetPackage) {
-            if (((StylesheetPackage) packageData).getSpaceStrippingRule() != NoElementsSpaceStrippingRule.INSTANCE) {
-                String name = ((StylesheetPackage) packageData).getPackageName();
-                if (name != null) {
-                    return new DocumentKey(absURI, name, ((StylesheetPackage) packageData).getPackageVersion());
-                }
+        if (strip && packageData instanceof StylesheetPackage &&
+                ((StylesheetPackage) packageData).getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance()) {
+            String name = ((StylesheetPackage) packageData).getPackageName();
+            if (name != null) {
+                return new DocumentKey(absURI, name, ((StylesheetPackage) packageData).getPackageVersion());
             }
         }
         return new DocumentKey(absURI);

@@ -46,7 +46,7 @@ public class CurrentOutputUri extends ContextAccessorFunction implements Callabl
         String uri = context.getCurrentOutputUri();
         return new ConstantFunction(
                 getFunctionName(),
-                uri==null ? EmptySequence.INSTANCE : new AnyURIValue(uri),
+                uri==null ? EmptySequence.getInstance() : new AnyURIValue(uri),
                 SequenceType.OPTIONAL_ANY_URI);
     }
 

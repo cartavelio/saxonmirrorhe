@@ -114,7 +114,7 @@ public class IdentityTransformerHandler extends ReceivingContentHandler implemen
             Receiver out = sf.getReceiver(result, new SerializationProperties(props));
             setPipelineConfiguration(out.getPipelineConfiguration());
             if (config.isStripsAllWhiteSpace()) {
-                out = new Stripper(AllElementsSpaceStrippingRule.INSTANCE, out);
+                out = new Stripper(AllElementsSpaceStrippingRule.getInstance(), out);
             }
             setReceiver(out);
         } catch (XPathException err) {

@@ -336,7 +336,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
         SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
         if (parent == null) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return new StrippingIterator(node.iterateFollowingSiblingAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
         }
@@ -405,7 +405,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
         SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
         if (parent == null) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return new StrippingIterator(node.iteratePrecedingSiblingAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
         }

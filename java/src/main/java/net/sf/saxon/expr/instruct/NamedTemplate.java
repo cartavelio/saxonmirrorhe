@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Item;
@@ -53,7 +54,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
 //    private boolean mayOmitContextItem = true;
 //    private boolean absentFocus = false;
     private List<LocalParamInfo> localParamDetails = new ArrayList<>(4);
-
+    private PushEvaluator bodyEvaluator;
 
     /**
      * Create a named template
@@ -219,7 +220,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
             }
         } else {
             TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-            if (requiredContextItemType != AnyItemType.INSTANCE &&
+            if (requiredContextItemType != AnyItemType.getInstance() &&
                     !requiredContextItemType.matches(contextItem, th)) {
                 RoleDiagnostic role = new RoleDiagnostic(
                         RoleDiagnostic.MISC, "context item for the named template", 0);
@@ -232,8 +233,13 @@ public class NamedTemplate extends Actor implements TraceableComponent {
                 context.setCurrentIterator(null);
             }
         }
-        makeBodyEvaluator();
-        return pushEvaluator.processLeavingTail(output, context);
+        synchronized(this) {
+            if (bodyEvaluator == null) {
+                bodyEvaluator = getBody().makeElaborator().elaborateForPush();
+            }
+        }
+
+        return bodyEvaluator.processLeavingTail(output, context);
     }
 
 
@@ -257,7 +263,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
     }
 
     public void explainProperties(ExpressionPresenter presenter) {
-        if (getRequiredContextItemType() != AnyItemType.INSTANCE) {
+        if (getRequiredContextItemType() != AnyItemType.getInstance()) {
             SequenceType st = SequenceType.one(getRequiredContextItemType());
             presenter.emitAttribute("cxt", st.toAlphaCode());
         }

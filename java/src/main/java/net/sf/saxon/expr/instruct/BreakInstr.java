@@ -120,7 +120,7 @@ public class BreakInstr extends Instruction implements TailCallLoop.TailCallInfo
             BreakInstr expr = (BreakInstr) getExpression();
             return (context) -> {
                 expr.markContext(context);
-                return EmptyIterator.INSTANCE;
+                return EmptyIterator.getInstance();
             };
         }
     }

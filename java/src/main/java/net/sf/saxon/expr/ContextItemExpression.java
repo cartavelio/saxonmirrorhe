@@ -325,7 +325,7 @@ public class ContextItemExpression extends Expression {
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("dot", this);
         ItemType type = getItemType();
-        if (!(type == AnyItemType.INSTANCE)) {
+        if (!(type == AnyItemType.getInstance())) {
             SequenceType st = SequenceType.one(type);
             destination.emitAttribute("type", st.toAlphaCode());
         }

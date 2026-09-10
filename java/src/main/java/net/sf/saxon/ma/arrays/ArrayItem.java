@@ -77,7 +77,7 @@ public abstract class ArrayItem extends MapOrArray implements FunctionItem {
         if (index >= 0 && index < arrayLength()) {
             return get(index);
         } else {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
     }
 

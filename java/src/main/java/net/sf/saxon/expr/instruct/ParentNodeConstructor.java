@@ -93,7 +93,7 @@ public abstract class ParentNodeConstructor extends Instruction
             if (validationOptions == null) {
                 validationOptions = new ParseOptions();
             }
-            if (schemaType == Untyped.INSTANCE) {
+            if (schemaType == Untyped.getInstance()) {
                 validationOptions = validationOptions.withSchemaValidationMode(Validation.SKIP);
             } else {
                 validationOptions = validationOptions.withSchemaValidationMode(mode)

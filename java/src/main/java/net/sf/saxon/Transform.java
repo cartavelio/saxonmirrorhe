@@ -8,7 +8,6 @@
 package net.sf.saxon;
 
 //import com.saxonica.ee.schema.PreparedSchema;
-
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.expr.parser.CodeInjector;
@@ -44,7 +43,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * This <b>Transform</b> class is the command-line entry point to the Saxon XSLT Processor.
@@ -851,17 +849,18 @@ public class Transform {
                         long totalTime = 0;
                         Logger logger = config.getLogger();
                         int threshold = logger instanceof StandardLogger ? ((StandardLogger)logger).getThreshold() : 0;
-                        Consumer<Integer> setLoggingThreshold = logger instanceof StandardLogger
-                                ? ((StandardLogger) logger)::setThreshold
-                                : level -> {};
                         for (int j = -repeatComp; j < repeatComp; j++) {
                             // Repeat loop is to get reliable performance data
                             if (j == 0) {
                                 startTime = now();
-                                setLoggingThreshold.accept(threshold);
+                                if (logger instanceof StandardLogger) {
+                                    ((StandardLogger) logger).setThreshold(threshold);
+                                }
                                 Compilation.TIMING = true;
                             } else if (j < 0) {
-                                setLoggingThreshold.accept(Logger.ERROR);
+                                if (logger instanceof StandardLogger) {
+                                    ((StandardLogger) logger).setThreshold(Logger.ERROR);
+                                }
                                 Compilation.TIMING = false;
                             }
                             sheet = compiler.compile(styleSource);

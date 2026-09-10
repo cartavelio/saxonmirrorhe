@@ -91,7 +91,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                         out.setSystemId(node.getBaseURI());
                     }
                     NodeName fqn = NameOfNode.makeName(node);
-                    out.startElement(fqn, schemaAware ? AnyType.INSTANCE : Untyped.INSTANCE, locationId, ReceiverOption.NONE);
+                    out.startElement(fqn, schemaAware ? AnyType.getInstance() : Untyped.getInstance(), locationId, ReceiverOption.NONE);
                     if (copyNamespaces) {
                         for (NamespaceBinding ns : node.getAllNamespaces()) {
                             out.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
@@ -103,7 +103,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
 
                     // apply-templates to all attributes
                     SequenceIterator attributes = node.iterateAttributeAxis(AnyGNode.TEST);
-                    if (attributes != EmptyIterator.INSTANCE) {
+                    if (attributes != EmptyIterator.getInstance()) {
                         c2.setOrigin(this);
                         c2.trackFocus(attributes);
                         TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, out, c2, locationId);

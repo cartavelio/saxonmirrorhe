@@ -273,12 +273,12 @@ public class FixedElement extends ElementCreator {
                 // we know the result will be an element of type xs:anyType
                 itemType = new NamedXNodeType(Type.ELEMENT,
                                               elementNameTest,
-                                              AnyType.INSTANCE, false, config);
+                                              AnyType.getInstance(), false, config);
             } else {
                 // we know the result will be an untyped element
                 itemType = new NamedXNodeType(Type.ELEMENT,
                                               elementNameTest,
-                                              Untyped.INSTANCE, false, config);
+                                              Untyped.getInstance(), false, config);
             }
         } else {
             itemType = new NamedXNodeType(Type.ELEMENT,
@@ -595,8 +595,9 @@ public class FixedElement extends ElementCreator {
             final PushEvaluator contentPusher =
                     expr.getContentExpression().makeElaborator().elaborateForPush();
 
-            SchemaType typeCode;
-            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.INSTANCE;
+            SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
+                    ? AnyType.getInstance()
+                    : Untyped.getInstance();
 
             Schema schema = expr.getRetainedStaticContext().getImportedSchema();
 

@@ -14,14 +14,12 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
@@ -353,13 +351,11 @@ public class Block extends Instruction {
         }
         if (hasAdjacentTextNodes) {
             List<Expression> content = new ArrayList<>(size());
-            UnicodeString pendingText = null;
+            String pendingText = null;
             for (int i = 0; i < size(); i++) {
                 if (isLiteralText[i]) {
-                    pendingText = (pendingText == null
-                                           ? EmptyUnicodeString.getInstance()
-                                           : pendingText).concat(
-                                                ((StringLiteral) ((ValueOf) child(i)).getSelect()).getUnicodeString());
+                    pendingText = (pendingText == null ? "" : pendingText) +
+                            ((StringLiteral) ((ValueOf) child(i)).getSelect()).getString();
                 } else {
                     if (pendingText != null) {
                         ValueOf inst = new ValueOf(new StringLiteral(pendingText), false, false);
@@ -767,7 +763,7 @@ public class Block extends Instruction {
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         if (size() == 0) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else if (size() == 1) {
             return child(0).iterate(context);
         } else {

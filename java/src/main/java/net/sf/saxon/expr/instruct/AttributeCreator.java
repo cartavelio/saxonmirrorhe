@@ -221,7 +221,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
             ann = schemaType;
             // test whether the value actually conforms to the given type
             ValidationFailure err = schemaType.validateContent(
-                    value, DummyNamespaceResolver.INSTANCE, context.getConfiguration().getConversionRules());
+                    value, DummyNamespaceResolver.getInstance(), context.getConfiguration().getConversionRules());
             if (err != null) {
                 ValidationFailure ve = new ValidationFailure(
                         "Attribute value " + Err.wrap(value, Err.VALUE) +
@@ -265,7 +265,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
         int validationAction = getValidationAction();
         if (schemaType != null) {
             ValidationFailure err = schemaType.validateContent(
-                    orphan.getUnicodeStringValue(), DummyNamespaceResolver.INSTANCE, rules);
+                    orphan.getUnicodeStringValue(), DummyNamespaceResolver.getInstance(), rules);
             if (err != null) {
                 err.setMessage("Attribute value " + Err.wrap(orphan.getUnicodeStringValue(), Err.VALUE) +
                                        " does not the match the required type " +

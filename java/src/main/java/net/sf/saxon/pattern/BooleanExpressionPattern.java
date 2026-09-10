@@ -163,7 +163,7 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
                 return ioe.getRequiredItemType();
             }
         }
-        return AnyItemType.INSTANCE;
+        return AnyItemType.getInstance();
     }
 
     /**

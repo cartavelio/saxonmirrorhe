@@ -199,7 +199,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
     public synchronized AtomicSequence getCurrentGroupingKey() {
         AtomicSequence val = groupKeys.get(position - 1);
         if (val == null) {
-            return AtomicArray.EMPTY_ATOMIC_ARRAY;
+            return EmptyAtomicSequence.getInstance();
         } else {
             return val;
         }

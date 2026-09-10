@@ -419,7 +419,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
 
     public static boolean isKnownToConform(Sequence value, ItemType itemType) {
         // Problem is we don't have access to a TypeHierarchy object...
-        if (itemType == AnyItemType.INSTANCE) {
+        if (itemType == AnyItemType.getInstance()) {
             return true;
         }
         try {
@@ -464,7 +464,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
         try {
             Item first = val.head();
             if (first == null) {
-                return AnyItemType.INSTANCE;
+                return AnyItemType.getInstance();
             } else {
                 ItemType type;
                 if (first instanceof AtomicValue) {
@@ -472,16 +472,16 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
                 } else if (first instanceof NodeInfo) {
                     type = NodeKindType.makeNodeKindTest(((NodeInfo) first).getNodeKind());
                 } else {
-                    type = AnyFunctionType.INSTANCE;
+                    type = AnyFunctionType.getInstance();
                 }
                 if (isKnownToConform(val, type)) {
                     return type;
                 } else {
-                    return AnyItemType.INSTANCE;
+                    return AnyItemType.getInstance();
                 }
             }
         } catch (XPathException e) {
-            return AnyItemType.INSTANCE;
+            return AnyItemType.getInstance();
         }
     }
 
@@ -566,7 +566,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
         AtomicValue key = (AtomicValue) args[0].head();
         Sequence value = get(key);
         if (value == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         } else {
             return value;
         }

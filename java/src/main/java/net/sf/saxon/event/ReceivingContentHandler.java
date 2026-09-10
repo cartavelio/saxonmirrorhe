@@ -170,7 +170,7 @@ public class ReceivingContentHandler
     public void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = pipe;
         Configuration config = pipe.getConfiguration();
-        ignoreIgnorable = pipe.getParseOptions().getSpaceStrippingRule() != NoElementsSpaceStrippingRule.INSTANCE;
+        ignoreIgnorable = pipe.getParseOptions().getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance();
         retainDTDAttributeTypes = config.getBooleanProperty(Feature.RETAIN_DTD_ATTRIBUTE_TYPES);
         if (!pipe.getParseOptions().isExpandAttributeDefaults()) {
             defaultedAttributesAction = -1;
@@ -407,12 +407,14 @@ public class ReceivingContentHandler
             AttributeMap attributes;
 
             if (atts.getLength() == 0) {
-                attributes = EmptyAttributeMap.INSTANCE;
-            } else {
+                attributes = EmptyAttributeMap.getInstance();
+            }
+            else
+            {
                 attributes = makeAttributeMap(atts, localLocator);
             }
 
-            receiver.startElement(elementName, Untyped.INSTANCE,
+            receiver.startElement(elementName, Untyped.getInstance(),
                                   attributes, currentNamespaceMap,
                                   localLocator, options);
 
@@ -487,22 +489,43 @@ public class ReceivingContentHandler
             String type = atts.getType(a);
             SimpleType typeCode = BuiltInAtomicType.UNTYPED_ATOMIC;
             if (retainDTDAttributeTypes) {
-                typeCode = switch (type) {
-                    case "CDATA" -> BuiltInAtomicType.UNTYPED_ATOMIC;
-                    case "ID" -> BuiltInAtomicType.ID;
-                    case "IDREF" -> BuiltInAtomicType.IDREF;
-                    case "IDREFS" -> BuiltInListType.IDREFS;
-                    case "NMTOKEN" -> BuiltInAtomicType.NMTOKEN;
-                    case "NMTOKENS" -> BuiltInListType.NMTOKENS;
-                    case "ENTITY" -> BuiltInAtomicType.ENTITY;
-                    case "ENTITIES" -> BuiltInListType.ENTITIES;
-                    default -> throw new IllegalStateException("Unexpected value: " + type);
-                };
+                switch (type) {
+                    case "CDATA":
+                        // common case, no action
+                        break;
+                    case "ID":
+                        typeCode = BuiltInAtomicType.ID;
+                        break;
+                    case "IDREF":
+                        typeCode = BuiltInAtomicType.IDREF;
+                        break;
+                    case "IDREFS":
+                        typeCode = BuiltInListType.IDREFS;
+                        break;
+                    case "NMTOKEN":
+                        typeCode = BuiltInAtomicType.NMTOKEN;
+                        break;
+                    case "NMTOKENS":
+                        typeCode = BuiltInListType.NMTOKENS;
+                        break;
+                    case "ENTITY":
+                        typeCode = BuiltInAtomicType.ENTITY;
+                        break;
+                    case "ENTITIES":
+                        typeCode = BuiltInListType.ENTITIES;
+                        break;
+                }
             } else {
                 switch (type) {
-                    case "ID" -> properties |= ReceiverOption.IS_ID;
-                    case "IDREF" -> properties |= ReceiverOption.IS_IDREF;
-                    case "IDREFS" -> properties |= ReceiverOption.IS_IDREF;
+                    case "ID":
+                        properties |= ReceiverOption.IS_ID;
+                        break;
+                    case "IDREF":
+                        properties |= ReceiverOption.IS_IDREF;
+                        break;
+                    case "IDREFS":
+                        properties |= ReceiverOption.IS_IDREF;
+                        break;
                 }
             }
             list.add(new AttributeInfo(attCode, typeCode, value, location, properties));

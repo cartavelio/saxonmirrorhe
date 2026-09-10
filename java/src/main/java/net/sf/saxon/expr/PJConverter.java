@@ -785,7 +785,7 @@ public abstract class PJConverter {
             Item head = iter.next();
             if (head == null) {
                 if (targetClass.isAssignableFrom(EmptySequence.class)) {
-                    return EmptySequence.INSTANCE;
+                    return EmptySequence.getInstance();
                 } else {
                     throw new XPathException("Supplied value is empty: expected + " + targetClass.getName());
                 }

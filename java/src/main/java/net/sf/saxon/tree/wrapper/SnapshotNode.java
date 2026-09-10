@@ -289,7 +289,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
         if (isAncestorOfPivot()) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return super.iterateFollowingSiblingAxis(predicate);
         }
@@ -305,7 +305,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
         if (isAncestorOfPivot()) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return super.iteratePrecedingSiblingAxis(predicate);
         }
@@ -321,7 +321,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
     @Override
     public SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
         if (isAncestorOfPivot()) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return Navigator.filter(
                     new Navigator.FollowingIterator(this), predicate);
@@ -338,7 +338,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
     @Override
     public SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
         if (isAncestorOfPivot()) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return Navigator.filter(
                     new Navigator.PrecedingIterator(this, false), predicate);

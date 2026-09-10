@@ -132,7 +132,7 @@ public class ZenoSequence implements GroundedValue {
         }
         int size = chain.size();
         if (start >= size || length <= 0) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
         if ((long)start + (long)length > (long)size) {
             length = size - start;

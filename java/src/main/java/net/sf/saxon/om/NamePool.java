@@ -32,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>Modified in 9.4 to remove namespace codes.</p>
  * <p>Modified in 9.7 to remove URI codes.</p>
  * <p>Modified in 9.8 to remove namecodes and all handling of prefixes.</p>
- * <p>Modified in 13.0 to use an array for the map from integer fingerprints to QNames.</p>
  */
 
 public final class NamePool {
@@ -60,22 +59,18 @@ public final class NamePool {
 
     private static final int MAX_FINGERPRINT = FP_MASK;
 
-    // Offset of first user-allocated fingerprint
-
-    private static final int OFFSET = 1024;
-
     // A map from QNames to fingerprints
 
-    private final ConcurrentHashMap<StructuredQName, Integer> qNameToInteger = new ConcurrentHashMap<>(1024);
+    private final ConcurrentHashMap<StructuredQName, Integer> qNameToInteger = new ConcurrentHashMap<>(1000);
 
     // A map from fingerprints to QNames
 
-    private volatile StructuredQName[] integerToQName = new StructuredQName[1024];
+    private final ConcurrentHashMap<Integer, StructuredQName> integerToQName = new ConcurrentHashMap<>(1000);
 
     // Next fingerprint available to be allocated. Starts at 1024 as low-end fingerprints are statically allocated to system-defined
     // names
 
-    private final AtomicCounter unique = new AtomicCounter(OFFSET);
+    private final AtomicCounter unique = new AtomicCounter(1024);
 
     // A map containing suggested prefixes for particular URIs
 
@@ -117,9 +112,7 @@ public final class NamePool {
         if ((fp & USER_DEFINED_MASK) == 0) {
             return StandardNames.getUnprefixedQName(fp);
         }
-        int index = fp - OFFSET;
-        StructuredQName[] localArray = integerToQName;
-        return (index >= 0 && index < localArray.length) ? localArray[index] : null;
+        return integerToQName.get(fp);
     }
 
     /**
@@ -171,7 +164,7 @@ public final class NamePool {
      * for the same name with a prefix equal to "".
      */
     
-    public synchronized int allocateFingerprint(NamespaceUri uri, String local) {
+    public int allocateFingerprint(NamespaceUri uri, String local) {
         if (NamespaceUri.isReserved(uri) || NamespaceUri.SAXON.equals(uri)) {
             int fp = StandardNames.getFingerprint(uri, local);
             if (fp != -1) {
@@ -179,34 +172,23 @@ public final class NamePool {
             }
         }
         StructuredQName qName = new StructuredQName("", uri, local);
-
-        int existing = qNameToInteger.getOrDefault(qName, -1);
-        if (existing >= 0) {
-            return existing;
-        }
-        long nextUnique = unique.getAndIncrement();
-        if (nextUnique > MAX_FINGERPRINT) {
-            throw new NamePoolLimitException("Too many distinct names in NamePool");
-        }
-        int next = (int) nextUnique;
-        Integer existing2 = qNameToInteger.putIfAbsent(qName, next);
-        if (keyWasAbsent(existing2)) {
-            ensureCapacity(next - OFFSET);
-            integerToQName[next - OFFSET] = qName;
-            return next;
-        } else {
-            return existing2;
-        }
-
-    }
-
-    private void ensureCapacity(int index) {
-        StructuredQName[] current = integerToQName;
-        if (index >= current.length) {
-            int newSize = Math.min(current.length * 2, MAX_FINGERPRINT);
-            StructuredQName[] newArray = new StructuredQName[newSize];
-            System.arraycopy(current, 0, newArray, 0, current.length);
-            integerToQName = newArray;
+        synchronized (this) {
+            int existing = qNameToInteger.getOrDefault(qName, -1);
+            if (existing >= 0) {
+                return existing;
+            }
+            long nextUnique = unique.getAndIncrement();
+            if (nextUnique > MAX_FINGERPRINT) {
+                throw new NamePoolLimitException("Too many distinct names in NamePool");
+            }
+            int next = (int) nextUnique;
+            Integer existing2 = qNameToInteger.putIfAbsent(qName, next);
+            if (keyWasAbsent(existing2)) {
+                integerToQName.put(next, qName);
+                return next;
+            } else {
+                return existing;
+            }
         }
     }
 

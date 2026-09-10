@@ -891,8 +891,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
         case Type.DOCUMENT:
             startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
-            SequenceIterator children = node.iterateChildAxis(null);
-            for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
+            for (NodeInfo child : node.children()) {
                 append(child, locationId, copyNamespaces);
             }
             endDocument();

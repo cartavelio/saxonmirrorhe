@@ -451,7 +451,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
                             return nonMatching.iterate(c2);
                         }
                     }
-                    return EmptyIterator.INSTANCE;
+                    return EmptyIterator.getInstance();
                 }, c2);
             };
         }

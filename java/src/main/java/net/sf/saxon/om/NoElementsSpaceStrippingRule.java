@@ -18,9 +18,13 @@ import net.sf.saxon.type.SchemaType;
  * A whitespace stripping rule that retains all whitespace text nodes
  */
 
-public enum NoElementsSpaceStrippingRule implements SpaceStrippingRule {
+public class NoElementsSpaceStrippingRule implements SpaceStrippingRule {
 
-    INSTANCE;
+    private final static NoElementsSpaceStrippingRule THE_INSTANCE = new NoElementsSpaceStrippingRule();
+
+    public static NoElementsSpaceStrippingRule getInstance() {
+        return THE_INSTANCE;
+    }
 
     /**
      * Decide whether an element is in the set of white-space preserving element types

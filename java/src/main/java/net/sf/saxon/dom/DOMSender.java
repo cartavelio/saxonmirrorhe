@@ -298,7 +298,7 @@ public class DOMSender {
         NodeName name = getNodeName(element.getTagName(), true);
         final Location loc = new Loc(systemId, -1, -1);
 
-        AttributeMap attributes = EmptyAttributeMap.INSTANCE;
+        AttributeMap attributes = EmptyAttributeMap.getInstance();
         NamedNodeMap atts = element.getAttributes();
         if (atts != null) {
             final int len = atts.getLength();
@@ -321,7 +321,7 @@ public class DOMSender {
                 }
             }
         }
-        receiver.startElement(name, Untyped.INSTANCE, attributes, namespaces.peek(), loc, ReceiverOption.NONE);
+        receiver.startElement(name, Untyped.getInstance(), attributes, namespaces.peek(), loc, ReceiverOption.NONE);
         walkNode(element);
         receiver.endElement();
     }

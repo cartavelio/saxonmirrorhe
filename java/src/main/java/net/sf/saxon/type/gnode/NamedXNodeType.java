@@ -13,13 +13,10 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeVectorMatchMaker;
 import net.sf.saxon.pattern.qname.*;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 
 import java.util.Optional;
-import java.util.function.IntPredicate;
 
 /**
  * {@code NamedXNodeType} is a node type corresponding to the syntax
@@ -31,7 +28,7 @@ import java.util.function.IntPredicate;
  * the node is nilled.</p>
  */
 
-public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, NodeVectorMatchMaker {
+public class NamedXNodeType extends XNodeType implements NamedXNodePredicate {
 
     private final int kind;
     private final QNameTest nameTest;
@@ -66,7 +63,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     public NamedXNodeType(int nodeKind, QNameTest nameTest, Configuration config) {
         this.kind = nodeKind;
         this.nameTest = nameTest;
-        this.schemaType = AnyType.INSTANCE;
+        this.schemaType = AnyType.getInstance();
         this.config = config;
         this.nillable = true;
     }
@@ -81,7 +78,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     public NamedXNodeType(int nodeKind, StructuredQName nameTest, Configuration config) {
         this.kind = nodeKind;
         this.nameTest = new SpecificQNameTest(nameTest, config.getNamePool());
-        this.schemaType = AnyType.INSTANCE;
+        this.schemaType = AnyType.getInstance();
         this.config = config;
         this.nillable = true;
     }
@@ -103,13 +100,18 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
      */
     @Override
     public UType getUType() {
-        return switch (kind) {
-            case Type.ELEMENT -> UType.ELEMENT;
-            case Type.ATTRIBUTE -> UType.ATTRIBUTE;
-            case Type.PROCESSING_INSTRUCTION -> UType.PI;
-            case Type.NAMESPACE -> UType.NAMESPACE;
-            default -> UType.ANY;
-        };
+        switch (kind) {
+            case Type.ELEMENT:
+                return UType.ELEMENT;
+            case Type.ATTRIBUTE:
+                return UType.ATTRIBUTE;
+            case Type.PROCESSING_INSTRUCTION:
+                return UType.PI;
+            case Type.NAMESPACE:
+                return UType.NAMESPACE;
+            default:
+                return UType.ANY;
+        }
     }
 
     /**
@@ -145,8 +147,8 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
      */
     @Override
     public int getRequiredFingerprint() {
-        if (nameTest instanceof SpecificQNameTest qTest) {
-            return qTest.getFingerprint();
+        if (nameTest instanceof SpecificQNameTest) {
+            return ((SpecificQNameTest)nameTest).getFingerprint();
         }
         return -1;
     }
@@ -176,10 +178,10 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     @Override
     public boolean isFingerprintSufficient() {
         if (kind == Type.ELEMENT) {
-            return nillable && (schemaType.equals(AnyType.INSTANCE));
+            return (nillable && schemaType.equals(AnyType.getInstance()));
         }
         if (kind == Type.ATTRIBUTE) {
-            return schemaType.equals(BuiltInAtomicType.ANY_ATOMIC) || schemaType == AnyType.INSTANCE;
+            return schemaType.equals(BuiltInAtomicType.ANY_ATOMIC);
         }
         return true;
     }
@@ -220,47 +222,24 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
      */
     @Override
     public boolean matches(Item item) {
-        if (item instanceof NodeInfo node) {
-            if (node.getNodeKind() != kind) {
+        if (item instanceof NodeInfo) {
+            NodeInfo n = (NodeInfo) item;
+            if (n.getNodeKind() != kind) {
                 return false;
             }
-            if (node.hasFingerprint() && nameTest instanceof SpecificQNameTest qTest) {
-                return qTest.getFingerprint() == node.getFingerprint() &&
-                        matchesAnnotation(node.getSchemaType())
-                        && (nillable || !Nilled_1.isNilled(node));
+            if (n.hasFingerprint() && nameTest instanceof SpecificQNameTest) {
+                return ((SpecificQNameTest) nameTest).getFingerprint() == n.getFingerprint() &&
+                        matchesAnnotation(n.getSchemaType())
+                        && (nillable || !Nilled_1.isNilled(n));
             } else {
-                return nameTest.matches(node.getQName()) &&
-                        matchesAnnotation(node.getSchemaType())
-                        && (nillable || !Nilled_1.isNilled(node));
+                return nameTest.matches(n.getQName()) &&
+                        matchesAnnotation(n.getSchemaType())
+                        && (nillable || !Nilled_1.isNilled(n));
             }
         } else {
             return false;
         }
     }
-
-    /**
-     * Get a matching function that can be used to test whether numbered nodes in a TinyTree
-     * or DominoTree satisfy the node test. (Calling this matcher must give the same result
-     * as calling <code>matchesNode(tree.getNode(nodeNr))</code>, but it may well be faster).
-     *
-     * @param tree the tree against which the returned function will operate
-     * @return an IntPredicate; the matches() method of this predicate takes a node number
-     * as input, and returns true if and only if the node identified by this node number
-     * matches the node predicate.
-     */
-    @Override
-    public IntPredicate getMatcher(NodeVectorTree tree) {
-        if (nameTest instanceof SpecificQNameTest) {
-            if (schemaType == AnyType.INSTANCE && nillable) {
-                int requiredFingerprint = ((SpecificQNameTest) nameTest).getFingerprint();
-                return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind
-                                && tree.getFingerprint(nodeNr) == requiredFingerprint;
-            }
-        }
-        return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind
-                                      && matches(tree.getNode(nodeNr));
-    }
-
 
 
 
@@ -268,7 +247,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         if (annotation == null) {
             return true;
         }
-        if (schemaType == AnyType.INSTANCE) {
+        if (schemaType == AnyType.getInstance()) {
             return true;
         }
 
@@ -287,7 +266,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
 
     @Override
     public final double getDefaultPriority() {
-        if (schemaType == null || schemaType == AnyType.INSTANCE) {
+        if (schemaType == null || schemaType == AnyType.getInstance()) {
             if (nameTest instanceof AnyQNameTest) {
                 return -0.5;
             } else if (nameTest instanceof SpecificQNameTest) {
@@ -377,17 +356,18 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     }
 
     public String toString() {
-        return switch (kind) {
-            case Type.ELEMENT
-                    -> "element(" + nameTest.toString() + ", " + schemaType.getEQName() + ')';
-            case Type.ATTRIBUTE
-                    -> "attribute(" + nameTest.toString() + ", " + schemaType.getEQName() + ')';
-            case Type.PROCESSING_INSTRUCTION
-                    -> "processing-instruction(" + nameTest.toString() + ")";
-            case Type.NAMESPACE
-                    -> "namespace(" + nameTest.toString() + ")";
-            default -> "???";
-        };
+        switch (kind) {
+            case Type.ELEMENT:
+                return "element(" + nameTest.toString() + ", " + schemaType.getEQName() + ')';
+            case Type.ATTRIBUTE:
+                return "attribute(" + nameTest.toString() + ", " + schemaType.getEQName() + ')';
+            case Type.PROCESSING_INSTRUCTION:
+                return "processing-instruction(" + nameTest.toString() + ")";
+            case Type.NAMESPACE:
+                return "namespace(" + nameTest.toString() + ")";
+            default:
+                return "???";
+        }
     }
 
     /**
@@ -445,7 +425,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
             return Optional.of("The node name does not match");
         }
         if (!matchesAnnotation(((NodeInfo)item).getSchemaType())) {
-            if (node.getSchemaType() == Untyped.INSTANCE) {
+            if (node.getSchemaType() == Untyped.getInstance()) {
                 return Optional.of("The supplied node has not been schema-validated");
             }
             if (node.getSchemaType() == BuiltInAtomicType.UNTYPED_ATOMIC) {
@@ -470,16 +450,24 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
      */
     @Override
     public String getBasicAlphaCode() {
-        return switch (kind) {
-            case Type.ELEMENT -> "NE";
-            case Type.ATTRIBUTE -> "NA";
-            case Type.TEXT -> "NT";
-            case Type.COMMENT -> "NC";
-            case Type.PROCESSING_INSTRUCTION -> "NP";
-            case Type.DOCUMENT -> "ND";
-            case Type.NAMESPACE -> "NN";
-            default -> "*";
-        };
+        switch (kind) {
+            case Type.ELEMENT:
+                return "NE";
+            case Type.ATTRIBUTE:
+                return "NA";
+            case Type.TEXT:
+                return "NT";
+            case Type.COMMENT:
+                return "NC";
+            case Type.PROCESSING_INSTRUCTION:
+                return "NP";
+            case Type.DOCUMENT:
+                return "ND";
+            case Type.NAMESPACE:
+                return "NN";
+            default:
+                return "*";
+        }
     }
 
     /**

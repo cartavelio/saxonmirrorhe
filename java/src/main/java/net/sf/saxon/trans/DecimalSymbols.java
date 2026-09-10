@@ -134,20 +134,32 @@ public class DecimalSymbols {
      */
 
     public static Property getPropertyForName(String name) {
-        return switch (name) {
-            case "decimal-separator" -> Property.DECIMAL_SEPARATOR_MARKER;
-            case "grouping-separator" -> Property.GROUPING_SEPARATOR_MARKER;
-            case "digit" -> Property.DIGIT;
-            case "minus-sign" -> Property.MINUS_SIGN;
-            case "percent" -> Property.PERCENT_MARKER;
-            case "per-mille" -> Property.PER_MILLE_MARKER;
-            case "zero-digit" -> Property.ZERO_DIGIT;
-            case "exponent-separator" -> Property.EXPONENT_SEPARATOR_MARKER;
-            case "pattern-separator" -> Property.PATTERN_SEPARATOR;
-            case "infinity" -> Property.INFINITY;
-            case "NaN" -> Property.NAN;
-            default -> throw new IllegalArgumentException();
-        };
+        switch (name) {
+            case "decimal-separator":
+                return Property.DECIMAL_SEPARATOR_MARKER;
+            case "grouping-separator":
+                return Property.GROUPING_SEPARATOR_MARKER;
+            case "digit":
+                return Property.DIGIT;
+            case "minus-sign":
+                return Property.MINUS_SIGN;
+            case "percent":
+                return Property.PERCENT_MARKER;
+            case "per-mille":
+                return Property.PER_MILLE_MARKER;
+            case "zero-digit":
+                return Property.ZERO_DIGIT;
+            case "exponent-separator":
+                return Property.EXPONENT_SEPARATOR_MARKER;
+            case "pattern-separator":
+                return Property.PATTERN_SEPARATOR;
+            case "infinity":
+                return Property.INFINITY;
+            case "NaN":
+                return Property.NAN;
+            default:
+                return null;
+        }
     }
 
     /**
@@ -245,35 +257,45 @@ public class DecimalSymbols {
      */
     public void setProperty(String propertyName, UnicodeString value) throws XPathException {
         switch (propertyName) {
-            case "decimal-separator" ->
-                    setDualProperty(propertyName, Property.DECIMAL_SEPARATOR_MARKER, Property.DECIMAL_SEPARATOR_RENDITION, value);
-            case "grouping-separator" ->
-                    setDualProperty(propertyName, Property.GROUPING_SEPARATOR_MARKER, Property.GROUPING_SEPARATOR_RENDITION, value);
-            case "digit" ->
-                    setSingleCharProperty(propertyName, Property.DIGIT, value);
-            case "minus-sign" ->
-                    setStringProperty(propertyName, Property.MINUS_SIGN, value);
-            case "percent" ->
-                    setDualProperty(propertyName, Property.PERCENT_MARKER, Property.PERCENT_RENDITION, value);
-            case "per-mille" ->
-                    setDualProperty(propertyName, Property.PER_MILLE_MARKER, Property.PER_MILLE_RENDITION, value);
-            case "zero-digit" -> {
+            case "decimal-separator":
+                setDualProperty(propertyName, Property.DECIMAL_SEPARATOR_MARKER, Property.DECIMAL_SEPARATOR_RENDITION, value);
+                break;
+            case "grouping-separator":
+                setDualProperty(propertyName, Property.GROUPING_SEPARATOR_MARKER, Property.GROUPING_SEPARATOR_RENDITION, value);
+                break;
+            case "digit":
+                setSingleCharProperty(propertyName, Property.DIGIT, value);
+                break;
+            case "minus-sign":
+                setStringProperty(propertyName, Property.MINUS_SIGN, value);
+                break;
+            case "percent":
+                setDualProperty(propertyName, Property.PERCENT_MARKER, Property.PERCENT_RENDITION, value);
+                break;
+            case "per-mille":
+                setDualProperty(propertyName, Property.PER_MILLE_MARKER, Property.PER_MILLE_RENDITION, value);
+                break;
+            case "zero-digit":
                 setSingleCharProperty(propertyName, Property.ZERO_DIGIT, value);
                 if (!isValidZeroDigit(value.codePointAt(0))) {
                     throw new XPathException("The value of the zero-digit attribute must be a Unicode digit with value zero",
                                              errorCodes[ERR_NOT_UNICODE_DIGIT]);
                 }
-            }
-            case "exponent-separator" ->
-                    setDualProperty(propertyName, Property.EXPONENT_SEPARATOR_MARKER, Property.EXPONENT_SEPARATOR_RENDITION, value);
-            case "pattern-separator" ->
-                    setSingleCharProperty(propertyName, Property.PATTERN_SEPARATOR, value);
-            case "infinity" ->
-                    setStringProperty(propertyName, Property.INFINITY, value);
-            case "NaN" ->
-                    setStringProperty(propertyName, Property.NAN, value);
-            default ->
-                    throw new XPathException("Unknown decimal format property: " + propertyName);
+                break;
+            case "exponent-separator":
+                setDualProperty(propertyName, Property.EXPONENT_SEPARATOR_MARKER, Property.EXPONENT_SEPARATOR_RENDITION, value);
+                break;
+            case "pattern-separator":
+                setSingleCharProperty(propertyName, Property.PATTERN_SEPARATOR, value);
+                break;
+            case "infinity":
+                setStringProperty(propertyName, Property.INFINITY, value);
+                break;
+            case "NaN":
+                setStringProperty(propertyName, Property.NAN, value);
+                break;
+            default:
+                throw new XPathException("Unknown decimal format property: " + propertyName);
         }
     }
 

@@ -172,7 +172,7 @@ public class XSLItemType extends StyleElement {
             ItemType resolved = super.resolveTypeAlias(typeName);
             if (resolved == null) {
                 ((XSLItemType)getStyleElement()).markUnresolved();
-                return AnyItemType.INSTANCE;
+                return AnyItemType.getInstance();
             } else {
                 return resolved;
             }

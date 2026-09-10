@@ -201,7 +201,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.INSTANCE;
+        return EmptyIterator.getInstance();
     }
 
     /**
@@ -314,10 +314,10 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
     public SchemaType getSchemaType() {
         SequenceIterator children = iterateChildAxis(NodeKindType.ELEMENT);
         NodeInfo node = (NodeInfo)children.next();
-        if (node == null || node.getSchemaType() == Untyped.INSTANCE) {
-            return Untyped.INSTANCE;
+        if (node == null || node.getSchemaType() == Untyped.getInstance()) {
+            return Untyped.getInstance();
         } else {
-            return AnyType.INSTANCE;
+            return AnyType.getInstance();
         }
     }
 
@@ -344,8 +344,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
 
         // output the children
 
-        SequenceIterator children = iterateChildAxis(null);
-        for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
+        for (NodeInfo child : children()) {
             child.copy(out, copyOptions, locationId);
         }
 

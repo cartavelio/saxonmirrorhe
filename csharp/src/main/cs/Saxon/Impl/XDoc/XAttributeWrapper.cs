@@ -111,20 +111,20 @@ namespace Saxon.Impl.XDoc {
         
 
         protected internal override SequenceIterator iterateAttributes(NodePredicate nodeTest) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
 
 
         protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
         
         protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
         
         protected override SequenceIterator iterateDescendants(NodePredicate nodeTest, bool includeSelf) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
 
         public override string getAttributeValue(NamespaceUri uri, string local) {

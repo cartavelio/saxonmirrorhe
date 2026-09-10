@@ -359,7 +359,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     public TailCall applyLeavingTail(Outputter output, XPathContext context) throws XPathException {
         //initialize();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-        if (requiredContextItemType != AnyItemType.INSTANCE &&
+        if (requiredContextItemType != AnyItemType.getInstance() &&
                 !requiredContextItemType.matches(context.getContextItem(), th)) {
             RoleDiagnostic role = new RoleDiagnostic(
                     RoleDiagnostic.MISC, "context item for the template rule", 0);
@@ -434,7 +434,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     }
 
     public void explainProperties(ExpressionPresenter presenter) {
-        if (getRequiredContextItemType() != AnyItemType.INSTANCE) {
+        if (getRequiredContextItemType() != AnyItemType.getInstance()) {
             SequenceType st = SequenceType.one(getRequiredContextItemType());
             presenter.emitAttribute("cxt", st.toAlphaCode());
         }

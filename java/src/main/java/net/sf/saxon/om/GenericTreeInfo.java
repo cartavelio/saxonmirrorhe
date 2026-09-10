@@ -34,7 +34,7 @@ public class GenericTreeInfo implements TreeInfo
     private String systemId;
     private Map<String, Object> userData;
     private long documentNumber = -1;
-    private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.INSTANCE;
+    private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.getInstance();
     private Durability durability = UNDEFINED;
 
     /**

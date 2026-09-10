@@ -11,7 +11,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.Latin1;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.StringValue;
@@ -24,8 +23,6 @@ import java.util.List;
  */
 
 public class InScopePrefixes extends SystemFunction {
-
-    private final static StringValue SV_XML = new StringValue(Latin1.of("xml"));
 
     /**
      * Call of in-scope-prefixes
@@ -54,7 +51,7 @@ public class InScopePrefixes extends SystemFunction {
         for (String s : prefixes) {
             result.add(new StringValue(s));
         }
-        result.add(SV_XML);
+        result.add(StringValue.bmp("xml"));
         return SequenceExtent.makeSequenceExtent(result);
     }
 

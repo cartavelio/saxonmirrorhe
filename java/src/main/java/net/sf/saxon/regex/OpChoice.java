@@ -136,7 +136,6 @@ public class OpChoice extends Operation {
             Operation currentOp = null;
 
             @Override
-            @CSharpSuppressWarnings("UnsafeIteratorConversion")
             public boolean hasNext() {
                 while (true) {
                     if (currentIter == null) {

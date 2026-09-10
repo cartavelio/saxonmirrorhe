@@ -181,7 +181,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     public SequenceIterator iterateCurrentGroup(String source) {
         List<Item> sourceMembers = currentSourceMembers.get(source);
         if (sourceMembers == null) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return new ListIterator.Of<>(sourceMembers);
         }

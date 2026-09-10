@@ -276,10 +276,10 @@ public class GroupByClause extends Clause {
      * as two Tuple objects, one holding the grouping key values and one holding everything else.
      */
 
-    public record ObjectToBeGrouped (
-            FlworTuple<AtomicValue> groupingValues,
-            FlworTuple<Sequence> retainedValues) {};
-
+    public static class ObjectToBeGrouped {
+        public FlworTuple<AtomicValue> groupingValues;
+        public FlworTuple<Sequence> retainedValues;
+    }
 
 
     /**
@@ -298,7 +298,7 @@ public class GroupByClause extends Clause {
         for (int j = 0; j < groupingValues.length; j++) {
             Sequence v = groupingValues[j];
             if (v == null) {
-                v = EmptySequence.INSTANCE;
+                v = EmptySequence.getInstance();
             }
             context.setLocalVariable(bindings[j].getLocalSlotNumber(), v);
         }

@@ -273,13 +273,13 @@ public class DocumentBuilderImpl extends DocumentBuilder {
         SpaceStrippingRule rule;
         switch (stripAction) {
             case Whitespace.ALL:
-                rule = AllElementsSpaceStrippingRule.INSTANCE;
+                rule = AllElementsSpaceStrippingRule.getInstance();
                 break;
             case Whitespace.NONE:
-                rule = NoElementsSpaceStrippingRule.INSTANCE;
+                rule = NoElementsSpaceStrippingRule.getInstance();
                 break;
             case Whitespace.IGNORABLE:
-                rule = IgnorableSpaceStrippingRule.INSTANCE;
+                rule = IgnorableSpaceStrippingRule.getInstance();
                 break;
             case Whitespace.UNSPECIFIED:
                 rule = null;
@@ -301,11 +301,11 @@ public class DocumentBuilderImpl extends DocumentBuilder {
     @Deprecated
     public int getStripSpace() {
         SpaceStrippingRule rule = parseOptions.getSpaceStrippingRule();
-        if (rule == AllElementsSpaceStrippingRule.INSTANCE) {
+        if (rule == AllElementsSpaceStrippingRule.getInstance()) {
             return Whitespace.ALL;
-        } else if (rule == NoElementsSpaceStrippingRule.INSTANCE) {
+        } else if (rule == NoElementsSpaceStrippingRule.getInstance()) {
             return Whitespace.NONE;
-        } else if (rule == IgnorableSpaceStrippingRule.INSTANCE) {
+        } else if (rule == IgnorableSpaceStrippingRule.getInstance()) {
             return Whitespace.IGNORABLE;
         } else if (rule == null) {
             return Whitespace.IGNORABLE;

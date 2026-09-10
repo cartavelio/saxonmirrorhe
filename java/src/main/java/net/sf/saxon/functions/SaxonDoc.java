@@ -95,13 +95,13 @@ public class SaxonDoc extends SystemFunction implements Callable {
             String s = value.head().getStringValue();
             switch (s) {
                 case "all":
-                    result = result.withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE);
+                    result = result.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                     break;
                 case "none":
-                    result = result.withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE);
+                    result = result.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                     break;
                 case "ignorable":
-                    result = result.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
+                    result = result.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
                     break;
                 case "package-defined":
                 case "default":
@@ -150,7 +150,7 @@ public class SaxonDoc extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue hrefVal = (AtomicValue) arguments[0].head();
         if (hrefVal == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
         String href = hrefVal.getStringValue();
         Item param = arguments[1].head();

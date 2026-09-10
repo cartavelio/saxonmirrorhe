@@ -35,7 +35,7 @@ public class Adjust_1 extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         CalendarValue in = (CalendarValue) arguments[0].head();
         if (in == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         } else {
             return in.adjustTimezone(context.getImplicitTimezone());
         }

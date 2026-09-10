@@ -75,7 +75,7 @@ public class SequenceWrapper extends SequenceReceiver {
     }
 
     private void startWrapper(NodeName name) throws XPathException {
-        out.startElement(name, Untyped.INSTANCE,
+        out.startElement(name, Untyped.getInstance(),
                          Loc.NONE,
                          ReceiverOption.NONE);
         out.namespace("xs", NamespaceUri.SCHEMA, ReceiverOption.NONE);
@@ -223,7 +223,7 @@ public class SequenceWrapper extends SequenceReceiver {
     public void append(/*@NotNull*/ Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (item instanceof AtomicValue) {
             final NamePool pool = getNamePool();
-            out.startElement(resultAtomicValue, Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
+            out.startElement(resultAtomicValue, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             AtomicType type = ((AtomicValue) item).getItemType();
             StructuredQName name = type.getStructuredQName();
             String prefix = name.getPrefix();
@@ -253,14 +253,14 @@ public class SequenceWrapper extends SequenceReceiver {
             }
         } else if (item instanceof MapItem) {
             ComplexContentOutputter out = getDestination();
-            out.startElement(resultMap, Untyped.INSTANCE, locationId, ReceiverOption.NONE);
+            out.startElement(resultMap, Untyped.getInstance(), locationId, ReceiverOption.NONE);
             MapItem map = (MapItem) item;
             for (KeyValuePair pair : map.keyValuePairs()) {
-                out.startElement(resultMapEntry, Untyped.INSTANCE, locationId, ReceiverOption.NONE);
-                out.startElement(resultMapKey, Untyped.INSTANCE, locationId, ReceiverOption.NONE);
+                out.startElement(resultMapEntry, Untyped.getInstance(), locationId, ReceiverOption.NONE);
+                out.startElement(resultMapKey, Untyped.getInstance(), locationId, ReceiverOption.NONE);
                 append(pair.key);
                 out.endElement();
-                out.startElement(resultMapValue, Untyped.INSTANCE, locationId, ReceiverOption.NONE);
+                out.startElement(resultMapValue, Untyped.getInstance(), locationId, ReceiverOption.NONE);
                 SequenceIterator value = pair.value.iterate();
                 Item valItem;
                 while ((valItem = value.next()) != null) {
@@ -271,10 +271,10 @@ public class SequenceWrapper extends SequenceReceiver {
             }
             out.endElement();
         } else if (item instanceof ArrayItem) {
-            out.startElement(resultArray, Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
+            out.startElement(resultArray, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             out.startContent();
             for (GroundedValue mem : ((ArrayItem) item).members()) {
-                out.startElement(resultArrayMember, Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
+                out.startElement(resultArrayMember, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
                 SequenceIterator value = mem.iterate();
                 Item valItem;
                 while ((valItem = value.next()) != null) {
@@ -284,13 +284,13 @@ public class SequenceWrapper extends SequenceReceiver {
             }
             out.endElement();
         } else if (item instanceof FunctionItem) {
-            out.startElement(resultFunction, Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
+            out.startElement(resultFunction, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             out.startContent();
             out.characters(StringView.of(((FunctionItem)item).getDescription()), locationId, ReceiverOption.NONE);
             out.endElement();
         } else if (item.getGenre() == Genre.EXTERNAL) {
             Object obj = ((ObjectValue<?>)item).getObject();
-            out.startElement(resultExternalValue, Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
+            out.startElement(resultExternalValue, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             out.attribute(new NoNamespaceName("class"), BuiltInAtomicType.UNTYPED_ATOMIC,
                           obj.getClass().getName(), Loc.NONE, ReceiverOption.NONE);
             out.startContent();
@@ -346,7 +346,7 @@ public class SequenceWrapper extends SequenceReceiver {
         if (!attName.hasURI(NamespaceUri.NULL)) {
             ns = ns.put(attName.getPrefix(), attName.getNamespaceUri());
         }
-        out.startElement(resultAttribute, Untyped.INSTANCE, atts, ns, Loc.NONE, 0);
+        out.startElement(resultAttribute, Untyped.getInstance(), atts, ns, Loc.NONE, 0);
         out.startContent();
         out.endElement();
     }
@@ -365,7 +365,7 @@ public class SequenceWrapper extends SequenceReceiver {
     private void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
         NamespaceMap ns = NamespaceMap.emptyMap();
         ns = ns.addAll(namespaceBindings);
-        out.startElement(resultNamespace, Untyped.INSTANCE, EmptyAttributeMap.INSTANCE, ns, Loc.NONE, 0);
+        out.startElement(resultNamespace, Untyped.getInstance(), EmptyAttributeMap.getInstance(), ns, Loc.NONE, 0);
         out.startContent();
         out.endElement();
     }

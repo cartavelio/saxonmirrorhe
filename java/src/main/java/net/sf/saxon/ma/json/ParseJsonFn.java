@@ -41,7 +41,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         parseJsonOptions.setAllowedValues("duplicates", "FOJS0005", "reject", "use-first", "use-last");
         parseJsonOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("fallback", SequenceType.one(fallbackType), null);
-        parseJsonOptions.addAllowedOption("null", SequenceType.ANY_SEQUENCE, EmptySequence.INSTANCE);
+        parseJsonOptions.addAllowedOption("null", SequenceType.ANY_SEQUENCE, EmptySequence.getInstance());
         parseJsonOptions.addAllowedOption("number-parser", SequenceType.one(parserType), null);
         parseJsonOptions.addAllowedOption("retain-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         return parseJsonOptions;
@@ -79,7 +79,7 @@ public class ParseJsonFn extends JsonToXMLFn {
 
     public static Item parse(IntIterator input, Map<String, GroundedValue> options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
-        GroundedValue nullRepresentation = EmptySequence.INSTANCE;
+        GroundedValue nullRepresentation = EmptySequence.getInstance();
         int flags = 0;
         if (options != null) {
             flags = JsonParser.getFlags(options, false, false);

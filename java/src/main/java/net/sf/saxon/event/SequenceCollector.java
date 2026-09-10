@@ -74,7 +74,7 @@ public final class SequenceCollector extends SequenceWriter {
     public GroundedValue getSequence() {
         switch (list.size()) {
             case 0:
-                return EmptySequence.INSTANCE;
+                return EmptySequence.getInstance();
             case 1:
                 return list.get(0);
             default:
@@ -90,7 +90,7 @@ public final class SequenceCollector extends SequenceWriter {
 
     public SequenceIterator iterate() {
         if (list.isEmpty()) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else {
             return new ListIterator.Of<>(list);
         }

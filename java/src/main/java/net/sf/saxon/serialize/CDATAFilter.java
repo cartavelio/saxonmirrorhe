@@ -15,7 +15,7 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.CharacterSet;
-import net.sf.saxon.str.Latin1;
+import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -228,7 +228,7 @@ public class CDATAFilter extends ProxyReceiver {
         final int chprop =
                 ReceiverOption.DISABLE_ESCAPING | ReceiverOption.DISABLE_CHARACTER_MAPS;
         final Location loc = Loc.NONE;
-        nextReceiver.characters(CDATA_OPEN, loc, chprop);
+        nextReceiver.characters(BMPString.of("<![CDATA["), loc, chprop);
 
         // Check that the character data doesn't include the substring "]]>"
         // Also get rid of any zero bytes inserted by character map expansion
@@ -238,7 +238,7 @@ public class CDATAFilter extends ProxyReceiver {
         while (i < len - 2) {
             if (data.codePointAt(i) == ']' && data.codePointAt(i + 1) == ']' && data.codePointAt(i+2) == '>') {
                 nextReceiver.characters(data.substring(doneto, i + 2), loc, chprop);
-                nextReceiver.characters(CDATA_CLOSE_AND_REOPEN, loc, chprop);
+                nextReceiver.characters(BMPString.of("]]><![CDATA["), loc, chprop);
                 doneto = i + 2;
             } else if (data.codePointAt(i) == 0) {
                 nextReceiver.characters(data.substring(doneto, i), loc, chprop);
@@ -247,12 +247,8 @@ public class CDATAFilter extends ProxyReceiver {
             i++;
         }
         nextReceiver.characters(data.substring(doneto, len), loc, chprop);
-        nextReceiver.characters(CDATA_CLOSE, loc, chprop);
+        nextReceiver.characters(BMPString.of("]]>"), loc, chprop);
     }
-
-    private static final UnicodeString CDATA_OPEN = Latin1.of("<![CDATA[");
-    private static final UnicodeString CDATA_CLOSE = Latin1.of("]]>");
-    private static final UnicodeString CDATA_CLOSE_AND_REOPEN = Latin1.of("]]><![CDATA[");
 
 
     /**

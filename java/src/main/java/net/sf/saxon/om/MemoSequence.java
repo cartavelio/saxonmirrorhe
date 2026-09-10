@@ -96,7 +96,7 @@ public class MemoSequence implements Sequence {
                 switch (used) {
                     case 0:
                         state = State.EMPTY;
-                        return EmptyIterator.INSTANCE;
+                        return EmptyIterator.getInstance();
                     case 1:
                         assert reservoir != null;
                         return SingletonIterator.makeIterator(reservoir[0]);
@@ -111,7 +111,7 @@ public class MemoSequence implements Sequence {
                 throw new UncheckedXPathException(de);
 
             case EMPTY:
-                return EmptyIterator.INSTANCE;
+                return EmptyIterator.getInstance();
 
             case ERROR:
                 XPathException e2 = new XPathException("Attempting to read a local variable when an error in that variable has already been reported", "XTDE0640");
@@ -320,7 +320,7 @@ public class MemoSequence implements Sequence {
             if (container.state == State.ALL_READ) {
                 return makeExtent();
             } else if (container.state == State.EMPTY) {
-                return EmptySequence.INSTANCE;
+                return EmptySequence.getInstance();
             } else {
                 // save the current position
                 int savePos = position;
@@ -337,7 +337,7 @@ public class MemoSequence implements Sequence {
         private GroundedValue makeExtent() {
             if (container.used == container.reservoir.length) {
                 if (container.used == 0) {
-                    return EmptySequence.INSTANCE;
+                    return EmptySequence.getInstance();
                 } else if (container.used == 1) {
                     return container.reservoir[0];
                 } else {
@@ -352,7 +352,7 @@ public class MemoSequence implements Sequence {
         @Override
         public GroundedValue getResidue() {
             if (container.state == State.EMPTY || position >= container.used || position == -2) {
-                return EmptySequence.INSTANCE;
+                return EmptySequence.getInstance();
             } else if (container.state == State.ALL_READ) {
                 return SequenceExtent.makeSequenceExtent(
                         Arrays.asList(container.reservoir).subList(position + 1, container.used));

@@ -213,7 +213,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
                     }
                 }
 
-                AttributeMap attributes = EmptyAttributeMap.INSTANCE;
+                AttributeMap attributes = EmptyAttributeMap.getInstance();
                 for (Triple t : pendingTag.attributes) {
                     NodeName attName;
                     if (t.uri.isEmpty()) {
@@ -226,7 +226,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
                                             Loc.NONE, ReceiverOption.NONE));
                 }
 
-                receiver.startElement(elemName, Untyped.INSTANCE, attributes, nsMap, Loc.NONE, ReceiverOption.NONE);
+                receiver.startElement(elemName, Untyped.getInstance(), attributes, nsMap, Loc.NONE, ReceiverOption.NONE);
 
 
                 pendingTag = null;

@@ -51,10 +51,9 @@ public class TryCatch extends Expression {
     }
 
     public void addCatchExpression(QNameTest test, Expression catchExpr) {
-        CatchClause clause = new CatchClause(
-                new Operand(this, catchExpr, OperandRole.SAME_FOCUS_ACTION),
-                test
-        );
+        CatchClause clause = new CatchClause();
+        clause.catchOp = new Operand(this, catchExpr, OperandRole.SAME_FOCUS_ACTION);
+        clause.nameTest = test;
         catchClauses.add(clause);
     }
 
@@ -131,7 +130,7 @@ public class TryCatch extends Expression {
     protected int computeCardinality() {
         int card = getTryExpr().getCardinality();
         for (CatchClause catchClause : catchClauses) {
-            card = Cardinality.union(card, catchClause.catchOp().getChildExpression().getCardinality());
+            card = Cardinality.union(card, catchClause.catchOp.getChildExpression().getCardinality());
         }
         return card;
     }
@@ -145,7 +144,7 @@ public class TryCatch extends Expression {
     public ItemType getItemType() {
         ItemType type = getTryExpr().getItemType();
         for (CatchClause catchClause : catchClauses) {
-            type = Type.getCommonSuperType(type, catchClause.catchOp().getChildExpression().getItemType());
+            type = Type.getCommonSuperType(type, catchClause.catchOp.getChildExpression().getItemType());
         }
         return type;
     }
@@ -163,7 +162,7 @@ public class TryCatch extends Expression {
         List<Operand> list = new ArrayList<>();
         list.add(tryOp);
         for (CatchClause cc : catchClauses) {
-            list.add(cc.catchOp());
+            list.add(cc.catchOp);
         }
         if (finallyOp != null) {
             list.add(finallyOp);
@@ -247,7 +246,7 @@ public class TryCatch extends Expression {
     public Expression copy(RebindingMap rebindings) {
         TryCatch t2 = new TryCatch(tryOp.getChildExpression().copy(rebindings));
         for (CatchClause clause : catchClauses) {
-            t2.addCatchExpression(clause.nameTest, clause.catchOp().getChildExpression().copy(rebindings));
+            t2.addCatchExpression(clause.nameTest, clause.catchOp.getChildExpression().copy(rebindings));
         }
         t2.setRollbackOutput(rollbackOutput);
         ExpressionTool.copyLocationInfo(this, t2);
@@ -308,8 +307,8 @@ public class TryCatch extends Expression {
         tryOp.getChildExpression().export(out);
         for (CatchClause clause : catchClauses) {
             out.startElement("catch");
-            out.emitAttribute("errors", clause.nameTest().exportQNameTest());
-            clause.catchOp().getChildExpression().export(out);
+            out.emitAttribute("errors", clause.nameTest.exportQNameTest());
+            clause.catchOp.getChildExpression().export(out);
             out.endElement();
         }
         // There's no `finally` operand in XSLT
@@ -326,9 +325,10 @@ public class TryCatch extends Expression {
         return new TryCatchElaborator();
     }
 
-    public record CatchClause (
-        Operand catchOp,
-        QNameTest nameTest) {
+    public static class CatchClause {
+        public int slotNumber = -1;
+        public Operand catchOp;
+        public QNameTest nameTest;
     }
 
     private static class TryCatchElaborator extends PushElaborator {
@@ -386,7 +386,7 @@ public class TryCatch extends Expression {
                             code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
                         }
                         for (CatchClause clause : expr.catchClauses) {
-                            if (clause.nameTest().matches(code)) {
+                            if (clause.nameTest.matches(code)) {
                                 if (o2 instanceof EventMonitor && ((EventMonitor) o2).hasBeenWrittenTo()) {
                                     // rollback=no was specified, and output has been written, so we cannot recover
                                     String message = err.getMessage() +
@@ -464,8 +464,8 @@ public class TryCatch extends Expression {
                             code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
                         }
                         for (CatchClause clause : expr.catchClauses) {
-                            if (clause.nameTest().matches(code)) {
-                                Expression caught = clause.catchOp().getChildExpression();
+                            if (clause.nameTest.matches(code)) {
+                                Expression caught = clause.catchOp.getChildExpression();
                                 XPathContextMajor c2 = context.newContext();
                                 c2.setCurrentException(err);
                                 // check for xsl:break within xsl:catch - test iterate-036
@@ -522,8 +522,8 @@ public class TryCatch extends Expression {
                             code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
                         }
                         for (CatchClause clause : expr.catchClauses) {
-                            if (clause.nameTest().matches(code)) {
-                                Expression caught = clause.catchOp().getChildExpression();
+                            if (clause.nameTest.matches(code)) {
+                                Expression caught = clause.catchOp.getChildExpression();
                                 XPathContextMajor c2 = context.newContext();
                                 c2.setCurrentException(err);
                                 Item resultItem = caught.evaluateItem(c2);
@@ -571,7 +571,7 @@ public class TryCatch extends Expression {
             }
             StructuredQName code = errorCode.getStructuredQName();
             for (CatchClause clause : catchClauses) {
-                if (clause.nameTest().matches(code)) {
+                if (clause.nameTest.matches(code)) {
                     return true;
                 }
             }

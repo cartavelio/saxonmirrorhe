@@ -389,7 +389,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
     @Override
     public TypeInfo getSchemaTypeInfo() {
         SchemaType type = node.getSchemaType();
-        if (type == null || Untyped.INSTANCE.equals(type) || BuiltInAtomicType.UNTYPED_ATOMIC.equals(type)) {
+        if (type == null || Untyped.getInstance().equals(type) || BuiltInAtomicType.UNTYPED_ATOMIC.equals(type)) {
             return null;
         }
         return new TypeInfoImpl(node.getConfiguration(), type);

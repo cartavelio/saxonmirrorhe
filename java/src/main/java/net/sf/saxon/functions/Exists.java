@@ -8,7 +8,10 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.elab.BooleanElaborator;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.OperatorSymbol;
@@ -60,8 +63,8 @@ public class Exists extends Aggregate {
 
     private static boolean exists(SequenceIterator iter) {
         boolean result;
-        if (iter instanceof LookaheadIterator lit && lit.supportsHasNext()) {
-            result = lit.hasNext();
+        if (iter instanceof LookaheadIterator && ((LookaheadIterator) iter).supportsHasNext()) {
+            result = ((LookaheadIterator) iter).hasNext();
         } else {
             result = iter.next() != null;
         }
@@ -104,13 +107,8 @@ public class Exists extends Aggregate {
         public BooleanEvaluator elaborateForBoolean() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            if (Cardinality.allowsMany(arg.getCardinality())) {
-                PullEvaluator puller = arg.makeElaborator().elaborateForPull();
-                return context -> exists(puller.iterate(context));
-            } else {
-                ItemEvaluator eval = arg.makeElaborator().elaborateForItem();
-                return context -> eval.eval(context) != null;
-            }
+            PullEvaluator puller = arg.makeElaborator().elaborateForPull();
+            return context ->  exists(puller.iterate(context));
         }
 
     }

@@ -169,7 +169,7 @@ public class ErrorExpression extends Expression {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return AnyItemType.INSTANCE;
+        return AnyItemType.getInstance();
     }
 
     /**

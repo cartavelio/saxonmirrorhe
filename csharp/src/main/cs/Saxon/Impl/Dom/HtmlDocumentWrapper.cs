@@ -102,13 +102,13 @@ namespace Saxon.Impl.Dom {
         }
 
         protected internal override SequenceIterator iterateAttributes(NodePredicate nodeTest) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
 
         protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
             //return SingleNodeIterator.makeIterator(outermostElement);
             if (!htmlDocument.HasChildNodes) {
-                return EmptyIterator.INSTANCE;
+                return EmptyIterator.getInstance();
             }
             System.Collections.Generic.List<NodeInfo> childList = new ();
             int indexPosition = 0;
@@ -125,7 +125,7 @@ namespace Saxon.Impl.Dom {
         }
 
         protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
 
         public override string getAttributeValue(NamespaceUri uri, string local) {

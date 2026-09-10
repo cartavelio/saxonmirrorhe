@@ -48,9 +48,9 @@ public class ApplyTemplatesFn extends SystemFunction {
         SequenceType paramsType = SequenceType.optional(
                 new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE));
         OptionsParameter options = new OptionsParameter(40);
-        options.addAllowedOption("mode", SequenceType.optional(modeType), EmptySequence.INSTANCE);
-        options.addAllowedOption("params", paramsType, EmptyMap.INSTANCE_40);
-        options.addAllowedOption("tunnel-params", paramsType, EmptyMap.INSTANCE_40);
+        options.addAllowedOption("mode", SequenceType.optional(modeType), EmptySequence.getInstance());
+        options.addAllowedOption("params", paramsType, EmptyMap.getInstance(40));
+        options.addAllowedOption("tunnel-params", paramsType, EmptyMap.getInstance(40));
         return options;
     }
 

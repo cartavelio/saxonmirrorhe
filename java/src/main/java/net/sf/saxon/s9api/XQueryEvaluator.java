@@ -97,7 +97,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
 
     public void setSchemaValidationMode(ValidationMode mode) {
         if (mode != null) {
-            context.setSchemaValidationMode(Validation.fromValidationMode(mode));
+            context.setSchemaValidationMode(mode.getNumber());
         }
     }
 
@@ -112,21 +112,8 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      */
 
     public ValidationMode getSchemaValidationMode() {
-        return getSchemaValidationMode(context.getSchemaValidationMode());
+        return ValidationMode.get(context.getSchemaValidationMode());
     }
-
-    public static ValidationMode getSchemaValidationMode(int mode) {
-        return switch (mode) {
-            case Validation.STRICT -> ValidationMode.STRICT;
-            case Validation.LAX -> ValidationMode.LAX;
-            case Validation.STRIP -> ValidationMode.STRIP;
-            case Validation.PRESERVE -> ValidationMode.PRESERVE;
-            case Validation.DEFAULT -> ValidationMode.DEFAULT;
-            default -> ValidationMode.DEFAULT;
-        };
-    }
-
-    ;
 
 
     /**

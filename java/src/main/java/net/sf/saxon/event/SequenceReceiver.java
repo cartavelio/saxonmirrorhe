@@ -202,8 +202,7 @@ public abstract class SequenceReceiver implements Receiver {
                         previousAtomic = false;
                     } else if (kind == Type.DOCUMENT) {
                         startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
-                        SequenceIterator children = node.iterateChildAxis(null);
-                        for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
+                        for (NodeInfo child : node.children()) {
                             append(child, locationId, copyNamespaces);
                         }
                         previousAtomic = false;

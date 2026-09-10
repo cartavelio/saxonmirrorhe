@@ -13,18 +13,17 @@ package net.sf.saxon.om;
  */
 public class CodedName implements NodeName {
 
-    // Don't use a record here, because C# doesn't like Equals() to be overridden
-
-
     private final int fingerprint;
     private final String prefix;
     private final NamePool pool;
 
     public CodedName(int fingerprint, String prefix, NamePool pool) {
+//        if (fingerprint >> 20 != 0) {
+//            throw new IllegalArgumentException();
+//        }
         this.fingerprint = fingerprint;
         this.prefix = prefix;
         this.pool = pool;
-
     }
 
     /**

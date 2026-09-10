@@ -595,6 +595,11 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
                         separator = makeSeparator(sep, context);
                     }
 
+                    // handle parameters if any
+
+                    ParameterSet params = assembleParams(context, expr.getActualParams());
+                    ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
+
                     // Get an iterator to iterate through the selected nodes in original order
 
                     SequenceIterator iter = select.iterate(context);
@@ -604,11 +609,6 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
                     if (iter instanceof EmptyIterator) {
                         return null;
                     }
-
-                    // handle parameters if any
-
-                    ParameterSet params = assembleParams(context, expr.getActualParams());
-                    ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
 
                     // process the selected nodes now
 

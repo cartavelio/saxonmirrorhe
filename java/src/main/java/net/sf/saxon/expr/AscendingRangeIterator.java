@@ -33,11 +33,11 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
 
     public static AtomicIterator makeRangeIterator(IntegerValue start, IntegerValue step, IntegerValue end) throws XPathException {
         if (start == null || step == null || end == null) {
-            return EmptyAtomicIterator.INSTANCE;
+            return EmptyIterator.ofAtomic();
         } else {
             int direction = step.compareTo(Int64Value.ZERO);
             if (direction == 0 || start.compareTo(end) > 0) {
-                return EmptyAtomicIterator.INSTANCE;
+                return EmptyIterator.ofAtomic();
             }
             if (start instanceof BigIntegerValue || step instanceof BigIntegerValue || end instanceof BigIntegerValue) {
                 if (direction < 0) {

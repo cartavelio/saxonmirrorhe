@@ -9,7 +9,6 @@ package net.sf.saxon.str;
 
 import net.sf.saxon.expr.sort.EmptyIntIterator;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
@@ -126,7 +125,6 @@ public class ZenoString extends UnicodeString {
      */
     @Override
     @CSharpReplaceBody(code="return new Saxon.Impl.Overrides.ZenoStringCodepoints(segments);")
-    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public IntIterator codePoints() {
         if (isEmpty()) {
             return EmptyIntIterator.getInstance();

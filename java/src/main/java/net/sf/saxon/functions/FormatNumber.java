@@ -61,7 +61,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                         Literal.isEmptySequence(arguments[2]))) {
             DecimalFormatManager dfm = getRetainedStaticContext().getDecimalFormatManager();
             assert dfm != null;
-            picture = ((StringLiteral) arguments[1]).getUnicodeString();
+            picture = ((StringLiteral) arguments[1]).getString();
             if (arguments.length == 3) {
                 if ((arguments[2] instanceof StringLiteral)) {
                     try {

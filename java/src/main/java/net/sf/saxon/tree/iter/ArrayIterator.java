@@ -135,7 +135,7 @@ public abstract class ArrayIterator implements SequenceIterator, FocusIterator,
                 newEnd = currentEnd;
             }
             if (newEnd <= newStart) {
-                return EmptyIterator.INSTANCE;
+                return EmptyIterator.getInstance();
             }
             return new Of<T>(items, newStart, newEnd);
         }

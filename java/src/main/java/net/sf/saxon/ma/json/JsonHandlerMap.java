@@ -34,7 +34,7 @@ public class JsonHandlerMap extends JsonHandler {
     Stack<Object> stack;
 
     protected Stack<UnicodeString> keys;
-    private GroundedValue nullRepresentation = EmptySequence.INSTANCE;
+    private GroundedValue nullRepresentation = EmptySequence.getInstance();
     private final int flags;
     private MapFunctionSet.OnDuplicatesAction duplicatesCombiner = null;
 

@@ -8,9 +8,6 @@
 package net.sf.saxon.lib;
 
 
-import net.sf.saxon.s9api.ValidationMode;
-import net.sf.saxon.transpile.CSharpReplaceBody;
-
 /**
  * This class contains constants and static methods to manipulate the validation
  * property of a type.
@@ -84,13 +81,17 @@ public final class Validation {
      */
 
     public static int getCode(String value) {
-        return switch (value) {
-            case "strict" -> STRICT;
-            case "lax" -> LAX;
-            case "preserve" -> PRESERVE;
-            case "strip" -> STRIP;
-            default -> INVALID;
-        };
+        if (value.equals("strict")) {
+            return STRICT;
+        } else if (value.equals("lax")) {
+            return LAX;
+        } else if (value.equals("preserve")) {
+            return PRESERVE;
+        } else if (value.equals("strip")) {
+            return STRIP;
+        } else {
+            return INVALID;
+        }
     }
 
     /**
@@ -102,18 +103,19 @@ public final class Validation {
 
     /*@NotNull*/
     public static String describe(int value) {
-        return switch (value) {
-            case STRICT -> "strict";
-            case LAX -> "lax";
-            case PRESERVE -> "preserve";
-            case STRIP -> "skip";  // for XQuery
-            case BY_TYPE -> "by type";
-            default -> "invalid";
-        };
-    }
-
-    @CSharpReplaceBody(code="return (int)mode;")
-    public static int fromValidationMode(ValidationMode mode) {
-        return mode.getNumber();
+        switch (value) {
+            case STRICT:
+                return "strict";
+            case LAX:
+                return "lax";
+            case PRESERVE:
+                return "preserve";
+            case STRIP:
+                return "skip";  // for XQuery
+            case BY_TYPE:
+                return "by type";
+            default:
+                return "invalid";
+        }
     }
 }

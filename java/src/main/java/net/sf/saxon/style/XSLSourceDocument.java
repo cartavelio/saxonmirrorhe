@@ -116,13 +116,13 @@ public class XSLSourceDocument extends StyleElement {
                     case "strip-space":
                         switch (Whitespace.normalizeWhitespace(StringView.of(value)).toString()) {
                             case "#all":
-                                parseOptions = parseOptions.withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE);
+                                parseOptions = parseOptions.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                                 break;
                             case "#none":
-                                parseOptions = parseOptions.withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE);
+                                parseOptions = parseOptions.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                                 break;
                             case "#ignorable":
-                                parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
+                                parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
                                 break;
                             case "#default":
                                 parseOptions = parseOptions.withSpaceStrippingRule(null);

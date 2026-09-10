@@ -194,7 +194,7 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
                 converted = converter.convert(value, context);
             }
             if (converted == null) {
-                converted = EmptySequence.INSTANCE;
+                converted = EmptySequence.getInstance();
             }
 
             if (required != null && !required.matches(converted, config.getTypeHierarchy())) {

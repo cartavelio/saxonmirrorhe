@@ -89,7 +89,7 @@ public class TypeHierarchy {
                 && !((FunctionItemType) requiredItemType).isArrayType()
                 && !(relationship(requiredItemType, suppliedItemType) == Affinity.SUBSUMES)) {
 
-            if (requiredItemType == AnyFunctionType.INSTANCE) {
+            if (requiredItemType == AnyFunctionType.getInstance()) {
                 // no action (the type checking is added later)
                 return iterator;
 

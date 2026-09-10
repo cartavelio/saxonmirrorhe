@@ -67,7 +67,7 @@ public class JsonToXMLFn extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item arg0 = arguments[0].head();
         if (arg0 == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
 
         // Following needed for parse-json but not for json-to-xml, see PR 2205

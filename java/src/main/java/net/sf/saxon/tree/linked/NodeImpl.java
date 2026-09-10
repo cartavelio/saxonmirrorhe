@@ -83,7 +83,7 @@ public abstract class NodeImpl
 
     @Override
     public SchemaType getSchemaType() {
-        return Untyped.INSTANCE;
+        return Untyped.getInstance();
     }
 
     /**
@@ -133,7 +133,7 @@ public abstract class NodeImpl
     @Override
     public AtomicSequence atomize() throws XPathException {
         SchemaType stype = getSchemaType();
-        if (stype == Untyped.INSTANCE || stype == BuiltInAtomicType.UNTYPED_ATOMIC) {
+        if (stype == Untyped.getInstance() || stype == BuiltInAtomicType.UNTYPED_ATOMIC) {
             return StringValue.makeUntypedAtomic(getUnicodeStringValue());
         } else {
             return stype.atomize(this);
@@ -220,7 +220,7 @@ public abstract class NodeImpl
 
     @Override
     public AttributeMap attributes() {
-        return EmptyAttributeMap.INSTANCE;
+        return EmptyAttributeMap.getInstance();
     }
 
     /**
@@ -531,7 +531,7 @@ public abstract class NodeImpl
         if (this instanceof ParentNodeImpl) {
             return ((ParentNodeImpl) this).iterateChildren(predicate);
         } else {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
     }
 
@@ -547,7 +547,7 @@ public abstract class NodeImpl
         if (hasChildNodes()) {
             return new SteppingNavigator.DescendantAxisIterator(this, false, predicate);
         } else {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
     }
 

@@ -2777,7 +2777,7 @@ public class Configuration implements SourceResolver {
      */
 
     public boolean isStripsAllWhiteSpace() {
-        return defaultParseOptions.getSpaceStrippingRule() == AllElementsSpaceStrippingRule.INSTANCE;
+        return defaultParseOptions.getSpaceStrippingRule() == AllElementsSpaceStrippingRule.getInstance();
     }
 
 //    //#if CSHARP==false
@@ -4456,13 +4456,13 @@ public class Configuration implements SourceResolver {
                     SpaceStrippingRule rule;
                     switch (s) {
                         case "all":
-                            rule = AllElementsSpaceStrippingRule.INSTANCE;
+                            rule = AllElementsSpaceStrippingRule.getInstance();
                             break;
                         case "none":
-                            rule = NoElementsSpaceStrippingRule.INSTANCE;
+                            rule = NoElementsSpaceStrippingRule.getInstance();
                             break;
                         case "ignorable":
-                            rule = IgnorableSpaceStrippingRule.INSTANCE;
+                            rule = IgnorableSpaceStrippingRule.getInstance();
                             break;
                         default:
                             throw new IllegalArgumentException(
@@ -5097,9 +5097,9 @@ public class Configuration implements SourceResolver {
 
             case FeatureCode.STRIP_WHITESPACE:
                 SpaceStrippingRule rule = getParseOptions().getSpaceStrippingRule();
-                if (rule == AllElementsSpaceStrippingRule.INSTANCE) {
+                if (rule == AllElementsSpaceStrippingRule.getInstance()) {
                     return "all";
-                } else if (rule == null || rule == IgnorableSpaceStrippingRule.INSTANCE) {
+                } else if (rule == null || rule == IgnorableSpaceStrippingRule.getInstance()) {
                     return "ignorable";
                 } else {
                     return "none";

@@ -44,8 +44,27 @@ public enum OccurrenceIndicator {
      */
     ONE_OR_MORE;
 
-    //#if CSHARP==false
-
+    /**
+     * Get the internal cardinality property corresponding to this occurrence indicator
+     * @return the internal cardinality property, for example {@link StaticProperty#ALLOWS_ONE_OR_MORE}.
+     */
+    int getCardinality() {
+        OccurrenceIndicator indicator = this;
+        switch (indicator) {
+            case ZERO:
+                return StaticProperty.EMPTY;
+            case ZERO_OR_ONE:
+                return StaticProperty.ALLOWS_ZERO_OR_ONE;
+            case ZERO_OR_MORE:
+                return StaticProperty.ALLOWS_ZERO_OR_MORE;
+            case ONE:
+                return StaticProperty.ALLOWS_ONE;
+            case ONE_OR_MORE:
+                return StaticProperty.ALLOWS_ONE_OR_MORE;
+            default:
+                return StaticProperty.EMPTY;
+        }
+    }
 
     /**
      * Get the {@link OccurrenceIndicator} value corresponding to an internal cardinality property
@@ -54,9 +73,69 @@ public enum OccurrenceIndicator {
      */
 
     public static OccurrenceIndicator getOccurrenceIndicator(int cardinality) {
-        return Cardinality.getOccurrenceIndicatorForCardinality(cardinality);
+        switch (cardinality) {
+            case StaticProperty.EMPTY:
+                return ZERO;
+            case StaticProperty.ALLOWS_ZERO_OR_ONE:
+                return ZERO_OR_ONE;
+            case StaticProperty.ALLOWS_ZERO_OR_MORE:
+                return ZERO_OR_MORE;
+            case StaticProperty.ALLOWS_ONE:
+                return ONE;
+            case StaticProperty.ALLOWS_ONE_OR_MORE:
+                return ONE_OR_MORE;
+            default:
+                return ZERO_OR_MORE;
+        }
     }
 
+    /**
+     * Ask whether this occurrence indicator permits an empty sequence.
+     *
+     * @return true if the occurrence indicator is one of {@link #ZERO}, {@link #ZERO_OR_ONE},
+     *         or {@link #ZERO_OR_MORE}
+     * @since 9.2
+     */
+
+    public boolean allowsZero() {
+        return Cardinality.allowsZero(getCardinality());
+    }
+
+    /**
+     * Ask whether this occurrence indicator permits a sequence containing more than one item.
+     *
+     * @return true if the occurrence indicator is one of {@link #ZERO_OR_MORE} or {@link #ONE_OR_MORE}
+     * @since 9.2
+     */
+
+    public boolean allowsMany() {
+        return Cardinality.allowsMany(getCardinality());
+    }
+
+    /**
+     * Ask whether this occurrence indicator permits a sequence of a given size
+     * @param size the number of items in the sequence
+     * @return true if this number of items is permitted by the occurrence indicator
+     * @since 12.0
+     */
+
+    public boolean allows(int size) {
+        OccurrenceIndicator indicator = this;
+        switch (indicator) {
+            case ZERO:
+                return size == 0;
+            case ZERO_OR_ONE:
+                return size <= 1;
+            case ZERO_OR_MORE:
+                return true;
+            case ONE:
+                return size == 1;
+            case ONE_OR_MORE:
+                return size > 0;
+            default:
+                return false;
+        }
+    }
 
     /**
      * Ask whether one occurrence indicator subsumes another. Specifically,
@@ -69,7 +148,7 @@ public enum OccurrenceIndicator {
      */
 
     public boolean subsumes(/*@NotNull*/ OccurrenceIndicator other) {
-        return Cardinality.subsumes(Cardinality.staticPropertyFromOccurrenceIndicator(this), Cardinality.staticPropertyFromOccurrenceIndicator(other));
+        return Cardinality.subsumes(getCardinality(), other.getCardinality());
     }
 
     /**
@@ -81,17 +160,22 @@ public enum OccurrenceIndicator {
 
     @CSharpModifiers(code={"public", "override"})
     public String toString() {
-        return switch (this) {
-            case ZERO -> "0";
-            case ZERO_OR_ONE -> "?";
-            case ZERO_OR_MORE -> "*";
-            case ONE -> "";
-            case ONE_OR_MORE -> "+";
-            default -> "!!!";
-        };
+        OccurrenceIndicator indicator = this;
+        switch (indicator) {
+            case ZERO:
+                return "0";
+            case ZERO_OR_ONE:
+                return "?";
+            case ZERO_OR_MORE:
+                return "*";
+            case ONE:
+                return "";
+            case ONE_OR_MORE:
+                return "+";
+            default:
+                return "!!!";
+        }
     }
-
-    //#endif
 
 }
 

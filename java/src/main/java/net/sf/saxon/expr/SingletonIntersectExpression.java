@@ -97,7 +97,7 @@ public class SingletonIntersectExpression extends VennExpression {
     public SequenceIterator iterate(XPathContext c) throws XPathException {
         NodeInfo m = (NodeInfo) getLhsExpression().evaluateItem(c);
         if (m == null) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         }
         SequenceIterator iter = getRhsExpression().iterate(c);
         NodeInfo n;
@@ -107,7 +107,7 @@ public class SingletonIntersectExpression extends VennExpression {
                 return SingletonIterator.makeIterator(m);
             }
         }
-        return EmptyIterator.INSTANCE;
+        return EmptyIterator.getInstance();
     }
 
     /**

@@ -13,7 +13,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
-import net.sf.saxon.str.Latin1;
+import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.Type;
@@ -246,11 +246,9 @@ public class Err {
         if (cs.length() <= 30) {
             return Whitespace.collapseWhitespace(cs);
         } else {
-            return Whitespace.collapseWhitespace(cs.substring(0, 30)).concat(U_ELLIPSIS);
+            return Whitespace.collapseWhitespace(cs.substring(0, 30)).concat(BMPString.of("..."));
         }
     }
-
-    private final static UnicodeString U_ELLIPSIS = Latin1.of("...");
 
     /**
      * Abbreviate a URI for use in error messages

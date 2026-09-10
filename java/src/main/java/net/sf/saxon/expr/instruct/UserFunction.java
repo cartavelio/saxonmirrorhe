@@ -10,6 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -65,6 +66,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     private SequenceType resultType;
     private SequenceType declaredResultType;
     protected volatile SequenceEvaluator bodyEvaluator = null;
+    protected PushEvaluator pushEvaluator = null;
     private boolean updating = false;
     private boolean ixslUpdating = false;
     private int inlineable = -1; // 0:no 1:yes -1:don't know
@@ -266,7 +268,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     public boolean acceptsNodesWithoutAtomization() {
         for (int i = 0; i < getArity(); i++) {
             ItemType type = getArgumentType(i).getPrimaryType();
-            if (type instanceof NodeTest || type == AnyItemType.INSTANCE) {
+            if (type instanceof NodeTest || type == AnyItemType.getInstance()) {
                 return true;
             }
         }
@@ -524,18 +526,17 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     /**
      * Set the declared streamability (XSLT 3.0 attribute)
      *
-     * @param streamability the declared streamability. Must not be null; use the
-     *                      value {@link FunctionStreamability#UNCLASSIFIED} if not specified
+     * @param streamability the declared streamability (defaults to "unclassified")
      */
 
     public void setDeclaredStreamability(FunctionStreamability streamability) {
-        this.declaredStreamability = streamability;
+        this.declaredStreamability = streamability == null ? FunctionStreamability.UNCLASSIFIED : streamability;
     }
 
     /**
      * Get the declared streamability (XSLT 3.0 attribute)
      *
-     * @return the declared streamability (defaults to {@link FunctionStreamability#UNCLASSIFIED})
+     * @return the declared streamability (defaults to "unclassified")
      */
 
     public FunctionStreamability getDeclaredStreamability() {
@@ -969,7 +970,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     @Override
     public GroundedValue subsequence(int start, int length) {
         //noinspection RedundantCast
-        return start <= 0 && (start + length) > 0 ? (GroundedValue) this : (GroundedValue) EmptySequence.INSTANCE;
+        return start <= 0 && (start + length) > 0 ? (GroundedValue) this : (GroundedValue) EmptySequence.getInstance();
     }
 
     /**

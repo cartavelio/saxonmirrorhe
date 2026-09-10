@@ -50,22 +50,6 @@
     <reason>Saxon is using transitive comparison for XQuery group-by even in 3.1 mode</reason>
   </exception>
   
-  <exception test-set="method-xhtml" test-case="Serialization-xhtml-36
-                                                Serialization-xhtml-36a
-                                                Serialization-xhtml-37
-                                                Serialization-xhtml-37a" 
-                                     run="false" report="n/a">
-    <created by="Michael Kay" on="2025-10-22"/>
-    <reason>Saxon outputs the meta tag in HTML5 format despite what the serialization 3.1 spec says</reason>
-  </exception>
-  
-  <exception test-set="method-html" test-case="Serialization-html-36
-                                               Serialization-html-37" 
-                                     run="false" report="n/a">
-    <created by="Michael Kay" on="2025-10-22"/>
-    <reason>Saxon outputs the meta tag in HTML5 format despite what the serialization 3.1 spec says</reason>
-  </exception>
-  
   
 
 </exceptions>

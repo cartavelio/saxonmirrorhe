@@ -522,7 +522,7 @@ public class SourceBinding {
                     boolean textonly = UType.TEXT.subsumes(b.getItemType().getUType());
                     UnicodeString constant = null;  // bug 3748
                     if (textonly && b instanceof ValueOf && ((ValueOf) b).getSelect() instanceof StringLiteral) {
-                        constant = ((StringLiteral) ((ValueOf) b).getSelect()).getUnicodeString();
+                        constant = ((StringLiteral) ((ValueOf) b).getSelect()).getString();
                     }
                     DocumentInstr doc = new DocumentInstr(textonly, constant);
                     doc.setContentExpression(b);
@@ -636,7 +636,7 @@ public class SourceBinding {
                                 atype = atype == null
                                         ? instructionType
                                         : ChoiceItemType.of(atype, instructionType);
-                                if (atype == AnyItemType.INSTANCE) {
+                                if (atype == AnyItemType.getInstance()) {
                                     break;
                                 }
                             }

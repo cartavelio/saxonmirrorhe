@@ -221,7 +221,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
                 compileContent(compilation, decl, instruction, separator);
                 return instruction;
             } else if (namespace instanceof StringLiteral) {
-                UnicodeString nsuri = ((StringLiteral) namespace).getUnicodeString();
+                UnicodeString nsuri = ((StringLiteral) namespace).getString();
                 if (nsuri.isEmpty()) {
                     parts[0] = "";
                 } else if (parts[0].equals("")) {

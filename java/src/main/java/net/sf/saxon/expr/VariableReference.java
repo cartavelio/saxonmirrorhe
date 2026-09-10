@@ -333,14 +333,14 @@ public abstract class VariableReference extends Expression implements BindingRef
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        if (staticType == null || staticType.getPrimaryType() == AnyItemType.INSTANCE) {
+        if (staticType == null || staticType.getPrimaryType() == AnyItemType.getInstance()) {
             if (binding != null) {
                 SequenceType st = binding.getRequiredType();
                 if (st != null) {
                     return st.getPrimaryType();
                 }
             }
-            return AnyItemType.INSTANCE;
+            return AnyItemType.getInstance();
         } else {
             return staticType.getPrimaryType();
         }

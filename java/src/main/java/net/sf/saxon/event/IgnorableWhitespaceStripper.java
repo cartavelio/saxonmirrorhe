@@ -44,7 +44,7 @@ public class IgnorableWhitespaceStripper extends ProxyReceiver {
         nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
 
         boolean strip = false;
-        if (type != Untyped.INSTANCE) {
+        if (type != Untyped.getInstance()) {
             // if the element has element-only content, whitespace stripping is enabled
             if (type.isComplexType() &&
                     !((ComplexType) type).isSimpleContent() &&

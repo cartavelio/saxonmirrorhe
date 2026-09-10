@@ -14,7 +14,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.*;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
+
 
 import javax.xml.transform.Source;
 import java.io.File;
@@ -189,7 +189,6 @@ public class PackageLibrary {
      * then the one with highest version number is taken.
      */
 
-    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public synchronized PackageDetails findPackage(String name, PackageVersionRanges ranges) {
         Set<PackageDetails> candidates = new HashSet<>();
         List<PackageVersion> available = packageVersions.get(name);

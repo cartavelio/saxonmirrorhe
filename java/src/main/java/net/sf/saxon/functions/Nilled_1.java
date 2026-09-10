@@ -66,7 +66,7 @@ public class Nilled_1 extends SystemFunction implements Callable {
 
         NodeInfo node = (NodeInfo)arguments[0].head();
         if (node == null || node.getNodeKind() != Type.ELEMENT) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
         return BooleanValue.get(isNilled(node));
     }

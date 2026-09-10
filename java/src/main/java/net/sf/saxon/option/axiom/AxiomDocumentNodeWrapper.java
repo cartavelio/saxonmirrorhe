@@ -246,12 +246,12 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper {
 
     @Override
     protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
-        return EmptyIterator.INSTANCE;
+        return EmptyIterator.getInstance();
     }
 
     @Override
     protected SequenceIterator iterateSiblings(NodePredicate nodeTest, boolean forwards) {
-        return EmptyIterator.INSTANCE;
+        return EmptyIterator.getInstance();
     }
 
     /**

@@ -84,7 +84,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
 
     @Override
     public SchemaType getSchemaType() {
-        return Untyped.INSTANCE;
+        return Untyped.getInstance();
     }
 
 
@@ -198,7 +198,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     @Override
     protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
         if (!((OMElement) node).getAllAttributes().hasNext()) {
-            return EmptyIterator.INSTANCE;
+            return EmptyIterator.getInstance();
         } else if (nodeTest instanceof NamedXNodePredicate) {
             NamedXNodePredicate fpTest = ((NamedXNodePredicate) nodeTest);
             StructuredQName requiredName = fpTest.getMatchingNodeName();
@@ -206,7 +206,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
             String local = requiredName.getLocalPart();
             OMAttribute att = ((OMElement) node).getAttribute(new QName(uri, local));
             if (att == null) {
-                return EmptyIterator.INSTANCE;
+                return EmptyIterator.getInstance();
             } else {
                 return SingletonIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
             }

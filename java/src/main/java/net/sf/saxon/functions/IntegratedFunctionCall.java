@@ -181,7 +181,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         if (function.getDefinition().trustResultType()) {
             return resultType.getPrimaryType();
         } else {
-            return AnyItemType.INSTANCE;
+            return AnyItemType.getInstance();
         }
     }
 
@@ -312,7 +312,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
                 result = new CardinalityCheckingIterator(result, card, role, getLocation());
             }
             final ItemType type = resultType.getPrimaryType();
-            if (type != AnyItemType.INSTANCE) {
+            if (type != AnyItemType.getInstance()) {
                 result = new ItemMappingIterator(result, ItemMapper.of(item -> {
                      if (!type.matches(item, th)) {
                          String msg = role.get().composeErrorMessage(type, item, th);

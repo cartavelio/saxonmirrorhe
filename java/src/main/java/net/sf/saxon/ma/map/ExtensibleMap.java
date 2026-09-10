@@ -5,7 +5,6 @@ import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.Iterator;
@@ -156,7 +155,6 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
          */
         
         @Override
-        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public boolean hasNext() {
             while (removals.contains(offset)) {
                 if (keyIter.hasNext() && valueIter.hasNext()) {

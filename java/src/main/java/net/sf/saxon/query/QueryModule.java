@@ -890,7 +890,6 @@ public class QueryModule implements StaticContext {
      *          if a circularity is found
      */
 
-    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public void checkForCircularities(/*@NotNull*/ List<GlobalVariable> compiledVars, /*@NotNull*/ XQueryFunctionLibrary globalFunctionLibrary) throws XPathException {
         Iterator<GlobalVariable> iter = compiledVars.iterator();
         IndexedStack<Object> stack = null;
@@ -924,7 +923,7 @@ public class QueryModule implements StaticContext {
             GlobalContextRequirement gcr = executable.getGlobalContextRequirement();
             if (gcr != null && gcr.getDefaultValue() != null) {
                 ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(
-                        AnyItemType.INSTANCE, Optionality.OPTIONAL);
+                        AnyItemType.getInstance(), Optionality.OPTIONAL);
                 gcr.setDefaultValue(gcr.getDefaultValue().typeCheck(visitor, info));
             }
         }
@@ -1149,7 +1148,6 @@ public class QueryModule implements StaticContext {
      *          variable reference cannot be resolved or if the variable is private
      */
 
-    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public void bindUnboundVariables() throws XPathException {
         for (UndeclaredVariable uv : undeclaredVariables.values()) {
             StructuredQName qName = uv.getVariableQName();

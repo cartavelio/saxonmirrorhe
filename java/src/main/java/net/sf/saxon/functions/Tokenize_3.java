@@ -44,11 +44,11 @@ public class Tokenize_3 extends RegexFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue sv = (AtomicValue) arguments[0].head();
         if (sv == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
         UnicodeString input = sv.getUnicodeStringValue();
         if (input.isEmpty()) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
         RegularExpression re = getRegularExpression(arguments, 1, 2);
         if (re == null) {

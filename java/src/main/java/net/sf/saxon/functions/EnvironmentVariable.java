@@ -38,7 +38,7 @@ public class EnvironmentVariable extends SystemFunction {
         if (value.isPresent()) {
             return value.get();
         } else {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
     }
 

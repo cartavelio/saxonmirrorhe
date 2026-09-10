@@ -38,7 +38,7 @@ import java.util.Objects;
 public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     private NodeName nodeName;
-    private SchemaType type = Untyped.INSTANCE;
+    private SchemaType type = Untyped.getInstance();
     private AttributeMap attributeMap;      // this excludes namespace attributes
     private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
 
@@ -47,7 +47,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     public ElementImpl() {
-        this.attributeMap = EmptyAttributeMap.INSTANCE;
+        this.attributeMap = EmptyAttributeMap.getInstance();
     }
 
     /**
@@ -210,7 +210,11 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     @Override
     public int getLineNumber() {
         DocumentImpl root = getPhysicalRoot();
-        return root == null ? -1 : root.getLineNumber(getRawSequenceNumber());
+        if (root == null) {
+            return -1;
+        } else {
+            return root.getLineNumber(getRawSequenceNumber());
+        }
     }
 
     /**
@@ -299,8 +303,8 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
         final boolean copyTypes = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
         final boolean copyForUpdate = CopyOptions.includes(copyOptions, CopyOptions.FOR_UPDATE);
-        SchemaType typeCode;
-        typeCode = copyTypes ? getSchemaType() : Untyped.INSTANCE;
+        SchemaType typeCode = copyTypes ?
+                getSchemaType() : Untyped.getInstance();
         java.util.function.Function<NodeInfo, Object> informee = out.getPipelineConfiguration().getCopyInformee();
         if (informee != null) {
             Object o = informee.apply(this);
@@ -676,8 +680,8 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     @Override
     public void removeTypeAnnotation() {
-        if (getSchemaType() != Untyped.INSTANCE) {
-            type = AnyType.INSTANCE;
+        if (getSchemaType() != Untyped.getInstance()) {
+            type = AnyType.getInstance();
             getRawParent().removeTypeAnnotation();
         }
     }

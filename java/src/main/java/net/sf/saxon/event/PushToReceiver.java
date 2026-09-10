@@ -66,7 +66,7 @@ public class PushToReceiver implements Push {
                 implicitClose();
                 final FingerprintedQName fp = new FingerprintedQName(
                         name.getStructuredQName(), getConfiguration().getNamePool());
-                getOutputter().startElement(fp, Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
+                getOutputter().startElement(fp, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
             }
@@ -80,7 +80,7 @@ public class PushToReceiver implements Push {
                 final NodeName fp = defaultNamespace.isEmpty()
                         ? new NoNamespaceName(name)
                         : new FingerprintedQName("", NamespaceUri.of(defaultNamespace), name);
-                cco.startElement(fp, Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
+                cco.startElement(fp, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             } catch (XPathException e) {
                 throw new SaxonApiException(e);
             }

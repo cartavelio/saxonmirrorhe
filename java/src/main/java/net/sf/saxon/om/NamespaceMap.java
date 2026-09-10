@@ -329,16 +329,20 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
 
     public NamespaceMap putAll(NamespaceMap delta)
     {
-        if (equals(delta)) {
+        if (this == delta)
+        {
             return this;
         }
-        else if (isEmpty()) {
+        else if (isEmpty())
+        {
             return delta;
         }
-        else if (delta.isEmpty()) {
+        else if (delta.isEmpty())
+        {
             return this;
         }
-        else {
+        else
+        {
             return mergePutAll(delta);
         }
     }
@@ -351,11 +355,6 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         String[] p2 = delta.prefixes;
         NamespaceUri[] u2 = delta.uris;
 
-        // Avoid creating a new map if one of the input maps will do
-        // (This makes the constructed arrays transient and eligible for quick garbage collection)
-        boolean sameAsMap1 = true;
-        boolean sameAsMap2 = true;
-
         int lengthSum = p1.length + p2.length;
 
         String[] p3 = new String[lengthSum];
@@ -363,54 +362,50 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         int i1 = 0;
         int i2 = 0;
         int writePos = 0;
-        while (true) {
+        while (true)
+        {
             int c = p1[i1].compareTo(p2[i2]);
-            if (c < 0) {
+            if (c < 0)
+            {
                 p3[writePos] = p1[i1];
                 u3[writePos++] = u1[i1];
-                sameAsMap2 = false;
-                if (++i1 >= p1.length) {
+                if (++i1 >= p1.length)
+                {
                     break;
                 }
             }
-            else if (c > 0) {
+            else if (c > 0)
+            {
                 p3[writePos] = p2[i2];
                 u3[writePos++] = u2[i2];
-                sameAsMap1 = false;
-                if (++i2 >= p2.length) {
+                if (++i2 >= p2.length)
+                {
                     break;
                 }
-            } else { // c == 0
+            }
+            else
+            { // c == 0
                 p3[writePos] = p2[i2];
                 u3[writePos++] = u2[i2];
-                if (!(u1[i1].equals(u2[i2]))) {
-                    sameAsMap1 = false;
-                }
                 i1++;
                 i2++;
-                if (i1 >= p1.length || i2 >= p2.length) {
+                if (i1 >= p1.length || i2 >= p2.length)
+                {
                     break;
                 }
             }
         }
-        while (i1 < p1.length) {
+        while (i1 < p1.length)
+        {
             p3[writePos] = p1[i1];
             u3[writePos++] = u1[i1];
-            sameAsMap2 = false;
             i1++;
         }
-        while (i2 < p2.length) {
+        while (i2 < p2.length)
+        {
             p3[writePos] = p2[i2];
             u3[writePos++] = u2[i2];
-            sameAsMap1 = false;
             i2++;
-        }
-
-        if (sameAsMap1) {
-            return this;
-        }
-        if (sameAsMap2) {
-            return delta;
         }
 
         return createNewNamespaceMap(p3, u3, lengthSum, writePos);

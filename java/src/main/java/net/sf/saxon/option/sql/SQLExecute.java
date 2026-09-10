@@ -126,7 +126,7 @@ public class SQLExecute extends ExtensionInstruction {
                 throw new XPathException("(SQL) " + ex.getMessage()).withXPathContext(context);
             }
 
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
     }
 }

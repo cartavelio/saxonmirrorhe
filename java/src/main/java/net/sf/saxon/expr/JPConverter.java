@@ -53,9 +53,9 @@ public abstract class JPConverter {
         converterMap.put(XdmItem.class, new FromXdmValue(AnyItemType.getInstance(), StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmAtomicValue.class, new FromXdmValue(BuiltInAtomicType.ANY_ATOMIC, StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmNode.class, new FromXdmValue(AnyXNodeType.getInstance(), StaticProperty.ALLOWS_ONE));
-        converterMap.put(XdmFunctionItem.class, new FromXdmValue(AnyFunctionType.INSTANCE, StaticProperty.ALLOWS_ONE));
+        converterMap.put(XdmFunctionItem.class, new FromXdmValue(AnyFunctionType.getInstance(), StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmMap.class, new FromXdmValue(MapType.ANY_MAP_TYPE, StaticProperty.ALLOWS_ONE));
-        converterMap.put(XdmArray.class, new FromXdmValue(ArrayItemType.ANY_ARRAY_TYPE, StaticProperty.ALLOWS_ONE));
+        converterMap.put(XdmArray.class, new FromXdmValue(ArrayItemType.getInstance(), StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmEmptySequence.class, new FromXdmValue(ErrorType.getInstance(), StaticProperty.ALLOWS_ZERO));
         converterMap.put(SequenceIterator.class, FromSequenceIterator.INSTANCE);
         converterMap.put(Sequence.class, FromSequence.INSTANCE);
@@ -130,9 +130,9 @@ public abstract class JPConverter {
         itemTypeMap.put(Base64BinaryValue.class, BuiltInAtomicType.BASE64_BINARY);
         itemTypeMap.put(NodeInfo.class, AnyXNodeType.getInstance());
         itemTypeMap.put(TreeInfo.class, NodeKindType.DOCUMENT);
-        itemTypeMap.put(MapItem.class, AnyFunctionType.INSTANCE);
-        itemTypeMap.put(ArrayItem.class, AnyFunctionType.INSTANCE);
-        itemTypeMap.put(FunctionItem.class, AnyFunctionType.INSTANCE);
+        itemTypeMap.put(MapItem.class, MapType.getInstance());
+        itemTypeMap.put(ArrayItem.class, ArrayItemType.getInstance());
+        itemTypeMap.put(FunctionItem.class, AnyFunctionType.getInstance());
         itemTypeMap.put(AtomicValue.class, BuiltInAtomicType.ANY_ATOMIC);
         //itemTypeMap.put(UntypedAtomicValue.class, BuiltInAtomicType.UNTYPED_ATOMIC);
     }
@@ -283,7 +283,7 @@ public abstract class JPConverter {
 
         @Override
         public ItemType getItemType() {
-            return AnyItemType.INSTANCE;
+            return AnyItemType.getInstance();
         }
 
         @Override
@@ -306,7 +306,7 @@ public abstract class JPConverter {
 
         @Override
         public ItemType getItemType() {
-            return AnyItemType.INSTANCE;
+            return AnyItemType.getInstance();
         }
 
         @Override
@@ -344,11 +344,8 @@ public abstract class JPConverter {
 
     public static class FromSequence extends JPConverter {
 
-        public static final FromSequence INSTANCE;
-
-        static {
-            INSTANCE = new FromSequence(AnyItemType.INSTANCE, StaticProperty.ALLOWS_ZERO_OR_MORE);
-        }
+        public static final FromSequence INSTANCE =
+                new FromSequence(AnyItemType.getInstance(), StaticProperty.ALLOWS_ZERO_OR_MORE);
 
         private final ItemType resultType;
         private final int cardinality;
@@ -698,7 +695,7 @@ public abstract class JPConverter {
 
         @Override
         public GroundedValue convert(Object object, XPathContext context) throws XPathException {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
 
         /**
@@ -706,7 +703,7 @@ public abstract class JPConverter {
          */
         @Override
         public ItemType getItemType() {
-            return AnyItemType.INSTANCE;
+            return AnyItemType.getInstance();
         }
     }
 
@@ -737,7 +734,7 @@ public abstract class JPConverter {
 
         @Override
         public ItemType getItemType() {
-            return AnyItemType.INSTANCE;
+            return AnyItemType.getInstance();
         }
 
         /**

@@ -143,7 +143,7 @@ public class ApplyFn extends SystemFunction  {
         }
 
         Sequence[] argArray = new Sequence[args.arrayLength()];
-        if (fit == AnyFunctionType.INSTANCE) {
+        if (fit == AnyFunctionType.ANY_FUNCTION) {
             for (int i = 0; i < argArray.length; i++) {
                 argArray[i] = args.get(i);
             }

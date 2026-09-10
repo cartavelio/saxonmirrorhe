@@ -13,7 +13,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 public class SequenceIteratorIsEmptySequence extends TypeSafeDiagnosingMatcher<SequenceIterator> {
-    private static final GroundedValue emptySequence = EmptySequence.INSTANCE;
+    private static final GroundedValue emptySequence = EmptySequence.getInstance();
 
     @Override
     public boolean matchesSafely(SequenceIterator actual, Description mismatchDescription) {

@@ -19,7 +19,6 @@ import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.jiter.IterableSequenceIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import org.xml.sax.Locator;
@@ -378,7 +377,7 @@ public interface NodeInfo extends GNode, Location
      *         For document nodes, either xs:untyped if the document has not been validated, or
      *         xs:anyType if it has.
      *         <p>The default implementation returns {@link BuiltInAtomicType#UNTYPED_ATOMIC} for attribute
-     *         nodes, {@link Untyped#INSTANCE} for element and document nodes, and null otherwise</p>
+     *         nodes, {@link Untyped#getInstance} for element and document nodes, and null otherwise</p>
      * @since 9.4
      */
 
@@ -388,7 +387,7 @@ public interface NodeInfo extends GNode, Location
                 return BuiltInAtomicType.UNTYPED_ATOMIC;
             case Type.DOCUMENT:
             case Type.ELEMENT:
-                return Untyped.INSTANCE;
+                return Untyped.getInstance();
             default:
                 return null;
         }
@@ -464,7 +463,7 @@ public interface NodeInfo extends GNode, Location
      */
 
     default Iterable<? extends NodeInfo> children() {
-        return new IterableSequenceIterator<NodeInfo>(iterateChildAxis(null));
+        return new Navigator.ChildrenAsIterable(this);
     }
 
     default Iterable<? extends NodeInfo> children(NodePredicate filter) {
@@ -472,7 +471,7 @@ public interface NodeInfo extends GNode, Location
     }
 
     default AttributeMap attributes() {
-        AttributeMap atts = EmptyAttributeMap.INSTANCE;
+        AttributeMap atts = EmptyAttributeMap.getInstance();
         if (getNodeKind() == Type.ELEMENT) {
             SequenceIterator iter = iterateAttributeAxis(AnyGNode.TEST);
             NodeInfo attr;

@@ -28,7 +28,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Int64Value;
@@ -108,18 +107,17 @@ public class LookupAllExpression extends UnaryExpression {
         boolean isMapLookup = containerType instanceof MapType || containerType instanceof RecordType;
 
         if (!isArrayLookup && !isMapLookup) {
-            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT) {
-                if (th.relationship(containerType, ArrayItemType.INSTANCE) == Affinity.DISJOINT) {
-                    if (Cardinality.allowsZero(getBaseExpression().getCardinality())) {
-                        visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "
-                                                     + containerType, SaxonErrorCode.SXWN9026, getLocation());
-                    } else {
-                        throw new XPathException("The left-hand operand of '?' must be a map or an array; "
-                                                         + "the supplied expression is of type " + containerType, "XPTY0004")
-                                .withLocation(getLocation())
-                                .asTypeError()
-                                .withFailingExpression(this);
-                    }
+            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT &&
+                    th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT) {
+                if (Cardinality.allowsZero(getBaseExpression().getCardinality())) {
+                    visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "
+                                                 + containerType, SaxonErrorCode.SXWN9026, getLocation());
+                } else {
+                    throw new XPathException("The left-hand operand of '?' must be a map or an array; "
+                                                     + "the supplied expression is of type " + containerType, "XPTY0004")
+                            .withLocation(getLocation())
+                            .asTypeError()
+                            .withFailingExpression(this);
                 }
             }
         }
@@ -322,7 +320,6 @@ public class LookupAllExpression extends UnaryExpression {
         }
 
         @Override
-        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public Item next() {
             if (baseIterator.hasNext()) {
                 GroundedValue value = baseIterator.next();
@@ -349,7 +346,6 @@ public class LookupAllExpression extends UnaryExpression {
         }
 
         @Override
-        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public Item next() {
             if (baseIterator.hasNext()) {
                 KeyValuePair kvp = baseIterator.next();

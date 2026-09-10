@@ -204,7 +204,7 @@ public class ExpressionContext implements StaticContext {
 
     @Override
     public ItemType getRequiredContextItemType() {
-        return AnyItemType.INSTANCE;
+        return AnyItemType.getInstance();
     }
 
     @Override

@@ -33,7 +33,7 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
     protected Configuration config;
     protected long documentNumber;
     private HashMap<String, NodeInfo> idIndex;
-    private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.INSTANCE;
+    private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.getInstance();
     private HashMap<String, Object> userData;
 
     /**

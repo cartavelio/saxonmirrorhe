@@ -35,7 +35,7 @@ public class Tokenize_1 extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item item = arguments[0].head();
         if (item == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
         return SequenceTool.toLazySequence(new Whitespace.Tokenizer(item.getUnicodeStringValue()));
     }

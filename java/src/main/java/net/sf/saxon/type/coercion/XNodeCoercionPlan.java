@@ -45,7 +45,7 @@ public final class XNodeCoercionPlan extends CoercionPlan {
         if (item instanceof JNode) {
             GroundedValue content = ((JNode)item).getContent();
             if (content.getLength() == 0) {
-                return EmptySequence.INSTANCE;
+                return EmptySequence.getInstance();
             } else if (content.getLength() == 1) {
                 if (content.itemAt(0) instanceof NodeInfo) {
                     return content;

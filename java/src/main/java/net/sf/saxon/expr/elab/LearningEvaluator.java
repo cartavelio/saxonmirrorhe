@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class LearningEvaluator implements SequenceEvaluator {
 
-    private final static int EVAL_LIMIT = 10;
+    private final static int EVAL_LIMIT = 20;
     private final static int LEARNING_LIMIT = 40;
 
     private final Expression expression;

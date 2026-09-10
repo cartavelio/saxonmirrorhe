@@ -187,10 +187,7 @@ public class DateValue extends GDateValue implements XPathComparable {
         MutableGDateValue g = new MutableGDateValue();
         g.typeLabel = BuiltInAtomicType.DATE;
         setLexicalValue(g, in, rules.isAllowYearZero());
-        if (g.error != null) {
-            return g.error;
-        }
-        return new DateValue(g);
+        return g.error == null ? new DateValue(g) : g.error;
     }
 
     /**

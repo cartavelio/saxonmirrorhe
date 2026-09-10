@@ -77,7 +77,7 @@ public class Replace extends RegexFunction  {
         }
         if (arguments[2] instanceof StringLiteral && doEarlyReplacementCheck) {
             // Do early checking of the replacement expression if known statically
-            UnicodeString rep = ((StringLiteral) arguments[2]).getUnicodeString();
+            UnicodeString rep = ((StringLiteral) arguments[2]).getString();
             if (checkReplacement(rep) == null) {
                 replacementChecked = true;
             }

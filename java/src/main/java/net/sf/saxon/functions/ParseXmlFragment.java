@@ -64,7 +64,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue input = (AtomicValue) arguments[0].head();
         if (input == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         } else {
             Map<String, GroundedValue> checkedOptions = Collections.emptyMap();
             if (getArity() >= 2) {
@@ -172,7 +172,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                     });
                 }
                 if (stripSpace) {
-                    options = options.withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE);
+                    options = options.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                 } else {
                     PackageData pd = getRetainedStaticContext().getPackageData();
                     if (pd instanceof StylesheetPackage) {
@@ -181,7 +181,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                             s = configuration.getAnnotationStripper(s);
                         }
                     } else {
-                        options = options.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
+                        options = options.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
                     }
                 }
                 options = options.withErrorHandler(errorHandler);

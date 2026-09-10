@@ -237,7 +237,7 @@ public class SourceDocument extends Instruction {
         String flags = "";
         if (parseOptions.getSpaceStrippingRule() == xsltStripSpace) {
             flags += "s";
-        } else if (parseOptions.getSpaceStrippingRule() == AllElementsSpaceStrippingRule.INSTANCE) {
+        } else if (parseOptions.getSpaceStrippingRule() == AllElementsSpaceStrippingRule.getInstance()) {
             flags += "S";
         }
         if (parseOptions.isLineNumbering()) {

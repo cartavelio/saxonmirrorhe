@@ -22,7 +22,6 @@ import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.*;
@@ -398,8 +397,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
                 controller.setGlobalContextItem(sourceNode);
                 //#endif
             } else {
-                sourceNode = controller.makeSourceTree(source,
-                                                       Validation.fromValidationMode(getSchemaValidationMode()));
+                sourceNode = controller.makeSourceTree(source, getSchemaValidationMode().getNumber());
                 controller.setGlobalContextItem(sourceNode);
             }
 

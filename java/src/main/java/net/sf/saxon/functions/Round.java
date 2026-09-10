@@ -46,7 +46,7 @@ public final class Round extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NumericValue val0 = (NumericValue) arguments[0].head();
         if (val0 == null) {
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
 
         int scaleRnd = 0;

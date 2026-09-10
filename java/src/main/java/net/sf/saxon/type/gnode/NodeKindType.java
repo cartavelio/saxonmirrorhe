@@ -10,13 +10,10 @@ package net.sf.saxon.type.gnode;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.nodetest.NodeVectorMatchMaker;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Optional;
 
@@ -24,7 +21,7 @@ import java.util.Optional;
  * A {@code NodeKindType} matches one of the seven kinds of XNode.
  */
 
-public class NodeKindType extends XNodeType implements NodeVectorMatchMaker {
+public class NodeKindType extends XNodeType {
 
     public static final NodeKindType DOCUMENT = new NodeKindType(Type.DOCUMENT);
     public static final NodeKindType ELEMENT = new NodeKindType(Type.ELEMENT);
@@ -94,32 +91,26 @@ public class NodeKindType extends XNodeType implements NodeVectorMatchMaker {
      */
 
     public static GNodeType makeNodeKindTest(int kind) {
-        return switch (kind) {
-            case Type.DOCUMENT -> DOCUMENT;
-            case Type.ELEMENT -> ELEMENT;
-            case Type.ATTRIBUTE -> ATTRIBUTE;
-            case Type.COMMENT -> COMMENT;
-            case Type.TEXT -> TEXT;
-            case Type.PROCESSING_INSTRUCTION -> PROCESSING_INSTRUCTION;
-            case Type.NAMESPACE -> NAMESPACE;
-            case Type.XNODE -> AnyXNodeType.getInstance();
-            default -> throw new IllegalArgumentException("Unknown node kind " + kind + " in NodeKindTest");
-        };
-    }
-
-    /**
-     * Get a matching function that can be used to test whether numbered nodes in a TinyTree
-     * or DominoTree satisfy the node test. (Calling this matcher must give the same result
-     * as calling <code>matchesNode(tree.getNode(nodeNr))</code>, but it may well be faster).
-     *
-     * @param tree the tree against which the returned function will operate
-     * @return an IntPredicate; the matches() method of this predicate takes a node number
-     * as input, and returns true if and only if the node identified by this node number
-     * matches the node predicate.
-     */
-    @Override
-    public IntPredicateProxy getMatcher(NodeVectorTree tree) {
-        return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind;
+        switch (kind) {
+            case Type.DOCUMENT:
+                return DOCUMENT;
+            case Type.ELEMENT:
+                return ELEMENT;
+            case Type.ATTRIBUTE:
+                return ATTRIBUTE;
+            case Type.COMMENT:
+                return COMMENT;
+            case Type.TEXT:
+                return TEXT;
+            case Type.PROCESSING_INSTRUCTION:
+                return PROCESSING_INSTRUCTION;
+            case Type.NAMESPACE:
+                return NAMESPACE;
+            case Type.XNODE:
+                return AnyXNodeType.getInstance();
+            default:
+                throw new IllegalArgumentException("Unknown node kind " + kind + " in NodeKindTest");
+        }
     }
 
     /**
@@ -136,7 +127,7 @@ public class NodeKindType extends XNodeType implements NodeVectorMatchMaker {
 
     @Override
     public boolean matches(Item item) {
-        return item instanceof NodeInfo node && kind == node.getNodeKind();
+        return item instanceof NodeInfo && kind == ((NodeInfo) item).getNodeKind();
     }
 
     /**

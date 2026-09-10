@@ -195,7 +195,7 @@ public class SQLInsert extends ExtensionInstruction {
                 dynamicError("SQL INSERT failed: " + ex.getMessage(), SaxonErrorCode.SXSQ0004, context);
             }
 
-            return EmptySequence.INSTANCE;
+            return EmptySequence.getInstance();
         }
 
     }
