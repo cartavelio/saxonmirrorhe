@@ -70,6 +70,8 @@ public class SaxonCAPI {
 
     public static ObjectHandles objectHandles = ObjectHandles.create();
 
+    public static int objHandlesCreated = 0;
+
     public static final long STATUS_OK = 0;
     public static final long STATUS_FAIL = -1;
 
@@ -165,11 +167,24 @@ public class SaxonCAPI {
         return STATUS_OK;
     }
 
-
+    public static void ObjectHandle createHandle(Object obj) {
+        if(debug) {
+            objHandlesCreated++;
+            System.err.println("Object Handles created: "+ objHandlesCreated);
+        }
+        return objectHandles.create(obj);
+    }
 
     @CEntryPoint(name = "j_handles_destroy")
    	public static void destroy(IsolateThread thread, ObjectHandle handle) {
-   		objectHandles.destroy(handle);
+        if(handle != WordFactory.nullPointer()) {
+            objectHandles.destroy(handle);
+            if(debug) {
+                objHandlesCreated++;
+            }
+        } else if(SaxonCAPI.debug) {
+            System.err.println("ObjectHandle not destroyed: Null found");
+        }
    	}
 
 

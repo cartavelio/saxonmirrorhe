@@ -128,6 +128,9 @@ XdmValue::~XdmValue() {
         values.clear();
     }
 	if (valueType != nullptr) { delete valueType; }
+	if(jValues >0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, jValues);
+	}
 	jValues = -1;
 	xdmSize = 0;
 
