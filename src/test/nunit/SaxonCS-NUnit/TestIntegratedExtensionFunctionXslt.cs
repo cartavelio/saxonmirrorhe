@@ -1,20 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
-using System.Collections;
-using NUnit.Framework.Internal;
-using Saxon.Hej.expr;
-using Saxon.Hej.om;
-using Saxon.Hej.s9api;
-using Saxon.Hej.type;
-using Saxon.Hej.value;
-using SaxonCS_NUnit;
 using StaticContext = Saxon.Api.StaticContext;
+using XdmAtomicType = Saxon.Api.XdmAtomicType;
 using XdmNodeKind = Saxon.Api.XdmNodeKind;
 
 namespace SaxonCS_NUnit {

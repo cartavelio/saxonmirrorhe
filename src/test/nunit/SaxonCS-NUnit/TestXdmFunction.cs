@@ -4,9 +4,6 @@ using System.IO;
 using System.Xml.Linq;
 using NUnit.Framework;
 using Saxon.Api;
-using Saxon.Ejavax.xml.transform.stream;
-using Saxon.Hej.s9api;
-using Saxon.Hej.type;
 using Singulink.Numerics;
 
 namespace SaxonCS_NUnit;
