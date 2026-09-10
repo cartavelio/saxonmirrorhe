@@ -1931,12 +1931,9 @@
 			<div class="qt4">
 				<h2 class="subtitle">Short-circuit boolean operators</h2>
 
-				<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled.</aside>
-
-				<p>Saxon 11 implemented two additional boolean operators: <code class="bold"
-						>orElse</code> and <code class="bold">andAlso</code>. These are retained in Saxon
-					12, but they are likely to be dropped as the community group has taken a different
-					direction. TODO check</p>
+				<aside>Saxon 11 and 12 implemented two additional boolean operators: <code class="bold"
+						>orElse</code> and <code class="bold">andAlso</code>. But these have been dropped
+					from the XPath 4.0 proposal, and are dropped in Saxon 13.</aside>
 
 				<p>The <code>and</code> and <code>or</code> operators now have stricter rules governing
 					optimization. It is still permitted to evaluate the operands in either order, but an
