@@ -16,16 +16,12 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
           if(proc == NULL) {
             fprintf(stdout, "Python proc is NULL");
           }
+        std::cerr << "arguments count="<< numOfArguments << std::endl;
+        fprintf(stdout, "user function python proc pointer= %p func=%p\n", (void *)proc, (void *)func);
     }
-
-    fprintf(stdout, "user function python pointer= %p func=%p\n", (void *)proc, (void *)func);
-
 
 
     if(proc != nullptr && numOfArguments>0) {
-
-
-        arguments = new XdmValue*[numOfArguments];
 
         graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
@@ -33,7 +29,7 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
 
         PyObject * argi = nullptr;
 
-        std::cerr << "arguments count="<< numOfArguments << std::endl;
+
         PyObject *pArgs;
 
         /*if(PyCallable_Check((PyObject *)proc)) {
@@ -41,65 +37,36 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
              return nullptr;
         } */
 
+        XdmValue * tempValue = nullptr;
+
         for(int i =0; i< numOfArguments; i++) {
             if (getenv("SAXONC_DEBUG_FLAG")) {
-                fprintf(stdout, "Making XdmValue YYYIII ref=%ld.\n", (long)argumentsi[i]);
+                fprintf(stdout, "Making XdmValue ref=%ld.\n", (long)argumentsi[i]);
             }
 
-            XdmValue * tempValue = SaxonProcessor::makeXdmValueFromRef((int64_t)argumentsi[i]);
-            //void * argxi = (void *)j_copy_handles(thread, (void *)argumentsi[i]);
+            long argxi = (long)j_copy_handles(thread, (void *)argumentsi[i]);
             //arguments[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)argxi);//, (void *)argumentsi[i]));
 
-            if(tempValue == NULL) {
-                        std::cerr << "Failed to construct list for arguments argument "<<i<< " is NULL" << std::endl;
-                        return nullptr;
-            }
 
-
-            fprintf(stdout, "user function xdm pointer[%i]= %p \n", i, (void *)arguments[i]);
-
-
-           /*argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("__convert_c_obj"),
+           /*argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"),
                                               (PyObject *) arguments[i]); */
-            //PyObject * xx = Py_BuildValue("O", arguments[i]);
-            /*pArgs = PyTuple_New(1);
-            PyTuple_SetItem(pArgs, i, (PyObject *) arguments[i]);
-            fprintf(stdout, "loop checkpoint :%i\n", i);
-            argi = PyObject_CallObject((PyObject *) proc, pArgs);*/
-            argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("_convert_c_obj"),
-                                              (PyObject *) tempValue);
-            //Py_INCREF(argi);
-            std::cerr << "arguments loop cp1"<< std::endl;
+
+            argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"), PyLong_FromLong(argxi));
+
             if(argi == Py_None ||  argi == nullptr) {
-            PyErr_Print();
+                //PyErr_Print();
 
-
-                std::cerr << "Null found  - argi Argument for list i="<<i << std::endl;
                 return nullptr;
             }
             err = PyList_SetItem(argsList, i, argi);
             if (err < 0) {
-                std::cerr << "Failed construction of Argument for list i="<<i << std::endl;
-                std::cerr << "Error code"<<err << std::endl;
+                //std::cerr << "Failed construction of Argument for list i="<<i << std::endl;
+                //std::cerr << "Error code"<<err << std::endl;
                 return nullptr;
             }
         }
-        fprintf(stderr, "We are in a CythonUserFunctionHandler proc is not null\n");
-
 
     }
-
-     if (getenv("SAXONC_DEBUG_FLAG")) {
-        fprintf(stdout, "checkpoint 1\n");
-     }
-    //fflush(stdout);
-
-    //arg = PyLong_FromLong(5);
-
-    //PyObject* result = PyObject_CallOneArg((PyObject *)func, arg);
-
-
-    //PyObject* result = PyObject_CallObject((PyObject *)func, argsList);
 
     PyObject* result = PyObject_CallFunctionObjArgs((PyObject *)func, (PyObject *) proc, argsList, NULL);
 
@@ -108,17 +75,16 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
         Py_DECREF(argsList);
     }
 
-    fprintf(stderr, "We are in a CythonUserFunctionHandler cp0\n");
     if(result == Py_None ||  result == nullptr) {
-        fprintf(stderr, "We are in a CythonUserFunctionHandler cp0a\n");
         return nullptr;
     }
 
-    fprintf(stderr, "We are in a CythonUserFunctionHandler cp1\n");
+    //fprintf(stderr, "We are in a CythonUserFunctionHandler cp1\n");
 
     PyTypeObject * typeObj = Py_TYPE(result);
 
     if(typeObj != nullptr) {
+        //TODO special case Xdm types. The primitive types need to be handled too
         //PyObject * typeObji = PyType_GetName(typeObj);
         const char* c_typeObjStr = Py_TYPE(result)->tp_name; //PyUnicode_AsUTF8(typeObji);
 
@@ -133,15 +99,13 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
             return nullptr;
         }
 
-
-        //std::cerr<< "Type of userFunction result = "<<c_typeObjStr<<std::endl;
-
     }
-    fprintf(stderr, "We are in a CythonUserFunctionHandler cp2\n");
 
-    long resulti = PyLong_AsLong(PyObject_CallMethodNoArgs(result, PyUnicode_FromString("__get_underlying_int_value")));
+    long resulti = PyLong_AsLong(PyObject_CallMethodNoArgs(result, PyUnicode_FromString("_get_underlying_int_value")));
 
-    //fflush(stdout);
+    if(resulti < 0) {
+        return nullptr;
+    }
 
     return  (void *)resulti;
 }

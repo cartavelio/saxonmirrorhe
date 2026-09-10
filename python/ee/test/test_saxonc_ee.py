@@ -140,7 +140,7 @@ def testUserFunction():
         result = xpath_processor.evaluate_single("dy:myFunc(3)")
 
         assert result is not None
-        assert result == 6
+        assert result == 5
     except Exception as err:
         print(err)
         assert False

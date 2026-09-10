@@ -514,7 +514,7 @@ cdef class PySaxonProcessor:
         """
         return PyXdmValue(self)
 
-    def _convert_c_obj(self,  value):
+    def convert_c_obj(self,  value):
         """
         Method for internal use only. Used for passing a C++ Xdm object and converting it to a wrapped Python object
         Args:
@@ -523,9 +523,11 @@ cdef class PySaxonProcessor:
         Returns:
             PyXdmValue: wrapped Xdm object in Python
         """
-        cdef void *void_ptr = <void *> value
-        cdef  saxoncClasses.XdmValue *value_ptr = <saxoncClasses.XdmValue *> void_ptr
+        """cdef void *void_ptr = <void *> value
+        cdef  saxoncClasses.XdmValue *value_ptr = <saxoncClasses.XdmValue *> void_ptr"""
         print("__convert_c_obj cp0!!")
+
+        cdef  saxoncClasses.XdmValue *value_ptr = saxoncClasses.SaxonProcessor.makeXdmValueFromRef(value)
 
         if value_ptr is NULL:
             return None
@@ -4303,7 +4305,7 @@ cdef class PyXdmValue:
         """
         return self.thisvptr
 
-    def __get_underlying_int_value(self):
+    def _get_underlying_int_value(self):
         """
         Return the underlying SaxonC Object Handle for this C++ object.
         :return:

@@ -150,6 +150,9 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         const char * getErrorMessage()
 
+        @staticmethod
+        XdmValue *makeXdmValueFromRef(long results)
+
 
     cdef cppclass DocumentBuilder:
         DocumentBuilder() except +handle_saxonc_api_exceptions
