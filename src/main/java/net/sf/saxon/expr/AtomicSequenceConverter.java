@@ -58,7 +58,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
 
     public static AtomicSequenceConverter makeDownCaster(Expression sequence, AtomicType requiredItemType, Configuration config) {
         AtomicSequenceConverter asc = new AtomicSequenceConverter(sequence, requiredItemType);
-        asc.setConverter(new Converter.DownCastingConverter(requiredItemType, config.getConversionRules()));
+        asc.setConverter(new Converter.DownCastingConverter(requiredItemType, config.getConversionRules(), "XPTY0004"));
         return asc;
     }
 

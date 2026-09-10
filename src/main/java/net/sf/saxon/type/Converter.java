@@ -201,10 +201,16 @@ public abstract class Converter {
 
     public static class DownCastingConverter extends Converter {
         private final AtomicType newType;
-
+        private String errorCode = null;
         public DownCastingConverter(AtomicType annotation, ConversionRules rules) {
             this.newType = annotation;
             setConversionRules(rules);
+        }
+
+        public DownCastingConverter(AtomicType annotation, ConversionRules rules, String errorCode) {
+            this.newType = annotation;
+            setConversionRules(rules);
+            this.errorCode = errorCode;
         }
 
         public AtomicType getTargetType() {
@@ -230,7 +236,9 @@ public abstract class Converter {
                 return input.copyAsSubType(newType);
             } else {
                 // validation failed
-                f.setErrorCode("XPTY0004");
+                if (errorCode != null) {
+                    f.setErrorCode(errorCode);
+                }
                 return f;
             }
         }
