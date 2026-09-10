@@ -134,12 +134,12 @@ public class FeatureData {
     }
 
     public static java.util.List<FeatureData> featureList = new java.util.ArrayList<>();
+    public static java.util.Map<String, FeatureData> featuresByUri = new java.util.HashMap<>();
 
-    public static java.util.Map<String, FeatureData> featuresByUri() {
-        return featureList.stream().collect(Collectors.toMap(feature -> feature.uri, feature -> feature));
-    }
-
-    public static void init() {]]>
+    public static synchronized void init() {]]>
+        if (!featureList.isEmpty()) {
+            return;
+        }
             </xsl:text>
             <xsl:for-each select="//feature">
                 <xsl:variable name="type" as="xs:string">
@@ -157,8 +157,9 @@ public class FeatureData {
                 </xsl:text>
             </xsl:for-each>
     <xsl:text>
-     }
- }    
+        featuresByUri = featureList.stream().collect(Collectors.toMap(feature -> feature.uri, feature -> feature));
+    }
+}
     </xsl:text>   
         </xsl:result-document>
 
