@@ -220,7 +220,7 @@ task qt3ExtraTestsJava() {
   // Just somewhere to hang dependencies
 }
 
-task qt3ExtraTests() {
+task qt3ExtraTestsDotnet() {
   // Just somewhere to hang dependencies
 }
 
