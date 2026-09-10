@@ -896,7 +896,7 @@
           &#xa0;
         </div>
         <div class="main">
-          <h1>Saxon.Api - the Saxon Application Programming Interface for .NET</h1>
+          <h1>Saxon.Api - the Saxon-CS Application Programming Interface for .NET</h1>
           <p>This namespace contains Saxon's application programming interfaces for using XSLT, XQuery,
             XPath and XSD on .NET.</p>
           <p>The top-level object is the <a href="Saxon/Api/Processor.html" class="apilink">Processor</a>;
@@ -904,8 +904,8 @@
             languages.</p>
           <p>The classes are all found in the assembly: <code>saxoncs.dll</code>.</p>
           <p>Further background information about this API is available at 
-            <a href="http://www.saxonica.com/html/documentation/dotnet/dotnetapi.html"
-              >http://www.saxonica.com/html/documentation/dotnet/dotnetapi.html</a></p>
+            <a href="https://www.saxonica.com/html/documentation11/saxon-cs/dotnetapi.html"
+              >https://www.saxonica.com/html/documentation11/saxon-cs/dotnetapi.html</a></p>
           <!-- Include summary tables for interfaces, delegates, classes, enums, and exceptions -->
           <p><xsl:text>&#xa0;</xsl:text></p>
           <xsl:call-template name="summary-table">
