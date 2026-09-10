@@ -52,7 +52,7 @@ public abstract class SchemaValidator extends AbstractDestination {
      * @return the relevant schema
      */
 
-    public abstract Schema getSchema();
+    public abstract XsdSchema getSchema();
 
     /**
      * The validation mode may be either strict or lax. The default is strict; this method may be called

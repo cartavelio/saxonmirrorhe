@@ -584,6 +584,7 @@ public class TestValidator {
 
             XPathCompiler xp = proc.newXPathCompiler();
             xp.setSchemaAware(true);
+            xp.useSchema(sv.getSchema());
             XdmAtomicValue result = (XdmAtomicValue) xp.evaluate("count(//comment())", destination.getXdmNode());
             assertEquals(1, result.getLongValue());
 

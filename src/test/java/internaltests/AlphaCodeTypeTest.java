@@ -103,7 +103,7 @@ public class AlphaCodeTypeTest {
                 System.err.println("Processing " + s);
                 SequenceType t = parser.parseSequenceType(s, ic);
                 String alpha = AlphaCode.fromSequenceType(t);
-                SequenceType t2 = AlphaCode.toSequenceType(alpha, config);
+                SequenceType t2 = AlphaCode.toSequenceType(alpha, config.emptySchema());
                 assertEquals(t, t2);
                 String alpha2 = AlphaCode.fromSequenceType(t2);
                 assertEquals(alpha, alpha2); // ?? component order may differ?
@@ -134,7 +134,7 @@ public class AlphaCodeTypeTest {
             for (String s : testCases) {
                 SequenceType t = parser.parseSequenceType(s, ic);
                 String alpha = AlphaCode.fromSequenceType(t);
-                SequenceType t2 = AlphaCode.toSequenceType(alpha, config);
+                SequenceType t2 = AlphaCode.toSequenceType(alpha, config.emptySchema());
                 assertEquals(t, t2);
                 String alpha2 = AlphaCode.fromSequenceType(t2);
                 assertEquals(alpha, alpha2); // ?? component order may differ?

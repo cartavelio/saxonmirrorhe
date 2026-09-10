@@ -151,6 +151,20 @@ public class XPathCompiler {
     }
 
     /**
+     * Set the {@link XsdSchema} to be used with this XQueryCompiler.
+     *
+     * <p>This is equivalent to importing the schema from within the query.
+     * Any <code>import schema</code> declarations within the query itself
+     * must be consistent with the supplied schema.</p>
+     * @since 13.0
+     */
+
+    public void useSchema(XsdSchema schema) {
+        setSchemaAware(true);
+        env.getPackageData().setImportedSchema(schema.getUnderlyingSchema());
+    }
+
+    /**
      * Say whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is required.
      *
      * @param value One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
