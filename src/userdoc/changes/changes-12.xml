@@ -127,7 +127,7 @@
         
         <p>The serializer now accepts any encoding known to .NET (specifically, any encoding recognised by <code>Encoding.GetEncoding()</code>,
             after calling <code>Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)</code> to enable use of the full set of 
-            encodings known to the platform).  TODO: check this is documented.</p>
+            encodings known to the platform).</p>
         
         
         
@@ -249,12 +249,16 @@
         
         <p>The proposed 4.0 functions <code>array:foot()</code> and <code>array:truncate()</code> are implemented.</p>
         
-        <h2>Dropped Extension Functions</h2>
+        <h2>Dropped or Changed Extension Functions</h2>
         
         <p>The Saxon extension functions <code>saxon:evaluate()</code>, <code>saxon:eval()</code>, and <code>saxon:expression()</code>
             have been dropped. (The function <code>saxon:evaluate-node()</code> was dropped in Saxon 10). 
             The same effect (and more) can be achieved using the standard XSLT 3.0 instruction
             <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a>.</p>
+        
+        <p>The Saxon extension function <code>saxon:in-scope-namespaces()</code> has been aligned with the proposed 4.0 function
+            <code>fn:in-scope-namespaces()</code> in that the returned map now always includes an entry for the XML namespace.</p>
+        
         
         <!--<h2>Extension Instructions</h2>-->
         
@@ -267,8 +271,6 @@
         
         <h2>XSLT extensions</h2>
         
-        <p>The Saxon extension function <code>saxon:in-scope-namespaces()</code> has been aligned with the proposed 4.0 function
-        <code>fn:in-scope-namespaces()</code> in that the returned map now always includes an entry for the XML namespace.</p>
         
         <p>If XSLT 4.0 extensions are enabled, two new (experimental) values are available for <code>xsl:mode/@on-no-match</code>,
             namely <code>shallow-copy-all</code> and <code>shallow-skip-all</code>. These have the same effect as <code>shallow-copy</code>
@@ -313,6 +315,14 @@
             <code>select="array:members($array)"</code> or <code>select="map:key-value-pairs($map)"</code>.</p>
         
         <p>The proposed instruction <code>xsl:match</code> added in Saxon 11 has been dropped.</p>
+        
+        <aside>Our general policy on implementation of new features in the draft 4.0 specifications is that
+        the Saxon product will modify or remove such features when the specification changes, even if this
+        creates backwards incompatibility. We will try to hold incompatible changes to the next major Saxon release where possible,
+        but we cannot guarantee this will always be feasible, especially when the changes only affect edge cases.</aside>
+        
+        <aside>Features described as "proposed 4.0 features" have not necessarily been fully specified in any
+        draft specification; in some cases they literally exist only as proposals.</aside>
  
 
     
@@ -352,15 +362,23 @@
         to the execution time of a query or stylesheet, and also to its allocation of heap memory and hence garbage collection
         costs.</p>
         
-        <p>TODO: currently implemented only for LetExpression and LetClause. We should do the same thing for function parameters.
-        Note, we're also collecting data on the size of the sequence, which we could potentially use for space allocation,
-        at the moment the data is unused.</p>
+        <p>The evaluation of filter expressions with more than one predicate has changed. In some cases, predicates can be
+        reordered to allow more efficient evaluation, taking advantage of indexes. For example, given the expression 
+        <code>//item[contains(@description, "cheese")][@useByDate="2022-12-01"]</code>, the evaluation (in Saxon-EE only)
+        might be rearranged to use an index on the value of <code>@useByDate</code>. The problem is that this can sometimes
+        trigger dynamic errors that the code is written to prevent: consider 
+            <code>//item[@code castable as xs:integer][xs:integer(@code)=4]</code>. While this rewrite is explicitly
+        permitted in XPath 3.0, it is recognized that it causes problems, so the rules have changed in the draft 4.0
+        specification: it is no longer permitted to rearrange the predicates if this might trigger a dynamic error.
+        Saxon 12 implements the new rules. It will still change the order of evaluation of the predicates where
+        appropriate, but if the second predicate throws an error, it will evaluate the first predicate and mask the
+        error if the first predicate is false.</p>
         
-        <p>TODO: there's potentially a problem because we force lazy evaluation (using both MemoClosure and SingletonClosure)
-        for variables created by loop-lifting or common subexpression elimination. The idea here is (a) to avoid the cost of evaluating
-        the expression if the loop is empty, and (b) to avoid triggering a dynamic error unnecessarily.</p>
+        <p>The same logic applies to <code>and</code> and <code>or</code> expressions. The effect is that although
+        the operands may be evaluated in any order, an error in evaluating one operand will never be propagated
+        if the other operand is false (in the case of <code>and</code>), or true (in the case of <code>or</code>).</p>
         
-        <p>There are other places where the code no longer tries to work out everything at compile time, but learns from
+        <!--<p>There are other places where the code no longer tries to work out everything at compile time, but learns from
         run-time experience. For example:</p>
         
         <ul>
@@ -368,7 +386,7 @@
             is allocated based on the run-time types of the operands on the first occasion the expression is evaluated. If
             (as is often the case) subsequent evaluations use the same operand types, the comparison function is re-used, 
             rather than allocating a new one each time.</p></li>
-        </ul>
+        </ul>-->
         
         <p>Bytecode generation is dropped from SaxonJ. Over time, as the JVM JIT compiler has improved, the benefits obtained
         from bytecode generation have been steadily diminishing, to the point where it is no longer worth maintaining the code.
@@ -386,7 +404,7 @@
         method. (A consequence is that the same class can now implement several closely-related functions, such as <code>fn:true()</code>
             and <code>fn:false()</code>, or <code>fn:exists()</code> and <code>fn:empty()</code>.)</p>
         
-        <p>There are two significant changes in the implementation of XDM arrays:</p>
+        <p>There are significant changes in the implementation of XDM arrays:</p>
         
         <ul>
             <li>Saxon uses two main implementations of arrays: <code java="net.sf.saxon.ma.arrays.SimpleArrayItem">SimpleArrayItem</code> is a wrapper
@@ -396,9 +414,10 @@
             <li>The <code>ImmutableArrayItem</code> implementation has been rewritten to use Saxon's <code
                 java="net.sf.saxon.ma.zeno.ZenoChain">ZenoChain</code> internally: this is a completely different data structure. (This change was
                 actually made in 11.4 to fix bugs.)</li>
-            <li>The choice between the two structures is now in many cases made dynamically, based on accumulated experience. Specifically, if an
-                expression or function delivers arrays which tend to be frequently modified by addition or removal of members, then Saxon will learn
-                to use an <code>ImmutableArrayItem</code> for future evaluation of the same expression or function.</li>
+            <li>The choice between the two structures is now in some cases made dynamically, based on accumulated experience. Specifically, if an
+                expression delivers arrays which tend to be frequently modified by addition or removal of members, then Saxon will learn
+                to use an <code>ImmutableArrayItem</code> for future evaluation of the same expression. At present this is implemented
+                only for "square array constructors".</li>
         </ul>
         
         
