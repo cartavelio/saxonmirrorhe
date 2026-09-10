@@ -4211,8 +4211,13 @@ public class XQueryParser extends XPathParser {
             expectChar(c, '=');
             c = t.nextChar();
             c = skipSpaces(c);
-            if (c == Tokenizer.NUL) {
-                grumble("End of input encountered within element start tag");
+
+            if (c != '"' && c != '\'') {
+                if (c == Tokenizer.NUL) {
+                    grumble("End of input encountered within element start tag");
+                } else {
+                    grumble("Expected ' or \" as attribute delimiter - found '" + c + "'");
+                }
             }
             char delim = c;
             if (c != '"' && c != '\'') {
