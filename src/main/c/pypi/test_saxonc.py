@@ -5,6 +5,8 @@ import os
 from os.path import isfile
 from datetime import datetime as date
 
+'''pytest --data-dir=[path/data]  test_saxonc.py'''
+
 
 @pytest.fixture
 def saxonproc():

@@ -557,11 +557,11 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
                 throw new SaxonApiException("Length of params array not equal to the length of values array");
             }
             if (params.length != 0) {
-                if (cwd != null && cwd.length() > 0) {
+                /*if (cwd != null && cwd.length() > 0) {
                     if (!cwd.endsWith("/")) {
                         cwd = cwd.concat("/");
                     }
-                }
+                }*/
                 for (int i = 0; i < params.length; i++) {
                     if (debug) {
                         System.err.println("parameter name:" + params[i]);

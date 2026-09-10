@@ -256,6 +256,7 @@ void testPackageExport(SaxonProcessor *processor, Xslt30Processor *trans,
           trans->compileFromFileAndSave("data/override-base-f-001.xsl", "data/sandpit/test-package-001.pack");
 
           SaxonProcessor * processor2 = new SaxonProcessor(true);
+          processor2->setcwd(processor->getcwd());
           Xslt30Processor * xc2 = processor2->newXslt30Processor();
           xc2->importPackage("data/sandpit/test-package-001.pack");
           XsltExecutable * xe = xc2->compileFromFile("data/override-f-001.xsl");
@@ -1139,13 +1140,12 @@ void exampleTransformToString(SaxonProcessor *sproc, Xslt30Processor *proc,
     sresult->failureList.push_back("exampleTransformToString");
   } else {
     cout << "exampleTransformToString = " << result << endl;
-    string filename = baseURI + "/../output.xml";
-    if (CppTestUtils::exists(filename.c_str())) {
+    if (CppTestUtils::exists("../output.xml")) {
       cout << "The file output.xml exists" << endl;
       remove("output.xml");
       sresult->success++;
     } else {
-      cout << "The file output.xml does not exist file path="<< filename << endl;
+      cout << "The file output.xml does not exist." << endl;
 
       sresult->failure++;
       sresult->failureList.push_back("exampleTransformToString");
@@ -2842,7 +2842,7 @@ void testAssociatedError(SaxonProcessor *proc, Xslt30Processor *trans,
   try {
     cerr << endl << "testAssociatedError test" << endl;
     XsltExecutable *executable =
-        trans->compileFromAssociatedFile("data/trax/xml/foo.xml");
+        trans->compileFromAssociatedFile("data-error/trax/xml/foo.xml");
     sresult->failure++;
     sresult->failureList.push_back("testAssociatedError");
   } catch (SaxonApiException &e) {

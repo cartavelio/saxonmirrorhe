@@ -726,7 +726,7 @@ public class SaxonCAPI {
 
         int sizea = catalogFiles.size();
         for(int i =0; i < sizea;i++) {
-            catalogFilesConverted.add(SaxonCAPI.resolveFileToURI(processor,cwd, catalogFiles.get(i), ResourceRequest.XML_NATURE).toASCIIString());
+            catalogFilesConverted.add(SaxonCAPI.resolveFileToURI(processor,cwd, catalogFiles.get(i)).toASCIIString());
         }
 
         if(catalogFiles.size() == 0) {
@@ -1117,7 +1117,7 @@ public class SaxonCAPI {
         JsonBuilder builder = proc.newJsonBuilder();
         XdmValue result = null;
 
-        URI resultURI = resolveFileToURI(proc, cwd, filename, "JSON");
+        URI resultURI = resolveFileToURI(proc, cwd, filename);
 
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(resultURI.toURL().openStream()));
@@ -1747,11 +1747,10 @@ public class SaxonCAPI {
      * @param processor  - processor object
      * @param cwd       - Current working directory
      * @param filename - the file name
-     * @param nature  - the nature of the file
      * @return Source
      * @throws SaxonApiException if error occurs when parsing file
      */
-    public static URI resolveFileToURI(Processor processor, String cwd, String filename, String nature) throws SaxonApiException {
+    public static URI resolveFileToURI(Processor processor, String cwd, String filename) throws SaxonApiException {
         
         URI cwdURI = null;
 

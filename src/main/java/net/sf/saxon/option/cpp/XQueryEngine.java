@@ -130,9 +130,9 @@ public class XQueryEngine extends SaxonCAPI {
                     char separatorChar = '/';
                     if (SaxonCAPI.RESOURCES_DIR == null && values[i] instanceof String) {
                         String dir1 = (String) values[i];
-                        if (!dir1.endsWith("/")) {
+                        /*if (!dir1.endsWith("/")) {
                             dir1 = dir1.concat("/");
-                        }
+                        } */
                         if (File.separatorChar != '/') {
                             dir1.replace(separatorChar, File.separatorChar);
                             separatorChar = '\\';
@@ -239,17 +239,12 @@ public class XQueryEngine extends SaxonCAPI {
                 } else if (optionsMap.containsKey("q")) {
                     if (cwd != null && cwd.length() > 0 && cwd.startsWith("http")) {
                         URI cwdURI = null;
-                        if (!cwd.endsWith("/")) {
-                            cwd = cwd.concat("/");
-                        }
                         try {
-                            cwdURI = new URI(cwd + (String) optionsMap.get("q"));
+                            cwdURI = SaxonCAPI.resolveFileToURI(processor, cwd, (String)optionsMap.get("q"));
                             URL url = cwdURI.toURL();
                             InputStream in = url.openStream();
                             executable = compiler.compile(in);
                             queryFile = new File("");
-                        } catch (URISyntaxException e) {
-                            throw new SaxonApiException(e);
                         } catch (MalformedURLException e) {
                             throw new SaxonApiException(e);
                         } catch (IOException e) {
