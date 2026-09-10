@@ -18,7 +18,7 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 public final class Version {
     // For a release, these values are set automatically by the build script
     private static final int MAJOR_VERSION = 13; // @@MAJOR_VERSION@@ (marker for build system)
-    private static final int MINOR_VERSION = 0; // @@MINOR_VERSION@@
+    private static final int MINOR_VERSION = 1; // @@MINOR_VERSION@@
     private static final int PATCH_VERSION = 0; // @@PATCH_VERSION@@
     private static final int BUILD = 120112; // @@BUILD@@; was mmddhh is now git hash. BEWARE: a leading 0 means octal.
     private static final String MAJOR_RELEASE_DATE = "2025-06-01"; // @@MAJOR_DATE@@
