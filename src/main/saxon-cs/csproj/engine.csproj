@@ -45,11 +45,14 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
     <NSPrincipalClass>NSApplication</NSPrincipalClass>
     <NSHighResolutionCapable>true</NSHighResolutionCapable>
     <NSRequiresAquaSystemAppearance>false</NSRequiresAquaSystemAppearance>
+    <DefineConstants>$(DefineConstants);DEBUG;EE;</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
   </ItemGroup>
+
+
     
     <ItemGroup>
         <Compile Include="../../../src/main/saxon-cs/**" />

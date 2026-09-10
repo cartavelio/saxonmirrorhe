@@ -341,7 +341,7 @@ task eecs_xml_digest(
     "-o:${buildDir}/ee_digest.xml",
     "xmlDir=../../../build/ee_xmlout"
 }
-
+                                                    _
 task eecs_refine_digest(
   type: JavaExec,
   dependsOn: ["eecs_xml_digest"],
@@ -437,7 +437,7 @@ task eecs_dll(
 
     exec {
         workingDir = "${buildDir}/cs/ee"
-        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
+        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj', '/p:DefineConstants="EE"'
     }
   }
 }

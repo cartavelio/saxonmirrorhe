@@ -1,7 +1,6 @@
 using System;
 using SysCollGen = System.Collections.Generic;
 using System.Text;
-using Saxon.Eej;
 using Saxon.Hej.functions;
 using SysUri = System.Uri;
 using SysIO = System.IO;

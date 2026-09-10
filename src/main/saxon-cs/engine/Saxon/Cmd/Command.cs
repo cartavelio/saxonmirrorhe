@@ -19,7 +19,9 @@ namespace Saxon.Cmd {
                 } else if (subCommand == "transform") {
                     Saxon.Hej.Transform.main(tail);
                 } else if (subCommand == "validate") {
+#if EE                    
                     Saxon.Eej.Validate.main(tail);
+#endif
                 } else if (subCommand == "version") {
                     Saxon.Hej.Version.main(tail);
                 } else if (subCommand == "help") {

@@ -435,7 +435,7 @@ task hecs_dll(
 
     exec {
         workingDir = "${buildDir}/cs/he"
-        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
+        commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj', '/p:DefineConstants="EE"'
     }
   }
 }
