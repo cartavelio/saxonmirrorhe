@@ -231,7 +231,8 @@ public class UseWhenFilter extends ProxyReceiver {
     }
 
     private DocumentImpl processIncludeImport(
-            NodeName elemName, Location location, URI baseUri, String href, boolean isImport) throws XPathException {
+            NodeName elemName, Location location, URI baseUri,
+            String href, boolean isImport, boolean is40) throws XPathException {
         if (href == null) {
             throw new XPathException("Missing href attribute on " + elemName.getDisplayName(), "XTSE0010");
         }
@@ -241,8 +242,16 @@ public class UseWhenFilter extends ProxyReceiver {
         DocumentKey key = DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), false);
         Map<DocumentKey, TreeInfo> map = compilation.getStylesheetModules();
         if (map.containsKey(key)) {
-            return (DocumentImpl) map.get(key);
+            // In 4.0, ignore an included stylesheet module if it has already been included at the
+            // same stylesheet level.
+            if (is40 && compilation.existsLoadedModule(key, precedence)) {
+                return null;
+            } else {
+                compilation.addLoadedModule(key, precedence);
+                return (DocumentImpl) map.get(key);
+            }
         } else {
+            compilation.addLoadedModule(key, precedence);
             ResourceRequest request = new ResourceRequest();
             request.relativeUri = href;
             request.baseUri = baseUriStr;
@@ -405,7 +414,9 @@ public class UseWhenFilter extends ProxyReceiver {
                     // We need to process the included/imported stylesheet now, because its static variables
                     // can be used later in this module
                     String href = attributes.getValue("href");
-                    includedDoc = processIncludeImport(elemName, location, baseUri, href, fp == StandardNames.XSL_IMPORT);
+                    boolean is40 = getVersion(pa, fp) >= 40;
+                    boolean isImport = fp == StandardNames.XSL_IMPORT;
+                    includedDoc = processIncludeImport(elemName, location, baseUri, href, isImport, is40);
                     break;
 
                 case StandardNames.XSL_IMPORT_SCHEMA:

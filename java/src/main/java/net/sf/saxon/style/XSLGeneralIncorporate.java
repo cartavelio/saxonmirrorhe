@@ -124,9 +124,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
                 }
 
             } else {
-
-//                Map<DocumentURI, TreeInfo> map = getCompilation().getStylesheetModules();
-//                DocumentImpl includedDoc = (DocumentImpl)map.get(key);
+                
                 DocumentImpl includedDoc = targetDoc;
                 // In 4.0 this is null if the xsl:include was redundant
                 if (includedDoc == null) {

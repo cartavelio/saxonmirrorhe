@@ -43,6 +43,18 @@ public class Compilation {
             this.key = key;
             this.precedence = precedence;
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof ModuleInfo
+                    && ((ModuleInfo) obj).key.equals(this.key)
+                    && ((ModuleInfo) obj).precedence.equals(this.precedence);
+        }
+
+        @Override
+        public int hashCode() {
+            return key.hashCode() ^ precedence.hashCode();
+        }
     }
 
     // diagnostic switch to control output of timing information
@@ -67,6 +79,7 @@ public class Compilation {
     private boolean fallbackToNonStreaming = false;
     private Set<StructuredQName> referencedModes = new HashSet<>();
     public Timer timer = null;
+    private HashSet<ModuleInfo> loadedModules = new HashSet<>();
 
     private static class ValueAndPrecedence {
         public ValueAndPrecedence(GroundedValue v, NestedIntegerValue p, boolean isParam) {
@@ -816,6 +829,14 @@ public class Compilation {
      */
     public Set<StructuredQName> getAllKnownModeNames() {
         return referencedModes;
+    }
+
+    public void addLoadedModule(DocumentKey key, NestedIntegerValue precedence) {
+        loadedModules.add(new ModuleInfo(key, precedence));
+    }
+
+    public boolean existsLoadedModule(DocumentKey key, NestedIntegerValue precedence) {
+        return loadedModules.contains(new ModuleInfo(key, precedence));
     }
 
 

@@ -21,8 +21,6 @@ import net.sf.saxon.value.Whitespace;
 
 public class XSLImportSchema extends StyleElement {
 
-    private String role = null;
-
     /**
      * Ask whether this node is a declaration, that is, a permitted child of xsl:stylesheet
      * (including xsl:include and xsl:import).
@@ -50,7 +48,7 @@ public class XSLImportSchema extends StyleElement {
                 namespace = Whitespace.trim(value);
             } else if (f.equals("role")) {
                 if (requireXslt40Attribute("role")) {
-                    role = Whitespace.trim(value);
+                    String role = Whitespace.trim(value);
                     if (!NameChecker.isValidNCName(role)) {
                         compileErrorInAttribute("Value of @role must be a valid NCName", "XTSE0020", "role");
                     }
