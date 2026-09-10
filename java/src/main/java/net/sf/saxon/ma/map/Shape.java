@@ -7,7 +7,9 @@ import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A {@code Shape} represents the common structure of a set of {@code ShapedMap} objects,
@@ -30,6 +32,24 @@ public class Shape {
         for (int i=0; i<keys.length; i++) {
             slotMap.put(keys[i], i);
         }
+    }
+
+    /**
+     * Derive the structure of a Shape from a RecordTest.
+     *
+     * @param recordTypeDefinition - an instance of RecordTest, populated with a list of field names
+     */
+    public Shape(RecordTest recordTypeDefinition) {
+        this(unicodeStringArrayFromStringList((ArrayList) recordTypeDefinition.getFieldNames()));
+    }
+
+    private static Twine8[] unicodeStringArrayFromStringList(ArrayList<String> stringList) {
+        List<Twine8> unicodeStringList = new ArrayList<Twine8>();
+        stringList.forEach((fieldName) -> {
+            unicodeStringList.add(new Twine8(fieldName));
+        });
+        Twine8[] unicodeStringArray = new Twine8[unicodeStringList.size()];
+        return unicodeStringList.toArray(unicodeStringArray);
     }
 
     /**
@@ -69,7 +89,6 @@ public class Shape {
     /**
      * Make an instance of this Shape
      */
-
     public ShapedMap make(GroundedValue... values) {
         return new ShapedMap(this, values);
     }
