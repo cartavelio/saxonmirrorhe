@@ -23,6 +23,7 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.ma.arrays.ArraySort;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
@@ -319,7 +320,7 @@ public class MergeInstr extends Instruction {
                 for (SortKeyDefinition skd : mergeSource.mergeKeyDefinitions) {
                     Expression sortKey = skd.getSortKey();
                     sortKey = sortKey.typeCheck(visitor, cit);
-                    if (sortKey != null) {
+                    if (sortKey != null && visitor.getStaticContext().getXPathVersion() < 40) {
                         Supplier<RoleDiagnostic> role = () ->
                                 new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:merge-key/select", 0, "XTTE1020");
                         sortKey = CardinalityChecker.makeCardinalityChecker(sortKey, StaticProperty.ALLOWS_ZERO_OR_ONE, role);
@@ -379,6 +380,9 @@ public class MergeInstr extends Instruction {
             fn.setControllingInstruction(instr, isInLoop);
         } else if (exp.isCallOn(CurrentMergeKey.class)) {
             CurrentMergeKey fn = (CurrentMergeKey) ((SystemFunctionCall) exp).getTargetFunction();
+            fn.setControllingInstruction(instr);
+        } else if (exp.isCallOn(CurrentMergeKeyArray.class)) {
+            CurrentMergeKeyArray fn = (CurrentMergeKeyArray) ((SystemFunctionCall) exp).getTargetFunction();
             fn.setControllingInstruction(instr);
         } else if (exp instanceof MergeInstr) {
             // a current-merge-group() reference to the outer xsl:merge can occur in the
@@ -519,7 +523,7 @@ public class MergeInstr extends Instruction {
                     } else {
                         AtomicComparer[] comps = getComparators(context);
 
-                        GroupIterator mgi = context.getCurrentMergeGroupIterator();
+                        MergeGroupingIterator mgi = context.getCurrentMergeGroupIterator();
                         final XPathContextMajor c1 = context.newContext();
                         c1.setCurrentMergeGroupIterator(mgi);
                         SequenceIterator inputIterator = getMergedInputIterator(context, comps);
@@ -557,7 +561,7 @@ public class MergeInstr extends Instruction {
             // and apply the merging action to each group of duplicate items within this sequence
             //c1.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
             XPathContextMajor c3 = context.newContext();
-            c3.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
+            c3.setCurrentMergeGroupIterator((MergeGroupingIterator) inputIterator);
             c3.trackFocus(inputIterator);
             return new ContextMappingIterator(cxt -> getAction().iterate(cxt), c3);
         } catch (XPathException e) {
@@ -754,8 +758,7 @@ public class MergeInstr extends Instruction {
                 ItemWithMergeKeys bItem = b.getObject();
 
                 for (int i = 0; i < sKeys.size(); i++) {
-                    int val = comps[i].compareAtomicValues(aItem.sortKeyValues.get(i), bItem.sortKeyValues.get(i));
-
+                    int val = ArraySort.compareSortKeys(aItem.sortKeyValues.get(i), bItem.sortKeyValues.get(i), comps[i]);
                     if (val != 0) {
                         return val;
                     }
@@ -906,7 +909,7 @@ public class MergeInstr extends Instruction {
 
                     // and apply the merging action to each group of duplicate items within this sequence
                     XPathContextMajor c3 = context.newContext();
-                    c3.setCurrentMergeGroupIterator((GroupIterator) inputIterator);
+                    c3.setCurrentMergeGroupIterator((MergeGroupingIterator) inputIterator);
                     c3.trackFocus(inputIterator);
                     //noinspection Convert2MethodRef
                     return new ContextMappingIterator(cxt -> actionPull.iterate(cxt), c3);

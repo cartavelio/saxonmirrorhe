@@ -11,19 +11,22 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.GroupIterator;
+import net.sf.saxon.expr.sort.MergeGroupingIterator;
 import net.sf.saxon.expr.sort.MergeInstr;
+import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
+
+import java.util.List;
 
 
 /**
- * Implements the XSLT function current-grouping-key()
+ * Implements the XSLT 4.0 function current-merge-key-array()
  */
 
-public class CurrentMergeKey extends SystemFunction implements Callable {
+public class CurrentMergeKeyArray extends SystemFunction implements Callable {
 
     private MergeInstr controllingInstruction = null; // may be unknown, when current group has dynamic scope
 
@@ -72,13 +75,13 @@ public class CurrentMergeKey extends SystemFunction implements Callable {
 
     /*@NotNull*/
     //@Override
-    public SequenceIterator iterate(XPathContext c) throws XPathException {
-        GroupIterator gi = c.getCurrentMergeGroupIterator();
+    public Item evaluateItem(XPathContext c) throws XPathException {
+        MergeGroupingIterator gi = c.getCurrentMergeGroupIterator();
         if (gi == null) {
             throw new XPathException("There is no current merge key", "XTDE3510");
         }
-        return gi.getCurrentGroupingKey().iterate();
-
+        List<GroundedValue> compositeKey = gi.getCompositeMergeKey();
+        return new SimpleArrayItem(compositeKey);
     }
 
     /**
@@ -87,12 +90,12 @@ public class CurrentMergeKey extends SystemFunction implements Callable {
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as SequenceIterators
      * @return the result of the evaluation, in the form of a SequenceIterator
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return SequenceTool.toLazySequence(iterate(context));
+        return evaluateItem(context);
     }
 
 }

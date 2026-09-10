@@ -56,7 +56,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
          */
 
         public void put(UnicodeString key, GroundedValue value) throws XPathException {
-            Instrumentation.count("LazyStringMapBuilder.put()");
+            //Instrumentation.count("LazyStringMapBuilder.put()");
             keys.add(key);
             values.add(value);
         }

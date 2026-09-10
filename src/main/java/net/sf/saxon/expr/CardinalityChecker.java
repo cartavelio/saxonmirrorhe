@@ -68,14 +68,14 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     public static Expression makeCardinalityChecker(Expression sequence, int cardinality, Supplier<RoleDiagnostic> roleSupplier) {
-        Expression result;
+        Expression result = sequence;
         if (sequence instanceof Literal && Cardinality.subsumes(cardinality, SequenceTool.getCardinality(((Literal) sequence).getGroundedValue()))) {
-            return sequence;
+            return result;
         }
         if (sequence instanceof Atomizer && !Cardinality.allowsMany(cardinality)) {
             Expression base = ((Atomizer) sequence).getBaseExpression();
             result = new SingletonAtomizer(base, roleSupplier, Cardinality.allowsZero(cardinality));
-        } else {
+        } else if (Cardinality.allowsMany(sequence.getCardinality())) {
             result = new CardinalityChecker(sequence, cardinality, roleSupplier);
         }
         ExpressionTool.copyLocationInfo(sequence, result);

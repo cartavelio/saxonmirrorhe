@@ -13,6 +13,7 @@ import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.sort.GroupIterator;
+import net.sf.saxon.expr.sort.MergeGroupingIterator;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.*;
@@ -39,7 +40,7 @@ public class XPathContextMajor extends XPathContextMinor {
     private Component.M currentMode;
     private Rule currentTemplate;
     private GroupIterator currentGroupIterator;
-    private GroupIterator currentMergeGroupIterator;
+    private MergeGroupingIterator currentMergeGroupIterator;
     private RegexIterator currentRegexIterator;
 
 
@@ -507,7 +508,7 @@ public class XPathContextMajor extends XPathContextMinor {
      * @param iterator the new current GroupIterator
      */
 
-    public void setCurrentMergeGroupIterator(GroupIterator iterator) {
+    public void setCurrentMergeGroupIterator(MergeGroupingIterator iterator) {
         currentMergeGroupIterator = iterator;
     }
 
@@ -519,7 +520,7 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     @Override
-    public GroupIterator getCurrentMergeGroupIterator() {
+    public MergeGroupingIterator getCurrentMergeGroupIterator() {
         return currentMergeGroupIterator;
     }
 

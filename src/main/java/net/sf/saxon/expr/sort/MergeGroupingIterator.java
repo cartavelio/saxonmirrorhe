@@ -10,14 +10,16 @@ package net.sf.saxon.expr.sort;
 import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -37,7 +39,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     private Map<String, List<Item>> currentSourceMembers;
     private final Comparator<? super ObjectValue<ItemWithMergeKeys>> comparer;
     private int position = 0;
-    List<AtomicValue> compositeMergeKey;
+    List<GroundedValue> compositeMergeKey;
     private final LastPositionFinder lastPositionFinder;
 
 
@@ -101,7 +103,7 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
                         list.add(currentItem);
                     }
                 } else if (c > 0) {
-                    List<AtomicValue> keys = nextCandidate.getObject().sortKeyValues;
+                    List<GroundedValue> keys = nextCandidate.getObject().sortKeyValues;
                     throw new XPathException(
                             "Merge input for source " + source + " is not ordered according to merge key, detected at key value: " +
                                     Arrays.toString(keys.toArray()), "XTDE2220");
@@ -164,7 +166,11 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
 
     @Override
     public AtomicSequence getCurrentGroupingKey() {
-        return new AtomicArray(compositeMergeKey);
+        throw new UnsupportedOperationException();
+    }
+
+    public List<GroundedValue> getCompositeMergeKey() {
+        return compositeMergeKey;
     }
 
     @Override

@@ -4351,6 +4351,10 @@ public class XPathParser {
                 grumble("The current-merge-key() function cannot be used in a pattern",
                         "XTSE3500", offset);
                 return new ErrorExpression();
+            } else if (fcall.isCallOn(CurrentMergeKeyArray.class)) {
+                grumble("The current-merge-key-array() function cannot be used in a pattern",
+                        "XTSE3500", offset);
+                return new ErrorExpression();
             }
         }
         setLocation(fcall, offset);

@@ -107,7 +107,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
 
     /**
      * Determine whether there are more items to come. Note that this operation
-     * is stateless and it is not necessary (or usual) to call it before calling
+     * is stateless, and it is not necessary (or usual) to call it before calling
      * next(). It is used only when there is an explicit need to tell if we
      * are at the last element.
      * <p>This method must not be called unless the method {@link #supportsHasNext()} returns true.</p>
@@ -233,7 +233,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
 
     private static class SortComparer implements Comparator<ObjectToBeSorted> {
 
-        private AtomicComparer[] comparators;
+        private final AtomicComparer[] comparators;
 
         public SortComparer(AtomicComparer[] comparators) {
             this.comparators = comparators;

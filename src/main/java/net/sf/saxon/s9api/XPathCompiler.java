@@ -328,7 +328,7 @@ public class XPathCompiler {
 
     @Deprecated
     public void importSchemaNamespace(String uri) {
-        assert uri != null;
+        //
     }
 
     /**

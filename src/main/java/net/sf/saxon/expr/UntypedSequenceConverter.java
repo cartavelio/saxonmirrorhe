@@ -324,7 +324,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
                         String errorCode = expr.getRoleSupplier().get().getErrorCode();
                         throw new XPathException(((ValidationFailure) result).getMessage(), errorCode);
                     } else {
-                        throw ((ValidationFailure)result).makeException();
+                        throw ((ValidationFailure)result).makeException().maybeWithLocation(expr.getLocation());
                     }
                 }
                 return result.asAtomic();

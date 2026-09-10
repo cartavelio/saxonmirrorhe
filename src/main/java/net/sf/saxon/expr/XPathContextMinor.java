@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.sort.GroupIterator;
+import net.sf.saxon.expr.sort.MergeGroupingIterator;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.*;
@@ -507,7 +508,7 @@ public class XPathContextMinor implements XPathContext {
      */
 
     @Override
-    public GroupIterator getCurrentMergeGroupIterator() {
+    public MergeGroupingIterator getCurrentMergeGroupIterator() {
         return getMajorContext().getCurrentMergeGroupIterator();
     }
 

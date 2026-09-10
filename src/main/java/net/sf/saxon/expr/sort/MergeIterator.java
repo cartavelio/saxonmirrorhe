@@ -7,12 +7,12 @@
 
 package net.sf.saxon.expr.sort;
 
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
 
 import java.util.Comparator;
@@ -78,11 +78,11 @@ public class MergeIterator implements
             } catch (ClassCastException e) {
                 ItemWithMergeKeys i1 = nextItem1.getObject();
                 ItemWithMergeKeys i2 = nextItem2.getObject();
-                AtomicValue a1 = i1.sortKeyValues.get(0);
-                AtomicValue a2 = i2.sortKeyValues.get(0);
+                GroundedValue a1 = i1.sortKeyValues.get(0);
+                GroundedValue a2 = i2.sortKeyValues.get(0);
                 XPathException err = new XPathException("Merge key values are of non-comparable types ("
-                        + Type.displayTypeName(a1)
-                        + " and " + Type.displayTypeName(a2) + ")", "XTTE2230");
+                        + Type.displayTypeName(a1.itemAt(0))
+                        + " and " + Type.displayTypeName(a2.itemAt(0)) + ")", "XTTE2230");
                 err.setIsTypeError(true);
                 throw new UncheckedXPathException(err);
             }

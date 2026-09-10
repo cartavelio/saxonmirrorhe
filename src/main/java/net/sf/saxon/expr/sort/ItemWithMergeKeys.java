@@ -8,9 +8,9 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.List;
 
 public class ItemWithMergeKeys {
     Item baseItem;
-    List<AtomicValue> sortKeyValues;
+    List<GroundedValue> sortKeyValues;
     String sourceName;
 
     /**
@@ -41,10 +41,10 @@ public class ItemWithMergeKeys {
     ItemWithMergeKeys(Item bItem, SortKeyDefinitionList sKeys, String name, XPathContext context) throws XPathException {
         baseItem = bItem;
         sourceName = name;
-        sortKeyValues = new ArrayList<AtomicValue>(sKeys.size());
+        sortKeyValues = new ArrayList<>(sKeys.size());
 
         for (SortKeyDefinition sKey : sKeys) {
-            sortKeyValues.add((AtomicValue) sKey.getSortKey().evaluateItem(context));
+            sortKeyValues.add(sKey.getSortKey().makeElaborator().eagerly().evaluate(context).materialize());
         }
 
     }

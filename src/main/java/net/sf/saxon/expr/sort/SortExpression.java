@@ -214,11 +214,10 @@ public class SortExpression extends Expression
             }
             if (sortKeyDef.isBackwardsCompatible()) {
                 sortKey = FirstItemExpression.makeFirstItemExpression(sortKey);
-            } else {
+            } else if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
                 Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0, "XTTE1020");
                 sortKey = tc.staticTypeCheck(sortKey, SequenceType.OPTIONAL_ATOMIC, role, visitor);
-                //sortKey = CardinalityChecker.makeCardinalityChecker(sortKey, StaticProperty.ALLOWS_ZERO_OR_ONE, role);
             }
             sortKeyDef.setSortKey(sortKey, sortKeyDef.isSetContextForSortKey());
             sortKeyDef.typeCheck(visitor, contextInfo);

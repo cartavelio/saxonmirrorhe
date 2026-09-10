@@ -140,7 +140,8 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         if ((properties & BuiltInFunctionSet.DCOLL) != 0) {
             dep |= StaticProperty.DEPENDS_ON_STATIC_CONTEXT;
         }
-        if (isCallOn(RegexGroup.class) || isCallOn(CurrentMergeGroup.class) || isCallOn(CurrentMergeKey.class)) {
+        if (isCallOn(RegexGroup.class) || isCallOn(CurrentMergeGroup.class)
+                || isCallOn(CurrentMergeKey.class) || isCallOn(CurrentMergeKeyArray.class)) {
             dep |= StaticProperty.DEPENDS_ON_CURRENT_GROUP;
         }
         return dep;
@@ -214,7 +215,9 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         // an inelegant solution because it's being handled differently from other context
         // dependencies, but it works.
         return super.isLiftable(forStreaming) &&
-                !isCallOn(CurrentMergeGroup.class) && !isCallOn(CurrentMergeKey.class) &&
+                !isCallOn(CurrentMergeGroup.class) &&
+                !isCallOn(CurrentMergeKey.class) &&
+                !isCallOn(CurrentMergeKeyArray.class) &&
                 (!forStreaming || !isCallOn(MapFunctionSet.MapEntry.class));
     }
 
