@@ -433,50 +433,40 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <h1>Python extension</h1>
 
       <p>The Python extension is an interface module that allows SaxonC to be invoked from Python
-         applications. SaxonC is now officially available as a wheel package available on pypi.</p>
+         applications. SaxonC is now officially available as a wheel package available on pypi. Requires: Python >=3.8 (64-bit)</p>
 
-       <h2 class="subtitle">Prerequisites</h2>
-
-       <p>Please have the following packages on your machine to build SaxonC for the Python
-          language: <code>Python3</code> (64-bit).</p>
-
-       <h2 class="subtitle">Installing (pip)</h2>
+       <h2 class="subtitle">Installation (Linux|Mac OS|Windows)</h2>
        <p>Choose the product:</p>
+
        <kbd>pip install saxoncee</kbd>
        <kbd>pip install saxoncpe</kbd>
        <kbd>pip install saxonche</kbd>
 
-       <h2 class="subtitle">Installing (without pip)</h2>
+       <h3 class="subtitle">Installing SaxonC manually without pip  - (Linux|Mac Os)</h3>
 
-      <h3 class="subtitle">Prerequisites</h3>
+       <p>The SaxonC Python extension API has been developed using Cython for Python3. Cython is
+          required to build the extension library. To install Python and Cython on Mac OS, we
+          recommend using brew or MacPorts. (For installing SaxonC on Windows see following section below)</p>
 
-      <p>Please have the following packages on your machine to build SaxonC for the Python
-         language: <code>Python3</code> (64-bit) and <code>Cython</code>.</p>
+       <p>Step by step instructions:</p>
+       <p>SaxonC should already have been installed following the instructions at <a
+              href="../installing">Installing SaxonC</a>.</p>
+       <kbd>cd <code>Saxon.C.API/python-saxon</code> </kbd>
+       <kbd>pip install cython</kbd>
+       <kbd>python3 saxon-setup.py build_ext -if</kbd>
 
-      <p>The SaxonC Python extension API has been developed using Cython for Python3. Cython is
-         required to build the extension library. To install Python and Cython on Mac OS, we
-         recommend using brew or MacPorts.</p>
 
-      <p>SaxonC should already have been installed following the instructions at <a
-            href="../installing">Installing SaxonC</a>.</p>
 
-      <h2 class="subtitle">Installing</h2>
 
-      <p>The Python extension is held in the directory <code>Saxon.C.API/python-saxon</code>. </p>
 
-      <h3>Linux and Mac OS platforms</h3>
-      <p>The Python extension on the Linux and Mac OS platforms can be built using the following
-         command:</p>
 
-      <kbd>python3 saxon-setup.py build_ext -if</kbd>
 
-      <h3>Windows platform</h3>
 
-       <p>The SaxonC Python extension on the Windows platform is available as pypi wheel package. The three products can be installed as follows:</p>
+      <h3>Installing SaxonC manually without pip  - (Windows)</h3>
 
-       <kbd>pip install saxonc[ee|pe|he]</kbd>
-
-       <p>SaxonC can also be built using the following instructions:</p>
+       <p>The SaxonC Python extension on the Windows platform is available as pypi wheel package above. Manual installation below:</p>
+       <p>SaxonC should already have been installed following the instructions at <a
+              href="../installing">Installing SaxonC</a>.</p>
        <p>Install Python 3.X (64-bit) with VS 2017 or 2019 which can then be run
           with command "py" from Powershell.</p>
 
