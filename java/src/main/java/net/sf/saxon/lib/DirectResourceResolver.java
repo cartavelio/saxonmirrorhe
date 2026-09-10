@@ -81,8 +81,12 @@ public class DirectResourceResolver implements ResourceResolver {
             // Get an input stream from the request URI
             if (request.baseUri != null) {
                 URI base = new URI(request.baseUri);
-                URI href = new URI(request.uri);
-                stream = ResourceLoader.urlStream(config, base.resolve(href).toString());
+                if (request.uri.isEmpty()) {
+                    stream = ResourceLoader.urlStream(config, base.toString());
+                } else {
+                    URI href = new URI(request.uri);
+                    stream = ResourceLoader.urlStream(config, base.resolve(href).toString());
+                }
             } else {
                 stream = ResourceLoader.urlStream(config, request.uri);
             }
