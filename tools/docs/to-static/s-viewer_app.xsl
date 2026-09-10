@@ -510,9 +510,12 @@ $ext)
                         </a>
 
                         <xsl:if test="$onpath">
+                            <xsl:variable name="sections" select="$section/section[@id = $ids[$index + 1]]"/>
+                            <xsl:if test="$sections[2]">
+                                <xsl:message expand-text="yes">Warning: ID value {$ids[$index + 1]} is duplicated ({string-join(distinct-values($sections!base-uri()), ', ')})</xsl:message>
+                            </xsl:if>
                             <xsl:call-template name="add-list">
-                                <xsl:with-param name="section"
-                                    select="$section/section[@id = $ids[$index + 1]]"/>
+                                <xsl:with-param name="section" select="$sections[1]"/>
                                 <xsl:with-param name="ids" select="$ids"/>
                                 <xsl:with-param name="index" select="$index + 1"/>
                                 <xsl:with-param name="hash-path" select="$hash-path"/>

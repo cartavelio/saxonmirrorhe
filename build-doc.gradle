@@ -289,12 +289,13 @@ task javadoc_linkchecker(
     "-o:${buildDir}/javadoc-tag-check.xml"
 }
 
-task FIXME_dotnet_doc_parsecs(
+task dotnet_doc_parsecs(
+// modified to use Saxon-CS input rather than Saxon-.NET - MHK 2021-08-18
   type: JavaExec,
-  dependsOn: ["een_csharpApi"],
+  dependsOn: ["eecs_dll"],
   description: "Parse dotnet cs files for docs"
 ) {
-  inputs.files fileTree(dir: "${buildDir}/n/csharp/api/Saxon.Api")
+  inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs/engine/Saxon/Api")
   inputs.file "${projectDir}/tools/docs/dotnet/parsecs.xsl"
   outputs.file "${buildDir}/dotnetdoc/names.xml"
   classpath = configurations.documentation
@@ -303,23 +304,27 @@ task FIXME_dotnet_doc_parsecs(
     "-s:${projectDir}/tools/docs/dotnet/parsecs.xsl",
     "-xsl:${projectDir}/tools/docs/dotnet/parsecs.xsl",
     "-o:${buildDir}/dotnetdoc/names.xml",
-    "inputdir=${buildDir}/n/csharp/api/Saxon.Api"
+    "inputdir=file://${projectDir}/src/main/saxon-cs/engine/Saxon/Api"
 }
 
-task dotnet_doc_parsecs(
-  description: "Parse dotnet cs files for docs"
-) {
-  doFirst {
-    mkdir "${buildDir}/dotnetdoc"
-  }
+//doFirst {
+//    mkdir "${buildDir}/dotnetdoc"
+//  }
 
-  doLast {
-    // FIXME: the .NET javadoc is not being built
-    def output = new FileWriter(new File("${buildDir}/dotnetdoc/names.xml"))
-    output.write("<package></package>\n")
-    output.close()
-  }
-}
+//task dotnet_doc_parsecs(
+//  description: "Parse dotnet cs files for docs"
+//) {
+//  doFirst {
+//    mkdir "${buildDir}/dotnetdoc"
+//  }
+//
+//  doLast {
+//    // FIXME: the .NET javadoc is not being built
+//    def output = new FileWriter(new File("${buildDir}/dotnetdoc/names.xml"))
+//    output.write("<package></package>\n")
+//    output.close()
+//  }
+//}
 
 task dotnet_doc_merge(
   type: JavaExec,
@@ -327,7 +332,7 @@ task dotnet_doc_merge(
   description: "Merge API docs for dotnet"
 ) {
   inputs.file "${buildDir}/dotnetdoc/names.xml"
-  // FIXME: inputs.file "${buildDir}/n/saxon-ee-api-${saxonVersion}.xml"
+  inputs.file "${buildDir}/csout/engine.xml"
   inputs.file "${projectDir}/tools/docs/dotnet/merge.xsl"
   outputs.file "${buildDir}/dotnetdoc/merged.xml"
   classpath = configurations.documentation
@@ -337,7 +342,7 @@ task dotnet_doc_merge(
     "-xsl:${projectDir}/tools/docs/dotnet/merge.xsl",
     "-o:${buildDir}/dotnetdoc/merged.xml",
     "names-file=${buildDir}/dotnetdoc/names.xml",
-    "api-doc-file=${buildDir}/n/saxon-ee-api-${saxonVersion}.xml"
+    "api-doc-file=${buildDir}/csout/engine.xml"
 }
 
 task dotnet_doc_css(

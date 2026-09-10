@@ -29,7 +29,7 @@
     
     <xsl:template match="feature">
         <tr style="border-bottom: solid">
-            <td><p><xsl:value-of select="if (string-length(name) le 20) then name else replace(name, '_', '_&#xad;')"/></p>
+            <td><p id="{name}"><xsl:value-of select="if (string-length(name) le 20) then name else replace(name, '_', '_&#xad;')"/></p>
                 <xsl:if test="commandline">
                     <p><xsl:value-of select="commandline"/></p>
                 </xsl:if>
