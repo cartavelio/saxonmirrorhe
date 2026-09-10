@@ -145,17 +145,6 @@ public class ParseXml extends SystemFunction implements Callable {
                 //#endif
             }
 
-//            val = checkedOptions.get("entity-expansion-limit").head();
-//            if (val != null) {
-//                //#if CSHARP==false
-//                parseOptions = parseOptions
-//                        .withParserFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false)
-//                        .withParserFeature("http://xml.org/sax/features/external-general-entities", false)
-//                        .withParserFeature("http://xml.org/sax/features/external-parameter-entities", false)
-//                        .withParserFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-//                //#endif
-//            }
-
             if (checkedOptions.containsKey("strip-space")) {
                 parseOptions = parseOptions.withSpaceStrippingRule(
                         checkedOptions.asBoolean("strip-space", false)

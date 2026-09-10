@@ -24,6 +24,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.type.EnumerationUnionType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.*;
@@ -44,8 +45,7 @@ public class Doc extends SystemFunction implements Callable {
         OptionsParameter docOptions = new OptionsParameter(version);
         docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
-        docOptions.addAllowedOption("strip-space", SequenceType.SINGLE_STRING, StringValue.bmp("none"));
-        docOptions.setAllowedValues("strip-space", "XPTY0004", "all", "none", "conditional");
+        docOptions.addAllowedOption("strip-space", SequenceType.one(EnumerationUnionType.of("all", "none", "conditional")), new StringValue("conditional"));
         docOptions.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));

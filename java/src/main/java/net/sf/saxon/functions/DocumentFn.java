@@ -52,8 +52,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("schema", SequenceType.SINGLE_STRING);
         docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
-        // Temporary, anticipate resolution of QT4 spec issue #2684
-        docOptions.addAllowedOption("strip-space-2684", SequenceType.one(EnumerationUnionType.of("all", "none", "conditional")), new StringValue("conditional"));
+        docOptions.addAllowedOption("strip-space", SequenceType.one(EnumerationUnionType.of("all", "none", "conditional")), new StringValue("conditional"));
         docOptions.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
@@ -160,7 +159,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 baseURI = b.getStringValue();
             }
 
-            GroundedValue strip = checkedOptions.get("strip-space-2684"); // See QT4 issue 2684
+            GroundedValue strip = checkedOptions.get("strip-space"); // See QT4 issue 2684
             if (strip != null) {
                 SpaceStrippingRule rule;
                 GroundedValue dtdVal = checkedOptions.get("dtd-validation");
