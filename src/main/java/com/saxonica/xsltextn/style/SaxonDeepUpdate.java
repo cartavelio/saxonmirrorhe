@@ -80,7 +80,7 @@ public class SaxonDeepUpdate extends ExtensionInstruction {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new ForEach(root,
-                           new DeepUpdate2(-1, new ContextItemExpression(), select, action));
+                           new DeepUpdate2(DeepUpdate2.UpdateTarget.UNKNOWN, new ContextItemExpression(), select, action));
     }
 
 

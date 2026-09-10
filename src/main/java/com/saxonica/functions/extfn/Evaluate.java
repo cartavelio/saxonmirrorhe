@@ -4,10 +4,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.SlotManager;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
@@ -72,7 +69,7 @@ public class Evaluate extends SystemFunction {
 
         Expression expr;
         try {
-            expr = ExpressionTool.make(exprText, env, 0, tok -> tok == Token.EOF, null);
+            expr = ExpressionTool.make(exprText, env, 0, Tokenizer.END_OF_INPUT, null);
         } catch (XPathException e) {
             throw e.withMessage("Static error in XPath expression supplied to " +
                                                             functionName + ": " + e.getMessage().trim())

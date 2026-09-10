@@ -36,13 +36,15 @@ import java.util.function.Supplier;
 
 public class DeepUpdate2 extends Instruction {
 
-    private final int operation;
+    private final UpdateTarget operation;
     private final Operand rootOp;
     private final Operand selectOp;
     private final Operand actionOp;
 
+    public static enum UpdateTarget { MAP, ARRAY, UNKNOWN };
 
-    public DeepUpdate2(int operation, Expression root, Expression select, Expression action) {
+
+    public DeepUpdate2(UpdateTarget operation, Expression root, Expression select, Expression action) {
         this.operation = operation;
         rootOp = new Operand(this, root, OperandRole.INSPECT);
         selectOp = new Operand(this, select, OperandRole.FOCUS_CONTROLLED_ACTION);
@@ -102,9 +104,9 @@ public class DeepUpdate2 extends Instruction {
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
 
-        if (operation != -1) {
+        if (operation != UpdateTarget.UNKNOWN) {
             Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.SUBEXPRESSION, "update/root", 0);
-            SequenceType required = operation == Token.UPDATE_MAP ? MapType.SINGLE_MAP_ITEM : ArrayItemType.SINGLE_ARRAY;
+            SequenceType required = operation == UpdateTarget.MAP ? MapType.SINGLE_MAP_ITEM : ArrayItemType.SINGLE_ARRAY;
             setRootExpression(tc.staticTypeCheck(getRootExpression(), required, role, visitor));
         }
 

@@ -154,38 +154,28 @@ public class UpdateParser {
     public static Expression parseInsertExpression(XPathParser p) throws XPathException {
         Tokenizer t = p.getTokenizer();
         int offset = t.currentTokenStartOffset;
-        p.nextToken();
+        p.readKeyword("insert");
+        p.nextToken(); // We already know this is "node" or "nodes"
         Expression source = p.parseExprSingle();
 
         InsertExpression.InsertPosition position = InsertExpression.InsertPosition.INTO;
-        if (p.isKeyword("as")) {
-            p.nextToken();
-            String pos = p.readName();
-            switch (pos) {
-                case "first":
-                    p.readKeyword("into");
-                    position = InsertExpression.InsertPosition.FIRST;
-                    break;
-                case "last":
-                    p.readKeyword("into");
-                    position = InsertExpression.InsertPosition.LAST;
-                    break;
-                case "after":
-                    position = InsertExpression.InsertPosition.AFTER;
-                    break;
-                case "before":
-                    position = InsertExpression.InsertPosition.BEFORE;
-                    break;
-                case "into":
-                    position = InsertExpression.InsertPosition.INTO;
-                    break;
-                default:
-                    p.grumble("insert position must be one of: before | after | as first into | as last into | into");
-                    position = InsertExpression.InsertPosition.INTO;
+        if (p.tryKeyword("after")) {
+            position = InsertExpression.InsertPosition.AFTER;
+        } else if (p.tryKeyword("before")) {
+            position = InsertExpression.InsertPosition.BEFORE;
+        } else if (p.tryKeyword("into")) {
+            position = InsertExpression.InsertPosition.INTO;
+        } else if (p.tryKeyword("as")) {
+            if (p.tryKeyword("first")) {
+                position = InsertExpression.InsertPosition.FIRST;
+            } else if (p.tryKeyword("last")) {
+                position = InsertExpression.InsertPosition.LAST;
+            } else {
+                p.grumble("insert position must be one of: before | after | as first into | as last into | into");
             }
-
+            p.readKeyword("into");
         }
-        p.nextToken();
+
         Expression target = p.parseExprSingle();
         QueryModule env = (QueryModule) p.getStaticContext();
         int constructionMode = env.getConstructionMode();
@@ -206,6 +196,7 @@ public class UpdateParser {
 
     public static Expression parseDeleteExpression(XPathParser p) throws XPathException {
         int offset = p.getTokenizer().currentTokenStartOffset;
+        p.nextToken();  // "node" or "nodes" - already checked
         p.nextToken();
         Expression target = p.parseExprSingle();
         Expression e = new DeleteExpression(target);
@@ -223,7 +214,8 @@ public class UpdateParser {
 
     public static Expression parseReplaceNodeExpression(XPathParser p) throws XPathException {
         int offset = p.getTokenizer().currentTokenStartOffset;
-        p.nextToken();
+        p.readKeyword("replace");
+        p.readKeyword("node");
         Expression target = p.parseExprSingle();
         p.readKeyword("with");
         Expression replacement = p.parseExprSingle();
@@ -244,7 +236,9 @@ public class UpdateParser {
     public static Expression parseReplaceValueExpression(XPathParser p) throws XPathException {
         int offset = p.getTokenizer().currentTokenStartOffset;
         p.nextToken();
-        // The tokenizer swallows the "of node"
+        p.readKeyword("value");
+        p.readKeyword("of");
+        p.readKeyword("node");
         Expression target = p.parseExprSingle();
         p.readKeyword("with");
         Expression replacement = p.parseExprSingle();
@@ -265,6 +259,7 @@ public class UpdateParser {
         int offset = p.getTokenizer().currentTokenStartOffset;
         QueryModule env = (QueryModule) p.getStaticContext();
         p.nextToken();
+        p.readKeyword("node");
         Expression target = p.parseExprSingle();
         p.readKeyword("as");
         Expression newName = p.parseExprSingle();

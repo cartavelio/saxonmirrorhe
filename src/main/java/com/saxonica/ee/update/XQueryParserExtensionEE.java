@@ -59,7 +59,6 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
             p.grumble("declare revalidation appears more than once", "XUST0003");
         }
         foundRevalidationDeclaration = true;
-        p.nextToken();
         String mode = p.readName();
         int val;
         if ("strict".equals(mode)) {
@@ -100,7 +99,11 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
                 return UpdateParser.parseTransformExpression(p);
             } else if (p.isKeywordPair("insert", "node")) {
                 return UpdateParser.parseInsertExpression(p);
+            } else if (p.isKeywordPair("insert", "nodes")) {
+                return UpdateParser.parseInsertExpression(p);
             } else if (p.isKeywordPair("delete", "node")) {
+                return UpdateParser.parseDeleteExpression(p);
+            } else if (p.isKeywordPair("delete", "nodes")) {
                 return UpdateParser.parseDeleteExpression(p);
             } else if (p.isKeywordPair("replace", "node")) {
                 return UpdateParser.parseReplaceNodeExpression(p);
@@ -148,7 +151,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
         parser.nextToken();
         Expression actionExpr = parser.parseExprSingle();
 
-        return new DeepUpdate2(-12345678, rootExpr, selectExpr, actionExpr);   // TODO: fixme
+        return new DeepUpdate2(DeepUpdate2.UpdateTarget.UNKNOWN, rootExpr, selectExpr, actionExpr);   // TODO: fixme
     }
 
 

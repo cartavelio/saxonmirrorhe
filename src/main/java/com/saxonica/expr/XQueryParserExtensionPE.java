@@ -26,7 +26,6 @@ public class XQueryParserExtensionPE extends SaxonSyntaxExtension {
 
     @Override
     public void parseItemTypeDeclaration(XQueryParser p) throws XPathException {
-        p.nextToken();
         String name = p.readName();
         StructuredQName typeName = p.makeStructuredQName(name, NamespaceUri.NULL);
         p.readKeyword("as");

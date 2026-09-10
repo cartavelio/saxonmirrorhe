@@ -260,7 +260,7 @@ public class CompileXPath extends SystemFunction {
             if (type != null && "pattern".equals(type.getStringValue())) {
                 expr = Pattern.make(exprText, env, null);
             } else {
-                expr = make(exprText, env, 0, tok -> tok == Token.EOF, null, inCatch);
+                expr = make(exprText, env, 0, Tokenizer.END_OF_INPUT, null, inCatch);
             }
         } catch (XPathException e) {
             throw new XPathException("Static error in XPath expression supplied to saxon:compile-XPath: " +
@@ -358,7 +358,7 @@ public class CompileXPath extends SystemFunction {
      * @param env          An object giving information about the compile-time
      *                     context of the expression
      * @param start        position of the first significant character in the expression
-     * @param terminator   The token that marks the end of this expression; typically
+     * @param finished   The token that marks the end of this expression; typically
      *                     Token.EOF, but may for example be a right curly brace
      * @param codeInjector true  allows injection of tracing, debugging, or performance monitoring code; null if
      *                     not required
@@ -369,7 +369,7 @@ public class CompileXPath extends SystemFunction {
 
     /*@NotNull*/
     public static Expression make(String expression, StaticContext env,
-                                  int start, Predicate<Token> terminator,
+                                  int start, Predicate<Tokenizer> finished,
                                   CodeInjector codeInjector, boolean inCatch) throws XPathException {
         int languageLevel = env.getXPathVersion();
         XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
@@ -379,7 +379,7 @@ public class CompileXPath extends SystemFunction {
         if (codeInjector != null) {
             parser.setCodeInjector(codeInjector);
         }
-        Expression exp = parser.parse(expression, start, terminator, env);
+        Expression exp = parser.parse(expression, start, finished, env);
         ExpressionTool.setDeepRetainedStaticContext(exp, env.makeRetainedStaticContext());
         exp = exp.simplify();
         return exp;

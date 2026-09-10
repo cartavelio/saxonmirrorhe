@@ -47,7 +47,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
     public static final Token NOMINAL_NAME = new Token.NameToken("N");
 
-    public static final Token NOMINAL_NUMBER = new Token.NumericLiteral("0", Int64Value.ZERO);
+    public static final Token NOMINAL_NUMBER = new Token.NumericLiteral("0", Int64Value.ZERO, 10);
 
     public static final Token NOMINAL_STRING = new Token.StringLiteral(("S"));
 
@@ -63,14 +63,14 @@ public class QuickXPathParser implements XPathParser.Accelerator {
      * @param t          the tokenizer
      * @param expression the string containing expression to be parsed
      * @param start      start position within the input string
-     * @param terminator either EOF or RCURLY, indicating how parsing should end
+     * @param finished   either EOF or RCURLY, indicating how parsing should end
      * @return either the parsed expression, or null if it is erroneous or too
      * complex to parse.
      */
 
     @Override
-    public Expression parse(Tokenizer t, StaticContext env, String expression, int start, Predicate<Token> terminator) {
-        if (expression.length() - start > 30 && !terminator.test(Token.RCURLY)) {
+    public Expression parse(Tokenizer t, StaticContext env, String expression, int start, Predicate<Tokenizer> finished) {
+        if (expression.length() - start > 30 && !finished.test(t)) {
             return null;
         }
         if (env.getXPathVersion() < 31) {
@@ -82,7 +82,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
             List<Token> tokenTypes = new ArrayList<>();
             List<String> tokenValues = new ArrayList<>();
 
-            while (t.currentToken != Token.EOF && t.currentToken != terminator) {
+            while (t.currentToken != Token.EOF && t.currentToken != finished) {
                 if (tokenTypes.size() > 6) {
                     return null;
                 }
@@ -94,7 +94,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                 }
             }
 
-            if (t.currentToken != terminator) {
+            if (t.currentToken != finished) {
                 return null; // no closing brace after embedded expression in AVT
             }
 

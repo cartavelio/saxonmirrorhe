@@ -6,7 +6,7 @@ import com.saxonica.ee.schema.IdentitySelector;
 import com.saxonica.ee.stream.StreamingPatternMaker;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceUri;
@@ -85,7 +85,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
         Pattern selector;
         Expression exp;
         try {
-            exp = new XPathParser(env).parse(xpath, 0, tok -> tok == Token.EOF, env);
+            exp = new XPathParser(env).parse(xpath, 0, Tokenizer.END_OF_INPUT, env);
             boolean allowExtensions = getXSDSchema().getAllowedExtensions().contains("id-xpath-syntax");
             if (allowExtensions) {
                 List<String> reasonsForFailure = new ArrayList<>();

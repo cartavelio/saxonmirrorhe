@@ -6,6 +6,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.QNameParser;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
@@ -141,6 +142,11 @@ public class SelectionParser extends XPathParser {
             Expression cie = new ContextItemExpression();
             setLocation(cie);
             return cie;
+        } else if (t.currentToken == Token.STAR) {
+            nextToken();
+            Expression ae2 = new AxisExpression(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+            setLocation(ae2);
+            return ae2;
         } else if (t.currentToken == Token.AT) {
             if (!isFieldSubset) {
                 grumble("The attribute axis cannot be used in a selector XPath");
