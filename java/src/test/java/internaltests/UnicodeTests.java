@@ -5,7 +5,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.StringValue;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,7 +71,7 @@ public class UnicodeTests {
         assertEquals(150001, str.indexOf('A'));
     }
 
-    @Ignore
+    @Disabled
     public void testBeyond2G() {
         try {
             UnicodeBuilder ub = new UnicodeBuilder();

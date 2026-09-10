@@ -6,7 +6,8 @@ import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
-import org.junit.Assert;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestMapBuilder implements BuilderDsl {
     StringMapBuilder map = new StringMapBuilder(40);
@@ -26,7 +27,7 @@ public class TestMapBuilder implements BuilderDsl {
         try {
             return map.getCompletedMap();
         } catch (XPathException e) {
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
             return null;
         }
     }

@@ -2,8 +2,7 @@ package s9apitest;
 
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
@@ -15,6 +14,7 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestChecksums {
@@ -106,7 +106,7 @@ public class TestChecksums {
                 exec = comp.compile(badChecksum.asSource());
                 fail();
             } catch (SaxonApiException ex) {
-                Assert.assertTrue(ex.getMessage().contains("incorrect checksum"));
+                assertTrue(ex.getMessage().contains("incorrect checksum"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -155,7 +155,7 @@ public class TestChecksums {
                 exec = comp.compile(badChecksum.asSource());
                 fail();
             } catch (SaxonApiException ex) {
-                Assert.assertTrue(ex.getMessage().contains("incorrect checksum"));
+                assertTrue(ex.getMessage().contains("incorrect checksum"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -203,7 +203,7 @@ public class TestChecksums {
                 exec = comp.compile(removedDigest.asSource());
                 fail();
             } catch (SaxonApiException ex) {
-                Assert.assertTrue(ex.getMessage().contains("incorrect checksum"));
+                assertTrue(ex.getMessage().contains("incorrect checksum"));
             }
         } catch (Exception e) {
             e.printStackTrace();
