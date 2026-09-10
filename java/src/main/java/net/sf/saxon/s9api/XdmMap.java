@@ -130,7 +130,7 @@ public class XdmMap extends XdmFunctionItem {
             @Override
             public Iterator<XdmAtomicValue> iterator() {
                 final Function<KeyValuePair, XdmAtomicValue> atomicValueFunction =
-                        kvp -> (XdmAtomicValue) XdmValue.wrap(kvp.key);
+                        kvp -> (XdmAtomicValue) XdmValue.wrap(kvp.key());
                 return new MappingJavaIterator<>(
                         getUnderlyingValue().keyValuePairs().iterator(),
                         atomicValueFunction);
@@ -365,7 +365,7 @@ public class XdmMap extends XdmFunctionItem {
     public Collection<XdmValue> values() {
         List<XdmValue> result = new ArrayList<>();
         for (KeyValuePair keyValuePair : getUnderlyingValue().keyValuePairs()) {
-            result.add(XdmValue.wrap(keyValuePair.value));
+            result.add(XdmValue.wrap(keyValuePair.value()));
         }
         return result;
     }
@@ -432,7 +432,7 @@ public class XdmMap extends XdmFunctionItem {
          */
         @Override
         public XdmAtomicValue getKey() {
-            return (XdmAtomicValue)XdmValue.wrap(pair.key);
+            return (XdmAtomicValue)XdmValue.wrap(pair.key());
         }
 
         /**
@@ -447,7 +447,7 @@ public class XdmMap extends XdmFunctionItem {
          */
         @Override
         public XdmValue getValue() {
-            return XdmValue.wrap(pair.value);
+            return XdmValue.wrap(pair.value());
         }
 
         /**

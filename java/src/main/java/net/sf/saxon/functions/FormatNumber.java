@@ -942,9 +942,9 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         }
         baseFormat = new DecimalSymbols(baseFormat);
         for (KeyValuePair kvp : options.keyValuePairs()) {
-            String key = kvp.key.getStringValue();
+            String key = kvp.key().getStringValue();
             if (DecimalSymbols.isValidPropertyName(key)) {
-                GroundedValue val = Atomizer.atomize(kvp.value);
+                GroundedValue val = Atomizer.atomize(kvp.value());
                 UnicodeString propValue = val.getUnicodeStringValue();
                 baseFormat.setProperty(key, propValue);
             }

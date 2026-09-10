@@ -131,7 +131,7 @@ public class ApplyTemplatesFn extends SystemFunction {
                 ? new ParameterSet(supplied.size())
                 : new ParameterSet(existing, supplied.size());
         for (KeyValuePair pair : supplied.keyValuePairs()) {
-            params.put(((QNameValue)pair.key).getStructuredQName(), pair.value, false);
+            params.put(((QNameValue)pair.key()).getStructuredQName(), pair.value(), false);
         }
         return params;
     }

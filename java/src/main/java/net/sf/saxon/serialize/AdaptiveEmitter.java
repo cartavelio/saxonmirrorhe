@@ -356,10 +356,10 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 emit(",");
                 indent(indentLevel);
             }
-            serializeItem(pair.key);
+            serializeItem(pair.key());
             emit(":");
             afterColon = true;
-            Sequence value = pair.value;
+            Sequence value = pair.value();
             outputInternalSequence(value);
             afterColon = false;
         }

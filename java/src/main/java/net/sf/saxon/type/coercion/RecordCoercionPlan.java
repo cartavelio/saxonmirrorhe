@@ -76,13 +76,13 @@ public final class RecordCoercionPlan extends CoercionPlan {
                     throw coercionError(item, requiredType, request);
                 }
                 for (KeyValuePair kvp : suppliedMap.keyValuePairs()) {
-                    if (kvp.key.getItemType() == BuiltInAtomicType.STRING) {
-                        if (test.getFieldType(kvp.key.getStringValue()) != null) {
+                    if (kvp.key().getItemType() == BuiltInAtomicType.STRING) {
+                        if (test.getFieldType(kvp.key().getStringValue()) != null) {
                             // Skip this entry, we have already dealt with it
                             continue;
                         }
                         if (resultMap == null) {
-                            builder.put(kvp.key.getUnicodeStringValue(), kvp.value);
+                            builder.put(kvp.key().getUnicodeStringValue(), kvp.value());
                             continue;
                         }
                     }
@@ -91,7 +91,7 @@ public final class RecordCoercionPlan extends CoercionPlan {
                         // to abandon the StringMapBuilder approach
                         resultMap = builder.getCompletedMapConfidently();
                     }
-                    resultMap.put(kvp.key, kvp.value);
+                    resultMap.put(kvp.key(), kvp.value());
                 }
             }
             if (resultMap == null) {

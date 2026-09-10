@@ -251,17 +251,16 @@ public class SequenceWrapper extends SequenceReceiver {
             } else {
                 ((NodeInfo) item).copy(this, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, locationId);
             }
-        } else if (item instanceof MapItem) {
+        } else if (item instanceof MapItem map) {
             ComplexContentOutputter out = getDestination();
             out.startElement(resultMap, Untyped.INSTANCE, locationId, ReceiverOption.NONE);
-            MapItem map = (MapItem) item;
             for (KeyValuePair pair : map.keyValuePairs()) {
                 out.startElement(resultMapEntry, Untyped.INSTANCE, locationId, ReceiverOption.NONE);
                 out.startElement(resultMapKey, Untyped.INSTANCE, locationId, ReceiverOption.NONE);
-                append(pair.key);
+                append(pair.key());
                 out.endElement();
                 out.startElement(resultMapValue, Untyped.INSTANCE, locationId, ReceiverOption.NONE);
-                SequenceIterator value = pair.value.iterate();
+                SequenceIterator value = pair.value().iterate();
                 Item valItem;
                 while ((valItem = value.next()) != null) {
                     append(valItem);

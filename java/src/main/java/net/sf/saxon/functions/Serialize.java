@@ -315,7 +315,7 @@ public class Serialize extends SystemFunction implements Callable {
     private static MapItem checkCharacterMapOptions(MapItem map, XPathContext context) throws XPathException {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         for (KeyValuePair pair : map.keyValuePairs()) {
-            AtomicValue key = pair.key;
+            AtomicValue key = pair.key();
             if (!(key instanceof StringValue)) {
                 throw new XPathException(
                         "Keys in a character map must all be strings. Found a value of type " + key.getItemType(), "XPTY0004");
@@ -323,7 +323,7 @@ public class Serialize extends SystemFunction implements Callable {
             if (((StringValue) key).length() != 1) {
                 throw new XPathException("Keys in a character map must all be one-character strings. Found " + Err.wrap(key.show()), "SEPM0016");
             }
-            if (!SequenceType.SINGLE_STRING.matches(pair.value)) {
+            if (!SequenceType.SINGLE_STRING.matches(pair.value())) {
                 throw new XPathException("Values in a character map must all be single strings. Found " + Err.wrap(key.show()), "XPTY0004");
             }
         }
@@ -340,9 +340,9 @@ public class Serialize extends SystemFunction implements Callable {
     public static CharacterMap toCharacterMap(MapItem charMap) throws XPathException {
         IntHashMap<String> intHashMap = new IntHashMap<>();
         for (KeyValuePair kvp : charMap.keyValuePairs()) {
-            AtomicValue charKey = kvp.key;
+            AtomicValue charKey = kvp.key();
             UnicodeString ch = charKey.getUnicodeStringValue();
-            String str = kvp.value.head().getStringValue();
+            String str = kvp.value().head().getStringValue();
             if (ch.length() != 1) {
                 throw new XPathException("In the serialization parameter for the character map, each character to be mapped " +
                     "must be a single Unicode character", "SEPM0016");
@@ -512,10 +512,10 @@ public class Serialize extends SystemFunction implements Callable {
             } else if (param instanceof MapItem paramMap) {
                 // If any parameters are supplied as QNames in the Saxon namespace, convert them to EQName strings
                 for (KeyValuePair kvp : paramMap.keyValuePairs()) {
-                    AtomicValue k = kvp.key;
+                    AtomicValue k = kvp.key();
                     if (k instanceof QNameValue && ((QNameValue)k).getStructuredQName().hasURI(NamespaceUri.SAXON)) {
                         String s = ((QNameValue) k).getStructuredQName().getEQName();
-                        paramMap = paramMap.put(new StringValue(s), kvp.value);
+                        paramMap = paramMap.put(new StringValue(s), kvp.value());
                     }
                 }
                 int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();

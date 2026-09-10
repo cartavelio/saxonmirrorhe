@@ -47,7 +47,7 @@ public final class MapCoercionPlan extends CoercionPlan {
             if (requiredType.matches(item)) {
                 return item;
             } else {
-                GeneralMapBuilder builder = item instanceof ExtensibleMap ? new GeneralMapBuilder(40) : FixedMap.getBuilder(40);
+                GeneralMapBuilder builder = AbstractFixedMap.getBuilder(40);
                 CoercionPlan keyPlan = requiredKeyType.getCoercionPlan(40);
                 CoercionPlan valuePlan = requiredValueType.getPrimaryType().getCoercionPlan(40);
                 if (keyPlan == null) {
@@ -58,9 +58,9 @@ public final class MapCoercionPlan extends CoercionPlan {
                 }
                 for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
                     builder.put(
-                            (AtomicValue) keyPlan.coerceItem(pair.key, requiredKeyType, request),
+                            (AtomicValue) keyPlan.coerceItem(pair.key(), requiredKeyType, request),
                             SequenceTool.toGroundedValue(valuePlan.coerceSequence(
-                                    pair.value.iterate(), requiredValueType, request))
+                                    pair.value().iterate(), requiredValueType, request))
                     );
                 }
                 try {

@@ -165,7 +165,7 @@ public class SingleEntryMap extends MapItem {
     }
 
     /**
-     * Convert to a HashTrieMap
+     * Convert to a HashTrieMap (typically when adding further entries)
      */
 
     private MapItem toGeneralMap() {

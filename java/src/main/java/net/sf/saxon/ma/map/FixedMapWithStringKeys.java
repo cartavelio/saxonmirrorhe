@@ -22,8 +22,8 @@ public class FixedMapWithStringKeys extends AbstractFixedMap {
     private final UnicodeString[] keyArray;
 
     @Override
-    protected AtomicValue getKey(int offset) {
-        return new StringValue(keyArray[offset]);
+    protected AtomicValue getKey(int position) {
+        return new StringValue(keyArray[position]);
     }
 
     /**

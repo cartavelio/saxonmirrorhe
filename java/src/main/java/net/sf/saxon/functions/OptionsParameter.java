@@ -129,9 +129,9 @@ public class OptionsParameter {
         // A 4.0 rule: reject mis-spelt option names
         if (version >= 40) {
             for (KeyValuePair kvp : supplied.keyValuePairs()) {
-                if (!(kvp.key instanceof StringValue && allowedOptions.containsKey(kvp.key.getStringValue())) &&
-                        !(kvp.key instanceof QNameValue && !((QNameValue) kvp.key).getNamespaceURI().isEmpty())) {
-                    throw new XPathException("Unrecognized option: " + Err.depict(kvp.key), "XPTY0004").asTypeError();
+                if (!(kvp.key() instanceof StringValue && allowedOptions.containsKey(kvp.key().getStringValue())) &&
+                        !(kvp.key() instanceof QNameValue && !((QNameValue) kvp.key()).getNamespaceURI().isEmpty())) {
+                    throw new XPathException("Unrecognized option: " + Err.depict(kvp.key()), "XPTY0004").asTypeError();
                 }
             }
         }

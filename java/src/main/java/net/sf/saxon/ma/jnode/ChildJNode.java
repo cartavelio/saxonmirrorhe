@@ -135,7 +135,7 @@ public abstract class ChildJNode extends JNode implements SiblingCountingNode {
                 if (mapEntryIterator.hasNext()) {
                     KeyValuePair nextItem = mapEntryIterator.next();
                     return new JNodeForMapEntry(
-                            origin, position, nextItem.key, nextItem.value, serialNr++);
+                            origin, position, nextItem.key(), nextItem.value(), serialNr++);
                 } else {
                     mapEntryIterator = null;
                 }

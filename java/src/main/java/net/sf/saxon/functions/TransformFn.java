@@ -231,10 +231,10 @@ public class TransformFn extends SystemFunction implements Callable {
     private void setRequestedProperties(Map<String, GroundedValue> options, Processor processor) throws XPathException {
         MapItem requestedProps = (MapItem) options.get("requested-properties").head();
         for (KeyValuePair kvp : requestedProps.keyValuePairs()) {
-            AtomicValue option = kvp.key;
+            AtomicValue option = kvp.key();
             if (option != null) {
                 StructuredQName optionName = ((QNameValue) option.head()).getStructuredQName();
-                AtomicValue value = (AtomicValue)kvp.value.head();
+                AtomicValue value = (AtomicValue)kvp.value().head();
                 if (optionName.hasURI(NamespaceUri.XSLT)) {
                     String localName = optionName.getLocalPart();
                     String val = value.getStringValue();
@@ -348,13 +348,13 @@ public class TransformFn extends SystemFunction implements Callable {
     private void setStaticParams(Map<String, GroundedValue> options, XsltCompiler xsltCompiler, boolean allowTypedNodes) throws XPathException {
         MapItem staticParamsMap = (MapItem) options.get("static-params").head();
         for (KeyValuePair kvp : staticParamsMap.keyValuePairs()) {
-            AtomicValue param = kvp.key;
+            AtomicValue param = kvp.key();
             if (param != null) {
                 if (!(param instanceof QNameValue)) {
                     throw new XPathException("Parameter names in static-params must be supplied as QNames", "FOXT0002");
                 }
                 QName paramName = new QName(((QNameValue) param).getStructuredQName());
-                GroundedValue value = kvp.value;
+                GroundedValue value = kvp.value();
                 if (!allowTypedNodes) {
                     checkSequenceIsUntyped(value);
                 }
@@ -932,13 +932,13 @@ public class TransformFn extends SystemFunction implements Callable {
 
     private void processParams(MapItem suppliedParams, Map<QName, XdmValue> checkedParams, boolean allowTypedNodes) throws XPathException {
          for (KeyValuePair kvp : suppliedParams.keyValuePairs()) {
-            AtomicValue param = kvp.key;
+            AtomicValue param = kvp.key();
             if (param != null) {
                 if (!(param instanceof QNameValue)) {
                     throw new XPathException("The names of parameters must be supplied as QNames", "FOXT0002");
                 }
                 QName paramName = new QName(((QNameValue) param).getStructuredQName());
-                Sequence value = kvp.value;
+                Sequence value = kvp.value();
                 if (!allowTypedNodes) {
                     checkSequenceIsUntyped(value);
                 }
@@ -1092,7 +1092,7 @@ public class TransformFn extends SystemFunction implements Callable {
             Serializer serializer = processor.newSerializer();
             if (serializationParamsMap != null) {
                 for (KeyValuePair kvp : serializationParamsMap.keyValuePairs()) {
-                    AtomicValue param = kvp.key;    // See bug 29440/29443. For the time being, accept both the old and new forms of serialization params
+                    AtomicValue param = kvp.key();    // See bug 29440/29443. For the time being, accept both the old and new forms of serialization params
                     QName paramName;
                     if (param instanceof StringValue) {
                         paramName = new QName(param.getStringValue());
@@ -1102,7 +1102,7 @@ public class TransformFn extends SystemFunction implements Callable {
                         throw new XPathException("Serialization parameters must be strings or QNames", "XPTY0004");
                     }
                     String paramValue = null;
-                    GroundedValue supplied = kvp.value;
+                    GroundedValue supplied = kvp.value();
                     if (supplied.getLength() > 0) {
                         if (supplied.getLength() == 1) {
                             Item val = supplied.itemAt(0);

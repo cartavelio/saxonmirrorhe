@@ -46,7 +46,7 @@ public abstract class AbstractFixedMap extends MapWithTypeCache implements Itera
 
         @Override
         public MapItem getCompletedMap() throws XPathException {
-            if (keys.size() == 0) {
+            if (keys.isEmpty()) {
                 return EmptyMap.getInstance(specVersion);
             } else if (keys.size() == 1) {
                 return new SingleEntryMap(keys.get(0), values.get(0), specVersion);
@@ -74,7 +74,7 @@ public abstract class AbstractFixedMap extends MapWithTypeCache implements Itera
          */
 
         public MapItem getCompletedMap(XPathContext context) throws XPathException {
-            if (keys.size() == 0) {
+            if (keys.isEmpty()) {
                 return EmptyMap.getInstance(specVersion);
             } else if (keys.size() == 1) {
                 return new SingleEntryMap(keys.get(0), values.get(0), specVersion);
@@ -198,7 +198,14 @@ public abstract class AbstractFixedMap extends MapWithTypeCache implements Itera
         return false;
     }
 
-    public int getIndex(AtomicValue key) {
+    /**
+     * Get the offset in the index of a given key, or -1 if the key is not present.
+     *
+     * @param key   the wanted key
+     * @return the offset in the index, or -1 if absent
+     */
+
+    public int getPosition(AtomicValue key) {
         ensureIndexed();
         return getOffset(index, key.asMapKey(getSpecVersion()));
     }
@@ -233,11 +240,22 @@ public abstract class AbstractFixedMap extends MapWithTypeCache implements Itera
     /**
      * Get the key at a given offset. This method is provided for use by subclasses,
      * which can store the actual key in different ways.
-     * @param offset the offset (sibling position within the ordered map) of the required key
+     * @param position the offset (sibling position within the ordered map) of the required key
      * @return the key at the specified position
      */
 
-    protected abstract AtomicValue getKey(int offset);
+    protected abstract AtomicValue getKey(int position);
+
+    /**
+     * Get the value at a given offset.
+     *
+     * @param position the offset (sibling position within the ordered map) of the required key
+     * @return the key at the specified position
+     */
+
+    protected GroundedValue getValue(int position) {
+        return values[position];
+    }
 
     /**
      * Get the content of the map as an iterable collection of key value pairs
@@ -307,7 +325,7 @@ public abstract class AbstractFixedMap extends MapWithTypeCache implements Itera
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        ExtensibleMap newMap = ExtensibleMap.copyOf(this);
+        DeltaMap newMap = new DeltaMap(this);
         newMap.setKnownType(knownKeyType, knownValueType);
         return newMap.put(key, value);
     }
@@ -322,7 +340,7 @@ public abstract class AbstractFixedMap extends MapWithTypeCache implements Itera
     @Override
     public MapItem remove(AtomicValue key) {
         if (get(key) != null) {
-            ExtensibleMap newMap = ExtensibleMap.copyOf(this);
+            DeltaMap newMap = new DeltaMap(this);
             newMap.setKnownType(knownKeyType, knownValueType);
             return newMap.remove(key);
         } else {
@@ -341,9 +359,9 @@ public abstract class AbstractFixedMap extends MapWithTypeCache implements Itera
             if (i++ != 0) {
                 sb.append(", ");
             }
-            sb.append(Err.depict(kvp.key))
+            sb.append(Err.depict(kvp.key()))
                     .append(": ")
-                    .append(Err.depictSequence(kvp.value));
+                    .append(Err.depictSequence(kvp.value()));
             if (i > 7) {
                 sb.append(" ...");
                 break;

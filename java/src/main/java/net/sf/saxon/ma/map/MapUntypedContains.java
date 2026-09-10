@@ -40,7 +40,7 @@ public class MapUntypedContains extends SystemFunction {
         if (key.isUntypedAtomic()) {
             if (typesPresent == UType.VOID) {
                 for (KeyValuePair pair : map.keyValuePairs()) {
-                    typesPresent = typesPresent.union(pair.key.getUType());
+                    typesPresent = typesPresent.union(pair.key().getUType());
                 }
             }
             for (PrimitiveUType prim : typesPresent.decompose()) {

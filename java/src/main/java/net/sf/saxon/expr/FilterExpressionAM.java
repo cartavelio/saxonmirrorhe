@@ -358,7 +358,7 @@ public class FilterExpressionAM extends BinaryExpression
             int position = 0;
             for (KeyValuePair pair : input.keyValuePairs()) {
                 position++;
-                ShapedMap kvp = new ShapedMap(Shape.KEY_VALUE_PAIR, pair.key, pair.value);
+                ShapedMap kvp = new ShapedMap(Shape.KEY_VALUE_PAIR, pair.key(), pair.value());
                 focus.setContextItem(kvp);
                 focus.incrementPosition();
                 GroundedValue predicateValue = predicate.evaluate(c2).materialize();
@@ -367,7 +367,7 @@ public class FilterExpressionAM extends BinaryExpression
                         if (it instanceof NumericValue) {
                             if (((NumericValue) it).isWholeNumber()
                                     && ((NumericValue) it).longValue() == position) {
-                                result.put(pair.key, pair.value);
+                                result.put(pair.key(), pair.value());
                                 break;
                             }
                         } else {
@@ -375,7 +375,7 @@ public class FilterExpressionAM extends BinaryExpression
                         }
                     }
                 } else if (predicateValue.effectiveBooleanValue()) {
-                    result.put(pair.key, pair.value);
+                    result.put(pair.key(), pair.value());
                 }
             }
             return result.getCompletedMap(context);

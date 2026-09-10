@@ -184,7 +184,7 @@ public class RootJNode extends JNode {
         public GNode next() {
             if (mapEntryIterator.hasNext()) {
                 KeyValuePair nextItem = mapEntryIterator.next();
-                return new JNodeForMapEntry(origin, 1, nextItem.key, nextItem.value, serialNr++);
+                return new JNodeForMapEntry(origin, 1, nextItem.key(), nextItem.value(), serialNr++);
             } else {
                 return null;
             }

@@ -118,7 +118,7 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
                     if (nsMap != null) {
                         namespaces = new HashMap<>();
                         for (KeyValuePair kvp : nsMap.keyValuePairs()) {
-                            namespaces.put(NamespaceUri.of(kvp.value.getStringValue()), kvp.key.getStringValue());
+                            namespaces.put(NamespaceUri.of(kvp.value().getStringValue()), kvp.key().getStringValue());
                         }
                     }
                 }

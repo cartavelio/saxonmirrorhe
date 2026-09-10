@@ -574,8 +574,8 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                             List<Item> result = new ArrayList<>();
                             int serialNr = 0;
                             for (KeyValuePair pair : ((MapItem) content).keyValuePairs()) {
-                                if (matchKeys.contains(pair.key.asMapKey(specVersion))) {
-                                    result.add(new JNodeForMapEntry((JNode) origin, 1, pair.key, pair.value, serialNr));
+                                if (matchKeys.contains(pair.key().asMapKey(specVersion))) {
+                                    result.add(new JNodeForMapEntry((JNode) origin, 1, pair.key(), pair.value(), serialNr));
                                 }
                                 serialNr++;
                             }

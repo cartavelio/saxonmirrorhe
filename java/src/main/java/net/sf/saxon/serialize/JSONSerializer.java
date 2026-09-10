@@ -167,7 +167,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             emitter.startMap(oneLiner);
             ArrayList<AtomicValue> keyList = new ArrayList<>(); // Needs to be ArrayList for sort() to work in C#
             for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
-                keyList.add(pair.key);
+                keyList.add(pair.key());
             }
             if (propertySorter != null) {
                 keyList.sort(propertySorter);
@@ -226,10 +226,10 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             return true;
         }
         for (KeyValuePair entry : map.keyValuePairs()) {
-            if (entry.value instanceof AtomicValue) {
-                totalSize += (int)entry.key.getUnicodeStringValue().estimatedLength() + ((AtomicValue) entry.value).getUnicodeStringValue().estimatedLength() + 4;
-            } else if (entry.value.getLength() == 0) {
-                totalSize += (int)entry.key.getUnicodeStringValue().estimatedLength() + 6; // ": null"
+            if (entry.value() instanceof AtomicValue) {
+                totalSize += (int)entry.key().getUnicodeStringValue().estimatedLength() + ((AtomicValue) entry.value()).getUnicodeStringValue().estimatedLength() + 4;
+            } else if (entry.value().getLength() == 0) {
+                totalSize += (int)entry.key().getUnicodeStringValue().estimatedLength() + 6; // ": null"
             } else {
                 return false;
             }

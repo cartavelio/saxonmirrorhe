@@ -7,23 +7,19 @@ import net.sf.saxon.value.SequenceType;
 
 public abstract class MapWithTypeCache extends MapItem {
 
-
     protected PlainType knownKeyType;
     protected SequenceType knownValueType;
-
 
     protected void setKnownType(PlainType keyType, SequenceType valueType) {
         this.knownKeyType = keyType;
         this.knownValueType = valueType;
     }
 
-    protected void notifyPut() {}
-
-    protected void notifyRemove(){}
-
     /**
-     * Ask whether the map conforms to a given map type. This implementation performs
-     * no optimization, it simply scans the entries in the map.
+     * Ask whether the map conforms to a given map type. This implementation caches the given type to
+     * avoid a complete scan of the map entries in cases where the type has already been established;
+     * this also involves passing on available type information when new maps are created using put()
+     * and remove() (which is done in subclasses).
      *
      * @param keyType   the required keyType
      * @param valueType the required valueType
@@ -33,31 +29,32 @@ public abstract class MapWithTypeCache extends MapItem {
 
         if (knownKeyType != null) {
             Affinity affinityKeyRelationship = Subsumption.computeRelationship(keyType, knownKeyType);
-            boolean ok = false;
-
-            ok = affinityKeyRelationship == Affinity.SAME_TYPE || affinityKeyRelationship == Affinity.SUBSUMED_BY;
-
-            if(ok) {
+            boolean ok = affinityKeyRelationship == Affinity.SAME_TYPE || affinityKeyRelationship == Affinity.SUBSUMED_BY;
+            if (ok) {
                 Affinity valueTypeRelationship = Subsumption.sequenceTypeRelationship(valueType, knownValueType);
                 ok = valueTypeRelationship == Affinity.SAME_TYPE || valueTypeRelationship == Affinity.SUBSUMED_BY;
             }
 
-            if(ok) {
+            if (ok) {
                 return true;
             }
 
         }
         for (KeyValuePair pair : keyValuePairs()) {
-            if (!keyType.matches(pair.key)) {
+            if (!keyType.matches(pair.key())) {
                 return false;
             }
-            if (!valueType.matches(pair.value)) {
+            if (!valueType.matches(pair.value())) {
                 return false;
             }
         }
         knownKeyType = keyType;
         knownValueType = valueType;
         return true;
+
+        // TODO: the logic could be improved here. If the key type matches and the value type doesn't, then we don't need
+        // to test all the keys; and vice versa. Also, if we find that the value conforms to a subtype of the known type,
+        // we could record a new known type.
     }
 
 }

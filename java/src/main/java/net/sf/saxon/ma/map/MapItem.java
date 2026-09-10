@@ -171,7 +171,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
         Iterator<KeyValuePair> all = keyValuePairs().iterator();
         while (all.hasNext()) {
             KeyValuePair current = all.next();
-            if (current.key.asMapKey(specVersion).equals(matchKey)) {
+            if (current.key().asMapKey(specVersion).equals(matchKey)) {
                 return all;
             }
         }
@@ -200,7 +200,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
         LinkedList<KeyValuePair> preceding = new LinkedList<>();
         while (all.hasNext()) {
             KeyValuePair current = all.next();
-            if (current.key.asMapKey(specVersion).equals(matchKey)) {
+            if (current.key().asMapKey(specVersion).equals(matchKey)) {
                 break;
             } else {
                 preceding.addFirst(current);
@@ -216,10 +216,10 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      * @return a {@link SequenceIterator} over the entries in the map, represented as single-entry maps
      */
     public SequenceIterator entries() {
-        int specVersion = getSpecVersion();
         return new SequenceIteratorOverJavaIterator<KeyValuePair>(
                 keyValuePairs().iterator(),
-                (entry, position) -> new SingleEntryMap(entry.key, entry.value, specVersion));
+                (entry, pos)
+                        -> new SingleEntryMap(((KeyValuePair)entry).key(), ((KeyValuePair) entry).value(), specVersion));
     }
 
 
@@ -255,10 +255,10 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      */
     public boolean conforms(PlainType keyType, SequenceType valueType) {
         for (KeyValuePair pair : keyValuePairs()) {
-            if (!keyType.matches(pair.key)) {
+            if (!keyType.matches(pair.key())) {
                 return false;
             }
-            if (!valueType.matches(pair.value)) {
+            if (!valueType.matches(pair.value())) {
                 return false;
             }
         }
@@ -281,10 +281,10 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
         int minCardinality = Integer.MAX_VALUE;
         int maxCardinality = 0;
         for (KeyValuePair pair : keyValuePairs()) {
-            commonKeyType = combinedItemType(th, commonKeyType, pair.key.getItemType());
-            maxCardinality = Math.max(maxCardinality, pair.value.getLength());
-            minCardinality = Math.min(minCardinality, pair.value.getLength());
-            for (Item item : pair.value.asIterable()) {
+            commonKeyType = combinedItemType(th, commonKeyType, pair.key().getItemType());
+            maxCardinality = Math.max(maxCardinality, pair.value().getLength());
+            minCardinality = Math.min(minCardinality, pair.value().getLength());
+            for (Item item : pair.value().asIterable()) {
                 commonValueType = combinedItemType(th,commonValueType, Type.getItemType(item,th));
             }
         }
@@ -334,9 +334,9 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
                 if (pos++ > 0) {
                     sb.append(", ");
                 }
-                sb.append(Err.depict(pair.key))
+                sb.append(Err.depict(pair.key()))
                         .append(":")
-                        .append(Err.depictSequence(pair.value));
+                        .append(Err.depictSequence(pair.value()));
             }
             sb.append("}");
         } else {
@@ -345,7 +345,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
                 if (pos++ > 0) {
                     sb.append(", ");
                 }
-                sb.append(Err.depict(pair.key));
+                sb.append(Err.depict(pair.key()));
                 if (pos > 5) {
                     break;
                 }
@@ -621,12 +621,12 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
             for (KeyValuePair kvp : keyValuePairs()) {
-                Sequence otherValue = ((MapItem) other).get(kvp.key);
+                Sequence otherValue = ((MapItem) other).get(kvp.key());
                 if (otherValue == null) {
                     return false;
                 }
                 if (!SaxonDeepEqual.deepEqual(otherValue.iterate(),
-                                              kvp.value.iterate(), comparer, context, flags)) {
+                                              kvp.value().iterate(), comparer, context, flags)) {
                     return false;
                 }
             }
@@ -646,11 +646,11 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
                 while (it1.hasNext() && it2.hasNext()) {
                     KeyValuePair kvp1 = it1.next();
                     KeyValuePair kvp2 = it2.next();
-                    if (!kvp1.key.asMapKey(specVersion).equals(kvp2.key.asMapKey(specVersion))) {
+                    if (!kvp1.key().asMapKey(specVersion).equals(kvp2.key().asMapKey(specVersion))) {
                         return false;
                     }
-                    if (!DeepEqual.deepEqual(kvp1.value.iterate(),
-                                             kvp2.value.iterate(),
+                    if (!DeepEqual.deepEqual(kvp1.value().iterate(),
+                                             kvp2.value().iterate(),
                                              context, options)) {
                         return false;
                     }
@@ -658,12 +658,12 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
                 return true;
             } else {
                 for (KeyValuePair kvp : keyValuePairs()) {
-                    GroundedValue otherValue = ((MapItem) other).get(kvp.key);
+                    GroundedValue otherValue = ((MapItem) other).get(kvp.key());
                     if (otherValue == null) {
                         return false;
                     }
                     if (!DeepEqual.deepEqual(otherValue.iterate(),
-                                             kvp.value.iterate(), context, options)) {
+                                             kvp.value().iterate(), context, options)) {
                         return false;
                     }
                 }
@@ -697,9 +697,9 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
             if (buffer.length() > 4) {
                 buffer.append(",");
             }
-            buffer.append(pair.key.toString());
+            buffer.append(pair.key().toString());
             buffer.append(":");
-            buffer.append(pair.value.toString());
+            buffer.append(pair.value().toString());
         }
         buffer.append("}");
         return buffer.toString();
@@ -713,8 +713,8 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
         out.startElement("map");
         out.emitAttribute("size", "" + size());
         for (KeyValuePair kvp : keyValuePairs()) {
-            Literal.exportAtomicValue(kvp.key, out);
-            Literal.exportValue(kvp.value, out);
+            Literal.exportAtomicValue(kvp.key(), out);
+            Literal.exportValue(kvp.value(), out);
         }
         out.endElement();
     }
@@ -736,7 +736,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
         @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public AtomicValue next () {
             if (kvpIterator.hasNext()) {
-                return kvpIterator.next().key;
+                return kvpIterator.next().key();
             } else {
                 return null;
             }

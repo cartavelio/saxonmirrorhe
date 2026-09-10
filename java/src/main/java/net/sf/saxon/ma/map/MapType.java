@@ -345,16 +345,16 @@ public class MapType extends AnyFunctionType {
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item instanceof MapItem) {
             for (KeyValuePair kvp : ((MapItem)item).keyValuePairs()) {
-                if (!keyType.matches(kvp.key)) {
-                    String s = "The map contains a key (" + kvp.key.show() + ") of type " + kvp.key.getItemType() +
+                if (!keyType.matches(kvp.key())) {
+                    String s = "The map contains a key (" + kvp.key().show() + ") of type " + kvp.key().getItemType() +
                             " that is not an instance of the required type " + keyType;
                     return Optional.of(s);
                 }
-                if (!valueType.matches(kvp.value)) {
-                    String s = "The map contains an entry with key (" + kvp.key.show() +
-                            ") whose corresponding value (" + Err.depictSequence(kvp.value) +
+                if (!valueType.matches(kvp.value())) {
+                    String s = "The map contains an entry with key (" + kvp.key().show() +
+                            ") whose corresponding value (" + Err.depictSequence(kvp.value()) +
                             ") is not an instance of the required type " + valueType;
-                    Optional<String> more = valueType.explainMismatch(kvp.value, th);
+                    Optional<String> more = valueType.explainMismatch(kvp.value(), th);
                     if (more.isPresent()) {
                         s = s + ". " + more.get();
                     }

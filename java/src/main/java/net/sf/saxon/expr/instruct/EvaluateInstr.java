@@ -630,11 +630,11 @@ public final class EvaluateInstr extends Expression {
 
                 if (dynamicParams != null) {
                     for (KeyValuePair kvp : dynamicParams.keyValuePairs()) {
-                        QNameValue paramName = (QNameValue)  kvp.key;
+                        QNameValue paramName = (QNameValue)  kvp.key();
                         int slot = slotMap.getVariableMap().indexOf(paramName.getStructuredQName());
                         if (slot >= 0) {
                             // can be false if the with-params changes from one call to the next
-                            c2.setLocalVariable(slot, kvp.value);
+                            c2.setLocalVariable(slot, kvp.value());
                         }
                     }
                 }

@@ -600,7 +600,7 @@ public class AlphaCode {
         out.append(" ");
 
         for (KeyValuePair kvp : map.keyValuePairs()) {
-            String key = kvp.key.getStringValue();
+            String key = kvp.key().getStringValue();
             switch (key) {
                 case "o":
                 case "p":
@@ -609,7 +609,7 @@ public class AlphaCode {
                 case "c":
                 case "t":
                     out.append(key);
-                    out.append(((StringValue) kvp.value).getStringValue());
+                    out.append(((StringValue) kvp.value()).getStringValue());
                     out.append(" ");
                     break;
                 case "k":
@@ -618,7 +618,7 @@ public class AlphaCode {
                 case "e":
                     out.append(key);
                     out.append('[');
-                    out.append(fromXdmMap((MapItem) kvp.value));
+                    out.append(fromXdmMap((MapItem) kvp.value()));
                     out.append(']');
                     out.append(" ");
                     break;
@@ -626,7 +626,7 @@ public class AlphaCode {
                 case "u":
                     out.append(key);
                     out.append('[');
-                    ArrayItem types = (ArrayItem) kvp.value;
+                    ArrayItem types = (ArrayItem) kvp.value();
                     boolean first = true;
                     for (GroundedValue t : types.members()) {
                         if (first) {

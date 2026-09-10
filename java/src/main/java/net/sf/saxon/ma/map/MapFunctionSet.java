@@ -300,9 +300,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             int position = 1;
             for (KeyValuePair pair : map.keyValuePairs()) {
                 BooleanValue match = (BooleanValue)dynamicCall(
-                        fn, context, pair.key, pair.value, Int64Value.makeIntegerValue(position++)).head();
+                        fn, context, pair.key(), pair.value(), Int64Value.makeIntegerValue(position++)).head();
                 if (match != null && match.getBooleanValue()) {
-                    result.put(pair.key, pair.value);
+                    result.put(pair.key(), pair.value());
                 }
             }
             return result.getCompletedMapConfidently();
@@ -489,7 +489,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                         result.add(value);
                     }
                     for (KeyValuePair entry : ((MapItem) item).keyValuePairs()) {
-                        processSequence(entry.value, key, result);
+                        processSequence(entry.value(), key, result);
                     }
                 }
             });
@@ -592,7 +592,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             ZenoSequence results = new ZenoSequence();
             int position = 1;
             for (KeyValuePair pair : map.keyValuePairs()) {
-                Sequence seq = dynamicCall(fn, context, pair.key, pair.value, Int64Value.makeIntegerValue(position++));
+                Sequence seq = dynamicCall(fn, context, pair.key(), pair.value(), Int64Value.makeIntegerValue(position++));
                 GroundedValue val = seq.materialize();
                 if (val.getLength() > 0) {
                     results = results.appendSequence(val);
@@ -640,7 +640,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             }
             ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
-                results = results.appendSequence(pair.value);
+                results = results.appendSequence(pair.value());
             }
             return results;
         }
@@ -679,7 +679,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            GeneralMapBuilder mapBuilder = new GeneralMapBuilder(40);
+            GeneralMapBuilder mapBuilder = AbstractFixedMap.getBuilder(40);
             FunctionItem keyFunction = (FunctionItem)arguments[1].head();
             FunctionItem valueFunction = (FunctionItem) arguments[2].head();
             MapItem rawOptions = (MapItem)arguments[3].head();
@@ -746,9 +746,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             FunctionItem fn = (FunctionItem) arguments[1].head();
             ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
-                BooleanValue selected = (BooleanValue) fn.call(context, new Sequence[]{pair.key, pair.value}).head();
+                BooleanValue selected = (BooleanValue) fn.call(context, new Sequence[]{pair.key(), pair.value()}).head();
                 if (selected != null && selected.getBooleanValue()) {
-                    results = results.append(pair.key);
+                    results = results.append(pair.key());
                 }
             }
             return results;
@@ -840,7 +840,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             MapItem next;
             while ((next = (MapItem) iter.next()) != null) {
                 for (KeyValuePair kvp : next.keyValuePairs()) {
-                    builder.put(kvp.key, kvp.value);
+                    builder.put(kvp.key(), kvp.value());
                 }
             }
             return builder.getCompletedMap(context);

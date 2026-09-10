@@ -2,13 +2,11 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
-import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -76,9 +74,9 @@ public class ExtensibleMap extends MapWithTypeCache implements Iterable<KeyValue
         ImmutableHashTrieMap<AtomicMatchKey, Integer> index = makeEmptyIndex();
         int offset = 0;
         for (KeyValuePair pair : map.keyValuePairs()) {
-            keys = keys.add(pair.key);
-            values = values.add(pair.value);
-            index = index.put(pair.key.asMapKey(specVersion), offset++);
+            keys = keys.add(pair.key());
+            values = values.add(pair.value());
+            index = index.put(pair.key().asMapKey(specVersion), offset++);
         }
         return new ExtensibleMap(keys, values, specVersion, index, RemovalsList.empty);
     }
@@ -212,16 +210,14 @@ public class ExtensibleMap extends MapWithTypeCache implements Iterable<KeyValue
             int last = keyList.size();
             ZenoChain<AtomicValue> keys2 = keyList.add(key);
             ZenoChain<GroundedValue> values2 = valueList.add(value);
-            ImmutableHashTrieMap<AtomicMatchKey, Integer> index2 = index.put(key.asMapKey(31), last);
+            ImmutableHashTrieMap<AtomicMatchKey, Integer> index2 = index.put(key.asMapKey(getSpecVersion()), last);
             newMap = new ExtensibleMap(keys2, values2, getSpecVersion(), index2, removals);
         }
-        if(knownKeyType != null) {
-            if ((!knownKeyType.matches(key) || !knownValueType.matches(value))) {
-                newMap.knownKeyType = null;
-                newMap.knownValueType = null;
+        if (knownKeyType != null) {
+            if ((knownKeyType.matches(key) && knownValueType.matches(value))) {
+                newMap.setKnownType(knownKeyType, knownValueType);
             } else {
-                newMap.knownKeyType = knownKeyType;
-                newMap.knownValueType = knownValueType;
+                newMap.setKnownType(null, null);
             }
         }
         return newMap;
@@ -242,10 +238,15 @@ public class ExtensibleMap extends MapWithTypeCache implements Iterable<KeyValue
             return this;
         }
         ExtensibleMap result = new ExtensibleMap(keyList, valueList, getSpecVersion(), index, removals.add(offset));
-        if (removals.size() * 4 > result.size()) {
-            // rebuild the map, thus clearing the removals list
-            return ExtensibleMap.copyOf(result);
+        int newSize = result.size();
+        if (newSize == 0) {
+            return EmptyMap.getInstance(getSpecVersion());
         }
+        if (removals.size() > newSize) {
+            // rebuild the map, thus clearing the removals list
+            result = ExtensibleMap.copyOf(result);
+        }
+        result.setKnownType(knownKeyType, knownValueType);
         return result;
     }
 

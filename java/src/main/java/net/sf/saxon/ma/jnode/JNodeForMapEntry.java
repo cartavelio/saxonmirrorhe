@@ -88,8 +88,8 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
                 KeyValuePair next = pairs.next();
                 return new JNodeForMapEntry(startJNode.getParent(),
                                             startJNode.getPosition(),
-                                            next.key,
-                                            next.value,
+                                            next.key(),
+                                            next.value(),
                                             ++serialNr);
             }
             return null;
@@ -134,8 +134,8 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
                 KeyValuePair next = pairs.next();
                 return new JNodeForMapEntry(startJNode.getParent(),
                                             startJNode.getPosition(),
-                                            next.key,
-                                            next.value,
+                                            next.key(),
+                                            next.value(),
                                             --serialNr);
             }
             return null;
@@ -195,7 +195,7 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
 
     protected void allocateSerialNr() {
         if (parent.getContent() instanceof AbstractFixedMap) {
-            this.serialNr = ((AbstractFixedMap)parent.getContent()).getIndex(getSelector());
+            this.serialNr = ((AbstractFixedMap)parent.getContent()).getPosition(getSelector());
         }
         // TODO: same logic for extensible maps
         Iterator<KeyValuePair> iter = ((MapItem) parent.getContent()).precedingKeyValuePairs(getSelector());

@@ -99,8 +99,8 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
                 AtomicValue key = null;
                 GroundedValue singletonValue = null;
                 for (KeyValuePair pair : ((MapItem)item).keyValuePairs()) {
-                    key = pair.key;
-                    singletonValue = pair.value;
+                    key = pair.key();
+                    singletonValue = pair.value();
                     break;
                 }
                 SequenceCollector collector = context.getController().allocateSequenceOutputter();

@@ -31,8 +31,8 @@ public class FixedMap extends AbstractFixedMap {
     private final AtomicValue[] keyArray;
 
     @Override
-    protected AtomicValue getKey(int offset) {
-        return keyArray[offset];
+    protected AtomicValue getKey(int position) {
+        return keyArray[position];
     }
 
     /**

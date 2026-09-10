@@ -383,7 +383,7 @@ public class SpecificFunctionType extends AnyFunctionType {
                     argTypes[0].getPrimaryType().isPlainType() &&
                     Cardinality.allowsZero(resultType.getCardinality())) {
                 for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
-                    if (!resultType.matches(pair.value)) {
+                    if (!resultType.matches(pair.value())) {
                         return false;
                     }
                 }
@@ -439,12 +439,12 @@ public class SpecificFunctionType extends AnyFunctionType {
                 if (argTypes[0].getCardinality() == StaticProperty.EXACTLY_ONE &&
                     argTypes[0].getPrimaryType().isPlainType()) {
                     for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
-                        if (!resultType.matches(pair.value)) {
-                            String s = "The supplied map contains an entry with key (" + pair.key +
-                                    ") whose corresponding value (" + Err.depictSequence(pair.value) +
+                        if (!resultType.matches(pair.value())) {
+                            String s = "The supplied map contains an entry with key (" + pair.key() +
+                                    ") whose corresponding value (" + Err.depictSequence(pair.value()) +
                                     ") is not an instance of the return type in the function signature (" +
                                     resultType + ")";
-                            Optional<String> more = resultType.explainMismatch(pair.value, th);
+                            Optional<String> more = resultType.explainMismatch(pair.value(), th);
                             if (more.isPresent()) {
                                 s = s + ". " + more.get();
                             }

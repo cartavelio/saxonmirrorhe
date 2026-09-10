@@ -353,7 +353,7 @@ public class LookupAllExpression extends UnaryExpression {
         public Item next() {
             if (baseIterator.hasNext()) {
                 KeyValuePair kvp = baseIterator.next();
-                return LookupExpression.makeEntry(kvp.key, kvp.value, container);
+                return LookupExpression.makeEntry(kvp.key(), kvp.value(), container);
             } else {
                 return null;
             }

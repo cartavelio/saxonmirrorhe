@@ -14,15 +14,8 @@ import net.sf.saxon.value.AtomicValue;
  * A key and a corresponding value to be held in a Map.
  */
 
-public class KeyValuePair  {
-    public AtomicValue key;
-    public GroundedValue value;
-
-    public KeyValuePair(AtomicValue key, GroundedValue value) {
-        this.key = key;
-        this.value = value;
-    }
+public record KeyValuePair(AtomicValue key, GroundedValue value) {
     
 }
 
-// Copyright (c) 2010-2023 Saxonica Limited
+// Copyright (c) 2010-2026 Saxonica Limited

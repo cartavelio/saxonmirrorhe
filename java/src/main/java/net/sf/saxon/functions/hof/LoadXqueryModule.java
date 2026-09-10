@@ -226,8 +226,8 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         if (variablesOption != null) {
             MapItem extVariables = (MapItem) variablesOption.head();
             for (KeyValuePair kvp : extVariables.keyValuePairs()) {
-                QNameValue key = (QNameValue)kvp.key;
-                dqc.setParameter(key.getStructuredQName(), kvp.value);
+                QNameValue key = (QNameValue)kvp.key();
+                dqc.setParameter(key.getStructuredQName(), kvp.value());
             }
         }
 

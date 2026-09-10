@@ -24,6 +24,8 @@ import java.util.List;
  */
 public class GeneralMapBuilder {
 
+    // TODO: we always use the subclass FixedMapBuilder, we should combine the two classes
+
     protected final List<AtomicValue> keys = new ArrayList<>();
     protected final List<GroundedValue> values = new ArrayList<>();
     protected final int specVersion;
@@ -78,7 +80,7 @@ public class GeneralMapBuilder {
 
     public void copy(MapItem map) {
         for (KeyValuePair pair : map.keyValuePairs()) {
-            put(pair.key, pair.value);
+            put(pair.key(), pair.value());
         }
     }
 

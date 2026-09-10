@@ -565,8 +565,8 @@ public class Literal extends Expression {
             out.startElement("map");
             out.emitAttribute("size", "" + ((MapItem) value).size());
             for (KeyValuePair kvp : ((MapItem) value).keyValuePairs()) {
-                exportAtomicValue(kvp.key, out);
-                exportValue(kvp.value, out);
+                exportAtomicValue(kvp.key(), out);
+                exportValue(kvp.value(), out);
             }
             out.endElement();
         } else if (value instanceof JNode) {
