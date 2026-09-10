@@ -266,17 +266,16 @@ public class Literal extends Expression {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config   the Saxon configuration
-     * @param topLevel
+     * @param config the Saxon configuration
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
+    public Pattern toPattern(Configuration config) throws XPathException {
         if (isEmptySequence(this)) {
             return new ItemTypePattern(ErrorType.getInstance());
         } else {
-            return super.toPattern(config, topLevel);
+            return super.toPattern(config);
         }
     }
 

@@ -21,10 +21,7 @@ import net.sf.saxon.pattern.GeneralNodePattern;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.pattern.SimplePositionalPattern;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.gnode.XNodeType;
 import net.sf.saxon.value.Cardinality;
 
 
@@ -91,36 +88,19 @@ public final class FirstItemExpression extends SingleItemFilter {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config   the Saxon configuration
-     * @param topLevel
+     * @param config the Saxon configuration
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
-        Pattern basePattern = getBaseExpression().toPattern(config, false);
-        ItemType type = basePattern.getItemType();
-        if (type instanceof XNodeType) {
-            NodeTest test = (XNodeType)type;
-            Expression baseExpr = getBaseExpression();
-            if (baseExpr instanceof AxisExpression &&
-                    ((AxisExpression) baseExpr).getAxis() == AxisInfo.CHILD && basePattern instanceof NodeTestPattern) {
-                return new SimplePositionalPattern(test, 1);
-            } else {
-                return new GeneralNodePattern(this, test);
-            }
-        }
-        if (type instanceof NodeTest) {
-            Expression baseExpr = getBaseExpression();
-            if (baseExpr instanceof AxisExpression &&
-                    ((AxisExpression) baseExpr).getAxis() == AxisInfo.CHILD && basePattern instanceof NodeTestPattern) {
-                return new SimplePositionalPattern((NodeTest) type, 1);
-            } else {
-                return new GeneralNodePattern(this, (NodeTest) type);
-            }
+    public Pattern toPattern(Configuration config) throws XPathException {
+        Pattern basePattern = getBaseExpression().toPattern(config);
+        Expression baseExpr = getBaseExpression();
+        if (baseExpr instanceof AxisExpression &&
+                ((AxisExpression) baseExpr).getAxis() == AxisInfo.CHILD && basePattern instanceof NodeTestPattern ntp) {
+            return new SimplePositionalPattern(ntp.getNodeTest(), 1);
         } else {
-            // For a non-node pattern, the predicate [1] is always true
-            return basePattern;
+            return new GeneralNodePattern(this, basePattern.getItemType());
         }
     }
 

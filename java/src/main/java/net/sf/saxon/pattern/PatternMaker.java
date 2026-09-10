@@ -42,7 +42,7 @@ public class PatternMaker {
 
     /*@NotNull*/
     public static Pattern fromExpression(Expression expression, Configuration config, boolean is30) throws XPathException {
-        Pattern result = expression.toPattern(config, true);
+        Pattern result = expression.toPattern(config);
         ExpressionTool.copyLocationInfo(expression, result);
         return result;
     }

@@ -732,13 +732,12 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config   the Saxon configuration
-     * @param topLevel
+     * @param config the Saxon configuration
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
+    public Pattern toPattern(Configuration config) throws XPathException {
 
         NodeTest test = getNodeTest();
         Pattern pat;
@@ -746,9 +745,9 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         if (test == null) {
             test = AnyGNodeType.getInstance();
         }
-        if (test instanceof SelectorTest) {
-            test = ((SelectorTest)test).asXNodeTest(config);
-        }
+//        if (test instanceof SelectorTest) {
+//            test = ((SelectorTest)test).asXNodeTest(config);
+//        }
         if (test instanceof AnyXNodeType
                 && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
             test = MultipleNodeKindTest.CHILD_NODE;
@@ -774,7 +773,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             }
         } else if (axis == AxisInfo.NAMESPACE) {
             if (kind == Type.XNODE) {
-                // namespace::node() matches any attribute, and only an attribute
+                // namespace::node() matches any namespace, and only a namespace
                 pat = new NodeTestPattern(NodeKindType.NAMESPACE);
             } else if (!AxisInfo.containsNodeKind(axis, kind)) {
                 // for example, namespace::comment()

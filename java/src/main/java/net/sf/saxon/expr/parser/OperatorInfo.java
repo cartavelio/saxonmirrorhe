@@ -18,47 +18,47 @@ public class OperatorInfo {
      */
 
     public static int operatorPrecedence(OperatorSymbol symbol) {
-        switch (symbol) {
-            case OR: return ( 4);
-            case AND: return ( 5);
-            case FEQ: return ( 6);
-            case FNE: return ( 6);
-            case FLT: return ( 6);
-            case FGT: return ( 6);
-            case FLE: return ( 6);
-            case FGE: return ( 6);
-            case EQUALS: return ( 6);
-            case NE: return ( 6);
-            case LT: return ( 6);
-            case LE: return ( 6);
-            case GT: return ( 6);
-            case GE: return ( 6);
-            case IS: return ( 6);
-            case IS_NOT: return (6);
-            case PRECEDES: return ( 6);
-            case FOLLOWS: return ( 6);
-            case PRECEDES_OR_IS: return (6);
-            case FOLLOWS_OR_IS: return (6);
-            case OTHERWISE: return ( 7);
-            case CONCAT: return ( 8);
-            case TO: return ( 9);
-            case PLUS: return ( 10);
-            case MINUS: return ( 10);
-            case TIMES: return ( 11);
-            case DIV: return ( 11);
-            case IDIV: return ( 11);
-            case MOD: return ( 11);
-            case UNION: return ( 13);
-            case INTERSECT: return ( 14);
-            case EXCEPT: return ( 14);
-            case INSTANCE_OF: return ( 15);
-            case TREAT_AS: return ( 16);
-            case CASTABLE_AS: return ( 17);
-            case CAST_AS: return ( 18);
-            case THIN_ARROW: return (19);
-            case FAT_ARROW: return (20);
-            case MAPPING_ARROW: return (21);
-            default: return -1;
+        return switch (symbol) {
+            case OR -> (4);
+            case AND -> (5);
+            case FEQ -> (6);
+            case FNE -> (6);
+            case FLT -> (6);
+            case FGT -> (6);
+            case FLE -> (6);
+            case FGE -> (6);
+            case EQUALS -> (6);
+            case NE -> (6);
+            case LT -> (6);
+            case LE -> (6);
+            case GT -> (6);
+            case GE -> (6);
+            case IS -> (6);
+            case IS_NOT -> (6);
+            case PRECEDES -> (6);
+            case FOLLOWS -> (6);
+            case PRECEDES_OR_IS -> (6);
+            case FOLLOWS_OR_IS -> (6);
+            case OTHERWISE -> (7);
+            case CONCAT -> (8);
+            case TO -> (9);
+            case PLUS -> (10);
+            case MINUS -> (10);
+            case TIMES -> (11);
+            case DIV -> (11);
+            case IDIV -> (11);
+            case MOD -> (11);
+            case UNION -> (13);
+            case INTERSECT -> (14);
+            case EXCEPT -> (14);
+            case INSTANCE_OF -> (15);
+            case TREAT_AS -> (16);
+            case CASTABLE_AS -> (17);
+            case CAST_AS -> (18);
+            case THIN_ARROW -> (19);
+            case FAT_ARROW -> (20);
+            case MAPPING_ARROW -> (21);
+            default -> -1;
 
             // remainder commented out because not used in precedence parsing (but perhaps they could be)
 //            case BANG:
@@ -70,7 +70,7 @@ public class OperatorInfo {
 //            case QMARK:
 //                return 23;
 
-        }
+        };
     }
 
     /**

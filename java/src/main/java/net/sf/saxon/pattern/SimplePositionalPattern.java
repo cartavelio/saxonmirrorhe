@@ -114,9 +114,8 @@ public final class SimplePositionalPattern extends Pattern {
      */
 
     public boolean equals(Object other) {
-        if (other instanceof SimplePositionalPattern) {
-            SimplePositionalPattern fp = (SimplePositionalPattern) other;
-            return nodeTest.equals(fp.nodeTest) && position == fp.position;
+        if (other instanceof SimplePositionalPattern spp) {
+            return nodeTest.equals(spp.nodeTest) && position == spp.position;
         } else {
             return false;
         }

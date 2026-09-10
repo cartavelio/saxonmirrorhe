@@ -19,17 +19,17 @@ import net.sf.saxon.type.ItemType;
 
 /**
  * A pseudo-expression is an object that can appear as a node on the expression tree, but which cannot
- * actually be evaluated in its own right. An example is a sort key definition. This has to be a node
- * on the tree, because it contains subexpressions, so recursive traversals of the tree need to process
- * it. But evaluating a sort key definition throws an exception.
+ * actually be evaluated in its own right. Example are sort key definitions, and XSLT patterns.
+ * These have to be nodes on the tree, because they contain subexpressions, so recursive traversals
+ * of the tree need to process them. But evaluating a sort key definition or an XSLT pattern throws an exception.
  *
- * <p>A constraint for pseudo-expressions is that rewrite methods (simplify, typecheck, promote etc)
+ * <p>A constraint for pseudo-expressions is that rewrite methods (such as simplify, typecheck, optimize etc.)
  * always return an object of the same class (nearly always the same object)</p>
  */
 public abstract class PseudoExpression extends Expression {
 
     private void cannotEvaluate() throws XPathException {
-        throw new XPathException("Cannot evaluate " + getClass().getName());
+        throw new XPathException("Cannot evaluate pseudo-expression " + getClass().getName());
     }
 
     @Override

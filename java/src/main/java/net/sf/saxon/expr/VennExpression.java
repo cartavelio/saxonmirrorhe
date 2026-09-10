@@ -7,10 +7,10 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
-import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.DocumentSorter;
@@ -20,7 +20,6 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.*;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -628,13 +627,12 @@ public class VennExpression extends BinaryExpression {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config   the Saxon configuration
-     * @param topLevel
+     * @param config the Saxon configuration
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
+    public Pattern toPattern(Configuration config) throws XPathException {
         if (isPredicatePattern(getLhsExpression()) || isPredicatePattern(getRhsExpression())) {
             throw new XPathException(
                     "Cannot use a predicate pattern as an operand of a union, intersect, or except operator",
@@ -642,8 +640,8 @@ public class VennExpression extends BinaryExpression {
         }
         if (operator == OperatorSymbol.UNION) {
             return new UnionPattern(
-                    getLhsExpression().toPattern(config, false),
-                    getRhsExpression().toPattern(config, false));
+                    getLhsExpression().toPattern(config),
+                    getRhsExpression().toPattern(config));
         } else {
             // Bug #5368 means it's dangerous to assume that the expression (A except B) can be translated
             // into a pattern that matches a node if A matches and B does not. We can only do this in special
@@ -653,19 +651,18 @@ public class VennExpression extends BinaryExpression {
             int commonAxis = ExpressionTool.getAxisNavigation(this);
             if (commonAxis == AxisInfo.CHILD || commonAxis == AxisInfo.ATTRIBUTE
                     || independentOfContextItem(getLhsExpression())
-                    || independentOfContextItem(getRhsExpression())
-                    || (topLevel && getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40)) {
+                    || independentOfContextItem(getRhsExpression())) {
                 if (operator == OperatorSymbol.EXCEPT) {
                     return new ExceptPattern(
-                            getLhsExpression().toPattern(config, false),
-                            getRhsExpression().toPattern(config, false));
+                            getLhsExpression().toPattern(config),
+                            getRhsExpression().toPattern(config));
                 } else {
                     return new IntersectPattern(
-                            getLhsExpression().toPattern(config, false),
-                            getRhsExpression().toPattern(config, false));
+                            getLhsExpression().toPattern(config),
+                            getRhsExpression().toPattern(config));
                 }
             }
-            return new GeneralNodePattern(this, (NodeTest)getItemType());
+            return new GeneralNodePattern(this, getItemType());
         } 
     }
 

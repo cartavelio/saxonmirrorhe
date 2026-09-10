@@ -89,14 +89,13 @@ public class HomogeneityChecker extends UnaryExpression {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config   the Saxon configuration
-     * @param topLevel
+     * @param config the Saxon configuration
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
-        return getBaseExpression().toPattern(config, false);
+    public Pattern toPattern(Configuration config) throws XPathException {
+        return getBaseExpression().toPattern(config);
     }
 
     /*@NotNull*/

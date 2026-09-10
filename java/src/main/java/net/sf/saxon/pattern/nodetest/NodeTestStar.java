@@ -51,7 +51,7 @@ public class NodeTestStar implements NodeTest {
      */
     @Override
     public double getDefaultPriority() {
-        return 0;
+        return -0.5;
     }
 
     /**

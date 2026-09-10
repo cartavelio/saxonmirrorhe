@@ -30,7 +30,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.gnode.GNodeType;
 import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.*;
@@ -1076,47 +1075,49 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config   the Saxon configuration
-     * @param topLevel
+     * @param config the Saxon configuration
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
+    public Pattern toPattern(Configuration config) throws XPathException {
         Expression base = getSelectExpression();
         Expression filter = getFilter();
         TypeHierarchy th = config.getTypeHierarchy();
-        Pattern basePattern = base.toPattern(config, false);
+        Pattern basePattern = base.toPattern(config);
         if (!isPositional(th)) {
             return new BasePatternWithPredicate(basePattern, filter);
         } else {
-            NodeTest test;
-            if (base instanceof AxisExpression) {
-                test = ((AxisExpression)base).getNodeTest();
-            } else if (base.getItemType() instanceof NodeTest) {
-                test = (NodeTest) base.getItemType();
-            } else {
-                test = (GNodeType) base.getItemType();
-            }
-            if (basePattern instanceof NodeTestPattern &&
-                    basePattern.getItemType().getGenre() == Genre.XNODE &&
+//            NodeTest test;
+//            if (base instanceof AxisExpression) {
+//                test = ((AxisExpression)base).getNodeTest();
+//            } else if (base.getItemType() instanceof NodeTest) {
+//                test = (NodeTest) base.getItemType();
+//            } else {
+//                ItemType itemType = base.getItemType();
+//                if (itemType instanceof GNodeType g) {
+//                    test = g;
+//                } else if (itemType instanceof ChoiceItemType choice) {
+//
+//                }
+//            }
+            if (basePattern instanceof NodeTestPattern ntp &&
+                    //basePattern.getItemType().getGenre() == Genre.XNODE &&
                     filterIsPositional &&
                     base instanceof AxisExpression &&
                     ((AxisExpression) base).getAxis() == AxisInfo.CHILD &&
                     (filter.getDependencies() & StaticProperty.DEPENDS_ON_LAST) == 0) {
 
+                NodeTest nt = ntp.getNodeTest();
                 if (filter instanceof Literal && ((Literal) filter).getGroundedValue() instanceof IntegerValue) {
-                    return new SimplePositionalPattern(test, (int) ((IntegerValue) ((Literal) filter).getGroundedValue()).longValue());
+                    return new SimplePositionalPattern(nt, (int) ((IntegerValue) ((Literal) filter).getGroundedValue()).longValue());
                 } else {
-                    return new GeneralPositionalPattern(test, filter);
+                    return new GeneralPositionalPattern(nt, filter);
                 }
             }
 
-            //if (base.getItemType() instanceof NodeTest) {
-                return new GeneralNodePattern(this, test);
-//            } else {
-//                throw new XPathException("The filtered expression in an XSLT pattern must be a simple step");
-//            }
+            return new GeneralNodePattern(this, base.getItemType());
+
         }
     }
 

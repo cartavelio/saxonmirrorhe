@@ -311,13 +311,25 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
 
     @Override
     public final double getDefaultPriority() {
+        return getDefaultPriority(implicitSchemaType, nameTest);
+    }
+
+    private static double getDefaultPriority(boolean implicitSchemaType, QNameTest nameTest) {
+        if (nameTest instanceof UnionQNameTest union) {
+            double max = Double.NEGATIVE_INFINITY;
+            for (QNameTest qTest : union.getTests()) {
+                double prio = getDefaultPriority(implicitSchemaType, qTest);
+                if (prio > max) {
+                    max = prio;
+                }
+            }
+            return max;
+        }
         if (implicitSchemaType) {
             if (nameTest instanceof AnyQNameTest) {
                 return -0.5;
             } else if (nameTest instanceof SpecificQNameTest) {
                 return 0;
-            } else if (nameTest instanceof UnionQNameTest) {
-                return -0.25;
             } else if (nameTest instanceof LocalQNameTest || nameTest instanceof NamespaceQNameTest) {
                 return -0.25;
             } else {
@@ -329,8 +341,6 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
                 return 0;
             } else if (nameTest instanceof SpecificQNameTest) {
                 return 0.25;
-            } else if (nameTest instanceof UnionQNameTest) {
-                return 0.125;
             } else if (nameTest instanceof LocalQNameTest || nameTest instanceof NamespaceQNameTest) {
                 return 0.125;
             } else {
@@ -404,9 +414,9 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         String displayedType = "";
         if (schemaType != AnyType.INSTANCE && schemaType != Untyped.INSTANCE && schemaType != BuiltInAtomicType.UNTYPED_ATOMIC) {
             displayedType = ", " + schemaType.getEQName();
-        }
-        if (nillable) {
-            displayedType += "?";
+            if (nillable) {
+                displayedType += "?";
+            }
         }
         return switch (kind) {
             case Type.ELEMENT

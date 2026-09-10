@@ -540,8 +540,7 @@ public class SimpleMode extends Mode {
         // search the specific list for this node type / node name
         Rule bestRule = null;
 
-        if (item instanceof NodeInfo) {
-            NodeInfo node = (NodeInfo) item;
+        if (item instanceof NodeInfo node) {
             bestRule = findBestRuleForNodeInfo(node, context);
         } else if (item instanceof AtomicValue) {
             if (atomicValueRuleChain != null) {
@@ -571,7 +570,7 @@ public class SimpleMode extends Mode {
         int nodeKind;
 
         if (node instanceof TinyElementImpl) {
-            nodeKind = Type.ELEMENT;
+            nodeKind = Type.ELEMENT;  // avoid polymorphic call for common case
         } else {
             nodeKind = node.getNodeKind();
         }
@@ -790,54 +789,47 @@ public class SimpleMode extends Mode {
 
         // Search the list for unnamed nodes of a particular kind
 
-        if (item instanceof NodeInfo) {
-            NodeInfo node = (NodeInfo) item;
+        if (item instanceof NodeInfo node) {
             switch (node.getNodeKind()) {
-                case Type.DOCUMENT:
-                    unnamedNodeChain = documentRuleChain;
-                    break;
-                case Type.ELEMENT: {
-                    unnamedNodeChain = unnamedElementRuleChain;
-                    RuleChain namedNodeChain;
-                    if (node.hasFingerprint()) {
-                        namedNodeChain = namedElementRuleChains.get(node.getFingerprint());
-                    } else {
-                        namedNodeChain = getNamedRuleChain(context, Type.ELEMENT, node.getNamespaceUri(), node.getLocalPart());
+                case Type.DOCUMENT ->
+                        unnamedNodeChain = documentRuleChain;
+                case Type.ELEMENT -> {
+                        unnamedNodeChain = unnamedElementRuleChain;
+                        RuleChain namedNodeChain;
+                        if (node.hasFingerprint()) {
+                            namedNodeChain = namedElementRuleChains.get(node.getFingerprint());
+                        } else {
+                            namedNodeChain = getNamedRuleChain(
+                                    context, Type.ELEMENT, node.getNamespaceUri(), node.getLocalPart());
+                        }
+                        if (namedNodeChain != null) {
+                            ruleSearchState = makeRuleSearchState(namedNodeChain, context);
+                            bestRule = searchRuleChain(item, context, null, namedNodeChain, ruleSearchState, filter);
+                        }
                     }
-                    if (namedNodeChain != null) {
-                        ruleSearchState = makeRuleSearchState(namedNodeChain, context);
-                        bestRule = searchRuleChain(item, context, null, namedNodeChain, ruleSearchState, filter);
+                case Type.ATTRIBUTE -> {
+                        unnamedNodeChain = unnamedAttributeRuleChain;
+                        RuleChain namedNodeChain;
+                        if (node.hasFingerprint()) {
+                            namedNodeChain = namedAttributeRuleChains.get(node.getFingerprint());
+                        } else {
+                            namedNodeChain = getNamedRuleChain(
+                                    context, Type.ATTRIBUTE, node.getNamespaceUri(), node.getLocalPart());
+                        }
+                        if (namedNodeChain != null) {
+                            ruleSearchState = makeRuleSearchState(namedNodeChain, context);
+                            bestRule = searchRuleChain(item, context, null, namedNodeChain, ruleSearchState, filter);
+                        }
                     }
-                    break;
-                }
-                case Type.ATTRIBUTE: {
-                    unnamedNodeChain = unnamedAttributeRuleChain;
-                    RuleChain namedNodeChain;
-                    if (node.hasFingerprint()) {
-                        namedNodeChain = namedAttributeRuleChains.get(node.getFingerprint());
-                    } else {
-                        namedNodeChain = getNamedRuleChain(context, Type.ATTRIBUTE, node.getNamespaceUri(), node.getLocalPart());
-                    }
-                    if (namedNodeChain != null) {
-                        ruleSearchState = makeRuleSearchState(namedNodeChain, context);
-                        bestRule = searchRuleChain(item, context, null, namedNodeChain, ruleSearchState, filter);
-                    }
-                    break;
-                }
-                case Type.TEXT:
-                    unnamedNodeChain = textRuleChain;
-                    break;
-                case Type.COMMENT:
-                    unnamedNodeChain = commentRuleChain;
-                    break;
-                case Type.PROCESSING_INSTRUCTION:
-                    unnamedNodeChain = processingInstructionRuleChain;
-                    break;
-                case Type.NAMESPACE:
-                    unnamedNodeChain = namespaceRuleChain;
-                    break;
-                default:
-                    throw new AssertionError("Unknown node kind");
+                case Type.TEXT ->
+                        unnamedNodeChain = textRuleChain;
+                case Type.COMMENT ->
+                        unnamedNodeChain = commentRuleChain;
+                case Type.PROCESSING_INSTRUCTION ->
+                        unnamedNodeChain = processingInstructionRuleChain;
+                case Type.NAMESPACE ->
+                        unnamedNodeChain = namespaceRuleChain;
+                default -> throw new AssertionError("Unknown node kind");
             }
 
             ruleSearchState = makeRuleSearchState(unnamedNodeChain, context);

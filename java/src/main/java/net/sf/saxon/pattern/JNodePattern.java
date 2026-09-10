@@ -39,9 +39,10 @@ public class JNodePattern extends Pattern {
         return AnyJNodeType.getInstance();
     }
 
+
     @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(); // TODO: implement this
     }
 
     @Override

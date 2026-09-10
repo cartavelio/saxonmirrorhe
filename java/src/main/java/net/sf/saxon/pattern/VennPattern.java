@@ -13,10 +13,8 @@ import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.om.Genre;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -95,15 +93,15 @@ public abstract class VennPattern extends Pattern {
     }
 
     private void mustBeNodePattern(Pattern p) throws XPathException {
-        if (p instanceof NodeTestPattern) {
-            ItemType it = p.getItemType();
-            if (it.getGenre() != Genre.XNODE) {
-                XPathException err = new XPathException("The operands of a union, intersect, or except pattern " +
-                        "must be patterns that match nodes", "XPTY0004");
-                err.setIsTypeError(true);
-                throw err;
-            }
-        }
+//        if (p instanceof NodeTestPattern) {
+//            ItemType it = p.getItemType();
+//            if (it.getGenre() != Genre.XNODE && it.getGenre() != Genre.JNODE) {
+//                XPathException err = new XPathException("The operands of a union, intersect, or except pattern " +
+//                        "must be patterns that match nodes", "XPTY0004");
+//                err.setIsTypeError(true);
+//                throw err;
+//            }
+//        }
     }
 
     /**

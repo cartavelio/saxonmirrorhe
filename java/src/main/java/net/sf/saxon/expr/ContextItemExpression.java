@@ -15,7 +15,6 @@ import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnchorPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -250,14 +249,14 @@ public class ContextItemExpression extends Expression {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config   the Saxon configuration
-     * @param topLevel
+     * @param config the Saxon configuration
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
-        return AnchorPattern.getInstance();
+    public Pattern toPattern(Configuration config) throws XPathException {
+        //return AnchorPattern.getInstance();
+        throw new XPathException("Cannot convert the expression '.' to a PathExprP");
     }
 
     /**

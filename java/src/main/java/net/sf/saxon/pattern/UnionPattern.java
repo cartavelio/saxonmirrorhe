@@ -35,6 +35,7 @@ public class UnionPattern extends VennPattern {
 
     public UnionPattern(Pattern p1, Pattern p2) {
         super(p1, p2);
+        setPriority(Double.max(p1.getDefaultPriority(), p2.getDefaultPriority()));
     }
 
     /**

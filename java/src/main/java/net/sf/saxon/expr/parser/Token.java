@@ -88,7 +88,7 @@ public class Token {
     public static final Token HASH = new Token("#");
     public static final Token QMARK = new Token("?", OperatorSymbol.LOOKUP);
     public static final Token QMARK_LSQB = new Token("?[", OperatorSymbol.AM_FILTER);
-    public static final Token TILDE_LSQB = new Token("~[");
+    public static final Token TILDE = new Token("~");
     public static final Token COLON_EQUALS = new Token(":=");
 
     public static final Token PERCENT = new Token("%");

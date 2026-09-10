@@ -794,13 +794,12 @@ public class SlashExpression extends BinaryExpression
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config   the Saxon configuration
-     * @param topLevel
+     * @param config the Saxon configuration
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
+    public Pattern toPattern(Configuration config) throws XPathException {
         Expression head = getLeadingSteps();
         if (head instanceof SequenceCoercer
                 && ((SequenceCoercer)head).getRequiredType().getPrimaryType() == AnyGNodeType.getInstance()) {
@@ -811,7 +810,7 @@ public class SlashExpression extends BinaryExpression
             // No need to type check the context item
             ItemChecker checker = (ItemChecker) head;
             if (checker.getBaseExpression() instanceof ContextItemExpression) {
-                return tail.toPattern(config, false);
+                return tail.toPattern(config);
             }
         } else if (tail instanceof VennExpression) {
             // Bug 4645. Rewrite a/(b|c) as (a/b union a/c). Note this rewrite isn't safe for
@@ -824,35 +823,33 @@ public class SlashExpression extends BinaryExpression
                         head.copy(new RebindingMap()), ve.getRhsExpression());
                 VennExpression topExpansion = new VennExpression(
                         lhExpansion, ve.operator, rhExpansion);
-                return topExpansion.toPattern(config, false);
+                return topExpansion.toPattern(config);
             }
         }
 
-        Pattern tailPattern = tail.toPattern(config, false);
+        Pattern tailPattern = tail.toPattern(config);
         if (tailPattern instanceof NodeTestPattern) {
             if (tailPattern.getItemType() instanceof ErrorType) {
                 return tailPattern;
             }
         } else if (tailPattern instanceof GeneralNodePattern) {
-            return new GeneralNodePattern(this, ((GeneralNodePattern)tailPattern).getNodeTest());
+            return new GeneralNodePattern(this, tailPattern.getItemType());
         }
 
         int axis = AxisInfo.PARENT;
         Pattern headPattern = null;
-        if (head instanceof SlashExpression) {
-            SlashExpression start = (SlashExpression) head;
-            if (start.getActionExpression() instanceof AxisExpression) {
-                AxisExpression mid = (AxisExpression) start.getActionExpression();
+        if (head instanceof SlashExpression start) {
+            if (start.getActionExpression() instanceof AxisExpression mid) {
                 if (mid.getAxis() == AxisInfo.DESCENDANT_OR_SELF &&
                         (mid.getNodeTest() == null || mid.getNodeTest() == AnyGNodeType.getInstance())) {
                     axis = AxisInfo.ANCESTOR;
-                    headPattern = start.getSelectExpression().toPattern(config, false);
+                    headPattern = start.getSelectExpression().toPattern(config);
                 }
             }
         }
         if (headPattern == null) {
             axis = PatternMaker.getAxisForPathStep(tail);
-            headPattern = head.toPattern(config, false);
+            headPattern = head.toPattern(config);
         }
         return new AncestorQualifiedPattern(tailPattern, headPattern, axis);
     }

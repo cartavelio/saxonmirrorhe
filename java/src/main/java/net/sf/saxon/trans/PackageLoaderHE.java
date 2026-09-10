@@ -3653,7 +3653,7 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         pMap.put("p.genNode", (loader, element) -> {
-            NodeTest type = (NodeTest) loader.parseAlphaCodeForItemType(element, "test");
+            ItemType type = loader.parseAlphaCodeForItemType(element, "test");
             Expression exp = loader.getFirstChildExpression(element);
             return new GeneralNodePattern(exp, type);
         });

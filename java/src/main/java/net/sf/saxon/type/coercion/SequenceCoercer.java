@@ -153,11 +153,11 @@ public final class SequenceCoercer extends UnaryExpression {
         return fsc2;
     }
 
-    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
+    public Pattern toPattern(Configuration config) throws XPathException {
         if (requiredType.equals(SequenceType.GNODE_SEQUENCE) || requiredType.equals(SequenceType.NODE_SEQUENCE)) {
-            return getBaseExpression().toPattern(config, topLevel);
+            return getBaseExpression().toPattern(config);
         } else {
-            return super.toPattern(config, topLevel);
+            return super.toPattern(config);
         }
     }
 

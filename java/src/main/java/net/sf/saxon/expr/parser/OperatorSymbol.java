@@ -37,57 +37,55 @@ public enum OperatorSymbol {
 
     @Override
     public String toString() {
-        switch(this) {
-            case AND: return "and";
-            case OR: return "or";
-            case PLUS: return "+" ;
-            case TIMES: return "*";
-            case MINUS: return "-";
-            case NEGATE: return "-";
-            case DIV: return "div";
-            case IDIV: return "idiv";
-            case MOD: return "mod";
-            case EQUALS: return "=";
-            case NE: return "!=";
-            case LT: return "<";
-            case LE: return "<=";
-            case GT: return ">";
-            case GE: return ">=";
-            case FEQ: return "eq";
-            case FNE: return "ne";
-            case FLT: return "lt";
-            case FLE: return "le";
-            case FGT: return "gt";
-            case FGE: return "ge";
-            case IS: return "is";
-            case IS_NOT: return "is-not";
-            case PRECEDES: return "<<";
-            case FOLLOWS: return ">>";
-            case PRECEDES_OR_IS:
-                return "precedes-or-is";
-            case FOLLOWS_OR_IS:
-                return "follows-or-is";
-            case UNION: return "union";
-            case INTERSECT: return "intersect";
-            case EXCEPT: return "except";
-            case OTHERWISE: return "otherwise";
-            case CONCAT: return "||";
-            case TO: return "to";
-            case CAST_AS: return "cast as";
-            case CASTABLE_AS: return "castable as";
-            case INSTANCE_OF: return "instance of";
-            case TREAT_AS: return "treat as";
-            case FAT_ARROW: return "=>";
-            case THIN_ARROW: return "->";
-            case MAPPING_ARROW: return "=!>";
-            case METHOD_CALL: return "?>";
-            case SLASH: return "/";
-            case SLASH_SLASH: return "//";
-            case BANG: return "!";
-            case LOOKUP: return "?";
-            case AM_FILTER: return "?[]";
-            default: return "<unknown op>";
-        }
+        return switch (this) {
+            case AND -> "and";
+            case OR -> "or";
+            case PLUS -> "+";
+            case TIMES -> "*";
+            case MINUS -> "-";
+            case NEGATE -> "-";
+            case DIV -> "div";
+            case IDIV -> "idiv";
+            case MOD -> "mod";
+            case EQUALS -> "=";
+            case NE -> "!=";
+            case LT -> "<";
+            case LE -> "<=";
+            case GT -> ">";
+            case GE -> ">=";
+            case FEQ -> "eq";
+            case FNE -> "ne";
+            case FLT -> "lt";
+            case FLE -> "le";
+            case FGT -> "gt";
+            case FGE -> "ge";
+            case IS -> "is";
+            case IS_NOT -> "is-not";
+            case PRECEDES -> "<<";
+            case FOLLOWS -> ">>";
+            case PRECEDES_OR_IS -> "precedes-or-is";
+            case FOLLOWS_OR_IS -> "follows-or-is";
+            case UNION -> "union";
+            case INTERSECT -> "intersect";
+            case EXCEPT -> "except";
+            case OTHERWISE -> "otherwise";
+            case CONCAT -> "||";
+            case TO -> "to";
+            case CAST_AS -> "cast as";
+            case CASTABLE_AS -> "castable as";
+            case INSTANCE_OF -> "instance of";
+            case TREAT_AS -> "treat as";
+            case FAT_ARROW -> "=>";
+            case THIN_ARROW -> "->";
+            case MAPPING_ARROW -> "=!>";
+            case METHOD_CALL -> "?>";
+            case SLASH -> "/";
+            case SLASH_SLASH -> "//";
+            case BANG -> "!";
+            case LOOKUP -> "?";
+            case AM_FILTER -> "?[]";
+            default -> "<unknown op>";
+        };
     }
 }
 

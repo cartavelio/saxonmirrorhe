@@ -105,4 +105,12 @@ public class NestedIntegerValue implements Comparable<NestedIntegerValue> {
         return Integer.signum(value.length - v2.value.length);
     }
 
+    public String toString() {
+        StringBuilder builder = new StringBuilder().append(value[0]);
+        for (int i = 1; i < value.length; i++) {
+            builder.append('.').append(value[i]);
+        }
+        return builder.toString();
+    }
+
 }

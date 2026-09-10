@@ -126,7 +126,7 @@ public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodeP
      */
 
     public int getRequiredFingerprint() {
-        if (this.nodeKind == nodeKind && key instanceof SpecificQNameTest) {
+        if (key instanceof SpecificQNameTest) {
             return ((SpecificQNameTest)key).getFingerprint();
         } else {
             return -1;

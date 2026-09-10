@@ -244,6 +244,11 @@ public class UseWhenFilter extends ProxyReceiver {
         if (href == null) {
             throw new XPathException("Missing href attribute on " + elemName.getDisplayName(), "XTSE0010");
         }
+        System.err.println((isImport ? "import" : "include") + " at precedence " + precedence);
+        NestedIntegerValue newPrecedence = precedence;
+        if (isImport) {
+            newPrecedence = precedence.getStem().append(precedence.getLeaf() - 1).append(2 * ++importCount);
+        }
         Configuration config = getConfiguration();
         ResourceResolver resolver = compilation.getCompilerInfo().getResourceResolver();
         String baseUriStr = baseUri.toString();
@@ -260,7 +265,7 @@ public class UseWhenFilter extends ProxyReceiver {
                 return (DocumentImpl) map.get(key);
             }
         } else {
-            compilation.addLoadedModule(key, precedence);
+            compilation.addLoadedModule(key, newPrecedence);
             ResourceRequest request = new ResourceRequest();
             request.relativeUri = href;
             request.baseUri = baseUriStr;
@@ -280,10 +285,7 @@ public class UseWhenFilter extends ProxyReceiver {
                 source = new StreamSource(
                         new StringReader("<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'/>"));
             }
-            NestedIntegerValue newPrecedence = precedence;
-            if (isImport) {
-                newPrecedence = precedence.getStem().append(precedence.getLeaf() - 1).append(2 * ++importCount);
-            }
+
             try {
                 DocumentImpl includedDoc = StylesheetModule.loadStylesheetModule(source, false, compilation, newPrecedence);
                 if (includedDoc != null) {
