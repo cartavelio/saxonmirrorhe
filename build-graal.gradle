@@ -72,7 +72,7 @@ task graalImage(
     exec {
       commandLine "${graalHome}/native-image",
         "-jar", "${buildDir}/libs/graalvm-ee-${saxonVersion}.jar",
-        "--no-fallback", "--allow-incomplete-classpath",
+        "--no-fallback", "--allow-incomplete-classpath", "-H:Path=${buildDir}/c",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
         "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
