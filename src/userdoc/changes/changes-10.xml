@@ -837,12 +837,12 @@
     
     <category name="xsd-extensions">
         
-        <p>The <a class="bodylink code" href="/schema-processing/extensions11/saxon.flags">saxon:flags</a> attribute of the
+        <p>The <a class="bodylink code" href="/schema-processing/extensions11/saxon-flags">saxon:flags</a> attribute of the
             <code>xs:pattern</code> facet was implemented in Saxon 9.9 but not
             documented or tested; it has now been made official. It allows flags for regular expression matching to be specified,
             following the rules for XPath functions such as <code>matches()</code>.</p>
         
-        <p>A new attribute <a href="/schema-processing/extensions11/saxon.separator" class="bodylink
+        <p>A new attribute <a href="/schema-processing/extensions11/saxon-separator" class="bodylink
             code">xs:list/@saxon:separator</a> is available for list types. The attribute holds
             a regular expression that is used to tokenize the supplied value, according to the rules of the XPath <code>tokenize()</code>
             function. For example with <code>&lt;xs:list saxon:separator=","/></code>, a list of integers in an attribute can now be
@@ -858,7 +858,7 @@
             in ascending or descending order (which implies that they must all be comparable). If a list type has this property, 
             then any types derived by retriction must have the same property.</p>
         
-        <p>A new attribute <a href="/schema-processing/extensions11/saxon.order-unique" class="bodylink
+        <p>A new attribute <a href="/schema-processing/extensions11/saxon-order-unique" class="bodylink
             code">xs:unique/xs:field/@saxon:order="ascending|descending"</a> is available for use with uniqueness constraints.
             If the attribute is present on any field of a uniqueness constraint, it indicates that the fields participating in the
             constraint must not only have unique values, they must also be correctly ordered. If the attribute is present on at

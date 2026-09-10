@@ -50,21 +50,20 @@
     </xsl:template>
 
     <xsl:function name="f:get-section-path" as="xs:string">
-        <xsl:param name="section" as="element()?"/>
+        <!-- Returns a string ending in .html if and only if the section has no subsections.
+            Subsequently use f:index-fix function to add /index.html for sections with subsections,
+            and handle sections with id='index'. -->
+        <xsl:param name="sectionElement" as="element()?"/>
         <xsl:param name="hash-path" as="xs:string*"/>
-        <xsl:if test="empty($section)">
+        <xsl:if test="empty($sectionElement)">
             <xsl:value-of select="''"/>
         </xsl:if>
-        <xsl:for-each select="$section">
+        <xsl:for-each select="$sectionElement">
             <xsl:variable name="hash-parts" as="xs:string*"
                 select="(ancestor::article|ancestor::section)/@id|@id"/>
             <xsl:variable name="ext" select="if (article|section) then '' else '.html'"
                 as="xs:string"/>
-            <xsl:value-of select="concat(
-$hash-path,
-string-join($hash-parts,
-'/'),
-$ext)"/>
+            <xsl:value-of select="concat($hash-path, string-join($hash-parts, '/'), $ext)"/>
         </xsl:for-each>
     </xsl:function>
 
@@ -72,6 +71,11 @@ $ext)"/>
 
         <xsl:variable name="hash-parts" as="xs:string*"
             select="(ancestor::article|ancestor::section)/@id|@id|*:name"/>
+        
+        <xsl:if test="contains(@id, '.') and not(matches(@id, '[0-9].[0-9]'))">
+            <xsl:message>Warning: section id contains '.' but this can cause problems in HTML docs - <xsl:value-of
+                select="string-join($hash-parts, '/')"/></xsl:message>
+        </xsl:if>
         
         <!--<xsl:message select="'hash-parts:', $hash-parts"/>-->
 
@@ -118,18 +122,12 @@ docs-count: <xsl:value-of select="count($section-docs/*)"/>
                 <xsl:with-param name="hash-path" select="$hash-path" tunnel="yes"/>
             </xsl:call-template>
         </xsl:variable>
-
-        <!-- index.html should be created for an id of 'index' because this will clash
-     with the 'intro' file name -->
-        <xsl:variable name="file-parts" as="xs:string*"
-            select="if ($hash-parts[last()] eq 'index') then
-                         (subsequence($hash-parts, 1, count($hash-parts) - 1), 'index-1')
-                    else ($hash-parts)"/>
-
-        <xsl:variable name="filepath" as="xs:string"
-            select="for $p in string-join($file-parts,'/') return
-                        if (not(section|article)) then concat($p, '.html')
-                         else concat($p, '/index.html')"/>
+        
+        <xsl:variable name="ext" as="xs:string"
+            select="if (article|section) then '' else '.html'" />
+        
+        <xsl:variable name="filepath"
+            select="f:index-fix(concat(string-join($hash-parts, '/'), $ext))"/>
 
         <!--<xsl:message>writing to: <xsl:value-of select="$filepath"/></xsl:message>-->
         <xsl:variable name="redirect"
@@ -255,8 +253,6 @@ select="$fndoc/def:functions/def:function[*:name = $href]"/>
                 <main>
                     <xsl:choose>
 
- 
-
                         <xsl:when test="$count eq 1">
                             <xsl:apply-templates select="$doc" mode="primary"/>
                         </xsl:when>
@@ -295,9 +291,9 @@ select="$fndoc/def:functions/def:function[*:name = $href]"/>
         <xsl:param name="ids" as="xs:string*"/>
         <xsl:param name="parent" as="node()?"/>
         <xsl:param name="index" as="xs:integer"/>
-        <xsl:variable name="section" select="$parent/section[@id eq $ids[$index]]"/>
+        <xsl:variable name="sectionElement" select="$parent/section[@id eq $ids[$index]]"/>
         <xsl:choose>
-            <xsl:when test="empty($section)">
+            <xsl:when test="empty($sectionElement)">
                 <xsl:message>
                     <p>Get-Section Error in URI hash-path:</p>
                     <p>Section '<xsl:value-of select="$ids[$index]"
@@ -306,12 +302,12 @@ select="$fndoc/def:functions/def:function[*:name = $href]"/>
             </xsl:when>
             <xsl:when test="$index gt count($ids)"/>
             <xsl:when test="$index eq count($ids)">
-                <xsl:apply-templates select="$section" mode="primary"/>
+                <xsl:apply-templates select="$sectionElement" mode="primary"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:call-template name="get-section">
                     <xsl:with-param name="ids" select="$ids"/>
-                    <xsl:with-param name="parent" select="$section"/>
+                    <xsl:with-param name="parent" select="$sectionElement"/>
                     <xsl:with-param name="index" select="$index + 1"/>
                 </xsl:call-template>
             </xsl:otherwise>
@@ -324,17 +320,17 @@ select="$fndoc/def:functions/def:function[*:name = $href]"/>
         <xsl:param name="index" as="xs:integer"/>
         <xsl:variable name="section-all"
             select="$parent/section[@id eq $ids[$index]]"/>
-        <xsl:variable name="section" select="$section-all[1]"/>
+        <xsl:variable name="sectionElement" select="$section-all[1]"/>
         <xsl:if test="count($section-all) gt 1">
             <xsl:message> Warning: Ambiguous path - found <xsl:value-of select="count($section-all)"
-                /> sections at id-path '<xsl:value-of select="string-join($ids,'/')"/>' the path
-                should reference only 1 section - first section found was used. </xsl:message>
+                /> sections at id-path '<xsl:value-of select="string-join($ids,'/')"
+                />' the path should reference only 1 section - first section found was used. </xsl:message>
         </xsl:if>
         <xsl:choose>
             <xsl:when test="count($ids) eq 1">
                 <xsl:sequence select="$parent"/>
             </xsl:when>
-            <xsl:when test="empty($section)">
+            <xsl:when test="empty($sectionElement)">
                 <xsl:message>GSE: Error in URI hash-path: Section '<xsl:value-of select="$ids[$index]"
                 />' not found in path: <xsl:value-of select="$ids" separator="/"/>
                 </xsl:message>
@@ -343,12 +339,12 @@ select="$fndoc/def:functions/def:function[*:name = $href]"/>
             </xsl:when>
             <xsl:when test="$index gt count($ids)"/>
             <xsl:when test="$index eq count($ids)">
-                <xsl:sequence select="$section"/>
+                <xsl:sequence select="$sectionElement"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:call-template name="get-section-element">
                     <xsl:with-param name="ids" select="$ids"/>
-                    <xsl:with-param name="parent" select="$section"/>
+                    <xsl:with-param name="parent" select="$sectionElement"/>
                     <xsl:with-param name="index" select="$index + 1"/>
                 </xsl:call-template>
             </xsl:otherwise>
@@ -376,41 +372,36 @@ select="$fndoc/def:functions/def:function[*:name = $href]"/>
         <xsl:param name="parent" as="node()?"/>
         <xsl:param name="index" as="xs:integer"/>
         <xsl:param name="hash-path" as="xs:string*"/>
-        <xsl:variable name="section" select="$parent/*[@id eq $ids[$index]]"/>
+        <xsl:variable name="sectionElement" select="$parent/*[@id eq $ids[$index]]"/>
         <xsl:variable name="ext"
-            select="if ($section/(article|section)) then '' else '.html'"
+            select="if ($sectionElement/(article|section)) then '' else '.html'"
             as="xs:string"/>
         <xsl:variable name="href" as="xs:string"
-            select="concat(
-$hash-path,
-string-join(
-subsequence($ids,1,$index),
-'/'),
-$ext)"/>
+            select="concat($hash-path, string-join(subsequence($ids,1,$index),'/'), $ext)"/>
         <xsl:choose>
             <xsl:when test="$index gt count($ids)"/>
-            <xsl:when test="$index eq count($ids) and empty($section)">
-                <li id="{$section/@id}" class="trail">
+            <xsl:when test="$index eq count($ids) and empty($sectionElement)">
+                <li id="{$sectionElement/@id}" class="trail">
                     <a href="{$href}">
                         <xsl:value-of select="$ids[$index]"/>
                     </a>
                 </li>
             </xsl:when>
             <xsl:when test="$index eq count($ids)">
-                <li id="{$section/@id}" class="trail">
+                <li id="{$sectionElement/@id}" class="trail">
                     <a href="{$href}">
-                        <xsl:value-of select="$section/@title"/>
+                        <xsl:value-of select="$sectionElement/@title"/>
                     </a>
                 </li>
             </xsl:when>
             <xsl:otherwise>
-                <li id="{$section/@id}" class="trail">
+                <li id="{$sectionElement/@id}" class="trail">
                     <a href="{$href}">
-                        <xsl:value-of select="$section/@title"/> &#x25b7; </a>
+                        <xsl:value-of select="$sectionElement/@title"/> &#x25b7; </a>
                 </li>
                 <xsl:call-template name="get-trail">
                     <xsl:with-param name="ids" select="$ids"/>
-                    <xsl:with-param name="parent" select="$section"/>
+                    <xsl:with-param name="parent" select="$sectionElement"/>
                     <xsl:with-param name="index" select="$index + 1"/>
                     <xsl:with-param name="hash-path" select="$hash-path"/>
                 </xsl:call-template>
@@ -426,8 +417,7 @@ $ext)"/>
         <xsl:variable name="id" select="$ids[1]"/>
         <xsl:variable name="posn" as="xs:integer"
             select="for $sc in 1 to count($sections) return
- if ($sections[$sc]/@ref eq $id) then $sc
- else ()"/>
+                if ($sections[$sc]/@ref eq $id) then $sc else ()"/>
 
         <xsl:for-each select="$sections[position() lt $posn]">
             <li id="@ref" class="closed">
@@ -450,7 +440,7 @@ $ext)"/>
                 </a>
  
                         <xsl:call-template name="add-list">
-                            <xsl:with-param name="section" select="$doc/*[@id eq $id]"/>
+                            <xsl:with-param name="sectionElement" select="$doc/*[@id eq $id]"/>
                             <xsl:with-param name="ids" select="$ids"/>
                             <xsl:with-param name="index" select="1"/>
                             <xsl:with-param name="hash-path" select="$hash-path"/>
@@ -470,16 +460,16 @@ $ext)"/>
     </xsl:template>
 
     <xsl:template name="add-list">
-        <xsl:param name="section" as="node()"/>
+        <xsl:param name="sectionElement" as="node()"/>
         <xsl:param name="ids" as="xs:string*"/>
         <xsl:param name="index" as="xs:integer"/>
         <xsl:param name="hash-path" as="xs:string*"/>
-        <xsl:if test="exists($section/section)">
+        <xsl:if test="exists($sectionElement/section)">
             <ul>
                 <!--
 <span>ids: <xsl:value-of select="string-join($ids,'/')"/></span>
 -->
-                <xsl:for-each select="$section/section">
+                <xsl:for-each select="$sectionElement/section">
                     <xsl:variable name="onpath" as="xs:boolean*"
                         select="$index lt count($ids) and @id eq $ids[$index + 1]"/>
                     <xsl:variable name="contains" select="exists(section)"/>
@@ -505,12 +495,14 @@ else 'item'}"><xsl:value-of select="@title"/></span>
                         </a>
 
                         <xsl:if test="$onpath">
-                            <xsl:variable name="sections" select="$section/section[@id = $ids[$index + 1]]"/>
-                            <xsl:if test="$sections[2]">
-                                <xsl:message expand-text="yes">Warning: ID value {$ids[$index + 1]} is duplicated ({string-join(distinct-values($sections!base-uri()), ', ')})</xsl:message>
+                            <xsl:variable name="subsections" select="$sectionElement/section[@id = $ids[$index + 1]]"/>
+                            <xsl:if test="$subsections[2]">
+                                <xsl:message>Warning: ID value <xsl:value-of 
+                                    select="$ids[$index + 1]"/> is duplicated (<xsl:value-of 
+                                    select="string-join(distinct-values($subsections!base-uri()), ', ')"/>)</xsl:message>
                             </xsl:if>
                             <xsl:call-template name="add-list">
-                                <xsl:with-param name="section" select="$sections[1]"/>
+                                <xsl:with-param name="sectionElement" select="$subsections[1]"/>
                                 <xsl:with-param name="ids" select="$ids"/>
                                 <xsl:with-param name="index" select="$index + 1"/>
                                 <xsl:with-param name="hash-path" select="$hash-path"/>
@@ -525,9 +517,8 @@ else 'item'}"><xsl:value-of select="@title"/></span>
 
 
     <xsl:function name="f:get-open-class" as="xs:string">
-        <xsl:param name="section" as="element()"/>
-        <xsl:sequence select="if ($section/section) then 'open'
- else 'empty'"/>
+        <xsl:param name="sectionElement" as="element()"/>
+        <xsl:sequence select="if ($sectionElement/section) then 'open' else 'empty'"/>
     </xsl:function>
 
 

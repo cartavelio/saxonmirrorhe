@@ -1186,7 +1186,7 @@
          <p>Another aid to diagnostics is the <code>saxon:message</code> attribute: if present on
             the <code>xs:assert</code> element, this provides a message to be output when the
             assertion is not satisfied: see <a class="bodylink code"
-               href="../../extensions11/saxon.message">saxon:message</a>.</p>
+               href="../../extensions11/saxon-message">saxon:message</a>.</p>
 
          <p>The XPath expression is evaluated against a temporary document that contains the subtree
             rooted at this element: more specifically, the subtree contains a document node with
@@ -1233,7 +1233,7 @@
             expression, the value is invalid. Currently no diagnostics are produced to indicate why
             the value is deemed invalid, other than a statement that the <code>xs:assertion</code>
             facet is violated. You can supply a message in a <code>saxon:message</code> attribute:
-            see <a class="bodylink code" href="../../extensions11/saxon.message"
+            see <a class="bodylink code" href="../../extensions11/saxon-message"
             >saxon:message</a>.</p>
 
          <p>The XPath expression has no access to any part of the document being validated, other
@@ -1481,11 +1481,11 @@
          >saxon:distinct</a>, <a class="bodylink code" href="order"
             >saxon:order</a>, and <a class="bodylink code" href="preprocess"
          >saxon:preprocess</a>. It also provides a number of additional attributes for various
-         elements, including: <a class="bodylink code" href="saxon.message">saxon:message</a> for
-         any facet; <a class="bodylink code" href="saxon.flags">saxon:flags</a> for the
-         <code>xs:pattern</code> facet; <a class="bodylink code" href="saxon.separator"
+         elements, including: <a class="bodylink code" href="saxon-message">saxon:message</a> for
+         any facet; <a class="bodylink code" href="saxon-flags">saxon:flags</a> for the
+         <code>xs:pattern</code> facet; <a class="bodylink code" href="saxon-separator"
             >saxon:separator</a> for the <code>xs:list</code> element, and <a class="bodylink code"
-               href="saxon.order-unique">saxon:order</a> for a <code>xs:unique/xs:field</code> element.</p>
+               href="saxon-order-unique">saxon:order</a> for a <code>xs:unique/xs:field</code> element.</p>
 
       <p>Saxon extensions to the XML Schema Language are implemented in the Saxon namespace
             <code>http://saxon.sf.net/</code>.</p>
@@ -1493,7 +1493,7 @@
          <ul/>
       </nav>
 
-      <section id="saxon.message" title="saxon:message - customizing validation messages">
+      <section id="saxon-message" title="saxon:message - customizing validation messages">
          <h1>saxon:message - customizing validation messages</h1>
 
 
@@ -1516,7 +1516,7 @@
 ]]></code></pre>
       </section>
      
-     <section id="saxon.streamable" title="saxon:streamable - streamable assertions">
+     <section id="saxon-streamable" title="saxon:streamable - streamable assertions">
        <h1>saxon:streamable - streamable assertions</h1>
        
        
@@ -1570,7 +1570,7 @@
        in-memory tree.</p>
      </section>
       
-      <section id="saxon.order-unique" title="saxon:order - rrdered uniqueness constraints">
+      <section id="saxon-order-unique" title="saxon:order - rrdered uniqueness constraints">
          <h1>saxon:order - ordered uniqueness constraints</h1>
          
          <p>Saxon allows the additional attribute <code>xs:unique/xs:field/@saxon:order</code>, with the permitted values
@@ -1597,7 +1597,7 @@
          
       </section>
       
-      <section id="saxon.separator" title="saxon:separator - defining the separator for list values">
+      <section id="saxon-separator" title="saxon:separator - defining the separator for list values">
          <h1>saxon:separator - defining the separator for list values</h1>
          
          <p>Normally, in an element or attribute whose type is derived from <code>xs:list</code>,
@@ -1637,7 +1637,7 @@
   </xs:simpleType>]]></code></pre>
       </section>
       
-      <section id="saxon.flags" title="saxon:flags - regular expression flags on xs:pattern">
+      <section id="saxon-flags" title="saxon:flags - regular expression flags on xs:pattern">
          <h1>saxon:flags - regular expression flags on xs:pattern</h1>
          
          <p>Saxon provides an additional attribute on the <code>xs:pattern</code> element,

@@ -239,8 +239,9 @@ resolved-ref <xsl:value-of select="$resolved-ref"/>
                               <xsl:variable name="ext"
                                    select="if (article|section|def:function) then '' else '.html'"/>
                               <xsl:variable name="pre-filepath"
-                                   select="concat($prefix, $fpath, $ext, $fragment)"/>
-                              <xsl:variable name="filepath" select="f:index-fix($pre-filepath)"/>
+                                   select="concat($prefix, $fpath, $ext)"/>
+                              <xsl:variable name="filepath"
+                                   select="concat(f:index-fix($pre-filepath), $fragment)"/>
                               <xsl:sequence select="$filepath"/>
 
                               <!--
@@ -288,14 +289,23 @@ terminated for ../xslt20
 
      </xsl:function>
 
-     <!-- fixes case where index.html name at the folder top-level may clash with
-     an item within the folder also named index (e.g. saxon:index)  -->
      <xsl:function name="f:index-fix">
+          <!-- Supplied string ends in '.html' if and only if the section has no subsections.
+               If supplied string ends 'index.html' then rename as 'index-1.html', to prevent clash
+               with folder top-level index.html page (e.g. for saxon:index page).
+               Add '/index.html' for a supplied string not ending '.html' (i.e. folder top-level
+               index.html page).
+               Returned string always ends with '.html'.
+               (Previously '/index.html' was not explicitly added here, and we relied on server
+               redirect to the index.html page. But this is insufficent when fragments may
+               subsequently be added.)
+          -->
           <xsl:param name="path"/>
           <xsl:sequence
                select="if (ends-with($path, '/index.html') or $path eq 'index.html') then
-concat(substring($path,1,string-length($path) - 5),'-1.html') 
-else $path "
+               concat(substring($path,1,string-length($path) - 5),'-1.html') 
+               else if (ends-with($path, '.html')) then $path
+               else concat($path, '/index.html') "
           />
      </xsl:function>
 
