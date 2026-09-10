@@ -30,7 +30,7 @@ public class DotNetIterator<T extends Object> implements Iterator<T> {
         this.enumerator = null;
         moreToCome = false;
     }
-
+    
     public DotNetIterator(IEnumerator enumerator) {
         this.enumerator = enumerator;
         this.moreToCome = enumerator.MoveNext();
