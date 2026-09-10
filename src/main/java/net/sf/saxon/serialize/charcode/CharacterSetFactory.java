@@ -111,7 +111,7 @@ public class CharacterSetFactory {
                 return cs;
             }
 
-            CSharp.emitCode("return unknownEncoding(encoding);");
+            CSharp.emitCode("return Saxon.Helpers.DotNetCharacterSet.GetCharacterSet(encoding);");
 
 //#if CSHARP==false
 

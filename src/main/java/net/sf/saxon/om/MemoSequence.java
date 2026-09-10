@@ -320,7 +320,7 @@ public class MemoSequence implements Sequence {
                 } else if (container.used == 1) {
                     return container.reservoir[0];
                 } else {
-                    return new SequenceExtent.Of<>(container.reservoir);
+                    return new SequenceExtent.Of<Item>(container.reservoir);
                 }
             } else {
                 return SequenceExtent.makeSequenceExtent(
