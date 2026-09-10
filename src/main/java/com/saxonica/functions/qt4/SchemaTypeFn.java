@@ -104,7 +104,7 @@ public class SchemaTypeFn extends SystemFunction {
         } else {
             result.put(new Twine8("base-type"), new ConstantFunction(EmptySequence.getInstance(), SequenceType.EMPTY_SEQUENCE));
         }
-        String variety = "*unknown*";
+        String variety = null;
         if (st.isSimpleType()) {
             if (st.isAtomicType()) {
                 variety = "atomic";
@@ -124,7 +124,9 @@ public class SchemaTypeFn extends SystemFunction {
                 variety = "element-only";
             }
         }
-        result.put(new Twine8("variety"), new StringValue(variety));  // TODO: should be an enum type
+        if (variety != null) {
+            result.put(new Twine8("variety"), new StringValue(variety));  // TODO: should be an enum type
+        }
 
         if (st.isComplexType() && ((ComplexType) st).isSimpleContent()) {
             SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(((ComplexType) st).getSimpleContentType()),
@@ -164,10 +166,10 @@ public class SchemaTypeFn extends SystemFunction {
             result.put(new Twine8("members"), fn);
         }
 
-        if (st.isAtomicType()) {
+        if (st instanceof PlainType) {
             CallableFunction matches = new CallableFunction((context, args) -> {
                 TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-                return BooleanValue.get(((AtomicType) st).matches(args[0].head(), th));
+                return BooleanValue.get(((PlainType) st).matches(args[0].head(), th));
             }, new SpecificFunctionType(SequenceType.SINGLE_ITEM, SequenceType.SINGLE_BOOLEAN));
             result.put(new Twine8("matches"), matches);
         }
