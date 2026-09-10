@@ -7,6 +7,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
 
@@ -42,11 +43,13 @@ public class IndexWhere extends SystemFunction {
         private final SequenceIterator base;
         private final FunctionItem predicate;
         private final XPathContext context;
+        private final int arity;
 
         public IndexIterator(SequenceIterator base, XPathContext context, FunctionItem predicate) {
             this.base = base;
             this.context = context;
             this.predicate = predicate;
+            this.arity = predicate.getArity();
         }
 
         /**
@@ -67,10 +70,24 @@ public class IndexWhere extends SystemFunction {
             while ((baseItem = base.next()) != null) {
                 index++;
                 try {
-                    Sequence result = dynamicCall(predicate, context, new Sequence[]{baseItem});
+                    Int64Value ix = new Int64Value(index);
+                    Sequence result;
+                    switch (arity) {
+                        case 0:
+                            result = dynamicCall(predicate, context);
+                            break;
+                        case 1:
+                            result = dynamicCall(predicate, context, baseItem);
+                            break;
+                        case 2:
+                            result = dynamicCall(predicate, context, baseItem, ix);
+                            break;
+                        default:
+                            result = EmptySequence.getInstance();
+                    }
                     BooleanValue val = (BooleanValue)result.head();
                     if (val != null && val.getBooleanValue()) {
-                        return new Int64Value(index);
+                        return ix;
                     }
                 } catch (XPathException e) {
                     throw new UncheckedXPathException(e);
