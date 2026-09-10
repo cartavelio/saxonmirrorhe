@@ -47,7 +47,9 @@ public class XMLNamespaceSchema {
         lengthFacet.setNumericValue(0);
         facetList.add(lengthFacet);
         zls.setFacetList(facetList);
-        members.add(new TypeReference(zls.getFingerprint(), config, null));
+        final TypeReference zlsRef = new TypeReference(zls.getFingerprint(), config, null);
+        zlsRef.setTarget(zls);
+        members.add(zlsRef);
 
         UserUnionType u = new UserUnionType(config);
         u.setMemberTypeReferences(members);
