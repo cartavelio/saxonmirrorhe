@@ -9,9 +9,11 @@ package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -175,7 +177,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateAncestorAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateAncestorAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -187,7 +192,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateAncestorOrSelfAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateAncestorOrSelfAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateAncestorOrSelfAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -199,7 +207,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateAttributeAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateAttributeAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -211,7 +222,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateChildAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateChildAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -223,7 +237,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateDescendantAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateDescendantAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -235,7 +252,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateDescendantOrSelfAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateDescendantOrSelfAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -247,7 +267,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateFollowingAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateFollowingAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -259,7 +282,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateFollowingOrSelfAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateFollowingOrSelfAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateFollowingOrSelfAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -271,7 +297,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateFollowingSiblingAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateFollowingSiblingAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -283,7 +312,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateFollowingSiblingOrSelfAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateFollowingSiblingOrSelfAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateFollowingSiblingOrSelfAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -296,7 +328,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateNamespaceAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateNamespaceAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateNamespaceAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -307,7 +342,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateParentAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateParentAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateParentAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -319,7 +357,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iteratePrecedingAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iteratePrecedingAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -331,7 +372,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iteratePrecedingOrSelfAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iteratePrecedingOrSelfAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iteratePrecedingOrSelfAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -343,7 +387,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iteratePrecedingSiblingAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iteratePrecedingSiblingAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -355,7 +402,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingOrSelfAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iteratePrecedingSiblingOrSelfAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iteratePrecedingSiblingOrSelfAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
@@ -367,7 +417,10 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
     @Override
     public SequenceIterator iterateSelfAxis(NodePredicate predicate) {
-        return new WrappingIterator(node.iterateSelfAxis(predicate), this, null);
+        return Navigator.filter(
+                new WrappingIterator(node.iterateSelfAxis(AnyGNode.TEST), this, null),
+                predicate
+        );
     }
 
     /**
