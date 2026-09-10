@@ -248,7 +248,7 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">atomic-type-annotation</name>
       <signatures>
-        <proto>
+        <proto return-type="fn:schema-type-record">
           <arg name="value" type="xs:anyAtomicType" desc="The input item"/>
           <in-spec>xpath40</in-spec>
         </proto>
@@ -384,7 +384,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">build-dateTime</name>
       <signatures>
         <proto return-type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?">
-          <arg desc="The date/time record" name="value"/>
+          <arg name="value" type="fn:dateTime-record?" desc="The date/time record" />
         </proto>
       </signatures>
       <status-ok/>
@@ -397,7 +397,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">build-uri</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="parts" type="map(*)" desc="The components of the URI, provided as a map"/>
+          <arg name="parts" type="fn:uri-structure-record" desc="The components of the URI, provided as a map"/>
           <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
           <in-spec>xpath40</in-spec>
         </proto>
@@ -2917,7 +2917,7 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">load-xquery-module</name>
       <signatures>
-        <proto>
+        <proto return-type="fn:load-xquery-module-record">
           <arg name="module-uri" type="xs:string" desc="The namespace of the target library module"/>
           <arg name="options" type="map(*)?" default="{}"
             desc="Used to control the way in which the function operates"/>
@@ -3440,7 +3440,7 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">node-type-annotation</name>
       <signatures>
-        <proto>
+        <proto return-type="fn:schema-type-record">
           <arg name="node" type="(element() | attribute())" 
             desc="The input element or attribute node"/>
           <in-spec>xpath40</in-spec>
@@ -3587,7 +3587,7 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">parse-csv</name>
       <signatures>
-        <proto>
+        <proto return-type="fn:parsed-csv-structure-record?">
           <arg name="value" type="xs:string?" desc="The input CSV data"/>
           <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
           <in-spec>xpath40</in-spec>
@@ -3720,7 +3720,7 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">parse-uri</name>
       <signatures>
-        <proto>
+        <proto return-type="fn:uri-structure-record?">
           <arg name="value" type="xs:string?" desc="The input URI"/>
           <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
           <in-spec>xpath40</in-spec>
@@ -3826,10 +3826,11 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">parts-of-dateTime</name>
       <signatures>
-        <proto>
-          <arg desc="The date/time value"
-               name="value"
-               type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?"/>
+        <proto return-type="fn:dateTime-record?">
+          <arg name="value"
+               type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?"
+               desc="The date/time value"
+          />
         </proto>
       </signatures>
       <status_ok/>
@@ -3948,7 +3949,7 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">random-number-generator</name>
       <signatures>
-        <proto>
+        <proto return-type="fn:random-number-generator-record">
           <arg name="seed" type="xs:anyAtomicType?" default="()" desc="The supplied seed"/>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
@@ -4252,7 +4253,7 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">schema-type</name>
       <signatures>
-        <proto>
+        <proto return-type="fn:schema-type-record?">
           <arg name="name" type="xs:QName" desc="A named schema type"/>
           <in-spec>xpath40</in-spec>
         </proto>
