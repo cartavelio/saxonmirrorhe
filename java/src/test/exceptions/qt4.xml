@@ -47,6 +47,11 @@
       <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
    </exception>
    
+   <exception test-set="app-CatalogCheck" test-case="Catalog014" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-01-03"/>
+      <reason>QT4 40-specific tests are missing covers-40 attribute</reason>
+   </exception>
+   
    <!--<exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
       <created by="Michael Kay" on="2023-03-14"/>
       <reason>Placeholders currently not allowed as keyword arguments</reason>
@@ -70,6 +75,11 @@
                                                       itemTypeDecl-018" run="false" report="notRun">
       <created by="Michael Kay" on="2026-01-01"/>
       <reason>XQuery item types: forwards references and self-references not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="prod-ModuleImport" test-case="modules-43" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-12"/>
+      <reason>XQuery item types: forwards references not yet implemented</reason>
    </exception>
    
 

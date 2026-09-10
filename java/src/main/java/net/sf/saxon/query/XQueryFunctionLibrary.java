@@ -183,24 +183,6 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             } else if (functionName.getArity() == fd.getNumberOfParameters()) {
                 // all arguments supplied
                 return fn;
-//            } else if (fn.isVariadic() && functionName.getArity() > fn.getArity()) {
-//                // Generate a function f(a,b,c,d) whose body is a call to f((a,b,c,d))
-//                FunctionItem simpleCall = getFunctionItem(new SymbolicName.F(functionName.getComponentName(), fn.getArity()), staticContext);
-//                Callable callable = (context, args) -> {
-//                    Sequence[] amalgamated = new Sequence[fn.getArity()];
-//                    System.arraycopy(args, 0, amalgamated, 0, fn.getArity() - 1);
-//                    amalgamated[fn.getArity() - 1] = SequenceTool.joinSequences(
-//                            Arrays.copyOfRange(args, fn.getArity() - 1, args.length)).materialize();
-//                    return simpleCall.call(context, amalgamated);
-//                };
-//                SequenceType[] argTypes = new SequenceType[functionName.getArity()];
-//                int last = fn.getArity() - 1;
-//                for (int i = 0; i < argTypes.length; i++) {
-//                    argTypes[i] = fn.getArgumentType(Math.min(i, last));
-//                }
-//                FunctionItemType fit = new SpecificFunctionType(argTypes, fn.getResultType());
-//                return new CallableFunction(functionName.getArity(), callable, fit);
-
             } else {
                 // return a reference to a reduced-arity version in which some of the arguments are defaulted
                 Callable callable = new ReducedArityCallable(fd, fn);

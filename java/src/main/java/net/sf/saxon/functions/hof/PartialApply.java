@@ -12,7 +12,9 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
+import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
@@ -26,12 +28,14 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
  * This expression class implements the operation of currying (or performing partial application) of a function.
  * That is, it takes a function and a set of argument bindings as input, and produces a new function as output.
+ * The result of evaluating a {@code PartialApply} expression is generally a {@link CurriedFunction}, which is a type
+ * of {@link FunctionItem}.
  * 
  * <p>Here are some notes on how partial function application works.</p>
  * 
@@ -64,47 +68,55 @@ import java.util.function.Supplier;
 
 public class PartialApply extends Expression {
 
-    private final Operand baseOp;
-    private final Operand[] boundArgumentsOp;
+    private final Operand functionItemOperand;
+    private final Operand[] operanda;
+    private final ArrayList<PlaceHolder> placeHolders;
+    private final Map<StructuredQName, Integer> keywordArgs;
 
     /**
      * Create a partial function application expression
      *
-     * @param base           the expression that returns the function to be called
-     * @param boundArguments an array corresponding to the declared arguments of the base function. Each entry
+     * @param functionItem   the expression that returns the function to be called
+     * @param arguments      an array corresponding to the declared arguments of the base function, in order. Each entry
      *                       in the array is either an expression which is evaluated and bound to the corresponding
-     *                       argument of the base function, or a {@link PlaceHolder} pseudo-expression wrapping
-     *                       in integer N which denotes the (0-based) Nth argument supplied to the actual
-     *                       call of the partially-applied function. Note that in 4.0, placeHolders can be
-     *                       used to change the order of arguments.
+     *                       argument of the base function, or a {@link PlaceHolder} pseudo-expression.
+     * @param keywordArgs    if keywords are used in the function call, a mapping from keywords to the integer
+     *                       argument positions (0-based) where the keyword is used. May be null.
      */
 
-    public PartialApply(Expression base, Expression[] boundArguments) {
-        baseOp = new Operand(this, base, OperandRole.INSPECT);
-        adoptChildExpression(base);
-        boundArgumentsOp = new Operand[boundArguments.length];
-        for (int i=0; i<boundArguments.length; i++) {
-            boundArgumentsOp[i] = new Operand(this, boundArguments[i], OperandRole.NAVIGATE);
-            adoptChildExpression(boundArguments[i]);
+    public PartialApply(Expression functionItem, Expression[] arguments, Map<StructuredQName, Integer> keywordArgs) {
+        functionItemOperand = new Operand(this, functionItem, OperandRole.INSPECT);
+        adoptChildExpression(functionItem);
+        placeHolders = new ArrayList<>();
+        for (Expression argument : arguments) {
+            if (argument instanceof PlaceHolder ph) {
+                placeHolders.add(ph);
+            }
+        }
+        operanda = new Operand[arguments.length - placeHolders.size()];
+        this.keywordArgs = keywordArgs;
+
+        int j = 0;
+        for (int i = 0; i < arguments.length; i++) {
+            if (!(arguments[i] instanceof PlaceHolder)) {
+                operanda[j] = new Operand(this, arguments[i], OperandRole.NAVIGATE);
+                positionMap[j] = i;
+                j++;
+            }
+            adoptChildExpression(arguments[i]);
         }
     }
 
     public Expression getBaseExpression() {
-        return baseOp.getChildExpression();
+        return functionItemOperand.getChildExpression();
     }
 
     public void setBaseExpression(Expression base) {
-        baseOp.setChildExpression(base);
+        functionItemOperand.setChildExpression(base);
     }
 
     public int getNumberOfPlaceHolders() {
-        int n = 0;
-        for (Operand o : boundArgumentsOp) {
-            if (o.getChildExpression() instanceof PlaceHolder) {
-                n++;
-            }
-        }
-        return n;
+        return placeHolders.size();
     }
 
 
@@ -124,8 +136,8 @@ public class PartialApply extends Expression {
             }
         }
         final String diagnosticName = baseName;
-        for (int i = 0; i < boundArgumentsOp.length; i++) {
-            final Operand op = boundArgumentsOp[i];
+        for (int i = 0; i < operanda.length; i++) {
+            final Operand op = operanda[i];
             Expression arg = op.getChildExpression();
             if (!(arg instanceof PlaceHolder)) {
                 if (baseType instanceof SpecificFunctionType && i < ((SpecificFunctionType) baseType).getArity()) {
@@ -162,10 +174,9 @@ public class PartialApply extends Expression {
         int placeholders = getNumberOfPlaceHolders();
         SequenceType[] argTypes = new SequenceType[placeholders];
         if (baseItemType instanceof SpecificFunctionType) {
-            for (int i = 0, j = 0; i < boundArgumentsOp.length; i++) {
-                Expression bound = boundArgumentsOp[i].getChildExpression();
+            for (int i = 0, j = 0; i < operanda.length; i++) {
+                Expression bound = operanda[i].getChildExpression();
                 if (bound instanceof PlaceHolder) {
-                    //  TODO: FIXME (KEYWORDS?)
                     argTypes[j++] = ((SpecificFunctionType) baseItemType).getArgumentTypes()[i];
                 }
             }
@@ -190,14 +201,7 @@ public class PartialApply extends Expression {
 
     @Override
     public Iterable<Operand> operands() {
-        List<Operand> operanda = new ArrayList<>(boundArgumentsOp.length + 1);
-        operanda.add(baseOp);
-        for (Operand o : boundArgumentsOp) {
-            if (!(o.getChildExpression() instanceof PlaceHolder)) {
-                operanda.add(o);
-            }
-        }
-        return operanda;
+        return Arrays.asList(operanda);
     }
 
     @Override
@@ -217,15 +221,15 @@ public class PartialApply extends Expression {
             if (!getBaseExpression().isEqual(pa2.getBaseExpression())) {
                 return false;
             }
-            if (boundArgumentsOp.length != pa2.boundArgumentsOp.length) {
+            if (operanda.length != pa2.operanda.length) {
                 return false;
             }
-            for (int i=0; i<boundArgumentsOp.length; i++) {
+            for (int i = 0; i< operanda.length; i++) {
                 //  TODO: FIXME
-                if ((boundArgumentsOp[i] == null) != (pa2.boundArgumentsOp[i] == null)) {
+                if ((operanda[i] == null) != (pa2.operanda[i] == null)) {
                     return false;
                 }
-                if (boundArgumentsOp[i] != null && !boundArgumentsOp[i].equals(pa2.boundArgumentsOp[i])) {
+                if (operanda[i] != null && !operanda[i].equals(pa2.operanda[i])) {
                     return false;
                 }
             }
@@ -254,11 +258,11 @@ public class PartialApply extends Expression {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("partialApply", this);
         getBaseExpression().export(out);
-        for (Operand o : boundArgumentsOp) {
+        for (Operand o : operanda) {
             Expression e = o.getChildExpression();
             if (e instanceof PlaceHolder) {
                 out.startElement("null", this);
-                out.emitAttribute("at", "" + ((PlaceHolder)e).getNewPosition());
+                out.emitAttribute("at", "" + ((PlaceHolder)e).getPlaceHolderSequence());
                 out.endElement();
             } else {
                 e.export(out);
@@ -275,9 +279,9 @@ public class PartialApply extends Expression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Expression[] boundArgumentsCopy = new Expression[boundArgumentsOp.length];
-        for (int i = 0; i < boundArgumentsOp.length; i++) {
-            boundArgumentsCopy[i] = boundArgumentsOp[i].getChildExpression().copy(rebindings);
+        Expression[] boundArgumentsCopy = new Expression[operanda.length];
+        for (int i = 0; i < operanda.length; i++) {
+            boundArgumentsCopy[i] = operanda[i].getChildExpression().copy(rebindings);
         }
         PartialApply exp = new PartialApply(getBaseExpression().copy(rebindings), boundArgumentsCopy);
         ExpressionTool.copyLocationInfo(this, exp);
@@ -308,13 +312,13 @@ public class PartialApply extends Expression {
             buff.append(getBaseExpression().toString());
         }
         buff.append("(");
-        for (int i = 0; i < boundArgumentsOp.length; i++) {
-            if (boundArgumentsOp[i] == null) {
+        for (int i = 0; i < operanda.length; i++) {
+            if (operanda[i] == null) {
                 buff.append("?");
             } else {
-                buff.append(boundArgumentsOp[i].getChildExpression().toString());
+                buff.append(operanda[i].getChildExpression().toString());
             }
-            if (i != boundArgumentsOp.length - 1) {
+            if (i != operanda.length - 1) {
                 buff.append(", ");
             }
         }
@@ -364,36 +368,81 @@ public class PartialApply extends Expression {
         public ItemEvaluator elaborateForItem() {
             PartialApply expr = (PartialApply)getExpression();
             ItemEvaluator functionEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
-            final int len = expr.boundArgumentsOp.length;
-            SequenceEvaluator[] boundArgumentsEvaluators = new SequenceEvaluator[len];
-            int[] unboundArgumentMap = new int[expr.getNumberOfPlaceHolders()];
-            int j = 0;
+//            final int len = expr.operanda.length + expr.getNumberOfPlaceHolders();
+//            SequenceEvaluator[] boundArgumentsEvaluators = new SequenceEvaluator[len];
+//            int[] unboundArgumentMap = new int[expr.getNumberOfPlaceHolders()];
+//            int j = 0;
+//            for (int i = 0; i < len; i++) {
+//                Expression boundArg = expr.operanda[i].getChildExpression();
+//                if (boundArg instanceof PlaceHolder) {
+//                    boundArgumentsEvaluators[i] = null;
+//                    unboundArgumentMap[j++] = ((PlaceHolder)boundArg).getArgumentPosition();
+//                } else {
+//                    boundArgumentsEvaluators[i] = boundArg.makeElaborator().eagerly();
+//                }
+//            }
+            final Map<StructuredQName, Integer> keywords =
+                    (expr.keywordArgs == null || expr.keywordArgs.isEmpty()) ? null : expr.keywordArgs; {
+//                final int len = expr.operanda.length + expr.getNumberOfPlaceHolders();
+//                SequenceEvaluator[] boundArgumentsEvaluators = new SequenceEvaluator[len];
+            Expression[] arguments = new Expression[len];
             for (int i = 0; i < len; i++) {
-                Expression boundArg = expr.boundArgumentsOp[i].getChildExpression();
-                if (boundArg instanceof PlaceHolder) {
-                    boundArgumentsEvaluators[i] = null;
-                    unboundArgumentMap[j++] = ((PlaceHolder)boundArg).getNewPosition();
-                } else {
-                    boundArgumentsEvaluators[i] = boundArg.makeElaborator().eagerly();
-                }
+                arguments[i] = expr.operanda[i].getChildExpression();
             }
-
             return context -> {
                 FunctionItem f = (FunctionItem) functionEval.eval(context);
                 assert f != null;
                 if (f.getArity() != len) {
                     throw new XPathException(
                             "The number of arguments supplied in the partial function application is " + len +
-                            ", but the arity of the function item is " + f.getArity(), "XPTY0004");
+                                    ", but the arity of the function item is " + f.getArity(), "XPTY0004");
                 }
-                Sequence[] values = new Sequence[len];
-                for (int i = 0; i < boundArgumentsEvaluators.length; i++) {
-                    if (boundArgumentsEvaluators[i] != null) {
-                        values[i] = boundArgumentsEvaluators[i].evaluate(context);
+
+                Expression[] expandedArgs = arguments.clone();
+                int maxArity = fd.getNumberOfParameters();
+
+                // If there are keyword arguments, we first reposition them to the correct position in the argument sequence
+                if (expr.keywordArgs != null && !expr.keywordArgs.isEmpty()) {
+                    expandedArgs = new Expression[maxArity];
+                    int positionalArgs = arguments.length - keywords.size();
+                    System.arraycopy(arguments, 0, expandedArgs, 0, positionalArgs);
+                    for (Map.Entry<StructuredQName, Integer> entry : keywords.entrySet()) {
+                        StructuredQName key = entry.getKey();
+                        int argPos = entry.getValue();
+                        int paramPos = fd.getPositionOfParameter(key);
+                        if (paramPos < 0) {
+                            throw new XPathException("Keyword " + key +
+                                                             " does not match the name of any declared parameter of function "
+                                                             + fd.getFunctionName(), "XPST0142");
+                        }
+                        if (paramPos < positionalArgs) {
+                            throw new XPathException("Parameter " + key + " of function " + fd.getFunctionName() +
+                                                             " is supplied both by position and by keyword", "XPST0017");
+                        }
+                        Expression supplied = arguments[argPos];
+                        expandedArgs[paramPos] = supplied;
+                    }
+                } else {
+                    expandedArgs = Arrays.copyOf(arguments, maxArity);
+                }
+
+                // We now have all the supplied parameters, including placeholders, in the right place
+                // Next step is to add values for defaulted parameters
+                for (int a = 0; a < maxArity; a++) {
+                    if (expandedArgs[a] == null) {
+                        expandedArgs[a] = new DefaultedArgumentExpression(); // to be fixed up later;
                     }
                 }
-                return new CurriedFunction(f, values, unboundArgumentMap);
+
+                
+
+
+                return new CurriedFunction(f, expandedArgs, unboundArgumentMap);
             };
+            } else {
+
+            }
+
         }
     }
 }

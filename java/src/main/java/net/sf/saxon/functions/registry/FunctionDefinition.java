@@ -58,7 +58,7 @@ public interface FunctionDefinition {
     Supplier<Expression> getDefaultValueExpression(int i);
 
     /**
-     * Get the position in the parameter list of a given parameter name
+     * Get the position within the parameter list of a given parameter name
      *
      * @param name the name of the required parameter
      * @return the position of the parameter in the parameter list, or -1 if absent

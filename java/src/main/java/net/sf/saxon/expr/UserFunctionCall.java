@@ -257,34 +257,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         return argumentEvaluators;
     }
 
-//    public static class ArgumentEvaluationModeAdjuster implements Consumer<MemoClosure.MemoClosureStatistics> {
-//
-//        private final UserFunctionCall functionCall;
-//        private final int argument;
-//        private int completed;
-//        private int abandoned;
-//
-//        public ArgumentEvaluationModeAdjuster(UserFunctionCall functionCall, int argument) {
-//            this.functionCall = functionCall;
-//            this.argument = argument;
-//        }
-//
-//        @Override
-//        public void accept(MemoClosure.MemoClosureStatistics statistics) {
-//            if (functionCall.argumentEvaluators[argument].getCode() == Evaluators.MAKE_MEMO_CLOSURE) {
-//                if (statistics.allRead) {
-//                    completed++;
-//                } else {
-//                    abandoned++;
-//                }
-//                if (completed > 10 && abandoned == 0) {
-//                    //System.err.println("Argument evaluator set to eager");
-//                    functionCall.argumentEvaluators[argument] = Evaluator.EagerSequence.INSTANCE;
-//                }
-//            }
-//        }
-//
-//    }
 
 
     /**

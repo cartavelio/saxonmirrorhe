@@ -38,8 +38,7 @@ import java.util.function.Supplier;
  * The fn:apply function is also used internally to implement dynamic function calls.
  */
 
-public class
-DynamicFunctionCall extends Expression {
+public class DynamicFunctionCall extends Expression {
 
     private final Operand targetFunction;
     private final OperandArray suppliedArguments;
@@ -398,7 +397,7 @@ DynamicFunctionCall extends Expression {
                         FunctionItem fn = (FunctionItem) item;
                         FunctionItemType fit = fn.getFunctionItemType();
                         int arity = fn.getArity();
-                        if (arity > argEvaluators.length) {
+                        if (arity != argEvaluators.length) {
                             String errorCode = "XPTY0004";
                             throw new XPathException(
                                     "Number of arguments required for dynamic call to " + fn.getDescription() + " is " + arity +

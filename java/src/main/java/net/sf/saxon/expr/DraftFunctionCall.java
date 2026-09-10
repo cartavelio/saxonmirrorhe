@@ -44,17 +44,22 @@ public class DraftFunctionCall extends DraftExpression {
     private final String lexicalName;
     private final QueryModule queryModule;
     private final Operand[] operanda;
-    private final List<Object> placeMarkerArgs;
     private final Map<StructuredQName, Integer> keywordArgs;
 
     /**
-     * Create a function call to a user-written function in a query or stylesheet
+     * Create a function call to a user-written function in a query
+     *
+     * @param lexicalName The name of the function as written in the source query
+     * @param queryModule The query module containing the function definition
+     * @param arguments   The argument expressions, in order, representing any
+     *                    "?" place marker by a PlaceHolder pseudo-expression
+     * @param keywordArgs Mapping from argument keywords (where used) to the zero-based
+     *                    position where the keyword is used
      */
 
     public DraftFunctionCall(String lexicalName,
                              QueryModule queryModule,
                              Expression[] arguments,
-                             List<Object> placeMarkerArgs,
                              Map<StructuredQName, Integer> keywordArgs) {
         this.lexicalName = lexicalName;
         this.queryModule = queryModule;
@@ -63,7 +68,6 @@ public class DraftFunctionCall extends DraftExpression {
         for (Expression arg : arguments) {
             operanda[i++] = new Operand(this, arg, OperandRole.NAVIGATE);
         }
-        this.placeMarkerArgs = placeMarkerArgs;
         this.keywordArgs = keywordArgs;
     }
 
@@ -103,7 +107,7 @@ public class DraftFunctionCall extends DraftExpression {
         for (Operand operand : operanda) {
             a2[i++] = operand.getChildExpression().copy(rebindings);
         }
-        return new DraftFunctionCall(lexicalName, queryModule, a2, placeMarkerArgs, keywordArgs);
+        return new DraftFunctionCall(lexicalName, queryModule, a2, keywordArgs);
     }
 
     private Expression[] getArguments() {
@@ -198,7 +202,8 @@ public class DraftFunctionCall extends DraftExpression {
 
     /**
      * The {@code simplify} method applied to a DraftFunctionCall when the entire query has been parsed, so all user-defined
-     * functions are now known, enabling the name to be resolved.
+     * functions are now known, enabling the name to be resolved. As well as locating the target function, keyword arguments
+     * can be resolved to positional arguments.
      * @return either a FunctionCall or a CurriedFunction
      * @throws XPathException if resolution fails
      */
@@ -235,9 +240,14 @@ public class DraftFunctionCall extends DraftExpression {
                     .withLocation(getLocation());
         }
 
-        if (placeMarkerArgs != null && !placeMarkerArgs.isEmpty()) {
-            return makeCurriedFunction(qName, getArguments(), placeMarkerArgs);
+        for (Operand op : operanda) {
+            if (op.getChildExpression() instanceof PlaceHolder) {
+                // If there are any placeholders, make a partial function application expression
+                return makePartialApplication(qName);
+            }
         }
+
+        // Make a function call expression (and return it)
 
         SymbolicName.F functionName = new SymbolicName.F(qName, arity);
         List<String> reasons = new ArrayList<>();
@@ -257,16 +267,14 @@ public class DraftFunctionCall extends DraftExpression {
         return exp;
     }
 
-    private Expression makeCurriedFunction(
-            StructuredQName name,
-            Expression[] args,
-            List<Object> placeMarkerArgs) throws XPathException {
+    private Expression makePartialApplication(StructuredQName name) throws XPathException {
 
         FunctionLibrary lib = queryModule.getFunctionLibrary();
-        SymbolicName.F sn = new SymbolicName.F(name, args.length);
+        int arity = operanda.length;
+        SymbolicName.F sn = new SymbolicName.F(name, arity);
         FunctionItem target = lib.getFunctionItem(sn, queryModule);
         if (target == null) {
-            String msg = "Cannot find a " + args.length
+            String msg = "Cannot find a " + arity
                     + "-argument function named " + name.getEQName() + "()";
             throw new XPathException(msg, "XPST0017").asStaticError();
         }
@@ -275,12 +283,12 @@ public class DraftFunctionCall extends DraftExpression {
             SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
             lookup.setRetainedStaticContext(queryModule.makeRetainedStaticContext());
             return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(name, BuiltInAtomicType.QNAME)),
-                                           Literal.makeLiteral(Int64Value.makeIntegerValue(args.length)));
+                                           Literal.makeLiteral(Int64Value.makeIntegerValue(arity)));
 
         }
         Expression targetExp = XPathParser.makeNamedFunctionReference(name, target);
         ExpressionTool.copyLocationInfo(this, targetExp);
-        return XPathParser.curryFunction(targetExp, args, placeMarkerArgs);
+        return XPathParser.makePartialApplication(targetExp, getArguments(), keywordArgs);
     }
 
 
