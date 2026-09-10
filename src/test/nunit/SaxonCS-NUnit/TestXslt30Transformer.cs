@@ -177,7 +177,7 @@ namespace SaxonCS_NUnit {
             var step2 = xsltStep2.Load();
 
             var dest = p.NewSerializer();
-            dest.SetOutputFile(ConfigTest.DATA_DIR + "OutputStep2.xml");
+            dest.OutputFile = ConfigTest.DATA_DIR + "OutputStep2.xml";
 
             step2.Destination = dest;
 
@@ -248,7 +248,7 @@ namespace SaxonCS_NUnit {
 
                 Serializer dest = p.NewSerializer();
                 dest.SetOutputProperty(Serializer.INDENT, "yes");
-                dest.SetOutputFile(ConfigTest.DATA_DIR + "/sandpit/OutputStep2.xml");
+                dest.OutputFile = ConfigTest.DATA_DIR + "/sandpit/OutputStep2.xml";
                 exec.CallTemplate(new QName("main"), dest);
                 Assert.True(true);
             }
@@ -388,7 +388,7 @@ namespace SaxonCS_NUnit {
                 transformer.ResultDocumentHandler = (href, baseUri) => {
                     Serializer ser = proc.NewSerializer();
                     ser.BaseUri = baseUri;
-                    ser.SetOutputFile(ConfigTest.SANDPIT_DIR + href);
+                    ser.OutputFile = ConfigTest.SANDPIT_DIR + href;
                     serializers.Add(ser);
                     return ser;
                 };
@@ -636,7 +636,7 @@ namespace SaxonCS_NUnit {
 
                 Serializer serializer = proc.NewSerializer();
                 MemoryStream os = new MemoryStream();
-                serializer.SetOutputStream(os);
+                serializer.OutputStream = os;
                 trans.ApplyTemplates(node, serializer);
 
                 Assert.Fail("Transformation should fail");
@@ -670,7 +670,7 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer transf = exec.Load30();
                 Serializer ser = processor.NewSerializer();
                 StringWriter sw = new StringWriter();
-                ser.SetOutputWriter(sw);
+                ser.OutputWriter = sw;
                 transf.CallTemplate(null, ser);
                 Assert.True(sw.ToString() != null);
             }
@@ -700,7 +700,7 @@ namespace SaxonCS_NUnit {
 
                 Serializer serializer = proc.NewSerializer();
                 MemoryStream os = new MemoryStream();
-                serializer.SetOutputStream(os);
+                serializer.OutputStream = os;
 
                 trans.CallTemplate(new QName("main"), serializer);
 
@@ -799,7 +799,7 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer transformer = executable.Load30();
 
                 Serializer serializer = processor.NewSerializer();
-                serializer.SetOutputWriter(Console.Out);
+                serializer.OutputWriter = Console.Out;
                 transformer.ApplyTemplates(new FileStream(foo_xml, FileMode.Open), serializer);
             }
             catch (Exception ex) {
@@ -1050,7 +1050,7 @@ namespace SaxonCS_NUnit {
                 StringWriter sw = new StringWriter();
                 Serializer outi = proc.NewSerializer();
                 XdmDestination d1 = new XdmDestination();
-                outi.SetOutputWriter(sw);
+                outi.OutputWriter = sw;
                 stage1.ApplyTemplates(new MemoryStream(Encoding.ASCII.GetBytes(xml)),
                     stage2.AsDocumentDestination(
                         stage3.AsDocumentDestination(
@@ -1122,7 +1122,7 @@ namespace SaxonCS_NUnit {
 
                 Serializer serializer = proc.NewSerializer();
                 MemoryStream os = new MemoryStream();
-                serializer.SetOutputStream(os);
+                serializer.OutputStream = os;
 
                 trans.CallTemplate(new QName("main"), serializer);
 
@@ -1175,7 +1175,7 @@ namespace SaxonCS_NUnit {
                 processor.SchemaManager.Compile(new Uri(ConfigTest.DATA_DIR + "books.xsd"));
 
                 Serializer serializer = processor.NewSerializer();
-                serializer.SetOutputFile(ConfigTest.DATA_DIR + "out/validationWarnings.xml");
+                serializer.OutputFile = ConfigTest.DATA_DIR + "out/validationWarnings.xml";
 
                 XsltCompiler compiler = processor.NewXsltCompiler();
                 compiler.SchemaAware = true;
@@ -1374,7 +1374,7 @@ namespace SaxonCS_NUnit {
                 Serializer s = proc.NewSerializer();
                 s.BaseUri = new Uri("file:///dummy/");
                 s.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
-                s.SetOutputWriter(sw);
+                s.OutputWriter = sw;
                 trans.InitialContextNode = node;
 
                 trans.Run(s);
@@ -1463,7 +1463,7 @@ namespace SaxonCS_NUnit {
                 StringWriter sw = new StringWriter();
                 Serializer s = processor.NewSerializer();
                 s.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
-                s.SetOutputWriter(sw);
+                s.OutputWriter = sw;
                 t.CallFunction(new QName("http://localhost/", "f:add"),
                     new XdmValue[] {new XdmAtomicValue(2), new XdmAtomicValue(3)}, s);
                 Assert.AreEqual(sw.ToString(), "57");
@@ -1931,7 +1931,7 @@ namespace SaxonCS_NUnit {
 
                 // Create a serializer, with output to the standard output stream
                 Serializer serializer = processor.NewSerializer();
-                serializer.SetOutputWriter(Console.Out);
+                serializer.OutputWriter = Console.Out;
 
                 // Transform the source XML and serialize the result document
                 transformer.Run(serializer);

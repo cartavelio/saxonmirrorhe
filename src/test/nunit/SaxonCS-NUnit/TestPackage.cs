@@ -68,7 +68,7 @@ namespace SaxonCS_NUnit {
                 Xslt30Transformer transf = exec.Load30();
                 Serializer serializer = processor.NewSerializer();
                 StringWriter sw = new StringWriter();
-                serializer.SetOutputWriter(sw);
+                serializer.OutputWriter = sw;
                 serializer.SetOutputProperty(Serializer.METHOD, "text");
 
                 transf.CallTemplate(null, serializer);

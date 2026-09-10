@@ -789,12 +789,12 @@ namespace SaxonCS_NUnit {
             Assert.AreEqual("some text", sw.ToString(), "text node");
 
             sw = new StringWriter();
-            serializer.SetOutputWriter(sw);
+            serializer.OutputWriter = sw;
             transformer.ApplyTemplates(builder.Wrap(wrappedDoc, commentNode), serializer);
             Assert.AreEqual("<!--a comment-->", sw.ToString(), "comment");
 
             sw = new StringWriter();
-            serializer.SetOutputWriter(sw);
+            serializer.OutputWriter = sw;
             transformer.ApplyTemplates(builder.Wrap(wrappedDoc, piNode), serializer);
             Assert.AreEqual("<?tgt some data?>", sw.ToString(), "processing instruction");
         }

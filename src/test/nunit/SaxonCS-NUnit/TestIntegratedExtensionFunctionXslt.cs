@@ -36,7 +36,7 @@ namespace SaxonCS_NUnit
                 xsl.InitialTemplate = new QName("go");
                 StringWriter sw = new StringWriter();
                 Serializer out1 = proc.NewSerializer();
-                out1.SetOutputWriter(sw);
+                out1.OutputWriter = sw;
                 xsl.Run(out1);
 
                 //"sqrt "

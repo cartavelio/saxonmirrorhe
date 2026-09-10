@@ -363,7 +363,7 @@ namespace SaxonCS_NUnit {
 
                 StringWriter sw = new StringWriter();
                 Serializer destination = processor.NewSerializer();
-                destination.SetOutputWriter(sw);
+                destination.OutputWriter = sw;
                 XQueryEvaluator eval = exp.Load();
                 eval.ContextItem = doc;
                 eval.Run(destination);
@@ -376,7 +376,7 @@ namespace SaxonCS_NUnit {
                 StringWriter sw2 = new StringWriter();
                 Serializer destination2 = processor.NewSerializer();
                 destination2.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
-                destination2.SetOutputWriter(sw2);
+                destination2.OutputWriter = sw2;
                 XQueryEvaluator eval2 = exp.Load();
                 eval2.ContextItem = doc;
                 eval2.Run(destination2);
@@ -521,7 +521,7 @@ namespace SaxonCS_NUnit {
                 builder.SchemaValidator = v;
                 builder.WhitespacePolicy = policy;
                 XdmNode doc = builder.Build(new XmlTextReader(ConfigTest.DATA_DIR + "books.xml"));
-                serializer.SetOutputWriter(sw);
+                serializer.OutputWriter = sw;
                 serializer.SerializeXdmValue(doc);
                 return sw.ToString();
             }
@@ -558,7 +558,7 @@ namespace SaxonCS_NUnit {
                 serializer.SetOutputProperty(Serializer.METHOD, "xml");
                 serializer.SetOutputProperty(Serializer.INDENT, "no");
                 StringWriter sw = new StringWriter();
-                serializer.SetOutputWriter(sw);
+                serializer.OutputWriter = sw;
                 serializer.SerializeXdmValue(d);
                 return sw.ToString();
             }
@@ -583,7 +583,7 @@ namespace SaxonCS_NUnit {
                 ss.SetOutputProperty(Serializer.METHOD, "xml");
                 ss.SetOutputProperty(Serializer.INDENT, "no");
                 StringWriter writer = new StringWriter();
-                ss.SetOutputWriter(writer);
+                ss.OutputWriter = writer;
                 ss.SerializeXdmValue(node);
                 Assert.True(writer.ToString().Contains("<doc><b> </b><i/></doc>"));
             }
@@ -609,7 +609,7 @@ namespace SaxonCS_NUnit {
                 ss.SetOutputProperty(Serializer.METHOD, "xml");
                 ss.SetOutputProperty(Serializer.INDENT, "no");
                 StringWriter writer = new StringWriter();
-                ss.SetOutputWriter(writer);
+                ss.OutputWriter = writer;
                 ss.SerializeXdmValue(node);
                 Assert.True(writer.ToString().Contains("<doc><b> <i/></b><i xml:space=\"preserve\"><sup><i/></sup></i></doc>"));
             }
