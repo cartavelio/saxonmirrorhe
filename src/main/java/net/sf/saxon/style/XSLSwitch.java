@@ -8,7 +8,7 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -65,7 +65,7 @@ public class XSLSwitch extends XSLChooseOrSwitch {
         for (NodeInfo curr : children()) {
             if (curr instanceof XSLWhen) {
                 Expression values = ((XSLWhen) curr).getCondition();
-                conditions[w] = new GeneralComparison20(new LocalVariableReference(switchVar), Token.EQUALS, values);
+                conditions[w] = new GeneralComparison20(new LocalVariableReference(switchVar), OperatorSymbol.EQUALS, values);
                 w++;
             } else if (curr instanceof XSLOtherwise) {
                 Expression otherwise = Literal.makeLiteral(BooleanValue.TRUE);

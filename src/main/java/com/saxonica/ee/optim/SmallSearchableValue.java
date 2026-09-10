@@ -4,7 +4,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.GeneralComparison;
 import net.sf.saxon.expr.ValueComparison;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -51,9 +51,9 @@ class SmallSearchableValue extends SearchableValue {
 
         EqualityComparer compare;
         if (convertUntypedToOther) {
-            compare = (a, b) -> GeneralComparison.compare(a, Token.FEQ, b, comparer, true, c2, use.getRetainedStaticContext());
+            compare = (a, b) -> GeneralComparison.compare(a, OperatorSymbol.FEQ, b, comparer, true, c2, use.getRetainedStaticContext());
         } else {
-            compare = (a, b) -> ValueComparison.compare(a, Token.FEQ, b, comparer, true);
+            compare = (a, b) -> ValueComparison.compare(a, OperatorSymbol.FEQ, b, comparer, true);
         }
 
         for (int i=0; i<end; i++) {

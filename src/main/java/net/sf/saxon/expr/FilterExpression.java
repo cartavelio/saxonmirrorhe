@@ -61,7 +61,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     public FilterExpression(Expression base, Expression filter) {
-        super(base, Token.LSQB, filter);
+        super(base, OperatorSymbol.EQUALS, filter);
         base.setFiltered(true);
     }
 
@@ -380,7 +380,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         if (getBase() instanceof AxisExpression
                 && ((AxisExpression)getBase()).getNodeTest() == NodeKindTest.ELEMENT
                 && getFilter() instanceof CompareToStringConstant
-                && ((CompareToStringConstant) getFilter()).getSingletonOperator() == Token.FEQ
+                && ((CompareToStringConstant) getFilter()).getSingletonOperator() == OperatorSymbol.FEQ
                 && ((CompareToStringConstant) getFilter()).getLhsExpression().isCallOn(LocalName_1.class)
                 && ((SystemFunctionCall)((CompareToStringConstant) getFilter()).getLhsExpression()).getArg(0) instanceof ContextItemExpression) {
             AxisExpression ax2 = new AxisExpression(((AxisExpression) getBase()).getAxis(),
@@ -441,7 +441,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
         if (filterIsPositional &&
                 getFilter() instanceof BooleanExpression &&
-                ((BooleanExpression) getFilter()).operator == Token.AND) {
+                ((BooleanExpression) getFilter()).operator == OperatorSymbol.AND) {
             BooleanExpression bf = (BooleanExpression) getFilter();
             if (isExplicitlyPositional(bf.getLhsExpression()) &&
                     !isExplicitlyPositional(bf.getRhsExpression())) {
@@ -697,7 +697,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         if (getFilter() instanceof ComparisonExpression) {
             Expression lhs = ((ComparisonExpression) getFilter()).getLhsExpression();
             Expression rhs = ((ComparisonExpression) getFilter()).getRhsExpression();
-            int operator = ((ComparisonExpression) getFilter()).getSingletonOperator();
+            OperatorSymbol operator = ((ComparisonExpression) getFilter()).getSingletonOperator();
             Expression comparand;
             if (lhs.isCallOn(PositionAndLast.Position.class)
                     && NumericType.isNumericType(rhs.getItemType())) {
@@ -772,8 +772,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             min = new LocalVariableReference(let);
             LocalVariableReference min2 = new LocalVariableReference(let);
             Expression minMinusOne = new ArithmeticExpression(
-                    min2, Token.MINUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), this));
-            Expression length = new ArithmeticExpression(max, Token.MINUS, minMinusOne);
+                    min2, OperatorSymbol.MINUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), this));
+            Expression length = new ArithmeticExpression(max, OperatorSymbol.MINUS, minMinusOne);
             // TODO: use fn:slice to avoid the arithmetic
             Expression subs = SystemFunction.makeCall("subsequence", getRetainedStaticContext(), getBase(), min, length);
             let.setAction(subs);
@@ -788,12 +788,12 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     }
 
     private static Expression tryToRewritePositionalFilterSupport(
-            Expression start, Expression comparand, int operator,
+            Expression start, Expression comparand, OperatorSymbol operator,
             TypeHierarchy th)
             throws XPathException {
         if (th.isSubType(comparand.getItemType(), BuiltInAtomicType.INTEGER)) {
             switch (operator) {
-                case Token.FEQ: {
+                case FEQ: {
                     if (Literal.isConstantOne(comparand)) {
                         return FirstItemExpression.makeFirstItemExpression(start);
                     } else if (comparand instanceof Literal && ((IntegerValue) ((Literal) comparand).getGroundedValue()).asBigInteger().compareTo(BigInteger.ZERO) <= 0) {
@@ -802,7 +802,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                         return new SubscriptExpression(start, comparand);
                     }
                 }
-                case Token.FLT: {
+                case FLT: {
 
                     Expression[] args = new Expression[3];
                     args[0] = start;
@@ -812,24 +812,24 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                         args[2] = Literal.makeLiteral(Int64Value.makeIntegerValue(n - 1), start);
                     } else {
                         ArithmeticExpression decrement = new ArithmeticExpression(
-                                comparand, Token.MINUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start));
+                                comparand, OperatorSymbol.MINUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start));
                         decrement.setCalculator(Calculator.getCalculator(      // bug 2704
                                                                                StandardNames.XS_INTEGER, StandardNames.XS_INTEGER, Calculator.MINUS, true));
                         args[2] = decrement;
                     }
                     return SystemFunction.makeCall("subsequence", start.getRetainedStaticContext(), args);
                 }
-                case Token.FLE: {
+                case FLE: {
                     Expression[] args = new Expression[3];
                     args[0] = start;
                     args[1] = Literal.makeLiteral(Int64Value.makeIntegerValue(1), start);
                     args[2] = comparand;
                     return SystemFunction.makeCall("subsequence", start.getRetainedStaticContext(), args);
                 }
-                case Token.FNE: {
+                case FNE: {
                     return SystemFunction.makeCall("remove", start.getRetainedStaticContext(), start, comparand);
                 }
-                case Token.FGT: {
+                case FGT: {
                     Expression[] args = new Expression[2];
                     args[0] = start;
                     if (Literal.isAtomic(comparand)) {
@@ -837,11 +837,11 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                         args[1] = Literal.makeLiteral(Int64Value.makeIntegerValue(n + 1), start);
                     } else {
                         args[1] = new ArithmeticExpression(
-                                comparand, Token.PLUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start));
+                                comparand, OperatorSymbol.PLUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start));
                     }
                     return SystemFunction.makeCall("subsequence", start.getRetainedStaticContext(), args);
                 }
-                case Token.FGE: {
+                case FGE: {
                     return SystemFunction.makeCall("subsequence", start.getRetainedStaticContext(), start, comparand);
                 }
                 default:
@@ -851,10 +851,10 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         } else {
             // the comparand is not known statically to be an integer
             switch (operator) {
-                case Token.FEQ: {
+                case FEQ: {
                     return new SubscriptExpression(start, comparand);
                 }
-                case Token.FLT: {
+                case FLT: {
                     // rewrite SEQ[position() lt V] as
                     // let $N := V return subsequence(SEQ, 1, if (is-whole-number($N)) then $N-1 else floor($N)))
                     LetExpression let = new LetExpression();
@@ -867,7 +867,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     LocalVariableReference floorArg = new LocalVariableReference(let);
                     Expression isWhole = VendorFunctionSetHE.getInstance().makeFunction("is-whole-number", 1).makeFunctionCall(isWholeArg);
                     Expression minusOne = new ArithmeticExpression(
-                            arithArg, Token.MINUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start));
+                            arithArg, OperatorSymbol.MINUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start));
                     Expression floor = SystemFunction.makeCall("floor", start.getRetainedStaticContext(), floorArg);
                     Expression choice = Choose.makeConditional(isWhole, minusOne, floor);
                     Expression subs = SystemFunction.makeCall(
@@ -876,12 +876,12 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     //decl.fixupReferences(let);
                     return let;
                 }
-                case Token.FLE: {
+                case FLE: {
                     Expression floor = SystemFunction.makeCall("floor", start.getRetainedStaticContext(), comparand);
                     return SystemFunction.makeCall(
                             "subsequence", start.getRetainedStaticContext(), start, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start), floor);
                 }
-                case Token.FNE: {
+                case FNE: {
                     // rewrite SEQ[position() ne V] as
                     // let $N := V return remove(SEQ, if (is-whole-number($N)) then xs:integer($N) else 0)
                     LetExpression let = new LetExpression();
@@ -902,7 +902,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     let.setAction(rem);
                     return let;
                 }
-                case Token.FGT: {
+                case FGT: {
                     // rewrite SEQ[position() gt V] as
                     // let $N := V return subsequence(SEQ, if (is-whole-number($N)) then $N+1 else ceiling($N)))
                     LetExpression let = new LetExpression();
@@ -915,14 +915,14 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     LocalVariableReference ceilingArg = new LocalVariableReference(let);
                     Expression isWhole = VendorFunctionSetHE.getInstance().makeFunction("is-whole-number", 1).makeFunctionCall(isWholeArg);
                     Expression plusOne = new ArithmeticExpression(
-                            arithArg, Token.PLUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start));
+                            arithArg, OperatorSymbol.PLUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start));
                     Expression ceiling = SystemFunction.makeCall("ceiling", start.getRetainedStaticContext(), ceilingArg);
                     Expression choice = Choose.makeConditional(isWhole, plusOne, ceiling);
                     Expression subs = SystemFunction.makeCall("subsequence", start.getRetainedStaticContext(), start, choice);
                     let.setAction(subs);
                     return let;
                 }
-                case Token.FGE: {
+                case FGE: {
                     // rewrite SEQ[position() ge V] => subsequence(SEQ, ceiling(V))
                     Expression ceiling = SystemFunction.makeCall("ceiling", start.getRetainedStaticContext(), comparand);
                     return SystemFunction.makeCall("subsequence", start.getRetainedStaticContext(), start, ceiling);

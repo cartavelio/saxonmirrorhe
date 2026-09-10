@@ -240,49 +240,56 @@ public final class Tokenizer {
         currentTokenStartOffset = nextTokenStartOffset;
         lineNumber = nextLineNumber;
 
-        // disambiguate the current token based on the tokenizer state
+        if (currentToken != Token.START_TAG) {
+            lookAhead();
+            // We can't do lookahead in the case of a START_TAG because we haven't yet
+            // parsed the direct element constructor and don't know where it will end.
+            // The parser will call lookahead after parsing the direct element constructor
+        }
 
-        switch (currentToken) {
-            case Token.NAME:
-                int optype = getBinaryOp(currentTokenValue);
-                if (optype != Token.UNKNOWN && !followsOperator(precedingToken)) {
-                    currentToken = optype;
-                }
-                break;
-//            case Token.LT:
-//                if (isXQuery && followsOperator(precedingToken) && !currentTokenValue.equals("" + FULL_WIDTH_LT)) {
-//                    currentToken = Token.START_TAG;
+//        // disambiguate the current token based on the tokenizer state
+//
+//        switch (currentToken) {
+//            case Token.NAME:
+//                int optype = getBinaryOp(currentTokenValue);
+//                if (optype != Token.UNKNOWN && !followsOperator(precedingToken)) {
+//                    currentToken = optype;
 //                }
 //                break;
-            case Token.STAR:
-                if (!followsOperator(precedingToken)) {
-                    currentToken = Token.MULT;
-                }
-                break;
-        }
+////            case Token.LT:
+////                if (isXQuery && followsOperator(precedingToken) && !currentTokenValue.equals("" + FULL_WIDTH_LT)) {
+////                    currentToken = Token.START_TAG;
+////                }
+////                break;
+//            case Token.STAR:
+//                if (!followsOperator(precedingToken)) {
+//                    currentToken = Token.MULT;
+//                }
+//                break;
+//        }
+//
+//        if (currentToken == Token.START_TAG || currentToken == Token.RCURLY || currentToken == Token.BACKTICK) {
+//
+//            // No lookahead after encountering "<" at the start of an XML-like tag.
+//            // After an RCURLY, the parser must do an explicit lookahead() to continue
+//            // tokenizing; otherwise it can continue with direct character reading
+//            return;
+//        }
+//
+//        int oldPrecedingToken = precedingToken;
 
-        if (currentToken == Token.START_TAG || currentToken == Token.RCURLY || currentToken == Token.BACKTICK) {
-
-            // No lookahead after encountering "<" at the start of an XML-like tag.
-            // After an RCURLY, the parser must do an explicit lookahead() to continue
-            // tokenizing; otherwise it can continue with direct character reading
-            return;
-        }
-
-        int oldPrecedingToken = precedingToken;
-        lookAhead();
-
-        if (Token.isNameToken(currentToken)) {
-
-            if (state == BARE_NAME_STATE) {
-                return;
-            }
-            if (oldPrecedingToken == Token.DOLLAR) {
-                return;
-            }
-
-            handleNextToken(oldPrecedingToken);
-        }
+//
+//        if (Token.isNameToken(currentToken)) {
+//
+//            if (state == BARE_NAME_STATE) {
+//                return;
+//            }
+//            if (oldPrecedingToken == Token.DOLLAR) {
+//                return;
+//            }
+//
+//            handleNextToken(oldPrecedingToken);
+//        }
     }
 
     private void handleNextToken(int oldPrecedingToken) throws XPathException {
@@ -468,6 +475,17 @@ public final class Tokenizer {
     }
 
     /**
+     * Ask if the the current token and next token constitute a given keyword pair
+     */
+
+    public boolean isKeywordPair(String s1, String s2) {
+        return currentToken == Token.NAME
+                && nextToken == Token.NAME
+                && currentTokenValue.equals(s1)
+                && nextTokenValue.equals(s2);
+    }
+
+    /**
      * Force the current token to be treated as an operator if possible
      */
 
@@ -479,9 +497,7 @@ public final class Tokenizer {
                     currentToken = optype;
                 }
                 break;
-            case Token.STAR:
-                currentToken = Token.MULT;
-                break;
+
         }
     }
 
@@ -744,8 +760,10 @@ public final class Tokenizer {
                                 }
                             }
                         } else if (isXQuery && NameChecker.isNCNameStartChar(c2)) {
+                            int savedPosition = inputOffset;
                             if (readDirectElementConstructor()) {
                                 nextToken = Token.START_TAG;
+                                inputOffset = savedPosition;
                                 return;
                             }
                         }
@@ -1089,15 +1107,15 @@ public final class Tokenizer {
                                 break;
                             case '.':
                             case '-':
-                                // If the name up to the "-" or "." is a valid operator, and if the preceding token
-                                // is such that an operator is valid here and an NCName isn't, then quit here (bug 2715)
-                                if (precedingToken > Token.LAST_OPERATOR &&
-                                        !(precedingToken == Token.QMARK || precedingToken == Token.SUFFIX) &&
-                                        getBinaryOp(input.substring(nextTokenStartOffset, inputOffset)) != Token.UNKNOWN &&
-                                        !(precedingToken == Token.NAME && getBinaryOp(precedingTokenValue) != Token.UNKNOWN)) {
-                                    nextToken = getBinaryOp(input.substring(nextTokenStartOffset, inputOffset));
-                                    return;
-                                }
+//                                // If the name up to the "-" or "." is a valid operator, and if the preceding token
+//                                // is such that an operator is valid here and an NCName isn't, then quit here (bug 2715)
+//                                if (precedingToken > Token.LAST_OPERATOR &&
+//                                        !(precedingToken == Token.QMARK || precedingToken == Token.SUFFIX) &&
+//                                        getBinaryOp(input.substring(nextTokenStartOffset, inputOffset)) != Token.UNKNOWN &&
+//                                        !(precedingToken == Token.NAME && getBinaryOp(precedingTokenValue) != Token.UNKNOWN)) {
+//                                    nextToken = getBinaryOp(input.substring(nextTokenStartOffset, inputOffset));
+//                                    return;
+//                                }
                                 CSharp.emitCode("goto case '_';");
                                 // else fall through
                             case '_':
@@ -1114,7 +1132,7 @@ public final class Tokenizer {
                         }
                     }
                     nextTokenValue = input.substring(nextTokenStartOffset, inputOffset);
-                    nextToken = Token.tokenForKeyword(nextTokenValue);
+                    nextToken = Token.NAME; //tokenForKeyword(nextTokenValue);
                     return;
             }
         }
@@ -1457,6 +1475,12 @@ public final class Tokenizer {
         // On entry, we have seen "<X" where X is an NCNameStartChar, and we are positioned at "X"
         // This method checks whether the content looks plausibly like a direct element constructor,
         // and if so it returns true.
+        // When called during look-ahead processing, the effect is to identify that an element
+        // constructor is present, and return the token START_TAG with the position of inputOffset
+        // unchanged. When next() returns the Token.START_TAG, it initiates parsing of the compound
+        // token at this offset using its own tokenizer, and resets the position of the original
+        // tokenizer on completion.
+
         int pos = inputOffset;
         while (pos < inputLength) {
             if (NameChecker.isNCNameChar(input.charAt(pos))) {

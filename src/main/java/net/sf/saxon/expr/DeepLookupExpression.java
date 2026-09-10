@@ -61,7 +61,7 @@ public class DeepLookupExpression extends BinaryExpression {
      */
 
     public DeepLookupExpression(Expression start, LookupExpression.Modifier modifier, Expression step) {
-        super(start, Token.QMARK_QMARK, step);
+        super(start, OperatorSymbol.DEEP_LOOKUP, step);
         this.modifier = modifier;
     }
 
@@ -118,7 +118,7 @@ public class DeepLookupExpression extends BinaryExpression {
 
         SequenceType atomicType = SequenceType.ATOMIC_SEQUENCE;
 
-        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
         return this;
     }

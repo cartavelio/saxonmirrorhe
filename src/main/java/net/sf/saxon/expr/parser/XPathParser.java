@@ -51,7 +51,6 @@ import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntPredicateProxy;
-import net.sf.saxon.z.IntToIntHashMap;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -111,7 +110,7 @@ public class XPathParser {
     protected int languageVersion = 20;
     protected int catchDepth = 0;
 
-    private final static IntToIntHashMap operatorPrecedenceTable = new IntToIntHashMap(30);
+    private final static HashMap<OperatorSymbol, Integer> operatorPrecedenceTable = new HashMap<>(30);
 
     static {
         initializeOperatorPrecedenceTable();
@@ -153,58 +152,54 @@ public class XPathParser {
      */
 
     private static void initializeOperatorPrecedenceTable() {
-        operatorPrecedenceTable.setDefaultValue(-1);
-        IntToIntHashMap m = operatorPrecedenceTable;
-        m.put(Token.QMARK_QMARK, 3);  // residue of ternary conditionals, no longer supported but still detected
-        m.put(Token.BANG_BANG, 3);    // ditto
-        m.put(Token.OR, 4);
-        m.put(Token.OR_ELSE, 4);
-        m.put(Token.AND, 5);
-        m.put(Token.AND_ALSO, 5);
-        m.put(Token.FEQ, 6);
-        m.put(Token.FNE, 6);
-        m.put(Token.FLT, 6);
-        m.put(Token.FGT, 6);
-        m.put(Token.FLE, 6);
-        m.put(Token.FGE, 6);
-        m.put(Token.EQUALS, 6);
-        m.put(Token.NE, 6);
-        m.put(Token.LT, 6);
-        m.put(Token.LE, 6);
-        m.put(Token.GT, 6);
-        m.put(Token.GE, 6);
-        m.put(Token.IS, 6);
-        m.put(Token.PRECEDES, 6);
-        m.put(Token.FOLLOWS, 6);
-        m.put(Token.OTHERWISE, 7);
-        m.put(Token.CONCAT, 8);
-        m.put(Token.TO, 9);
-        m.put(Token.PLUS, 10);
-        m.put(Token.MINUS, 10);
-        m.put(Token.MULT, 11);
-        m.put(Token.MATH_MULT, 11);
-        m.put(Token.DIV, 11);
-        m.put(Token.MATH_DIVIDE, 11);
-        m.put(Token.IDIV, 11);
-        m.put(Token.MOD, 11);
-        m.put(Token.UNION, 13);
-        m.put(Token.INTERSECT, 14);
-        m.put(Token.EXCEPT, 14);
-        m.put(Token.INSTANCE_OF, 15);
-        m.put(Token.TREAT_AS, 16);
-        m.put(Token.CASTABLE_AS, 17);
-        m.put(Token.CAST_AS, 18);
-        m.put(Token.FAT_ARROW, 19);
-        m.put(Token.MAPPING_ARROW, 19);
+        HashMap<OperatorSymbol, Integer> m = operatorPrecedenceTable;
+        //m.put(Token.QMARK_QMARK, 3);  // residue of ternary conditionals, no longer supported but still detected
+        //m.put(Token.BANG_BANG, 3);    // ditto
+        m.put(OperatorSymbol.OR, 4);
+        //m.put(Token.OR_ELSE, 4);
+        m.put(OperatorSymbol.AND, 5);
+        //m.put(Token.AND_ALSO, 5);
+        m.put(OperatorSymbol.FEQ, 6);
+        m.put(OperatorSymbol.FNE, 6);
+        m.put(OperatorSymbol.FLT, 6);
+        m.put(OperatorSymbol.FGT, 6);
+        m.put(OperatorSymbol.FLE, 6);
+        m.put(OperatorSymbol.FGE, 6);
+        m.put(OperatorSymbol.EQUALS, 6);
+        m.put(OperatorSymbol.NE, 6);
+        m.put(OperatorSymbol.LT, 6);
+        m.put(OperatorSymbol.LE, 6);
+        m.put(OperatorSymbol.GT, 6);
+        m.put(OperatorSymbol.GE, 6);
+        m.put(OperatorSymbol.IS, 6);
+        m.put(OperatorSymbol.PRECEDES, 6);
+        m.put(OperatorSymbol.FOLLOWS, 6);
+        m.put(OperatorSymbol.OTHERWISE, 7);
+        m.put(OperatorSymbol.CONCAT, 8);
+        m.put(OperatorSymbol.TO, 9);
+        m.put(OperatorSymbol.PLUS, 10);
+        m.put(OperatorSymbol.MINUS, 10);
+        m.put(OperatorSymbol.TIMES, 11);
+        m.put(OperatorSymbol.DIV, 11);
+        m.put(OperatorSymbol.MOD, 11);
+        m.put(OperatorSymbol.UNION, 13);
+        m.put(OperatorSymbol.INTERSECT, 14);
+        m.put(OperatorSymbol.EXCEPT, 14);
+        m.put(OperatorSymbol.INSTANCE_OF, 15);
+        m.put(OperatorSymbol.TREAT_AS, 16);
+        m.put(OperatorSymbol.CASTABLE_AS, 17);
+        m.put(OperatorSymbol.CAST_AS, 18);
+        m.put(OperatorSymbol.FAT_ARROW, 19);
+        m.put(OperatorSymbol.MAPPING_ARROW, 19);
 
                 // remainder commented out because not used in precedence parsing (but perhaps they could be)
-//            case Token.BANG:
+//            case BANG:
 //                return 20;
-//            case Token.SLASH:
+//            case SLASH:
 //                return 21;
-//            case Token.SLASH_SLASH:
+//            case SLASH_SLASH:
 //                return 22;
-//            case Token.QMARK:
+//            case QMARK:
 //                return 23;
 
     }
@@ -340,6 +335,12 @@ public class XPathParser {
     public void expectName() throws XPathException {
         if (!Token.isNameToken(t.currentToken)) {
             grumble("expected a name, found " + currentTokenDisplay());
+        }
+    }
+
+    public void expectKeyword(String keyword) throws XPathException {
+        if (!isKeyword(keyword)) {
+            grumble("expected '" + keyword + "', found " + currentTokenDisplay());
         }
     }
 
@@ -844,87 +845,45 @@ public class XPathParser {
                     break;
             }
         }
-        int tok = classifyNameAtStartOfExpression();
-        t.currentToken = tok;
-        switch (tok) {
-            case Token.EOF:
-                grumble("Expected an expression, but reached the end of the input");
-                return null;
-            case Token.FOR:
-            case Token.LET:
-            case Token.FOR_MEMBER:
-            case Token.FOR_KEY:
-            case Token.FOR_VALUE:
-            case Token.FOR_SLIDING:
-            case Token.FOR_TUMBLING:
-                return parseFLWORExpression();
-            case Token.SOME:
-            case Token.EVERY:
-                return parseQuantifiedExpression();
-            case Token.IF:
-                return parseIfExpression();
-            case Token.SWITCH:
-                return parseSwitchExpression();
-            case Token.SWITCH_CASE:
-                return parseSwitchExpression();
-            case Token.TYPESWITCH:
-                return parseTypeswitchExpression();
-            case Token.VALIDATE:
-            case Token.VALIDATE_STRICT:
-            case Token.VALIDATE_LAX:
-            case Token.VALIDATE_TYPE:
-                return parseValidateExpression();
-            case Token.UPDATE_MAP:
-            case Token.UPDATE_ARRAY:
-                return parseDeepUpdateExpression();
-            case Token.PRAGMA:
-                return parseExtensionExpression();  // XQuery only
-            case Token.NAME:
-                if (t.peekAhead() == Token.LCURLY && t.currentTokenValue.equals("try")) {
-                    nextToken();
+
+        if (t.currentToken == Token.NAME) {
+
+            int afterName = t.peekAhead();
+            if (afterName == Token.DOLLAR) {
+                 switch (t.currentTokenValue) {
+                     case "for":
+                     case "let":
+                         return parseFLWORExpression();
+                     case "some":
+                     case "every":
+                         return parseQuantifiedExpression();
+                 }
+            } else if (afterName == Token.NAME) {
+                if (isKeyword("for")) {
+                    return parseFLWORExpression();
+                } else if (isKeyword("switch")) {
+                    return parseSwitchExpression();
+                } 
+            } else if (afterName == Token.LCURLY) {
+                if (isKeyword("switch")) {
+                    return parseSwitchExpression();
+                } else if (isKeyword("try")) {
                     return parseTryCatchExpression();
                 }
-                // else drop through
-                CSharp.emitCode("goto default;");
-            default:
-                Expression e1 = parseBinaryExpression(parseUnaryExpression(), 4);
-                // Process ternary conditional (no longer supported)
-                if (t.currentToken == Token.QMARK_QMARK) {
-                    grumble("Ternary conditionals (A ?? B !! C) have been dropped from the specification");
+            } else if (afterName == Token.LPAREN) {
+                if (isKeyword("if")) {
+                    return parseIfExpression();
+                } else if (isKeyword("switch")) {
+                    return parseSwitchExpression();
+                } else if (isKeyword("typeswitch")) {
+                    return parseTypeswitchExpression();
                 }
-                return e1;
-        }
-    }
-
-    private int classifyNameAtStartOfExpression() {
-        int thisToken = t.currentToken;
-        if (Token.isNameToken(thisToken)) {
-            int nextToken = t.peekAhead();
-            switch (thisToken) {
-                case Token.FOR:
-                case Token.LET:
-                case Token.SOME:
-                case Token.EVERY:
-                    return nextToken == Token.DOLLAR ? thisToken : Token.NAME;
-                default:
-                    if (nextToken == Token.LPAREN) {
-                        return classifyNameFollowedByLeftParen(t.currentTokenValue,false);
-//                        switch (thisToken) {
-//                            case Token.IF:
-//                            case Token.TYPESWITCH:
-//                            case Token.SWITCH:
-//                                return thisToken;
-//                            default:
-//                                return Token.FUNCTION_CALL;
-//                        }
-                    }
-                    return thisToken;
             }
-        } else {
-            return thisToken;
         }
-
+        return parseBinaryExpression(parseUnaryExpression(), 4);
     }
+
+    
 
     /**
      * Parse a binary expression, using operator precedence parsing. This is used
@@ -943,23 +902,23 @@ public class XPathParser {
 
     /*@NotNull*/
     public Expression parseBinaryExpression(Expression lhs, int minPrecedence) throws XPathException {
-        while (getCurrentOperatorPrecedence() >= minPrecedence) {
+        OperatorSymbol operator = readOperator();
+        while (operatorPrecedence(operator) >= minPrecedence) {
             int offset = t.currentTokenStartOffset;
-            int operator = t.currentToken;
-            int prec = getCurrentOperatorPrecedence();
+            int prec = operatorPrecedence(operator);
             switch (operator) {
-                case Token.INSTANCE_OF:
-                case Token.TREAT_AS:
+                case INSTANCE_OF:
+                case TREAT_AS:
                     nextToken();
                     SequenceType seq = parseSequenceType();
                     lhs = makeSequenceTypeExpression(lhs, operator, seq);
                     setLocation(lhs, offset);
-                    if (getCurrentOperatorPrecedence() >= prec) {
-                        grumble("Left operand of '" + Token.tokens[t.currentToken] + "' needs parentheses");
-                    }
+//                    if (operatorPrecedence(currentTokenAsOperator()) >= prec) {
+//                        grumble("Left operand of '" + Token.tokens[t.currentToken] + "' needs parentheses");
+//                    }
                     break;
-                case Token.CAST_AS:
-                case Token.CASTABLE_AS:
+                case CAST_AS:
+                case CASTABLE_AS:
                     nextToken();
                     boolean leftParenFollows = t.peekAhead() == Token.LPAREN;
                     CastingTarget at;
@@ -1013,24 +972,26 @@ public class XPathParser {
                     }
                     lhs = makeSingleTypeExpression(lhs, operator, at, allowEmpty);
                     setLocation(lhs, offset);
-                    if (getCurrentOperatorPrecedence() >= prec) {
-                        grumble("Left operand of '" + Token.tokens[t.currentToken] + "' needs parentheses");
-                    }
+//                    if (operatorPrecedence(currentTokenAsOperator()) >= prec) {
+//                        grumble("Left operand of '" + Token.tokens[t.currentToken] + "' needs parentheses");
+//                    }
                     break;
-                case Token.FAT_ARROW:
+                case FAT_ARROW:
                     lhs = parseArrowPostfix(lhs);
                     break;
-                case Token.MAPPING_ARROW:
+                case MAPPING_ARROW:
                     checkLanguageVersion40();
                     lhs = parseMappingArrowPostfix(lhs);
                     break;
                 default:
                     nextToken();
                     Expression rhs = parseUnaryExpression();
-                    while (getCurrentOperatorPrecedence() > prec) {
-                        rhs = parseBinaryExpression(rhs, getCurrentOperatorPrecedence());
-                    }
-                    if (getCurrentOperatorPrecedence() == prec && !allowMultipleOperators()) {
+                    OperatorSymbol nextOperator = readOperator();
+//                    while (operatorPrecedence(nextOperator) > prec) {
+//                        rhs = parseBinaryExpression(rhs, operatorPrecedence(nextOperator));
+//                        nextOperator = currentTokenAsOperator();
+//                    }
+                    if (operatorPrecedence(nextOperator) == prec && !allowMultipleOperators()) {
                         String tok = Token.tokens[t.currentToken];
                         String message = "Left operand of '" + Token.tokens[t.currentToken] + "' needs parentheses";
                         if (tok.equals("<") || tok.equals(">")) {
@@ -1041,11 +1002,122 @@ public class XPathParser {
                     }
                     lhs = makeBinaryExpression(lhs, operator, rhs);
                     setLocation(lhs, offset);
+                    operator = nextOperator;
                     break;
             }
         }
         return lhs;
     }
+
+    private OperatorSymbol readOperator() throws XPathException {
+        OperatorSymbol op = readOperator0();
+        if (op != null) {
+            nextToken();
+        }
+        return op;
+    }
+
+    private OperatorSymbol readOperator0() throws XPathException {
+        switch (t.currentToken) {
+            case Token.PLUS:
+                return OperatorSymbol.PLUS;
+            case Token.MINUS:
+                return OperatorSymbol.MINUS;
+            case Token.STAR:
+            case Token.MATH_MULT:
+                return OperatorSymbol.TIMES;
+            case Token.MATH_DIVIDE:
+                return OperatorSymbol.DIV;
+            case Token.EQUALS:
+                return OperatorSymbol.EQUALS;
+            case Token.NE:
+                return OperatorSymbol.NE;
+            case Token.LT:
+                return OperatorSymbol.LT;
+            case Token.LE:
+                return OperatorSymbol.LE;
+            case Token.GT:
+                return OperatorSymbol.GT;
+            case Token.GE:
+                return OperatorSymbol.GE;
+            case Token.UNION:
+                return OperatorSymbol.UNION;
+            case Token.PRECEDES:
+                return OperatorSymbol.PRECEDES;
+            case Token.FOLLOWS:
+                return OperatorSymbol.FOLLOWS;
+            case Token.NAME:
+                String first = t.currentTokenValue;
+                switch (first) {
+                    case "div":
+                        return OperatorSymbol.DIV;
+                    case "idiv":
+                        return OperatorSymbol.IDIV;
+                    case "mod":
+                        return OperatorSymbol.MOD;
+                    case "eq":
+                        return OperatorSymbol.FEQ;
+                    case "ne":
+                        return OperatorSymbol.FNE;
+                    case "lt":
+                        return OperatorSymbol.FLT;
+                    case "le":
+                        return OperatorSymbol.FLE;
+                    case "gt":
+                        return OperatorSymbol.FGT;
+                    case "ge":
+                        return OperatorSymbol.FGE;
+                    case "union":
+                        return OperatorSymbol.UNION;
+                    case "intersect":
+                        return OperatorSymbol.INTERSECT;
+                    case "except":
+                        return OperatorSymbol.EXCEPT;
+                    case "is":
+                        return OperatorSymbol.IS;
+                    case "instance":
+                        nextToken();
+                        if (t.currentTokenValue.equals("of")) {
+                            return OperatorSymbol.INSTANCE_OF;
+                        } else {
+                            return null;
+                        }
+                    case "cast":
+                        nextToken();
+                        if (t.currentTokenValue.equals("as")) {
+                            return OperatorSymbol.CAST_AS;
+                        } else {
+                            return null;
+                        }
+                    case "treat":
+                        nextToken();
+                        if (t.currentTokenValue.equals("as")) {
+                            return OperatorSymbol.TREAT_AS;
+                        } else {
+                            return null;
+                        }
+                    case "castable":
+                        nextToken();
+                        if (t.currentTokenValue.equals("as")) {
+                            return OperatorSymbol.CASTABLE_AS;
+                        } else {
+                            return null;
+                        }
+
+                    default:
+                        return null;
+                }
+            default:
+                return null;
+
+        }
+    }
+
+//    private OperatorSymbol currentTokenAsOperator() {
+//        return t.currentToken == Token.NAME
+//                ? Token.tokenForKeyword(t.currentTokenValue)
+//                : t.currentToken;
+//    }
 
     private boolean allowMultipleOperators() {
         switch (t.currentToken) {
@@ -1071,49 +1143,46 @@ public class XPathParser {
         }
     }
 
-    private int getCurrentOperatorPrecedence() {
-        return operatorPrecedence(t.currentToken);
-    }
-
     /**
      * Get the precedence associated with a given operator
      * @param operator the operator in question
      * @return a higher number for higher precedence (closer binding)
      */
 
-    public static int operatorPrecedence(int operator) {
-        return operatorPrecedenceTable.get(operator);
+    public static int operatorPrecedence(OperatorSymbol operator) {
+        Integer p = operatorPrecedenceTable.get(operator);
+        return p==null ? -1 : p;
     }
 
 
         /*@NotNull*/
-    private Expression makeBinaryExpression(Expression lhs, int operator, Expression rhs) throws XPathException {
+    private Expression makeBinaryExpression(Expression lhs, OperatorSymbol operator, Expression rhs) throws XPathException {
         switch (operator) {
-            case Token.OR:
+            case OR:
                 return new OrExpression(lhs, rhs);
-            case Token.AND:
+            case AND:
                 return new AndExpression(lhs, rhs);
-            case Token.FEQ:
-            case Token.FNE:
-            case Token.FLE:
-            case Token.FLT:
-            case Token.FGE:
-            case Token.FGT:
+            case FEQ:
+            case FNE:
+            case FLE:
+            case FLT:
+            case FGE:
+            case FGT:
                 return new ValueComparison(lhs, operator, rhs);
-            case Token.EQUALS:
-            case Token.NE:
-            case Token.LE:
-            case Token.LT:
-            case Token.GE:
-            case Token.GT:
+            case EQUALS:
+            case NE:
+            case LE:
+            case LT:
+            case GE:
+            case GT:
                 return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeGeneralComparison(lhs, operator, rhs);
-            case Token.IS:
-            case Token.PRECEDES:
-            case Token.FOLLOWS:
+            case IS:
+            case PRECEDES:
+            case FOLLOWS:
                 return new IdentityComparison(lhs, operator, rhs);
-            case Token.TO:
+            case TO:
                 return new RangeExpression(lhs, rhs);
-            case Token.CONCAT: {
+            case CONCAT: {
                 if (!allowXPath30Syntax) {
                     grumble("Concatenation operator ('||') requires XPath 3.0 to be enabled");
                 }
@@ -1136,37 +1205,37 @@ public class XPathParser {
                     return concat.makeFunctionCall(args);
                 }
             }
-            case Token.PLUS:
-            case Token.MINUS:
-            case Token.MULT:
-            case Token.DIV:
-            case Token.IDIV:
-            case Token.MOD:
+            case PLUS:
+            case MINUS:
+            case TIMES:
+            case DIV:
+            case IDIV:
+            case MOD:
                 return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, operator, rhs);
-            case Token.MATH_MULT:
-                return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, Token.MULT, rhs);
-            case Token.MATH_DIVIDE:
-                return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, Token.DIV, rhs);
-            case Token.OTHERWISE:
+//            case TIMES:
+//                return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, OperatorSymbol.TIMES, rhs);
+//            case DIV:
+//                return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, OperatorSymbol.DIV, rhs);
+            case OTHERWISE:
                 return makeOtherwiseExpression(lhs, rhs);
-            case Token.UNION:
-            case Token.INTERSECT:
-            case Token.EXCEPT:
+            case UNION:
+            case INTERSECT:
+            case EXCEPT:
                 return new VennExpression(lhs, operator, rhs);
-            case Token.OR_ELSE: {
-                // Compile ($x orElse $y) as (if ($x) then true() else boolean($y))
-                RetainedStaticContext rsc = new RetainedStaticContext(env);
-                rhs = SystemFunction.makeCall("boolean", rsc, rhs);
-                return Choose.makeConditional(lhs, Literal.makeLiteral(BooleanValue.TRUE), rhs);
-            }
-            case Token.AND_ALSO: {
-                // Compile ($x andAlso $y) as (if ($x) then boolean($y) else false())
-                RetainedStaticContext rsc = new RetainedStaticContext(env);
-                rhs = SystemFunction.makeCall("boolean", rsc, rhs);
-                return Choose.makeConditional(lhs, rhs, Literal.makeLiteral(BooleanValue.FALSE));
-            }
+//            case OR_ELSE: {
+//                // Compile ($x orElse $y) as (if ($x) then true() else boolean($y))
+//                RetainedStaticContext rsc = new RetainedStaticContext(env);
+//                rhs = SystemFunction.makeCall("boolean", rsc, rhs);
+//                return Choose.makeConditional(lhs, Literal.makeLiteral(BooleanValue.TRUE), rhs);
+//            }
+//            case AND_ALSO: {
+//                // Compile ($x andAlso $y) as (if ($x) then boolean($y) else false())
+//                RetainedStaticContext rsc = new RetainedStaticContext(env);
+//                rhs = SystemFunction.makeCall("boolean", rsc, rhs);
+//                return Choose.makeConditional(lhs, rhs, Literal.makeLiteral(BooleanValue.FALSE));
+//            }
             default:
-                throw new IllegalArgumentException(Token.tokens[operator]);
+                throw new IllegalArgumentException(operator.toString());
         }
     }
 
@@ -1196,11 +1265,11 @@ public class XPathParser {
         return let;
     }
 
-    private Expression makeSequenceTypeExpression(Expression lhs, int operator, /*@NotNull*/ SequenceType type) {
+    private Expression makeSequenceTypeExpression(Expression lhs, OperatorSymbol operator, /*@NotNull*/ SequenceType type) {
         switch (operator) {
-            case Token.INSTANCE_OF:
+            case INSTANCE_OF:
                 return new InstanceOfExpression(lhs, type);
-            case Token.TREAT_AS:
+            case TREAT_AS:
                 return TreatExpression.make(lhs, type);
             default:
                 throw new IllegalArgumentException();
@@ -1208,18 +1277,18 @@ public class XPathParser {
 
     }
 
-    private Expression makeSingleTypeExpression(Expression lhs, int operator, CastingTarget type, boolean allowEmpty)
+    private Expression makeSingleTypeExpression(Expression lhs, OperatorSymbol operator, CastingTarget type, boolean allowEmpty)
             throws XPathException {
         if (type instanceof AtomicType && !(type == ErrorType.getInstance())) {
             switch (operator) {
-                case Token.CASTABLE_AS:
+                case CASTABLE_AS:
                     CastableExpression castable = new CastableExpression(lhs, (AtomicType) type, allowEmpty);
                     if (lhs instanceof StringLiteral) {
                         castable.setOperandIsStringLiteral(true);
                     }
                     return castable;
 
-                case Token.CAST_AS:
+                case CAST_AS:
                     CastExpression cast = new CastExpression(lhs, (AtomicType) type, allowEmpty);
                     if (lhs instanceof StringLiteral) {
                         cast.setOperandIsStringLiteral(true);
@@ -1231,7 +1300,7 @@ public class XPathParser {
             }
         } else if (allowXPath30Syntax) {
             switch (operator) {
-                case Token.CASTABLE_AS:
+                case CASTABLE_AS:
                     if (type instanceof UnionType) {
                         NamespaceResolver resolver = env.getNamespaceResolver();
                         UnionCastableFunction ucf = new UnionCastableFunction((UnionType) type, resolver, allowEmpty);
@@ -1242,7 +1311,7 @@ public class XPathParser {
                         return new StaticFunctionCall(lcf, new Expression[]{lhs});
                     }
                     break;
-                case Token.CAST_AS:
+                case CAST_AS:
                     if (type instanceof UnionType) {
                         NamespaceResolver resolver = env.getNamespaceResolver();
                         UnionConstructorFunction ucf = new UnionConstructorFunction((UnionType) type, resolver, allowEmpty);
@@ -1761,12 +1830,12 @@ public class XPathParser {
             checkLanguageVersion40();
             return parseBracedActions(condition);
         }
-        expect(Token.THEN);
+        expectKeyword("then");
         nextToken();
         Expression thenExp = makeTracer(parseExprSingle(), null);
         setLocation(thenExp, thenoffset);
         int elseoffset = t.currentTokenStartOffset;
-        expect(Token.ELSE);
+        expectKeyword("else");
         nextToken();
         Expression elseExp = makeTracer(parseExprSingle(), null);
         setLocation(elseExp, elseoffset);
@@ -2061,7 +2130,7 @@ public class XPathParser {
         int occurrenceFlag;
         switch (t.currentToken) {
             case Token.STAR:
-            case Token.MULT:
+            //case MULT:
                 // "*" will be tokenized different ways depending on what precedes it
                 occurrenceFlag = StaticProperty.ALLOWS_ZERO_OR_MORE;
                 // Make the tokenizer ignore the occurrence indicator when classifying the next token
@@ -2223,7 +2292,7 @@ public class XPathParser {
         RecordTest recordTest = new RecordTest();
         while (true) {
             String name;
-            if (t.currentToken == Token.STAR || t.currentToken == Token.MULT) {
+            if (t.currentToken == Token.STAR) {
                 extensible = true;
                 p.nextToken();
                 p.expect(Token.RPAREN);
@@ -2414,7 +2483,7 @@ public class XPathParser {
         List<SequenceType> argTypes = new ArrayList<>(3);
         SequenceType resultType;
 
-        if (t.currentToken == Token.STAR || t.currentToken == Token.MULT) {
+        if (t.currentToken == Token.STAR) {
             // Allow both to be safe
             nextToken();
             expect(Token.RPAREN);
@@ -2473,7 +2542,7 @@ public class XPathParser {
         checkMapExtensions();
         Tokenizer t = getTokenizer();
         nextToken();
-        if (t.currentToken == Token.STAR || t.currentToken == Token.MULT) {
+        if (t.currentToken == Token.STAR) {
             // Allow both to be safe
             nextToken();
             expect(Token.RPAREN);
@@ -2510,7 +2579,7 @@ public class XPathParser {
         checkLanguageVersion31();
         Tokenizer t = getTokenizer();
         nextToken();
-        if (t.currentToken == Token.STAR || t.currentToken == Token.MULT) {
+        if (t.currentToken == Token.STAR) {
             // Allow both to be safe
             nextToken();
             expect(Token.RPAREN);
@@ -2569,11 +2638,12 @@ public class XPathParser {
     /*@NotNull*/
     private Expression parseUnaryExpression() throws XPathException {
         Expression exp;
+
         switch (t.currentToken) {
             case Token.MINUS: {
                 nextToken();
                 Expression operand = parseUnaryExpression();
-                exp = makeUnaryExpression(Token.NEGATE, operand);
+                exp = makeUnaryExpression(OperatorSymbol.NEGATE, operand);
                 break;
             }
             case Token.PLUS: {
@@ -2581,7 +2651,7 @@ public class XPathParser {
                 // Unary plus: can't ignore it completely, it might be a type error, or it might
                 // force conversion to a number which would affect operations such as "=".
                 Expression operand = parseUnaryExpression();
-                exp = makeUnaryExpression(Token.PLUS, operand);
+                exp = makeUnaryExpression(OperatorSymbol.PLUS, operand);
                 break;
             }
             case Token.VALIDATE:
@@ -2610,7 +2680,8 @@ public class XPathParser {
         return exp;
     }
 
-    private Expression makeUnaryExpression(int operator, Expression operand) {
+    private Expression makeUnaryExpression(OperatorSymbol operator, Expression operand) {
+        System.err.println("inputOffset " + t.inputOffset);
         if (Literal.isAtomic(operand)) {
             // very early evaluation of expressions like "-1", so they are treated as numeric literals
             AtomicValue val = (AtomicValue) ((Literal) operand).getGroundedValue();
@@ -2618,7 +2689,7 @@ public class XPathParser {
                 if (env.isInBackwardsCompatibleMode()) {
                     val = new DoubleValue(((NumericValue) val).getDoubleValue());
                 }
-                AtomicValue value = operator == Token.NEGATE ? ((NumericValue) val).negate() : (NumericValue) val;
+                AtomicValue value = operator == OperatorSymbol.NEGATE ? ((NumericValue) val).negate() : (NumericValue) val;
                 return Literal.makeLiteral(value);
             }
         }
@@ -2780,6 +2851,7 @@ public class XPathParser {
 
     /*@NotNull*/
     protected Expression parseRelativePath() throws XPathException {
+
         int offset = t.currentTokenStartOffset;
         Expression exp = parseStepExpression(language == ParsedLanguage.XSLT_PATTERN);
         while (t.currentToken == Token.SLASH ||
@@ -3214,6 +3286,7 @@ public class XPathParser {
                 }
                 AxisExpression ae = new AxisExpression(defaultAxis, test);
                 setLocation(ae);
+                //nextToken();
                 return ae;
 
             case Token.AT:
@@ -3255,7 +3328,7 @@ public class XPathParser {
                     case Token.PREFIX:
                     case Token.SUFFIX:
                     case Token.STAR:
-                    //case Token.KEYWORD_LBRA:
+                    //case KEYWORD_LBRA:
                     case Token.LPAREN:
                         Expression ax = new AxisExpression(axis, parseNodeTest(principalNodeType));
                         setLocation(ax);
@@ -3270,7 +3343,7 @@ public class XPathParser {
                 checkLanguageVersion40();
                 return parseMapExpression();
 
-//            case Token.KEYWORD_CURLY:
+//            case KEYWORD_CURLY:
 //                switch (t.currentTokenValue) {
 //                    case "map":
 //                        return parseMapExpression();
@@ -3286,8 +3359,12 @@ public class XPathParser {
             case Token.ATTRIBUTE_QNAME:
             case Token.NAMESPACE_QNAME:
             case Token.PI_QNAME:
-            case Token.START_TAG:
                 return parseConstructor();
+
+            case Token.START_TAG:
+                Expression constructor = getPendingDirectElementConstructor();
+                nextToken();
+                return constructor;
 
             case Token.DIRECT_PI_CONSTRUCTOR:
                 return parseDirectPIConstructor();
@@ -3302,6 +3379,10 @@ public class XPathParser {
                 break;
         }
         return new ErrorExpression();
+    }
+
+    protected Expression getPendingDirectElementConstructor() {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -3796,7 +3877,7 @@ public class XPathParser {
             }
             nextToken();
             result = makeLookupExpression(lhs, modifier, Literal.makeLiteral(number), deep);
-        } else if (token == Token.STAR || token == Token.MULT) {
+        } else if (token == Token.STAR) {
             nextToken();
             result = lookupStar(lhs, modifier, SequenceType.ANY_SEQUENCE, deep);
         } else if (token == Token.LPAREN) {
@@ -3887,7 +3968,9 @@ public class XPathParser {
                 if (t.peekAhead() == Token.LPAREN) {
                     return parseKindTest();
                 }
-                return makeNameTest(nodeType, tokv, nodeType == Type.ELEMENT);
+                NodeTest test = makeNameTest(nodeType, tokv, nodeType == Type.ELEMENT);
+                nextToken();
+                return test;
 
             case Token.PREFIX:
                 nextToken();
@@ -3918,7 +4001,7 @@ public class XPathParser {
         NodeTest test = parseNodeTest(nodeType);
         while (t.currentToken == Token.UNION && !t.currentTokenValue.equals("union")) {
             nextToken();
-            test = new CombinedNodeTest(test, Token.UNION, parseNodeTest(nodeType));
+            test = new CombinedNodeTest(test, OperatorSymbol.UNION, parseNodeTest(nodeType));
         }
         expect(Token.RPAREN);
         nextToken();
@@ -4127,7 +4210,7 @@ public class XPathParser {
                                 // this represents element(*,T) or attribute(*,T)
                                 result = typeTest;
                             } else {
-                                result = new CombinedNodeTest(nodeTest, Token.INTERSECT, typeTest);
+                                result = new CombinedNodeTest(nodeTest, OperatorSymbol.INTERSECT, typeTest);
                             }
                         }
                     } else {
@@ -4177,7 +4260,7 @@ public class XPathParser {
                     break;
 
                 case Token.STAR:
-                case Token.MULT:
+                //case MULT:
                     nextToken();
                     matchesAll = true;
                     break;
@@ -5635,7 +5718,7 @@ public class XPathParser {
                     NameTest test1 = new NameTest(nodeKind, fp1, pool);
                     int fp2 = pool.allocateFingerprint(NamespaceUri.NULL, q.getLocalPart());
                     NameTest test2 = new NameTest(nodeKind, fp2, pool);
-                    return new CombinedNodeTest(test1, Token.UNION, test2);
+                    return new CombinedNodeTest(test1, OperatorSymbol.UNION, test2);
                 case ANY_NAMESPACE:
                     if (!NameChecker.isValidNCName(StringTool.codePoints(qname))) {
                         grumble("Invalid name '" + qname + "'");

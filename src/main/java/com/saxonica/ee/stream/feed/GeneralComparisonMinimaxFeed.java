@@ -6,6 +6,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.GeneralComparison;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.NumericComparer;
@@ -43,7 +44,7 @@ public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
     private List<AtomicValue> unstreamedValues;
     private NumericValue minUnstreamedNumeric;
     private NumericValue maxUnstreamedNumeric;
-    private int operator;
+    private OperatorSymbol operator;
     private boolean done = false;
     private boolean closed = false;
     private final Expression pullOperand;
@@ -63,15 +64,15 @@ public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
         predicate = makeTest(operator);
     }
 
-    private static Predicate<Integer> makeTest(int operator) {
+    private static Predicate<Integer> makeTest(OperatorSymbol operator) {
         switch (operator) {
-            case Token.FLT:
+            case FLT:
                 return i -> i<0;
-            case Token.FLE:
+            case FLE:
                 return i -> i<=0;
-            case Token.FGT:
+            case FGT:
                 return i -> i>0;
-            case Token.FGE:
+            case FGE:
                 return i -> i>0;
             default:
                 throw new IllegalArgumentException();
@@ -147,25 +148,25 @@ public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
             if (streamedVal instanceof NumericValue) {
                 NumericComparer comparer = NumericComparer11.getInstance();
                 switch (operator) {
-                    case Token.FLE:
+                    case FLE:
                         if (comparer.compareAtomicValues(streamedVal, maxUnstreamedNumeric) <= 0) {
                             reportDone(true);
                             return;
                         }
                         break;
-                    case Token.FLT:
+                    case FLT:
                         if (comparer.compareAtomicValues(streamedVal, maxUnstreamedNumeric) < 0) {
                             reportDone(true);
                             return;
                         }
                         break;
-                    case Token.FGE:
+                    case FGE:
                         if (comparer.compareAtomicValues(streamedVal, minUnstreamedNumeric) >= 0) {
                             reportDone(true);
                             return;
                         }
                         break;
-                    case Token.FGT:
+                    case FGT:
                         if (comparer.compareAtomicValues(streamedVal, minUnstreamedNumeric) > 0) {
                             reportDone(true);
                             return;

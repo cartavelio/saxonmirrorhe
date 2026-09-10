@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.parser.Token;
 
@@ -26,7 +27,7 @@ public class GeneralComparison20 extends GeneralComparison {
      * @param op the operator, as a token returned by the Tokenizer (e.g. Token.LT)
      * @param p1 the right-hand operand
      */
-    public GeneralComparison20(Expression p0, int op, Expression p1) {
+    public GeneralComparison20(Expression p0, OperatorSymbol op, Expression p1) {
         super(p0, op, p1);
     }
 

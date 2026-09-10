@@ -1533,7 +1533,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("among", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-            return new SingletonIntersectExpression(lhs, Token.INTERSECT, rhs);
+            return new SingletonIntersectExpression(lhs, OperatorSymbol.INTERSECT, rhs);
         });
 
         eMap.put("analyzeString", (loader, element) -> {
@@ -1606,7 +1606,7 @@ public class PackageLoaderHE implements IPackageLoader {
             final String code = element.getAttributeValue(NamespaceUri.NULL,"calc");
             Calculator calc = Calculator.reconstructCalculator(code);
             int operator = Calculator.operatorFromCode(code.charAt(1));
-            int token = Calculator.getTokenFromOperator(operator);
+            OperatorSymbol token = Calculator.getArithmeticOperatorSymbol(operator);
             ArithmeticExpression exp = new ArithmeticExpression(lhs, token, rhs);
             exp.setCalculator(calc);
             return exp;
@@ -1618,7 +1618,7 @@ public class PackageLoaderHE implements IPackageLoader {
             final String code = element.getAttributeValue(NamespaceUri.NULL,"calc");
             Calculator calc = Calculator.reconstructCalculator(code);
             int operator = Calculator.operatorFromCode(code.charAt(1));
-            int token = Calculator.getTokenFromOperator(operator);
+            OperatorSymbol token = Calculator.getArithmeticOperatorSymbol(operator);
             ArithmeticExpression10 exp = new ArithmeticExpression10(lhs, token, rhs);
             exp.setCalculator(calc);
             return exp;
@@ -2261,7 +2261,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("except", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-            return new VennExpression(lhs, Token.EXCEPT, rhs);
+            return new VennExpression(lhs, OperatorSymbol.EXCEPT, rhs);
         });
 
         eMap.put("false", (loader, element) -> Literal.makeLiteral(BooleanValue.FALSE));
@@ -2353,7 +2353,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("follows", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-            return new IdentityComparison(lhs, Token.FOLLOWS, rhs);
+            return new IdentityComparison(lhs, OperatorSymbol.FOLLOWS, rhs);
         });
 
         eMap.put("for", (loader, element) -> {
@@ -2452,7 +2452,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("gc", (loader, element) -> {
             String opAtt = element.getAttributeValue(NamespaceUri.NULL,"op");
-            int op = getOperator(opAtt);
+            OperatorSymbol op = getOperator(opAtt);
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
             String compAtt = element.getAttributeValue(NamespaceUri.NULL,"comp");
@@ -2465,7 +2465,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("gc10", (loader, element) -> {
             String opAtt = element.getAttributeValue(NamespaceUri.NULL,"op");
-            int op = getOperator(opAtt);
+            OperatorSymbol op = getOperator(opAtt);
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
             String compAtt = element.getAttributeValue(NamespaceUri.NULL,"comp");
@@ -2576,7 +2576,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("intersect", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-            return new VennExpression(lhs, Token.INTERSECT, rhs);
+            return new VennExpression(lhs, OperatorSymbol.INTERSECT, rhs);
         });
 
         eMap.put("intRangeTest", (loader, element) -> {
@@ -2590,7 +2590,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
             String op = element.getAttributeValue(NamespaceUri.NULL, "op");
-            IdentityComparison comp = new IdentityComparison(lhs, Token.IS, rhs);
+            IdentityComparison comp = new IdentityComparison(lhs, OperatorSymbol.IS, rhs);
             if ("is-g".equals(op)) {
                 comp.setGenerateIdEmulation(true);
             }
@@ -3021,7 +3021,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("precedes", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-            return new IdentityComparison(lhs, Token.PRECEDES, rhs);
+            return new IdentityComparison(lhs, OperatorSymbol.PRECEDES, rhs);
         });
 
         eMap.put("procInst", (loader, element) -> {
@@ -3317,7 +3317,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("union", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-            return new VennExpression(lhs, Token.UNION, rhs);
+            return new VennExpression(lhs, OperatorSymbol.UNION, rhs);
         });
 
         eMap.put("useAS", (loader, element) -> {
@@ -3353,8 +3353,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("vc", (loader, element) -> {
             String opAtt = element.getAttributeValue(NamespaceUri.NULL,"op");
-            int op;
-            op = parseValueComparisonOperator(opAtt);
+            OperatorSymbol op = parseValueComparisonOperator(opAtt);
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
             ValueComparison vc = new ValueComparison(lhs, op, rhs);
@@ -3435,26 +3434,26 @@ public class PackageLoaderHE implements IPackageLoader {
         return children.toArray(new Expression[0]);
     }
 
-    protected static int getOperator(String opAtt) {
-        int op;
+    protected static OperatorSymbol getOperator(String opAtt) {
+        OperatorSymbol op;
         switch (opAtt) {
             case "=":
-                op = Token.EQUALS;
+                op = OperatorSymbol.EQUALS;
                 break;
             case "!=":
-                op = Token.NE;
+                op = OperatorSymbol.NE;
                 break;
             case "<=":
-                op = Token.LE;
+                op = OperatorSymbol.LE;
                 break;
             case ">=":
-                op = Token.GE;
+                op = OperatorSymbol.GE;
                 break;
             case "<":
-                op = Token.LT;
+                op = OperatorSymbol.LT;
                 break;
             case ">":
-                op = Token.GT;
+                op = OperatorSymbol.GT;
                 break;
             default:
                 throw new IllegalStateException();
@@ -3462,26 +3461,26 @@ public class PackageLoaderHE implements IPackageLoader {
         return op;
     }
 
-    private static int parseValueComparisonOperator(String opAtt) {
-        int op;
+    private static OperatorSymbol parseValueComparisonOperator(String opAtt) {
+        OperatorSymbol op;
         switch (opAtt) {
             case "eq":
-                op = Token.FEQ;
+                op = OperatorSymbol.FEQ;
                 break;
             case "ne":
-                op = Token.FNE;
+                op = OperatorSymbol.FNE;
                 break;
             case "le":
-                op = Token.FLE;
+                op = OperatorSymbol.FLE;
                 break;
             case "ge":
-                op = Token.FGE;
+                op = OperatorSymbol.FGE;
                 break;
             case "lt":
-                op = Token.FLT;
+                op = OperatorSymbol.FLT;
                 break;
             case "gt":
-                op = Token.FGT;
+                op = OperatorSymbol.FGT;
                 break;
             default:
                 throw new IllegalStateException();

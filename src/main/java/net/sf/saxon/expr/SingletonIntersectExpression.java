@@ -11,10 +11,7 @@ import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -36,7 +33,7 @@ public class SingletonIntersectExpression extends VennExpression {
      * @param p2 the second argument
      */
 
-    public SingletonIntersectExpression(final Expression p1, final int op, final Expression p2) {
+    public SingletonIntersectExpression(final Expression p1, final OperatorSymbol op, final Expression p2) {
         super(p1, op, p2);
     }
 

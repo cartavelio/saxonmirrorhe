@@ -69,7 +69,7 @@ public class OptimizerEE extends Optimizer {
 
         Expression lhs = vc.getLhsExpression();
         Expression rhs = vc.getRhsExpression();
-        int operator = vc.getOperator();
+        OperatorSymbol operator = vc.getOperator();
         boolean isCodepointCollation =
                 vc.getRetainedStaticContext().getDefaultCollationName().equals(NamespaceConstant.CODEPOINT_COLLATION_URI);
 
@@ -130,15 +130,15 @@ public class OptimizerEE extends Optimizer {
             assert lhs instanceof SystemFunctionCall;
             Expression arg = ((SystemFunctionCall) lhs).getArg(0);
             switch (vc.getOperator()) {
-                case Token.FEQ:
-                case Token.FLE:
+                case FEQ:
+                case FLE:
                     return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), arg);
-                case Token.FNE:
-                case Token.FGT:
+                case FNE:
+                case FGT:
                     return SystemFunction.makeCall("boolean", vc.getRetainedStaticContext(), arg);
-                case Token.FGE:
+                case FGE:
                     return Literal.makeLiteral(BooleanValue.TRUE, vc);
-                case Token.FLT:
+                case FLT:
                     return Literal.makeLiteral(BooleanValue.FALSE, vc);
             }
         }
@@ -149,15 +149,15 @@ public class OptimizerEE extends Optimizer {
             assert rhs instanceof SystemFunctionCall;
             Expression arg = ((SystemFunctionCall) rhs).getArg(0);
             switch (vc.getOperator()) {
-                case Token.FEQ:
-                case Token.FGE:
+                case FEQ:
+                case FGE:
                     return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), arg);
-                case Token.FNE:
-                case Token.FLT:
+                case FNE:
+                case FLT:
                     return SystemFunction.makeCall("boolean", vc.getRetainedStaticContext(), arg);
-                case Token.FLE:
+                case FLE:
                     return Literal.makeLiteral(BooleanValue.TRUE, vc);
-                case Token.FGT:
+                case FGT:
                     return Literal.makeLiteral(BooleanValue.FALSE, vc);
             }
         }
@@ -177,11 +177,11 @@ public class OptimizerEE extends Optimizer {
                 isCodepointCollation) {
 
             switch (vc.getOperator()) {
-                case Token.FNE:
-                case Token.FGT:
+                case FNE:
+                case FGT:
                     return SystemFunction.makeCall("boolean", vc.getRetainedStaticContext(), lhs);
-                case Token.FEQ:
-                case Token.FLE:
+                case FEQ:
+                case FLE:
                     if (lhs.getCardinality() == StaticProperty.EXACTLY_ONE) {
                         return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), lhs);
                     }
@@ -202,11 +202,11 @@ public class OptimizerEE extends Optimizer {
                 isCodepointCollation) {
 
             switch (vc.getOperator()) {
-                case Token.FNE:
-                case Token.FLT:
+                case FNE:
+                case FLT:
                     return SystemFunction.makeCall("boolean", vc.getRetainedStaticContext(), rhs);
-                case Token.FEQ:
-                case Token.FGE:
+                case FEQ:
+                case FGE:
                     if (rhs.getCardinality() == StaticProperty.EXACTLY_ONE) {
                         return SystemFunction.makeCall("not", vc.getRetainedStaticContext(), rhs);
                     }
@@ -250,13 +250,13 @@ public class OptimizerEE extends Optimizer {
 
         if (p0 == StandardNames.XS_BOOLEAN &&
                 p1 == StandardNames.XS_BOOLEAN &&
-                (operator == Token.FEQ || operator == Token.FNE) &&
+                (operator == OperatorSymbol.FEQ || operator == OperatorSymbol.FNE) &&
                 lhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 rhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 (lhs instanceof Literal || rhs instanceof Literal)) {
             Literal literal = (Literal) (lhs instanceof Literal ? lhs : rhs);
             Expression other = lhs instanceof Literal ? rhs : lhs;
-            boolean negate = (operator == Token.FEQ) != ((BooleanValue) literal.getGroundedValue()).getBooleanValue();
+            boolean negate = (operator == OperatorSymbol.FEQ) != ((BooleanValue) literal.getGroundedValue()).getBooleanValue();
             if (negate) {
                 Expression fn = SystemFunction.makeCall("not", vc.getRetainedStaticContext(), other);
                 assert fn != null;
@@ -280,10 +280,10 @@ public class OptimizerEE extends Optimizer {
             SystemFunctionCall f1 = (SystemFunctionCall) rhs;
             if (!Cardinality.allowsMany(f0.getArg(0).getCardinality()) &&
                     !Cardinality.allowsMany(f1.getArg(0).getCardinality()) &&
-                    (operator == Token.FEQ)) {
+                    (operator == OperatorSymbol.FEQ)) {
                 IdentityComparison id =
                         new IdentityComparison(f0.getArg(0),
-                                               Token.IS,
+                                               OperatorSymbol.IS,
                                                f1.getArg(0));
                 id.setGenerateIdEmulation(true);
                 ExpressionTool.copyLocationInfo(vc, id);
@@ -323,20 +323,20 @@ public class OptimizerEE extends Optimizer {
         sequence = sequence.unordered(true, false);
 
         AtomicValue literalOperand = (AtomicValue) ((Literal) (inverted ? vc.getLhsExpression() : vc.getRhsExpression())).getGroundedValue();
-        int op = inverted ? Token.inverse(vc.getOperator()) : vc.getOperator();
+        OperatorSymbol op = inverted ? Token.inverse(vc.getOperator()) : vc.getOperator();
 
         if (isZero(literalOperand)) {
-            if (op == Token.FEQ || op == Token.FLE) {
+            if (op == OperatorSymbol.FEQ || op == OperatorSymbol.FLE) {
                 // rewrite count(x)=0 as empty(x)
                 Expression result = SystemFunction.makeCall("empty", vc.getRetainedStaticContext(), sequence);
                 trace("Rewrite count()=0 as:", result);
                 return result;
-            } else if (op == Token.FNE || op == Token.FGT) {
+            } else if (op == OperatorSymbol.FNE || op == OperatorSymbol.FGT) {
                 // rewrite count(x)!=0, count(x)>0 as exists(x)
                 Expression result = SystemFunction.makeCall("exists", vc.getRetainedStaticContext(), sequence);
                 trace("Rewrite count()>0 as:", result);
                 return result;
-            } else if (op == Token.FGE) {
+            } else if (op == OperatorSymbol.FGE) {
                 // rewrite count(x)>=0 as true()
                 return Literal.makeLiteral(BooleanValue.TRUE, vc);
             } else {  // singletonOperator == Token.FLT
@@ -348,25 +348,25 @@ public class OptimizerEE extends Optimizer {
             if (literalOperand instanceof IntegerValue) {
                 operand = ((IntegerValue) literalOperand).longValue();
             } else if (literalOperand.isNaN()) {
-                return Literal.makeLiteral(BooleanValue.get(op == Token.FNE), vc);
+                return Literal.makeLiteral(BooleanValue.get(op == OperatorSymbol.FNE), vc);
             } else if (((NumericValue) literalOperand).isWholeNumber()) {
                 operand = ((NumericValue) literalOperand).longValue();
-            } else if (op == Token.FEQ) {
+            } else if (op == OperatorSymbol.FEQ) {
                 return Literal.makeLiteral(BooleanValue.FALSE, vc);
-            } else if (op == Token.FNE) {
+            } else if (op == OperatorSymbol.FNE) {
                 return Literal.makeLiteral(BooleanValue.TRUE, vc);
-            } else if (op == Token.FGT || op == Token.FGE) {
+            } else if (op == OperatorSymbol.FGT || op == OperatorSymbol.FGE) {
                 operand = ((NumericValue) literalOperand).ceiling().longValue();
-                op = Token.FGE;
+                op = OperatorSymbol.FGE;
             } else /*if (op == Token.FLT || op == Token.FLE)*/ {
                 operand = ((NumericValue) literalOperand).floor().longValue();
-                op = Token.FLE;
+                op = OperatorSymbol.FLE;
             }
             if (operand < 0) {
                 switch (op) {
-                    case Token.FEQ:
-                    case Token.FLT:
-                    case Token.FLE:
+                    case FEQ:
+                    case FLT:
+                    case FLE:
                         return Literal.makeLiteral(BooleanValue.FALSE, vc);
                     default:
                         return Literal.makeLiteral(BooleanValue.TRUE, vc);
@@ -374,9 +374,9 @@ public class OptimizerEE extends Optimizer {
             }
             if (operand > Integer.MAX_VALUE) {
                 switch (op) {
-                    case Token.FEQ:
-                    case Token.FGT:
-                    case Token.FGE:
+                    case FEQ:
+                    case FGT:
+                    case FGE:
                         return Literal.makeLiteral(BooleanValue.FALSE, vc);
                     default:
                         return Literal.makeLiteral(BooleanValue.TRUE, vc);
@@ -387,10 +387,10 @@ public class OptimizerEE extends Optimizer {
                 return null;
             }
             switch (op) {
-                case Token.FEQ:
-                case Token.FNE:
-                case Token.FLE:
-                case Token.FLT:
+                case FEQ:
+                case FNE:
+                case FLE:
+                case FLT:
                     // rewrite count(E) op N as count(subsequence(E, 1, N+1)) op N
                     Expression ss = SystemFunction.makeCall("subsequence",
                                                             vc.getRetainedStaticContext(), sequence,
@@ -401,11 +401,11 @@ public class OptimizerEE extends Optimizer {
                     trace("Rewrite count()~N as:", ctic);
                     ExpressionTool.copyLocationInfo(vc, ctic);
                     return ctic;
-                case Token.FGE:
-                case Token.FGT:
+                case FGE:
+                case FGT:
                     // rewrite count(x) gt n as exists(x[n+1])
                     //     and count(x) ge n as exists(x[n])
-                    TailExpression tail = new TailExpression(sequence, (int) (op == Token.FGE ? operand : operand + 1));
+                    TailExpression tail = new TailExpression(sequence, (int) (op == OperatorSymbol.FGE ? operand : operand + 1));
                     ExpressionTool.copyLocationInfo(vc, tail);
                     Expression result = SystemFunction.makeCall("exists", vc.getRetainedStaticContext(), tail);
                     ExpressionTool.copyLocationInfo(vc, result);
@@ -437,7 +437,7 @@ public class OptimizerEE extends Optimizer {
         if (!"EE".equals(visitor.getTargetEdition())) {
             return gc;
         }
-        if (gc.getOperator() == Token.EQUALS) {
+        if (gc.getOperator() == OperatorSymbol.EQUALS) {
             Expression p0 = gc.getLhsExpression();
             Expression p1 = gc.getRhsExpression();
             boolean many0 = Cardinality.expectsMany(p0);
@@ -803,7 +803,7 @@ public class OptimizerEE extends Optimizer {
         } else {
             Expression p = ExpressionTool.makePathExpression(start, operands.get(0));
             for (int i = 1; i < operands.size(); i++) {
-                p = new VennExpression(p, Token.UNION,
+                p = new VennExpression(p, OperatorSymbol.UNION,
                                        ExpressionTool.makePathExpression(start.copy(new RebindingMap()), operands.get(i)));
             }
             return p;
@@ -811,7 +811,7 @@ public class OptimizerEE extends Optimizer {
     }
 
     private static void gatherUnionOperands(Expression exp, List<Expression> list) {
-        if (exp instanceof VennExpression && ((VennExpression) exp).getOperator() == Token.UNION) {
+        if (exp instanceof VennExpression && ((VennExpression) exp).getOperator() == OperatorSymbol.UNION) {
             final VennExpression ve = (VennExpression) exp;
             gatherUnionOperands(ve.getLhsExpression(), list);
             gatherUnionOperands(ve.getRhsExpression(), list);
@@ -1341,7 +1341,7 @@ public class OptimizerEE extends Optimizer {
     @Override
     public int isIndexableFilter(Expression filter) {
         if (filter instanceof ComparisonExpression &&
-                ((ComparisonExpression) filter).getSingletonOperator() == Token.FEQ) {
+                ((ComparisonExpression) filter).getSingletonOperator() == OperatorSymbol.FEQ) {
             return isIndexableComparison((ComparisonExpression) filter);
         } else {
             return 0;
@@ -1661,7 +1661,7 @@ public class OptimizerEE extends Optimizer {
         if (condition instanceof GeneralComparison) {
             return false;
         }
-        if (((ComparisonExpression) condition).getSingletonOperator() != Token.FEQ) {
+        if (((ComparisonExpression) condition).getSingletonOperator() != OperatorSymbol.FEQ) {
             return false;
         }
         Expression lhs = ((ComparisonExpression) condition).getLhsExpression();
@@ -1733,7 +1733,7 @@ public class OptimizerEE extends Optimizer {
 //            }
             if (expr instanceof ComparisonExpression) {
                 ComparisonExpression compExpr = (ComparisonExpression) expr;
-                int op;
+                OperatorSymbol op;
 
                 if (compExpr instanceof BinaryExpression) {
                     BinaryExpression exprBin = (BinaryExpression) expr;
@@ -1767,7 +1767,7 @@ public class OptimizerEE extends Optimizer {
                     }
                 }
 
-                if ((op == Token.FEQ) || op == Token.EQUALS) {
+                if ((op == OperatorSymbol.FEQ) || op == OperatorSymbol.EQUALS) {
                     final TypeHierarchy th = getConfiguration().getTypeHierarchy();
                     commonParts = comparisonExprFixup(commonParts, map, otherExps, th, expr, left, right);
                     return commonParts;
@@ -1823,7 +1823,7 @@ public class OptimizerEE extends Optimizer {
 
         for (Map.Entry<Expression, List<Expression>> entry : map.entrySet()) {
             Expression comparison = new GeneralComparison20 (
-                    entry.getKey(), Token.EQUALS, Block.makeBlock(entry.getValue()));
+                    entry.getKey(), OperatorSymbol.EQUALS, Block.makeBlock(entry.getValue()));
             comparison.setRetainedStaticContext(nsResolver);
             Expression e = comparison.typeCheck(visitor, contextItemType);
             if (e != null) {
@@ -1975,7 +1975,7 @@ public class OptimizerEE extends Optimizer {
             StructuredQName valueName = NamespaceUri.NULL.qName("value");
             slots.allocateSlotNumber(valueName, null);
             SuppliedParameterReference ref = new SuppliedParameterReference(0);
-            ArithmeticExpression increment = new ArithmeticExpression(ref, Token.PLUS, Literal.makeLiteral(Int64Value.PLUS_ONE, ni));
+            ArithmeticExpression increment = new ArithmeticExpression(ref, OperatorSymbol.PLUS, Literal.makeLiteral(Int64Value.PLUS_ONE, ni));
             increment.setCalculator(Calculator.INTEGER_INTEGER[Calculator.PLUS]);
             increment.setRetainedStaticContext(ni.getRetainedStaticContext());
             ExpressionTool.allocateSlots(increment, 1, slots);
@@ -2022,7 +2022,7 @@ public class OptimizerEE extends Optimizer {
                 SystemFunction fn = XSLT30FunctionSet.getInstance().makeFunction("accumulator-before", 1);
                 fn.setRetainedStaticContext(ni.getRetainedStaticContext());
                 Expression call = fn.makeFunctionCall(new StringLiteral(genName.getEQName()));
-                Expression nonZero = new CompareToIntegerConstant(new ContextItemExpression(), Token.FNE, 0);
+                Expression nonZero = new CompareToIntegerConstant(new ContextItemExpression(), OperatorSymbol.FNE, 0);
                 // If the accumulator value is zero, return an empty sequence
                 Expression result = new FilterExpression(call, nonZero);
                 // If numbering a selected node, make this the context item for accumulator-before()

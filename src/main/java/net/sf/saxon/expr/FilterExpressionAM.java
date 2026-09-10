@@ -47,7 +47,7 @@ public class FilterExpressionAM extends BinaryExpression
      */
 
     public FilterExpressionAM(Expression start, Expression step) {
-        super(start, Token.QMARK_LSQB, step);
+        super(start, OperatorSymbol.AM_FILTER, step);
     }
 
     @Override

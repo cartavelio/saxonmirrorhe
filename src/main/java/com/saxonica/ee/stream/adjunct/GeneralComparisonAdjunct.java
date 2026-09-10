@@ -2,7 +2,7 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.feed.*;
 import net.sf.saxon.expr.GeneralComparison;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 
 
 /**
@@ -17,10 +17,10 @@ public class GeneralComparisonAdjunct extends StreamingAdjunct {
     @Override
     public FeedMaker getFeedMaker(final int streamedArg) {
         return new FeedMakerDelegate((watchManager, out, context) -> {
-            int op = ((GeneralComparison)getExpression()).getSingletonOperator();
-            if (op == Token.FEQ) {
+            OperatorSymbol op = ((GeneralComparison)getExpression()).getSingletonOperator();
+            if (op == OperatorSymbol.FEQ) {
                 return new GeneralComparisonEqualityFeed(watchManager, getExpression(), streamedArg, out, context);
-            } else if (op == Token.FNE) {
+            } else if (op == OperatorSymbol.FNE) {
                 return new GeneralComparisonInequalityFeed(watchManager, getExpression(), streamedArg, out, context);
             } else {
                 return new GeneralComparisonMinimaxFeed(watchManager, getExpression(), streamedArg, out, context);

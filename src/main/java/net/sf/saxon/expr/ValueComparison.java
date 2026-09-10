@@ -47,7 +47,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      * @param p2 the right-hand operand
      */
 
-    public ValueComparison(Expression p1, int op, Expression p2) {
+    public ValueComparison(Expression p1, OperatorSymbol op, Expression p2) {
         super(p1, op, p2);
     }
 
@@ -111,7 +111,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      */
 
     @Override
-    public int getSingletonOperator() {
+    public OperatorSymbol getSingletonOperator() {
         return operator;
     }
 
@@ -188,10 +188,10 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         final SequenceType optionalAtomic = SequenceType.OPTIONAL_ATOMIC;
         TypeChecker tc = config.getTypeChecker(false);
 
-        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 0);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), optionalAtomic, role0, visitor));
 
-        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), optionalAtomic, role1, visitor));
 
         PlainType t0 = getLhsExpression().getItemType().getAtomizedItemType();
@@ -244,7 +244,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                         .asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
             }
         }
-        if (!(operator == Token.FEQ || operator == Token.FNE)) {
+        if (!(operator == OperatorSymbol.FEQ || operator == OperatorSymbol.FNE)) {
             mustBeOrdered(t0, p0);
             mustBeOrdered(t1, p1);
         }
@@ -390,7 +390,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      * @throws XPathException if the values are not comparable
      */
 
-    public static boolean compare(AtomicValue v0, int op, AtomicValue v1, AtomicComparer comparer, boolean checkTypes)
+    public static boolean compare(AtomicValue v0, OperatorSymbol op, AtomicValue v1, AtomicComparer comparer, boolean checkTypes)
             throws XPathException {
         if (checkTypes &&
                 !Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), Token.isOrderedOperator(op))) {
@@ -398,21 +398,21 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                     " to " + Type.displayTypeName(v1)).withErrorCode("XPTY0004").asTypeError();
         }
         if (v0.isNaN() || v1.isNaN()) {
-            return op == Token.FNE;
+            return op == OperatorSymbol.FNE;
         }
         try {
             switch (op) {
-                case Token.FEQ:
+                case FEQ:
                     return comparer.comparesEqual(v0, v1);
-                case Token.FNE:
+                case FNE:
                     return !comparer.comparesEqual(v0, v1);
-                case Token.FGT:
+                case FGT:
                     return comparer.compareAtomicValues(v0, v1) > 0;
-                case Token.FLT:
+                case FLT:
                     return comparer.compareAtomicValues(v0, v1) < 0;
-                case Token.FGE:
+                case FGE:
                     return comparer.compareAtomicValues(v0, v1) >= 0;
-                case Token.FLE:
+                case FLE:
                     return comparer.compareAtomicValues(v0, v1) <= 0;
                 default:
                     throw new UnsupportedOperationException("Unknown operator " + op);
@@ -524,7 +524,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             } catch (XPathException e) {
                 throw new IllegalStateException("Unknown default collation in static context: " + expr.getRetainedStaticContext().getDefaultCollationName());
             }
-            final int operator = expr.getOperator();
+            final OperatorSymbol operator = expr.getOperator();
 
             final int card0 = expr.getLhsExpression().getCardinality();
             final int card1 = expr.getRhsExpression().getCardinality();
@@ -581,7 +581,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             } catch (XPathException e) {
                 throw new IllegalStateException("Unknown default collation in static context: " + expr.getRetainedStaticContext().getDefaultCollationName());
             }
-            final int operator = expr.getOperator();
+            final OperatorSymbol operator = expr.getOperator();
             final boolean resultWhenEmpty = expr.getResultWhenEmpty() != null && expr.getResultWhenEmpty().getBooleanValue();
 
             final int card0 = expr.getLhsExpression().getCardinality();

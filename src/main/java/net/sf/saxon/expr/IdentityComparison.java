@@ -46,7 +46,7 @@ public final class IdentityComparison extends BinaryExpression {
      * @param p2 the right-hand operand
      */
 
-    public IdentityComparison(Expression p1, int op, Expression p2) {
+    public IdentityComparison(Expression p1, OperatorSymbol op, Expression p2) {
         super(p1, op, p2);
     }
 
@@ -93,12 +93,12 @@ public final class IdentityComparison extends BinaryExpression {
         }
 
         Supplier<RoleDiagnostic> role0 =
-                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 0);
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), SequenceType.OPTIONAL_NODE, role0, visitor));
 
         Supplier<RoleDiagnostic> role1 =
-                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), SequenceType.OPTIONAL_NODE, role1, visitor));
 
         if (!Cardinality.allowsZero(getLhsExpression().getCardinality()) && !Cardinality.allowsZero(getRhsExpression().getCardinality())) {
@@ -167,9 +167,9 @@ public final class IdentityComparison extends BinaryExpression {
     @Override
     protected String tag() {
         switch (operator) {
-            case Token.IS: return "is";
-            case Token.PRECEDES: return "precedes";
-            case Token.FOLLOWS: return "follows";
+            case IS: return "is";
+            case PRECEDES: return "precedes";
+            case FOLLOWS: return "follows";
             default: return "?";
         }
     }
@@ -215,11 +215,11 @@ public final class IdentityComparison extends BinaryExpression {
     private boolean compareIdentity(NodeInfo node0, NodeInfo node1) {
 
         switch (operator) {
-            case Token.IS:
+            case IS:
                 return node0.equals(node1);
-            case Token.PRECEDES:
+            case PRECEDES:
                 return GlobalOrderComparer.getInstance().compare(node0, node1) < 0;
-            case Token.FOLLOWS:
+            case FOLLOWS:
                 return GlobalOrderComparer.getInstance().compare(node0, node1) > 0;
             default:
                 throw new UnsupportedOperationException("Unknown node identity test");
@@ -302,11 +302,11 @@ public final class IdentityComparison extends BinaryExpression {
             final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
             final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
             final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
-            final int operator = exp.getOperator();
+            final OperatorSymbol operator = exp.getOperator();
             final boolean generateIdEmulation = exp.isGenerateIdEmulation();
 
             switch (operator) {
-                case Token.IS:
+                case IS:
                     if (nullable0 || nullable1) {
                         if (generateIdEmulation) {
                             return context -> {
@@ -330,7 +330,7 @@ public final class IdentityComparison extends BinaryExpression {
                     } else {
                         return context -> p0.eval(context).equals(p1.eval(context));
                     }
-                case Token.PRECEDES:
+                case PRECEDES:
                     return context -> {
                         NodeInfo v0 = (NodeInfo) p0.eval(context);
                         NodeInfo v1 = (NodeInfo) p1.eval(context);
@@ -339,7 +339,7 @@ public final class IdentityComparison extends BinaryExpression {
                         }
                         return GlobalOrderComparer.getInstance().compare(v0, v1) < 0;
                     };
-                case Token.FOLLOWS:
+                case FOLLOWS:
                     return context -> {
                         NodeInfo v0 = (NodeInfo) p0.eval(context);
                         NodeInfo v1 = (NodeInfo) p1.eval(context);
@@ -359,11 +359,11 @@ public final class IdentityComparison extends BinaryExpression {
             final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
             final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
             final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
-            final int operator = exp.getOperator();
+            final OperatorSymbol operator = exp.getOperator();
             final boolean generateIdEmulation = exp.isGenerateIdEmulation();
 
             switch (operator) {
-                case Token.IS:
+                case IS:
                     if (nullable0 || nullable1) {
                         if (generateIdEmulation) {
                             return context -> {
@@ -398,7 +398,7 @@ public final class IdentityComparison extends BinaryExpression {
                     } else {
                         return context -> BooleanValue.get(p0.eval(context).equals(p1.eval(context)));
                     }
-                case Token.PRECEDES:
+                case PRECEDES:
                     return context -> {
                         NodeInfo v0 = (NodeInfo) p0.eval(context);
                         if (v0 == null) {
@@ -410,7 +410,7 @@ public final class IdentityComparison extends BinaryExpression {
                         }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) < 0);
                     };
-                case Token.FOLLOWS:
+                case FOLLOWS:
                     return context -> {
                         NodeInfo v0 = (NodeInfo) p0.eval(context);
                         if (v0 == null) {

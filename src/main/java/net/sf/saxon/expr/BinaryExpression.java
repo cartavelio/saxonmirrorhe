@@ -27,7 +27,7 @@ public abstract class BinaryExpression extends Expression {
 
     private final Operand lhs;
     private final Operand rhs;
-    protected int operator;       // represented by the token number from class Tokenizer
+    protected OperatorSymbol operator;
 
     /**
      * Create a binary expression identifying the two operands and the operator
@@ -37,7 +37,7 @@ public abstract class BinaryExpression extends Expression {
      * @param p1 the right-hand operand
      */
 
-    public BinaryExpression(Expression p0, int op, Expression p1) {
+    public BinaryExpression(Expression p0, OperatorSymbol op, Expression p1) {
         operator = op;
 //        p0.verifyParentPointers();
 //        p1.verifyParentPointers();
@@ -204,7 +204,7 @@ public abstract class BinaryExpression extends Expression {
      * @return the operator, for example {@link Token#PLUS}
      */
 
-    public int getOperator() {
+    public OperatorSymbol getOperator() {
         return operator;
     }
 
@@ -249,17 +249,17 @@ public abstract class BinaryExpression extends Expression {
      * @return true if the operator is commutative
      */
 
-    protected static boolean isCommutative(int operator) {
-        return operator == Token.AND ||
-                operator == Token.OR ||
-                operator == Token.UNION ||
-                operator == Token.INTERSECT ||
-                operator == Token.PLUS ||
-                operator == Token.MULT ||
-                operator == Token.EQUALS ||
-                operator == Token.FEQ ||
-                operator == Token.NE ||
-                operator == Token.FNE;
+    protected static boolean isCommutative(OperatorSymbol operator) {
+        return operator == OperatorSymbol.AND ||
+                operator == OperatorSymbol.OR ||
+                operator == OperatorSymbol.UNION ||
+                operator == OperatorSymbol.INTERSECT ||
+                operator == OperatorSymbol.PLUS ||
+                operator == OperatorSymbol.TIMES ||
+                operator == OperatorSymbol.EQUALS ||
+                operator == OperatorSymbol.FEQ ||
+                operator == OperatorSymbol.NE ||
+                operator == OperatorSymbol.FNE;
     }
 
     /**
@@ -269,13 +269,13 @@ public abstract class BinaryExpression extends Expression {
      * @return true if the operator is associative
      */
 
-    protected static boolean isAssociative(int operator) {
-        return operator == Token.AND ||
-                operator == Token.OR ||
-                operator == Token.UNION ||
-                operator == Token.INTERSECT ||
-                operator == Token.PLUS ||
-                operator == Token.MULT;
+    protected static boolean isAssociative(OperatorSymbol operator) {
+        return operator == OperatorSymbol.AND ||
+                operator == OperatorSymbol.OR ||
+                operator == OperatorSymbol.UNION ||
+                operator == OperatorSymbol.INTERSECT ||
+                operator == OperatorSymbol.PLUS ||
+                operator == OperatorSymbol.TIMES;
     }
 
     /**
@@ -287,7 +287,7 @@ public abstract class BinaryExpression extends Expression {
      * @param op2 the second operator
      * @return true if the operators are the inverse of each other
      */
-    protected static boolean isInverse(int op1, int op2) {
+    protected static boolean isInverse(OperatorSymbol op1, OperatorSymbol op2) {
         return op1 != op2 && op1 == Token.inverse(op2);
     }
 
@@ -404,8 +404,8 @@ public abstract class BinaryExpression extends Expression {
     protected int computeHashCode() {
         // Ensure that an operator and its inverse get the same hash code,
         // so that (A lt B) has the same hash code as (B gt A)
-        int op = Math.min(operator, Token.inverse(operator));
-        return ("BinaryExpression " + op).hashCode()
+        int opHash = Math.min(operator.hashCode(), Token.inverse(operator).hashCode());
+        return opHash
                 ^ getLhsExpression().hashCode()
                 ^ getRhsExpression().hashCode();
     }
@@ -481,7 +481,7 @@ public abstract class BinaryExpression extends Expression {
      */
 
     protected String displayOperator() {
-        return Token.tokens[operator];
+        return operator.toString();
     }
 
 

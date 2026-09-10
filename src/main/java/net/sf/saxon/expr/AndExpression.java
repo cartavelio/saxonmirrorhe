@@ -31,7 +31,7 @@ public class AndExpression extends BooleanExpression {
      */
 
     public AndExpression(Expression p1, Expression p2) {
-        super(p1, Token.AND, p2);
+        super(p1, OperatorSymbol.AND, p2);
     }
 
     @Override

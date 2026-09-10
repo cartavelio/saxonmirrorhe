@@ -69,7 +69,7 @@ public class LookupExpression extends BinaryExpression {
      */
 
     public LookupExpression(Expression start, Modifier modifier, Expression step) {
-        super(start, Token.QMARK, step);
+        super(start, OperatorSymbol.LOOKUP, step);
         this.modifier = modifier;
     }
 

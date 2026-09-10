@@ -413,7 +413,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         if (!(arith.getLhsExpression() instanceof ContextItemExpression)) {
             return false;
         }
-        if (!(arith.getOperator() == Token.PLUS || arith.getOperator() == Token.MINUS)) {
+        if (!(arith.getOperator() == OperatorSymbol.PLUS || arith.getOperator() == OperatorSymbol.MINUS)) {
             return false;
         }
         if (!(arith.getRhsExpression() instanceof Literal || arith.getRhsExpression() instanceof VariableReference)) {

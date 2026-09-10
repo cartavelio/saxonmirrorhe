@@ -1,7 +1,7 @@
 package com.saxonica.ee.trans;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.pattern.BasePatternWithPredicate;
@@ -31,11 +31,11 @@ public class EqualityPatternOptimizer extends PatternOptimizer {
             Expression exp = ((PatternWithPredicate) pattern).getPredicate();
             if (exp instanceof ComparisonExpression) {
                 if (exp instanceof GeneralComparison && ((ComparisonExpression) exp).getRhsExpression() instanceof StringLiteral
-                        && ((GeneralComparison) exp).getSingletonOperator() == Token.FEQ) {
+                        && ((GeneralComparison) exp).getSingletonOperator() == OperatorSymbol.FEQ) {
                     return true;
                 }
                 if (exp instanceof ValueComparison && ((ComparisonExpression) exp).getRhsExpression() instanceof StringLiteral
-                        && ((ValueComparison) exp).getSingletonOperator() == Token.FEQ) {
+                        && ((ValueComparison) exp).getSingletonOperator() == OperatorSymbol.FEQ) {
                     return true;
                 }
             }

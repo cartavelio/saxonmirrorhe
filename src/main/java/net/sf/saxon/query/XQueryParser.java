@@ -582,7 +582,7 @@ public class XQueryParser extends XPathParser {
 
         while (true) {
             try {
-                if (t.currentToken == Token.MODULE_NAMESPACE) {
+                if (t.isKeywordPair("module", "namespace")) {
                     NamespaceUri uri = ((QueryModule) env).getModuleNamespace();
                     if (uri == null) {
                         grumble("Module declaration must not be used in a main module");
@@ -592,25 +592,29 @@ public class XQueryParser extends XPathParser {
                     if (!allowModuleDecl) {
                         grumble("Module declaration must precede other declarations in the query prolog");
                     }
+                    nextToken();
+                    nextToken();
                 }
                 allowModuleDecl = false;
-                switch (t.currentToken) {
-                    case Token.DECLARE_NAMESPACE:
+                if (isKeyword("declare")) {
+                    nextToken();
+
+                    if (isKeyword("namespace")) {
                         if (!allowDeclarations) {
                             grumble("Namespace declarations cannot follow variables, functions, or options");
                         }
-                        //allowSetters = false;
+                        nextToken();
                         parseNamespaceDeclaration();
-                        break;
-                    case Token.DECLARE_ANNOTATED:
+                    } else if (t.currentToken == Token.PERCENT) {
+                        nextToken();
                         // we have read "declare %"
                         processPreamble();
                         if (allowDeclarations) {
                             sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
-                        nextToken();
-                        expect(Token.PERCENT);
+//                        nextToken();
+//                        expect(Token.PERCENT);
                         AnnotationList annotationList = parseAnnotationsList();
                         if (isKeyword("function")) {
                             annotationList.check(env.getConfiguration(), "DF");
@@ -624,8 +628,7 @@ public class XQueryParser extends XPathParser {
                         } else {
                             grumble("Annotations can appear only in 'declare variable' and 'declare function'");
                         }
-                        break;
-                    case Token.DECLARE_FIXED:
+                    } else if (isKeyword("fixed")) {
                         checkLanguageVersion40();
                         nextToken();
                         if (!isKeyword("default")) {
@@ -650,8 +653,7 @@ public class XQueryParser extends XPathParser {
                                 grumble("After 'declare fixed default', expected 'element' or 'function'");
                                 break;
                         }
-                        break;
-                    case Token.DECLARE_DEFAULT:
+                    } else if (isKeyword("default")) {
                         nextToken();
                         expectName();
                         switch (t.currentTokenValue) {
@@ -689,52 +691,32 @@ public class XQueryParser extends XPathParser {
                                 grumble("After 'declare default', expected 'element', 'function', or 'collation'");
                                 break;
                         }
-                        break;
-                    case Token.DECLARE_BOUNDARY_SPACE:
+                    } else if (isKeyword("boundary-space")) {
                         if (!allowDeclarations) {
                             grumble("'declare boundary-space' must appear earlier in the query prolog");
                         }
                         parseBoundarySpaceDeclaration();
-                        break;
-                    case Token.DECLARE_ORDERING:
+                    } else if (isKeyword("ordering")) {
                         if (!allowDeclarations) {
                             grumble("'declare ordering' must appear earlier in the query prolog");
                         }
                         parseOrderingDeclaration();
-                        break;
-                    case Token.DECLARE_COPY_NAMESPACES:
+                    } else if (isKeyword("copy-namespaces")) {
                         if (!allowDeclarations) {
                             grumble("'declare copy-namespaces' must appear earlier in the query prolog");
                         }
                         parseCopyNamespacesDeclaration();
-                        break;
-                    case Token.DECLARE_BASEURI:
+                    } else if (isKeyword("base-uri")) {
                         if (!allowDeclarations) {
                             grumble("'declare base-uri' must appear earlier in the query prolog");
                         }
                         parseBaseURIDeclaration();
-                        break;
-                    case Token.DECLARE_DECIMAL_FORMAT:
+                    } else if (isKeyword("decimal-format")) {
                         if (!allowDeclarations) {
                             grumble("'declare decimal-format' must appear earlier in the query prolog");
                         }
                         parseDecimalFormatDeclaration();
-                        break;
-                    case Token.IMPORT_SCHEMA:
-                        //allowSetters = false;
-                        if (!allowDeclarations) {
-                            grumble("Import schema must appear earlier in the prolog");
-                        }
-                        parseSchemaImport();
-                        break;
-                    case Token.IMPORT_MODULE:
-                        //allowSetters = false;
-                        if (!allowDeclarations) {
-                            grumble("Import module must appear earlier in the prolog");
-                        }
-                        parseModuleImport();
-                        break;
-                    case Token.DECLARE_VARIABLE:
+                    } else if (isKeyword("variable")) {
                         //allowSetters = false;
                         if (allowDeclarations) {
                             sealNamespaces(namespacesToBeSealed, env.getConfiguration());
@@ -742,25 +724,21 @@ public class XQueryParser extends XPathParser {
                         }
                         processPreamble();
                         parseVariableDeclaration(AnnotationList.EMPTY);
-                        break;
-                    case Token.DECLARE_CONTEXT:
-                        //allowSetters = false;
+                    } else if (isKeyword("context")) {
                         if (allowDeclarations) {
                             sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
                         parseContextItemDeclaration();
-                        break;
-                    case Token.DECLARE_FUNCTION:
+                    } else if (isKeyword("function")) {
                         if (allowDeclarations) {
                             sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
                         parseFunctionDeclaration(AnnotationList.EMPTY);
-                        break;
-                    case Token.DECLARE_UPDATING:
+                    } else if (isKeyword("updating")) {
                         nextToken();
                         if (!isKeyword("function")) {
                             grumble("expected 'function' after 'declare updating");
@@ -771,44 +749,56 @@ public class XQueryParser extends XPathParser {
                         }
                         processPreamble();
                         parserExtension.parseUpdatingFunctionDeclaration(this);
-                        break;
-                    case Token.DECLARE_OPTION:
+                    } else if (isKeyword("option")) {
                         if (allowDeclarations) {
                             sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         parseOptionDeclaration();
-                        break;
-                    case Token.DECLARE_ITEM_TYPE:
+                    } else if (isKeyword("item-type")) {
                         checkSyntaxExtensions("declare item-type");
                         if (allowDeclarations) {
                             sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         parseItemTypeDeclaration(AnnotationList.EMPTY);
-                        break;
-                    case Token.DECLARE_CONSTRUCTION:
+                    } else if (isKeyword("construction")) {
                         if (!allowDeclarations) {
                             grumble("'declare construction' must appear earlier in the query prolog");
                         }
                         parseConstructionDeclaration();
-                        break;
-                    case Token.DECLARE_REVALIDATION:
+                    } else if (isKeyword("revalidation")) {
                         if (!allowDeclarations) {
                             grumble("'declare revalidation' must appear earlier in the query prolog");
                         }
                         parserExtension.parseRevalidationDeclaration(this);
-                        break;
-                    case Token.EOF:
-                        NamespaceUri uri = ((QueryModule) env).getModuleNamespace();
-                        if (uri == null) {
-                            grumble("The main module must contain a query expression after any declarations in the prolog");
-                        } else {
-                            return;
+                    } else {
+                        grumble("Unknown keyword " + t.currentToken + " after 'declare'");
+                    }
+                } else if (isKeyword("import")) {
+                    nextToken();
+                    if (isKeyword("schema")) {
+                        if (!allowDeclarations) {
+                            grumble("Import schema must appear earlier in the prolog");
                         }
-                        break;
-                    default:
+                        parseSchemaImport();
+                    } else if (isKeyword("module")) {
+                        if (!allowDeclarations) {
+                            grumble("Import module must appear earlier in the prolog");
+                        }
+                        parseModuleImport();
+                    } else {
+                        grumble("Unknown keyword " + t.currentToken + " after 'import'");
+                    }
+                } else if (t.currentToken == Token.EOF) {
+                    NamespaceUri uri = ((QueryModule) env).getModuleNamespace();
+                    if (uri == null) {
+                        grumble("The main module must contain a query expression after any declarations in the prolog");
+                    } else {
                         return;
+                    }
+                } else {
+                    return;
                 }
                 expect(Token.SEMICOLON);
                 nextToken();
@@ -1213,7 +1203,7 @@ public class XQueryParser extends XPathParser {
                 fixedDefault = true;
                 nextToken();
             }
-            if (isKeyword("default") || t.currentToken == Token.DEFAULT) {
+            if (isKeyword("default")) {
                 nextToken();
                 if (!isKeyword("element")) {
                     grumble("In 'import schema', expected 'element namespace'");
@@ -2350,14 +2340,14 @@ public class XQueryParser extends XPathParser {
         List<Clause> clauseList = new ArrayList<>(4);
         while (true) {
             int offset = t.currentTokenStartOffset;
-            if (t.currentToken == Token.FOR) {
+            if (t.currentToken == Token.FOR || isKeyword("for")) {
                 parseForClause(flwor, clauseList);
             } else if (t.currentToken == Token.FOR_MEMBER || t.currentToken == Token.FOR_KEY || t.currentToken == Token.FOR_VALUE) {
                 if (!allowXPath40Syntax) {
                     grumble("The 'for member/key/value' clause requires XQuery 4.0 to be enabled");
                 }
                 parseForClause(flwor, clauseList);
-            } else if (t.currentToken == Token.LET) {
+            } else if (t.currentToken == Token.LET || isKeyword("let")) {
                 parseLetClause(flwor, clauseList);
             } else if (t.currentToken == Token.COUNT) {
                 parseCountClause(clauseList);
@@ -2372,7 +2362,7 @@ public class XQueryParser extends XPathParser {
                 setLocation(clause, t.currentTokenStartOffset);
                 clause.setRepeated(containsLoopingClause(clauseList));
                 clauseList.add(clause);
-            } else if (t.currentToken == Token.WHILE || isKeyword("while")) {
+            } else if (isKeyword("while")) {
                 if (!allowXPath40Syntax) {
                     grumble("The 'while' clause requires XQuery 4.0 to be enabled");
                 }
@@ -2437,7 +2427,7 @@ public class XQueryParser extends XPathParser {
         }
 
         int returnOffset = t.currentTokenStartOffset;
-        expect(Token.RETURN);
+        expectKeyword("return");
         t.setState(Tokenizer.DEFAULT_STATE);
         nextToken();
         Expression returnExpression = parseExprSingle();
@@ -2630,7 +2620,7 @@ public class XQueryParser extends XPathParser {
                 clause.setPositionVariable(pos);
                 nextToken();
             }
-            expect(Token.IN);
+            expectKeyword("in");
             nextToken();
             Expression collection = parseExprSingle();
             if (iterand == Token.FOR_MEMBER) {
@@ -2732,7 +2722,7 @@ public class XQueryParser extends XPathParser {
             StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
             SequenceType type = SequenceType.ANY_SEQUENCE;
             nextToken();
-            if (t.currentToken == Token.AS) {
+            if (isKeyword("as")) {
                 nextToken();
                 type = parseSequenceType();
             }
@@ -3221,7 +3211,7 @@ public class XQueryParser extends XPathParser {
             nextToken();
         }
 
-        while (t.currentToken == Token.CASE || isKeyword("case")) {
+        while (isKeyword("case")) {
             List<SequenceType> typeList;
             Expression action;
             nextToken();
@@ -3231,7 +3221,7 @@ public class XQueryParser extends XPathParser {
                 final String var = t.currentTokenValue;
                 final StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
                 nextToken();
-                expect(Token.AS);
+                expectKeyword("as");
                 nextToken();
                 typeList = parseSequenceTypeList();
                 action = makeTracer(
@@ -3254,7 +3244,7 @@ public class XQueryParser extends XPathParser {
         if (types.isEmpty()) {
             grumble("At least one case clause is required in a typeswitch");
         }
-        expect(Token.DEFAULT);
+        expectKeyword("default");
         final int defaultOffset = t.currentTokenStartOffset;
         nextToken();
         Expression defaultAction;
@@ -3430,7 +3420,7 @@ public class XQueryParser extends XPathParser {
             for (int i = 0; i < caseExpressions.size(); i++) {
                 SwitchCaseComparison vc = new SwitchCaseComparison(
                         new LocalVariableReference(outerLet),
-                        Token.FEQ,
+                        OperatorSymbol.FEQ,
                         caseExpressions.get(i),
                         allowXPath40Syntax);
                 if (i == 0) {
@@ -3678,6 +3668,7 @@ public class XQueryParser extends XPathParser {
     /*@NotNull*/
     @Override
     protected Expression parseConstructor() throws XPathException {
+        System.err.println("parseConstructor inputOffset " + t.inputOffset);
         int offset = t.currentTokenStartOffset;
         int tok = Token.isNameToken(t.currentToken) ? Token.NAME : t.currentToken;
         switch (tok) {
@@ -4275,7 +4266,7 @@ public class XQueryParser extends XPathParser {
                         break;
 
                     case Token.STAR:
-                    case Token.MULT:
+                    //case Token.MULT:
                         nextToken();
                         tests.add(AnyNodeTest.getInstance());
                         break;
@@ -4400,6 +4391,29 @@ public class XQueryParser extends XPathParser {
             inst.setSelect(stringify(content, false, env));
         }
         setLocation(inst, offset);
+    }
+
+    /**
+     * Read the next token, catching any exception thrown by the tokenizer
+     *
+     * @throws XPathException if an invalid token is found
+     */
+    @Override
+    public void nextToken() throws XPathException {
+        super.nextToken();
+        if (t.currentToken == Token.START_TAG) {
+            // The tokenizer has identified a direct element constructor, but it hasn't yet
+            // been parsed.
+            pendingDirectElementConstructor = parseDirectElementConstructor(false);
+            t.lookAhead();
+        }
+    }
+
+    private Expression pendingDirectElementConstructor = null;
+
+    @Override
+    protected Expression getPendingDirectElementConstructor() {
+        return pendingDirectElementConstructor;
     }
 
     /**
@@ -4865,8 +4879,8 @@ public class XQueryParser extends XPathParser {
                     addStringComponent(components, avt, last, i0);
                 }
                 Expression exp;
-                XPathParser parser = newParser();
-                ((XQueryParser) parser).executable = executable;
+                XQueryParser parser = newParser();
+                parser.executable = executable;
                 parser.setAllowAbsentExpression(allowXPath31Syntax);
                 parser.setScanOnly(scanOnly);
                 parser.setRangeVariableStack(rangeVariables);

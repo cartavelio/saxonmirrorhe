@@ -41,7 +41,7 @@ public class ArithmeticExpression extends BinaryExpression {
      * @param p1       the second operand
      */
 
-    public ArithmeticExpression(Expression p0, int operator, Expression p1) {
+    public ArithmeticExpression(Expression p0, OperatorSymbol operator, Expression p1) {
         super(p0, operator, p1);
     }
 
@@ -111,7 +111,7 @@ public class ArithmeticExpression extends BinaryExpression {
 
         SequenceType atomicType = SequenceType.OPTIONAL_ATOMIC;
 
-        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 0);
         //role0.setSourceLocator(this);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
         final ItemType itemType0 = getLhsExpression().getItemType();
@@ -131,7 +131,7 @@ public class ArithmeticExpression extends BinaryExpression {
 
         // System.err.println("First operand"); operand0.display(10);
 
-        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
         final ItemType itemType1 = getRhsExpression().getItemType();
         if (itemType1 instanceof ErrorType) {
@@ -168,7 +168,7 @@ public class ArithmeticExpression extends BinaryExpression {
 
 
 
-        if (operator == Token.NEGATE) {
+        if (operator == OperatorSymbol.NEGATE) {
             if (getRhsExpression() instanceof Literal && ((Literal) getRhsExpression()).getGroundedValue() instanceof NumericValue) {
                 NumericValue nv = (NumericValue) ((Literal) getRhsExpression()).getGroundedValue();
                 return Literal.makeLiteral(nv.negate(), this);
@@ -246,11 +246,11 @@ public class ArithmeticExpression extends BinaryExpression {
             return null;
         } else {
             switch (operator) {
-                case Token.PLUS:
+                case PLUS:
                     return new IntegerValue[]{bounds0[0].plus(bounds1[0]), bounds0[1].plus(bounds1[1])};
-                case Token.MINUS:
+                case MINUS:
                     return new IntegerValue[]{bounds0[0].minus(bounds1[1]), bounds0[1].minus(bounds1[0])};
-                case Token.MULT:
+                case TIMES:
                     if (getRhsExpression() instanceof Literal) {
                         IntegerValue val1 = bounds1[0];
                         if (val1.signum() > 0) {
@@ -267,8 +267,8 @@ public class ArithmeticExpression extends BinaryExpression {
                         }
                     }
                     return null; 
-                case Token.DIV:
-                case Token.IDIV:
+                case DIV:
+                case IDIV:
                     if (getRhsExpression() instanceof Literal) {
                         IntegerValue val1 = bounds1[0];
                         if (val1.signum() > 0) {
@@ -329,20 +329,20 @@ public class ArithmeticExpression extends BinaryExpression {
      *         {@link Calculator#PLUS}
      */
 
-    public static int mapOpCode(int op) {
+    public static int mapOpCode(OperatorSymbol op) {
         switch (op) {
-            case Token.PLUS:
+            case PLUS:
                 return Calculator.PLUS;
-            case Token.MINUS:
-            case Token.NEGATE:
+            case MINUS:
+            case NEGATE:
                 return Calculator.MINUS;
-            case Token.MULT:
+            case TIMES:
                 return Calculator.TIMES;
-            case Token.DIV:
+            case DIV:
                 return Calculator.DIV;
-            case Token.IDIV:
+            case IDIV:
                 return Calculator.IDIV;
-            case Token.MOD:
+            case MOD:
                 return Calculator.MOD;
             default:
                 throw new IllegalArgumentException();
@@ -381,7 +381,7 @@ public class ArithmeticExpression extends BinaryExpression {
                 // is unknown, we can still infer that the result is numeric. (Not so for X*2, however, where it could
                 // be a duration)
                 TypeHierarchy th = getConfiguration().getTypeHierarchy();
-                if ((operator == Token.PLUS || operator == Token.MINUS) &&
+                if ((operator == OperatorSymbol.PLUS || operator == OperatorSymbol.MINUS) &&
                         (NumericType.isNumericType(t2) || NumericType.isNumericType(t1))) {
                     resultType = NumericType.getInstance();
                 }
@@ -402,7 +402,7 @@ public class ArithmeticExpression extends BinaryExpression {
         // The rationale for this is in the XSLT 3.0 spec
         if (getParentExpression() instanceof FilterExpression && ((FilterExpression)getParentExpression()).getRhsExpression() == this) {
             return UType.NUMERIC;
-        } else if (operator == Token.NEGATE) {
+        } else if (operator == OperatorSymbol.NEGATE) {
             return UType.NUMERIC;
         } else {
             return UType.ANY_ATOMIC;

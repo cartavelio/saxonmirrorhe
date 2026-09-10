@@ -327,7 +327,7 @@ public final class ItemChecker extends UnaryExpression {
         switch (relationship) {
             case OVERLAPS:
                 if (requiredItemType instanceof NodeTest && operandType instanceof NodeTest) {
-                    return new CombinedNodeTest((NodeTest) requiredItemType, Token.INTERSECT, (NodeTest) operandType);
+                    return new CombinedNodeTest((NodeTest) requiredItemType, OperatorSymbol.INTERSECT, (NodeTest) operandType);
                 } else {
                     // we don't know how to intersect atomic types, it doesn't actually happen
                     return requiredItemType;

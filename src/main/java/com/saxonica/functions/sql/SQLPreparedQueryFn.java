@@ -1,7 +1,7 @@
 package com.saxonica.functions.sql;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.NotFn;
 import net.sf.saxon.functions.SystemFunction;
@@ -131,19 +131,19 @@ public class SQLPreparedQueryFn extends SystemFunction {
         return ok;
     }
 
-    private static String makeOperator(int op) {
+    private static String makeOperator(OperatorSymbol op) {
         switch (op) {
-            case Token.FEQ:
+            case FEQ:
                 return "=";
-            case Token.FNE:
+            case FNE:
                 return "<>";
-            case Token.FLE:
+            case FLE:
                 return "<=";
-            case Token.FLT:
+            case FLT:
                 return "<";
-            case Token.FGE:
+            case FGE:
                 return ">=";
-            case Token.FGT:
+            case FGT:
                 return ">";
             default:
                 return "###";

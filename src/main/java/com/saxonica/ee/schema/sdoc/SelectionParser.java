@@ -2,10 +2,7 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.stream.StreamingPatternMaker;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.expr.parser.Tokenizer;
-import net.sf.saxon.expr.parser.XPathParser;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.QNameParser;
 import net.sf.saxon.pattern.AnyNodeTest;
@@ -86,7 +83,7 @@ public class SelectionParser extends XPathParser {
                 grumble("Union operator in the selector/field XPath subset must be written as '|'");
             }
             nextToken();
-            exp = new VennExpression(exp, Token.UNION, parseRelativePath());
+            exp = new VennExpression(exp, OperatorSymbol.UNION, parseRelativePath());
             setLocation(exp);
         }
         return exp;

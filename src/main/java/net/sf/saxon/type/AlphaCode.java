@@ -9,7 +9,7 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -374,15 +374,15 @@ public class AlphaCode {
                     break;
                 case "i": // intersection of types
                     tree.vennOperands = value.toArray(new AlphaCodeTree[]{});
-                    tree.vennOperator = Token.INTERSECT;
+                    tree.vennOperator = OperatorSymbol.INTERSECT;
                     break;
                 case "u": // union of types
                     tree.vennOperands = value.toArray(new AlphaCodeTree[]{});
-                    tree.vennOperator = Token.UNION;
+                    tree.vennOperator = OperatorSymbol.UNION;
                     break;
                 case "d": // difference of types
                     tree.vennOperands = value.toArray(new AlphaCodeTree[]{});
-                    tree.vennOperator = Token.EXCEPT;
+                    tree.vennOperator = OperatorSymbol.EXCEPT;
                     break;
                 default:
                     throw new IllegalArgumentException("Bad alphacode component " + key);
@@ -664,7 +664,7 @@ public class AlphaCode {
         AlphaCodeTree resultType;
         List<AlphaCodeTree> argTypes;
         AlphaCodeTree elementType;
-        int vennOperator;
+        OperatorSymbol vennOperator;
         AlphaCodeTree[] vennOperands;
         List<String> fieldNames;
         Set<String> optionalFieldNames;
@@ -768,7 +768,7 @@ public class AlphaCode {
                     itemType = new CombinedNodeTest(nt0, tree.vennOperator, nt1);
                 } else {
                     // Dangerous short-cut here - we know this will be a union of node kind tests
-                    assert tree.vennOperator == Token.UNION;
+                    assert tree.vennOperator == OperatorSymbol.UNION;
                     UType u = UType.VOID;
                     for (int i = 0; i < tree.vennOperands.length; i++) {
                         ItemType it = sequenceTypeFromTree(tree.vennOperands[i], config).getPrimaryType();
@@ -862,7 +862,7 @@ public class AlphaCode {
                             } else {
                                 itemType = new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
                                 if (contentTest != null) {
-                                    itemType = new CombinedNodeTest((NodeTest) itemType, Token.INTERSECT, contentTest);
+                                    itemType = new CombinedNodeTest((NodeTest) itemType, OperatorSymbol.INTERSECT, contentTest);
                                 }
                             }
                             break;
@@ -876,7 +876,7 @@ public class AlphaCode {
                             } else {
                                 itemType = new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
                                 if (contentTest != null) {
-                                    itemType = new CombinedNodeTest((NodeTest) itemType, Token.INTERSECT, contentTest);
+                                    itemType = new CombinedNodeTest((NodeTest) itemType, OperatorSymbol.INTERSECT, contentTest);
                                 }
                             }
                             break;
@@ -1048,7 +1048,7 @@ public class AlphaCode {
                 result.vennOperands[1] = makeTree(combi.getOperand(1));
             }
         } else if (primary instanceof MultipleNodeKindTest) {
-            result.vennOperator = Token.UNION;
+            result.vennOperator = OperatorSymbol.UNION;
             Set<PrimitiveUType> types = primary.getUType().decompose();
             result.vennOperands = new AlphaCodeTree[types.size()];
             int i = 0;
@@ -1192,8 +1192,8 @@ public class AlphaCode {
         }
         if (tree.vennOperands != null) {
             String operator =
-                    tree.vennOperator == Token.INTERSECT ? "i"
-                            : tree.vennOperator == Token.UNION ? "u"
+                    tree.vennOperator == OperatorSymbol.INTERSECT ? "i"
+                            : tree.vennOperator == OperatorSymbol.UNION ? "u"
                             : "d";
             sb.append(" ")
                     .append(operator)

@@ -100,7 +100,7 @@ public abstract class Token {
     /**
      * Multiply operator, "*" when used in an operator context
      */
-    public static final int MULT = 17;
+    public static final int MULT = 207;
     /**
      * Operator "div"
      */
@@ -739,7 +739,6 @@ public abstract class Token {
         reg(LE, "<=");
         reg(PLUS, "+");
         reg(MINUS, "-");
-        reg(MULT, "*");
         reg(MATH_MULT, "×");
         regk(DIV, "div");
         reg(MATH_DIVIDE, "÷");
@@ -921,24 +920,24 @@ public abstract class Token {
      * @return the inverse operator
      */
 
-    public static int inverse(int operator) {
+    public static OperatorSymbol inverse(OperatorSymbol operator) {
         switch (operator) {
             case LT:
-                return GT;
+                return OperatorSymbol.GT;
             case LE:
-                return GE;
+                return OperatorSymbol.GE;
             case GT:
-                return LT;
+                return OperatorSymbol.LT;
             case GE:
-                return LE;
+                return OperatorSymbol.LE;
             case FLT:
-                return FGT;
+                return OperatorSymbol.FGT;
             case FLE:
-                return FGE;
+                return OperatorSymbol.FGE;
             case FGT:
-                return FLT;
+                return OperatorSymbol.FLT;
             case FGE:
-                return FLE;
+                return OperatorSymbol.FLE;
             default:
                 return operator;
         }
@@ -952,27 +951,27 @@ public abstract class Token {
      * @return the negated operator
      */
 
-    public static int negate(int operator) {
+    public static OperatorSymbol negate(OperatorSymbol operator) {
         switch (operator) {
             case FEQ:
-                return FNE;
+                return OperatorSymbol.FNE;
             case FNE:
-                return FEQ;
+                return OperatorSymbol.FEQ;
             case FLT:
-                return FGE;
+                return OperatorSymbol.FGE;
             case FLE:
-                return FGT;
+                return OperatorSymbol.FGT;
             case FGT:
-                return FLE;
+                return OperatorSymbol.FLE;
             case FGE:
-                return FLT;
+                return OperatorSymbol.FLT;
             default:
                 throw new IllegalArgumentException("Invalid operator for negate()");
         }
     }
 
-    public static boolean isOrderedOperator(int operator) {
-        return operator != FEQ && operator != FNE;
+    public static boolean isOrderedOperator(OperatorSymbol operator) {
+        return operator != OperatorSymbol.FEQ && operator != OperatorSymbol.FNE;
     }
 }
 

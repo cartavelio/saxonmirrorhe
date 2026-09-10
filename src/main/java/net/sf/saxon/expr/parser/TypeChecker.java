@@ -230,11 +230,11 @@ public class TypeChecker {
         return null;
     }
 
-    public Expression makeArithmeticExpression(Expression lhs, int operator, Expression rhs) {
+    public Expression makeArithmeticExpression(Expression lhs, OperatorSymbol operator, Expression rhs) {
         return new ArithmeticExpression(lhs, operator, rhs);
     }
 
-    public Expression makeGeneralComparison(Expression lhs, int operator, Expression rhs) {
+    public Expression makeGeneralComparison(Expression lhs, OperatorSymbol operator, Expression rhs) {
         return new GeneralComparison20(lhs, operator, rhs);
     }
 

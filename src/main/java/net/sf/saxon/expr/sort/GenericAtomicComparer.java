@@ -9,6 +9,7 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.CompareToConstant;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StandardNames;
@@ -138,7 +139,7 @@ public class GenericAtomicComparer implements AtomicComparer {
      * @return a function to perform the comparison
      */
 
-    private static AtomicComparisonFunction getContextFreeComparisonFunction(int operator) {
+    private static AtomicComparisonFunction getContextFreeComparisonFunction(OperatorSymbol operator) {
         return (a, b, context) -> {
             int comp = ((XPathComparable) a).compareTo((XPathComparable) b);
             return CompareToConstant.interpretComparisonResult(operator, comp);
@@ -151,10 +152,10 @@ public class GenericAtomicComparer implements AtomicComparer {
      * @return a function to perform the comparison
      */
 
-    private static AtomicComparisonFunction getFloatingPointComparisonFunction(int operator) {
+    private static AtomicComparisonFunction getFloatingPointComparisonFunction(OperatorSymbol operator) {
         return (a, b, context) -> {
             if (a.isNaN() || b.isNaN()) {
-                return operator == Token.FNE;
+                return operator == OperatorSymbol.FNE;
             }
             int comp = ((XPathComparable) a).compareTo((XPathComparable) b);
             return CompareToConstant.interpretComparisonResult(operator, comp);
@@ -201,7 +202,7 @@ public class GenericAtomicComparer implements AtomicComparer {
 
     public static AtomicComparisonFunction makeAtomicComparisonFunction(
             BuiltInAtomicType type0, BuiltInAtomicType type1,
-            StringCollator collator, int operator,
+            StringCollator collator, OperatorSymbol operator,
             boolean allowRecursion, boolean allow40) {
 
         int fp0 = applyPromotion(type0, allow40);
@@ -238,9 +239,9 @@ public class GenericAtomicComparer implements AtomicComparer {
                 case StandardNames.XS_QNAME:
                 case StandardNames.XS_NOTATION:
                     switch (operator) {
-                        case Token.FEQ:
+                        case FEQ:
                             return (a, b, context) -> a.equals(b);
-                        case Token.FNE:
+                        case FNE:
                             return (a, b, context) -> !a.equals(b);
                         default:
                             return (a, b, context) -> {
@@ -249,10 +250,10 @@ public class GenericAtomicComparer implements AtomicComparer {
                     }
 
                 case StandardNames.XS_STRING:
-                    if (collator instanceof CodepointCollator && operator == Token.FEQ) {
+                    if (collator instanceof CodepointCollator && operator == OperatorSymbol.FEQ) {
                         return (a, b, context) -> a.equals(b);
                     }
-                    if (collator instanceof CodepointCollator && operator == Token.FNE) {
+                    if (collator instanceof CodepointCollator && operator == OperatorSymbol.FNE) {
                         return (a, b, context) -> !a.equals(b);
                     } else {
                         return (a, b, context) -> {
@@ -267,9 +268,9 @@ public class GenericAtomicComparer implements AtomicComparer {
         if (type0.isDurationType() && type1.isDurationType()) {
             // potentially different subtypes of xs:duration - only equality comparison allowed
             switch (operator) {
-                case Token.FEQ:
+                case FEQ:
                     return (a, b, context) -> a.equals(b);
-                case Token.FNE:
+                case FNE:
                     return (a, b, context) -> !a.equals(b);
                 default:
                     // fall through and try again using the run-time types

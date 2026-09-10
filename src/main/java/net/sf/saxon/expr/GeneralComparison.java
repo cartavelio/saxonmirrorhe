@@ -47,7 +47,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     public enum ComparisonCardinality {ONE_TO_ONE, MANY_TO_ONE, MANY_TO_MANY}
     // Note, a one-to-many comparison is inverted into a many-to-one comparison
 
-    protected int singletonOperator;
+    protected OperatorSymbol singletonOperator;
     protected AtomicComparer comparer;
     protected boolean runtimeCheckNeeded = true;
     protected ComparisonCardinality comparisonCardinality = ComparisonCardinality.MANY_TO_MANY;
@@ -62,7 +62,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * @param p1 the right-hand operand
      */
 
-    public GeneralComparison(Expression p0, int op, Expression p1) {
+    public GeneralComparison(Expression p0, OperatorSymbol op, Expression p1) {
         super(p0, op, p1);
         singletonOperator = getCorrespondingSingletonOperator(op);
     }
@@ -167,7 +167,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     @Override
-    public int getSingletonOperator() {
+    public OperatorSymbol getSingletonOperator() {
         return singletonOperator;
     }
 
@@ -226,11 +226,11 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
         TypeChecker tc = config.getTypeChecker(false);
         Supplier<RoleDiagnostic> role0 =
-                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 0);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
 
         Supplier<RoleDiagnostic> role1 =
-                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
 
         if (getLhsExpression() != oldOp0) {
@@ -474,7 +474,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         }
 
         // look for (N to M = I)
-        if (operator == Token.EQUALS) {
+        if (operator == OperatorSymbol.EQUALS) {
 
             // First a variable range...
 
@@ -535,8 +535,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         // early exit on a many-to-one comparison. But with a many-to-one comparison, do it
         // if the "many" branch can be lifted up the expression tree.
 
-        if (operator != Token.EQUALS &&
-                operator != Token.NE &&
+        if (operator != OperatorSymbol.EQUALS &&
+                operator != OperatorSymbol.NE &&
                 (comparisonCardinality == ComparisonCardinality.MANY_TO_MANY ||
                          comparisonCardinality == ComparisonCardinality.MANY_TO_ONE && (manyOperandIsLiftable() || manyOperandIsRangeExpression())) &&
                 (NumericType.isNumericType(t0) || NumericType.isNumericType(t1))) {
@@ -544,16 +544,16 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             // System.err.println("** using minimax optimization **");
             ValueComparison vc;
             switch (operator) {
-                case Token.LT:
-                case Token.LE:
+                case LT:
+                case LE:
                     vc = new ValueComparison(makeMinOrMax(visitor, contextInfo, getLhsExpression(), "min"),
                             singletonOperator,
                             makeMinOrMax(visitor, contextInfo, getRhsExpression(), "max"));
                     vc.setResultWhenEmpty(BooleanValue.FALSE);
                     //vc.setAtomicComparer(comparer);
                     break;
-                case Token.GT:
-                case Token.GE:
+                case GT:
+                case GE:
                     vc = new ValueComparison(makeMinOrMax(visitor, contextInfo, getLhsExpression(), "max"),
                             singletonOperator,
                             makeMinOrMax(visitor, contextInfo, getRhsExpression(), "min"));
@@ -649,7 +649,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      */
 
     public static boolean compare(AtomicValue a0,
-                                  int operator,
+                                  OperatorSymbol operator,
                                   AtomicValue a1,
                                   AtomicComparer comparer,
                                   boolean checkTypes,
@@ -727,20 +727,20 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * @return the corresponding singleton operator, for example {@link Token#FLE}
      */
 
-    public static int getCorrespondingSingletonOperator(int op) {
+    public static OperatorSymbol getCorrespondingSingletonOperator(OperatorSymbol op) {
         switch (op) {
-            case Token.EQUALS:
-                return Token.FEQ;
-            case Token.GE:
-                return Token.FGE;
-            case Token.NE:
-                return Token.FNE;
-            case Token.LT:
-                return Token.FLT;
-            case Token.GT:
-                return Token.FGT;
-            case Token.LE:
-                return Token.FLE;
+            case EQUALS:
+                return OperatorSymbol.FEQ;
+            case GE:
+                return OperatorSymbol.FGE;
+            case NE:
+                return OperatorSymbol.FNE;
+            case LT:
+                return OperatorSymbol.FLT;
+            case GT:
+                return OperatorSymbol.FGT;
+            case LE:
+                return OperatorSymbol.FLE;
             default:
                 return op;
         }
@@ -815,7 +815,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             final boolean needsRunTimeCheck = exp.needsRuntimeCheck();
             final AtomicComparer comparer = exp.getAtomicComparer();
             final RetainedStaticContext staticContext = exp.getRetainedStaticContext();
-            final int singletonOperator = exp.getSingletonOperator();
+            final OperatorSymbol singletonOperator = exp.getSingletonOperator();
 
             switch (cardinality) {
                 case ONE_TO_ONE: {
@@ -866,14 +866,14 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
         public boolean evaluateManyToOne(SequenceIterator iter0,
                                          AtomicValue value1,
-                                         int singletonOperator,
+                                         OperatorSymbol singletonOperator,
                                          AtomicComparer comparer,
                                          boolean runTimeCheckNeeded,
                                          RetainedStaticContext staticContext,
                                          Location loc,
                                          XPathContext context) throws XPathException {
             try {
-                if (value1 == null || (value1.isNaN() && singletonOperator != Token.FNE)) {
+                if (value1 == null || (value1.isNaN() && singletonOperator != OperatorSymbol.FNE)) {
                     iter0.close();
                     return false;
                 }
@@ -883,17 +883,17 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                     }
                     RangeIterator ri = (RangeIterator) iter0;
                     switch (singletonOperator) {
-                        case Token.FEQ:
+                        case FEQ:
                             return ri.containsEq((NumericValue) value1);
-                        case Token.FNE:
+                        case FNE:
                             return ri.getFirst().compareTo(ri.getLast()) != 0 || ri.getFirst().compareTo(((NumericValue) value1)) != 0;
-                        case Token.FLE:
+                        case FLE:
                             return ri.getMin().compareTo(((NumericValue) value1)) <= 0;
-                        case Token.FLT:
+                        case FLT:
                             return ri.getMin().compareTo(((NumericValue) value1)) < 0;
-                        case Token.FGE:
+                        case FGE:
                             return ri.getMax().compareTo(((NumericValue) value1)) >= 0;
-                        case Token.FGT:
+                        case FGT:
                             return ri.getMax().compareTo(((NumericValue) value1)) > 0;
                         default:
                             throw new AssertionError();
@@ -917,7 +917,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
         public boolean evaluateManyToMany(SequenceIterator iter0,
                                           SequenceIterator iter1,
-                                          int singletonOperator,
+                                          OperatorSymbol singletonOperator,
                                           AtomicComparer comparer,
                                           boolean runTimeCheckNeeded,
                                           RetainedStaticContext staticContext,

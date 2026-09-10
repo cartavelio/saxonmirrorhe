@@ -10,12 +10,7 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Choose;
-import net.sf.saxon.expr.instruct.EvaluateInstr;
-import net.sf.saxon.expr.instruct.WithParam;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.expr.parser.TypeChecker;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -281,7 +276,7 @@ public class XSLEvaluate extends StyleElement {
             validationError = new XmlProcessingIncident("xsl:evaluate is not available in this configuration", "XTDE3175");
             return fallbackProcessing(exec, decl, this);
         } else {
-            Expression evaluateExpr = makeEvaluateInstruction(decl);
+            Expression evaluateExpr = getConfiguration().makeEvaluateInstruction(this, decl);
             if (evaluateExpr instanceof ErrorExpression) {
                 return evaluateExpr;
             }
@@ -293,7 +288,7 @@ public class XSLEvaluate extends StyleElement {
                 Expression sysProp = SystemFunction.makeCall("system-property",
                                                         makeRetainedStaticContext(),
                                                         new StringLiteral("Q{" + NamespaceConstant.XSLT + "}supports-dynamic-evaluation"));
-                conditions[0] = new ValueComparison(sysProp, Token.FEQ, new StringLiteral("no"));
+                conditions[0] = new ValueComparison(sysProp, OperatorSymbol.FEQ, new StringLiteral("no"));
                 conditions[1] = Literal.makeLiteral(BooleanValue.TRUE);
                 Expression[] actions = new Expression[2];
                 List<Expression> fallbackExpressions = new ArrayList<>();
@@ -307,31 +302,6 @@ public class XSLEvaluate extends StyleElement {
                 return evaluateExpr;
             }
         }
-    }
-
-    /**
-     * Make an instruction to implement xsl:evaluate
-     *
-     * @param decl   the corresponding component declaration
-     * @return the compiled instruction
-     * @throws XPathException if static errors are found
-     */
-
-    public Expression makeEvaluateInstruction(ComponentDeclaration decl) throws XPathException {
-        Expression xpath = getTargetExpression();
-        SequenceType requiredType = getRequiredType();
-        Expression contextItem = getContextItemExpression();
-        Expression baseUri = getBaseUriExpression();
-        Expression namespaceContext = getNamespaceContextExpression();
-        Expression schemaAware = getSchemaAwareExpression();
-        Expression withParams = getWithParamsExpression();
-        EvaluateInstr inst = new EvaluateInstr(xpath, requiredType, contextItem, baseUri, namespaceContext, schemaAware);
-        WithParam[] params = getWithParamInstructions(inst, getCompilation(), decl, false);
-        inst.setActualParams(params);
-        inst.setDynamicParams(withParams);
-        inst.setDefaultXPathNamespace(getDefaultXPathNamespace());
-        inst.setOptionsExpression(getOptionsExpression());
-        return inst;
     }
 
 

@@ -12,10 +12,7 @@ import net.sf.saxon.expr.AtomicSequenceConverter;
 import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.FirstItemExpression;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.expr.parser.TypeChecker;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -96,12 +93,12 @@ public class TypeChecker10 extends TypeChecker {
     }
 
     @Override
-    public Expression makeArithmeticExpression(Expression lhs, int operator, Expression rhs) {
+    public Expression makeArithmeticExpression(Expression lhs, OperatorSymbol operator, Expression rhs) {
         return new ArithmeticExpression10(lhs, operator, rhs);
     }
 
     @Override
-    public Expression makeGeneralComparison(Expression lhs, int operator, Expression rhs) {
+    public Expression makeGeneralComparison(Expression lhs, OperatorSymbol operator, Expression rhs) {
         return new GeneralComparison10(lhs, operator, rhs);
     }
 

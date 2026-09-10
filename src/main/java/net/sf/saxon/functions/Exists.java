@@ -14,7 +14,7 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -49,7 +49,7 @@ public class Exists extends Aggregate {
         //    exists(A|B) => exists(A) or exists(B)
         if (arguments[0] instanceof VennExpression && !visitor.isOptimizeForStreaming()) {
             VennExpression v = (VennExpression) arguments[0];
-            if (v.getOperator() == Token.UNION) {
+            if (v.getOperator() == OperatorSymbol.UNION) {
                 Expression e0 = SystemFunction.makeCall("exists", getRetainedStaticContext(), v.getLhsExpression());
                 Expression e1 = SystemFunction.makeCall("exists", getRetainedStaticContext(), v.getRhsExpression());
                 return new OrExpression(e0, e1).optimize(visitor, contextInfo);

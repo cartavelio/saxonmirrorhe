@@ -83,7 +83,7 @@ public class PatternParser extends XPathParser {
                         // the predicate may be numeric
                         if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY) {
                             // the predicate IS numeric: rewrite as N eq 1, since other values don't match
-                            filter = new ValueComparison(filter, Token.FEQ, Literal.makeLiteral(Int64Value.PLUS_ONE));
+                            filter = new ValueComparison(filter, OperatorSymbol.FEQ, Literal.makeLiteral(Int64Value.PLUS_ONE));
                         } else {
                             // the predicate MIGHT BE numeric: rewrite as
                             // let $P := predicate return if ($P instance of xs:numeric) then ($P eq 1) else $P
@@ -96,7 +96,7 @@ public class PatternParser extends XPathParser {
                             LocalVariableReference ref = new LocalVariableReference(let);
                             ref.setStaticType(SequenceType.ANY_SEQUENCE, null, 0);
                             ValueComparison comparison =
-                                    new ValueComparison(ref, Token.FEQ, Literal.makeLiteral(Int64Value.PLUS_ONE));
+                                    new ValueComparison(ref, OperatorSymbol.FEQ, Literal.makeLiteral(Int64Value.PLUS_ONE));
                             Choose choice = new Choose(new Expression[]{condition, Literal.makeLiteral(BooleanValue.TRUE)},
                                                        new Expression[]{comparison, new LocalVariableReference(let)});
                             let.setSequence(filter);

@@ -613,7 +613,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             gatherSubPatterns(up.getRHS(), subPatterns);
         } else if (match instanceof NodeTestPattern &&
                 match.getItemType() instanceof CombinedNodeTest &&
-                ((CombinedNodeTest) match.getItemType()).getOperator() == Token.UNION) {
+                ((CombinedNodeTest) match.getItemType()).getOperator() == OperatorSymbol.UNION) {
             CombinedNodeTest cnt = (CombinedNodeTest) match.getItemType();
             NodeTest[] nt = cnt.getComponentNodeTests();
             final NodeTestPattern nt0 = new NodeTestPattern(nt[0]);

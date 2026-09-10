@@ -7,7 +7,7 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -32,7 +32,7 @@ public class CombinedNodeTest extends NodeTest {
 
     private final NodeTest nodetest1;
     private final NodeTest nodetest2;
-    private final int operator;
+    private final OperatorSymbol operator;
 
     /**
      * Create a NodeTest that combines two other node tests
@@ -43,7 +43,7 @@ public class CombinedNodeTest extends NodeTest {
      * @param nt2      the second operand
      */
 
-    public CombinedNodeTest(NodeTest nt1, int operator, NodeTest nt2) {
+    public CombinedNodeTest(NodeTest nt1, OperatorSymbol operator, NodeTest nt2) {
         nodetest1 = nt1;
         this.operator = operator;
         nodetest2 = nt2;
@@ -60,11 +60,11 @@ public class CombinedNodeTest extends NodeTest {
         UType u1 = nodetest1.getUType();
         UType u2 = nodetest2.getUType();
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 return u1.union(u2);
-            case Token.INTERSECT:
+            case INTERSECT:
                 return u1.intersection(u2);
-            case Token.EXCEPT:
+            case EXCEPT:
                 return u1;
             default:
                 throw new IllegalArgumentException("Unknown operator in Combined Node Test");
@@ -89,15 +89,15 @@ public class CombinedNodeTest extends NodeTest {
     @Override
     public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 return nodetest1 == null ||
                         nodetest2 == null ||
                         nodetest1.matches(nodeKind, name, annotation) ||
                         nodetest2.matches(nodeKind, name, annotation);
-            case Token.INTERSECT:
+            case INTERSECT:
                 return (nodetest1 == null || nodetest1.matches(nodeKind, name, annotation)) &&
                         (nodetest2 == null || nodetest2.matches(nodeKind, name, annotation));
-            case Token.EXCEPT:
+            case EXCEPT:
                 return (nodetest1 == null || nodetest1.matches(nodeKind, name, annotation)) &&
                         !(nodetest2 == null || nodetest2.matches(nodeKind, name, annotation));
             default:
@@ -108,11 +108,11 @@ public class CombinedNodeTest extends NodeTest {
     @Override
     public IntPredicateProxy getMatcher(NodeVectorTree tree) {
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 return IntUnionPredicate.makeUnion(nodetest1.getMatcher(tree), (nodetest2.getMatcher(tree)));
-            case Token.INTERSECT:
+            case INTERSECT:
                 return IntIntersectionPredicate.makeIntersection(nodetest1.getMatcher(tree), (nodetest2.getMatcher(tree)));
-            case Token.EXCEPT:
+            case EXCEPT:
                 return IntExceptPredicate.makeDifference(nodetest1.getMatcher(tree), nodetest2.getMatcher(tree));
             default:
                 throw new IllegalArgumentException("Unknown operator in Combined Node Test");
@@ -130,15 +130,15 @@ public class CombinedNodeTest extends NodeTest {
     @Override
     public boolean test(/*@NotNull*/ NodeInfo node) {
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 return nodetest1 == null ||
                         nodetest2 == null ||
                         nodetest1.test(node) ||
                         nodetest2.test(node);
-            case Token.INTERSECT:
+            case INTERSECT:
                 return (nodetest1 == null || nodetest1.test(node)) &&
                         (nodetest2 == null || nodetest2.test(node));
-            case Token.EXCEPT:
+            case EXCEPT:
                 return (nodetest1 == null || nodetest1.test(node)) &&
                         !(nodetest2 == null || nodetest2.test(node));
             default:
@@ -151,7 +151,7 @@ public class CombinedNodeTest extends NodeTest {
     }
 
     private String makeString(boolean forExport) {
-        if (nodetest1 instanceof NameTest && operator == Token.INTERSECT) {
+        if (nodetest1 instanceof NameTest && operator == OperatorSymbol.INTERSECT) {
             int kind = nodetest1.getPrimitiveType();
             String skind = kind == Type.ELEMENT ? "element(" : "attribute(";
             String content = "";
@@ -170,7 +170,7 @@ public class CombinedNodeTest extends NodeTest {
         } else {
             String nt1 = nodetest1 == null ? "item()" : nodetest1.toString();
             String nt2 = nodetest2 == null ? "item()" : nodetest2.toString();
-            return '(' + nt1 + ' ' + Token.tokens[operator] + ' ' + nt2 + ')';
+            return '(' + nt1 + ' ' + operator.toString() + ' ' + nt2 + ')';
         }
     }
 
@@ -191,9 +191,9 @@ public class CombinedNodeTest extends NodeTest {
 
 
     public String getContentTypeForAlphaCode() {
-        if (nodetest1 instanceof NameTest && operator == Token.INTERSECT && nodetest2 instanceof ContentTypeTest) {
+        if (nodetest1 instanceof NameTest && operator == OperatorSymbol.INTERSECT && nodetest2 instanceof ContentTypeTest) {
             return getContentTypeForAlphaCode((NameTest) nodetest1, (ContentTypeTest)nodetest2);
-        } else if (nodetest2 instanceof NameTest && operator == Token.INTERSECT && nodetest1 instanceof ContentTypeTest) {
+        } else if (nodetest2 instanceof NameTest && operator == OperatorSymbol.INTERSECT && nodetest1 instanceof ContentTypeTest) {
             return getContentTypeForAlphaCode((NameTest) nodetest2, (ContentTypeTest) nodetest1);
         } else {
             return null;
@@ -226,7 +226,7 @@ public class CombinedNodeTest extends NodeTest {
      */
 
     public void addTypeDetails(DictionaryMap map) {
-        if (nodetest1 instanceof NameTest && operator == Token.INTERSECT) {
+        if (nodetest1 instanceof NameTest && operator == OperatorSymbol.INTERSECT) {
             map.initialPut("n", new StringValue(nodetest1.getMatchingNodeName().getEQName()));
             if (nodetest2 instanceof ContentTypeTest) {
                 SchemaType schemaType = ((ContentTypeTest) nodetest2).getSchemaType();
@@ -276,13 +276,13 @@ public class CombinedNodeTest extends NodeTest {
             IntSet s1 = os1.get();
             IntSet s2 = os2.get();
             switch (operator) {
-                case Token.UNION: {
+                case UNION: {
                     return Optional.of(s1.union(s2));
                 }
-                case Token.INTERSECT: {
+                case INTERSECT: {
                     return Optional.of(s1.intersect(s2));
                 }
-                case Token.EXCEPT: {
+                case EXCEPT: {
                     return Optional.of(s1.except(s2));
                 }
                 default:
@@ -305,7 +305,7 @@ public class CombinedNodeTest extends NodeTest {
         if (type1.isSameType(type2)) {
             return type1;
         }
-        if (operator == Token.INTERSECT) {
+        if (operator == OperatorSymbol.INTERSECT) {
             if (type2 instanceof AnyType || (type2 instanceof AnySimpleType && type1.isSimpleType())) {
                 return type1;
             }
@@ -329,7 +329,7 @@ public class CombinedNodeTest extends NodeTest {
         if (type1.isSameType(type2)) {
             return type1;
         }
-        if (operator == Token.INTERSECT) {
+        if (operator == OperatorSymbol.INTERSECT) {
             if (type2.equals(BuiltInAtomicType.ANY_ATOMIC)) {
                 return type1;
             }
@@ -351,11 +351,11 @@ public class CombinedNodeTest extends NodeTest {
     @Override
     public boolean isAtomizable(TypeHierarchy th) {
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 return nodetest1.isAtomizable(th) || nodetest2.isAtomizable(th);
-            case Token.INTERSECT:
+            case INTERSECT:
                 return nodetest1.isAtomizable(th) && nodetest2.isAtomizable(th);
-            case Token.EXCEPT:
+            case EXCEPT:
                 return nodetest1.isAtomizable(th);
             default:
                 return true;
@@ -374,10 +374,10 @@ public class CombinedNodeTest extends NodeTest {
         if (fp1 == fp2) {
             return fp1;
         }
-        if (fp2 == -1 && operator == Token.INTERSECT) {
+        if (fp2 == -1 && operator == OperatorSymbol.INTERSECT) {
             return fp1;
         }
-        if (fp1 == -1 && operator == Token.INTERSECT) {
+        if (fp1 == -1 && operator == OperatorSymbol.INTERSECT) {
             return fp2;
         }
         return -1;
@@ -390,10 +390,10 @@ public class CombinedNodeTest extends NodeTest {
         if (n1 != null && n1.equals(n2)) {
             return n1;
         }
-        if (n1 == null && operator == Token.INTERSECT) {
+        if (n1 == null && operator == OperatorSymbol.INTERSECT) {
             return n2;
         }
-        if (n2 == null && operator == Token.INTERSECT) {
+        if (n2 == null && operator == OperatorSymbol.INTERSECT) {
             return n1;
         }
         return null;
@@ -437,7 +437,7 @@ public class CombinedNodeTest extends NodeTest {
 
     @Override
     public double getDefaultPriority() {
-        if (operator == Token.UNION) {
+        if (operator == OperatorSymbol.UNION) {
             return nodetest1.getDefaultPriority();
         } else {
             // typically it's element(E, T), element(E:*, T), etc
@@ -463,7 +463,7 @@ public class CombinedNodeTest extends NodeTest {
      * @return the operator
      */
 
-    public int getOperator() {
+    public OperatorSymbol getOperator() {
         return operator;
     }
 
@@ -486,7 +486,7 @@ public class CombinedNodeTest extends NodeTest {
         if (explanation.isPresent()) {
             return explanation;
         }
-        if (operator == Token.INTERSECT) {
+        if (operator == OperatorSymbol.INTERSECT) {
             // the most common case
             if (!nodetest1.test((NodeInfo)item)) {
                 return nodetest1.explainMismatch(item, th);

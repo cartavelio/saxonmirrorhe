@@ -42,7 +42,7 @@ public class ContextValueSetter extends BinaryExpression
      */
 
     public ContextValueSetter(Expression start, Expression step) {
-        super(start, Token.BANG, step);
+        super(start, OperatorSymbol.BANG, step);
     }
 
     @Override

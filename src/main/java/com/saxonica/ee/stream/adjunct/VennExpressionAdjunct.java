@@ -13,7 +13,7 @@ import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.expr.sort.LocalOrderComparer;
 import net.sf.saxon.om.Item;
@@ -54,7 +54,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         VennExpression exp = (VennExpression) getExpression();
         Expression e0 = exp.getLhsExpression();
         Expression e1 = exp.getRhsExpression();
-        int operator = exp.getOperator();
+        OperatorSymbol operator = exp.getOperator();
 
         Pattern p0 = makeStreamingPattern(e0, config);
         if (p0 == null) {
@@ -65,9 +65,9 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
             return null;
         }
 
-        if (operator == Token.UNION) {
+        if (operator == OperatorSymbol.UNION) {
             return new UnionPattern(p0, p1);
-        } else if (operator == Token.EXCEPT) {
+        } else if (operator == OperatorSymbol.EXCEPT) {
             return new ExceptPattern(p0, p1);
         } else {
             return new IntersectPattern(p0, p1);
@@ -129,7 +129,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
 
         // Rule 5
         if (reasons != null) {
-            reasons.add("Operands of " + Token.tokens[exp.getOperator()] + " expression on line "
+            reasons.add("Operands of " + exp.getOperator() + " expression on line "
                                 + exp.getLocation().getLineNumber() + " have mixed posture (" + p0 + " | " + p1 + ")");
         }
 
@@ -244,13 +244,13 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
             super.open(terminator);
             VennExpression exp = ((VennExpression) getExpression());
             switch (exp.getOperator()) {
-                case Token.UNION:
+                case UNION:
                     combiner = new CombiningUnionFeed(exp, getResultFeed(), getContext());
                     break;
-                case Token.INTERSECT:
+                case INTERSECT:
                     combiner = new CombiningIntersectFeed(exp, getResultFeed(), getContext());
                     break;
-                case Token.EXCEPT:
+                case EXCEPT:
                     combiner = new CombiningExceptFeed(exp, getResultFeed(), getContext(), watchManager);
                     break;
                 default:
@@ -794,18 +794,18 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
             return new VennTwoWayFeed(exp, this, out, context, watchManager);
         }
 
-        int operator = exp.getOperator();
-        if (operator == Token.UNION) {
+        OperatorSymbol operator = exp.getOperator();
+        if (operator == OperatorSymbol.UNION) {
             if (a0consuming) {
                 return new SemiStreamedUnionFeed(exp, exp.getRhsExpression(), out, context);
             } else {
                 return new SemiStreamedUnionFeed(exp, exp.getLhsExpression(), out, context);
             }
-        } else if (operator == Token.INTERSECT) {
+        } else if (operator == OperatorSymbol.INTERSECT) {
             return new FilteringFeed(watchManager, out, context, FilteringFeed.OpaqueFilter);
 
 
-        } else if (operator == Token.EXCEPT) {
+        } else if (operator == OperatorSymbol.EXCEPT) {
             if (a0consuming) {
                 // If the LHS expression is streamed, we deliver its contents and ignore the RHS
                 // expression, which cannot deliver any streamed nodes

@@ -7,7 +7,7 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -44,11 +44,13 @@ public abstract class Calculator {
      * @return the corresponding token
      */
 
-    public static int getTokenFromOperator(int operator) {
+    public static OperatorSymbol getArithmeticOperatorSymbol(int operator) {
         return tokens[operator];
     }
 
-    private static final int[] tokens = new int[] {Token.PLUS, Token.MINUS, Token.MULT, Token.DIV, Token.MOD, Token.IDIV};
+    private static final OperatorSymbol[] tokens = new OperatorSymbol[] {
+            OperatorSymbol.PLUS, OperatorSymbol.MINUS,
+            OperatorSymbol.TIMES, OperatorSymbol.DIV, OperatorSymbol.MOD, OperatorSymbol.IDIV};
 
     /**
      * Get a short code to identify the calculator in expression export files

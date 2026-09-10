@@ -8,7 +8,7 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.UnicodeString;
@@ -54,24 +54,24 @@ public class UntypedNumericComparer implements AtomicComparer {
      */
 
     public static boolean quickCompare(
-            StringValue a0, NumericValue a1, int operator, ConversionRules rules)
+            StringValue a0, NumericValue a1, OperatorSymbol operator, ConversionRules rules)
             throws XPathException {
         if (a1.isNaN()) {
-            return operator == Token.FNE;
+            return operator == OperatorSymbol.FNE;
         }
         int comp = quickComparison(a0, a1, rules);
         switch (operator) {
-            case Token.FEQ:
+            case FEQ:
                 return comp == 0;
-            case Token.FLE:
+            case FLE:
                 return comp <= 0;
-            case Token.FLT:
+            case FLT:
                 return comp < 0;
-            case Token.FGE:
+            case FGE:
                 return comp >= 0;
-            case Token.FGT:
+            case FGT:
                 return comp > 0;
-            case Token.FNE:
+            case FNE:
             default:
                 return comp != 0;
         }

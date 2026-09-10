@@ -9,8 +9,8 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.CombinedNodeTest;
 import net.sf.saxon.pattern.ContentTypeTest;
@@ -87,7 +87,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
             }
             ItemType type = new CombinedNodeTest(
                     new NameTest(Type.ATTRIBUTE, attName, getConfiguration().getNamePool()),
-                    Token.INTERSECT,
+                    OperatorSymbol.INTERSECT,
                     new ContentTypeTest(Type.ATTRIBUTE, typeCode, getConfiguration(), false));
             checkItemType(type, nodeSupplier(Type.ATTRIBUTE, attName, typeCode, StringView.tidy(value)), location);
         }
@@ -195,7 +195,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
                 // don't bother with any caching on the first item, it will often be the only one
                 ItemType type = new CombinedNodeTest(
                         new NameTest(Type.ELEMENT, elemName, namePool),
-                        Token.INTERSECT,
+                        OperatorSymbol.INTERSECT,
                         new ContentTypeTest(Type.ELEMENT, elemType, config, false));
                 checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUnicodeString.getInstance()), location);
             } else {
@@ -206,7 +206,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
                 if (!checkedElements.contains(key)) {
                     ItemType type = new CombinedNodeTest(
                             new NameTest(Type.ELEMENT, elemName, namePool),
-                            Token.INTERSECT,
+                            OperatorSymbol.INTERSECT,
                             new ContentTypeTest(Type.ELEMENT, elemType, config, false));
                     checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUnicodeString.getInstance()), location);
                     checkedElements.add(key);

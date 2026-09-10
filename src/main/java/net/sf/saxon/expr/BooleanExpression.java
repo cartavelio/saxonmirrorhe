@@ -34,7 +34,7 @@ public abstract class BooleanExpression extends BinaryExpression implements Nega
      * @param p2       the second operand
      */
 
-    public BooleanExpression(Expression p1, int operator, Expression p2) {
+    public BooleanExpression(Expression p1, OperatorSymbol operator, Expression p2) {
         super(p1, operator, p2);
     }
 
@@ -48,7 +48,7 @@ public abstract class BooleanExpression extends BinaryExpression implements Nega
      */
     @Override
     public String getExpressionName() {
-        return Token.tokens[getOperator()] + "-expression";
+        return getOperator().toString() + "-expression";
     }
 
     /*@NotNull*/
@@ -214,7 +214,7 @@ public abstract class BooleanExpression extends BinaryExpression implements Nega
      */
 
     public static void listAndComponents(Expression exp, List<Expression> list) {
-        if (exp instanceof BooleanExpression && ((BooleanExpression) exp).getOperator() == Token.AND) {
+        if (exp instanceof BooleanExpression && ((BooleanExpression) exp).getOperator() == OperatorSymbol.AND) {
             for (Operand o : exp.operands()) {
                 listAndComponents(o.getChildExpression(), list);
             }

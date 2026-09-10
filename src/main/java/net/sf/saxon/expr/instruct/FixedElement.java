@@ -216,7 +216,7 @@ public class FixedElement extends ElementCreator {
 
                 itemType = new CombinedNodeTest(
                     new NameTest(Type.ELEMENT, fp, env.getConfiguration().getNamePool()),
-                    Token.INTERSECT,
+                    OperatorSymbol.INTERSECT,
                     new ContentTypeTest(Type.ELEMENT, schemaType, config, false));
                 if (xsiType != null || !decl.hasTypeAlternatives()) {
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
@@ -250,7 +250,7 @@ public class FixedElement extends ElementCreator {
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                     itemType = new CombinedNodeTest(
                             new NameTest(Type.ELEMENT, fp, config.getNamePool()),
-                            Token.INTERSECT,
+                            OperatorSymbol.INTERSECT,
                             new ContentTypeTest(Type.ELEMENT, instr.getSchemaType(), config, false));
                     try {
                         schemaType.analyzeContentExpression(content, Type.ELEMENT);
@@ -263,19 +263,19 @@ public class FixedElement extends ElementCreator {
                 // we know the result will be an element of type xs:anyType
                 itemType = new CombinedNodeTest(
                         new NameTest(Type.ELEMENT, fp, config.getNamePool()),
-                        Token.INTERSECT,
+                        OperatorSymbol.INTERSECT,
                         new ContentTypeTest(Type.ELEMENT, AnyType.getInstance(), config, false));
             } else {
                 // we know the result will be an untyped element
                 itemType = new CombinedNodeTest(
                         new NameTest(Type.ELEMENT, fp, config.getNamePool()),
-                        Token.INTERSECT,
+                        OperatorSymbol.INTERSECT,
                         new ContentTypeTest(Type.ELEMENT, Untyped.getInstance(), config, false));
             }
         } else {
             itemType = new CombinedNodeTest(
                     new NameTest(Type.ELEMENT, fp, config.getNamePool()),
-                    Token.INTERSECT,
+                    OperatorSymbol.INTERSECT,
                     new ContentTypeTest(Type.ELEMENT, schemaType, config, false)
             );
             try {

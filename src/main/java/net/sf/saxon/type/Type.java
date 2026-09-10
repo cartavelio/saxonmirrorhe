@@ -8,7 +8,7 @@
 package net.sf.saxon.type;
 
 import com.saxonica.ee.pin.pin.LabeledItem;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
@@ -174,7 +174,7 @@ public abstract class Type {
                     } else {
                         return new CombinedNodeTest(
                                 new SameNameTest(node),
-                                Token.INTERSECT,
+                                OperatorSymbol.INTERSECT,
                                 new ContentTypeTest(Type.ELEMENT, eltype, node.getConfiguration(), false));
                     }
 
@@ -185,7 +185,7 @@ public abstract class Type {
                     } else {
                         return new CombinedNodeTest(
                                 new SameNameTest(node),
-                                Token.INTERSECT,
+                                OperatorSymbol.INTERSECT,
                                 new ContentTypeTest(Type.ATTRIBUTE, attype, node.getConfiguration(), false));
                     }
 

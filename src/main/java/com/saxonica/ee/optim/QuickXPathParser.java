@@ -1,6 +1,7 @@
 package com.saxonica.ee.optim;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
@@ -394,7 +395,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                                     AxisInfo.CHILD,
                                     new NameTest(Type.ELEMENT, second.getNamespaceUri(), second.getLocalPart(), env.getConfiguration().getNamePool()));
                     two.setLocation(env.getContainingLocation());
-                    return new VennExpression(one, Token.UNION, two);
+                    return new VennExpression(one, OperatorSymbol.UNION, two);
                 });
 
         // name/@name - simple path expression selecting attributes of children
@@ -476,7 +477,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     varRef.setLocation(env.getContainingLocation());
                     Expression comparand = new StringLiteral(values.get(3));
                     comparand.setLocation(env.getContainingLocation());
-                    return new GeneralComparison20(varRef, Token.EQUALS, comparand);
+                    return new GeneralComparison20(varRef, OperatorSymbol.EQUALS, comparand);
                 });
 
         // $name != string-literal - variable reference != string literal
@@ -491,7 +492,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     varRef.setLocation(env.getContainingLocation());
                     Expression comparand = new StringLiteral(values.get(3));
                     comparand.setLocation(env.getContainingLocation());
-                    return new GeneralComparison20(varRef, Token.NE, comparand);
+                    return new GeneralComparison20(varRef, OperatorSymbol.NE, comparand);
                 });
 
         // $name = numeric-literal - variable reference = numeric literal
@@ -506,7 +507,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     varRef.setLocation(env.getContainingLocation());
                     Expression comparand = toNumericLiteral(values.get(3));
                     comparand.setLocation(env.getContainingLocation());
-                    return new GeneralComparison20(varRef, Token.EQUALS, comparand);
+                    return new GeneralComparison20(varRef, OperatorSymbol.EQUALS, comparand);
                 });
 
         // $name != numeric-literal - variable reference != numeric literal
@@ -521,7 +522,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     varRef.setLocation(env.getContainingLocation());
                     Expression comparand = toNumericLiteral(values.get(3));
                     comparand.setLocation(env.getContainingLocation());
-                    return new GeneralComparison20(varRef, Token.NE, comparand);
+                    return new GeneralComparison20(varRef, OperatorSymbol.NE, comparand);
                 });
 
         // $name + number - variable reference + numeric literal
@@ -536,7 +537,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     varRef.setLocation(env.getContainingLocation());
                     Expression addend = toNumericLiteral(values.get(3));
                     addend.setLocation(env.getContainingLocation());
-                    return new ArithmeticExpression(varRef, Token.PLUS, addend);
+                    return new ArithmeticExpression(varRef, OperatorSymbol.PLUS, addend);
                 });
 
         // <axis> name - select elements on explicit axis

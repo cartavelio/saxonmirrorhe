@@ -61,7 +61,7 @@ public class SlashExpression extends BinaryExpression
      */
 
     public SlashExpression(Expression start, Expression step) {
-        super(start, Token.SLASH, step);
+        super(start, OperatorSymbol.SLASH, step);
     }
 
     @Override
@@ -819,7 +819,7 @@ public class SlashExpression extends BinaryExpression
             // Bug 4645. Rewrite a/(b|c) as (a/b union a/c). Note this rewrite isn't safe for
             // the "intersect" and "except" operators, except in special cases
             VennExpression ve = (VennExpression)tail;
-            if (ve.operator == Token.UNION) {
+            if (ve.operator == OperatorSymbol.UNION) {
                 Expression lhExpansion = new SlashExpression(
                         head.copy(new RebindingMap()), ve.getLhsExpression());
                 Expression rhExpansion = new SlashExpression(

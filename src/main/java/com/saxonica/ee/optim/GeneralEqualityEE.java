@@ -43,7 +43,7 @@ public class GeneralEqualityEE extends GeneralComparison {
      * @param p1 the right-hand operand
      */
 
-    public GeneralEqualityEE(Expression p0, int op, Expression p1) {
+    public GeneralEqualityEE(Expression p0, OperatorSymbol op, Expression p1) {
         super(p0, op, p1);
     }
 
@@ -53,7 +53,7 @@ public class GeneralEqualityEE extends GeneralComparison {
         // if either operand is an indexed variable, replace the comparison A=V by the indexed filter
         // expression exists(V[.=A])
 
-        if (singletonOperator == Token.FEQ && !(getParentExpression() instanceof FilterExpression)) {
+        if (singletonOperator == OperatorSymbol.FEQ && !(getParentExpression() instanceof FilterExpression)) {
             Expression lhs = getLhsExpression();
             Expression rhs = getRhsExpression();
             Expression e2 = tryIndexedComparison(lhs, rhs);
@@ -74,7 +74,7 @@ public class GeneralEqualityEE extends GeneralComparison {
                 (rhs.getDependencies() & StaticProperty.DEPENDS_ON_FOCUS) == 0) {
             // Rewrite ($x = V) as exists($x[. = V]), with potential for indexed evaluation
             Expression predicate = new GeneralEqualityEE(
-                    new ContextItemExpression(), Token.EQUALS, rhs);
+                    new ContextItemExpression(), OperatorSymbol.EQUALS, rhs);
             Expression filterExp = new FilterExpression(lhs, predicate);
             return SystemFunction.makeCall(
                     "exists", getRetainedStaticContext(), filterExp);
@@ -141,7 +141,7 @@ public class GeneralEqualityEE extends GeneralComparison {
 
         @Override
         public boolean evaluateManyToMany(SequenceIterator lhsIter, SequenceIterator rhsIter,
-                                          int singletonOperator, AtomicComparer comparer,
+                                          OperatorSymbol singletonOperator, AtomicComparer comparer,
                                           boolean runTimeCheckNeeded, RetainedStaticContext staticContext,
                                           Location loc, XPathContext context) throws XPathException {
             // Avoid the general hash join routine if either sequence is empty or a singleton
@@ -225,7 +225,7 @@ public class GeneralEqualityEE extends GeneralComparison {
                         .withLocation(loc)
                         .asTypeError();
             }
-            return compare(lhsValue, Token.FEQ, rhsValue, comparer.provideContext(context),
+            return compare(lhsValue, OperatorSymbol.FEQ, rhsValue, comparer.provideContext(context),
                            false, context, staticContext);
         }
 
@@ -409,7 +409,7 @@ public class GeneralEqualityEE extends GeneralComparison {
                         if (strays2 != null) {
                             for (AtomicValue stray2 : strays2) {
                                 try {
-                                    if (compare(first1, Token.FEQ, stray2, boundComparer, false, context, staticContext)) {
+                                    if (compare(first1, OperatorSymbol.FEQ, stray2, boundComparer, false, context, staticContext)) {
                                         return true;
                                     }
                                 } catch (XPathException e) {
@@ -495,7 +495,7 @@ public class GeneralEqualityEE extends GeneralComparison {
                         if (strays1 != null) {
                             for (AtomicValue stray1 : strays1) {
                                 try {
-                                    if (compare(first2, Token.FEQ, stray1, boundComparer, false, context, staticContext)) {
+                                    if (compare(first2, OperatorSymbol.FEQ, stray1, boundComparer, false, context, staticContext)) {
                                         return true;
                                     }
                                 } catch (XPathException e) {

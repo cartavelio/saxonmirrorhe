@@ -27,7 +27,7 @@ public class OrExpression extends BooleanExpression {
      */
 
     public OrExpression(Expression p1, Expression p2) {
-        super(p1, Token.OR, p2);
+        super(p1, OperatorSymbol.OR, p2);
     }
 
     @Override

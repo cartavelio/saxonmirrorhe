@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.lib.StringCollator;
 
@@ -36,7 +37,7 @@ public interface ComparisonExpression {
      * @return the operator, as defined in class {@link net.sf.saxon.expr.parser.Token}
      */
 
-    int getSingletonOperator();
+    OperatorSymbol getSingletonOperator();
 
     /**
      * Get the left-hand operand of the comparison

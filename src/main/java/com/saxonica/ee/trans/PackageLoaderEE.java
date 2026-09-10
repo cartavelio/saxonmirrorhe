@@ -4,17 +4,16 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.optim.GeneralEqualityEE;
 import com.saxonica.ee.optim.IndexedFilterExpression;
 import com.saxonica.ee.optim.SwitchExpression;
-import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.stream.StreamInstr;
 import com.saxonica.ee.stream.StreamableUserFunction;
 import com.saxonica.ee.update.*;
 import com.saxonica.ee.xtupdate.SaxonInsert;
 import com.saxonica.trans.PackageLoaderPE;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
@@ -23,7 +22,6 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
 
@@ -56,7 +54,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
 
         eMap.put("gcEE", (loader, element) -> {
             String opAtt = element.getAttributeValue(NamespaceUri.NULL, "op");
-            int op = getOperator(opAtt);
+            OperatorSymbol op = getOperator(opAtt);
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
             String compAtt = element.getAttributeValue(NamespaceUri.NULL, "comp");
@@ -127,7 +125,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
             SchemaType schemaType = null;
             StructuredQName typeAtt = loader.getQNameAttribute(element, "schemaType");
             if (typeAtt != null) {
-                schemaType = loader.getSchema().getSchemaType(typeAtt);
+                schemaType = loader.getConfiguration().getSchemaType(typeAtt);
                 validation = Validation.BY_TYPE;
             }
             final ParseOptions options = loader.getConfiguration().getParseOptions()
@@ -196,20 +194,6 @@ public class PackageLoaderEE extends PackageLoaderPE {
             return super.makeFunction(flags);
         }
     }
-
-
-    @Override
-    protected Schema readSchema(NodeInfo packageElement) throws XPathException {
-        Configuration config = getConfiguration();
-
-        for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> n.getNamespaceUri().equals(NamespaceUri.SCM)))) {
-            PreparedSchema ps = new PreparedSchema((EnterpriseConfiguration)config);
-            ps.importComponents(varElement.asActiveSource());
-            return ps;
-        }
-        return null;
-    }
-
 }
 
 // Copyright (c) 2018-2023 Saxonica Limited

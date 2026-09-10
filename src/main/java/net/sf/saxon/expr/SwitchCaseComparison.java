@@ -54,7 +54,7 @@ public class SwitchCaseComparison extends BinaryExpression implements Comparison
      * @param allowMultiple true if the 4.0 semantics are implemented (second operand may be a sequence)
      */
 
-    public SwitchCaseComparison(Expression p1, int operator, Expression p2, boolean allowMultiple) {
+    public SwitchCaseComparison(Expression p1, OperatorSymbol operator, Expression p2, boolean allowMultiple) {
         super(p1, operator, p2);
         this.allowMultiple = allowMultiple;
     }
@@ -165,7 +165,7 @@ public class SwitchCaseComparison extends BinaryExpression implements Comparison
     }
 
     @Override
-    public int getSingletonOperator() {
+    public OperatorSymbol getSingletonOperator() {
         return operator;
     }
 

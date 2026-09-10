@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -23,7 +24,7 @@ import net.sf.saxon.value.BooleanValue;
 
 public abstract class CompareToConstant extends UnaryExpression implements ComparisonExpression {
 
-    protected int operator;
+    protected OperatorSymbol operator;
 
     public CompareToConstant(Expression p0) {
         super(p0);
@@ -59,7 +60,7 @@ public abstract class CompareToConstant extends UnaryExpression implements Compa
      *         {@link Token#FGT}, {@link Token#FLE}, {@link Token#FLT}
      */
 
-    public int getComparisonOperator() {
+    public OperatorSymbol getComparisonOperator() {
         return operator;
     }
 
@@ -152,7 +153,7 @@ public abstract class CompareToConstant extends UnaryExpression implements Compa
      */
 
     @Override
-    public int getSingletonOperator() {
+    public OperatorSymbol getSingletonOperator() {
         return operator;
     }
 
@@ -175,19 +176,19 @@ public abstract class CompareToConstant extends UnaryExpression implements Compa
      * @return true or false depending on the operator in use
      */
 
-    public static boolean interpretComparisonResult(int operator, int c) {
+    public static boolean interpretComparisonResult(OperatorSymbol operator, int c) {
         switch (operator) {
-            case Token.FEQ:
+            case FEQ:
                 return c == 0;
-            case Token.FNE:
+            case FNE:
                 return c != 0;
-            case Token.FGT:
+            case FGT:
                 return c > 0;
-            case Token.FLT:
+            case FLT:
                 return c < 0;
-            case Token.FGE:
+            case FGE:
                 return c >= 0;
-            case Token.FLE:
+            case FLE:
                 return c <= 0;
             default:
                 throw new UnsupportedOperationException("Unknown operator " + operator);

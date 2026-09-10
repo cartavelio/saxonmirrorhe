@@ -121,26 +121,26 @@ public class Optimizer {
         return vc;
     }
 
-    private Expression optimizePositionVsLast(Expression lhs, Expression rhs, int operator) {
+    private Expression optimizePositionVsLast(Expression lhs, Expression rhs, OperatorSymbol operator) {
 
         // optimise [position()=last()] etc
 
         if (lhs.isCallOn(PositionAndLast.Position.class) &&
                 rhs.isCallOn(PositionAndLast.Last.class)) {
             switch (operator) {
-                case Token.FEQ:
-                case Token.FGE:
+                case FEQ:
+                case FGE:
                     IsLastExpression iletrue = new IsLastExpression(true);
                     ExpressionTool.copyLocationInfo(lhs, iletrue);
                     return iletrue;
-                case Token.FNE:
-                case Token.FLT:
+                case FNE:
+                case FLT:
                     IsLastExpression ilefalse = new IsLastExpression(false);
                     ExpressionTool.copyLocationInfo(lhs, ilefalse);
                     return ilefalse;
-                case Token.FGT:
+                case FGT:
                     return Literal.makeLiteral(BooleanValue.FALSE, lhs);
-                case Token.FLE:
+                case FLE:
                     return Literal.makeLiteral(BooleanValue.TRUE, lhs);
             }
         }

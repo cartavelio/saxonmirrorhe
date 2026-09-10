@@ -47,7 +47,7 @@ public class VennExpression extends BinaryExpression {
      * @param p2 the right-hand operand
      */
 
-    public VennExpression(final Expression p1, final int op, final Expression p2) {
+    public VennExpression(final Expression p1, final OperatorSymbol op, final Expression p2) {
         super(p1, op, p2);
     }
 
@@ -83,16 +83,7 @@ public class VennExpression extends BinaryExpression {
 
     @Override
     public String getExpressionName() {
-        switch (operator) {
-            case Token.UNION:
-                return "union";
-            case Token.INTERSECT:
-                return "intersect";
-            case Token.EXCEPT:
-                return "except";
-            default:
-                return "unknown";
-        }
+        return operator.toString();
     }
 
     /**
@@ -105,7 +96,7 @@ public class VennExpression extends BinaryExpression {
     @Override
     public final ItemType getItemType() {
         final ItemType t1 = getLhsExpression().getItemType();
-        if (operator == Token.UNION) {
+        if (operator == OperatorSymbol.UNION) {
             ItemType t2 = getRhsExpression().getItemType();
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
             return Type.getCommonSuperType(t1, t2, th);
@@ -124,11 +115,11 @@ public class VennExpression extends BinaryExpression {
     @Override
     public UType getStaticUType(UType contextItemType) {
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 return getLhsExpression().getStaticUType(contextItemType).union(getRhsExpression().getStaticUType(contextItemType));
-            case Token.INTERSECT:
+            case INTERSECT:
                 return getLhsExpression().getStaticUType(contextItemType).intersection(getRhsExpression().getStaticUType(contextItemType));
-            case Token.EXCEPT:
+            case EXCEPT:
             default:
                 return getLhsExpression().getStaticUType(contextItemType);
         }
@@ -144,7 +135,7 @@ public class VennExpression extends BinaryExpression {
         final int c1 = getLhsExpression().getCardinality();
         final int c2 = getRhsExpression().getCardinality();
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 if (Literal.isEmptySequence(getLhsExpression())) {
                     return c2;
                 }
@@ -153,7 +144,7 @@ public class VennExpression extends BinaryExpression {
                 }
                 return c1 | c2 | StaticProperty.ALLOWS_ONE | StaticProperty.ALLOWS_MANY;
             // allows ZERO only if one operand allows ZERO
-            case Token.INTERSECT:
+            case INTERSECT:
                 if (Literal.isEmptySequence(getLhsExpression())) {
                     return StaticProperty.EMPTY;
                 }
@@ -162,7 +153,7 @@ public class VennExpression extends BinaryExpression {
                 }
                 return (c1 & c2) | StaticProperty.ALLOWS_ZERO | StaticProperty.ALLOWS_ONE;
             // allows MANY only if both operands allow MANY
-            case Token.EXCEPT:
+            case EXCEPT:
                 if (Literal.isEmptySequence(getLhsExpression())) {
                     return StaticProperty.EMPTY;
                 }
@@ -209,11 +200,11 @@ public class VennExpression extends BinaryExpression {
 
     private boolean testContextDocumentNodeSet(final int prop0, final int prop1) {
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 return (prop0 & prop1 & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
-            case Token.INTERSECT:
+            case INTERSECT:
                 return ((prop0 | prop1) & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
-            case Token.EXCEPT:
+            case EXCEPT:
                 return (prop0 & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
         }
         return false;
@@ -228,7 +219,7 @@ public class VennExpression extends BinaryExpression {
      *                 mutatis mutandis, for intersect expressions.
      */
 
-    public void gatherComponents(int operator, Set<Expression> set) {
+    public void gatherComponents(OperatorSymbol operator, Set<Expression> set) {
         if (getLhsExpression() instanceof VennExpression && ((VennExpression) getLhsExpression()).operator == operator) {
             ((VennExpression) getLhsExpression()).gatherComponents(operator, set);
         } else {
@@ -252,11 +243,11 @@ public class VennExpression extends BinaryExpression {
 
     private boolean testSubTree(final int prop0, final int prop1) {
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 return (prop0 & prop1 & StaticProperty.SUBTREE_NODESET) != 0;
-            case Token.INTERSECT:
+            case INTERSECT:
                 return ((prop0 | prop1) & StaticProperty.SUBTREE_NODESET) != 0;
-            case Token.EXCEPT:
+            case EXCEPT:
                 return (prop0 & StaticProperty.SUBTREE_NODESET) != 0;
         }
         return false;
@@ -289,22 +280,22 @@ public class VennExpression extends BinaryExpression {
         getRhs().typeCheck(visitor, contextInfo);
 
         if (!(getLhsExpression() instanceof Pattern)) {
-            Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+            Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 0);
             setLhsExpression(tc.staticTypeCheck(getLhsExpression(), SequenceType.NODE_SEQUENCE, role0, visitor));
         }
 
         if (!(getRhsExpression() instanceof Pattern)) {
-            Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+            Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
             setRhsExpression(tc.staticTypeCheck(getRhsExpression(), SequenceType.NODE_SEQUENCE, role1, visitor));
         }
 
         // For the intersect and except operators, if the types are disjoint then we can simplify
-        if (operator != Token.UNION) {
+        if (operator != OperatorSymbol.UNION) {
             TypeHierarchy th = config.getTypeHierarchy();
             ItemType t0 = getLhsExpression().getItemType();
             ItemType t1 = getRhsExpression().getItemType();
             if (th.relationship(t0, t1) == Affinity.DISJOINT) {
-                if (operator == Token.INTERSECT) {
+                if (operator == OperatorSymbol.INTERSECT) {
                     return Literal.makeEmptySequence();
                 } else {
                     if (getLhsExpression().hasSpecialProperty(StaticProperty.ORDERED_NODESET)) {
@@ -354,7 +345,7 @@ public class VennExpression extends BinaryExpression {
         Expression lhs = getLhsExpression();
         Expression rhs = getRhsExpression();
         switch (operator) {
-            case Token.UNION:
+            case UNION:
                 if (Literal.isEmptySequence(lhs) &&
                         (rhs.getSpecialProperties() & StaticProperty.ORDERED_NODESET) != 0) {
                     return rhs;
@@ -370,7 +361,7 @@ public class VennExpression extends BinaryExpression {
                     return lhs;
                 }
                 break;
-            case Token.INTERSECT:
+            case INTERSECT:
                 if (Literal.isEmptySequence(lhs)) {
                     return lhs;
                 }
@@ -384,7 +375,7 @@ public class VennExpression extends BinaryExpression {
                     return rhs;
                 }
                 break;
-            case Token.EXCEPT:
+            case EXCEPT:
                 if (Literal.isEmptySequence(lhs)) {
                     return lhs;
                 }
@@ -415,7 +406,7 @@ public class VennExpression extends BinaryExpression {
             final AxisExpression a2 = (AxisExpression) rhs;
             if (a1.getAxis() == a2.getAxis()) {
                 if (a1.getNodeTest().equals(a2.getNodeTest())) {
-                    if (operator == Token.EXCEPT) {
+                    if (operator == OperatorSymbol.EXCEPT) {
                         return Literal.makeEmptySequence();
                     } else {
                         return a1;
@@ -443,7 +434,7 @@ public class VennExpression extends BinaryExpression {
         // TODO: generalize this code to handle all distributive operators, and expressions involving multiple
         //   unions (p/x | p/y | p/z)
 
-        if (lhs instanceof SlashExpression && rhs instanceof SlashExpression && operator == Token.UNION) {
+        if (lhs instanceof SlashExpression && rhs instanceof SlashExpression && operator == OperatorSymbol.UNION) {
             final SlashExpression path1 = (SlashExpression) lhs;
             final SlashExpression path2 = (SlashExpression) rhs;
 
@@ -471,15 +462,15 @@ public class VennExpression extends BinaryExpression {
                     exp0.getSelectExpression().isEqual(exp1.getSelectExpression())) {
                 final Expression filter;
                 switch (operator) {
-                    case Token.UNION:
+                    case UNION:
                         filter = new OrExpression(exp0.getFilter(),
                                 exp1.getFilter());
                         break;
-                    case Token.INTERSECT:
+                    case INTERSECT:
                         filter = new AndExpression(exp0.getFilter(),
                                 exp1.getFilter());
                         break;
-                    case Token.EXCEPT:
+                    case EXCEPT:
                         Expression negate2 = SystemFunction.makeCall("not", getRetainedStaticContext(), exp1.getFilter());
                         filter = new AndExpression(exp0.getFilter(), negate2);
                         break;
@@ -495,7 +486,7 @@ public class VennExpression extends BinaryExpression {
 
         // Convert @*|node() into @*,node() to eliminate the sorted merge operation
         // Avoid doing this when streaming because xsl:value-of select="@*,node()" is not currently streamable
-        if (!visitor.isOptimizeForStreaming() && operator == Token.UNION &&
+        if (!visitor.isOptimizeForStreaming() && operator == OperatorSymbol.UNION &&
                 lhs instanceof AxisExpression && rhs instanceof AxisExpression) {
             AxisExpression a0 = (AxisExpression) lhs;
             AxisExpression a1 = (AxisExpression) rhs;
@@ -507,18 +498,18 @@ public class VennExpression extends BinaryExpression {
         }
 
         // Convert (A intersect B) to use a serial search where one operand is a singleton
-        if (operator == Token.INTERSECT && !Cardinality.allowsMany(lhs.getCardinality())) {
+        if (operator == OperatorSymbol.INTERSECT && !Cardinality.allowsMany(lhs.getCardinality())) {
             return new SingletonIntersectExpression(lhs, operator, rhs.unordered(false, false));
         }
-        if (operator == Token.INTERSECT && !Cardinality.allowsMany(rhs.getCardinality())) {
+        if (operator == OperatorSymbol.INTERSECT && !Cardinality.allowsMany(rhs.getCardinality())) {
             return new SingletonIntersectExpression(rhs, operator, lhs.unordered(false, false));
         }
 
         // If the types of the operands are disjoint, simplify "intersect" and "except"
         if (operandsAreDisjoint(th)) {
-            if (operator == Token.INTERSECT) {
+            if (operator == OperatorSymbol.INTERSECT) {
                 return Literal.makeEmptySequence();
-            } else if (operator == Token.EXCEPT) {
+            } else if (operator == OperatorSymbol.EXCEPT) {
                 if ((lhs.getSpecialProperties() & StaticProperty.ORDERED_NODESET) != 0) {
                     return lhs;
                 } else {
@@ -564,7 +555,7 @@ public class VennExpression extends BinaryExpression {
      */
      @Override
      public Expression unordered(boolean retainAllNodes, boolean forStreaming) {
-         if (operator == Token.UNION && !forStreaming &&
+         if (operator == OperatorSymbol.UNION && !forStreaming &&
                  operandsAreDisjoint(getConfiguration().getTypeHierarchy())) {
              // replace union operator by comma operator to avoid cost of sorting into document order. See XMark q7
              Block block = new Block(new Expression[]{getLhsExpression(), getRhsExpression()});
@@ -629,7 +620,7 @@ public class VennExpression extends BinaryExpression {
             if (getLhsExpression().isEqual(b.getLhsExpression()) && getRhsExpression().isEqual(b.getRhsExpression())) {
                 return true;
             }
-            if (operator == Token.UNION || operator == Token.INTERSECT) {
+            if (operator == OperatorSymbol.UNION || operator == OperatorSymbol.INTERSECT) {
                 // These are commutative and associative, so for example (A|B)|C equals B|(A|C)
                 Set<Expression> s0 = new HashSet<>(10);
                 gatherComponents(operator, s0);
@@ -661,7 +652,7 @@ public class VennExpression extends BinaryExpression {
                     "Cannot use a predicate pattern as an operand of a union, intersect, or except operator",
                     "XTSE0340");
         }
-        if (operator == Token.UNION) {
+        if (operator == OperatorSymbol.UNION) {
             return new UnionPattern(
                     getLhsExpression().toPattern(config),
                     getRhsExpression().toPattern(config));
@@ -674,7 +665,7 @@ public class VennExpression extends BinaryExpression {
             if (commonAxis == AxisInfo.CHILD || commonAxis == AxisInfo.ATTRIBUTE
                     || independentOfContextItem(getLhsExpression())
                     || independentOfContextItem(getRhsExpression())) {
-                if (operator == Token.EXCEPT) {
+                if (operator == OperatorSymbol.EXCEPT) {
                     return new ExceptPattern(
                             getLhsExpression().toPattern(config),
                             getRhsExpression().toPattern(config));
@@ -706,10 +697,10 @@ public class VennExpression extends BinaryExpression {
      */
     @Override
     protected String tag() {
-        if (operator == Token.UNION) {
+        if (operator == OperatorSymbol.UNION) {
             return "union";
         }
-        return Token.tokens[operator];
+        return operator.toString();
     }
 
     /**
@@ -724,20 +715,20 @@ public class VennExpression extends BinaryExpression {
     @Override
     public SequenceIterator iterate(final XPathContext c) throws XPathException {
         switch (operator) {
-            case Token.UNION: {
+            case UNION: {
                 // If either of the operands is a union expression, then we merge its component
                 // iterators into a single multi-way union iterator
                 List<SequenceIterator> operands = new ArrayList<>();
                 gatherUnionLeafIterators(operands, c);
                 return new UnionIterator(operands, GlobalOrderComparer.getInstance());
             }
-            case Token.INTERSECT: {
+            case INTERSECT: {
                 SequenceIterator i1 = getLhsExpression().iterate(c);
                 SequenceIterator i2 = getRhsExpression().iterate(c);
                 return new IntersectionIterator(i1, i2,
                                                 GlobalOrderComparer.getInstance());
             }
-            case Token.EXCEPT: {
+            case EXCEPT: {
                 SequenceIterator i1 = getLhsExpression().iterate(c);
                 SequenceIterator i2 = getRhsExpression().iterate(c);
                 return new DifferenceIterator(i1, i2,
@@ -749,13 +740,13 @@ public class VennExpression extends BinaryExpression {
 
     private void gatherUnionLeafIterators(List<SequenceIterator> leafIterators, XPathContext context) throws XPathException {
         Expression e1 = getLhsExpression();
-        if (e1 instanceof VennExpression && ((VennExpression)e1).operator == Token.UNION) {
+        if (e1 instanceof VennExpression && ((VennExpression)e1).operator == OperatorSymbol.UNION) {
             ((VennExpression)e1).gatherUnionLeafIterators(leafIterators, context);
         } else {
             leafIterators.add(e1.iterate(context));
         }
         Expression e2 = getRhsExpression();
-        if (e2 instanceof VennExpression && ((VennExpression) e2).operator == Token.UNION) {
+        if (e2 instanceof VennExpression && ((VennExpression) e2).operator == OperatorSymbol.UNION) {
             ((VennExpression) e2).gatherUnionLeafIterators(leafIterators, context);
         } else {
             leafIterators.add(e2.iterate(context));
@@ -769,7 +760,7 @@ public class VennExpression extends BinaryExpression {
 
     @Override
     public boolean effectiveBooleanValue(final XPathContext context) throws XPathException {
-        if (operator == Token.UNION) {
+        if (operator == OperatorSymbol.UNION) {
             // NOTE: this optimization was probably already done statically
             return getLhsExpression().effectiveBooleanValue(context) || getRhsExpression().effectiveBooleanValue(context);
         } else {
@@ -810,7 +801,7 @@ public class VennExpression extends BinaryExpression {
 
             final VennExpression exp = (VennExpression)getExpression();
 
-            if (exp.getOperator() == Token.UNION) {
+            if (exp.getOperator() == OperatorSymbol.UNION) {
                 final List<PullEvaluator> leafEvaluators = new ArrayList<>();
                 gatherUnionLeafEvaluators(exp, leafEvaluators);
                 return context -> {
@@ -823,7 +814,7 @@ public class VennExpression extends BinaryExpression {
             } else {
                 PullEvaluator p1 = exp.getLhsExpression().makeElaborator().elaborateForPull();
                 PullEvaluator p2 = exp.getRhsExpression().makeElaborator().elaborateForPull();
-                if (exp.getOperator() == Token.INTERSECT) {
+                if (exp.getOperator() == OperatorSymbol.INTERSECT) {
                     return context -> new IntersectionIterator(
                             p1.iterate(context), p2.iterate(context), GlobalOrderComparer.getInstance());
                 } else {
@@ -835,13 +826,13 @@ public class VennExpression extends BinaryExpression {
 
         private static void gatherUnionLeafEvaluators(VennExpression exp, List<PullEvaluator> leafEvaluators) {
             Expression e1 = exp.getLhsExpression();
-            if (e1 instanceof VennExpression && ((VennExpression) e1).getOperator() == Token.UNION) {
+            if (e1 instanceof VennExpression && ((VennExpression) e1).getOperator() == OperatorSymbol.UNION) {
                 gatherUnionLeafEvaluators(((VennExpression) e1), leafEvaluators);
             } else {
                 leafEvaluators.add(e1.makeElaborator().elaborateForPull());
             }
             Expression e2 = exp.getRhsExpression();
-            if (e2 instanceof VennExpression && ((VennExpression) e2).getOperator() == Token.UNION) {
+            if (e2 instanceof VennExpression && ((VennExpression) e2).getOperator() == OperatorSymbol.UNION) {
                 gatherUnionLeafEvaluators(((VennExpression) e2), leafEvaluators);
             } else {
                 leafEvaluators.add(e2.makeElaborator().elaborateForPull());
