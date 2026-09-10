@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="../../schemas/simplified_catalog.rnc" type="application/relax-ng-compact-syntax" ?>
 <catalog spec="xslt" version="4.0" maintained-by="QT4 CG">
+	<function name="fn:accumulator-after"/>
+	<function name="fn:accumulator-before"/>
 	<function name="fn:apply-templates"/>
+	<function name="fn:available-system-properties"/>
+	<function name="fn:character-map"/>
+	<function name="fn:copy-of"/>
 	<function name="fn:current"/>
 	<function name="fn:current-group"/>
 	<function name="fn:current-grouping-key"/>
 	<function name="fn:current-merge-group"/>
-	<function name="fn:current-merge-key-array"/>
 	<function name="fn:current-merge-key"/>
+	<function name="fn:current-merge-key-array"/>
 	<function name="fn:current-output-uri"/>
-	<function name="fn:regex-groups"/>
-	<function name="fn:regex-group"/>
-	<function name="fn:copy-of"/>
-	<function name="fn:snapshot"/>
 	<function name="fn:document"/>
-	<function name="fn:unparsed-entity-uri"/>
-	<function name="fn:unparsed-entity-public-id"/>
+	<function name="fn:element-available"/>
+	<function name="fn:function-available"/>
 	<function name="fn:key"/>
 	<function name="fn:map-for-key"/>
-	<function name="fn:character-map"/>
-	<function name="fn:system-property"/>
-	<function name="fn:available-system-properties"/>
-	<function name="fn:function-available"/>
-	<function name="fn:element-available"/>
-	<function name="fn:type-available"/>
+	<function name="fn:regex-group"/>
+	<function name="fn:regex-groups"/>
+	<function name="fn:snapshot"/>
 	<function name="fn:stream-available"/>
-	<function name="fn:accumulator-before"/>
-	<function name="fn:accumulator-after"/>
+	<function name="fn:system-property"/>
+	<function name="fn:type-available"/>
+	<function name="fn:unparsed-entity-public-id"/>
+	<function name="fn:unparsed-entity-uri"/>
 </catalog>

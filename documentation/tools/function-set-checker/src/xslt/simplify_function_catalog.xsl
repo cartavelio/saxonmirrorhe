@@ -23,18 +23,19 @@
 	</xsl:template>
 	
 	<xsl:template match="fos:functions">
-		<xsl:apply-templates select="* except fos:global-variables" />
+		<xsl:apply-templates select="* except fos:global-variables">
+			<xsl:sort select="if (self::fos:record-type) then @id else @name" data-type="text" order="ascending" />
+		</xsl:apply-templates>
+	</xsl:template>
+		
+	
+	<xsl:template match="fos:record-type | fos:function">
+		<xsl:variable name="local-name" select="if (self::fos:record-type) then @id else @name" as="xs:string?" />		
+		<xsl:variable name="prefix" select="local:get-prefix(self::*)" as="xs:string?" />
+		
+		<function name="{if (normalize-space($prefix) = '') then $local-name else string-join(($prefix, $local-name), ':')}" />
 	</xsl:template>
 	
-	<xsl:template match="fos:record-type">
-		<xsl:variable name="prefix" select="local:get-prefix(self::*)" as="xs:string?" />
-		<function name="{if (normalize-space($prefix) = '') then @id else string-join(($prefix, @id), ':')}" />
-	</xsl:template>
-	
-	<xsl:template match="fos:function">
-		<xsl:variable name="prefix" select="local:get-prefix(self::*)" as="xs:string?" />
-		<function name="{if (normalize-space($prefix) = '') then @name else string-join(($prefix, @name), ':')}" />
-	</xsl:template>
 	
 	<xsl:template match="comment() | processing-instruction()" />
 	
