@@ -15,8 +15,7 @@
          API for .NET</a> section for the .NET interface.</aside>
    
    <aside>Saxon provides further extensions to the XPath expression syntax (these require Saxon-PE
-      or higher), for details see <a class="bodylink" href="/extensions/syntax-extensions">Syntax
-         Extensions</a>.</aside>
+      or higher), for details see <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</aside>
 
    <h3 class="subtitle">New Features in XPath 3.0 and 3.1</h3>
 

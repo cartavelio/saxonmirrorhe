@@ -1280,7 +1280,7 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
          stylesheet.</p>
      
      <p>The XPath syntax extensions described in <a class="bodylink"
-       href="/extensions/syntax-extensions">Syntax Extensions</a> are also available in XQuery.</p>
+        href="/v4extensions">Experimental 4.0 Extensions</a> are also available in XQuery.</p>
      
       <h2 class="subtitle">declare option saxon:default</h2>
 

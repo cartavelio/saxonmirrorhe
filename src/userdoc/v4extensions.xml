@@ -94,7 +94,7 @@
                <li>A commonly used type can be referenced using a <b>type alias</b>, for example
           <code>as="type(my:date-or-time)"</code>. Type aliases are available in both XSLT and XQuery,
           and are described in <a class="bodylink"
-                     href="/v4extensions/syntax-extensions/type-aliases"
+             href="/v4extensions/new-types/type-aliases"
                   >Type Aliases</a>. Type aliases go some way towards
           hiding the implementation details of the type, and allowing the implementation to be changed
           without affecting users of the function library; in addition they simply make the code more
@@ -858,7 +858,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
          <h1>The xsl:item-type declaration</h1>
          
          <p>The <code>xsl:item-type</code> declaration declares a type alias for use within a stylesheet.
-            See <a class="bodylink" href="/v4extensions/syntax-extensions/type-aliases">Type Aliases</a> for an overview. For example:</p>
+            See <a class="bodylink" href="/v4extensions/new-types/type-aliases">Type Aliases</a> for an overview. For example:</p>
          
          <example>
             <samp><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>]]></samp>
@@ -895,7 +895,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
          </li>
       </ul>
 
-      <p>For example if a <a class="bodylink" href="/v4extensions/syntax-extensions/type-aliases"
+         <p>For example if a <a class="bodylink" href="/v4extensions/new-types/type-aliases"
             >type alias</a> has been declared:</p>
 
       <example><samp>&lt;xsl:item-type name="cx:complex" type="record(r as xs:double, i as xs:double)"/></samp></example>

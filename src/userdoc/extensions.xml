@@ -356,7 +356,8 @@ saxon:evaluate($expression)
     
     <aside>For the <code>select</code> attribute on <code>xsl:when</code> and <code>xsl:otherwise</code>,
     and the <code>then</code> and <code>else</code> attributes on <code>xsl:if</code>, see 
-      <a class="bodylink code" href="/extensions/xslt-syntax-extensions">XSLT Syntax Extensions</a></aside>
+      <a class="bodylink code" href="/v4extensions/xslt-syntax-extensions">Experimental XSLT 4.0
+        Extensions</a>.</aside>
     
     <section id="as" title="saxon:as">
       <h1>saxon:as</h1>
@@ -401,7 +402,7 @@ saxon:evaluate($expression)
       will be ignored by other XSLT processors (this applies to XSLT 1.0 and 2.0 processors as well as XSLT 3.0 processors).
       It therefore allows stylesheets to take advantage of Saxon extensions to the sequence type syntax (notably,
       tuple types, union types, and type aliases; see <a class="bodylink"
-        href="/extensions/syntax-extensions">Syntax extensions</a>) without sacrificing stylesheet portability.</p>
+        href="/v4extensions/new-types">New types</a>) without sacrificing stylesheet portability.</p>
       
       <p>The <code>saxon:as</code> attribute can also be defined on the <a class="bodylink code"
         href="/xsl-elements/mode">xsl:mode</a> element. Used here, it 

@@ -384,7 +384,7 @@
       <details>
         <aside>
           As an alternative, consider using the <code>saxon:internal-dtd-subset</code> serialization parameter:
-          see <a class="bodylink" href="extensions/output-extras/serialization-parameters">Serialization Parameters</a>.
+          see <a class="bodylink" href="/extensions/output-extras/serialization-parameters">Serialization Parameters</a>.
         </aside>
         <p>The content of the element is a template-body that is instantiated to create an XML
           document that represents the DTD to be generated; this XML document is then serialized
@@ -693,7 +693,7 @@
           arrays whose members are not singleton items.</aside>
         <aside>Internally, the instruction compiles into the same code as the <code>for member $M in A return X</code>
           expression (see <a class="bodylink"
-            href="/extensions/syntax-extensions/for-member-expression">For-Member expressions</a>).</aside>
+            href="/v4extensions/other-xpath-extensions/for-member-expression">For-Member expressions</a>).</aside>
         <p>Example:</p>
         <samp><![CDATA[<xsl:variable name="emp-array" select="parse-json('employees.json')"/>
 <saxon:for-each-member select="array:sort($emp-array, function($e){$e?ssn})" bind-to="emp">
@@ -833,7 +833,7 @@
           in XPath expressions requires the configuration option <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/> to be enabled.</p>
         
         <p>For further information about the syntax extension, see <a class="bodylink"
-          href="/extensions/syntax-extensions/type-aliases">Type aliases</a>.</p>
+          href="/v4extensions/new-types/type-aliases">Type aliases</a>.</p>
       </details>
       <examples>
         <example>
