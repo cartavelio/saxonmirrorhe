@@ -128,10 +128,11 @@ public class SaxonApiException extends Exception {
 
     /**
      * When a transformation is terminated using <code>xsl:message</code> with
-     * <code>terminate="yes"</code>, this method provides access to the content
+     * <code>terminate="yes"</code>, or using <code>xsl:assert</code>,
+     * this method provides access to the content
      * of the final message that caused termination.
-     * @return the content of the final xsl:message that caused termination;
-     * otherwise null.
+     * @return the content of the final <code>xsl:message</code> or <code>xsl:assert</code>
+     * that caused termination; otherwise null.
      */
 
     public Message getTerminatingXsltMessage() {
