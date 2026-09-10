@@ -56,7 +56,7 @@ import java.util.Properties;
  * is supplied with parameters derived from the query or stylesheet, which are merged with the parameters
  * set on this {@code Serializer}.</p>
  * <p>Any serialization parameters that are not given an explicit value using one of these mechanisms
- * are defaulted using the rules for the XSLT 3.0 <code>&lt;xsl:output</code> declaration. In particular,
+ * are defaulted using the rules for the XSLT 3.0 <code>xsl:output</code> declaration. In particular,
  * this means that the default serialization method (when serializing an XDM document) depends on the
  * name of the first element encountered in the document.</p>
  * <p><i>Changed in 9.9 so the {@code Serializer} now only holds one set of output properties. Additional
@@ -359,7 +359,7 @@ public class Serializer extends AbstractDestination {
      * {@code Properties} object are QNames in Clark format, that is "{uri}local"; any QNames
      * within the values must also be in this format.
      * <p>The values supplied are typically those specified in the stylesheet or query. In the case of XSLT,
-     * they are typically the properties associated with unnamed xsl:output declarations.</p>
+     * they are typically the properties associated with unnamed <code>xsl:output</code> declarations.</p>
      *
      * @param suppliedProperties the output properties to be used. These overwrite any properties
      *                           that have been individually specified using
@@ -430,7 +430,7 @@ public class Serializer extends AbstractDestination {
      * <p><code>serializer.setOutputProperty(Serializer.Property.METHOD, "xml");</code></p>
      * <p>Any serialization properties supplied via this interface take precedence over serialization
      * properties defined in the source stylesheet or query, including properties set dynamically
-     * using xsl:result-document. However, they only affect the principal output of a transformation;
+     * using <code>xsl:result-document</code>. However, they only affect the principal output of a transformation;
      * the serialization of secondary result documents is controlled using an {@link OutputURIResolver}.</p>
      *
      * @param property The name of the property to be set
@@ -645,7 +645,7 @@ public class Serializer extends AbstractDestination {
      * document nodes is then serialized using the serialization parameters defined in this serializer.
      *
      * <p>The default serialization properties used by this method correspond to the properties used
-     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * by an XSLT 3.0 stylesheet with no <code>xsl:output</code> declaration. In particular, the default output
      * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
      * encountered.</p>
      *
@@ -674,7 +674,7 @@ public class Serializer extends AbstractDestination {
      * document nodes is then serialized using the serialization parameters defined in this serializer.
      *
      * <p>The default serialization properties used by this method correspond to the properties used
-     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * by an XSLT 3.0 stylesheet with no <code>xsl:output</code> declaration. In particular, the default output
      * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
      * encountered.</p>
      *
@@ -702,7 +702,7 @@ public class Serializer extends AbstractDestination {
      * Serialize an XdmNode to a string using this serializer
      *
      * <p>The default serialization properties used by this method correspond to the properties used
-     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * by an XSLT 3.0 stylesheet with no <code>xsl:output</code> declaration. In particular, the default output
      * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
      * encountered.</p>
      *
@@ -733,7 +733,7 @@ public class Serializer extends AbstractDestination {
      * to be output via this serializer.
      *
      * <p>The default serialization properties used by this method correspond to the properties used
-     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * by an XSLT 3.0 stylesheet with no <code>xsl:output</code> declaration. In particular, the default output
      * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
      * encountered.</p>
      *
@@ -756,7 +756,7 @@ public class Serializer extends AbstractDestination {
      * source of SAX events) to this serializer.
      *
      * <p>The default serialization properties used by this method correspond to the properties used
-     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * by an XSLT 3.0 stylesheet with no <code>xsl:output</code> declaration. In particular, the default output
      * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
      * encountered.</p>
      *
@@ -812,7 +812,7 @@ public class Serializer extends AbstractDestination {
      * @param pipe The Saxon configuration. This is an internal implementation object
      *               held within the {@link Processor}
      * @param params Serialization parameters originating from the query or stylesheet
-     *               (for example, xsl:output declarations or xsl:result-document attributes).
+     *               (for example, <code>xsl:output</code> declarations or <code>xsl:result-document</code> attributes).
      *               These parameters are combined with those held by this {@code Serializer} itself,
      *               with properties set on the {@code Serializer} taking precedence. If a particular
      *               property has not been set either on the {@code Serializer} object itself
@@ -868,7 +868,7 @@ public class Serializer extends AbstractDestination {
      * within this {@code Serializer} object, and not including any defaults taken from the stylesheet or query.
      * @return a newly-constructed Properties object holding the declared serialization properties. Specifically,
      * it holds the properties defined explicitly on this Serializer object, and excludes any properties defined
-     * in named or unnamed xsl:output declarations in the stylesheet, or the equivalent in XQuery.
+     * in named or unnamed <code>xsl:output</code> declarations in the stylesheet, or the equivalent in XQuery.
      */
 
     protected Properties getLocallyDefinedProperties() {
@@ -888,7 +888,7 @@ public class Serializer extends AbstractDestination {
      * @return a newly-constructed {@code SerializationProperties} object holding the declared
      * serialization properties. Specifically, it holds the properties defined explicitly on this
      * {@code Serializer} object, and excludes any properties defined in named or unnamed
-     * {@code xsl:output} declarations in the stylesheet, or the equivalent in XQuery.
+     * <code>xsl:output</code> declarations in the stylesheet, or the equivalent in XQuery.
      */
 
     public SerializationProperties getSerializationProperties() {
