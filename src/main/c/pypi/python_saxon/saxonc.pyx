@@ -898,16 +898,16 @@ cdef class PySaxonProcessor:
         py_error_message = "Error: parse_json should contain exactly one of the following keyword arguments: (json_file_name|json_text)"
         if kwds.keys() >= {"json_file_name", "json_text"}:
             raise Exception(py_error_message)
-        cdef PyXdmNode val = None
+        cdef PyXdmValue val = None
         cdef str py_value = None
         cdef char * c_json_string = NULL
         cdef char * c_encoding_string = NULL
-        encoding = None
+        cdef str encoding = None
 
         if "encoding" in kwds:
             encoding = kwds["encoding"]
-        py_encoding_string = encoding.encode(encoding)
-        c_encoding_string = py_encoding_string
+            py_encoding_string = encoding.encode("UTF-8")
+            c_encoding_string = py_encoding_string
 
         if "json_text" in kwds:
           py_value = kwds["json_text"]

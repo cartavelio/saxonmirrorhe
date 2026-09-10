@@ -746,6 +746,51 @@ def testResultDocumentAsMap(saxonproc):
     assert isinstance(rdocs_map[keysList[0]].head, PyXdmNode)
     assert  'hello' in rdocs_map[keysList[1]].head.string_value
 
+def testParseJson(saxonproc):
+    json1 = """{ "test" : "This is a test. Price is higher than 25 €. " }"""
+
+    try:
+        parsed_json1 = saxon_proc.parse_json(json_text=json1)
+        print(parsed_json1)
+        assert True
+    except PySaxonApiError as e:
+        print(e.message)
+        assert False
+    except Exception as e:
+        print(e)
+        assert False
+
+def testParseJsonWithEncoding(saxonproc):
+    json1 = """{ "test" : "This is a test. Price is higher than 25 €. " }"""
+
+    try:
+        parsed_json1 = saxon_proc.parse_json(json_text=json1, encoding="UTF-8")
+        print(parsed_json1)
+        assert True
+    except PySaxonApiError as e:
+        print(e.message)
+        assert False
+    except Exception as e:
+        print(e)
+        assert False
+
+
+
+def testParseJsonFunction(saxonproc):
+    json1 = """{ "test" : "This is a test. Price is higher than 25 €. " }"""
+
+
+    parse_json_fn = PyXdmFunctionItem().get_system_function(saxon_proc, '{http://www.w3.org/2005/xpath-functions}parse-json', 1)
+
+    try:
+        parsed_json1 = parse_json_fn.call(saxon_proc, [saxon_proc.make_string_value(json1, encoding="UTF-8")])
+        print(parsed_json1)
+        assert True
+    except PySaxonApiError as e:
+        print(e.message)
+        assert False
+
+
 
 def testResultDocumentWitJson(saxonproc):
     inputDoc = saxonproc.parse_xml(xml_text="<a>b</a>")

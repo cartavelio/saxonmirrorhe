@@ -53,6 +53,7 @@ const char *XdmValue::toString() {
 int XdmValue::size() { return xdmSize; }
 
 XdmValue::XdmValue(int64_t valRef) {
+  initialize();
   XdmItem *value = new XdmItem(valRef);
   values_cap = 1;
   values = new XdmItem*[values_cap];
