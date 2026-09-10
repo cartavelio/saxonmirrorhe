@@ -172,7 +172,7 @@ void SchemaValidator::setLax(bool l){
         }
       int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
 
-      int64_t  status = j_registerSchema(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (char *)sourceStr, (char *)systemID, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+      int64_t  status = j_registerSchemaString(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (char *)(systemID == nullptr ? cwdV.c_str() : systemID), (char *)sourceStr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
       if(status == -2) {
         throw SaxonApiException();
       }

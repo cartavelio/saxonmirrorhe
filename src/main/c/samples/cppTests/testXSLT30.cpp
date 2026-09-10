@@ -2580,7 +2580,7 @@ void testThreads (SaxonProcessor * processor, Xslt30Processor * trans, sResultCo
             threads.push_back(std::thread(RunThread, executable, i, s[i]));
 
     }
-    cerr<<"testThreads cp0"<<endl;
+
     for (auto &th : threads) {
         th.join();
         cerr<<"testThreads cp1 - loop"<<endl;

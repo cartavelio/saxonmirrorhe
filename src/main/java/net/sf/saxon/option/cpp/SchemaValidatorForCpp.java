@@ -195,7 +195,10 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             cwd = CTypeConversion.toJavaString(ccwd);
         }
 
-        String xsd = CTypeConversion.toJavaString(cxsd);
+        String xsd = null;
+        if(cxsd != WordFactory.nullPointer()) {
+            xsd = CTypeConversion.toJavaString(cxsd);
+        }
 
         if (xsd == null) {
             SaxonApiException ex = new SaxonApiException("Schema document not found");
@@ -220,7 +223,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @return long value: Success= 0, Failure = -1 or Exception thrown = -2
      */
     @CEntryPoint(name = "j_registerSchemaString")
-    public static long registerSchemaString(IsolateThread thread, ObjectHandle processorRef, CCharPointer cxsd, CCharPointer csystemId, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long registerSchemaString(IsolateThread thread, ObjectHandle processorRef, CCharPointer csystemId, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Processor processor = null;
         if (processorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("Processor object is null");
@@ -236,7 +239,10 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             values = processorDataAccumulator.getValues();
         }
         SchemaValidatorForCpp.setProperties(processor, params, values);
-        String xsd = CTypeConversion.toJavaString(cxsd);
+        String xsd = null;
+        if(cxsd != WordFactory.nullPointer()) {
+            xsd = CTypeConversion.toJavaString(cxsd);
+        }
         String systemId = null;
         if (csystemId != WordFactory.nullPointer()) {
             systemId = CTypeConversion.toJavaString(csystemId);

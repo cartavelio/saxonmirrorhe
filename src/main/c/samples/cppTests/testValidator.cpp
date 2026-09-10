@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void testValidator1(SchemaValidator * val){
+void testValidator1(SchemaValidator * val, sResultCount *sresult){
 	cout<<endl<<"Test Validate Schema from string"<<endl;	
  string invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
  const char* sch1 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified' attributeFormDefault='unqualified'><xs:element name='request'><xs:complexType><xs:sequence><xs:element name='a' type='xs:string'/><xs:element name='b' type='xs:string'/></xs:sequence><xs:assert test='count(child::node()) = 3'/></xs:complexType></xs:element></xs:schema>";
@@ -15,17 +15,20 @@ void testValidator1(SchemaValidator * val){
 
         string doc1 = "<Family xmlns='http://myexample/family'><Parent>John</Parent><Child>Alice</Child></Family>";
 	try {
-	val->registerSchemaFromString(sch1);
+	    val->registerSchemaFromString(sch1);
+        sresult->failure++;
+        sresult->failureList.push_back("testValidator1");
 	} catch(SaxonApiException &e){
 	    const char * message = e.getMessage();
 	    if(message != nullptr) {
 	        cerr<<"Exception thrown = "<<message<<endl;
 	    }
+	    sresult->success++;
 	}
 
 }
 
-void testValidator2(){
+void testValidator2(sResultCount *sresult){
   SaxonProcessor * processor = new SaxonProcessor(true);
   processor->setConfigurationProperty("xsdversion", "1.1");
   SchemaValidator * val = processor->newSchemaValidator();
@@ -45,6 +48,7 @@ void testValidator2(){
            	    if(message != nullptr) {
            	        cerr<<"Exception thrown = "<<message<<endl;
            	    }
+           	    sresult->success++;
    }
 
 
@@ -57,12 +61,15 @@ void testValidator2(){
 	    val->validate();
 	    delete val;
 	    cout<<endl<<"Doc is valid!"<<endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testValidator2");
 	}catch(SaxonApiException &e){
 	    cout<<endl<<"Doc is not valid!"<<endl;
         const char * message = e.getMessage();
         if(message != nullptr) {
               cerr<<"Exception thrown = "<<message<<endl;
         }
+        sresult->success++;
     }
 
 
@@ -70,7 +77,7 @@ void testValidator2(){
 
 }
 
-void testValidator3(SaxonProcessor * processor, SchemaValidator * val){
+void testValidator3(SaxonProcessor * processor, SchemaValidator * val, sResultCount *sresult){
   processor->exceptionClear();
   val->clearParameters(true);
   val->clearProperties();
@@ -81,17 +88,19 @@ void testValidator3(SaxonProcessor * processor, SchemaValidator * val){
     val->setProperty("http://saxon.sf.net/feature/multipleSchemaImports", "on");
     val->validate("family.xml");
     cout<<endl<<"Doc1 is OK"<<endl;
+    sresult->failure++;
+    sresult->failureList.push_back("testValidator3");
   } catch(SaxonApiException &e){
     cout<<endl<<"Error: Doc reported as invalid!"<<endl;
     const char * message = e.getMessage();
     if(message != nullptr) {
               cerr<<"Exception thrown = "<<message<<endl;
     }
-
+    sresult->success++;
   }
 }
 
-void testValidator4(SaxonProcessor * processor, SchemaValidator * val){
+void testValidator4(SaxonProcessor * processor, SchemaValidator * val, sResultCount *sresult){
   processor->exceptionClear();
   val->clearParameters(true);
   val->clearProperties();
@@ -103,6 +112,7 @@ void testValidator4(SaxonProcessor * processor, SchemaValidator * val){
 	val->registerSchemaFromFile("../data/family.xsd");
 	val->validate("../data/family.xml");
     cout<<endl<<"Doc1 is OK"<<endl;
+    sresult->success++;
   } catch(SaxonApiException &e){
     cout<<endl<<"Error: Doc reported as invalid!"<<endl;
     const char * message = e.getMessage();
@@ -114,12 +124,14 @@ void testValidator4(SaxonProcessor * processor, SchemaValidator * val){
 
         cerr<<"Exception thrown = "<<message<<endl;
     }
+    sresult->failure++;
+    sresult->failureList.push_back("testValidator4");
 
   }
 
 }
 
-void testValidator4a(SaxonProcessor * processor, SchemaValidator * val){
+void testValidator4a(SaxonProcessor * processor, SchemaValidator * val, sResultCount *sresult){
   processor->exceptionClear();
   val->clearParameters(true);
   val->clearProperties();
@@ -137,7 +149,7 @@ void testValidator4a(SaxonProcessor * processor, SchemaValidator * val){
 	 	} else {
 			cout<<endl<<"Error: Doc reported as valid!"<<endl;
 	}
-
+   sresult->success++;
   } catch(SaxonApiException &e) {
     cout<<endl<<"Error: Doc reported as invalid!"<<endl;
     const char * message = e.getMessage();
@@ -149,13 +161,15 @@ void testValidator4a(SaxonProcessor * processor, SchemaValidator * val){
 
         cerr<<"Exception thrown = "<<message<<endl;
     }
-    }
+    sresult->failure++;
+    sresult->failureList.push_back("testValidator4a");
+  }
 
 
 
 }
 
-void testValidator5(SaxonProcessor * processor, SchemaValidator * val){
+void testValidator5(SaxonProcessor * processor, SchemaValidator * val, sResultCount *sresult){
   processor->exceptionClear();
   val->clearParameters(true);
   val->clearProperties();
@@ -177,13 +191,8 @@ void testValidator5(SaxonProcessor * processor, SchemaValidator * val){
 
 	val->setProperty("verbose", "true");
 	val->validate();
-	XdmNode * node = val->getValidationReport();
-    const char * value = node->toString();
-    if(value != nullptr) {
-            cout << endl << "Validation Report: " << value << endl;
-        } else {
-            cout << endl << "Validation Report value is NULL" << endl;
-    }
+    sresult->failure++;
+    sresult->failureList.push_back("testValidator5");
 
    } catch (SaxonApiException &e){
         cout<<endl<<"Error: Doc reported as invalid!"<<endl;
@@ -196,12 +205,22 @@ void testValidator5(SaxonProcessor * processor, SchemaValidator * val){
         if(message != nullptr) {
             cerr<<"Exception thrown = "<<message<<endl;
         }
+	    XdmNode * node = val->getValidationReport();
+        const char * value = node->toString();
+        if(value != nullptr) {
+            cout << endl << "Validation Report: " << value << endl;
+            sresult->success++;
+        } else {
+            cout << endl << "Validation Report value is NULL" << endl;
+            sresult->failure++;
+            sresult->failureList.push_back("testValidator5");
+    }
 	}
 
 }
 
 
-void testValidator6(SaxonProcessor * processor, SchemaValidator * val){
+void testValidator6(SaxonProcessor * processor, SchemaValidator * val, sResultCount *sresult){
   processor->exceptionClear();
   val->clearParameters(true);
   val->clearProperties();
@@ -219,6 +238,7 @@ void testValidator6(SaxonProcessor * processor, SchemaValidator * val){
 	val->registerSchemaFromString(sch1);
 	val->exportSchema("exportedSchema.scm");
 	 cout<<endl<<"No errors found"<<endl;
+	 sresult->success++;
 	} catch (SaxonApiException &e) {
         cout<<endl<<"Error: Validation error found "<<endl;
       const char * message = e.getMessage();
@@ -229,6 +249,8 @@ void testValidator6(SaxonProcessor * processor, SchemaValidator * val){
         if(message != nullptr) {
             cerr<<"Exception thrown = "<<message<<endl;
         }
+        sresult->failure++;
+        sresult->failureList.push_back("testValidator5");
 	}
 
 }
@@ -238,6 +260,7 @@ int main(int argc, char* argv[])
 
 	SaxonProcessor * processor = new SaxonProcessor(true);
     //setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+    sResultCount *sresult = new sResultCount();
     cout<<"Test: SchemaValidator with Saxon version="<<processor->version()<<endl<<endl;
 
     char * cwd = nullptr;
@@ -270,22 +293,35 @@ int main(int argc, char* argv[])
         delete processor;
 	    return 0;
 	}
-	testValidator1(validator);
-	testValidator2();
+	testValidator1(validator, sresult);
+	testValidator2(sresult);
 
-	testValidator3(processor, validator);
+	testValidator3(processor, validator, sresult);
 	processor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSchemaImports", "on");
 	SchemaValidator * validator2 = processor->newSchemaValidator();
-	testValidator4(processor, validator2);
-	testValidator4a(processor, validator2);
+	testValidator4(processor, validator2, sresult);
+	testValidator4a(processor, validator2, sresult);
 	processor->setConfigurationProperty("xsdversion", "1.1");
 	SchemaValidator * validator3 = processor->newSchemaValidator();
-	testValidator5(processor, validator3);
-	testValidator6(processor, validator3);
+	testValidator5(processor, validator3, sresult);
+	testValidator6(processor, validator3, sresult);
+
+    std::cout << "\nTest Results - Number of tests= " << (sresult->success + sresult->failure) << ", Successes = "
+              << sresult->success << ",  Failures= " << sresult->failure << std::endl;
+
+    std::list<std::string>::iterator it;
+    std::cout << "Failed tests:" << std::endl;
+// Make iterate point to beginning and increment it one by one till it reaches the end of list.
+    for (it = sresult->failureList.begin(); it != sresult->failureList.end(); it++) {
+        //Print the contents
+        std::cout << it->c_str() << std::endl;
+
+    }
 	delete validator;
 	delete validator2;
 	delete validator3;
     processor->release();
     delete processor;
+    delete sresult;
 	return 0;
 }
