@@ -378,7 +378,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <code>format-integer()</code>, or <code>format-date()</code>, is not available for languages other than English.
       (We have not been able to find a .NET library that provides this capability).</p>
       
-      <p>For more general information about theses localization features, see the <a class="bodylink"
+      <p>For more general information about these localization features, see the <a class="bodylink"
          href="/localization">Localization</a> section.</p>
    </section>
    <section id="restrictions" title="Restrictions" class="csonly">
