@@ -82,8 +82,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns a date value equivalent to the original date, but adjusted to a different
-          timezone, or with the timezone removed.</p>
+        <p>Returns a date value equivalent to the original date, but with the timezone removed.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -104,8 +103,8 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns a dateTime value equivalent to the original dateTime, but adjusted to a different
-          timezone, or with the timezone removed.</p>
+        <p>Returns a dateTime value equivalent to the original dateTime, but with the timezone
+          removed.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -126,8 +125,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns a time value equivalent to the original time, but adjusted to a different
-          timezone, or with the timezone removed.</p>
+        <p>Returns a time value equivalent to the original time, but with the timezone removed.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -373,7 +371,7 @@
             href="/functions/fn/resolve-uri">resolve-uri()</a>.</p>
       </details>
       <description>
-        <p>Returns the base URI of a node.</p>
+        <p>Returns the base URI of the context node.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -656,8 +654,7 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns a sequence of items making up the collection whose URI is supplied; or the
-          default collection if no URI is supplied.</p>
+        <p>Returns a sequence of items making up the default collection.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -679,8 +676,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Compares two strings using the specified collation, or the default collation if none is
-          supplied.</p>
+        <p>Compares two strings using the default collation.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -1074,7 +1070,7 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns the result of atomizing a sequence.</p>
+        <p>Returns the result of atomizing the context item.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -1601,7 +1597,7 @@
       <signatures>
         <proto return-type="element()*">
           <arg name="values" type="xs:string*"
-            desc="The ID value being sought"/>
+            desc="The ID value being sought, within the document containing the context node"/>
           <arg name="node" type="node()" default="."
             desc="A node (typically the root) of the document being searched"/>
           <in-spec>xpath30</in-spec>
@@ -2062,7 +2058,9 @@
       <saxon-edition>ALL</saxon-edition>
       <see-also name="format-dateTime" namespace="http://www.w3.org/2005/xpath-functions"/>
       <description>
-        <p>Formats a date, using a format controlled by the picture string.</p>
+        <p>Formats a date, using a format controlled by the picture string. The result is equivalent
+          to the 5-argument form of the function, with the third, fourth, and fifth arguments set to
+          an empty sequence.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2154,7 +2152,9 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Formats a dateTime, using a format controlled by the picture string.</p>
+        <p>Formats a dateTime, using a format controlled by the picture string. The result is
+          equivalent to the 5-argument form of the function, with the third, fourth, and fifth
+          arguments set to an empty sequence.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2211,7 +2211,7 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Formats a number as specified by a picture string and decimal format.</p>
+        <p>Formats a number as specified by a picture string, using the default decimal format.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2220,7 +2220,7 @@
         <proto return-type="xs:string?">
           <arg name="value" type="xs:time?" desc="The xs:time value to be formatted"/>
           <arg name="picture" type="xs:string"
-            desc="Picture showing how the time should be formatted"/>
+            desc="Picture showing how the time should be displayed"/>
           <arg name="language" type="xs:string?" default="()" desc="The language for the output"/>
           <arg name="calendar" type="xs:string?" default="()" desc="The calendar for the output"/>
           <arg name="place" type="xs:string?" default="()"
@@ -2237,7 +2237,7 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Formats a time value, using a format controlled by the picture string.</p>
+        <p>Formats a time value.</p>
       </description>
       <see-also name="format-dateTime" namespace="http://www.w3.org/2005/xpath-functions"/>
     </function>
@@ -2288,6 +2288,7 @@
             desc="The arity of the requested function (number of arguments)"/>
           <in-spec>xslt20</in-spec>
           <in-spec>xslt30</in-spec>
+          <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
@@ -2299,8 +2300,8 @@
       <saxon-edition>ALL</saxon-edition>
       <see-also name="function-lookup" namespace="http://www.w3.org/2005/xpath-functions"/>
       <description>
-        <p>Determines whether a function with a given name, and arity if supplied, is available in
-          the context.</p>
+        <p>Determines whether a function with a given name (regardless of arity) is available in the
+          context.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2383,7 +2384,7 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns a generated unique ASCII identifier for a node.</p>
+        <p>Returns a generated unique ASCII identifier for the context node.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3048,8 +3049,8 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns true if the <code>xml:lang</code> value for the supplied node (or the context
-          item if the second argument is omitted) matches the given language.</p>
+        <p>Returns true if the <code>xml:lang</code> value for the context node matches the given
+          language.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3109,7 +3110,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns the local part of the name of a node.</p>
+        <p>Returns the local part of the name of the context node.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3523,7 +3524,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns the name of a node, as a string in the lexical form of a QName.</p>
+        <p>Returns the name of the context node, as a string in the lexical form of a QName.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3543,7 +3544,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns the namespace URI of the name of a node.</p>
+        <p>Returns the namespace URI of the name of the context node.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3630,8 +3631,8 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns the name of a node, as a QName value (that is, a namespace URI plus local
-          name).</p>
+        <p>Returns the name of the context node, as a QName value (that is, a namespace URI plus
+          local name).</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3670,8 +3671,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Eliminates redundant spaces from the supplied string, or the string value of the context
-          item.</p>
+        <p>Eliminates redundant spaces from the string value of the context item.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3694,8 +3694,8 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Converts a string to the specified Unicode normalization form (the default is NFC) by
-          modifying the way in which combining characters are represented.</p>
+        <p>Converts a string to Unicode normalization form NFC by modifying the way in which
+          combining characters are represented.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3733,8 +3733,8 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Converts the supplied value (or the value of the context item) to a double, or returns
-          NaN if conversion is not possible.</p>
+        <p>Equivalent to <code>number(.)</code>; converts the value of the context item to a
+          double.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4291,10 +4291,9 @@
       <signatures>
         <proto return-type="xs:anyURI?">
           <arg name="href" type="xs:string?"
-            desc="A relative URI reference to be resolved against the specified base URI"/>
+            desc="A relative URI reference to be resolved against the static base URI from the context"/>
           <arg name="base" type="xs:string?" default="()"
-            desc="The base URI used for resolving the relative reference; if not supplied or the
-            supplied value is the empty sequence, then the static base URI from the context is used"/>
+            desc="The base URI used for resolving the relative reference"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -4312,7 +4311,7 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Resolves a relative URI against a base URI.</p>
+        <p>Resolves a relative URI against the base URI from the static context.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4353,7 +4352,7 @@
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns the root node (typically but not necessarily a document node) of the tree
-          containing a node.</p>
+          containing the context node.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4361,7 +4360,7 @@
       <signatures>
         <proto return-type="xs:numeric?">
           <arg name="value" type="xs:numeric?"
-            desc="The value to be rounded"/>
+            desc="The value to be rounded to the nearest whole number"/>
           <arg name="precision" type="xs:integer?" default="0"
             desc="The number of decimal places required"/>
           <arg name="mode"
@@ -4388,8 +4387,8 @@
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Rounds a numeric value to a specified number of decimal places, with control over how the
-          rounding takes place.</p>
+        <p>Rounds a numeric value to the nearest whole number, rounding x.5 towards positive
+          infinity.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4397,7 +4396,7 @@
       <signatures>
         <proto return-type="xs:numeric?">
           <arg name="value" type="xs:numeric?"
-            desc="The value to be rounded"/>
+            desc="The value to be rounded to the nearest whole number"/>
           <arg name="precision" type="xs:integer?" default="0"
             desc="The number of decimal places required"/>
           <in-spec>xpath20</in-spec>
@@ -4411,8 +4410,8 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Rounds a numeric value to a specified number of decimal places, rounding to make the last
-          digit even if two such values are equally near.</p>
+        <p>Rounds a numeric value to the nearest whole number, rounding x.5 towards the nearest even
+          number.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4859,7 +4858,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns the string value of the supplied value.</p>
+        <p>Returns the string value of the context node.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4884,7 +4883,7 @@
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns a string created by concatenating all the items in the given sequence (casting
-          each item to a string), separated by the given separator.</p>
+          each item to a string), with no separator.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4903,7 +4902,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Returns the number of characters in a string.</p>
+        <p>Returns the number of characters in the string value of the context item.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4947,7 +4946,7 @@
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns those items in the given sequence from the given starting position to the end of
-          the sequence, or <code>$length</code> items if fewer.</p>
+          the sequence.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4994,7 +4993,7 @@
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns a substring of a given string starting at the given starting position and
-          continuing to the end of the string, or <code>$length</code> characters if shorter.</p>
+          continuing to the end of the string.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
