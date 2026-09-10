@@ -4478,6 +4478,7 @@ public class XPathParser {
                     }
                     result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
                         .makeFunctionCall(block, Literal.makeLiteral(optionsMap));
+                    result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
                 break;
         }
@@ -4967,6 +4968,9 @@ public class XPathParser {
     protected StructuredQName resolveFunctionName(String fname) throws XPathException {
         if (scanOnly) {
             return NamespaceUri.SAXON.qName("dummy");
+        }
+        if (isReservedFunctionName(fname, env.getXPathVersion())) {
+            grumble("Function name " + fname + " is a reserved name");
         }
         StructuredQName functionName = null;
         try {
