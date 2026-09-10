@@ -137,6 +137,8 @@ public class EmptyIterator implements SequenceIterator,
 
     /**
      * Static method to get an empty AxisIterator
+     *
+     * @return an empty AxisIterator
      */
 
     public static AxisIterator ofNodes() {
@@ -145,6 +147,8 @@ public class EmptyIterator implements SequenceIterator,
 
     /**
      * Static method to get an empty AtomicIterator
+     *
+     * @return an empty AtomicIterator
      */
 
     public static AtomicIterator ofAtomic() {

@@ -74,8 +74,9 @@ public class ProcInstImpl extends NodeImpl {
     /**
      * Set the system ID and line number
      *
-     * @param uri        the system identifier
-     * @param lineNumber the line number
+     * @param uri          the system identifier
+     * @param lineNumber   the line number
+     * @param columnNumber the column number
      */
 
     public void setLocation(String uri, int lineNumber, int columnNumber) {
@@ -127,7 +128,7 @@ public class ProcInstImpl extends NodeImpl {
      * Rename this node
      *
      * @param newNameCode the new name
-     * @param inherit
+     * @param inherit true if any new namespace binding is to be inherited by descendants
      */
 
     @Override

@@ -119,6 +119,8 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
 
     /**
      * Get the name code of the node, used for finding names in the name pool
+     *
+     * @return the name code
      */
 
     public int getNameCode() {

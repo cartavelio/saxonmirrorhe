@@ -54,6 +54,8 @@ public class VirtualUntypedCopy extends VirtualCopy {
      * Protected constructor: create a virtual copy of a node
      *
      * @param base the node to be copied
+     * @param root the node in the source tree corresponding to the root of the virtual tree. This must be an ancestor
+     *             of the base node
      */
 
     protected VirtualUntypedCopy(NodeInfo base, NodeInfo root) {

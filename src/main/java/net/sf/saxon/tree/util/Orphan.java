@@ -298,6 +298,7 @@ public final class Orphan implements MutableNodeInfo {
      * Determine whether this is the same node as another node.
      * <p>Note: a.equals(b) if and only if generateId(a)==generateId(b)</p>
      *
+     * @param other Node object
      * @return true if this Node object and the supplied Node object represent the
      *         same node in the tree.
      */
@@ -711,7 +712,7 @@ public final class Orphan implements MutableNodeInfo {
      * @param attType    the type annotation of the new attribute
      * @param value      the string value of the new attribute
      * @param properties properties including IS_ID and IS_IDREF properties
-     * @param inheritNamespaces
+     * @param inheritNamespaces true if any namespace used by this attribute name is to be inherited by descendant elements
      */
 
     @Override
@@ -784,7 +785,7 @@ public final class Orphan implements MutableNodeInfo {
      * parent of the target attribute</p>
      *
      * @param newNameCode the namecode of the new name in the name pool
-     * @param inherit
+     * @param inherit true if any new namespace binding is to be inherited
      * @throws IllegalArgumentException if the new name code is not present in the name pool, or if
      *                                  it has a (prefix, uri) pair in which the
      *                                  prefix is the same as that of an existing in-scope namespace binding and the uri is different from that
@@ -806,7 +807,7 @@ public final class Orphan implements MutableNodeInfo {
      *                added. If the target element already has a namespace binding with this (prefix, uri) pair, the call has
      *                no effect. If the target element currently has a namespace binding with this prefix and a different URI, an
      *                exception is raised.
-     * @param inherit
+     * @param inherit true if the namespace is to be inherited by children and descendants
      * @throws IllegalArgumentException if the namespace code is not present in the namepool, or if the target
      *                                  element already has a namespace binding for this prefix
      */

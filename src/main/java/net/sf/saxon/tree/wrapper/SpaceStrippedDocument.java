@@ -49,6 +49,8 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
 
     /**
      * Create a wrapped node within this document
+     * @param node the node to be wrapped
+     * @return the wrapped node
      */
 
     public SpaceStrippedNode wrap(NodeInfo node) {
@@ -69,6 +71,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
 
     /**
      * Get the document's strippingRule
+     * @return the strippingRule
      */
 
     public SpaceStrippingRule getStrippingRule() {

@@ -52,7 +52,7 @@ public class XMLStreamWriterDestination extends AbstractDestination {
      * @param pipe The Saxon configuration. This is supplied so that the destination can
      *               use information from the configuration (for example, a reference to the name pool)
      *               to construct or configure the returned Receiver.
-     * @param params
+     * @param params Serialization parameters known to the caller of the method.
      * @return the Receiver to which events are to be sent. It is the caller's responsibility to
      *         initialize this Receiver with a {@link net.sf.saxon.event.PipelineConfiguration} before calling
      *         its <code>open()</code> method. The caller is also responsible for ensuring that the sequence

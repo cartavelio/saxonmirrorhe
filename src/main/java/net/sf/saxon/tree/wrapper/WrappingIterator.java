@@ -29,9 +29,10 @@ public class WrappingIterator implements AxisIterator {
     /**
      * Create a WrappingIterator
      *
-     * @param base   The underlying iterator
-     * @param parent If all the nodes to be wrapped have the same parent,
-     *               it can be specified here. Otherwise specify null.
+     * @param base     The underlying iterator
+     * @param function The wrapping function
+     * @param parent   If all the nodes to be wrapped have the same parent,
+     *                 it can be specified here. Otherwise specify null.
      */
 
     public WrappingIterator(AxisIterator base, WrappingFunction function, VirtualNode parent) {

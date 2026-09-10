@@ -315,7 +315,7 @@ public class AttributeImpl extends NodeImpl {
      * Rename this node
      *
      * @param newNameCode the NamePool code of the new name
-     * @param inherit
+     * @param inherit true if any new namespace binding is to be inherited
      */
 
     @Override

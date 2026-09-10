@@ -147,6 +147,10 @@ public abstract class SystemFunction extends AbstractFunction {
 
     /**
      * Optimize for constant argument values
+     * @param arguments the supplied arguments to the function call
+     * @return either a function call on this function, or an expression that delivers
+     * the same result, or null indicating that no optimization has taken place
+     * @throws XPathException if an error is detected
      */
 
     public Expression fixArguments(Expression... arguments) throws XPathException {
@@ -304,6 +308,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * @param visitor an expression visitor, providing access to the static context and configuration
      * @param contextItemType information about whether the context item is set, and what its type is
      * @param arguments the expressions appearing as arguments in the function call
+     * @throws XPathException if an error is detected
      */
 
     public void supplyTypeInformation (
@@ -409,6 +414,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * is that a system function call is non-creative unless more details
      * are defined in a subclass.
      * @param arguments the actual arguments supplied in a call to the function
+     * @return the properties
      */
 
     public int getSpecialProperties(Expression[] arguments) {
@@ -449,6 +455,7 @@ public abstract class SystemFunction extends AbstractFunction {
     /**
      * Make a dynamic call to a supplied argument function (convenience method for use by implementations)
      *
+     * @param f       the function
      * @param context the XPath dynamic evaluation context
      * @param args    the actual arguments to be supplied
      * @return the result of invoking the function
@@ -486,8 +493,10 @@ public abstract class SystemFunction extends AbstractFunction {
     /**
      * Type-check a call on this function
      * @param caller the function call expression calling this function
+     * @param visitor
      * @param contextInfo static context information relating to the call
      * @return a type-checked replacement for the supplied function call
+     * @throws XPathException if an error is detected
      */
 
     public Expression typeCheckCaller(FunctionCall caller, ExpressionVisitor visitor, ContextItemStaticInfo contextInfo)

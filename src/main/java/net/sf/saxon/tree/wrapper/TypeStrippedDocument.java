@@ -35,6 +35,8 @@ public class TypeStrippedDocument extends GenericTreeInfo {
 
     /**
      * Create a wrapped node within this document
+     * @param node the node to be wrapped
+     * @return the wrapped node
      */
 
     public TypeStrippedNode wrap(NodeInfo node) {
@@ -45,7 +47,9 @@ public class TypeStrippedDocument extends GenericTreeInfo {
      * Get the element with a given ID, if any
      *
      * @param id        the required ID value
-     * @param getParent
+     * @param getParent true if running the element-with-id() function rather than the id()
+     *                  function; the difference is that in the case of an element of type xs:ID, the parent of
+     *                  the element should be returned, not the element itself.
      * @return the element with the given ID value, or null if there is none.
      */
 

@@ -112,6 +112,8 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
      * Escape a string for XML output (in an attribute delimited by double quotes).
      * This method also collapses whitespace (since the value may be an XPath expression that
      * was originally written over several lines).
+     * @param in the input string
+     * @return the escaped string
      */
 
     public String escape(/*@Nullable*/ String in) {
@@ -145,7 +147,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     /**
      * Called after an instruction of the stylesheet got processed
-     * @param info
+     * @param info trace information
      */
 
     @Override
@@ -204,6 +206,8 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     /**
      * Get n spaces
+     * @param n the requested number of spaces
+     * @return a string containing the requested number of spaces
      */
 
     protected static String spaces(int n) {
@@ -226,6 +230,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     /**
      * Get the output destination
+     * @return the output destination for tracing output
      */
 
     public Logger getOutputDestination() {
@@ -234,7 +239,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     /**
      * Method called when a rule search has completed.
-     *  @param rule the rule (or possible built-in ruleset) that has been selected
+     * @param rule the rule (or possible built-in ruleset) that has been selected
      * @param mode the mode in operation
      * @param item the item that was checked against
      */

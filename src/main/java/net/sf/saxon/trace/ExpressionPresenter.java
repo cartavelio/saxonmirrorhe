@@ -207,6 +207,8 @@ public class ExpressionPresenter {
 
     /**
      * Set the options
+     *
+     * @param options the options
      */
 
     public void setOptions(Options options) {
@@ -253,7 +255,7 @@ public class ExpressionPresenter {
      * @param config the Configuration
      * @param out    the OutputStream
      * @return a Receiver that directs serialized output to this output stream
-     * @throws XPathException
+     * @throws XPathException if a serializer cannot be created
      */
 
     /*@Nullable*/
@@ -266,6 +268,7 @@ public class ExpressionPresenter {
     /**
      * Make a Properties object containing defaulted serialization attributes for the expression tree
      *
+     * @param config the Configuration
      * @return a default set of properties
      */
 
@@ -575,6 +578,7 @@ public class ExpressionPresenter {
     /**
      * Static method to escape a string using Javascript escaping conventions
      * @param in the string to be escaped
+     * @return the escaped string
      */
 
     public static String jsEscape(String in) {

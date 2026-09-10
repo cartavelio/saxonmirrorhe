@@ -144,7 +144,7 @@ public class TinyBuilder extends Builder {
 
     /**
      * Write a document node to the tree
-     * @param properties
+     * @param properties properties of the document node
      */
 
     @Override
