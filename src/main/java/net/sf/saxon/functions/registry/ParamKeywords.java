@@ -75,6 +75,7 @@ public class ParamKeywords {
         fnParamNames.put("avg", "values");
         fnParamNames.put("base-uri", "node");
         fnParamNames.put("boolean", "input");
+        fnParamNames.put("build-uri", "parts|options");
         fnParamNames.put("ceiling", "value");
         fnParamNames.put("char", "name");
         fnParamNames.put("characters", "value");
@@ -194,6 +195,7 @@ public class ParamKeywords {
         fnParamNames.put("parse-json", "json|options");
         fnParamNames.put("parse-html", "html|options");
         fnParamNames.put("parse-QName", "eqname");
+        fnParamNames.put("parse-uri", "uri|options");
         fnParamNames.put("parse-xml", "value");
         fnParamNames.put("parse-xml-fragment", "value");
         fnParamNames.put("parts", "");
