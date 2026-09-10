@@ -892,7 +892,7 @@ public class OptimizerEE extends Optimizer {
             }
             f.restoreParentPointers();
             // failing that, try a variable-level index (an IndexedFilterExpression)
-            if (f.getSelectExpression() instanceof VariableReference) {
+            if (f.getSelectExpression() instanceof VariableReference && isOptionSet(OptimizerOptions.INDEX_VARIABLES)) {
                 VariableReference varRef = (VariableReference) f.getSelectExpression();
                 Binding binding = varRef.getBinding();
                 // don't index unless the filter expression is used more than once in the life of the variable
