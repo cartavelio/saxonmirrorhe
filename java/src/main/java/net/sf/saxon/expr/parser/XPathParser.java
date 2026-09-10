@@ -30,6 +30,7 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
+import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.jnode.SpecificJNodeType;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
@@ -3104,12 +3105,30 @@ public class XPathParser {
                         setLocation(ae);
                         return ae;
                     }
-                    case "jnode":
+                    case "jnode": {
+                        checkLanguageVersion40("nodeTest " + name);
+                        JNodeType jType;
+                        if (t.currentToken == Token.RPAREN) {
+                            jType = AnyJNodeType.getInstance();
+                        } else {
+                            SequenceType contentType = parseSequenceType();
+                            TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
+                            jType = new SpecificJNodeType(contentType, th);
+                        }
+                        int defaultAxis = AxisInfo.CHILD;
+                        AxisExpression ae = new AxisExpression(defaultAxis, new NodeTypeTest(jType));
+                        setLocation(ae);
+                        return ae;
+                    }
                     case "gnode": {
                         checkLanguageVersion40("nodeTest " + name);
-                        NodeTest nodeTest = parseNodeTest(Type.ELEMENT);
+                        nextToken();
+                        readToken(Token.LPAREN);
+                        readToken(Token.RPAREN);
                         int defaultAxis = AxisInfo.CHILD;
-                        AxisExpression ae = new AxisExpression(defaultAxis, nodeTest);
+                        TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
+                        SpecificJNodeType test = new SpecificJNodeType(SequenceType.one(AnyGNodeType.getInstance()), th);
+                        AxisExpression ae = new AxisExpression(defaultAxis, new NodeTypeTest(test));
                         setLocation(ae);
                         return ae;
                     }
@@ -3157,7 +3176,8 @@ public class XPathParser {
                     }
                     case "array":
                     case "map":
-                    case "enum": {
+                    case "enum":
+                    case "item": {
                         checkLanguageVersion40("nodeTest " + name + "()");
                         ItemType type = parseItemType();
                         AxisExpression ae = new AxisExpression(
@@ -3787,6 +3807,7 @@ public class XPathParser {
             }
             nextToken();
             if (name.equals("type") && t.currentToken == Token.LPAREN) {
+                // TODO: syntax dropped?
                 nextToken();
                 SequenceType requiredType = parseSequenceType();
                 expect(Token.RPAREN);
@@ -3808,6 +3829,13 @@ public class XPathParser {
             }
             nextToken();
             result = makeLookupExpression(env.getConfiguration(), lhs, Literal.makeLiteral(number));
+
+        } else if (token == Token.HASH) {
+            checkLanguageVersion40("a QName literal after `?`");
+            StructuredQName qn = parseEQName();
+            result = makeLookupExpression(env.getConfiguration(), lhs,
+                                          Literal.makeLiteral(new QNameValue(qn, BuiltInAtomicType.QNAME)));
+
         } else if (token == Token.STAR) {
             nextToken();
             result = parserExtension.lookupStar(lhs, SequenceType.ANY_SEQUENCE, allowXPath40Syntax);
@@ -3824,6 +3852,12 @@ public class XPathParser {
             offset = t.currentTokenStartOffset;
             StructuredQName varName = parseEQName();
             result = makeLookupExpression(env.getConfiguration(), lhs, resolveVariableReference(offset, varName));
+        } else if (token == Token.DOT) {
+            checkLanguageVersion40("`.` after `?`");
+            nextToken();
+            offset = t.currentTokenStartOffset;
+            result = makeLookupExpression(env.getConfiguration(), lhs, new ContextValueExpression());
+
         } else {
             grumble("Unexpected " + token + " after '?'");
             return null;
@@ -3935,6 +3969,13 @@ public class XPathParser {
             nextToken();
         }
         switch (kind) {
+            case "item":
+                if (empty) {
+                    return AnyGNodeType.getInstance();
+                } else {
+                    grumble("Expected ')': no arguments are allowed in item()");
+                    return null;
+                }
             case "node":
                 if (empty) {
                     return AnyXNodeType.getInstance();
@@ -4118,13 +4159,21 @@ public class XPathParser {
                     grumble("Expected ')' or ',' in SequenceType");
                 }
                 return null;
-            case "jnode":
+            case "jnode": {
                 checkLanguageVersion40("NodeTest jnode()");
-                // TODO: allow parameterisation by content type
-                return AnyJNodeType.getInstance();
+                if (t.currentToken == Token.RPAREN) {
+                    return AnyJNodeType.getInstance();
+                }
+                SequenceType type = parseSequenceType();
+                readToken(Token.RPAREN);
+                return new SpecificJNodeType(type,
+                                             env.getConfiguration().getTypeHierarchy());
+
+            }
             case "gnode":
                 checkLanguageVersion40("NodeTest gnode()");
-                return AnyGNodeType.getInstance();
+                return new SpecificJNodeType(AnyGNodeType.getInstance().one(),
+                                             env.getConfiguration().getTypeHierarchy());
 
             case "type": {
                 checkLanguageVersion40("nodeTest type()");
