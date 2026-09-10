@@ -115,13 +115,16 @@ namespace TestRunner {
 
         protected override void processSpec(string specStr) {
             if (specStr.Equals("XT10")) {
-                spec = Spec.XT10;
+                requestedSpec = Spec.XT10;
             }
             else if (specStr.Equals("XT20")) {
-                spec = Spec.XT20;
+                requestedSpec = Spec.XT20;
             }
             else if (specStr.Equals("XT30")) {
-                spec = Spec.XT30;
+                requestedSpec = Spec.XT30;
+            }
+            else if (specStr.Equals("XT40")) {
+                requestedSpec = Spec.XT40;
             }
             else {
                 throw new Exception("Unknown spec " + specStr);
@@ -1170,7 +1173,7 @@ namespace TestRunner {
                     bool atLeast = value.EndsWith("+");
                     value = value.Replace("+", "");
 
-                    String specName = ((SpecAttr) spec.GetAttr()).svname.Replace("XT", "XSLT");
+                    String specName = SpecAttr.ShortNameAndVersionOf(requestedSpec).Replace("XT", "XSLT");
                     int order = value.CompareTo(specName);
                     return atLeast ? order <= 0 : order == 0;
 

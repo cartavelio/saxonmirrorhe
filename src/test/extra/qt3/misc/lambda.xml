@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="us-ascii"?>
 <test-set xmlns="http://www.w3.org/2010/09/qt-fots-catalog" name="lambda">
   <description>Testing the saxon extension syntax: lambda operator</description>
-  <dependency type="spec" value="XP30+ XQ30+"/>
+  <dependency type="spec" value="XP40+ XQ40+"/>
   <dependency type="feature" value="higherOrderFunctions"/>
 
   <environment name="lambda">
@@ -13,7 +13,7 @@
     <description>Simple function expression, simple case, original syntax</description>
     <created by="Michael Kay" on="2017-11-03"/>
     <environment ref="lambda"/>
-    <test>deep-equal(filter(1 to 10, fn{. gt 5}), 6 to 10)</test>
+    <test>deep-equal(filter(1 to 10, ->{. gt 5}), 6 to 10)</test>
     <result>
       <assert-true/>
     </result>
@@ -23,7 +23,7 @@
     <description>Dot-function expression, simple case, revised syntax</description>
     <created by="Michael Kay" on="2020-01-02"/>
     <environment ref="lambda"/>
-    <test>deep-equal(filter(1 to 10, .{. gt 5}), 6 to 10)</test>
+    <test>deep-equal(filter(1 to 10, ->{. gt 5}), 6 to 10)</test>
     <result>
       <assert-true/>
     </result>
@@ -33,7 +33,7 @@
     <description>Dot-function expression, context item as node</description>
     <created by="Michael Kay" on="2020-01-02"/>
     <environment ref="lambda"/>
-    <test>doc('docs/atomic.xml')/*/* => filter(.{@*:attr = 'id1 id2'}) => tokenize()</test>
+    <test>doc('docs/atomic.xml')/*/* => filter(->{@*:attr = 'id1 id2'}) => tokenize()</test>
     <result>
       <assert-deep-eq>"id1", "id2"</assert-deep-eq>
     </result>
@@ -43,7 +43,7 @@
     <description>Dot-function expression, use as function item without call</description>
     <created by="Michael Kay" on="2020-01-02"/>
     <environment ref="lambda"/>
-    <test>.{@x} => function-arity()</test>
+    <test>->{@x} => function-arity()</test>
     <result>
       <assert-eq>1</assert-eq>
     </result>
@@ -53,7 +53,7 @@
     <description>Dot-function expression, use as function item without call</description>
     <created by="Michael Kay" on="2020-01-02"/>
     <environment ref="lambda"/>
-    <test>.{@x} instance of function(item()) as item()*</test>
+    <test>->{@x} instance of function(item()) as item()*</test>
     <result>
       <assert-true/>
     </result>
@@ -63,7 +63,7 @@
     <description>Dot-function expression, uses closure</description>
     <created by="Michael Kay" on="2020-01-02"/>
     <environment ref="lambda"/>
-    <test>let $x := 3, $f := .{. gt $x} return filter(1 to 10, $f)</test>
+    <test>let $x := 3, $f := ->{. gt $x} return filter(1 to 10, $f)</test>
     <result>
       <assert-deep-eq>4 to 10</assert-deep-eq>
     </result>

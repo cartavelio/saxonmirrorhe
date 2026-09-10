@@ -88,12 +88,14 @@ namespace TestRunner {
 
             //environment.processor.SetProperty(JFeatureKeys.TRACE_EXTERNAL_FUNCTIONS, "true");
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
-            environment.xpathCompiler.BaseUri = baseURI; 
+            environment.xpathCompiler.BaseUri = baseURI;
+            environment.xpathCompiler.XPathLanguageVersion = SpecAttr.VersionOf(spec);
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
             environment.xqueryCompiler.BaseUri = baseURI;
+            environment.xqueryCompiler.XQueryLanguageVersion = SpecAttr.VersionOf(spec);
             environment.xsltCompiler = environment.processor.NewXsltCompiler();
             environment.xsltCompiler.BaseUri = baseURI;
-            environment.xsltCompiler.XsltLanguageVersion = spec.Equals(Spec.XT30) ? "3.0" : "2.0";
+            environment.xsltCompiler.XsltLanguageVersion = SpecAttr.VersionOf(spec);
 
             if (unfolded) {
                 // environment.xqueryCompiler.Implementation.setCodeInjector(new LazyLiteralInjector()); //TODO
@@ -121,8 +123,8 @@ namespace TestRunner {
          * @throws SaxonApiException
          */
         public static Environment processEnvironment(TestRunner.TestDriver driver,
-            XPathCompiler xpc, XdmNode env, SysCollGen.Dictionary<string, Environment> environments,
-            Environment defaultEnvironment) {
+                XPathCompiler xpc, XdmNode env, SysCollGen.Dictionary<string, Environment> environments,
+                Environment defaultEnvironment) {
             Environment environment = new Environment();
             String name = env.GetAttributeValue(new QName("name"));
             if (name != null) {
@@ -140,11 +142,13 @@ namespace TestRunner {
 
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
             environment.xpathCompiler.BaseUri = env.BaseUri;
+            environment.xpathCompiler.XPathLanguageVersion = SpecAttr.VersionOf(driver.Spec);
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
             environment.xqueryCompiler.BaseUri = env.BaseUri;
+            environment.xqueryCompiler.XQueryLanguageVersion = SpecAttr.VersionOf(driver.Spec);
             if (driver.Spec.ToString().Contains("XT")) {
                 environment.xsltCompiler = environment.processor.NewXsltCompiler();
-                environment.xsltCompiler.XsltLanguageVersion = ((SpecAttr) (driver.Spec.GetAttr())).version;
+                environment.xsltCompiler.XsltLanguageVersion = SpecAttr.VersionOf(driver.Spec);
             }
 
             if (driver.Unfolded) {

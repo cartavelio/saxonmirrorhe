@@ -6,6 +6,7 @@
          
    <dependency type="spec" value="XQ30+"/>
    <dependency type="xsd-version" value="1.1"/>
+   <dependency type="saxon:platform" value="J"/>
       
    <test-case name="reflex-001">
       <description>Static method, int argument, overloaded</description>
