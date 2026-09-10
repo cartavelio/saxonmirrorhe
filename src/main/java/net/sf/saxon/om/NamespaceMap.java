@@ -119,6 +119,9 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
 
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public static NamespaceMap fromNamespaceResolver(NamespaceResolver resolver) {
+        if (resolver instanceof NamespaceMap) {
+            return (NamespaceMap)resolver;
+        }
         Iterator<String> iter = resolver.iteratePrefixes();
         List<NamespaceBinding> bindings = new ArrayList<>();
         while (iter.hasNext()) {

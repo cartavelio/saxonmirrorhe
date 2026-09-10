@@ -146,6 +146,7 @@
     <xs:complexType>
 	  <xs:attribute name="type" use="required" type="scm:typeReferenceType"/>
 	  <xs:attribute name="test" use="required" type="scm:xpathExpressionType"/>
+    <xs:attribute name="nsContext" use="required" type="scm:nsContextType"/>
 	  <xs:attribute name="defaultNamespace" use="required" type="scm:uriType"/>
 	  <xs:attribute ref="xml:base" use="optional"/>
 	</xs:complexType>
@@ -872,6 +873,7 @@
     </xs:annotation>
     <xs:complexType>
 	  <xs:attribute name="test" use="required" type="scm:xpathExpressionType"/>
+    <xs:attribute name="nsContext" use="required" type="scm:nsContextType"/>
 	  <xs:attribute name="defaultNamespace" use="required" type="scm:uriType"/>
 	  <xs:attribute ref="xml:base" use="optional"/>
 	</xs:complexType>
@@ -995,6 +997,7 @@
       </xs:documentation>
     </xs:annotation>  
     <xs:attribute name="xpath" use="required" type="scm:xpathExpressionType"/>
+    <xs:attribute name="nsContext" use="required" type="scm:nsContextType"/>
     <xs:attribute name="defaultNamespace" use="required" type="scm:uriType"/>
     <xs:attribute name="type" use="optional" type="scm:builtInTypeReferenceType"/> <!-- TODO: only used for fields, not selectors -->
     <xs:attribute ref="xml:base" use="optional"/>
@@ -1227,9 +1230,23 @@
       </xs:documentation>
     </xs:annotation>  
     <xs:restriction base="xs:string">
-	<xs:pattern value=".+"/>
+	    <xs:pattern value=".+"/>
     </xs:restriction>
-  </xs:simpleType> 
+  </xs:simpleType>
+  
+  <xs:simpleType name="nsContextType">
+    <xs:annotation>
+      <xs:documentation>
+        An attribute holding a namespace context in the form "prefix=uri prefix=uri".
+        The uri is replaced by "~" if this is a binding of one of the well-known
+        conventional prefixes such as "xs" or "xsi". The prefix is absent in the
+        case of the default namespace.
+      </xs:documentation>
+    </xs:annotation>  
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([^=]*=[^=]+\s)*([^=]*=[^=]+)?"/>
+    </xs:restriction>
+  </xs:simpleType>
   
   <xs:simpleType name="xsdVersionType">
     <xs:annotation>

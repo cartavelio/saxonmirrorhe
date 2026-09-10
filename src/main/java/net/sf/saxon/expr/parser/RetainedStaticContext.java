@@ -37,7 +37,7 @@ public class RetainedStaticContext implements NamespaceResolver {
     private URI staticBaseUri;
     private String staticBaseUriString;
     private String defaultCollationName;
-    private NamespaceResolver namespaces;
+    private NamespaceResolver namespaces;  // Normally a NamespaceMap, except for the JAXP case
     private NamespaceUri defaultFunctionNamespace = NamespaceUri.FN;
     private NamespaceUri defaultElementNamespace;
     private DecimalFormatManager decimalFormatManager;
@@ -67,22 +67,8 @@ public class RetainedStaticContext implements NamespaceResolver {
         this.defaultElementNamespace = sc.getDefaultElementNamespace();
         defaultFunctionNamespace = sc.getDefaultFunctionNamespace();
         backwardsCompatibility = sc.isInBackwardsCompatibleMode();
-        if (Version.platform.JAXPStaticContextCheck(this, sc)) {
-            //updated in method
-        } else {
-            NamespaceResolver resolver = sc.getNamespaceResolver();
-            if (resolver instanceof NamespaceMap) {
-                namespaces = resolver;
-            } else {
-                NamespaceMap map = NamespaceMap.emptyMap();
-                for (Iterator<String> it = resolver.iteratePrefixes(); it.hasNext(); ) {
-                    String prefix = it.next();
-                    if (!prefix.equals("xml")) {
-                        map = map.put(prefix, resolver.getURIForPrefix(prefix, true));
-                    }
-                }
-                namespaces = map;
-            }
+        if (!Version.platform.JAXPStaticContextCheck(this, sc)) {
+            namespaces = sc.getNamespaceResolver();
         }
 
     }
@@ -331,9 +317,20 @@ public class RetainedStaticContext implements NamespaceResolver {
                 && namespaces.equals(r.namespaces);
     }
 
+    /**
+     * Set the in-scope namespaces.
+     * @param namespaces the in-scope namespaces. The preferred representation is as a NamespaceMap;
+     *                   however this is not possible in the case of the JAXP XPath API, which does
+     *                   not allow the in-scope namespaces to be enumerated.
+     */
 
     public void setNamespaces(NamespaceResolver namespaces) {
         this.namespaces = namespaces;
+    }
+
+    public NamespaceMap getNamespaceMap() {
+        // This fails for a JAXP static context, whose namespaces cannot be enumerated
+        return NamespaceMap.fromNamespaceResolver(namespaces);
     }
 
 
