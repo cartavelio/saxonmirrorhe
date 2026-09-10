@@ -460,6 +460,7 @@ task eejJarTests(
   from ("${buildDir}/testdriver_classes/eej") {
     include "net/sf/saxon/testdriver/**"
     include "com/saxonica/testdriver/**"
+    include "com/saxonica/js/**"
   }
 }
 
@@ -803,6 +804,7 @@ task eej_copyTestDriverSources(
   from "src/main/java"
   into "${buildDir}/src/testdrivers/eej"
   include "com/saxonica/testdriver/**/*.java"
+  include "com/saxonica/js/*.java"
   include "net/sf/saxon/testdriver/*.java"
 }
 
