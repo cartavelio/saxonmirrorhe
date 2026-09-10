@@ -305,6 +305,8 @@
         <p>The <code>escape-solidus</code> option of <code>xml-to-json</code> is implemented. (This is available
         whether or not 4.0 is enabled). (PR 1353)</p>
         
+        <p>The serialization option <code>json-lines="yes"</code> is implemented. (PR 1497, PR 1596)</p>
+        
         <p>In decimal format properties, it is now possible to set composite values for some properties,
         for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
         in the picture string, but the value "pc" will appear in the output. (PR 1250)</p>
