@@ -224,6 +224,11 @@ def testSuiteMatrix = [
         "": [:],
         "ex": ["export": "on"],
         "strict": ["strict":"on"]
+      ],
+      "XT40": [
+        "": [:],
+        "ex": ["export": "on"],
+        "strict": ["strict":"on"]
       ]
     ],
     "xslt40": [
@@ -320,6 +325,11 @@ def testSuiteMatrix = [
       "_depends": ["copySaxonExtraTestSuites"],
 
       "XT30": [
+        "": [:],
+        "ex": ["export": "on"],
+        "strict": ["strict":"on"]
+      ],
+      "XT40": [
         "": [:],
         "ex": ["export": "on"],
         "strict": ["strict":"on"]
