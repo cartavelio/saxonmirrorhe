@@ -146,14 +146,14 @@ public class ExperimentalXPathCompiler {
         return new FunctionLibrary() {
 
             @Override
-            public boolean isAvailable(SymbolicName.F functionName) {
+            public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
                 return library.containsKey(functionName);
             }
 
 
             @Override
             public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
-                if (isAvailable(functionName)) {
+                if (isAvailable(functionName, env.getXPathVersion())) {
                     UserFunction fn = library.get(functionName);
                     fn.setFunctionName(functionName.getComponentName());
                     //lib.put(functionName, fn);

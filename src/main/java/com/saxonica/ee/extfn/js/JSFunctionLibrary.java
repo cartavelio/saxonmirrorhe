@@ -22,7 +22,7 @@ import java.util.List;
 public class JSFunctionLibrary implements FunctionLibrary {
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         return NamespaceConstant.GLOBAL_JS.equals(functionName.getComponentName().getURI());
     }
 

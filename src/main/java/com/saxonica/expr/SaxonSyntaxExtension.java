@@ -215,7 +215,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
     public void handleExternalFunctionDeclaration(XQueryParser p, XQueryFunction func) throws XPathException {
         QueryModule qenv = (QueryModule)p.getStaticContext();
         SymbolicName.F fName = new SymbolicName.F(func.getFunctionName(), func.getNumberOfArguments());
-        if (!qenv.getFunctionLibrary().isAvailable(fName)) {
+        if (!qenv.getFunctionLibrary().isAvailable(fName, qenv.getXPathVersion())) {
             p.grumble("External function " + fName + " is not available", "XPST0017");
         }
         Function ext = qenv.getFunctionLibrary().getFunctionItem(fName, qenv);

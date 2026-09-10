@@ -295,7 +295,7 @@ public class CompileXPath extends SystemFunction {
         }
 
         @Override
-        public boolean isAvailable(SymbolicName.F functionName) {
+        public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
             return lib.containsKey(functionName);
         }
 
