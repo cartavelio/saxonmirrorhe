@@ -112,6 +112,11 @@
               <xsl:variable name="base" select="if ($has-explicit-base) then $explicitBase else 'object'"/>
               <xsl:variable name="line-pre-base" select="if ($has-explicit-base) then substring-before($line, ':') else $line"/>
               
+              <xsl:variable name="is-constructor-from-base" select="($is-method) and contains($line-pre-arrow, ':')"/>
+              <!-- NOTE: Update the $line-pre-arrow variable for constructors defined from base constructors -->
+              <xsl:variable name="line-pre-arrow" select="if ($is-constructor-from-base) then
+                normalize-space(substring-before($line-pre-arrow, ':')) else $line-pre-arrow"/>
+              
               <xsl:variable name="is-generic-type" select="(not($is-method or $is-initializer) and contains($line-pre-base, '&lt;')) or 
                 ($is-method and (substring-before($line-pre-arrow, '(') => tokenize('\s')) => reverse() =>
                 tail() => reverse() => string-join(' ') => contains('&gt;')) or 
@@ -125,7 +130,7 @@
                 contains('&gt;.')"/>
               
               <xsl:variable name="method-input" select="if ($is-method) then
-                (normalize-space(substring-before(substring-after($line, '('),')'))) else ''"/>
+                (normalize-space(substring-before(substring-after($line-pre-arrow, '('),')'))) else ''"/>
               <xsl:variable name="has-args" select="$is-method and ($method-input != '')"/>
               <!-- Can't always just tokenize $method-input on ','. 
                 This is wrong when some argument has generic type with more than one type parameter. -->
