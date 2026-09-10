@@ -169,17 +169,26 @@ public abstract class Outputter implements Receiver {
      * @throws XPathException if an error occurs
      */
     @Override
-    public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+    public void startElement(NodeName elemName, SchemaType type,
+                             AttributeMap attributes, NamespaceMap namespaces,
+                             Location location, int properties) throws XPathException {
         // This is a default implementation which is not particularly efficient. An Outputter that feeds
         // directly into a Receiver should try to avoid decomposing the attributes and namespaces.
-        startElement(elemName, type, location, properties);
+        spreadStartElement(elemName, type, attributes, namespaces, location, properties, this);
+    }
+
+    protected void spreadStartElement(NodeName elemName, SchemaType type,
+                                      AttributeMap attributes, NamespaceMap namespaces,
+                                      Location location, int properties,
+                                      Outputter out) throws XPathException {
+        out.startElement(elemName, type, location, properties);
         for (NamespaceBinding ns : namespaces) {
-            namespace(ns.getPrefix(), ns.getNamespaceUri(), properties);
+            out.namespace(ns.getPrefix(), ns.getNamespaceUri(), properties);
         }
         for (AttributeInfo att : attributes) {
-            attribute(att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties());
+            out.attribute(att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties());
         }
-        startContent();
+        out.startContent();
     }
 
     /**
