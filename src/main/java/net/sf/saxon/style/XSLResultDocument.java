@@ -94,6 +94,7 @@ public class XSLResultDocument extends StyleElement {
     private SchemaType schemaType = null;
     private final Map<StructuredQName, Expression> serializationAttributes = new HashMap<>(10);
     private boolean async = true;
+    private Expression select;
 
     /**
      * Determine whether this node is an instruction.
@@ -143,6 +144,9 @@ public class XSLResultDocument extends StyleElement {
                 typeAtt = Whitespace.trim(value);
             } else if (f.equals("use-character-maps")) {
                 useCharacterMapsAtt = Whitespace.trim(value);
+            } else if (f.equals("select")) {
+                requireXslt40Attribute("select");
+                select = makeExpression(value, att);
             } else if (fans.contains(f) || (f.startsWith("{") && !StandardNames.SAXON_ASYCHRONOUS.equals(f))) {
                 // this is a serialization attribute
                 String val = value;
@@ -203,11 +207,15 @@ public class XSLResultDocument extends StyleElement {
 
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
+        checkSelectXorContent(true);
         if (href != null && !getConfiguration().getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
             compileError("xsl:result-document is disabled when extension functions are disabled");
         }
         href = typeCheck("href", href);
         formatExpression = typeCheck("format", formatExpression);
+        if (select != null) {
+            select = typeCheck("select", select);
+        }
 
         for (StructuredQName prop : serializationAttributes.keySet()) {
             final Expression exp1 = serializationAttributes.get(prop);
@@ -317,7 +325,13 @@ public class XSLResultDocument extends StyleElement {
                 getContainingPackage().getCharacterMapIndex()
         );
 
-        Expression content = compileSequenceConstructor(exec, decl, true);
+        Expression content;
+
+        if (select != null) {
+            content = select;
+        } else {
+            content = compileSequenceConstructor(exec, decl, true);
+        }
         if (content == null) {
             content = Literal.makeLiteral(EmptySequence.getInstance());
         }
