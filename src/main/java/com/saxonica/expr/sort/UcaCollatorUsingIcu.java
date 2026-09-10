@@ -6,7 +6,6 @@ import com.ibm.icu.text.Collator;
 import com.ibm.icu.text.RuleBasedCollator;
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.VersionInfo;
-import net.sf.saxon.Version;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.CollationMatchKey;
 import net.sf.saxon.lib.SubstringMatcher;
@@ -275,11 +274,6 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
                     if ("quaternary".equals(props.getProperty("strength"))) {
                         setStrength(com.ibm.icu.text.Collator.TERTIARY);
                     }
-                    //#if CSHARP==true
-                    if (Version.platform.getPlatformSuffix().equals("CS")) {
-                        error("alternate", "non-ignorable|shifted (on .NET)", alternate);
-                    }
-                    //#endif
                     break;
                 default:
                     if (fallbackError) {
