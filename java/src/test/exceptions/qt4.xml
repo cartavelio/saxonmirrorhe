@@ -159,7 +159,7 @@
       <reason>Spec unclear: see issue 2359</reason>
    </exception>
 
-    <exception test-case="same-key-023"  run="false" report="n/a">
+    <!--<exception test-case="same-key-023"  run="false" report="n/a">
         <created by="O'Neil Delpratt" on="2026-01-16"/>
         <reason>Temporary test taking too long</reason>
     </exception>
@@ -167,7 +167,7 @@
     <exception test-case="same-key-024"  run="false" report="n/a">
         <created by="O'Neil Delpratt" on="2026-01-16"/>
         <reason>Temporary test taking too long</reason>
-    </exception>
+    </exception>-->
 
 
 </exceptions>
