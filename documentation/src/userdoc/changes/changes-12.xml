@@ -224,7 +224,7 @@
         
         <p>Interfaces affected include <code java="net.sf.saxon.om.NodeInfo">NodeInfo</code>, <code
             java="net.sf.saxon.event.Receiver">Receiver</code>, <code java="net.sf.saxon.om.StructuredQName">StructuredQName</code>,
-            <code java="net.sf.saxon.om.NodeInfo">NodeName</code>, <code java="net.sf.saxon.sxpath.XPathStaticContext">XPathStaticContext</code>,
+            <code java="net.sf.saxon.om.NodeInfo">NodeName</code>, <code>net.sf.saxon.sxpath.XPathStaticContext</code>,
             <code java="net.sf.saxon.om.AttributeMap">AttributeMap</code>, and <code java="net.sf.saxon.om.NodeInfo">NamespaceMap</code>. In some
             cases the old interface has been retained for compatibility, but use of a <code>NamespaceUri</code> is preferred.</p>
         
