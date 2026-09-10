@@ -146,7 +146,7 @@ TODO: rethink redefines and override
             or the new <code>XsdCompiler</code>, needs to be explicitly made available to any <code>XsltCompiler</code>
             or <code>XQueryCompiler</code> that uses it, using the new <code>useSchema()</code> method.</p></li>
             <li><p>Although Saxon now allows multiple schemas to be held in a <code>Processor</code> (and indeed,
-            XSLT 4.0 allows multiple schemas to be used within a single transformation &mdash; for example one schema for
+            XSLT 4.0 allows multiple schemas to be used within a single transformation – for example one schema for
             the source document and another for the result document), the schemas must be consistent with each other.
             This primarily means that two schemas within a <code>Processor</code> must not hold conflicting definitions
             of the same component (for example, different definitions of the same complex type).</p></li>
@@ -654,8 +654,9 @@ TODO: rethink redefines and override
             <li><p>PR1622 - XSLT map-for-key function</p></li>
             <!--<li><p>JSON-Lines input and output</p></li>-->
             <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
-            <li><p>merge-when attribute for xsl:for-each-group</p></li>
+            <li><p>PR2051 - merge-when attribute for xsl:for-each-group</p></li>
             <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
+            <li><p>PR2213 - trusted attribute for xsl:evaluate</p></li>
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
