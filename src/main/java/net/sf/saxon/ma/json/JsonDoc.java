@@ -25,6 +25,7 @@ import net.sf.saxon.z.IntSetPredicate;
 
 import java.io.Reader;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -84,7 +85,9 @@ public class JsonDoc extends SystemFunction  {
         Map<String, GroundedValue> checkedOptions;
         if (getArity() == 2) {
             MapItem options = (MapItem) arguments[1].head();
-            checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+            checkedOptions = options == null
+                    ? new HashMap<>()
+                    : getDetails().optionDetails.processSuppliedOptions(options, context);
         } else {
             checkedOptions = ParseJsonFn.OPTION_DETAILS.getDefaultOptions();
         }

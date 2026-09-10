@@ -81,6 +81,9 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         Sequence vendorOptionsOption = null;
         if (args.length == 2) {
             MapItem suppliedOptions = (MapItem) args[1].head();
+            if (suppliedOptions == null) {
+                suppliedOptions = new DictionaryMap();
+            }
             Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
             xqueryVersionOption = checkedOptions.get("xquery-version");
             if (xqueryVersionOption != null) {
