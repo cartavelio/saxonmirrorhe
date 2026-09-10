@@ -7,12 +7,14 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
+import java.util.EnumSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +29,10 @@ public class GMonthDayValue extends GDateValue {
 
     private GMonthDayValue(MutableGDateValue m) {
         super(m);
+    }
+
+    protected EnumSet<AccessorFn.Component> getDefinedComponents() {
+        return EnumSet.of(AccessorFn.Component.MONTH, AccessorFn.Component.DAY);
     }
 
     public static ConversionResult makeGMonthDayValue(UnicodeString value) {

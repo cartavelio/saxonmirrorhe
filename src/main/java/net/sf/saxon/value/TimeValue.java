@@ -519,6 +519,10 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 } else {
                     return null;
                 }
+            case YEAR:
+            case MONTH:
+            case DAY:
+                return null;
             default:
                 throw new IllegalArgumentException("Unknown component for time: " + component);
         }

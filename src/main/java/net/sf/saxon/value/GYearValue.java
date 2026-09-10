@@ -7,11 +7,13 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
+import java.util.EnumSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,6 +66,10 @@ public class GYearValue extends GDateValue {
         MutableGDateValue m = makeMutableCopy();
         m.typeLabel = metadata.getType();
         return new GYearValue(m);
+    }
+
+    protected EnumSet<AccessorFn.Component> getDefinedComponents() {
+        return EnumSet.of(AccessorFn.Component.YEAR);
     }
 
     /**

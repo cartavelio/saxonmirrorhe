@@ -7,10 +7,12 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
+import java.util.EnumSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +27,10 @@ public class GDayValue extends GDateValue {
 
     protected GDayValue(MutableGDateValue m) {
         super(m);
+    }
+
+    protected EnumSet<AccessorFn.Component> getDefinedComponents() {
+        return EnumSet.of(AccessorFn.Component.DAY);
     }
 
     public static ConversionResult makeGDayValue(UnicodeString value) {

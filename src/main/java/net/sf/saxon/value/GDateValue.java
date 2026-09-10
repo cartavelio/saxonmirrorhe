@@ -78,6 +78,10 @@ public abstract class GDateValue extends CalendarValue {
         this.hasNoYearZero = m.hasNoYearZero;
     }
 
+    protected EnumSet<AccessorFn.Component> getDefinedComponents() {
+        return EnumSet.of(AccessorFn.Component.YEAR, AccessorFn.Component.MONTH, AccessorFn.Component.DAY);
+    }
+
     /**
      * Test whether a candidate date is actually a valid date in the proleptic Gregorian calendar
      */
@@ -499,10 +503,19 @@ public abstract class GDateValue extends CalendarValue {
             case YEAR_ALLOWING_ZERO:
                 return Int64Value.makeIntegerValue(year);
             case YEAR:
+                if (!getDefinedComponents().contains(component)) {
+                    return null;
+                }
                 return Int64Value.makeIntegerValue(year > 0 || !hasNoYearZero ? year : year - 1);
             case MONTH:
+                if (!getDefinedComponents().contains(component)) {
+                    return null;
+                }
                 return Int64Value.makeIntegerValue(month);
             case DAY:
+                if (!getDefinedComponents().contains(component)) {
+                    return null;
+                }
                 return Int64Value.makeIntegerValue(day);
             case TIMEZONE:
                 if (hasTimezone()) {
@@ -510,6 +523,10 @@ public abstract class GDateValue extends CalendarValue {
                 } else {
                     return null;
                 }
+            case HOURS:
+            case MINUTES:
+            case SECONDS:
+                return null;
             default:
                 throw new IllegalArgumentException("Unknown component for date: " + component);
         }
