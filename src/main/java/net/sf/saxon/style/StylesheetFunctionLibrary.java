@@ -171,9 +171,11 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
         for (Component c : candidates) {
             UserFunction fn = (UserFunction)c.getActor();
             if (fn.isVariadic() && fn.getMinimumArity() <= actualArgs) {
+                fn.incrementReferenceCount();
                 return c;
             }
             if (fn.getMinimumArity() <= actualArgs && fn.getArity() >= actualArgs) {
+                fn.incrementReferenceCount();
                 return c;
             }
         }

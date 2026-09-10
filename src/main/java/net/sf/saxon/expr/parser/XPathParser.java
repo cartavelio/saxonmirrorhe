@@ -22,6 +22,7 @@ import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
+import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
@@ -4693,16 +4694,24 @@ public class XPathParser {
                 // This cannot be done until run-time. In the meantime we return an expression whose
                 // effect, when evaluated, is to make the call on {@code bindContext} and return
                 // the bound function item.
-                IContextAccessorFunction unboundFunction = (IContextAccessorFunction)foundFunction;
-                CallableDelegate callable = new CallableDelegate(
-                        (context, args) -> unboundFunction.bindContext(context));
-                callable.setDescription(foundFunction.getDescription());
-                CallableFunction binder = new CallableFunction(
-                        0, callable, new SpecificFunctionType(new SequenceType[]{}, SequenceType.SINGLE_FUNCTION));
-                DynamicFunctionCall dfc = new DynamicFunctionCall(
-                        new FunctionLiteral(binder), Collections.emptyList());
-                setLocation(dfc, offset);
-                return dfc;
+//                IContextAccessorFunction unboundFunction = (IContextAccessorFunction)foundFunction;
+//                CallableDelegate callable = new CallableDelegate(
+//                        (context, args) -> unboundFunction.bindContext(context));
+//                callable.setDescription(foundFunction.getDescription());
+//                CallableFunction binder = new CallableFunction(
+//                        0, callable, new SpecificFunctionType(new SequenceType[]{}, SequenceType.SINGLE_FUNCTION));
+//                DynamicFunctionCall dfc = new DynamicFunctionCall(
+//                        new FunctionLiteral(binder), Collections.emptyList());
+//                setLocation(dfc, offset);
+//                return dfc;
+
+                // For a context-dependent function, return a call on function-lookup(), which saves the context
+                SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
+                lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
+                return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(functionName, BuiltInAtomicType.QNAME)),
+                                               Literal.makeLiteral(Int64Value.makeIntegerValue(arity)));
+
+
             }
 
             Expression ref = makeNamedFunctionReference(functionName, foundFunction);
