@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.UnparsedTextFunction;
+import net.sf.saxon.lib.StandardUnparsedTextResolver;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -23,6 +24,7 @@ import net.sf.saxon.z.IntSetPredicate;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -120,6 +122,39 @@ public class JsonBuilder {
     public XdmValue parseJson(String json) throws SaxonApiException {
         return parseJson(new StringReader(json));
     }
+
+    /**
+     * Parse a JSON input string from a resource, supplied as a {@code URI},
+     * and construct an {@code XdmValue} representing
+     * its content. The {@code XdmValue} will usually be an {@code XdmMap} or {@code XdmArray}.
+     * If the JSON input consists simply of a string, number, or boolean, then the result will be an
+     * {@code XdmAtomicValue}. If the input is the JSON string "null", the method returns an
+     * {@code XdmEmptySequence}.
+     *
+     * <p>The method follows the rules of the {@code fn:parse-json()} function when called with
+     * default options.</p>
+     *
+     * @param uri supplies the URI of a resource containing the input JSON
+     * @return the result of parsing the JSON input
+     * @throws SaxonApiException if the resource cannot be read or contains invalid JSON input
+     * @since 13
+     */
+
+    public XdmValue loadJson(URI uri) throws SaxonApiException {
+        Reader reader;
+        try {
+            reader = new StandardUnparsedTextResolver().resolve(uri, "utf-8", config);
+            if (reader == null) {
+                throw new XPathException("Unable to resolve json-doc() URI " + uri, "FOUT1170");
+            }
+        } catch (XPathException err) {
+            err.maybeSetErrorCode("FOUT1170");
+            throw new SaxonApiException(err);
+        }
+
+        return parseJson(reader);
+    }
+
 
 }
 

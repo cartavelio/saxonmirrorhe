@@ -1,11 +1,16 @@
 package s9apitest;
 
+import jaxptest.ConfigTest;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.StringReader;
+import java.net.URI;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * test Processor.newJsonBuilder() (new in 11)
@@ -129,6 +134,23 @@ public class TestJsonBuilder {
             fail();
         }
     }
+
+    @Test
+    public void testParseFromURI() {
+        try {
+            URI uri = new File(new ConfigTest().getDataDir() + "sample.json").toURI();
+            XdmValue val = new Processor(false).newJsonBuilder().loadJson(uri);
+            assertTrue(val instanceof XdmMap);
+            XdmMap m = (XdmMap) val;
+            assertTrue(m.get("id") instanceof XdmAtomicValue);
+            assertEquals(1, ((XdmAtomicValue) m.get("id")).getDoubleValue());
+            assertEquals(4, m.mapSize());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
 
 }
 
