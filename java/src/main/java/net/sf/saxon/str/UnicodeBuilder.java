@@ -12,13 +12,14 @@ import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Arrays;
 
 /**
  * Builder class to construct a UnicodeString by appending text incrementally
  */
 
-public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
+public final class UnicodeBuilder extends Writer implements UniStringConsumer, UnicodeWriter {
 
     // The data held by the UnicodeBuilder is in two parts: an archive part
     // of arbitrary length, held as a ZenoString, and an active part which
@@ -415,6 +416,16 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     @Override
     public void write(String chars) throws IOException {
         append(chars);
+    }
+
+    @Override
+    public void write(char[] cbuf, int off, int len) throws IOException {
+        append(new String(cbuf, off, len));
+    }
+
+    @Override
+    public void flush() throws IOException {
+        // no action
     }
 
     /**

@@ -109,7 +109,8 @@ public class StringTool {
      */
 
     public static UnicodeString fromCharSequence(CharSequence chars) {
-        if (chars.length() == 0) {
+        int len = chars.length();
+        if (len == 0) {
             return EmptyUnicodeString.getInstance();
         }
         int width = getWidth(chars);
@@ -120,6 +121,9 @@ public class StringTool {
             return new BMPString(chars.toString());
         }
         int uLength = StringTool.getStringLength(chars);
+        if (uLength > Integer.MAX_VALUE / 3) {
+            throw new UnsupportedOperationException("Non-BMP string (length " + uLength + ") exceeds Saxon limits");
+        }
         byte[] triples = new byte[uLength * 3];
         for (int i = 0, j = 0; i < chars.length(); i++) {
             char c = chars.charAt(i);

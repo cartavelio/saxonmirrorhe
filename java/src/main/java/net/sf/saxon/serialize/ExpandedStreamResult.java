@@ -82,6 +82,9 @@ public class ExpandedStreamResult {
 
     public UnicodeWriter obtainUnicodeWriter() throws XPathException {
         if (writer != null) {
+            if (writer instanceof UnicodeWriter uw) {
+                return uw;
+            }
             return new UnicodeWriterToWriter(writer);
         } else {
             OutputStream os = obtainOutputStream();

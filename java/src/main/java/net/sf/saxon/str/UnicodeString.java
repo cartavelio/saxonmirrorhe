@@ -9,7 +9,6 @@ package net.sf.saxon.str;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
-import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.z.IntIterator;
@@ -281,23 +280,6 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
         }
     }
 
-    /**
-     * Diagnostic method: verify that all the characters in the string are valid XML codepoints
-     * @throws IllegalStateException if the contents are invalid
-     */
-    public void verifyCharacters() {
-        IntIterator iter = codePoints();
-        int p = 0;
-        while (iter.hasNext()) {
-            int x = iter.next();
-            if (!XMLCharacterData.isValid11(x)) {
-                throw new IllegalStateException("Invalid char " + x + " in " + getClass() + " at offset " + p);
-            }
-            p++;
-        }
-    }
-
-    //private static long counter = 0;
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof UnicodeString other) {

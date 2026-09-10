@@ -26,14 +26,16 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.StylesheetCache;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.wrapper.RebasedDocument;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.*;
+import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -1241,7 +1243,7 @@ public class TransformFn extends SystemFunction implements Callable {
     private static class SerializedDeliverer extends Deliverer {
         private final Processor processor;
         private final Map<String, GroundedValue> results = new ConcurrentHashMap<>();
-        private StringWriter primaryWriter;
+        private UnicodeBuilder primaryBuilder;
 
         public SerializedDeliverer(Processor processor) {
             this.processor = processor;
@@ -1250,14 +1252,14 @@ public class TransformFn extends SystemFunction implements Callable {
         @Override
         public Destination getPrimaryDestination(MapItem serializationParamsMap) throws XPathException {
             Serializer serializer = makeSerializer(processor, serializationParamsMap);
-            primaryWriter = new StringWriter();
-            serializer.setOutputWriter(primaryWriter);
+            primaryBuilder = new UnicodeBuilder();
+            serializer.setOutputWriter(primaryBuilder);
             return serializer;
         }
 
         @Override
         public Sequence getPrimaryResult() throws XPathException {
-            String str = primaryWriter.toString();
+            UnicodeString str = primaryBuilder.toUnicodeString();
             if (str.isEmpty()) {
                 return null;
             }
