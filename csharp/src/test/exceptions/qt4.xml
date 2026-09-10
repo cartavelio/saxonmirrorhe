@@ -239,7 +239,7 @@
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
-   
+   -->
    <exception test-set="fn-graphemes" 
       test-case="
       graphemes-1172 
@@ -255,7 +255,7 @@
       <reason>ICU4N bug https://github.com/NightOwl888/ICU4N/issues/70</reason>
    </exception>
    
-   
+   <!--
    
    <exception test-set="op-same-key" 
       test-case="same-key-006a" run="false" report="n/a">
@@ -517,7 +517,7 @@
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Generated test case contains incorrect syntax</reason>
    </exception>
-   
+   -->
    <exception test-set="misc-HtmlTestSuite" test-case="
       html-test-0011
       html-test-0033
@@ -554,9 +554,9 @@
       html-test-1368
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-29"/>
-      <reason>Wrong results from AngleSharp? Needs checking.</reason>
+      <reason>Wrong results from AngleSharp? Needs checking. Confirmed 2026-03-25</reason>
    </exception>
-   
+   <!--
    <exception test-set="fn-format-number" test-case="
       numberformat-40-87 numberformat-40-88
       " run="false" report="n/a">
@@ -708,7 +708,7 @@
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
-   
+   -->
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-invisible-xml-001
       fo-test-fn-invisible-xml-002
@@ -718,6 +718,12 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
+   <exception test-set="fn-invisible-xml"
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-16"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+  <!-- 
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-parse-csv-001
       fo-test-fn-parse-csv-002
