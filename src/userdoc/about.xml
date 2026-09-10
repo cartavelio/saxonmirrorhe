@@ -799,7 +799,7 @@
                
                <tr>
                   <td>
-                     <p><span class="nowrap">xmlresolverdata-x.y.z.jar</span></p>
+                     <p><span class="nowrap">xmlresolver-4.2.0-data.jar</span></p>
                   </td>
                   <td>
                      <p>TBA</p>
@@ -827,7 +827,7 @@
             form (such as <code>lib/jline-2.14.6.jar</code>) which picks up the version that is
             issued with the Saxon product, and an unversioned form (<code>lib/jline.jar</code>) which
             is designed to make it easy to replace the issued version with a compatible maintenance
-            release should this become necessary.</p>
+            release should this become necessary (see below).</p>
 
          <p>The classpath is written as a list of filenames. These will either be the names of
             directories (folders) that contain relevant classes, or the names of JAR files
@@ -871,7 +871,35 @@
                
             </tbody>
          </table>
-         
+
+       <h2 class="subtitle">Updating third party libraries</h2>
+
+       <p>It may happen from time to time that you want to upgrade to a more recent
+version of one of the third party libraries that’s bundled with Saxon. Exactly how
+to do this depends a little bit on your environment.</p>
+
+<ol>
+<li><p>If you’re running in a build environment that uses Maven to resolve
+dependencies, point to the newer version of the relevant library. If necessary,
+configure your build system’s resolution strategy to favor the new version.
+</p>
+</li>
+<li><p>If you’re running with a classpath that you’ve configured, include the
+newer version of the library on the classpath before the Saxon jar file.
+</p></li>
+<li><p>If you’re running the Saxon jar directly (with <code>-jar</code> or
+with only the Saxon library on the classpath), edit the contents of the
+<code>lib</code> directory where you installed Saxon.</p>
+<p>Delete the library you wish to replace and copy the new version into that
+directory <em>without its version number</em>. For example, to replace the
+<code>xmlresolver-4.2.0.jar</code> APIs with a new version, perhaps
+<code>xmlresolver-4.4.0.jar</code>, delete
+<code>xmlresolver-4.2.0.jar</code> and copy the 4.4.0 jar file into
+the lib directory using the name <code>xmlresolver.jar</code>, without
+any version number.</p>
+</li>
+</ol>
+
          <h2 class="subtitle">Verifying the Saxon JAR files</h2>
          
          <p>Before releasing new versions of the SaxonJ JAR files, Saxonica signs them with a digital signature which you
