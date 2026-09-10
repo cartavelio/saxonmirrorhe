@@ -312,7 +312,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
      */
     @Override
     public String toShortString() {
-        int size = getLength();
+        int size = getMembers().size();
         if (size == 0) {
             return "[]";
         } else if (size > 5) {
