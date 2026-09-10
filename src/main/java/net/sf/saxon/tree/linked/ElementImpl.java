@@ -243,11 +243,11 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         if (sequence >= 0) {
             getPhysicalRoot().generateId(buffer);
             buffer.append("e");
-            buffer.append(Integer.toString(sequence));
+            buffer.append(sequence);
         } else {
             getRawParent().generateId(buffer);
             buffer.append("f");
-            buffer.append(Integer.toString(getSiblingPosition()));
+            buffer.append(getSiblingPosition());
         }
     }
 

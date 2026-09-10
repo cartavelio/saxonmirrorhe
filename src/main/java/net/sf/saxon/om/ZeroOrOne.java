@@ -13,7 +13,6 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.EmptySequence;
 
 /**
@@ -138,7 +137,7 @@ public class ZeroOrOne<T extends Item> implements GroundedValue {
      * Return an iterator over this value.
      */
     @Override
-    public UnfailingIterator iterate() {
+    public SequenceIterator iterate() {
         return SingletonIterator.makeIterator(item);
     }
 

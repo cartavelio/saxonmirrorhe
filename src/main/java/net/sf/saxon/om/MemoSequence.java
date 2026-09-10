@@ -16,7 +16,6 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 
 /**
  * A Sequence implementation that represents a lazy evaluation of a supplied iterator. Items
@@ -246,6 +245,12 @@ public class MemoSequence implements Sequence {
         public void close() {
         }
 
+
+        @Override
+        public boolean supportsGetLength() {
+            return true;
+        }
+
         /**
          * Get the last position (that is, the number of items in the sequence)
          */
@@ -266,6 +271,10 @@ public class MemoSequence implements Sequence {
                 // return the total number of items
                 return container.used;
             }
+        }
+
+        public boolean isActuallyGrounded() {
+            return true;
         }
 
         /**
@@ -332,20 +341,6 @@ public class MemoSequence implements Sequence {
         }
 
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link SequenceIteratorProperty#GROUNDED} and {@link SequenceIteratorProperty#LAST_POSITION_FINDER}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         */
-
-        @Override
-        public EnumSet<SequenceIteratorProperty> getProperties() {
-            // bug 1740 shows that it is better to report the iterator as grounded even though this
-            // may trigger eager evaluation of the underlying sequence.
-            return EnumSet.of(SequenceIteratorProperty.GROUNDED, SequenceIteratorProperty.LAST_POSITION_FINDER);
-        }
     }
 
 }

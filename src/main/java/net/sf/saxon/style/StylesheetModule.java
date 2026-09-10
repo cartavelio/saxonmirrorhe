@@ -275,6 +275,7 @@ public class StylesheetModule {
         }
     }
 
+    //#if CSHARP==false
 
     /**
      * Get the stylesheet specification(s) associated
@@ -337,6 +338,8 @@ public class StylesheetModule {
             }
         }
     }
+
+    //#endif
 
     /**
      * Process a series of stylesheet inputs, treating them in import or cascade

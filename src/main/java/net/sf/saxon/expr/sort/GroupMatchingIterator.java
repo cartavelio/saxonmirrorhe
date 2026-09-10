@@ -17,9 +17,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
-import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -52,6 +50,11 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+    @Override
     public boolean hasNext() {
         return nextItem != null;
     }
@@ -79,12 +82,7 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
         population.close();
     }
 
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
-    }
-
-//#if EE==true
+    //#if EE==true
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {

@@ -546,7 +546,7 @@ public class VirtualCopy implements NodeInfo {
     @Override
     public void generateId(/*@NotNull*/ StringBuilder buffer) {
         buffer.append("d");
-        buffer.append(Long.toString(getTreeInfo().getDocumentNumber()));
+        buffer.append(getTreeInfo().getDocumentNumber());
         original.generateId(buffer);
     }
 

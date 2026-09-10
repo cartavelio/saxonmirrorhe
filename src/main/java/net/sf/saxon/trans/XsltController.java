@@ -23,6 +23,7 @@ import net.sf.saxon.serialize.MessageEmitter;
 import net.sf.saxon.serialize.PrincipalOutputGatekeeper;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.TemplateRuleTraceListener;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -1005,6 +1006,7 @@ public class XsltController extends Controller {
      */
 
     /*@Nullable*/
+    @CSharpInnerClass(outer=true, extra="net.sf.saxon.@event.Outputter finalResult")
     public Receiver getStreamingReceiver(Mode mode, Receiver result)
             throws XPathException {
         // System.err.println("*** TransformDocument");

@@ -39,6 +39,11 @@ public class GroupStartingIterator extends GroupMatchingIterator implements Look
     }
 
     @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
+    @Override
     public int getLength() {
         try {
             GroupStartingIterator another = new GroupStartingIterator(select, pattern, baseContext);

@@ -22,7 +22,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
@@ -31,7 +30,6 @@ import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.Type;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -692,6 +690,11 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
         }
 
         @Override
+        public boolean supportsHasNext() {
+            return true;
+        }
+
+        @Override
         public boolean hasNext() {
             return ix < attList.size();
         }
@@ -706,20 +709,6 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
             return current;
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-         *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        @Override
-        public EnumSet<SequenceIteratorProperty> getProperties() {
-            return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
-        }
     }
 
 
@@ -860,6 +849,11 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
         }
 
         @Override
+        public boolean supportsHasNext() {
+            return true;
+        }
+
+        @Override
         public boolean hasNext() {
             return position < items.size();
         }
@@ -873,21 +867,6 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
                 position = -1;
                 return null;
             }
-        }
-
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-         *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         */
-
-        @Override
-        public EnumSet<SequenceIteratorProperty> getProperties() {
-            return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
         }
 
     } // end of class ChildEnumeration

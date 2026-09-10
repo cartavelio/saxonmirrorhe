@@ -11,12 +11,9 @@ import net.sf.saxon.pattern.NodeTest;
 
 final class AncestorEnumeration extends TreeEnumeration {
 
-    private final boolean includeSelf;
-
     public AncestorEnumeration(NodeImpl node,
                                NodeTest nodeTest, boolean includeSelf) {
         super(node, nodeTest);
-        this.includeSelf = includeSelf;
         if (!includeSelf || !conforms(node)) {
             advance();
         }

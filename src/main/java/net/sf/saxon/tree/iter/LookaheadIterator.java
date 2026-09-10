@@ -19,6 +19,17 @@ import net.sf.saxon.om.SequenceIterator;
 public interface LookaheadIterator extends SequenceIterator {
 
     /**
+     * Ask whether the hasNext() method can be called. This method must
+     * be called before calling hasNext(), because some iterators
+     * implement this interface, but only support look-ahead under particular
+     * circumstances (this is usually because they delegate to another
+     * iterator)
+     * @return true if the {@link #hasNext()} method is available
+     */
+
+    boolean supportsHasNext();
+
+    /**
      * Determine whether there are more items to come. Note that this operation
      * is stateless and it is not necessary (or usual) to call it before calling
      * next(). It is used only when there is an explicit need to tell if we

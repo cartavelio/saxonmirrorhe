@@ -11,19 +11,19 @@ import net.sf.saxon.expr.AdjacentTextNodeMerger;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.str.UnicodeBuilder;
 
-import java.util.EnumSet;
+import java.io.Closeable;
 
 /**
  * AdjacentTextNodeMergingIterator is an iterator that eliminates zero-length text nodes
  * and merges adjacent text nodes from the underlying iterator
  */
 
-public class AdjacentTextNodeMergingIterator implements LookaheadIterator {
+public class AdjacentTextNodeMergingIterator implements LookaheadIterator, Closeable {
 
     // Ideally we would specify bounds: AdjacentTextNodeMergingIterator<? extends Item super NodeInfo>,
     // but Java doesn't allow both an upper and a lower bound
@@ -73,13 +73,14 @@ public class AdjacentTextNodeMergingIterator implements LookaheadIterator {
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+    @Override
     public void close() {
         base.close();
     }
 
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
-    }
 }
 

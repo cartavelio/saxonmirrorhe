@@ -14,7 +14,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.type.*;
 
 import java.util.Optional;
@@ -475,7 +474,7 @@ public final class SequenceType {
 
     public boolean matches(GroundedValue value, TypeHierarchy th) {
         int count = 0;
-        UnfailingIterator iter = value.iterate();
+        SequenceIterator iter = value.iterate();
         Item item;
         while ((item = iter.next()) != null) {
             count++;

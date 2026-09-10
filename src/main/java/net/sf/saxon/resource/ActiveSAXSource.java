@@ -11,7 +11,6 @@ import net.sf.saxon.trans.*;
 import org.xml.sax.*;
 
 import javax.xml.transform.sax.SAXSource;
-import java.io.IOException;
 import java.util.Map;
 
 public class ActiveSAXSource extends SAXSource implements ActiveSource  {
@@ -38,13 +37,12 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
     public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
         try {
             XMLReader parser = getXMLReader();
-            if (parser == null) {
-                parser = options.obtainXMLReader();
-            }
+            //System.err.println("Using parser " + parser.getClass());
             ReceivingContentHandler rch = new ReceivingContentHandler();
             rch.setReceiver(receiver);
             rch.setPipelineConfiguration(receiver.getPipelineConfiguration());
             parser.setContentHandler(rch);
+            parser.setProperty("http://xml.org/sax/properties/lexical-handler", rch);
             if (options.getErrorHandler() != null) {
                 parser.setErrorHandler(parser.getErrorHandler());
             } else if (options.getErrorReporter() != null) {
@@ -52,11 +50,25 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
             } else {
                 parser.setErrorHandler(new StandardErrorHandler(new StandardErrorReporter()));
             }
+            //System.err.println("Parse " + getSystemId());
             parser.parse(getInputSource());
         } catch (UncheckedXPathException uxpe) {
             throw new XPathException(uxpe);
-        } catch (IOException|SAXException e) {
-            throw new XPathException("Error reported by XML parser: " + e);
+        } catch (SAXException err) {
+            Exception nested = err.getException();
+            if (nested instanceof XPathException) {
+                throw (XPathException) nested;
+            } else if (nested instanceof RuntimeException) {
+                throw (RuntimeException) nested;
+            } else {
+                XPathException de = new XPathException(err);
+                de.setErrorCode(SaxonErrorCode.SXXP0003);
+                de.setHasBeenReported(true);
+                throw de;
+            }
+        } catch (java.io.IOException err) {
+            throw new XPathException("I/O error reported by XML parser processing " +
+                                             getSystemId() + ": " + err.getMessage(), err);
         } catch (Exception x) {
             x.printStackTrace();
             throw new IllegalStateException();

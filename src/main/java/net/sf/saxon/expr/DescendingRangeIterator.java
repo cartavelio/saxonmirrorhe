@@ -14,8 +14,6 @@ import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerRange;
 import net.sf.saxon.value.IntegerValue;
 
-import java.util.EnumSet;
-
 /**
  * Iterator that produces numeric values in a monotonic sequence,
  * ascending or descending. Although a range expression (N to M) is always
@@ -54,6 +52,10 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
         if (step != 1L) {
             limit = start + ((end - start) / step) * step;
         }
+    }
+
+    public boolean isActuallyGrounded() {
+        return true;
     }
 
     /**
@@ -117,6 +119,11 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+    @Override
     public boolean hasNext() {
         return currentValue - step >= limit;
     }
@@ -132,23 +139,13 @@ public class DescendingRangeIterator extends RangeIterator implements AtomicIter
     }
 
     @Override
-    public int getLength() {
-        return (int) ((start - limit) + 1);
+    public boolean supportsGetLength() {
+        return true;
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
     @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
+    public int getLength() {
+        return (int) ((start - limit) + 1);
     }
 
     @Override

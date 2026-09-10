@@ -9,13 +9,13 @@ package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.*;
+import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringItem;
 
@@ -96,8 +96,8 @@ public class ArraySort extends SystemFunction {
     }
 
     public static int compareSortKeys(GroundedValue a, GroundedValue b, AtomicComparer comparer) {
-        UnfailingIterator iteratora = a.iterate();
-        UnfailingIterator iteratorb = b.iterate();
+        SequenceIterator iteratora = a.iterate();
+        SequenceIterator iteratorb = b.iterate();
         while (true){
             AtomicValue firsta = (AtomicValue) iteratora.next();
             AtomicValue firstb = (AtomicValue) iteratorb.next();

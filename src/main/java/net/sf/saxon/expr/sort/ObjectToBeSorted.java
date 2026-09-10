@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.sort;
 
+import net.sf.saxon.om.Item;
 import net.sf.saxon.value.AtomicValue;
 
 /**
@@ -15,9 +16,9 @@ import net.sf.saxon.value.AtomicValue;
  * values of the sort keys, and the original position of the item in the input sequence (which is needed
  * to achieve stable sorting.)
  */
-public class ObjectToBeSorted<T> {
+public class ObjectToBeSorted {
 
-    public T value;
+    public Item value;
     public AtomicValue[] sortKeyValues;
     public int originalPosition;
 

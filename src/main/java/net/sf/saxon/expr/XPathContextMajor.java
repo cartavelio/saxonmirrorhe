@@ -23,7 +23,6 @@ import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 
 import javax.xml.transform.URIResolver;
 import java.util.Arrays;
@@ -93,7 +92,7 @@ public class XPathContextMajor extends XPathContextMinor {
                 new XsltController(exec.getConfiguration(), (PreparedStylesheet)exec) :
                 new Controller(exec.getConfiguration(), exec);
         if (item != null) {
-            UnfailingIterator iter = SingletonIterator.makeIterator(item);
+            SequenceIterator iter = SingletonIterator.makeIterator(item);
             currentIterator = new FocusTrackingIterator(iter);
             currentIterator.next();
             last = new LastValue(1);

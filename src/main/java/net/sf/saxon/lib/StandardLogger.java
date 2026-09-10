@@ -40,6 +40,17 @@ public class StandardLogger extends Logger {
     }
 
     /**
+     * Create a Logger that wraps the specified writer. Closing the Logger will
+     * not close the underlying stream; this remains the caller's responsibility
+     *
+     * @param writer the writer to which the Logger's output should be written
+     */
+
+    public StandardLogger(Writer writer) {
+        setPrintWriter(new PrintWriter(writer));
+    }
+
+    /**
      * Create a Logger that writes to a specified file
      *
      * @param fileName the file to which output should be written. When the logger is closed,

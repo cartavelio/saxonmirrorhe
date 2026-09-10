@@ -12,7 +12,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public interface GroundedValue extends Sequence {
      */
 
     @Override
-    UnfailingIterator iterate();
+    SequenceIterator iterate();
 
     /**
      * Get the n'th item in the value, counting from zero (0)

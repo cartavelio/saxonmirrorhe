@@ -11,7 +11,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.LookaheadIteratorImpl;
-import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.om.SequenceIterator;
 
 import java.util.Iterator;
 
@@ -30,7 +30,7 @@ public class WrappingJavaIterator<T extends Item> implements Iterator<T> {
      * @param in the input iterator
      */
 
-    public WrappingJavaIterator(UnfailingIterator in) {
+    public WrappingJavaIterator(SequenceIterator in) {
         try {
             this.input = LookaheadIteratorImpl.makeLookaheadIterator(in);
         } catch (XPathException e) {

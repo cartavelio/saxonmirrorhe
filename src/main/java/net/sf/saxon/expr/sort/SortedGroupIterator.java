@@ -8,13 +8,11 @@
 package net.sf.saxon.expr.sort;
 
 import com.saxonica.ee.stream.ManualGroupIterator;
-import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.Arrays;
 
@@ -45,14 +43,9 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
 
     @Override
     protected void buildArray() throws XPathException {
-        int allocated;
-        if (base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
-            allocated = ((LastPositionFinder) base).getLength();
-        } else {
-            allocated = 100;
-        }
+        int allocated = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 100;
 
-        values = new GroupToBeSorted[allocated];
+        values = new ObjectToBeSorted[allocated];
         count = 0;
 
         XPathContextMajor c2 = context.newContext();

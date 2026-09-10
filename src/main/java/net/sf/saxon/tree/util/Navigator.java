@@ -13,6 +13,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
@@ -297,10 +298,10 @@ public final class Navigator {
 
     public static AbsolutePath getAbsolutePath(NodeInfo node) {
         boolean streamed = node.getConfiguration().isStreamedNode(node);
-        List<AbsolutePath.PathElement> path = new LinkedList<>();
+        LinkedList<AbsolutePath.PathElement> path = new LinkedList<>();
         String sysId = node.getSystemId();
         while (node != null && node.getNodeKind() != Type.DOCUMENT) {
-            path.add(0, new AbsolutePath.PathElement(node.getNodeKind(),
+            path.addFirst(new AbsolutePath.PathElement(node.getNodeKind(),
                                                      NameOfNode.makeName(node),
                                                      streamed ? -1 : getNumberSimple(node, null)));
             node = node.getParent();
@@ -1024,7 +1025,7 @@ public final class Navigator {
     public static void appendSequentialKey(/*@NotNull*/ SiblingCountingNode node, /*@NotNull*/ StringBuilder sb, boolean addDocNr) {
         if (addDocNr) {
             sb.append('w');
-            sb.append(Long.toString(node.getTreeInfo().getDocumentNumber()));
+            sb.append(node.getTreeInfo().getDocumentNumber());
         }
         if (node.getNodeKind() != Type.DOCUMENT) {
             NodeInfo parent = node.getParent();
@@ -1332,8 +1333,8 @@ public final class Navigator {
 
     public static final class DescendantEnumeration implements AxisIterator {
 
-        /*@Nullable*/ private AxisIterator children = null;
-        /*@Nullable*/ private AxisIterator descendants = null;
+        private SequenceIterator children = null;
+        private AxisIterator descendants = null;
         private final NodeInfo start;
         private final boolean includeSelf;
         private final boolean forwards;
@@ -1365,7 +1366,7 @@ public final class Navigator {
                 }
             }
             if (children != null) {
-                NodeInfo n = children.next();
+                NodeInfo n = (NodeInfo)children.next();
                 if (n != null) {
                     if (n.hasChildNodes()) {
                         if (forwards) {
@@ -1393,20 +1394,9 @@ public final class Navigator {
             } else {
                 // we're just starting...
                 if (start.hasChildNodes()) {
-                    //children = new NodeWrapper.ChildEnumeration(start, true, forwards);
                     children = start.iterateAxis(AxisInfo.CHILD);
                     if (!forwards) {
-                        if (children instanceof ReversibleIterator) {
-                            children = (AxisIterator) ((ReversibleIterator) children).getReverseIterator();
-                        } else {
-                            LinkedList<NodeInfo> list = new LinkedList<>();
-                            AxisIterator forwards = start.iterateAxis(AxisInfo.CHILD);
-                            NodeInfo n;
-                            while ((n = forwards.next()) != null) {
-                                list.addFirst(n);
-                            }
-                            children = new NodeListIterator(list);
-                        }
+                        children = Reverse.getReverseIterator(children);
                     }
                 } else {
                     children = EmptyIterator.ofNodes();

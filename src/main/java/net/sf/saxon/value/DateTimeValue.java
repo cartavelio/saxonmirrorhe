@@ -1174,7 +1174,7 @@ public final class DateTimeValue extends CalendarValue
         int mi = minute;
         mi += tz;
         if (mi < 0 || mi > 59) {
-            h += mi / 60;  // was Math.floor(mi / 60.0); - MHK 2021-02-25
+            h += (int)Math.floor(mi / 60.0);
             mi = (mi + 60 * 24) % 60;
         }
 
@@ -1634,7 +1634,7 @@ public final class DateTimeValue extends CalendarValue
         int mi = minute;
         mi += tz;
         if (mi < 0 || mi > 59) {
-            h += mi / 60;  // was Math.floor(mi / 60.0);  - MHK 2021-02-25
+            h += (int)Math.floor(mi / 60.0);
             mi = (mi + 60 * 24) % 60;
         }
         while (h < 0) {

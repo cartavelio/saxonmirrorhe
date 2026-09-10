@@ -11,6 +11,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.TwoItemIterator;
 import net.sf.saxon.value.Cardinality;
@@ -48,24 +49,28 @@ public final class CardinalityCheckingIterator implements SequenceIterator {
             throws XPathException {
         this.base = base;
         this.locator = locator;
-        first = base.next();
-        if (first == null) {
-            if (!Cardinality.allowsZero(requiredCardinality)) {
-                typeError("An empty sequence is not allowed as the " +
-                        role.getMessage(), role.getErrorCode());
+        try {
+            first = base.next();
+            if (first == null) {
+                if (!Cardinality.allowsZero(requiredCardinality)) {
+                    typeError("An empty sequence is not allowed as the " +
+                            role.getMessage(), role.getErrorCode());
+                }
+            } else {
+                if (requiredCardinality == StaticProperty.EMPTY) {
+                    typeError("The only value allowed for the " +
+                            role.getMessage() + " is an empty sequence", role.getErrorCode());
+                }
+                second = base.next();
+                if (second != null && !Cardinality.allowsMany(requiredCardinality)) {
+                    Item[] leaders = new Item[]{first, second};
+                    typeError("A sequence of more than one item is not allowed as the " +
+                            role.getMessage() + CardinalityChecker.depictSequenceStart(new TwoItemIterator(first, second), 2),
+                            role.getErrorCode());
+                }
             }
-        } else {
-            if (requiredCardinality == StaticProperty.EMPTY) {
-                typeError("The only value allowed for the " +
-                        role.getMessage() + " is an empty sequence", role.getErrorCode());
-            }
-            second = base.next();
-            if (second != null && !Cardinality.allowsMany(requiredCardinality)) {
-                Item[] leaders = new Item[]{first, second};
-                typeError("A sequence of more than one item is not allowed as the " +
-                        role.getMessage() + CardinalityChecker.depictSequenceStart(new TwoItemIterator(first, second), 2),
-                        role.getErrorCode());
-            }
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
         }
     }
 

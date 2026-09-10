@@ -9,7 +9,6 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.NodeInfo;
 
-import java.util.EnumSet;
 import java.util.Iterator;
 
 /**
@@ -47,6 +46,10 @@ public class NodeWrappingAxisIterator<B>
         return wrappingFunction;
     }
 
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
 
     @Override
     public boolean hasNext() {
@@ -67,21 +70,6 @@ public class NodeWrappingAxisIterator<B>
 
     public boolean isIgnorable(B node) {
         return false;
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
     }
 
 }

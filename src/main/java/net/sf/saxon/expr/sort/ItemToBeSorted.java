@@ -7,14 +7,12 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.om.Item;
-
 /**
  * This class is a specialization of class ObjectToBeSorted for use when
  * the sequence being sorted is a sequence of items (including tuples, which
  * are represented as items).
  */
-public class ItemToBeSorted extends ObjectToBeSorted<Item> {
+public class ItemToBeSorted extends ObjectToBeSorted {
 
     public ItemToBeSorted(int numberOfSortKeys) {
         super(numberOfSortKeys);

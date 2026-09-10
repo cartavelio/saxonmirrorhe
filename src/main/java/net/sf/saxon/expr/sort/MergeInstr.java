@@ -503,9 +503,15 @@ public class MergeInstr extends Instruction {
      * @return a function capable of computing the number of merge groups
      */
 
+    @CSharpInnerClass(outer=true, extra="net.sf.saxon.expr.XPathContext context")
     private LastPositionFinder getLastPositionFinder(final XPathContext context) {
         return new LastPositionFinder() {
             private int last  = -1;
+
+            @Override
+            public boolean supportsGetLength() {
+                return true;
+            }
 
             @Override
             public int getLength() {
@@ -741,7 +747,7 @@ public class MergeInstr extends Instruction {
         return mergeSources[0].mergeKeyDefinitions.getSortKeyDefinition(0).getSortKey();
     }
 
-    @CSharpInnerClass(outer=false)
+    @CSharpInnerClass(outer=false, extra={"net.sf.saxon.expr.sort.SortKeyDefinitionList sKeys", "net.sf.saxon.expr.sort.AtomicComparer[] comps"})
     public Comparator<ObjectValue<ItemWithMergeKeys>> getComparer(final SortKeyDefinitionList sKeys, final AtomicComparer[] comps) {
         //noinspection Convert2Lambda
         return new Comparator<ObjectValue<ItemWithMergeKeys>>() {
@@ -844,13 +850,17 @@ public class MergeInstr extends Instruction {
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context)
             throws XPathException {
-
-        try (SequenceIterator iter = iterate(context)) {
-            SequenceTool.supply(iter, (ItemConsumer<? super Item>) it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
-        } catch (XPathException e) {
+        SequenceIterator iter = iterate(context);
+        try {
+            SequenceTool.supply(iter, /*(ItemConsumer<? super Item>)*/ it -> output.append(it, getLocation(), ReceiverOption.ALL_NAMESPACES));
+        } catch (UncheckedXPathException err) {
+            iter.close();
+            XPathException e = err.getXPathException();
             e.maybeSetLocation(getLocation());
             e.maybeSetContext(context);
             throw e;
+        } finally {
+            iter.close();
         }
         return null;
     }
@@ -892,7 +902,7 @@ public class MergeInstr extends Instruction {
             Item currentItem = context.getContextItem();
             manualIterator.setContextItem(currentItem);
             ItemWithMergeKeys newItem = new ItemWithMergeKeys(currentItem, ms.mergeKeyDefinitions, ms.sourceName, keyContext);
-            return SingletonIterator.makeIterator(new ObjectValue<>(newItem));
+            return SingletonIterator.makeIterator(new ObjectValue<ItemWithMergeKeys>(newItem));
 
         }
     }

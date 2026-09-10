@@ -696,7 +696,8 @@ public class XQueryCompiler {
      * @since 9.9. Redefined in 10.0 as a convenience wrapper over the new {@link #setErrorReporter(ErrorReporter)} method.
      */
     public void setErrorList(List<? super StaticError> errorList) {
-        setErrorReporter(errorList::add);
+        //noinspection Convert2MethodRef
+        setErrorReporter(err -> errorList.add(err));
     }
 
 }

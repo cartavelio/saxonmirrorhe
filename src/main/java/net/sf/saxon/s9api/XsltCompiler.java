@@ -25,6 +25,7 @@ import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.VersionedPackageName;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 
 import javax.xml.transform.ErrorListener;
@@ -557,7 +558,7 @@ public class XsltCompiler {
      * @since 9.6
      */
 
-
+    @CSharpReplaceBody(code="throw new NotImplementedException()")
     public Source getAssociatedStylesheet(Source source, String media, String title, String charset)
             throws SaxonApiException {
         try {

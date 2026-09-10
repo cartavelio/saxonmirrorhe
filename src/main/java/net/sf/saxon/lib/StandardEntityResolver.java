@@ -641,6 +641,7 @@ public class StandardEntityResolver implements EntityResolver {
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
         // See if it's a known public ID
+        System.err.println("ResolveEntity " + systemId);
         String fileName = publicIds.get(publicId);
         if (fileName != null) {
             return fetch(fileName, config);
@@ -683,6 +684,7 @@ public class StandardEntityResolver implements EntityResolver {
      */
 
     public static InputSource fetch(String filename, Configuration config) {
+        System.err.println("Fetch " + filename);
         boolean tracing = false;
         Logger traceDestination = null;
         if (config != null) {

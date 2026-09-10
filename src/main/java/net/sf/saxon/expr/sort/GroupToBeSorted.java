@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.MemoSequence;
 
 /**
@@ -17,9 +16,9 @@ import net.sf.saxon.om.MemoSequence;
  * item, but the object holds in addition the value of the grouping key, and an
  * iterator over the items in the group.
  */
-public class GroupToBeSorted extends ObjectToBeSorted<Item> {
+public class GroupToBeSorted extends ObjectToBeSorted {
 
-    /*@Nullable*/ public AtomicSequence currentGroupingKey;
+    public AtomicSequence currentGroupingKey;
     public MemoSequence currentGroup;
 
     public GroupToBeSorted(int numberOfSortKeys) {

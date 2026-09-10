@@ -25,6 +25,7 @@ import net.sf.saxon.str.EmptyUniString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.Traceable;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.AtomicType;
@@ -948,6 +949,11 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
             } else {
                 throw new AssertionError("process() is not implemented in the subclass " + getClass());
             }
+        } catch (UncheckedXPathException unxe) {
+            XPathException e = unxe.getXPathException();
+            e.maybeSetLocation(getLocation());
+            e.maybeSetContext(context);
+            throw e;
         } catch (XPathException e) {
             e.maybeSetLocation(getLocation());
             e.maybeSetContext(context);

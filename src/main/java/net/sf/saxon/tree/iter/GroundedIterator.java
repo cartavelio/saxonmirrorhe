@@ -27,6 +27,16 @@ import net.sf.saxon.value.SequenceExtent;
 public interface GroundedIterator extends SequenceIterator {
 
     /**
+     * Ask if the iterator is actually grounded. This method must be called before calling
+     * {@link #materialize()} or {@link #getResidue()}, because the iterator might
+     * be grounded under some conditions and not others (usually when it delegates
+     * to another iterator)
+     * @return true if this iterator is grounded
+     */
+
+    boolean isActuallyGrounded();
+
+    /**
      * Return a GroundedValue containing all the remaining items in the sequence returned by this
      * SequenceIterator, starting at the current position. This should be an "in-memory" value, not a
      * Closure. This method does not change the state of the iterator (in particular, it does not

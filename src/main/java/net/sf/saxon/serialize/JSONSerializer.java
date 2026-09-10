@@ -148,8 +148,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             }
             boolean oneLiner = !isIndenting || isOneLinerMap((MapItem) item);
             emitter.startMap(oneLiner);
-            boolean first = true;
-            List<AtomicValue> keyList = new ArrayList<>();
+            ArrayList<AtomicValue> keyList = new ArrayList<>(); // Needs to be ArrayList for sort() to work in C#
             for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
                 keyList.add(pair.key);
             }
@@ -169,7 +168,6 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
         } else if (item instanceof ArrayItem) {
             boolean oneLiner = !isIndenting || isOneLinerArray((ArrayItem) item);
             emitter.startArray(oneLiner);
-            boolean first = true;
             for (Sequence member : ((ArrayItem) item).members()) {
                 writeSequence(member.materialize());
             }

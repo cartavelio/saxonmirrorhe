@@ -105,7 +105,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         }
     }
 
-    @CSharpReplaceBody(code="System.Array.Sort(bindingArray, (x, y) => System.String.Compare(x.getPrefix(), y.getPrefix(), System.StringComparison.Ordinal)")
+    @CSharpReplaceBody(code="System.Array.Sort(bindingArray, (x, y) => System.String.Compare(x.getPrefix(), y.getPrefix(), System.StringComparison.Ordinal));")
     private void sortByPrefix(NamespaceBinding[] bindingArray) {
         Arrays.sort(bindingArray, Comparator.comparing(NamespaceBinding::getPrefix));
     }

@@ -132,8 +132,9 @@ public class CollectionFn extends SystemFunction implements Callable {
     /**
      * Get an iterator of the Resources in a ResourceCollection, returned in the form of external objects wrapping
      * a Resource object
+     *
      * @param collection the resource collection
-     * @param context the XPath dynamic context
+     * @param context    the XPath dynamic context
      * @return a SequenceIterator delivering ObjectValue&lt;Resource> items
      * @throws XPathException if a dynamic error occurs
      */
@@ -142,33 +143,38 @@ public class CollectionFn extends SystemFunction implements Callable {
             final ResourceCollection collection, final XPathContext context) throws XPathException {
 
         final Iterator<? extends Resource> sources = collection.getResources(context);
+        return new CollectionIterator(sources);
+    }
 
-        return new AbstractSequenceIterator() {
+    private static class CollectionIterator implements SequenceIterator, Closeable {
 
-            @Override
-            @CSharpModifiers(code = {"public", "override"})
-            public Item next() {
-                if (sources.hasNext()) {
-                    return new ObjectValue<Resource>(sources.next());
-                } else {
-                    return null;
+        private final Iterator<? extends Resource> sources;
+
+        public CollectionIterator(Iterator<? extends Resource> sources) {
+            this.sources = sources;
+        }
+
+        @Override
+        @CSharpModifiers(code = {"public", "override"})
+        public Item next() {
+            if (sources.hasNext()) {
+                return new ObjectValue<Resource>(sources.next());
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        @CSharpModifiers(code = {"public", "override"})
+        public void close() {
+            if (sources instanceof Closeable) {
+                try {
+                    ((Closeable) sources).close();
+                } catch (IOException e) {
+                    throw new UncheckedXPathException(new XPathException(e));
                 }
             }
-
-            @Override
-            @CSharpModifiers(code = {"public", "override"})
-            public void close() {
-                if (sources instanceof Closeable) {
-                    try {
-                        ((Closeable)sources).close();
-                    } catch (IOException e) {
-                        throw new UncheckedXPathException(new XPathException(e));
-                    }
-                }
-            }
-
-
-        };
+        }
     }
 
     /**
@@ -216,7 +222,7 @@ public class CollectionFn extends SystemFunction implements Callable {
             }
         }
 
-        GroundedValue cachedCollection = (GroundedValue)context.getController().getUserData("saxon:collections", collectionKey);
+        GroundedValue cachedCollection = (GroundedValue) context.getController().getUserData("saxon:collections", collectionKey);
         if (cachedCollection != null) {
             return cachedCollection;
         }
@@ -246,7 +252,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         // Get an iterator over the items representing the resources
         SequenceIterator result = context.getConfiguration()
                 .getMultithreadedItemMappingIterator(sourceSeq,
-                           ItemMapper.of(it -> ((ExternalObject<Resource>)it).getObject().getItem(context)));
+                                                     ItemMapper.of(it -> ((ExternalObject<Resource>) it).getObject().getItem(context)));
 
         // In XSLT, apply space-stripping to document nodes in the collection
         if (whitespaceRule != null) {
@@ -270,16 +276,16 @@ public class CollectionFn extends SystemFunction implements Callable {
             SequenceIterator iter = cachedCollection.iterate();
             Item item;
             while ((item = iter.next()) != null) {
-                if (item instanceof NodeInfo && ((NodeInfo)item).getNodeKind() == Type.DOCUMENT) {
-                    String docUri = ((NodeInfo)item).getSystemId();
+                if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.DOCUMENT) {
+                    String docUri = ((NodeInfo) item).getSystemId();
                     DocumentKey docKey;
                     if (packageData instanceof StylesheetPackage) {
-                        StylesheetPackage pack = (StylesheetPackage)packageData;
+                        StylesheetPackage pack = (StylesheetPackage) packageData;
                         docKey = new DocumentKey(docUri, pack.getPackageName(), pack.getPackageVersion());
                     } else {
                         docKey = new DocumentKey(docUri);
                     }
-                    TreeInfo info = item instanceof TreeInfo ? (TreeInfo)item : new GenericTreeInfo(controller.getConfiguration(), (NodeInfo)item);
+                    TreeInfo info = item instanceof TreeInfo ? (TreeInfo) item : new GenericTreeInfo(controller.getConfiguration(), (NodeInfo) item);
                     docPool.add(info, docKey);
                 }
             }

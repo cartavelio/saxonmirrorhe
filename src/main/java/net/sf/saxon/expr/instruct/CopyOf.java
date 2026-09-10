@@ -551,7 +551,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 });
             } else {
                 // Use the iterate() method to create a virtual copy.
-                SequenceTool.supply(iterate(context), (ItemConsumer<? super Item>) out::append);
+                SequenceTool.supply(iterate(context), (ItemConsumer<? super Item>)out::append);
             }
         } else {
 

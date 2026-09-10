@@ -10,7 +10,6 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.serialize.charcode.CharacterSet;
-import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.str.UnicodeWriterToWriter;
@@ -22,6 +21,8 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 /**
@@ -37,24 +38,20 @@ public class ExpandedStreamResult {
     private final String systemId;
     private Writer writer;
     private OutputStream outputStream;
-    private UnicodeWriter unicodeWriter;
     private CharacterSet characterSet;
     private String encoding;
-    private boolean mustClose;
-    private boolean allCharactersEncodable;
 
     public ExpandedStreamResult(Configuration config, StreamResult result, Properties outputProperties) throws XPathException {
         this.config = config;
         this.systemId = result.getSystemId();
         this.writer = result.getWriter();
         this.outputStream = result.getOutputStream();
+        this.outputProperties = outputProperties;
         this.encoding = outputProperties.getProperty(OutputKeys.ENCODING);
         if (encoding == null) {
             encoding = "UTF8";
-            allCharactersEncodable = true;
         } else if (encoding.equalsIgnoreCase("UTF-8")) {
             encoding = "UTF8";
-            allCharactersEncodable = true;
         } else if (encoding.equalsIgnoreCase("UTF-16")) {
             encoding = "UTF16";
         }
@@ -81,16 +78,6 @@ public class ExpandedStreamResult {
      * @throws net.sf.saxon.trans.XPathException if an error occurs
      */
 
-    public Writer obtainWriter() throws XPathException {
-        if (writer != null) {
-            return writer;
-        } else {
-            OutputStream os = obtainOutputStream();
-            writer = makeWriterFromOutputStream(os);
-            return writer;
-        }
-    }
-
     public UnicodeWriter obtainUnicodeWriter() throws XPathException {
         if (writer != null) {
             return new UnicodeWriterToWriter(writer);
@@ -112,10 +99,6 @@ public class ExpandedStreamResult {
         try {
             File file = makeWritableOutputFile(uriString);
             outputStream = new FileOutputStream(file);
-            // Set the outputstream in the StreamResult object so that the
-            // call on OutputURIResolver.close() can close it
-            //streamResult.setOutputStream(outputStream);
-            mustClose = true;
         } catch (FileNotFoundException | URISyntaxException | IllegalArgumentException fnf) {
             throw new XPathException(fnf);
         }
@@ -185,8 +168,6 @@ public class ExpandedStreamResult {
             String enc = ((OutputStreamWriter) writer).getEncoding();
             outputProperties.setProperty(OutputKeys.ENCODING, enc);
             characterSet = config.getCharacterSetFactory().getCharacterSet(outputProperties);
-            allCharactersEncodable = characterSet instanceof UTF8CharacterSet ||
-                characterSet instanceof UTF16CharacterSet;
         }
     }
 
@@ -218,16 +199,16 @@ public class ExpandedStreamResult {
         // the character encoding is correct.
 
         try {
-            String javaEncoding = encoding;
+            Charset javaEncoding;
             if (encoding.equalsIgnoreCase("iso-646") || encoding.equalsIgnoreCase("iso646")) {
-                javaEncoding = "US-ASCII";
+                javaEncoding = StandardCharsets.US_ASCII;
+            } else {
+                javaEncoding = Charset.forName(encoding);
             }
             if (encoding.equalsIgnoreCase("UTF8")) {
                 writer = new UTF8Writer(outputStream);
             } else {
-                writer = new BufferedWriter(
-                    new OutputStreamWriter(
-                        outputStream, javaEncoding));
+                writer = new BufferedWriter(new OutputStreamWriter(outputStream, javaEncoding));
             }
             return writer;
         } catch (Exception err) {

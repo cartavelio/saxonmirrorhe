@@ -10,7 +10,6 @@ package net.sf.saxon.option.exslt;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.DoubleValue;
 
 /**
@@ -71,7 +70,7 @@ public abstract class Random {
      * Iterator over a sequence of random numbers
      */
 
-    private static class RandomIterator implements UnfailingIterator {
+    private static class RandomIterator implements SequenceIterator {
 
         protected int position = 0;
         private final int count;

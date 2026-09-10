@@ -12,10 +12,8 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.Comparator;
-import java.util.EnumSet;
 
 /**
  * An enumeration representing a nodeset that is a union of two other NodeSets.
@@ -67,6 +65,11 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+    @Override
     public boolean hasNext() {
         return nextNode1 != null || nextNode2 != null;
     }
@@ -115,21 +118,6 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
     public void close() {
         e1.close();
         e2.close();
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
     }
 
 }

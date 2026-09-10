@@ -122,8 +122,12 @@ public class PackageLoaderHE implements IPackageLoader {
         return config;
     }
 
-    public StylesheetPackage getPackage() {
+    public StylesheetPackage getTopLevelPackage() {
         return packStack.get(0);
+    }
+
+    public StylesheetPackage getPackage(String key) {
+        return allPackages.get(key);
     }
 
     public Stack<StylesheetPackage> getPackStack() {
@@ -132,6 +136,11 @@ public class PackageLoaderHE implements IPackageLoader {
 
     public void addCompletionAction(Action action) {
         completionActions.add(action);
+    }
+
+    private void addComponentFixup(ComponentInvocation invocation) {
+        List<ComponentInvocation> currentList = fixups.peek();
+        currentList.add(invocation);
     }
 
     @Override
@@ -209,12 +218,12 @@ public class PackageLoaderHE implements IPackageLoader {
 
 
     public void needsPELicense(String name) {
-        int localLicenseId = getPackage().getLocalLicenseId();
+        int localLicenseId = getTopLevelPackage().getLocalLicenseId();
         config.checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION, name, localLicenseId);
     }
 
     public void needsEELicense(String name) {
-        int localLicenseId = getPackage().getLocalLicenseId();
+        int localLicenseId = getTopLevelPackage().getLocalLicenseId();
         config.checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT, name, localLicenseId);
     }
 
@@ -1704,7 +1713,8 @@ public class PackageLoaderHE implements IPackageLoader {
             inst.setActualParameters(actuals, tunnels);
             int bindingSlot = loader.getIntegerAttribute(element, "bSlot");
             inst.setBindingSlot(bindingSlot);
-            loader.fixups.peek().add(inst);
+
+            loader.addComponentFixup(inst);
             return inst;
         });
 
@@ -2459,7 +2469,7 @@ public class PackageLoaderHE implements IPackageLoader {
             GlobalVariableReference ref = new GlobalVariableReference(name);
             int bindingSlot = loader.getIntegerAttribute(element, "bSlot");
             ref.setBindingSlot(bindingSlot);
-            loader.fixups.peek().add(ref);
+            loader.addComponentFixup(ref);
             return ref;
         });
 
@@ -2877,7 +2887,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("origF", (loader, element) -> {
             StructuredQName name = loader.getQNameAttribute(element, "name");
             String packKey = element.getAttributeValue("", "pack");
-            StylesheetPackage declPack = loader.allPackages.get(packKey);
+            StylesheetPackage declPack = loader.getPackage(packKey);
             if (declPack == null) {
                 throw new XPathException("Unknown package key " + packKey);
             }
@@ -2892,7 +2902,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("origFC", (loader, element) -> {
             StructuredQName name = loader.getQNameAttribute(element, "name");
             String packKey = element.getAttributeValue("", "pack");
-            StylesheetPackage declPack = loader.allPackages.get(packKey);
+            StylesheetPackage declPack = loader.getPackage(packKey);
             if (declPack == null) {
                 throw new XPathException("Unknown package key " + packKey);
             }
@@ -3113,7 +3123,7 @@ public class PackageLoaderHE implements IPackageLoader {
             String flags = element.getAttributeValue("", "flags");
             if (flags != null) {
                 if (flags.contains("s")) {
-                    loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getPackage().getSpaceStrippingRule()));
+                    loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
                 }
                 if (flags.contains("l")) {
                     options.setLineNumbering(true);
@@ -3236,7 +3246,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 }
                 call.setArgumentEvaluationModes(evalModes);
             }
-            loader.fixups.peek().add(call);
+            loader.addComponentFixup(call);
             return call;
         });
 
@@ -3247,7 +3257,7 @@ public class PackageLoaderHE implements IPackageLoader {
             UserFunctionReference call = new UserFunctionReference(symbolicName);
             int bindingSlot = loader.getIntegerAttribute(element, "bSlot");
             call.setBindingSlot(bindingSlot);
-            loader.fixups.peek().add(call);
+            loader.addComponentFixup(call);
             return call;
         });
 
@@ -3263,7 +3273,7 @@ public class PackageLoaderHE implements IPackageLoader {
             UseAttributeSet use = new UseAttributeSet(name, streamable);
             int bindingSlot = loader.getIntegerAttribute(element, "bSlot");
             use.setBindingSlot(bindingSlot);
-            loader.fixups.peek().add(use);
+            loader.addComponentFixup(use);
             return use;
         });
 

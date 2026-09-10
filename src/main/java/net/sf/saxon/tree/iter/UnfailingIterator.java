@@ -10,15 +10,13 @@ package net.sf.saxon.tree.iter;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 
-import java.util.function.Consumer;
-
 
 /**
- * A SequenceIterator is used to iterate over a sequence. An UnfailingIterator
+ * A SequenceIterator is used to iterate over a sequence. An SequenceIterator
  * is a SequenceIterator that throws no checked exceptions.
  */
 
-public interface UnfailingIterator extends SequenceIterator /*, Iterable<Item> */ {
+public interface UnfailingIterator extends SequenceIterator {
 
     /**
      * Get the next item in the sequence.
@@ -28,19 +26,6 @@ public interface UnfailingIterator extends SequenceIterator /*, Iterable<Item> *
 
     @Override
     Item next();
-
-    /**
-     * Process all the items returned by the iterator, supplying them to a given {@link Consumer}.
-     * Note that this method throws no exceptions. This method consumes the iterator.
-     * @param consumer the function that is to consume each of the (remaining) items returned by
-     *                 the iterator
-     */
-    default void forEach(Consumer<? super Item> consumer) {
-        Item item;
-        while ((item = next()) != null) {
-            consumer.accept(item);
-        }
-    }
 
 }
 

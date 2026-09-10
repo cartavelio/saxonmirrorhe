@@ -571,7 +571,7 @@ public final class Orphan implements MutableNodeInfo {
     @Override
     public void generateId(/*@NotNull*/ StringBuilder buffer) {
         buffer.append('Q');
-        buffer.append(Integer.toString(hashCode()));
+        buffer.append(hashCode());
     }
 
     /**

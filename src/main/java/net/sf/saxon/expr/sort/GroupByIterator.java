@@ -17,11 +17,9 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
@@ -235,6 +233,12 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+
+    @Override
     public boolean hasNext() {
         return position < groups.size();
     }
@@ -259,19 +263,9 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
         return groups.get(position - 1).get(0);
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
     @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
+    public boolean supportsGetLength() {
+        return true;
     }
 
     /**

@@ -29,7 +29,7 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
+import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 import net.sf.saxon.tree.wrapper.SpaceStrippedNode;
@@ -1609,7 +1609,7 @@ public class Controller implements ContextOriginator {
     public void setMemoizingFocusTrackerFactory() {
         setFocusTrackerFactory(base -> {
             FocusTrackingIterator fti;
-            if (!base.getProperties().contains(SequenceIteratorProperty.GROUNDED) &&
+            if (!(base instanceof GroundedIterator && ((GroundedIterator)base).isActuallyGrounded()) &&
                     !(base instanceof GroupIterator) && !(base instanceof RegexIterator)) {
                 try {
                     MemoSequence ms = new MemoSequence(base);

@@ -200,7 +200,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         // Evaluate the global variables, and add values to the result.
 
-        HashTrieMap variablesMap = new HashTrieMap();
+        MapItem variablesMap = new HashTrieMap();
         for (GlobalVariable var : lib.getGlobalVariables()) {
             GroundedValue value;
             QNameValue qNameValue = new QNameValue(var.getVariableQName(), BuiltInAtomicType.QNAME);
@@ -219,7 +219,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             }
         }
         // Add functions to the result.
-        HashTrieMap functionsMap = new HashTrieMap();
+        MapItem functionsMap = new HashTrieMap();
         XQueryFunctionLibrary functionLib = lib.getGlobalFunctionLibrary();
 
         ExportAgent agent = new ExportAgent() {

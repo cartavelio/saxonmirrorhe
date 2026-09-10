@@ -7,6 +7,7 @@
 
 package net.sf.saxon.tree.iter;
 
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.ObjectValue;
 
 
@@ -14,7 +15,7 @@ import net.sf.saxon.value.ObjectValue;
  * ObjectIterator: a sequence iterator over wrapped external objects
  */
 
-public interface ObjectIterator<T> extends UnfailingIterator {
+public interface ObjectIterator<T> extends SequenceIterator {
 
     @Override
     ObjectValue<T> next();

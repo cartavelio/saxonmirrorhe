@@ -13,8 +13,6 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 
-import java.util.EnumSet;
-
 
 /**
  * SingleNodeIterator: an iterator over a sequence of zero or one nodes
@@ -53,6 +51,12 @@ public class SingleNodeIterator implements AxisIterator,
         }
     }
 
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+
     /**
      * Determine whether there are more items to come. Note that this operation
      * is stateless and it is not necessary (or usual) to call it before calling
@@ -82,6 +86,11 @@ public class SingleNodeIterator implements AxisIterator,
     }
 
     @Override
+    public boolean supportsGetLength() {
+        return true;
+    }
+
+    @Override
     public int getLength() {
         return 1;
     }
@@ -90,6 +99,10 @@ public class SingleNodeIterator implements AxisIterator,
     @Override
     public SequenceIterator getReverseIterator() {
         return new SingleNodeIterator(item);
+    }
+
+    public boolean isActuallyGrounded() {
+        return true;
     }
 
     public NodeInfo getValue() {
@@ -113,21 +126,6 @@ public class SingleNodeIterator implements AxisIterator,
     @Override
     public GroundedValue getResidue() {
         return SequenceTool.itemOrEmpty(item);
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.GROUNDED);
     }
 
 }
