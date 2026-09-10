@@ -8,14 +8,11 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.serialize.UTF8Writer;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.PositiveIntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
@@ -361,14 +358,6 @@ public class Twine8 extends UnicodeString {
     @CSharpReplaceBody(code="return Saxon.Impl.Helpers.StringUtils.LATIN_1.GetString(bytes);")
     public String toString() {
         return new String(bytes, StandardCharsets.ISO_8859_1);
-    }
-
-    private void write(Writer writer, long start, long len) throws IOException {
-        if (writer instanceof UTF8Writer) {
-            ((UTF8Writer) writer).writeLatin1(bytes, requireInt(start), requireInt(len));
-        } else {
-            writer.write(toString().substring(requireInt(start), requireInt(start+len)));
-        }
     }
 
     /**
