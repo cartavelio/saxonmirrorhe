@@ -692,10 +692,10 @@
     <details link="localization/ICU-numbers-and-dates" name="Numbers and dates from ICU" subpages="has-subpages"/>
     <description>
       <p>Full support for formatting numbers as words in different languages is provided using the <a
-        href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p>
+        href="https://icu.unicode.org" class="bodylink">ICU4J library</a>.</p>
     </description>
     <products>
-      <product J="PE" C="PE"/>
+      <product J="PE"/>
     </products>
   </feature>
   
@@ -703,20 +703,23 @@
     <shortName>Formatting dates using ICU</shortName>
     <details link="localization/ICU-numbers-and-dates" name="Numbers and dates from ICU" subpages="has-subpages"/>
     <description>
+      <!--<p>Full support for formatting dates as words in different languages is provided using the <a
+        href="https://icu.unicode.org" class="bodylink">ICU library</a> for the relevant platform (ICU4J
+        for SaxonJ and SaxonC, and ICU4N for SaxonCS).</p>-->
       <p>Full support for formatting dates as words in different languages is provided using the <a
-        href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the relevant platform (ICU4J
-        for SaxonJ and SaxonC, and ICU4N for SaxonCS).</p>
+        href="https://icu.unicode.org" class="bodylink">ICU library</a> for the relevant platform (ICU4J
+        for SaxonJ, and ICU4N for SaxonCS).</p>
     </description>
-    <alt-description J="PE" C="PE">
+    <alt-description J="PE">
       <p>Full support for formatting dates as words in different languages is provided using the <a
-        href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p>
+        href="https://icu.unicode.org" class="bodylink">ICU4J library</a>.</p>
     </alt-description>
     <alt-description CS="PE">
       <p>Full support for formatting dates as words in different languages is provided using the ICU4N
         library.</p>
     </alt-description>
     <products>
-      <product J="PE" CS="PE" C="PE"/>
+      <product J="PE" CS="PE"/>
     </products>
   </feature>
   
@@ -738,13 +741,16 @@
     <shortName>Sorting and collations using ICU</shortName>
     <details link="localization/unicode-collation-algorithm" name="Unicode Collation Algorithm" subpages="has-subpages"/>
     <description>
+      <!--<p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
+        collation facilities available from the <a href="https://icu.unicode.org" class="bodylink">ICU
+          library</a> for the relevant platform (ICU4J for SaxonJ and SaxonC, and ICU4N for SaxonCS).</p>-->
       <p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
-        collation facilities available from the <a href="http://site.icu-project.org/" class="bodylink">ICU
-          library</a> for the relevant platform (ICU4J for SaxonJ and SaxonC, and ICU4N for SaxonCS).</p>
+        collation facilities available from the <a href="https://icu.unicode.org" class="bodylink">ICU
+          library</a> for the relevant platform (ICU4J for SaxonJ, and ICU4N for SaxonCS).</p>
     </description>
-    <alt-description J="PE" C="PE">
+    <alt-description J="PE">
       <p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
-        collation facilities available from the <a href="http://site.icu-project.org/" class="bodylink">ICU4J
+        collation facilities available from the <a href="https://icu.unicode.org" class="bodylink">ICU4J
           library</a>.</p>
     </alt-description>
     <alt-description CS="PE">
@@ -752,7 +758,7 @@
         collation facilities available from the ICU4N library.</p>
     </alt-description>
     <products>
-      <product J="PE" CS="PE" C="PE"/>
+      <product J="PE" CS="PE"/>
     </products>
   </feature>
   
