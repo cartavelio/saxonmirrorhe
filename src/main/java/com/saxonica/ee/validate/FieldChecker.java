@@ -124,13 +124,23 @@ public class FieldChecker extends AbstractReceiver {
         } else {
             try {
                 if (type.isNamespaceSensitive()) {
-                    val = type.getTypedValue(value, namespaceResolver, rules);
+                    try {
+                        val = type.getTypedValue(value, namespaceResolver, rules);
+                    } catch (ValidationException e) {
+                        // Error already reported, we assume
+                        val = null;
+                    }
                 } else if (type.isAtomicType()) {
                     // We only need an instance of the primitive type for ID checking; checking against facets
                     // is done separately.
                     AtomicType prim = (AtomicType)((AtomicType)type).getPrimitiveItemType();
                     StringConverter converter = prim.getStringConverter(getConfiguration().getConversionRules());
-                    val = converter.convertString(value).asAtomic();
+                    ConversionResult result = converter.convertString(value);
+                    if (result instanceof ValidationFailure) {
+                        val = null;
+                    } else {
+                        val = result.asAtomic();
+                    }
                     if (type instanceof UserAtomicType) {
                         // To reduce memory use, use a shared instance where possible
                         EnumerationFacetSet en = (EnumerationFacetSet)((UserAtomicType)type).getFacet(EnumerationFacetSet.class);
@@ -139,12 +149,18 @@ public class FieldChecker extends AbstractReceiver {
                         }
                     }
                 } else {
-                    val = type.getTypedValue(value, namespaceResolver, rules);
+                    try {
+                        val = type.getTypedValue(value, namespaceResolver, rules);
+                    } catch (ValidationException e) {
+                        val = null;
+                    }
                 }
             } catch (XPathException e) {
                 throw new ValidationException(e);
             }
-            parentWatch.addFieldValue(currentRow, column, val, false, locationId);
+            if (val != null) {
+                parentWatch.addFieldValue(currentRow, column, val, false, locationId);
+            }
         }
     }
 
@@ -199,14 +215,25 @@ public class FieldChecker extends AbstractReceiver {
                     // fast path for a commmon case
                     val = StringValue.makeStringValue(buffer.toString()); // force to String because buffer is mutable
                 } else if (((SimpleType) contentType).isNamespaceSensitive()) {
-                    val = ((SimpleType) contentType).getTypedValue(
-                            fieldVal, namespaceResolver, getConfiguration().getConversionRules());
+                    try {
+                        val = ((SimpleType) contentType).getTypedValue(
+                                fieldVal, namespaceResolver, getConfiguration().getConversionRules());
+                    } catch (ValidationException e) {
+                        // Presumably we've already reported the value as invalid; now we just need to avoid crashing
+                        val = null;
+                    }
                 } else if (contentType.isAtomicType()) {
                     // We've already validated the value, and for equality matching we only need a value of the
                     // correct primitive type.
                     AtomicType prim = (AtomicType)((AtomicType)contentType).getPrimitiveItemType();
                     StringConverter converter = prim.getStringConverter(getConfiguration().getConversionRules());
-                    val = converter.convertString(fieldVal).asAtomic();
+                    ConversionResult result = converter.convertString(fieldVal);
+                    if (result instanceof ValidationFailure) {
+                        // Presumably we've already reported the value as invalid; now we just need to avoid crashing
+                        val = null;
+                    } else {
+                        val = result.asAtomic();
+                    }
                     if (contentType instanceof UserAtomicType) {
                         // To reduce memory use, use a shared instance where possible
                         EnumerationFacetSet en = (EnumerationFacetSet)((UserAtomicType)contentType).getFacet(EnumerationFacetSet.class);
@@ -216,11 +243,17 @@ public class FieldChecker extends AbstractReceiver {
                     }
                 } else {
                     // a list or union type
-                    val = ((SimpleType) contentType).getTypedValue(
-                            fieldVal, namespaceResolver, getConfiguration().getConversionRules());
+                    try {
+                        val = ((SimpleType) contentType).getTypedValue(
+                                fieldVal, namespaceResolver, getConfiguration().getConversionRules());
+                    } catch (ValidationException e) {
+                        val = null;
+                    }
                 }
             }
-            parentWatch.addFieldValue(currentRow, column, val, nillableElement, textLocationId);
+            if (val != null) {
+                parentWatch.addFieldValue(currentRow, column, val, nillableElement, textLocationId);
+            }
         }
         depth--;
     }
