@@ -10,10 +10,13 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FilterFn;
 import net.sf.saxon.functions.hof.ForEachFn;
 import net.sf.saxon.functions.hof.ForEachPairFn;
+import net.sf.saxon.functions.hof.LoadXqueryModule;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.json.JsonDoc;
+import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
@@ -300,6 +303,21 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("items-starting-where", 2, e -> e.populate(ItemsStarting.ItemsFrom::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate2, ONE, null));
+
+        register("json-doc", 2, e -> e.populate(JsonDoc::new, AnyItemType.getInstance(), OPT, LATE)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+                .setOptionDetails(ParseJsonFn.OPTION_DETAILS));
+
+        register("json-to-xml", 2, e -> e.populate(JsonToXMLFn::new, AnyItemType.getInstance(), OPT, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+                .setOptionDetails(JsonToXMLFn.OPTION_DETAILS));
+
+        register("load-xquery-module", 2, e -> e.populate(LoadXqueryModule::new, MapType.ANY_MAP_TYPE, ONE, LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null) // null or EMPTY?
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+                .setOptionDetails(LoadXqueryModule.makeOptionsParameter()));
 
         register("lowest", 1, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
