@@ -748,29 +748,8 @@ task all_saxonc_releases() {
       copy {
         from "${projectDir}/src/main/c/samples"
         into "${saxoncReleaseDir}/samples"
-        if (edition != "ee") {
-          exclude "Validate.c"
-        }
-        if (systemOs.isLinux()) {
-          exclude "**/build64-mac.sh"
-          exclude "**/build-windows.bat"
-        } else if (systemOs.isMacOsX()) {
-          exclude "**/build64-linux.sh"
-          exclude "**/build-windows.bat"
-        } else {
-          exclude "**/build64-linux.sh"
-          exclude "**/build64-mac.sh"
-        }
-
         filter { line ->
-          if (edition != 'ee' && line.contains('Validate')) {
-            line = "";
-          }
-          if (arch == 'aarch64') {
-            line = line.replace('-m64 ', '')
-          }
           line.replaceAll('@@VERSION@@', saxonVersion)
-                  .replace('@@libdir@@', libdir)
                   .replace('@@edition@@', edition)
                   .replace('@@EDITION@@', edition.toUpperCase())
         }
@@ -781,21 +760,7 @@ task all_saxonc_releases() {
       copy {
         from "${projectDir}/src/main/c/command"
         into "${saxoncReleaseDir}/command"
-        if (edition != "ee") {
-          exclude "Validate.c"
-        }
-        if (systemOs.isWindows()) {
-          exclude "build-saxonc-commands.sh"
-        } else {
-          exclude "build-saxonc-commands.bat"
-        }
         filter { line ->
-          if (edition != 'ee' && line.contains('Validate')) {
-            line = "";
-          }
-          if (arch == 'aarch64') {
-            line = line.replace('-m64 ', '')
-          }
           line.replaceAll('@@VERSION@@', saxonVersion)
                   .replace('@@edition@@', edition)
                   .replace('@@EDITION@@', edition.toUpperCase())
@@ -969,7 +934,7 @@ task all_saxonc_releases() {
         }
       }
     }
-    
+
     def SAXONC_HOME = (systemOs.isMacOsX()
                        ? "${pypiDir}/libs/darwin"
                        : (systemOs.isLinux()
@@ -995,7 +960,7 @@ task all_saxonc_releases() {
         include "libsaxon-${edition}c*.h"
       }
     }
-    
+
     doLast {
       copy {
         from "${projectDir}/src/main/c/pypi/python_saxon"
@@ -1125,7 +1090,7 @@ task all_saxonc_releases() {
       if (libdir == null) {
         throw GradleException("Don't know how to create Python wheels on this OS.");
       }
-     
+
       copy {
         into "${buildDir}/wheels/${systemOsName}/${edition}c_pypi/${libdir}"
         from "${buildDir}/c"
@@ -1172,7 +1137,7 @@ task saxonc_build_wheels(
     user = 'norm' // HACK
   }
 
-  def osarch = System.getProperty("os.arch") 
+  def osarch = System.getProperty("os.arch")
   def now = new Date()
   def isodate = "${now.format('yyyy-MM-dd')}T${now.format('HH-mm-ss')}"
 
@@ -1371,44 +1336,54 @@ project.task("all_python_test_suites") {
       def output = new FileWriter(new File("${buildDir}/wheels/${edition}c_wheel.txt"))
       output.write("${wheel}")
       output.close()
-    }    
-  }
-
-  Task t = task "${edition}c_xslt30_test_suite"(
-    dependsOn: ["pyenv_install_saxon_${edition}c"]
-  ) {
-    inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi/testsuite_driver")
-    outputs.files fileTree(dir: "${buildDir}/c/${edition}c_testsuite_driver")
-
-    doFirst {
-      mkdir("${buildDir}/test-results/${edition}c/xslt30/XT30/${DSTAMP}")
     }
+  }
+  ["xslt30", "qt3"].each { testsuite ->
+    Task t = task "${edition}c_${testsuite}_test_suite"(
+            dependsOn: ["pyenv_install_saxon_${edition}c"]
+    ) {
+      def output_path = "${buildDir}/test-results/${edition}c/${saxonVersion}/${testsuite}/${DSTAMP}";
 
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/pypi/testsuite_driver"
-        into "${buildDir}/c/${edition}c_testsuite_driver"
-        filter { line ->
-          line.replaceAll('@@edition@@', edition)
+      inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi/testsuite_driver")
+      outputs.files fileTree(dir: "${buildDir}/c/${edition}c_testsuite_driver")
+      outputs.files fileTree(dir: output_path)
+
+      doFirst {
+        mkdir(output_path)
+      }
+
+      doLast {
+        copy {
+          from "${projectDir}/src/main/c/pypi/testsuite_driver"
+          into "${buildDir}/c/${edition}c_testsuite_driver"
+          filter { line ->
+            line.replaceAll('@@edition@@', edition)
+                    .replaceAll('@@version@@', saxonVersion)
+          }
+        }
+      }
+
+      doLast {
+        exec {
+          workingDir "${buildDir}/c/${edition}c_testsuite_driver"
+          commandLine "python3", "-m", "pip", "install", "-r", "requirements.txt"
+        }
+      }
+
+      doLast {
+        exec {
+          workingDir "${buildDir}/c/${edition}c_testsuite_driver"
+          if (${testsuite} == "xslt30") {
+            commandLine "python3", "./${testsuite}_test_suite_driver.py", "${testsuites.w3cXslt30TestSuiteDir}/..",
+                    "-o", output_path
+          } else if (${testsuite} == "qt3") {
+            commandLine "python3", "./${testsuite}_test_suite_driver.py", "${testsuites.w3cQT3TestSuiteDir}/..",
+                    "-o", output_path
+          }
+
         }
       }
     }
-
-    doLast {
-      exec {
-        workingDir "${buildDir}/c/${edition}c_testsuite_driver"
-        commandLine "python3", "-m", "pip", "install", "-r", "requirements.txt"
-      }
-    }
-
-    doLast {
-      exec {
-        workingDir "${buildDir}/c/${edition}c_testsuite_driver"
-        commandLine "python3", "./xslt30_test_suite_driver.py", "${testsuites.w3cXslt30TestSuiteDir}/..",
-          "-o", "${buildDir}/test-results/${edition}c/xslt30/XT30/${DSTAMP}"
-      }
-    }
   }
-  tasks.findByName("all_python_test_suites").dependsOn t
+  tasks.findByName("all_python_test_suites").dependsOn
 }
-
