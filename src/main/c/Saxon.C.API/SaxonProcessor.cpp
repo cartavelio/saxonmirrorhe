@@ -382,7 +382,7 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 }
 
 SaxonProcessor::~SaxonProcessor() {
-  // SaxonProcessor::attachCurrentThread();
+  SaxonProcessor::attachCurrentThread();
   clearConfigurationProperties();
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~SaxonProcessor destructor:"
@@ -485,11 +485,12 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     XdmValue *value = nullptr;
     int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
                                      (void *)results);
-
+#ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "C++ makeXdmValueFromRef - typeRef= " << typeRef
                 << std::endl;
     }
+#endif
     if (typeRef == SXN_EXCEPTION) {
 
       throw SaxonApiException();
@@ -601,11 +602,13 @@ int64_t SaxonProcessor::createParameterJArray(
     std::map<std::string, std::string> properties, int additions) {
 
   int size = parameters.size() + properties.size() + additions;
-
+#ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "Properties size: " << properties.size() << std::endl;
     std::cerr << "Parameter size: " << parameters.size() << std::endl;
   }
+#endif
+
   if (size > 0) {
     int64_t processorDataRef = createProcessorDataWithCapacity(
         SaxonProcessor::sxn_environ->thread, size);
@@ -919,7 +922,7 @@ XdmValue *SaxonProcessor::parseJsonFromFile(const char *source) {
 XdmNode *SaxonProcessor::parseXmlFromString(const char *source,
                                             const char *encoding,
                                             SchemaValidator *validator) {
-  // SaxonProcessor::attachCurrentThread();
+   SaxonProcessor::attachCurrentThread();
 
   applyConfigurationProperties();
   int64_t xdmNodeRef = parseXmlStringWithValidator(

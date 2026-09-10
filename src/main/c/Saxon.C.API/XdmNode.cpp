@@ -45,10 +45,12 @@ XDM_NODE_KIND XdmNode::getNodeKind() {
 }
 
 XdmNode::~XdmNode() {
+#ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmNode destructor called:" << refCount
               << " ob ref=" << (this) << std::endl;
   }
+#endif
   // if(getRefCount() <= 1) {
   if (baseURI != nullptr) {
     operator delete((char *)baseURI);
@@ -93,11 +95,12 @@ XdmNode::~XdmNode() {
 
 void XdmNode::incrementRefCountForRelinquishedChildren() {
     if (childCount > 0) {
-
+#ifdef DEBUG
         if (getenv("SAXONC_DEBUG_FLAG")) {
             std::cerr << "refCount-inc-relinquished-xdmNode=" << refCount << " ob ref=" << (this)
                       << std::endl;
         }
+#endif
         for(int i=0; i<childCount; i++) {
             children[i]->incrementRefCount();
         }
@@ -110,11 +113,12 @@ bool XdmNode::hasRelinquishedChildren(){
 
 void XdmNode::resetRelinquishedChildren(){
     if (childCount > 0 && children != nullptr) {
-
+#ifdef DEBUG
         if (getenv("SAXONC_DEBUG_FLAG")) {
             std::cerr << "XdmNode-resetRelinquishedChildren =" << refCount << " ob ref=" << (this)
                       << std::endl;
         }
+#endif
         for(int i=0; i<childCount; i++) {
             if(children[i] != nullptr) {
                 children[i]->decrementRefCount();
@@ -276,9 +280,9 @@ XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
   if (axisCount == 0) {
     return nullptr;
   }
-  if (getenv("SAXONC_DEBUG_FLAG")) {
+  /*if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "axisNodes count=" << axisCount << std::endl;
-  }
+  } */
   XdmNode **valuesi = nullptr;
 
   valuesi = new XdmNode *[axisCount];
@@ -312,9 +316,6 @@ int XdmNode::getChildCount() {
 }
 
 XdmNode **XdmNode::getChildren(bool cached) {
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "~XdmNode getChildren called:" << " ob ref=" << (this)  << std::endl;
-  }
   if (childCount < 0) {
     getChildCount();
   }

@@ -237,10 +237,10 @@ cdef class PySaxonProcessor:
         if self.thisptr is not NULL:
             del self.thisptr
             self.thisptr = NULL
-        if _proc_count == 1:
-            self.thisptr.release()
-        else:
-            _proc_count = _proc_count - 1
+            if _proc_count == 1:
+                self.thisptr.release()
+            else:
+                _proc_count = _proc_count - 1
 
 
     def __enter__(self):

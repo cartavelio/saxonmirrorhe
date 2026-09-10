@@ -41,6 +41,7 @@ DocumentBuilder::DocumentBuilder(const DocumentBuilder &other) {
 }
 
 DocumentBuilder::~DocumentBuilder() {
+  //SaxonProcessor::attachCurrentThread();
   if (docBuilderObject != -1) {
     docBuilderObject = -1;
   }

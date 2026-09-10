@@ -6,7 +6,29 @@ from pathlib import Path
 from os.path import isfile
 from datetime import datetime as date
 import sys
+import threading
+
 '''pytest --data-dir=[path/data]  test_saxonc.py'''
+
+class myThread (threading.Thread):
+    def __init__(self, threadID, name, saxon_proc):
+        threading.Thread.__init__(self)
+        print ("Starting thread init")
+        self.threadID = threadID
+        self.name = name
+        self.saxon_proc = saxon_proc
+
+
+    def run(self):
+        print ("Starting " + self.name)
+        xml = '<root><child>Test</child></root>'
+        builder = self.saxon_proc.new_document_builder()
+        node = builder.parse_xml(xml_text=xml)
+        xml = node.to_string()
+        print("Exiting " + self.name)
+        return xml
+
+
 
 
 
@@ -101,6 +123,21 @@ def test_version2():
 
 def test_schema_aware1(saxonproc):
     assert saxonproc.is_schema_aware == False
+
+def test_threading(saxonproc):
+    # Create new threads
+    thread1 = myThread(1, "Thread-1", saxonproc)
+    thread2 = myThread(2, "Thread-2", saxonproc)
+    thread3 = myThread(3, "Thread-3", saxonproc)
+
+    # Start new Threads
+    thread1.start()
+    thread2.start()
+    thread3.start()
+    thread1.join()
+    thread2.join()
+    thread3.join()
+    assert True
 
 def test_icu_lib():
     saxonproc = PySaxonProcessor(license=True)
