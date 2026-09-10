@@ -7,10 +7,7 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.expr.DefaultedArgumentExpression;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.SuppliedParameterReference;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UserFunction;
@@ -106,6 +103,11 @@ public class XSLLocalParam extends XSLGeneralVariable {
                             ufp.setFunctionStreamability(uf.getDeclaredStreamability());
                         }
                         Expression defaultVal = sourceBinding.getSelectExpression();
+                        if (defaultVal != null) {
+                            if (!(defaultVal instanceof Literal || defaultVal instanceof ContextItemExpression)) {
+                                 compileError("The default value for a function parameter must be either a literal, or '.' (temporary Saxon restriction)");
+                            }
+                        }
                         if (defaultVal == null && !sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
                             defaultVal = new DefaultedArgumentExpression();
                         }
@@ -235,7 +237,16 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 Expression selectExpression = sourceBinding.getSelectExpression();
                 if (selectExpression == null) {
                     selectExpression = Literal.makeEmptySequence();
+                } else {
+                    Expression underlyingExpression = selectExpression;
+                    while (underlyingExpression instanceof ItemChecker || underlyingExpression instanceof CardinalityChecker) {
+                        underlyingExpression = ((UnaryExpression)underlyingExpression).getBaseExpression();
+                    }
+                    if (!(underlyingExpression instanceof Literal || underlyingExpression instanceof ContextItemExpression)) {
+                        compileError("The default value for a function parameter must be either a literal, or '.' (temporary Saxon restriction)");
+                    }
                 }
+
                 int pos = getParameterPosition();
                 ((XSLFunction)getParent()).getCompiledFunction().getParameterDefinitions()[pos]
                         .setDefaultValueExpression(selectExpression);
