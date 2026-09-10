@@ -1,5 +1,7 @@
 using System;
 using System.Globalization;
+using ICU4N;
+using ICU4N.Globalization;
 using Saxon.Hej.expr.number;
 
 namespace Saxon.Impl.Overrides {
@@ -47,7 +49,15 @@ namespace Saxon.Impl.Overrides {
            }
            return name;
         }
-        
+
+       // public override string toWords(string cardinal, long number) {
+       //     return experiment(number);
+       // }
+       //
+       // public static string experiment(long number) {
+       //     return number.ToString(NumberPresentation.SpellOut, new UCultureInfo("en-GB"));
+       // }
+       //  
         
     }
 }
