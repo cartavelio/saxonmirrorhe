@@ -239,14 +239,14 @@ public abstract class ItemFeed extends ProxyOutputter {
 
     /**
      * Supply one item towards the streamed input of the expression. This implementation
-     * calls {@link #append(Item)}, and it is final so subclasses do not have to cater for
+     * calls {@link #append(Item)}. Subclasses do not have to cater for
      * this event
      *
      * @param item the item to be supplied
      */
 
     @Override
-    public final void append(Item item, Location locationId, int properties) throws XPathException {
+    public void append(Item item, Location locationId, int properties) throws XPathException {
         append(item);
     }
 

@@ -14,6 +14,7 @@ import net.sf.saxon.functions.ContextItemAccessorFunction;
 import net.sf.saxon.functions.IntegratedFunctionCall;
 import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.FunctionStreamability;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -427,6 +428,12 @@ public class StreamingAdjunct {
         Streamability.setPostureAndSweep(co, Streamability.getPostureAndSweepIfKnown(proxy));
 
         return new FeedMakerDelegate((watchManager, out, context) -> new BufferingFeed(getExpression(), out, context));
+    }
+
+    public static String genId(NodeInfo node) {
+        StringBuilder buffer = new StringBuilder(16);
+        node.generateId(buffer);
+        return buffer.toString();
     }
 
 

@@ -152,6 +152,7 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
 
         @Override
         public void append(Item item) throws XPathException {
+            //System.err.println("DocSorterAdj " + this + " append() " + ((NodeInfo) item).getDisplayName() + " " + genId((NodeInfo)item));
             NodeInfo node = (NodeInfo)item;
             if (!stack.isEmpty() && Navigator.isAncestorOrSelf(node, stack.peek())) {
                 // this node is an ancestor of the previous node; add it to the stack
@@ -168,6 +169,7 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
 
         @Override
         public void close() throws XPathException {
+            //System.err.println("DocSorterAdj " + this + " close()");
             flush();
             super.close();
         }
@@ -179,6 +181,7 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
                 int depth = depthOfNode(n);
                 NodeInfo prev = mostRecentAtDepth.get(depth);
                 if (prev == null || prev != n) {
+                    //System.err.println("DocSorterAdj " + this + " emitting " + n.getDisplayName() + " " + genId(n));
                     out.append(n);
                     mostRecentAtDepth.put(depth, n);
                 }

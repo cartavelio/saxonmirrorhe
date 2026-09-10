@@ -127,16 +127,23 @@ public class FleetingNode implements NodeInfo {
      *         the same node in the tree.
      */
 
-    public final boolean equals(Object other) {
+    public boolean equals(Object other) {
         if (this == other) {
             return true;
         } else if (other instanceof FleetingNode) {
             FleetingNode fn = (FleetingNode) other;
-            return
-                    (getNodeKind() == Type.ATTRIBUTE && fn.getNodeKind() == Type.ATTRIBUTE &&
-                             getParent() == fn.getParent() && getURI().equals(fn.getURI()) && getLocalPart().equals(fn.getLocalPart())) ||
-                            (getNodeKind() == Type.NAMESPACE && fn.getNodeKind() == Type.NAMESPACE &&
-                                     getParent() == fn.getParent() && getLocalPart().equals(fn.getLocalPart()));
+            switch (getNodeKind()) {
+                case Type.ATTRIBUTE:
+                    return getNodeKind() == fn.getNodeKind() &&
+                            getParent() == fn.getParent() &&
+                            getNodeName().equals(fn.getNodeName());
+                case Type.NAMESPACE:
+                    return getNodeKind() == fn.getNodeKind() &&
+                            getParent() == fn.getParent() &&
+                            getLocalPart().equals(fn.getLocalPart());
+                default:
+                    return false;
+            }
         } else {
             return false;
         }
@@ -146,7 +153,7 @@ public class FleetingNode implements NodeInfo {
     public int hashCode() {
         switch (getNodeKind()) {
             case Type.ATTRIBUTE:
-                case Type.NAMESPACE:
+            case Type.NAMESPACE:
                 return getParent().hashCode() ^ getLocalPart().hashCode();
             default:
                 return super.hashCode();
@@ -215,8 +222,6 @@ public class FleetingNode implements NodeInfo {
 
     @Override
     public final int compareOrder(NodeInfo other) {
-        // We work on the assumption that both nodes are nodes that are remembered during a streaming pass
-        // (that is, ancestors of the context node and their attributes and namespaces)
         if (equals(other)) {
             return 0;
         }
@@ -231,26 +236,20 @@ public class FleetingNode implements NodeInfo {
                         return compareOrder(other.getParent());
                     }
                 }
-                if (Navigator.isAncestorOrSelf(this, other)) {
-                    return -1;
-                }
-                if (Navigator.isAncestorOrSelf(other, this)) {
-                    return +1;
-                }
-                throw new IllegalStateException();
+                return Integer.compare(getNodeNumber(), ((FleetingNode)other).getNodeNumber());
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
             case Type.TEXT:
-                return +1;
+                if (other.getNodeKind() == Type.ATTRIBUTE || other.getNodeKind() == Type.NAMESPACE) {
+                    return compareOrder(other.getParent());
+                }
+                return Integer.compare(getNodeNumber(), ((FleetingNode) other).getNodeNumber());
             case Type.ATTRIBUTE:
                 if (other.getNodeKind() == Type.ATTRIBUTE) {
                     if (getParent().equals(other.getParent())) {
                         // the relative position of attributes is determined by their position in the
                         // attribute collection of the containing element
                         return ((FleetingElementNode)getParent()).compareAttributeOrder(NameOfNode.makeName(this), NameOfNode.makeName(other));
-//                        int i0 = ((FleetingElementNode)getParent()).getAttributeIndex(getURI(), getLocalPart());
-//                        int i1 = ((FleetingElementNode)getParent()).getAttributeIndex(other.getURI(), other.getLocalPart());
-//                        return i0 < i1 ? -1 : +1;
                     } else {
                         return getParent().compareOrder(other.getParent());
                     }

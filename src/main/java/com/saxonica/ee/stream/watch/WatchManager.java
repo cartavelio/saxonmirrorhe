@@ -90,10 +90,13 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
     private final List<GroupingScope> capturingScopes = new ArrayList<>();
 
+    // sequence number to identify the current event
+    private long eventNumber = 0;
+
     //#if CSHARP==false
     private void trace(String message) {
         if (TRACING) {
-            System.err.println("WM " + Integer.toHexString(hashCode()) + " " + message);
+            System.err.println("WM " + Integer.toHexString(hashCode()) + " " + eventNumber + " " + message);
         }
     }
     //#endif
@@ -172,6 +175,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
             startDocumentProperties = properties;
             namespaceStack = new Stack<>();
         }
+        eventNumber++;
     }
 
     private void deferredStartDocument() throws XPathException {
@@ -240,7 +244,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties)
             throws XPathException {
-        //trace("startElement " + elementName);
+        trace("startElement " + elementName);
         try {
             if (startDocumentPending) {
                 startDocumentPending = false;
@@ -312,6 +316,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         }
 
         processAttributes(attributes);
+        eventNumber++;
     }
 
     /**
@@ -423,6 +428,10 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         return elementStack[elementStackTop - 1];
     }
 
+    public long getCurrentEventNumber() {
+        return eventNumber;
+    }
+
     protected void addPrearrangedWatches() throws XPathException {
         // No action: exists for the benefit of subclasses
     }
@@ -471,6 +480,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
             warning(quit);
             throw quit;
         }
+        eventNumber++;
     }
 
     private void warning(QuitParsingException exception) {
@@ -554,6 +564,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
             warning(quit);
             throw quit;
         }
+        eventNumber++;
 
     }
 
@@ -593,7 +604,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
                 }
             }
         }
-
+        eventNumber++;
         //nextReceiver.endDocument();
     }
 
@@ -632,7 +643,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
             lastLocationId = locationId;
         }
-
+        eventNumber++;
     }
 
     /**
@@ -671,6 +682,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
             lastLocationId = locationId;
         }
+        eventNumber++;
     }
 
     /**
