@@ -58,6 +58,10 @@ namespace Saxon.Api.Support {
         public override void supplyStaticContext(Saxon.Hej.expr.StaticContext context, int locationId, Expression[] arguments) {
             apiCall.SupplyStaticContext(new Saxon.Api.StaticContext(context));
         }
+        
+        public override void copyLocalData(Saxon.Hej.lib.ExtensionFunctionCall destination) {
+            apiCall.CopyLocalData(((ExtensionFunctionCallWrapper) destination).apiCall);
+        }
 
         public override Sequence call(XPathContext context, Sequence[] arguments) {
             DynamicContext dc = new DynamicContext(context);

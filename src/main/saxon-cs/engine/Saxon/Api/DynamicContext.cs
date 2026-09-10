@@ -1,3 +1,4 @@
+using Saxon.Hej;
 using Saxon.Hej.expr;
 
 namespace Saxon.Api {
@@ -32,6 +33,19 @@ namespace Saxon.Api {
         /// <remarks>Calling this method throws an exception if the context item is undefined.</remarks>
 
         public int ContextSize => context.getLast();
+
+        /// <summary>
+        /// The <c>Processor</c> that was used for the application in which this <c>DynamicContext</c> appears
+        /// </summary>
+        /// <remarks>
+        /// <para>There may be circumstances in which this is not available, notably when low-level
+        /// interfaces are used to create several <c>Processor</c> objects that share the same underlying
+        /// <c>Saxon.Hej.Configuration</c>. In such cases the method may return null, or may return a different
+        /// <c>Processor</c>.</para>
+        /// </remarks>
+
+        public Processor Processor =>
+            context.getConfiguration().getProcessor() is Processor p ? p : null;
 
         /// <summary>
         /// The underlying object in the Saxon implementation, an instance of class
