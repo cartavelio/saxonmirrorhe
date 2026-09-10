@@ -1,9 +1,9 @@
 """This documentation details the Python API for SaxonC, which has been written in cython for Python3.
 SaxonC is produced by compiling the Java source code of Saxon to a native executable using GraalVM,
 and adding APIs for C/C++, Python, and PHP.
-SaxonC provides processing in XSLT 3.0, XQuery 3.1 and XPath 3.1, and Schema validation 1.0/1.1.
-Main classes in SaxonC Python API: PySaxonProcessor, PyXslt30Processor, PyXsltExecutable, PyXQueryProcessor,
-PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmArray, and PyXdmMap."""
+SaxonC provides processing in XSLT 3.0, XQuery 3.1 and XPath 3.1; and Schema validation 1.0/1.1 with SaxonC-EE.
+SaxonC-EE and SaxonC-PE also include support for many features in the XPath, XQuery, and XSLT 4.0
+specifications currently in development in the QT4 Community Group."""
 
 # distutils: language = c++
 # distutils: sources = SaxonProcessor.cpp

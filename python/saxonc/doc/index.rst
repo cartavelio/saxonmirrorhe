@@ -18,12 +18,14 @@ Saxon C |release| Python API documentation
    xquery/processor
    xpath_processor
    xdm/index
+   xsd/schema_validator
+   xsd/compiler
+   xsd/schema
    document_builder
-   schema_validator
    error
 
 .. automodule:: saxonche
    :members:
    :undoc-members:
    :show-inheritance:
-   :exclude-members: PySaxonProcessor, PyXPathProcessor, PyDocumentBuilder, PyXslt30Processor, PyXsltExecutable, PyXQueryProcessor, PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmArray, PyXdmMap, XdmNodeKind, XdmType, create_xdm_dict, PyXdmValueIterator
+   :exclude-members: PySaxonProcessor, PyXPathProcessor, PyDocumentBuilder, PyXslt30Processor, PyXsltExecutable, PyXQueryProcessor, PySchemaValidator, PyXsdCompiler, PyXsdSchema, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmArray, PyXdmMap, XdmNodeKind, XdmType, create_xdm_dict, PyXdmValueIterator
