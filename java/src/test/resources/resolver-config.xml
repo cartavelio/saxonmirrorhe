@@ -1,0 +1,9 @@
+<configuration xmlns="http://saxon.sf.net/ns/configuration">
+  <!-- This file contains a test to set an XML Resolver feature. -->
+
+  <xmlResolver>
+    <feature name="http://xmlresolver.org/feature/prefer-public" value="true"/>
+    <feature name="prefer-property-file" value="false"/>
+  </xmlResolver>
+
+</configuration>

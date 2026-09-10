@@ -2,6 +2,7 @@ package resolvers;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.junit.Testdata;
+import net.sf.saxon.lib.CatalogResourceResolver;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.s9api.*;
@@ -9,19 +10,91 @@ import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
+import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CatalogResolverTest {
+    @Test
+    public void configureResolver() {
+        // Tests that the Configuration.setConfigurationProperty accepts the XML Resolver URIs.
+        Configuration config = new Configuration();
+        CatalogResourceResolver resolver = (CatalogResourceResolver) config.getResourceResolver();
+        resolver.setFeature(ResolverFeature.URI_FOR_SYSTEM, true);
+
+        try {
+            config.setConfigurationProperty(ResolverFeature.URI_FOR_SYSTEM.getName(), false);
+            config.setConfigurationProperty(ResolverFeature.CATALOG_ADDITIONS.getName(), Arrays.asList(new String[] {"a.xml", "b.xml"}));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+
+        Assertions.assertEquals(false, resolver.getFeature(ResolverFeature.URI_FOR_SYSTEM));
+        Assertions.assertEquals(2, resolver.getFeature(ResolverFeature.CATALOG_ADDITIONS).size());
+        Assertions.assertEquals("a.xml", resolver.getFeature(ResolverFeature.CATALOG_ADDITIONS).get(0));
+        Assertions.assertEquals("b.xml", resolver.getFeature(ResolverFeature.CATALOG_ADDITIONS).get(1));
+    }
+
+    @Test
+    public void readConfigurationFile() {
+        try {
+            File configFile = Testdata.file("resolver-config/resolver-config.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            CatalogResourceResolver resolver = (CatalogResourceResolver) processor.getUnderlyingConfiguration().getResourceResolver();
+            Assertions.assertEquals(false, resolver.getFeature(ResolverFeature.URI_FOR_SYSTEM));
+            Assertions.assertEquals(2, resolver.getFeature(ResolverFeature.CATALOG_ADDITIONS).size());
+            Assertions.assertEquals("a.xml", resolver.getFeature(ResolverFeature.CATALOG_ADDITIONS).get(0));
+            Assertions.assertEquals("b.xml", resolver.getFeature(ResolverFeature.CATALOG_ADDITIONS).get(1));
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void readConfigurationFileBadType() {
+        try {
+            File configFile = Testdata.file("resolver-config/resolver-config-bad-type.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            fail();
+        } catch (SaxonApiException e) {
+            Assertions.assertTrue(e.getMessage().contains("Invalid XML resolver feature value"));
+        }
+    }
+
+    @Test
+    public void readConfigurationFileBadName() {
+        try {
+            File configFile = Testdata.file("resolver-config/resolver-config-bad-name.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            fail();
+        } catch (SaxonApiException e) {
+            Assertions.assertTrue(e.getMessage().contains("Unknown XML resolver feature"));
+        }
+    }
+
+    @Test
+    public void readConfigurationFileNotConfigurable() {
+        try {
+            File configFile = Testdata.file("resolver-config/resolver-config-not-config.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
+            fail();
+        } catch (SaxonApiException e) {
+            Assertions.assertTrue(e.getMessage().contains("XML resolver feature cannot be configured"));
+        }
+    }
+
     @Test
     public void noResolverFail() {
         Configuration config = new Configuration();

@@ -1,0 +1,8 @@
+<configuration xmlns="http://saxon.sf.net/ns/configuration">
+  <!-- This file contains a test to set an XML Resolver feature. -->
+
+  <xmlResolver>
+    <feature name="http://xmlresolver.org/feature/uri-for-system" value="spoon"/>
+  </xmlResolver>
+
+</configuration>
