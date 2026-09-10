@@ -25,6 +25,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trace.ExitCounter;
 import net.sf.saxon.trace.TraceEventMulticaster;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -392,13 +393,23 @@ public class Controller implements ContextOriginator {
      * Controller as well as other configuration information.
      */
 
+    private ParseOptions options;
+
     /*@NotNull*/
     public PipelineConfiguration makePipelineConfiguration() {
         PipelineConfiguration pipe = new PipelineConfiguration(getConfiguration());
         pipe.setController(this);
-        ParseOptions options = new ParseOptions(getConfiguration().getParseOptions());
-        options.setSchemaValidationMode(validationMode);
-        options.setErrorReporter(errorReporter);
+
+        if (options == null)
+        {
+            options = new ParseOptions(getConfiguration().getParseOptions());
+            //ExitCounter.count(options.toString());
+            options.setSchemaValidationMode(validationMode);
+            options.setErrorReporter(errorReporter);
+
+            options.freeze();
+        }
+
         pipe.setParseOptions(options);
         return pipe;
         //pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);

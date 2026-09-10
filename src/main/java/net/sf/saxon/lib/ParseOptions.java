@@ -14,6 +14,7 @@ import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
+import net.sf.saxon.trace.ExitCounter;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -44,39 +45,79 @@ import java.util.*;
 //})
 public class ParseOptions {
 
-    private int schemaValidation = Validation.DEFAULT;
-    private int dtdValidation = Validation.DEFAULT;
+    private int schemaValidation;
+    private int dtdValidation;
     private StructuredQName topLevelElement;
     private SchemaType topLevelType;
 
-    private Optional<Boolean> wrapDocument = Optional.empty();
-    /*@Nullable*/ private TreeModel treeModel = null;
+    private Optional<Boolean> wrapDocument;
+    /*@Nullable*/ private TreeModel treeModel;
     //private int stripSpace = Whitespace.UNSPECIFIED;
-    private SpaceStrippingRule spaceStrippingRule = null;
-    private Optional<Boolean> lineNumbering = Optional.empty();
-    private boolean pleaseClose = false;
-    /*@Nullable*/ private transient ErrorReporter errorReporter = null;
-    /*@Nullable*/ private List<FilterFactory> filters = null;
-    private boolean continueAfterValidationErrors = false;
-    private boolean addCommentsAfterValidationErrors = false;
-    private boolean expandAttributeDefaults = true;
-    private boolean useXsiSchemaLocation = true;
-    private boolean checkEntityReferences = false;
-    private boolean stable = true;
-    private int validationErrorLimit = Integer.MAX_VALUE;
-    /*@Nullable*/ private ValidationParams validationParams = null;
-    /*@Nullable*/ private ValidationStatisticsRecipient validationStatisticsRecipient = null;
-    private Map<String, Boolean> parserFeatures = null;
-    private Map<String, Object> parserProperties = null;
-    private InvalidityHandler invalidityHandler = null;
-    private Set<? extends Accumulator> applicableAccumulators = null; // null means "all"
+    private SpaceStrippingRule spaceStrippingRule;
+    private Optional<Boolean> lineNumbering;
+    private boolean pleaseClose;
+    /*@Nullable*/ private transient ErrorReporter errorReporter;
+    /*@Nullable*/ private List<FilterFactory> filters;
+    private boolean continueAfterValidationErrors;
+    private boolean addCommentsAfterValidationErrors;
+    private boolean expandAttributeDefaults;
+    private boolean useXsiSchemaLocation;
+    private boolean checkEntityReferences;
+    private boolean stable;
+    private int validationErrorLimit;
+    /*@Nullable*/ private ValidationParams validationParams;
+    /*@Nullable*/ private ValidationStatisticsRecipient validationStatisticsRecipient;
+    private Map<String, Boolean> parserFeatures;
+    private Map<String, Object> parserProperties;
+    private InvalidityHandler invalidityHandler;
+    private Set<? extends Accumulator> applicableAccumulators;
 
     //#if CSHARP==false
-    private transient XMLReader parser = null;
+    private transient XMLReader parser;
     private Maker<XMLReader> parserMaker;
-    private transient EntityResolver entityResolver = null;
-    private transient ErrorHandler errorHandler = null;
+    private transient EntityResolver entityResolver;
+    private transient ErrorHandler errorHandler;
     //#endif
+
+    private boolean frozen = false;
+
+    public void freeze()
+    {
+        frozen = true;
+    }
+
+    private void initDefaults()
+    {
+        schemaValidation = Validation.DEFAULT;
+        dtdValidation = Validation.DEFAULT;
+        wrapDocument = Optional.empty();
+        treeModel = null;
+        //stripSpace = Whitespace.UNSPECIFIED;
+        spaceStrippingRule = null;
+        lineNumbering = Optional.empty();
+        pleaseClose = false;
+        errorReporter = null;
+        filters = null;
+        continueAfterValidationErrors = false;
+        addCommentsAfterValidationErrors = false;
+        expandAttributeDefaults = true;
+        useXsiSchemaLocation = true;
+        checkEntityReferences = false;
+        stable = true;
+        validationErrorLimit = Integer.MAX_VALUE;
+        validationParams = null;
+        validationStatisticsRecipient = null;
+         parserFeatures = null;
+        parserProperties = null;
+        invalidityHandler = null;
+        applicableAccumulators = null; // null means "all"
+
+        //#if CSHARP==false
+        XMLReader parser = null;
+        EntityResolver entityResolver = null;
+        ErrorHandler errorHandler = null;
+        //#endif
+    }
 
     /**
      * Create a ParseOptions object with default options set
@@ -84,6 +125,7 @@ public class ParseOptions {
 
     public ParseOptions() {
         //entityResolver = new StandardEntityResolver();
+        initDefaults();
     }
 
     /**
@@ -93,6 +135,10 @@ public class ParseOptions {
      */
 
     public ParseOptions(/*@NotNull*/ ParseOptions p) {
+        initDefaults();
+
+        //ExitCounter.countCaller();
+
         schemaValidation = p.schemaValidation;
         validationParams = p.validationParams;
         setDTDValidationMode(p.dtdValidation);
@@ -308,6 +354,7 @@ public class ParseOptions {
      */
 
     public void setSpaceStrippingRule(SpaceStrippingRule rule) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         spaceStrippingRule = rule;
     }
 
@@ -319,6 +366,7 @@ public class ParseOptions {
      */
 
     public void setTreeModel(int model) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         treeModel = TreeModel.getTreeModel(model);
     }
 
@@ -411,6 +459,7 @@ public class ParseOptions {
      */
 
     public void setModel(TreeModel model) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         treeModel = model;
     }
 
@@ -436,6 +485,7 @@ public class ParseOptions {
      */
 
     public void setSchemaValidationMode(int option) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         schemaValidation = option;
     }
 
@@ -459,6 +509,7 @@ public class ParseOptions {
      */
 
     public void setExpandAttributeDefaults(boolean expand) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         this.expandAttributeDefaults = expand;
     }
 
@@ -483,6 +534,7 @@ public class ParseOptions {
      */
 
     public void setTopLevelElement(StructuredQName elementName) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         topLevelElement = elementName;
     }
 
@@ -507,6 +559,7 @@ public class ParseOptions {
      */
 
     public void setTopLevelType(SchemaType type) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         topLevelType = type;
     }
 
@@ -531,6 +584,7 @@ public class ParseOptions {
      */
 
     public void setUseXsiSchemaLocation(boolean use) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         useXsiSchemaLocation = use;
     }
 
@@ -566,6 +620,7 @@ public class ParseOptions {
      */
 
     public void setValidationErrorLimit(int validationErrorLimit) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         this.validationErrorLimit = validationErrorLimit;
     }
 
@@ -579,6 +634,7 @@ public class ParseOptions {
      */
 
     public void setDTDValidationMode(int option) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         dtdValidation = option;
         addParserFeature("http://xml.org/sax/features/validation",
                          option == Validation.STRICT || option == Validation.LAX);
@@ -606,6 +662,7 @@ public class ParseOptions {
      */
 
     public void setValidationStatisticsRecipient(/*@Nullable*/ ValidationStatisticsRecipient recipient) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         validationStatisticsRecipient = recipient;
     }
 
@@ -629,6 +686,7 @@ public class ParseOptions {
      */
 
     public void setLineNumbering(boolean lineNumbering) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         this.lineNumbering = Optional.of(lineNumbering);
     }
 
@@ -663,6 +721,7 @@ public class ParseOptions {
      */
 
     public void setXMLReader(XMLReader parser) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         this.parser = parser;
     }
 
@@ -683,6 +742,7 @@ public class ParseOptions {
      */
 
     public void setXMLReaderMaker(Maker<XMLReader> parserMaker) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         this.parserMaker = parserMaker;
     }
 
@@ -723,6 +783,7 @@ public class ParseOptions {
      */
 
     public void setEntityResolver(/*@Nullable*/ EntityResolver resolver) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         entityResolver = resolver;
     }
 
@@ -747,6 +808,7 @@ public class ParseOptions {
      */
 
     public void setErrorHandler(/*@Nullable*/ ErrorHandler handler) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         errorHandler = handler;
     }
 
@@ -774,6 +836,7 @@ public class ParseOptions {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public void setWrapDocument(Optional<Boolean> wrap) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         wrapDocument = wrap;
     }
 
@@ -803,6 +866,7 @@ public class ParseOptions {
      * @since 8.9
      */
     public void setXIncludeAware(boolean state) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         addParserFeature("http://apache.org/xml/features/xinclude", state);
     }
 
@@ -835,6 +899,7 @@ public class ParseOptions {
      */
 
     public void setErrorReporter(/*@Nullable*/ ErrorReporter reporter) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         if (reporter == null) {
             reporter = new StandardErrorReporter();
         }
@@ -864,6 +929,7 @@ public class ParseOptions {
      */
 
     public void setContinueAfterValidationErrors(boolean keepGoing) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         continueAfterValidationErrors = keepGoing;
     }
 
@@ -891,6 +957,7 @@ public class ParseOptions {
      */
 
     public void setAddCommentsAfterValidationErrors(boolean keepGoing) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         addCommentsAfterValidationErrors = keepGoing;
     }
 
@@ -916,6 +983,7 @@ public class ParseOptions {
      */
 
     public void setValidationParams(ValidationParams params) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         validationParams = params;
     }
 
@@ -942,6 +1010,7 @@ public class ParseOptions {
      */
 
     public void setCheckEntityReferences(boolean check) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         this.checkEntityReferences = check;
     }
 
@@ -977,6 +1046,7 @@ public class ParseOptions {
      */
 
     public void setStable(boolean stable) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         this.stable = stable;
     }
 
@@ -997,6 +1067,7 @@ public class ParseOptions {
      */
 
     public void setInvalidityHandler(InvalidityHandler invalidityHandler) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         this.invalidityHandler = invalidityHandler;
     }
 
@@ -1010,6 +1081,7 @@ public class ParseOptions {
      */
 
     public void setApplicableAccumulators(Set<? extends Accumulator> accumulators) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         this.applicableAccumulators = accumulators;
     }
 
@@ -1040,6 +1112,7 @@ public class ParseOptions {
      */
 
     public void setPleaseCloseAfterUse(boolean close) {
+        if (frozen) { throw new RuntimeException("ParseOptions was frozen");}
         pleaseClose = close;
     }
 
@@ -1092,5 +1165,21 @@ public class ParseOptions {
         }
     }
 
+    @Override
+    public String toString()
+    {
+        return "ParseOptions{" + "schemaValidation=" + schemaValidation + ", dtdValidation=" + dtdValidation + ", topLevelElement="
+                + topLevelElement + ", topLevelType=" + topLevelType + ", wrapDocument=" + wrapDocument + ", treeModel=" + treeModel
+                + ", spaceStrippingRule=" + spaceStrippingRule + ", lineNumbering=" + lineNumbering + ", pleaseClose=" + pleaseClose
+                + ", errorReporter=" + errorReporter + ", filters=" + filters + ", continueAfterValidationErrors="
+                + continueAfterValidationErrors + ", addCommentsAfterValidationErrors=" + addCommentsAfterValidationErrors
+                + ", expandAttributeDefaults=" + expandAttributeDefaults + ", useXsiSchemaLocation=" + useXsiSchemaLocation
+                + ", checkEntityReferences=" + checkEntityReferences + ", stable=" + stable + ", validationErrorLimit="
+                + validationErrorLimit + ", validationParams=" + validationParams + ", validationStatisticsRecipient="
+                + validationStatisticsRecipient + ", parserFeatures=" + parserFeatures + ", parserProperties=" + parserProperties
+                + ", invalidityHandler=" + invalidityHandler + ", applicableAccumulators=" + applicableAccumulators + ", parser="
+                + parser + ", parserMaker=" + parserMaker + ", entityResolver=" + entityResolver + ", errorHandler=" + errorHandler
+                + '}';
+    }
 }
 
