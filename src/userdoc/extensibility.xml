@@ -1881,7 +1881,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
         <aside>This example does not take advantage of the full power of the interface, for example the ability to pick up details
         of the static context (such as the static base URI or the default collation), or the dynamic context (such as the context item).</aside>
         
-        <p>Full details of the interface are defined in the <a class="apilink" href="/dotnetdoc">.NET API documentation</a>.</p>
+        <p>Full details of the interface are defined in the API documentation for class <a class="apilink" href="/dotnetdoc">.NET API documentation</a>.</p>
       
     </section>
 

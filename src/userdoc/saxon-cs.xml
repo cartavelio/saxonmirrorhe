@@ -64,7 +64,7 @@ platform. This is available from any .NET-supported language, although the examp
       delegates and lambda expressions.</aside>
 
       <p>This section provides a brief introduction to the structure and concepts of the API. Full specifications are
-available in the <a href="/dotnetdoc" class="apilink">.NET API</a>.</p>
+available in the <a href="/dotnetdoc" class="bodylink">.NET API</a>.</p>
 
       <p>An example C# program illustrating various use cases for the API is available in the <code>samples/cs</code>
           directory, see <a class="bodylink" href="/samples/dotnetsamples">Example applications for
