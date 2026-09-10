@@ -61,30 +61,11 @@
       
       <h2 class="subtitle">Test results</h2>
       
-      <p>TBA: update for Saxon 11.</p>
+      <p>At the time of release, Saxon-CS 11 passes all 11393 applicable tests from the XSLT 3.0 test suite. Some 1658 tests
+      are classified as not applicable, because they have unsatisfied dependencies (for example, localization).</p>
       
-      <p>At the time of release Saxon-EE 9.9 passes all 11435 applicable tests in the W3C XSLT 3.0 test suite. For the first time,
-         this includes testing that it always returns the right error code in the case of error tests. Tests are run
-         with bytecode enabled or disabled, with stylesheets that are exported and re-imported, and with JIT compilation
-         enabled and disabled (but with JIT enabled, static errors in stylesheets are not always detected if the code
-         is never executed). Appropriate subsets of the tests are also run with Saxon-PE and Saxon-HE. Tests are run on both
-         the Java and .NET platforms.
-      </p>
       
-      <p>The only tests that are not included in these results are:</p>
-      
-      <ul>
-         <li>3 tests (document-2004/5/6) that use non-ASCII characters in test filenames, which causes problems
-         for the GIT client used by our test driver.</li>
-         <li>1178 tests labeled with dependencies that Saxon does not satisfy. These have not been analyzed in detail. Many of them are specifically intended
-            only to be run with an XSLT 2.0 processor. Some of them depend on specific Unicode versions or specific localization languages.</li>
-         <li>Tests in the <code>regex-classes</code> test set, which have not been updated to the latest Unicode standards: minor changes to the list
-            of characters included in a particular category will cause a test failure. (Despite this, Saxon passes 98
-         out of 120 of these tests.)</li>
-         <li>The "posture and sweep" tests, which test that the streamability of particular expressions is correctly calculated. Saxon does not run these
-         tests because (a) they are not in line with the final XSLT 3.0 recommendation, and (b) there is no conformance requirement on a product to
-         use the algorithms appearing in the spec, provided that the final result is correct.</li>
-      </ul>
+ 
       
       <p>Although the W3C XSLT Working Group has ceased operation, the W3C test suite continues to be developed by
       volunteers, and Saxonica remains an active contributor. Conformance issues raised by Saxon users typically
@@ -171,112 +152,7 @@
       </ol>
          
  
-      <h2>Summary of new XSLT 3.0 features</h2>
-
- 
-
- 
-      <p>New XSLT 3.0 features implemented in Saxon include the following. The links are to sections
-         of the documentation that summarize the usage of each element, and in some cases describe details of the Saxon implementation.</p>
-
-      <ul>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/iterate">xsl:iterate</a>
-               instruction</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/mode">xsl:mode</a> declaration</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/merge">xsl:merge</a> instruction</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/try">xsl:try</a> and <a
-                  class="bodylink code" href="/xsl-elements/catch">xsl:catch</a> instructions</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a>
-               instruction</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code"
-               href="/xsl-elements/source-document">xsl:source-document</a> instruction (Saxon-EE
-               only)</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/fork">xsl:fork</a> instruction
-               (Saxon-EE only)</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/accumulator">xsl:accumulator</a>
-               instruction</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/assert">xsl:assert</a>
-               instruction</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/map">xsl:map</a> and <a
-                  class="bodylink code" href="/xsl-elements/map-entry">xsl:map-entry</a>
-               instructions</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/on-empty">xsl:on-empty</a>, <a
-                  class="bodylink code" href="/xsl-elements/on-non-empty">xsl:on-non-empty</a>, and
-                  <a class="bodylink code" href="/xsl-elements/where-populated"
-                  >xsl:where-populated</a> instructions</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/package">xsl:package</a> element, <a
-                  class="bodylink code" href="/xsl-elements/use-package">xsl:use-package</a>
-               declaration, and <a class="bodylink code" href="/xsl-elements/override"
-                  >xsl:override</a> element</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/xsl-elements/accept">xsl:accept</a> and <a
-                  class="bodylink code" href="/xsl-elements/expose">xsl:expose</a> elements</p>
-         </li>
-         <li>
-            <p>The <code>visibility</code> attribute of the <a class="bodylink code"
-                  href="/xsl-elements/function">xsl:function</a>, <a class="bodylink code"
-                  href="/xsl-elements/template">xsl:template</a>, <a class="bodylink code"
-                  href="/xsl-elements/attribute-set">xsl:attribute-set</a>, <a class="bodylink code"
-                  href="/xsl-elements/variable">xsl:variable</a> and <a class="bodylink code"
-                  href="/xsl-elements/mode">xsl:mode</a> declarations</p>
-         </li>
-         <li>
-            <p>The <code>select</code> attribute of the <a class="bodylink code"
-                  href="/xsl-elements/copy">xsl:copy</a> instruction</p>
-         </li>
-         <li>
-            <p>The <code>composite</code> attribute of the <a class="bodylink code"
-               href="/xsl-elements/for-each-group">xsl:for-each-group</a> instruction and <a
-                  class="bodylink code" href="/xsl-elements/key">xsl:key</a> declaration</p>
-         </li>
-         <li>
-            <p>The <code>static</code> attribute of the <a class="bodylink code"
-                  href="/xsl-elements/variable">xsl:variable</a> and <a class="bodylink code"
-                  href="/xsl-elements/param">xsl:param</a> declarations</p>
-         </li>
-         <li>
-            <p>The <code>[xsl:]default-mode</code> standard attribute</p>
-         </li>
-         <li>
-            <p>The <a class="bodylink code" href="/functions/fn/copy-of">copy-of()</a> and <a
-                  class="bodylink code" href="/functions/fn/copy-of">snapshot()</a> functions</p>
-         </li>
-
-         <li>
-            <p>The syntax of patterns has been generalized.</p>
-         </li>
-
-      </ul>
-      
-      <p>Packages are fully implemented. Packages can be exported in compiled form only in Saxon-EE, but importing
-         of compiled packages works with Saxon-PE provided that the package does not require features
-         beyond the capabilities of the particular Saxon edition. The preferred mechanism for locating packages
-         in Saxon 9.8 is to register them in the configuration file.</p>
-
+  
       
 
       <h2 class="subtitle">Checklist of Implementation-Defined Items</h2>
@@ -974,11 +850,16 @@
 
       <p>Saxon implements the final XPath 3.1 Recommendation in its entirety.</p>
       
-      <p>TODO: update test results</p>
-      
-      <p>At the time of release Saxon-EE 10.0 passes all 22049 applicable tests in the W3C XPath/XQuery test suite (QT3). Tests are run on both
-         the Java and .NET platforms.
+      <p>At the time of releasing Saxon-CS 11.0, the corresponding Java product passes all 22,263 applicable XPath 3.1 tests in 
+         the W3C XPath/XQuery test suite (QT3). The pass rate on C# is slightly lower (22,000 tests), mainly because the tests are written
+         to require requests on the <code>fn:unparsed-text()</code> function to be redirected to local files, and the Saxon-CS XPath API
+         does not currently offer this capability.
       </p>
+      
+      <aside>A further 2031 tests have been classified as "not applicable". These include tests for static type checking (which is
+      not implemented in Saxon), tests for other optional features such as number and date formatting in German or French,
+      tests that exceed Saxon limits such as the maximum length of durations, and a handful of tests that cannot
+      be conveniently run because they take too much time or memory.</aside>
       
       <p>Although the W3C XQuery Working Group has ceased operation, the W3C QT3 test suite continues to be developed by
          volunteers, and Saxonica remains an active contributor. The test suite can be found at 
@@ -987,54 +868,7 @@
          Conformance issues raised by Saxon users typically
          result in new test cases being added to the test suite.</p>
       
-      <p>New features that were introduced in XPath 3.0 or 3.1 include the following:</p>
-      
-      <ul>
-         <li>
-            <p>String contatenation operator <code>||</code></p>
-         </li>
-         <li>
-            <p>Simple mapping operator <code>!</code></p>
-         </li>
-         <li>
-            <p>Casting is allowed from a string to a union or list type</p>
-         </li>
-         <li>
-            <p>Union types, provided they meet certain rules, can be used as a
-               <code>SequenceType</code></p>
-         </li>
-         <li>
-            <p>Higher order functions, including:</p>
-            <ul>
-               <li>Inline functions, for example <code>function($i) {$i*$i}</code></li>
-               <li>Dynamic function calls</li>
-               <li>Function literals, for example <code>substring#2</code></li>
-               <li>Partial function application, for example <code>concat('$', ?)</code></li>
-            </ul>
-         </li>
-
-         <li>
-            <p>Let expressions, for example <code>let $v := expr return f($v)</code></p>
-         </li>
-         <li>
-            <p>EQNames (<code>Q{uri}local</code>) wherever QNames are allowed</p>
-         </li>
-
-         <li>
-            <p>Support for maps and arrays</p>
-         </li>
-         <li>
-            <p>Functions to read and write data in JSON format</p>
-         </li>
-         <li>
-            <p>A new operator (<code>=></code>) to allow function chaining</p>
-         </li>
-         <li>
-            <p>Various new functions including <code>random-number-generator()</code>,
-                  <code>sort()</code>, <code>parse-ietf-date()</code>.</p>
-         </li>
-      </ul>
-      
+ 
       
       
       <h2 class="subtitle">Implementation-defined aspects of Functions and Operators</h2>
@@ -1179,24 +1013,17 @@
       
       <h2 class="subtitle">Test results</h2>
       
-      <p>TODO: update test results</p>
-      
-      <p>At the time of release Saxon-EE 10.0 passes all 31009 applicable tests in the W3C XPath/XQuery test suite (QT3). 
-        Tests are run on both
-         the Java and .NET platforms, with bytecode enabled and disabled. Since many of the tests are simple constant expressions (for example,
-         <code>contains("banana", "n")</code>), which will normally be pre-evaluated during expression optimization and thus never result in bytecode
-         being generated, the test driver also includes an option to "unfold" the test to create artificial complications: for example the constant
-         string <code>"banana"</code> is replaced by a call to a function <code>f:scramble("banana")</code> which actually returns its argument unchanged,
-         but only after various manipulations designed to defeat the optimizer.
+      <p>At the time of release Saxon-CS 11.0 passes all 31104 applicable tests in the W3C XPath/XQuery test suite (QT3),
+         when run as an XQuery 3.1 processor.
       </p>
       
-      <p>The only tests that are not run are:</p>
+      <aside>A further 2031 tests have been classified as "not applicable". These include tests for static type checking (which is
+         not implemented in Saxon), tests for other optional features such as number and date formatting in German or French,
+         tests that exceed Saxon limits such as the maximum length of durations, and a handful of tests that cannot
+         be conveniently run because they take too much time or memory.</aside>
       
-      <ul>
-         <li>415 tests that exercise the optional "static typing feature", which Saxon does not implement (and which W3C
-            has discontinued).</li>
-         <li>2 tests that expose bugs in the ICU library, used for Unicode collation support. The bugs have been reported.</li>
-      </ul>
+      
+      
       
       <p>Although the W3C XQuery Working Group has ceased operation, the W3C QT3 test suite continues to be developed by
          volunteers, and Saxonica remains an active contributor. The test suite can be found at 

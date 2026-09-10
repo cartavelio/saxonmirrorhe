@@ -619,7 +619,7 @@
         <h2>XSLT syntax extensions</h2>
         
         <p>The syntax of match patterns is extended to make it easier to match maps and arrays (see
-            <a class="bodylink" href="/extensions/xslt-syntax-extensions">XSLT Syntax Extensions</a>).</p>
+            <a class="bodylink" href="/v4extensions/xslt-syntax-extensions/match-patterns">XSLT Syntax Extensions: Match Patterns</a>).</p>
         
         <p>In particular the syntax <code>ma-type predicate*</code> is allowed, where <code>ma-type</code>
             is any of:</p>

@@ -227,64 +227,73 @@
 
          <ol>
             <li>
-               <p>Saxon-CS is targeted at .NET Core 5, and you will need to install this separately.
+               <p>Saxon-CS is targeted at .NET Core 5, which you will need to install separately.
                   For details, see <a class="bodylink" href="https://dotnet.microsoft.com/download/dotnet/5.0">https://dotnet.microsoft.com/download/dotnet/5.0</a>.
                There's a bewildering variety of options. Choose the latest version of the SDK (for example, SDK 5.0.400)
                corresponding to your chosen operating system (Windows, MacOS, or Linux) and CPU architecture (for example Arm64, x64, or x86).</p>
 
             </li>
             <li>
-               <p>Download the software from <a
-                     href="https://www.saxonica.com/" class="bodylink">www.saxonica.com</a>.
-               TBA?? Use nuget.</p>
+               <p>Download the software from <a href="https://www.nuget.org" class="bodylink">nuget</a>. 
+                  Search for the package name Saxon-CS. Alternatively, add Saxon-CS as a dependency to your
+                  Visual Studio or Rider project, and it will be downloaded and installed automatically by the IDE.
+                  No further installation is needed.
+               </p>
             </li>
             <li>
-               <p>TBA: The software comes as a .exe installer: <code>SaxonHEn-n-n-nNsetup.exe</code> for
-                  Saxon Home Edition, <code>SaxonPEn-n-n-nNsetup.exe</code> for the Professional
-                  Edition, and <code>SaxonEEn-n-n-nNsetup.exe</code> for the Enterprise Edition.
-                  Double-click it to run the installer. It installs the executable files into a
-                  user-selected directory, sets a registry entry to point to this location, and
-                  registers the relevant DLLs in the Global Assembly Cache.</p>
+               <p>To run Saxon from the command line, invoke it via the <code>dotnet</code> command:
+               for example:</p>
+               <kbd><code>dotnet Saxon-CS transform -s:source.xml -xsl:stylesheet.xsl</code></kbd>
+               
+               <p>See <a class="bodylink" href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet">the dotnet documentation</a>
+               for further details.</p>
+               
+               <p>Note that the Saxon-CS DLL has a single entry point (<code>Main</code> method). As well as specifying
+               the DLL you want to execute (Saxon-CS) you therefore need to specify which Saxon utility you want to run, for example
+               <code>transform</code>, <code>query</code>, or <code>validate</code>.</p>
+               <li>
+                  <p>You will need to obtain a file containing a licence key. The license key is
+                     interchangeable between the Java and .NET platforms. You can apply for a free
+                     30-day evaluation license key by going to <a href="http://www.saxonica.com/"
+                        class="bodylink">www.saxonica.com</a> and clicking on "Try Saxon for 30 days".
+                     The license key file will be sent by email within 24 hours. This file, called
+                     <code>saxon-license.lic</code>, should be placed in a suitable directory,
+                     and the environment variable <code>SAXON_LICENSE_DIR</code> must be set to the
+                     name of this directory.</p>
+               </li>
             </li>
             <li>
-               <p>As a first-time user, you will probably want to install the sample applications.
+               <p>As a first-time user, you may probably want to install the sample application Example.cs.
                   These are packaged together with a copy of this documentation in the file
                   <code>saxon-resources-11.zip</code>. This can be downloaded from
-                  either the SourceForge or Saxonica sites (it is the same file in both cases).
-                  Unzip the contents of this file into the same directory as the Saxon software.</p>
+                  the Saxonica site. Unzip the contents of this file into the same directory as the Saxon software.
+               The easiest (or most productive) way to run the sample application is to create a command-line application in your IDE
+               (for example, Visual Studio), copy the <code>Example.cs</code> source code into the IDE as your entry module,
+               and add a dependency on Saxon-CS 11.</p>
             </li>
-            <li>
-               <p>You will need to obtain a file containing a licence key. The license key is
-                  interchangeable between the Java and .NET platforms. You can apply for a free
-                  30-day evaluation license key by going to <a href="http://www.saxonica.com/"
-                     class="bodylink">www.saxonica.com</a> and clicking on "Try Saxon for 30 days".
-                  The license key file will be sent by email within 24 hours. This file, called
-                     <code>saxon-license.lic</code>, should be placed in a suitable directory,
-               and the environment variable <code>SAXON_LICENSE_DIR</code> must be set to the
-               name of this directory.</p>
-            </li>
+            
          </ol>
 
 
-         <p>You can now run one of the sample stylesheets or queries that comes with the
+         <p>You can now use the command line to run one of the sample stylesheets or queries that comes with the
                <code>saxon-resources</code> download. Assuming you installed into
                <code>c:\saxon</code>, make this your current directory, and type:</p>
 
          <p>
             <i>for XSLT (all on one line):</i>
          </p>
-         <samp><![CDATA[dotnet Saxon transform -t -s:samples\data\books.xml 
+         <samp><![CDATA[dotnet SaxonCS transform -t -s:samples\data\books.xml 
      -xsl:samples\styles\books.xsl -o:c:\temp.html]]></samp>
 
          <p>
             <i>for XQuery (all on one line):</i>
          </p>
-         <samp><![CDATA[dotnet Saxon query -t -s:samples\data\books.xml 
+         <samp><![CDATA[dotnet SaxonCS query -t -s:samples\data\books.xml 
        -q:samples\query\books-to-html.xq -o:c:\temp.html]]></samp>
 
          <p>Now open <code>c:\temp.html</code> in your browser to check that it worked.</p>
 
-         <p>For more complete details on installing Saxon on the .NET platform, see <a
+         <p>For more complete details on installing Saxon-CS on the .NET platform, see <a
                class="bodylink" href="../../installationdotnet">Installing (.NET)</a></p>
          
       </section>

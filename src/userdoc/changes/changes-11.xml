@@ -23,6 +23,8 @@
     
     <category name="s9api">
         
+        <div class="javaonly">
+        
         <p>A new class <code java="net.sf.saxon.s9api.JsonBuilder">JsonBuilder</code> has been added, analagous to the <code
             java="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder</code>. It can be instantiated from a <code>Processor</code>
             using <code java="net.sf.saxon.s9api.Processor#newJsonBuilder">Processor.newJsonBuilder()</code>, and allows JSON
@@ -78,11 +80,11 @@
         <p>New methods <code java="net.sf.saxon.s9api.streams.XdmStream#firstItem">firstItem()</code> and <code
             java="net.sf.saxon.s9api.streams.XdmStream#lastItem">lastItem()</code> have been added to <code>XdmStream</code>.</p>
         
- 
+        </div>
     </category>
 
     <category name="JAXP">
-
+       <div class="javaonly">
         <p>A new interface <code java="net.sf.saxon.lib.ActiveSource">ActiveSource</code> is introduced as 
             a sub-interface of the JAXP <code>Source</code>
         interface. Unlike <code>Source</code>, this is a true interface in that Saxon will accept any class
@@ -91,7 +93,7 @@
         contents of the source: the method must deliver a sequence of events to the supplied
         <code>Receiver</code>. The <code>ParseOptions</code> can be ignored if not required; they
         are relevant primarily in cases where the <code>ActiveSource</code> performs XML parsing.</p>
-
+       </div>
     </category>
     
     <category name="dotnet">
@@ -155,7 +157,7 @@
             
             <p>The <code>MessageListener</code> property of <code cs="Saxon.Api.XsltTransformer">XsltTransformer</code> and <code
                 cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code> is now a delegate in the form
-                <code>Action&lt;Message&gt;</code>.</p><!-- TODO delegate? really? -->
+                <code>Action&lt;Message&gt;</code>.</p>
             
             <p>The <code cs="Saxon.Api.ValidationFailure">ValidationFailure</code> object which provides information about errors
                 detected during schema validation now delivers information about the error in the form of C# properties rather
@@ -171,7 +173,7 @@
     </category>
     
     <category name="localization">
-        
+        <div class="javaonly">
         <p>Saxon now uses the Java <code>java.time.ZoneId</code> class for handling timezones in place of the old
             <code>java.util.Timezone</code>. This may affect the set of timezone names that are recognized.</p>
         
@@ -181,7 +183,7 @@
             etc. with a format specifier of "ZN" now use such timezone abbreviations only if (a) the fifth argument ("place") is
             "us", "uk", or "gb", or an IANA timezone name starting with "America/", and (b) the actual timezone is one of a small
             number of commonly used timezones, specifically those used in North America and Europe.</p>
-        
+        </div>
     </category>
     
     <category name="spi">
@@ -190,13 +192,13 @@
         
         <p>Extensive changes have been made to the internal representation of strings. There are a number of motivations
         for this, including better Unicode support, capitalizing on improvements to string handling in Java 9, and most
-        notably, efficiency on the .NET platform: Saxon's extensive use of the Java <code>CharSequence</code> interface appears to translate
-        to very inefficient code on .NET.</p>
+        notably, efficiency on the .NET platform: Saxon's previous extensive use of the Java <code>CharSequence</code> interface 
+            appeared to translate to very inefficient code on .NET.</p>
         
         <p>Most uses of <code>CharSequence</code> have been replaced by a new class <code
             java="net.sf.saxon.str.UnicodeString">UnicodeString</code> (which also replaces the old class
-            <code>net.sf.saxon.regex.UnicodeString</code>). The <code>UnicodeString</code> class has a number of implementations:
-            all of them are designed to be codepoint-addressible: they expose an indexable array of 32-bit codepoint values, and
+            <code>net.sf.saxon.regex.UnicodeString</code>). The <code>UnicodeString</code> class has a number of implementations.
+            All of them are designed to be codepoint-addressible: they expose an indexable array of 32-bit codepoint values, and
             never use surrogate pairs. The implementations of <code>UnicodeString</code> include:</p>
         
         <ul>
@@ -210,11 +212,13 @@
             <li><code java="net.sf.saxon.str.Slice16">Slice16</code>: a sub-range of an array using two bytes per character.</li>
             <li><code java="net.sf.saxon.str.Slice24">Slice24</code>: a sub-range of an array using two bytes per character.</li>
             <li><code java="net.sf.saxon.str.BMPString">BMPString</code>: a wrapper around a Java/C# string known to contain no
-                surrogate pairs.</li>
-            <li><code java="net.sf.saxon.str.StringView">StringView</code>: a wrapper around an arbitrary Java/C# string.</li>
+                surrogate pairs.</li>            
             <li><code java="net.sf.saxon.str.ZenoString">ZenoString</code>: a composite string held as a list of segments, each of
                 which is itself a <code>UnicodeString</code>. The name derives from the algorithm used to combine segments, which
                 results in segments having progressively decreasing lengths towards the end of the string.</li>
+            <li><code java="net.sf.saxon.str.StringView">StringView</code>: a wrapper around an arbitrary Java/C# string. (This
+            stores the string both in its native Java form, and using a "real" codepoint-addressible implementation of <code>UnicodeString</code>,
+            which is constructed lazily when it is first required.)</li>
         </ul>
 
         
@@ -275,14 +279,18 @@
         <p>A number of internal changes have been made to facilitate conversion of the source code from
         Java to C#. These should only affect applications that use very low-level interfaces within Saxon.</p>
 
-        <p>For example, </p>
+        <p>For example, in some data objects such as <code>ParseOptions</code>, some properties were maintained
+            as three-valued fields of type <code>java.lang.Boolean</code> (true, false, or null - meaning unspecified). C# booleans
+            do not have a null in the value space so the representation has changed, typically to <code>Optional&lt;Boolean</code>.
+            The same applies to enumeration types where there was a need for a "null" in the value space; in some cases an extra
+            enumeration constant such as <code>UNKNOWN</code> has been added.</p>
         
-        <p>TODO</p>
-        
+        <p>Code designed to implement or use JAXP interfaces was previously scattered around the product rather liberally.
+        Because JAXP interfaces exist in Java but not in C#, this code has often been moved into separate modules that are
+        platform-specific.</p>
+         
  
-        <h2>Dropped interfaces</h2>
-        
-        <p>TODO</p>
+
         
  
         <h2>Tracing and Diagnostics</h2>
@@ -429,7 +437,7 @@
         <p>The ternary conditional syntax <code>A ?? B !! C</code> is implemented (it is semantically equivalent
         to <code>if (A) then B else C</code>). <emph>The syntax is borrowed from Perl6.</emph></p>
         
-        <p>The <a class="bodylink" href="/extensions/syntax-extensions/tuple-types">Tuple type</a> construct
+        <p>The <a class="bodylink" href="/v4extensions/new-types/record-types">Tuple type</a> construct
             <code>tuple(x,y,x)</code> is now renamed <code>record(x,y,z)</code>, though the old keyword is retained for
             compatibility. The flag "?" after a field name, indicating that the field is optional, is now implemented; permitting
             an empty sequence is no longer enough to make the field optional.</p>
