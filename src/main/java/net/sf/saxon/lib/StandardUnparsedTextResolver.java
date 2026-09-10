@@ -8,6 +8,7 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.query.InputStreamMarker;
 import net.sf.saxon.resource.EncodingDetector;
 import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.resource.TypedStreamSource;
@@ -179,9 +180,7 @@ public class StandardUnparsedTextResolver
 
         try {
             if (encoding == null || isXmlMediaType) {
-                if (!inputStream.markSupported()) {
-                    inputStream = new BufferedInputStream(inputStream);
-                }
+                inputStream = InputStreamMarker.ensureMarkSupported(inputStream);
                 encoding = EncodingDetector.inferStreamEncoding(inputStream, debug ? err : null);
                 if (debug) {
                     err.info("unparsed-text(): inferred encoding = " + encoding);

@@ -10,6 +10,7 @@ package net.sf.saxon.resource;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.query.InputStreamMarker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.StringValue;
@@ -88,9 +89,7 @@ public class UnparsedTextResource implements Resource {
                 InputStream stream = ResourceLoader.urlStream(new URL(href));
                 String enc = encoding;
                 if (enc == null) {
-                    if (!stream.markSupported()) {
-                        stream = new BufferedInputStream(stream);
-                    }
+                    stream = InputStreamMarker.ensureMarkSupported(stream);
                     enc = EncodingDetector.inferStreamEncoding(stream, null);
                 }
                 unparsedText = CatalogCollection.makeStringFromStream(stream, enc);
