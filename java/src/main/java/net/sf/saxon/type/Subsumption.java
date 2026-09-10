@@ -638,7 +638,7 @@ public abstract class Subsumption {
             boolean foundSUB = false;
             for (int i = 0; i < c1.memberTypes.size(); i++) {
                 Affinity a = affinities[i][j];
-                if (a == SAME_TYPE || a == SUBSUMED_BY) {
+                if (a == SAME_TYPE || a == SUBSUMES) {
                     foundSUB = true;
                     break;
                 }
