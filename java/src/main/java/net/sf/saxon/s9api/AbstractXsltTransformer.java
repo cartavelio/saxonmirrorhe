@@ -346,12 +346,24 @@ public abstract class AbstractXsltTransformer {
 
     /**
      * Get the message handler to be notified of {@code xsl:message} and {@code xsl:assert} output.
-     *
+     * @param messageHandler not used. The argument was declared in error.
      * @return the message handler to be notified
      * @since 13
+     * @deprecated - use {@link #getMessageHandler()}
      */
 
     public Consumer<Message> getMessageHandler(Consumer<Message> messageHandler) {
+        return controller.getMessageHandler();
+    }
+
+    /**
+     * Get the message handler to be notified of {@code xsl:message} and {@code xsl:assert} output.
+     *
+     * @return the message handler to be notified
+     * @since 13.1
+     */
+
+    public Consumer<Message> getMessageHandler() {
         return controller.getMessageHandler();
     }
 
