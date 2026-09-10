@@ -946,7 +946,8 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         for (KeyValuePair kvp : options.keyValuePairs()) {
             String key = kvp.key.getStringValue();
             if (DecimalSymbols.isValidPropertyName(key)) {
-                UnicodeString propValue = kvp.value.getUnicodeStringValue();
+                GroundedValue val = Atomizer.atomize(kvp.value);
+                UnicodeString propValue = val.getUnicodeStringValue();
                 baseFormat.setProperty(key, propValue);
             }
         }
