@@ -40,6 +40,8 @@ sourceSets.named("editionTest") {
     exclude("internaltests/LFUCacheTest.java")
     exclude("internaltests/LicenseTests.java")
     exclude("internaltests/NumberingTests.java")
+    exclude("internaltests/OrderedMapTests.java")
+    exclude("internaltests/PriorityTests.java")
     exclude("internaltests/RedirectTests.java")
     exclude("internaltests/ResourceTests.java")
     exclude("internaltests/SignatureTest.java")
