@@ -65,7 +65,7 @@ val phpConfigureTask = tasks.register<DefaultWithExec>("configure") {
   }
 }
 
-val makeOutputs = arrayOf("saxon.la", ".lo", ".dep")
+val makeOutputs = arrayOf("saxon.la", ".dep", ".loT")
 val makeTask = tasks.register<Exec>("make") {
   inputs.files(phpConfigureTask)
   outputs.files(layout.projectDirectory.files(makeOutputs))
@@ -90,7 +90,7 @@ val makeCleanTask = tasks.register<Exec>("makeClean") {
 
 
 tasks.named("clean") {
-  dependsOn("cleanPhpize", "cleanConfigure")
+  dependsOn("cleanPhpize", "cleanConfigure", makeCleanTask)
 }
 
 val releaseFolderTask = tasks.register<Copy>("release_folder") {
