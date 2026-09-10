@@ -99,9 +99,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("head", 1, e -> e.populate( ArrayHead::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
+    //#if EE==true || PE==true
         register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, filterFunctionType, ONE | INS, null));
+    //#endif
 
         register("insert-before", 3, e -> e.populate( ArrayInsertBefore::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
