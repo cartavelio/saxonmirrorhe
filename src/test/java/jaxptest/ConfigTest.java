@@ -293,8 +293,8 @@ public class ConfigTest {
             Processor proc = new Processor(new StreamSource(new StringReader(config)));
             fail("invalidity not detected");
         } catch (SaxonApiException err) {
-            assertTrue(err.getMessage().contains("Invalid configuration property xsd/@occurrenceLimits"));
-            assertTrue(err.getMessage().contains("Property occurrenceLimits not available in Saxon-HE"));
+            assertTrue(err.getMessage().contains("Configuration property xsd/@occurrenceLimits"));
+            assertTrue(err.getMessage().contains("Property occurrenceLimits is not available in Saxon-HE"));
             System.err.println(err.getMessage());
             // failure expected;
         }
