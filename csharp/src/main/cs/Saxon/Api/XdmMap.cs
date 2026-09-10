@@ -9,16 +9,17 @@ using KeyValuePair = Saxon.Hej.ma.map.KeyValuePair;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmFunctionItem">
-    /// The class <c>XdmMap</c> represents a map item in an XPath 3.1 sequence:
-    /// this is a new kind of item in the XDM data model. A map is a list of zero or more entries, each of which
+    /// The class <c>XdmMap</c> represents an XDM map item:
+    /// this was a new kind of item in the XDM 3.1 data model. A map is a list of zero or more entries, each of which
     /// is a pair comprising a key (which is an atomic value) and a value (which is an arbitrary value).
     /// </summary>
     [Serializable]
     public class XdmMap : XdmFunctionItem {
         /// <summary>
-        /// Create an empty <c>XdmMap</c>
+        /// Create an empty <c>XdmMap</c>. The new map follows XDM 4.0 semantics - specifically,
+        /// hexBinary and base64Binary keys are mutually comparable.
         /// </summary>
-        public XdmMap() : base(new ImmMap()) {
+        public XdmMap() : base(EmptyMap.getInstance(40)) {
         }
 
         // Wrap a supplied Saxon map

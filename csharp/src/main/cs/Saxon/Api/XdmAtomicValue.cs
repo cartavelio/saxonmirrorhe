@@ -383,11 +383,14 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="other">The object to be compared</param>
         /// <returns>The result of the equality comparison, using the rules of the
-        /// <c>op:is-same-key()</c> comparison used for comparing key values in maps.</returns>
+        /// <c>op:is-same-key()</c> comparison used for comparing key values in maps.
+        /// The rules used are those of the XPath 4.0 atomic-equal() function
+        /// (meaning that hexBinary and base64Binary values are mutually comparable)
+        /// </returns>
         public override bool Equals(object other) {
             if (other is XdmAtomicValue otherValue) {
-                return ((AtomicValue) value).asMapKey()
-                    .Equals(((AtomicValue) otherValue.value).asMapKey());
+                return ((AtomicValue) value).asMapKey(40)
+                    .Equals(((AtomicValue) otherValue.value).asMapKey(40));
             }
 
             return false;
@@ -398,7 +401,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>A suitable hash code</returns>
         public override int GetHashCode() {
-            return ((AtomicValue) value).asMapKey().GetHashCode();
+            return ((AtomicValue) value).asMapKey(40).GetHashCode();
         }
 
         /// <summary>
