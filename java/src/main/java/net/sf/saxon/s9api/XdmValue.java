@@ -178,14 +178,11 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     public static XdmValue wrap(AtomicSequence value) {
-        switch (value.getLength()) {
-            case 0:
-                return XdmEmptySequence.getInstance();
-            case 1:
-                return new XdmAtomicValue(value.head());
-            default:
-                return new XdmValue(value);
-        }
+        return switch (value.getLength()) {
+            case 0 -> XdmEmptySequence.getInstance();
+            case 1 -> new XdmAtomicValue(value.head());
+            default -> new XdmValue(value);
+        };
     }
 
 
