@@ -8,25 +8,30 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.instruct.SequenceInstr;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.Whitespace;
 
 import java.util.function.Supplier;
 
 
 /**
- * An xsl:sequence element in the stylesheet.
+ * An xsl:select element in the stylesheet (XSLT 4.0).
  */
 
-public class XSLSequence extends StyleElement {
+public class XSLSelect extends StyleElement {
 
     private Expression select;
     private SequenceType requiredType;
+
+    // TODO: xsl:fallback child not implemented
 
     /**
      * Determine whether this node is an instruction.
@@ -47,7 +52,7 @@ public class XSLSequence extends StyleElement {
 
     @Override
     protected boolean mayContainSequenceConstructor() {
-        return true;
+        return false;
     }
 
     /**
@@ -76,9 +81,7 @@ public class XSLSequence extends StyleElement {
             NodeName attName = att.getNodeName();
             String value = att.getValue();
             String f = attName.getDisplayName();
-            if (f.equals("select")) {
-                select = makeExpression(value, att);
-            } else if (f.equals("as")) {
+            if (f.equals("as")) {
                 requireXslt40Attribute("as");
                 try {
                     requiredType = makeSequenceType(value);
@@ -94,24 +97,39 @@ public class XSLSequence extends StyleElement {
 
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-        checkSelectXorContent(true);
-        select = typeCheck("select", select);
+        UnicodeString content = null;
+        for (NodeInfo n : children()) {
+            if (n.getNodeKind() == Type.ELEMENT) {
+                if (!(n instanceof XSLFallback)) {
+                    compileError("Invalid child of xsl:select - " + n.getDisplayName());
+                }
+            } else if (n.getNodeKind() == Type.TEXT) {
+                UnicodeString s = n.getUnicodeStringValue();
+                if (!Whitespace.isAllWhite(s)) {
+                    if (content != null) {
+                        compileError("xsl:select has multiple significant text node children");
+                    } else {
+                        content = s;
+                    }
+                }
+            }
+        }
+        if (content == null) {
+            select = Literal.makeEmptySequence();
+        } else {
+            select = makeExpression(content.toString(), null);
+        }
+        typeCheck("select", select);
     }
 
     /*@Nullable*/
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-        if (select == null) {
-            select = compileSequenceConstructor(exec, decl, false);
-        }
         if (requiredType != null) {
             Supplier<RoleDiagnostic> role = () ->
-                    new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sequence/select", 0, "XPTY0004");
+                    new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:select/#content", 0, "XPTY0004");
             select = getConfiguration().getTypeChecker(false).staticTypeCheck(
                     select, requiredType, role, makeExpressionVisitor());
-        }
-        if (getConfiguration().getBooleanProperty(Feature.STRICT_STREAMABILITY)) {
-            select = new SequenceInstr(select);
         }
         return select;
     }

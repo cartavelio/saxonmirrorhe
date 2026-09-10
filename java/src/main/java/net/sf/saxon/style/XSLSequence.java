@@ -101,12 +101,13 @@ public class XSLSequence extends StyleElement {
     /*@Nullable*/
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
+        String container = select == null ? "xsl:sequence/#content" : "xsl:sequence/select";
         if (select == null) {
             select = compileSequenceConstructor(exec, decl, false);
         }
         if (requiredType != null) {
             Supplier<RoleDiagnostic> role = () ->
-                    new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sequence/select", 0, "XPTY0004");
+                    new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, container, 0, "XPTY0004");
             select = getConfiguration().getTypeChecker(false).staticTypeCheck(
                     select, requiredType, role, makeExpressionVisitor());
         }

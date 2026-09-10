@@ -158,7 +158,10 @@ public class RoleDiagnostic {
                     attributeName = name.substring(slash + 1);
                     name = name.substring(0, slash);
                 }
-                return "@" + attributeName + " attribute of " + (name.equals("LRE") ? "a literal result element" : name);
+                String a = attributeName.equals("#content")
+                                    ? "content of "
+                                    : "@" + attributeName + " attribute of ";
+                return a + (name.equals("LRE") ? "a literal result element" : name);
             }
             case SUBEXPRESSION: {
                 int slash = name.indexOf('/');

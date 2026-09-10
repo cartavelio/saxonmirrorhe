@@ -105,10 +105,11 @@ public abstract class StandardNames {
     public static final int XSL_PRESERVE_SPACE = XSL + 71;
     public static final int XSL_PROCESSING_INSTRUCTION = XSL + 72;
     public static final int XSL_RESULT_DOCUMENT = XSL + 73;
-    public static final int XSL_SEQUENCE = XSL + 74;
-    public static final int XSL_SORT = XSL + 75;
-    public static final int XSL_SOURCE_DOCUMENT = XSL + 76;
-    public static final int XSL_STRIP_SPACE = XSL + 77;
+    public static final int XSL_SELECT = XSL + 74;
+    public static final int XSL_SEQUENCE = XSL + 75;
+    public static final int XSL_SORT = XSL + 76;
+    public static final int XSL_SOURCE_DOCUMENT = XSL + 77;
+    public static final int XSL_STRIP_SPACE = XSL + 78;
     public static final int XSL_STYLESHEET = XSL + 80;
     public static final int XSL_SWITCH = XSL + 81;
     public static final int XSL_TEMPLATE = XSL + 82;
@@ -408,6 +409,7 @@ public abstract class StandardNames {
         bindXSLTName(XSL_PRESERVE_SPACE, "preserve-space");
         bindXSLTName(XSL_PROCESSING_INSTRUCTION, "processing-instruction");
         bindXSLTName(XSL_RESULT_DOCUMENT, "result-document");
+        bindXSLTName(XSL_SELECT, "select");
         bindXSLTName(XSL_SEQUENCE, "sequence");
         bindXSLTName(XSL_SORT, "sort");
         bindXSLTName(XSL_SOURCE_DOCUMENT, "source-document");
