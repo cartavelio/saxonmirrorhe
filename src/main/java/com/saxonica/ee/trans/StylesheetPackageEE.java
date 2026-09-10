@@ -173,6 +173,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
         presenter.emitAttribute("targetVersion", presenter.getOptions().targetVersion+"");
         presenter.emitAttribute("relocatable", isRelocatable() ? "true" : "false");
         presenter.emitAttribute("implicit", isImplicitPackage() ? "true" : "false");
+        presenter.emitAttribute("edition", "EE"); // FIXME: should this be configurable?
         for (StylesheetPackage used : getUsedPackages()) {
             if (!packageIdMap.containsKey(used)) {
                 packageIdMap.put(used, packageIdMap.size());
