@@ -3204,6 +3204,49 @@ void compileStylesheetWithError(SaxonProcessor *proc, Xslt30Processor *trans,
 }
 
 
+
+void testTransformCommand(const string * const dataDir, sResultCount *sresult) {
+
+  cout << endl << "Test testTransformCommand:" << endl;
+
+  std::string xslArg = "-xsl:" + *dataDir + "/q12.xsl";
+  std::string xmlArg = "-s:" + *dataDir + "/xmark100k.xml";
+
+  const char *argv[] = {
+    xmlArg.c_str(),
+    xslArg.c_str()
+};
+
+  int argc = 2;
+
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t processorDataRef =
+      createProcessorDataWithCapacity(thread, argc);
+  int i = 0;
+  for (; i < argc; i++) {
+    addProcessorProperty(thread, (void *)processorDataRef,
+                         (char *)argv[i], &r);
+
+    if (r.status != SAXON_OK) {
+      sresult->failure++;
+      sresult->failureList.push_back("testTransformCommandError-1");
+    }
+  }
+
+  j_run_transform(thread, (void *)processorDataRef, &r);
+
+  if (r.status == SAXON_OK) {
+    sresult->success++;
+  } else {
+    cerr << "Error code: " << r.message<< endl;
+    sresult->failure++;
+    sresult->failureList.push_back("testTransformCommand-2");
+  }
+}
+
+
+
 static int NUM_THREADS = 10;
 
 void RunThread(XsltExecutable *executable, int tid,
@@ -3711,6 +3754,13 @@ int main(int argc, char *argv[]) {
        << endl;
 
   xmarkTest2(trans, &dataDir, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+
+  testTransformCommand(&dataDir, sresult);
 
   cout << endl
        << "============================================================="

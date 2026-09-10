@@ -148,6 +148,90 @@ void testxQueryError(XQueryProcessor *queryProc, sResultCount *sresult) {
   queryProc->clearProperties();
 }
 
+void testQueryCommandError(const string * const dataDir, sResultCount *sresult) {
+
+  cout << endl << "Test testQueryCommandError:" << endl;
+
+  std::string jsonArg = "-json:" + *dataDir + "/sample1.json";
+
+  std::cerr << endl << jsonArg << std::endl;
+
+  const char *argv[] = {
+    "-qs:*",
+    jsonArg.c_str(),
+    "!method=adaptive"
+};
+
+  int argc = 3;
+
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t processorDataRef =
+      createProcessorDataWithCapacity(thread, argc);
+  int i = 0;
+  for (; i < argc; i++) {
+    addProcessorProperty(thread, (void *)processorDataRef,
+                         (char *)argv[i], &r);
+
+    if (r.status != SAXON_OK) {
+      sresult->failure++;
+      sresult->failureList.push_back("testQueryCommandError-1");
+    }
+  }
+
+  j_run_query(thread, (void *)processorDataRef, &r);
+
+  if (r.status == SAXON_OK) {
+    sresult->failure++;
+    sresult->failureList.push_back("testQueryCommandError-2");
+  } else {
+      cerr << "Error code: " << r.message<< endl;
+    sresult->success++;
+  }
+}
+
+
+
+void testQueryCommand(sResultCount *sresult) {
+
+  cout << endl << "Test testQueryCommand:" << endl;
+
+
+  const char *argv[] = {
+    "-qs:sum(1 to 10)"
+};
+
+  int argc = 1;
+
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t processorDataRef =
+      createProcessorDataWithCapacity(thread, argc);
+  int i = 0;
+  for (; i < argc; i++) {
+    addProcessorProperty(thread, (void *)processorDataRef,
+                         (char *)argv[i], &r);
+
+    if (r.status != SAXON_OK) {
+      sresult->failure++;
+      sresult->failureList.push_back("testQueryCommand-1");
+    }
+  }
+
+  j_run_query(thread, (void *)processorDataRef, &r);
+
+  if (r.status == SAXON_OK) {
+    sresult->success++;
+  } else {
+      cerr << "Error code: " << r.message<< endl;
+    sresult->failure++;
+    sresult->failureList.push_back("testQueryCommand-2");
+  }
+
+}
+
+
+
 void testXQueryError2(SaxonProcessor *processor, XQueryProcessor *queryProc,
                       sResultCount *sresult) {
   cout << endl << "Test testXQueryError-test2:" << endl;
@@ -450,6 +534,18 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
   testReusability(processor, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+  testQueryCommand(sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testQueryCommandError(&dataDir, sresult);
   cout << endl
        << "============================================================="
        << endl

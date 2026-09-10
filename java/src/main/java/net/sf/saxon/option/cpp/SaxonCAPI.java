@@ -431,7 +431,7 @@ public class SaxonCAPI {
      * @return success status. 1 for success, -1 for fail and -2 for exception thrown
      */
     @CEntryPoint(name = "j_run_transform")
-    public static long run_transform(IsolateThread thread, ObjectHandle processorDataRef) {
+    public static long run_transform(IsolateThread thread, ObjectHandle processorDataRef, SaxonError saxonError) {
 
         String[] args;
 
@@ -442,8 +442,12 @@ public class SaxonCAPI {
             ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
             args = processorDataAccumulator.getParameterNames();
         }
-
-        new Transform().doTransform(args);
+        try {
+            new Transform().doTransform(args);
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return STATUS_FAIL;
+        }
 
 
         return STATUS_OK;
@@ -492,10 +496,9 @@ public class SaxonCAPI {
      * @return success status. 1 for success, -1 for fail and -2 for exception thrown
      */
     @CEntryPoint(name = "j_run_query")
-    public static long run_query(IsolateThread thread, ObjectHandle processorDataRef) {
+    public static long run_query(IsolateThread thread, ObjectHandle processorDataRef, SaxonError saxonError) {
 
         String[] args;
-
 
         if (processorDataRef == WordFactory.nullPointer()) {
             return STATUS_FAIL;
@@ -504,8 +507,12 @@ public class SaxonCAPI {
             args = processorDataAccumulator.getParameterNames();
         }
 
-        new Query().doQuery(args, "java net.sf.saxon.Query");
-
+        try {
+            new Query().doQuery(args, "java net.sf.saxon.Query");
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return STATUS_FAIL;
+        }
 
         return STATUS_OK;
     }

@@ -37,17 +37,25 @@ int transform(sxnc_environment *environi, int argc, const char *argv[]) {
 #endif
     addProcessorProperty(environi->thread, (void *)processorDataRef,
                          (char *)argv[i], &r);
+    if (r.status != SAXON_OK) {
+      printf("\nError: %s\n", r.message);
+      return -1;
+    }
   }
 #ifdef DEBUG
   printf("\nprocessorData = %i", (int)processorDataRef);
 #endif
-  long status = j_run_transform(environi->thread, (void *)processorDataRef);
+  long status = j_run_transform(environi->thread, (void *)processorDataRef, &r);
 #ifdef DEBUG
   printf("\nj_run_transform status=%i", (int)status);
   if (status == -1) {
     printf("\nProcessorDataRef is null");
   }
 #endif
+  if (r.status != SAXON_OK) {
+    printf("\nError: %s\n", r.message);
+    return -1;
+  }
 
   return 0;
 }
