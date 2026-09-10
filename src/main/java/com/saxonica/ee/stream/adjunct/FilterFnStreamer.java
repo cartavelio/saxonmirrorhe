@@ -103,9 +103,10 @@ public class FilterFnStreamer extends FilteringAdjunct {
     public FilteringFeed.Filter makeFilter(final XPathContext context, ItemFeed out) throws XPathException {
         final FunctionItem function = (FunctionItem) ((SystemFunctionCall)getExpression()).getArg(1).evaluateItem(context);
         final Sequence[] args = SequenceTool.makeSequenceArray(1);
+        XPathContext c2 = function.makeNewContext(context, null);
         return new FilteringFeed.FilterLambda((item, position) -> {
             args[0] = item;
-            return ((BooleanValue) function.call(context, args).head()).getBooleanValue()
+            return ((BooleanValue) function.call(c2, args).head()).getBooleanValue()
                     ? FilteringFeed.FilterResult.MATCHES
                     : FilteringFeed.FilterResult.SKIP;
         });
