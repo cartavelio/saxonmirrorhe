@@ -33,11 +33,11 @@ final class TinyCommentImpl extends TinyNodeImpl {
 
     /**
      * Get the XPath string value of the comment
-     * @return
+     * @return the string value
      */
 
     @Override
-    public final UnicodeString getUnicodeStringValue() {
+    public UnicodeString getUnicodeStringValue() {
         int start = tree.alpha[nodeNr];
         int len = tree.beta[nodeNr];
         if (len == 0) {
@@ -64,7 +64,7 @@ final class TinyCommentImpl extends TinyNodeImpl {
      */
 
     @Override
-    public final int getNodeKind() {
+    public int getNodeKind() {
         return Type.COMMENT;
     }
 
