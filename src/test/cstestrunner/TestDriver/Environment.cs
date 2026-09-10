@@ -63,7 +63,7 @@ namespace TestDriver {
         public SysCollGen.IList<ResetAction> resetActions = new SysCollGen.List<ResetAction>();
         public bool outputTree = true;
         public bool outputSerialize = false;
-        public String streamedInputValidation = "skip";
+        public string streamedInputValidation = "skip";
         internal bool failedToBuild = false;
 
 
@@ -351,8 +351,8 @@ namespace TestDriver {
             Configuration config = environment.processor.Implementation;
             XmlUrlResolver res = new TracingXmlResolver(env.BaseUri);
             foreach (XdmNode schema in env.Children("schema")) {
-                String role = schema.GetAttributeValue(new QName("role"));
-                String xsdVersion = schema.GetAttributeValue(new QName("xsd-version"));
+                string role = schema.GetAttributeValue(new QName("role"));
+                string xsdVersion = schema.GetAttributeValue(new QName("xsd-version"));
                 if (manager == null || !driver.schemaAware) {
                     driver.println("** Processor is not schema aware **");
                     environment.usable = false;
@@ -364,8 +364,8 @@ namespace TestDriver {
                 }
 
                 if (!"secondary".Equals(role)) {
-                    String href = ((XdmNode) schema).GetAttributeValue(new QName("file"));
-                    String ns = schema.GetAttributeValue("uri");
+                    string href = ((XdmNode) schema).GetAttributeValue(new QName("file"));
+                    string ns = schema.GetAttributeValue("uri");
                     if (href == null) {
                         if (ns == "http://www.w3.org/2005/xpath-functions") {
                             Console.Error.WriteLine("No need to load schema document " + ns);
@@ -418,9 +418,9 @@ namespace TestDriver {
         private static void DeclareExternalVariables(Driver driver, XPathCompiler xpc, XdmItem env,
             Environment environment) {
             foreach (XdmItem param in xpc.Evaluate("param", env)) {
-                String varName = ((XdmNode) param).GetAttributeValue(new QName("name"));
+                string varName = ((XdmNode) param).GetAttributeValue(new QName("name"));
                 XdmValue value;
-                String source = ((XdmNode) param).GetAttributeValue(new QName("source"));
+                string source = ((XdmNode) param).GetAttributeValue(new QName("source"));
                 if (source != null) {
                     XdmNode sourceDoc = null;
                     try {
@@ -436,7 +436,7 @@ namespace TestDriver {
                     value = sourceDoc;
                 }
                 else {
-                    String select = ((XdmNode) param).GetAttributeValue(new QName("select"));
+                    string select = ((XdmNode) param).GetAttributeValue(new QName("select"));
                     value = xpc.Evaluate(select, null);
                 }
 
@@ -452,7 +452,7 @@ namespace TestDriver {
 
 
                 environment.xpathCompiler.DeclareVariable(varQName);
-                String declared = ((XdmNode) param).GetAttributeValue(new QName("declared"));
+                string declared = ((XdmNode) param).GetAttributeValue(new QName("declared"));
                 if (declared != null && "true".Equals(declared) || "1".Equals(declared)) {
                     // no action
                 }
@@ -502,8 +502,8 @@ namespace TestDriver {
 
                 foreach (XdmItem decimalFormatAtt in xpc.Evaluate("@* except @name", formatElement)) {
                     XdmNode formatAttribute = (XdmNode) decimalFormatAtt;
-                    String property = formatAttribute.NodeName.LocalName;
-                    String value = formatAttribute.StringValue;
+                    string property = formatAttribute.NodeName.LocalName;
+                    string value = formatAttribute.StringValue;
                     environment.paramDecimalDeclarations.Append(property + "=\"" + value + "\" ");
                     try {
                         environment.xpathCompiler.SetDecimalFormatProperty(formatQName, property, value);
@@ -827,19 +827,19 @@ namespace TestDriver {
             foreach (XdmItem source in xpc.Evaluate("source", env)) {
                 XdmNode doc = null;
 
-                String uri = ((XdmNode) source).GetAttributeValue(new QName("uri"));
-                String mime = ((XdmNode) source).GetAttributeValue(new QName("media-type"));
+                string uri = ((XdmNode) source).GetAttributeValue(new QName("uri"));
+                string mime = ((XdmNode) source).GetAttributeValue(new QName("media-type"));
                 
                 if (mime != null && "application/xml".Equals(mime)) {
                     continue;
                 }
 
-                String validation = ((XdmNode) source).GetAttributeValue(new QName("", "validation"));
+                string validation = ((XdmNode) source).GetAttributeValue(new QName("", "validation"));
                 if (validation == null) {
                     validation = "skip";
                 }
 
-                String streaming = ((XdmNode) source).GetAttributeValue(new QName("", "streaming"));
+                string streaming = ((XdmNode) source).GetAttributeValue(new QName("", "streaming"));
                 if (!validateSources && validation.Equals("skip")) {
                     builder.SchemaValidationMode = SchemaValidationMode.None;
                     builder.SchemaValidator = null;
@@ -863,8 +863,8 @@ namespace TestDriver {
                     }
                 }
 
-                String role = ((XdmNode) source).GetAttributeValue(new QName("role"));
-                String href = ((XdmNode) source).GetAttributeValue(new QName("file"));
+                string role = ((XdmNode) source).GetAttributeValue(new QName("role"));
+                string href = ((XdmNode) source).GetAttributeValue(new QName("file"));
                 
                 Console.Error.WriteLine("Load source document " + href);
                 
@@ -942,7 +942,7 @@ namespace TestDriver {
                     }
 
                     XdmItem selectedItem = doc;
-                    String select = ((XdmNode) source).GetAttributeValue(new QName("select"));
+                    string select = ((XdmNode) source).GetAttributeValue(new QName("select"));
                     if (select != null) {
                         XPathSelector selector = environment.xpathCompiler.Compile(select).Load();
                         selector.ContextItem = selectedItem;
@@ -955,7 +955,7 @@ namespace TestDriver {
                             environment.contextItem = selectedItem;
                         }
                         else if (role.StartsWith("$")) {
-                            String varName = role.Substring(1);
+                            string varName = role.Substring(1);
                             environment.params1.Add(new QName(varName), selectedItem);
                             environment.xpathCompiler.DeclareVariable(new QName(varName));
                             environment.paramDeclarations.Append("declare variable $" + varName + " external; ");
@@ -963,7 +963,7 @@ namespace TestDriver {
                     }
                 }
 
-                String definesStylesheet = ((XdmNode) source).GetAttributeValue(new QName("defines-stylesheet"));
+                string definesStylesheet = ((XdmNode) source).GetAttributeValue(new QName("defines-stylesheet"));
                 if (definesStylesheet != null) {
                     definesStylesheet = definesStylesheet.Trim();
                 }
