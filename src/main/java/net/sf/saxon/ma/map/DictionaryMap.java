@@ -74,6 +74,15 @@ public class DictionaryMap extends MapItem {
     }
 
     /**
+     * Ask whether a given string is present as a key in the map
+     * @param key the key being tested
+     * @return true if the key is present
+     */
+    public boolean containsStringKey(String key) {
+        return hashMap.containsKey(key);
+    }
+
+    /**
      * Get an entry from the Map
      *
      * @param key the value of the key
