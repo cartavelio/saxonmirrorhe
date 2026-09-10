@@ -10,6 +10,10 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
+/**
+ * A schema that contains only the built-in types
+ */
+
 public class MinimalSchema implements Schema {
 
     final Configuration config;
@@ -138,8 +142,12 @@ public class MinimalSchema implements Schema {
      * @throws ValidationException if the value is invalid
      */
     @Override
-    public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation) throws ValidationException, MissingComponentException {
-        throw new IllegalStateException();
+    public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation) throws ValidationException {
+        ValidationFailure ve = new ValidationFailure(
+                "No global attribute declaration found for attribute " +
+                        nodeName.getDisplayName());
+        ve.setErrorCode("XTTE1512");
+        throw ve.makeException();
     }
 
     /**
@@ -151,7 +159,7 @@ public class MinimalSchema implements Schema {
      */
     @Override
     public NodeTest makeSchemaElementTest(int fp) throws SchemaException {
-        return null;
+        throw new SchemaException("No such element declaration");
     }
 
     /**
@@ -163,7 +171,7 @@ public class MinimalSchema implements Schema {
      */
     @Override
     public NodeTest makeSchemaAttributeTest(int fp) throws SchemaException {
-        return null;
+        throw new SchemaException("No such attribute declaration");
     }
     
 }
