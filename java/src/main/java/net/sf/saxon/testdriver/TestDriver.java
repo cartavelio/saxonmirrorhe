@@ -387,6 +387,7 @@ public abstract class TestDriver {
         QName testCase = new QName("test-case");
         QName run = new QName("run");
         QName edition = new QName("edition");
+        QName specAtt = new QName("spec");
         QName platform = new QName("platform");
         QName compiler = new QName("compiler");
         QName relocate = new QName("relocatable");
@@ -410,11 +411,15 @@ public abstract class TestDriver {
                 }
                 String runVal = entry.getAttributeValue(run);
                 String editionVal = entry.getAttributeValue(edition);
+                String specVal = entry.getAttributeValue(specAtt);
                 if (runVal == null) {
                     runVal = "false";
                 }
                 if (editionVal == null) {
                     editionVal = saxonEdition;
+                }
+                if (specVal == null) {
+                    specVal = spec.specAndVersion;
                 }
                 boolean appliesThisEdition = false;
                 for (String ed : editionVal.trim().split("\\s+")) {
@@ -441,7 +446,7 @@ public abstract class TestDriver {
                     }
                     relocateVal = relocateVal.trim();
                     // If exception/@compiler is not specified, then exception is relevant to all compilers
-                    if (!compilerVal.equals("")) {
+                    if (!compilerVal.isEmpty()) {
                         String[] exceptedCompilers = compilerVal.trim().split("\\s+");
                         boolean exceptionCoversThisCompiler = false;
                         // If exception/@compiler is specified but doesn't include "XJ",
@@ -457,7 +462,7 @@ public abstract class TestDriver {
                         }
                     }
                     // If exception/@platform is not specified, then exception is relevant to all platforms
-                    if (!platformVal.equals("")) {
+                    if (!platformVal.isEmpty()) {
                         String[] exceptedPlatforms = platformVal.trim().split("\\s+");
                         // If there is some platform (member of jsPlatforms) not in exceptedPlatforms,
                         // then set appliesThisEdition = false, to ignore the exception at compile time
@@ -479,7 +484,7 @@ public abstract class TestDriver {
                         appliesThisEdition = false;
                     }
                 }
-                if (appliesThisEdition) {
+                if (appliesThisEdition && specVal.equals(spec.specAndVersion)) {
                     if (runVal.equals("false")) {
                         for (String tc : testName.trim().split("\\s+")) {
                             exceptionsMap.put(tc, entry);
