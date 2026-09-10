@@ -88,6 +88,11 @@ public class Leading extends SystemFunction {
             base.close();
         }
 
+        @Override
+        public void discharge() {
+            base.discharge();
+        }
+
     }
 
 

@@ -68,6 +68,11 @@ public abstract class OneToOneMappingIterator implements SequenceIterator, Looka
         base.close();
     }
 
+    @Override
+    public void discharge() {
+        base.discharge();
+    }
+
     public boolean supportsGetLength() {
         return SequenceTool.supportsGetLength(base);
     }

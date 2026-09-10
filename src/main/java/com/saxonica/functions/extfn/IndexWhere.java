@@ -58,6 +58,11 @@ public class IndexWhere extends SystemFunction {
             base.close();
         }
 
+        @Override
+        public void discharge() {
+            base.discharge();
+        }
+
         /**
          * Get the next item in the sequence.
          */

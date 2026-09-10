@@ -5,6 +5,7 @@ import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.ObjectValue;
@@ -21,6 +22,7 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
 
     private ExecutorService service;
     private BlockingQueue<Future<Item>> resultQueue = new LinkedBlockingQueue<>();
+    private SequenceIterator dischargedIterator = null;
 
     public MultithreadedItemMappingIterator(SequenceIterator base, ItemMappingFunction action, MultithreadingFactory factory) throws XPathException {
         super(base, action);
@@ -59,6 +61,9 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
 
     @Override
     public Item next() {
+        if (dischargedIterator != null) {
+            return dischargedIterator.next();
+        }
         while (true) {
             Item nextIn = getBaseIterator().next();
             try {
@@ -106,6 +111,15 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
         service.shutdown();
     }
 
+    @Override
+    public void discharge() {
+        // This reads the rest of the sequence into an in-memory list, so that the concurrent threads
+        // can be released. This is necessary because the caller is telling us there is no guarantee that
+        // close() will be called to tidy up.
+        dischargedIterator = SequenceTool.toGroundedValue(this).iterate();
+        close();
+    }
+
     private void mapOneItem(Item in) {
         //Future<Item> future = service.submit(new CallableAction(getMappingFunction(), in, service));
         ItemMappingFunction action = getMappingFunction();
@@ -125,32 +139,6 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
         resultQueue.add(future);
     }
 
-//    private static class CallableAction<F extends Item, T extends Item> implements Callable<Item> {
-//        private final ItemMappingFunction action;
-//        private final F input;
-//        private final ExecutorService service;
-//
-//        public CallableAction(ItemMappingFunction action, F input, ExecutorService service) {
-//            this.action = action;
-//            this.input = input;
-//            this.service = service;
-//        }
-//
-//        @Override
-//        public Item call() throws XPathException {
-//            try {
-//                Item out = action.mapItem(input);
-//                if (out == null) {
-//                    return new NullItem(true);
-//                } else {
-//                    return out;
-//                }
-//            } catch (XPathException e) {
-//                service.shutdown();
-//                throw e;
-//            }
-//        }
-//    }
 
     /**
      * An {@link ItemMappingFunction} returns zero or one items in the output corresponding to each item

@@ -34,6 +34,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
     private final Supplier<Integer> lastPositionFinder;
     private final ExecutorService service;
     private final BlockingQueue<Future<GroundedValue>> resultQueue = new LinkedBlockingQueue<>();
+    private SequenceIterator dischargedIterator;
 
     /**
      * Construct an Iterator that will apply a specified action expression to
@@ -80,6 +81,9 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
 
     @Override
     public Item next() {
+        if (dischargedIterator != null) {
+            return dischargedIterator.next();
+        }
         Item nextItem;
         while (true) {
             if (stepIterator != null) {
@@ -136,6 +140,12 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
     public void close() {
         base.close();
         service.shutdown();
+    }
+
+    @Override
+    public void discharge() {
+        dischargedIterator = SequenceTool.toGroundedValue(this).iterate();
+        close();
     }
 
 

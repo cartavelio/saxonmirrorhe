@@ -108,6 +108,11 @@ public abstract class Ending extends SystemFunction {
             baseIterator.close();
         }
 
+        @Override
+        public void discharge() {
+            baseIterator.discharge();
+        }
+
     }
 
 }

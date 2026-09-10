@@ -192,6 +192,12 @@ public class PushToPull {
             allDone = true;
             provider.interrupt();
         }
+
+        @Override
+        public void discharge() {
+            throw new UnsupportedOperationException();
+            // TODO: implement me?
+        }
     }
 
 

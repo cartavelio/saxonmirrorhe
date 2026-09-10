@@ -102,6 +102,11 @@ public abstract class Starting extends SystemFunction {
             baseIterator.close();
         }
 
+        @Override
+        public void discharge() {
+            baseIterator.discharge();
+        }
+
     }
 
 }
