@@ -9,10 +9,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.lib.ActiveSource;
-import net.sf.saxon.lib.AugmentedSource;
-import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.lib.Validation;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
@@ -171,7 +168,7 @@ public abstract class Sender {
 //#if EE==true
             // Add a document validator to the pipeline
             Schema schema = options.getSchema();
-            if (schema == null && sv == Validation.STRICT) {
+            if (schema == null && sv == Validation.STRICT && !options.isUseXsiSchemaLocation()) {
                 throw new XPathException("Cannot perform strict schema validation; no schema supplied");
             }
             if (schema != null && !(receiver instanceof DocumentValidator)) {
