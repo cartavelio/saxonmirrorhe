@@ -252,14 +252,14 @@
         
         <xsl:choose>
             <xsl:when test="$start eq 'javadoc'">
-                <ixsl:set-property name="document.title" select="'Saxon Java API Documentation'"/>
+                <ixsl:set-property name="document.title" select="'Saxon 13 Java API Documentation'"/>
                 <xsl:call-template name="apidoc-page">
                     <xsl:with-param name="package-path" select="$jpackage-path"/>
                     <xsl:with-param name="hash-parts" select="$hash-parts"/>
                 </xsl:call-template>
             </xsl:when>
             <xsl:when test="$start eq 'dotnetdoc'">
-                <ixsl:set-property name="document.title" select="'Saxon .NET API Documentation'"/>
+                <ixsl:set-property name="document.title" select="'Saxon 13 .NET API Documentation'"/>
                 <xsl:call-template name="apidoc-page">
                     <xsl:with-param name="package-path" select="$npackage-path"/>
                     <xsl:with-param name="hash-parts" select="$hash-parts"/>
@@ -833,7 +833,7 @@
         <xsl:result-document href="#trail" method="ixsl:replace-content">
             <li id="trail1"><a href="https://saxonica.com">Saxonica ▷</a></li>
             <li id="trail2"><a
-                href="https://www.saxonica.com/documentation/documentation.xml">Saxon ▷</a></li>
+                href="https://www.saxonica.com/documentation13/documentation.xml">Saxon 13 ▷</a></li>
             <xsl:call-template name="get-trail">
                 <xsl:with-param name="parent" select="$doc"/>
                 <xsl:with-param name="hash-parts" select="$hash-parts"/>
