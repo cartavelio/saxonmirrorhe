@@ -102,6 +102,7 @@ def saxonApiDir = "${buildDir}/../src/main/c/Saxon.C.API"
 def commandDir = "${buildDir}/../src/main/c/command"
 def sharedLibDir = "${buildDir}/c"
 
+
 task buildSaxonGlue(
   type: Exec,
   dependsOn: ["graal_ce_home"]
@@ -916,36 +917,21 @@ task all_saxonc_releases() {
   }
 }
 
-
 tasks.register("pyBuildVenv") {
-  dependsOn 'record_branch'
-  description "Create Python Venv for the current branch if none exists"
-
-  BufferedReader branch = new BufferedReader(new FileReader(layout.buildDirectory.file("built-branch").get().asFile))
-  def currentBranch = branch.readLine()
-  System.err.println(currentBranch)
-  def venvDir = layout.buildDirectory.dir("py_venvs/${currentBranch}")
+  description "Ensure there is a Python Venv for the current branch, creating one if none exists"
 
   // only if the venv is not there
   // (caching this won't work - we don't know the outputs until the task is run)
   onlyIf {
-    !venvDir.get().file("pyvenv.cfg").asFile.exists()
+    !file(project.pythonEnv.venvDirPath.map { "${it}/pyvenv.cfg" }).exists()
   }
-  outputs.dir(venvDir)
-
-  ext {
-    venvPath = venvDir
-  }
+  outputs.dir(project.pythonEnv.venvDirPath.map{ it.toString() })
 
   doFirst {
-    System.err.println(venvDir.get().toString())
     exec {
-      if(systemOs.isMacOsX() || systemOs.isLinux()) {
-        executable "python3"
-      } else {
-        executable "python"
-      }
-      args "-m", "venv", venvDir.get().toString()
+      logger.info("Creating Python Venv for ${project.branches.current.get()}")
+      executable project.pythonEnv.systemPythonBinary.get()
+      args "-m", "venv", project.pythonEnv.venvDirPath.get()
     }
   }
 }
@@ -1085,13 +1071,11 @@ tasks.register("pyBuildVenv") {
       exec {
         workingDir layout.buildDirectory.dir("${edition}c_pypi")
 
-        def venvDir = tasks.named("pyBuildVenv").get().venvPath
+//        def venvDir = project.pythonEnv.venvDirPath
+        System.err.println("PIP INSTALL: " + project.pythonEnv.venvDirPath.toString())
+        System.err.println("PIP INSTALL: " + project.pythonEnv.venvPip.toString())
 
-        if(systemOs.isMacOsX() || systemOs.isLinux()) {
-          executable venvDir.get().file("bin/pip")
-        } else {
-          executable venvDir.get().file("Scripts/pip")
-        }
+        executable file(project.pythonEnv.venvPip)
         args "install", "-r", "requirements.txt"
       }
     }
@@ -1107,13 +1091,7 @@ tasks.register("pyBuildVenv") {
       exec {
         workingDir layout.buildDirectory.dir("${edition}c_pypi")
 
-        def venvDir = tasks.named("pyBuildVenv").get().venvPath
-
-        if(systemOs.isMacOsX() || systemOs.isLinux()) {
-          executable venvDir.get().file("bin/python")
-        } else {
-          executable venvDir.get().file("Scripts/python")
-        }
+        executable file(project.pythonEnv.venvPython)
         args "setup.py", "bdist_wheel"
       }
     }

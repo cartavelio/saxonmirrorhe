@@ -1,9 +1,17 @@
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
+
+interface ManageBranchesExtension {
+  Property<String> getCurrent()
+  Property<String> getLastBuilt()
+}
 
 public class ManageBranchesPlugin implements Plugin<Project> {
   void apply(Project project) {
+    def extension = project.extensions.create('branches', ManageBranchesExtension)
+
     // Where is git?
     String git = null
     System.getenv("PATH").split(System.getProperty("path.separator")).each { dir ->
@@ -38,12 +46,16 @@ public class ManageBranchesPlugin implements Plugin<Project> {
     String currentBranch = reader.readLine()
     reader.close()
 
+    extension.current.convention(currentBranch)
+
     String builtBranch = null
     try {
       String fn = "${project.buildDir}/built-branch"
       BufferedReader xbranch = new BufferedReader(new FileReader(new File(fn)))
       builtBranch = xbranch.readLine()
+      extension.lastBuilt.convention(builtBranch)
     } catch (FileNotFoundException foe) {
+      extension.lastBuilt.convention(null)
       // nop
     }
 

@@ -25,6 +25,7 @@ apply plugin: 'signing'
 apply plugin: JarSignPlugin
 apply plugin: ManageBranchesPlugin
 apply plugin: ManageTestSuitesPlugin
+apply plugin: ManagePythonEnvPlugin
 
 import org.gradle.internal.os.OperatingSystem;
 import com.nwalsh.gradle.docker.DockerContainer
@@ -110,6 +111,7 @@ ext {
   csplatform = null
   c_sendria = "sendriasmtp"
   testWithJava = null
+  currentBranch = null
 }
 
 // Find dotnet
@@ -886,13 +888,17 @@ task record_branch(
   type: Exec,
   description: "Records the branch so we can detect switches."
 ) {
+  outputs.file(layout.buildDirectory.file("built-branch"))
+
   def recordBranch = new ByteArrayOutputStream();
   commandLine "git", "rev-parse", "--abbrev-ref", "HEAD"
   standardOutput = recordBranch
   doLast {
     def output = new FileWriter(new File("${buildDir}/built-branch"))
-    output.write(recordBranch.toString("utf-8"))
+    def branchName = recordBranch.toString("utf-8")
+    output.write(branchName)
     output.close()
+    project.currentBranch = branchName
   }
   doFirst {
     mkdir buildDir
