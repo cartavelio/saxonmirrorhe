@@ -112,7 +112,7 @@ public class XSDInclude extends AnnotationParent {
 
     }
 
-    @CSharpReplaceBody(code="return cause.InnerException is System.IO.FileNotFoundException || cause.InnerException is System.Net.Http.HttpRequestException;")
+    @CSharpReplaceBody(code="return cause.Message.StartsWith(\"Unable to retrieve\");")
     public static boolean isFileNotFoundException(Throwable cause) {
         return cause instanceof java.io.IOException;
     }
