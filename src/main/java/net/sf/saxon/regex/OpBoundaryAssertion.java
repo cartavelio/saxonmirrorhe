@@ -21,6 +21,10 @@ public class OpBoundaryAssertion extends Operation {
 
     private final boolean positive;
 
+    /**
+     * Create a boundary assertion
+     * @param positive true for `\b`, false for `\B`
+     */
     public OpBoundaryAssertion(boolean positive) {
         this.positive = positive;
     }
@@ -32,18 +36,16 @@ public class OpBoundaryAssertion extends Operation {
 
     @Override
     public int matchesEmptyString() {
-        return MATCHES_ZLS_AT_START | MATCHES_ZLS_AT_END;
+        return positive ? MATCHES_ZLS_AT_START | MATCHES_ZLS_AT_END : 0;
     }
 
     @Override
     public IntIterator iterateMatches(final REMatcher matcher, final int position) {
         UnicodeString search = matcher.search;
-        boolean atBoundary = position == 0 || position == search.length();
-        if (!atBoundary) {
-            int prev = search.codePointAt(position - 1);
-            int next = search.codePointAt(position);
-            atBoundary = Categories.ESCAPE_w.test(prev) != Categories.ESCAPE_w.test(next);
-        }
+        // Assume a non-word character before and after the string
+        int prev = position == 0 ? '@' : search.codePointAt(position - 1);
+        int next = position == search.length() ? '@' : search.codePointAt(position);
+        boolean atBoundary = Categories.ESCAPE_w.test(prev) != Categories.ESCAPE_w.test(next);
         if (atBoundary == positive) {
             return new IntSingletonIterator(position);
         } else {

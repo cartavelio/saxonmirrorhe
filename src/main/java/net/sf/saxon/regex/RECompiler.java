@@ -31,9 +31,7 @@
 package net.sf.saxon.regex;
 
 import net.sf.saxon.regex.charclass.*;
-import net.sf.saxon.str.StringConstants;
-import net.sf.saxon.str.UnicodeBuilder;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.*;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.*;
@@ -724,6 +722,18 @@ public class RECompiler {
     }
 
     /**
+     * Test whether the string starting at the current position is equal to some specified
+     * sequence of characters
+     *
+     * @param chars the string being tested, which must consist of ASCII characters only
+     * @return true if the specified string is present
+     */
+
+    private boolean thereFollows(String chars) {
+        return thereFollows(StringTool.expand(new Twine8(chars)));
+    }
+
+    /**
      * Make the union of two IntPredicates (matches if p1 matches or p2 matches)
      *
      * @param p1 the first
@@ -1038,6 +1048,12 @@ public class RECompiler {
         // Get terminal symbol
         Operation ret = parseTerminal(terminalFlags);
 
+        // In 4.0, quantifiers are not allowed after assertions
+        boolean disallowQuantifier = false;
+        if (isXPath40) {
+            disallowQuantifier = ret instanceof OpBOL || ret instanceof OpEOL || ret instanceof OpBoundaryAssertion;
+        }
+
         // Or in flags from terminal symbol
         flags[0] |= terminalFlags[0];
 
@@ -1066,7 +1082,11 @@ public class RECompiler {
                 }
 
 
-                if (ret instanceof OpBOL || ret instanceof OpEOL) {
+                if (ret instanceof OpBOL || ret instanceof OpEOL || ret instanceof OpBoundaryAssertion) {
+                    if (disallowQuantifier) {
+                        // XPath 4.0 path
+                        throw new RESyntaxException("No quantifier allowed after an assertion", idx);
+                    }
                     // Pretty meaningless, but legal. If the quantifier allows zero occurrences, ignore the instruction.
                     // Otherwise, ignore the quantifier
                     if (quantifierType == '?' || quantifierType == '*' ||
@@ -1190,15 +1210,62 @@ public class RECompiler {
         List<Operation> branches = new ArrayList<>();
         int closeParens = capturingOpenParenCount;
         boolean capturing = true;
+        boolean lookbehind = false;
+        int marker = 0;
         if ((compilerFlags[0] & NODE_TOPLEVEL) == 0 && pattern.codePointAt(idx) == '(') {
             // if its a cluster ( rather than a proper subexpression ie with backrefs )
-            if (idx + 2 < len && pattern.codePointAt(idx + 1) == '?' && pattern.codePointAt(idx + 2) == ':') {
-                if (!isXPath30) {
-                    syntaxError("Non-capturing groups allowed only in XPath3.0");
+            if (idx + 2 < len && pattern.codePointAt(idx + 1) == '?') {
+                marker = pattern.codePointAt(idx + 2);
+                if (marker == ':') {
+                    if (!isXPath30) {
+                        syntaxError("Non-capturing groups allowed only in XPath3.0");
+                    }
+                } else if (marker == '=' || marker == '!') {
+                    if (!isXPath40) {
+                        syntaxError("Lookahead assertions allowed only in XPath4.0");
+                    }
+                } else if (marker == '<') {
+                    if (!isXPath40) {
+                        syntaxError("Lookbehind assertions allowed only in XPath4.0");
+                    }
+                    lookbehind = true;
+                    if (idx + 3 < len) {
+                        marker = pattern.codePointAt(idx + 3);
+                        if (!(marker == '=' || marker == '!')) {
+                            syntaxError("Expected '=' or '!' after '(?<'");
+                        }
+                        idx++;
+                    } else {
+                        syntaxError("Expected '=' or '!' after '(?<'");
+                    }
+                } else {
+                    syntaxError("Invalid character after '(?'");
                 }
                 paren = 2;
                 idx += 3;
                 capturing = false;
+            } else if (idx + 2 < len && pattern.codePointAt(idx + 1) == '*') {
+                if (thereFollows("(*positive_lookahead:")) {
+                    idx += "(*positive_lookahead:".length();
+                    paren = 2;
+                    marker = '=';
+                } else if (thereFollows("(*negative_lookahead:")) {
+                    idx += "(*negative_lookahead:".length();
+                    paren = 2;
+                    marker = '!';
+                } else if (thereFollows("(*positive_lookbehind:")) {
+                    idx += "(*positive_lookbehind:".length();
+                    paren = 2;
+                    marker = '=';
+                    lookbehind = true;
+                } else if (thereFollows("(*negative_lookbehind:")) {
+                    idx += "(*negative_lookbehind:".length();
+                    paren = 2;
+                    marker = '!';
+                    lookbehind = true;
+                } else {
+                    syntaxError("Unexpected characters after '(*'");
+                }
             } else {
                 paren = 1;
                 idx++;
@@ -1228,11 +1295,17 @@ public class RECompiler {
             if (idx < len && pattern.codePointAt(idx) == ')') {
                 idx++;
             } else {
-                syntaxError("Missing close paren");
+                syntaxError("Missing close parenthesis");
             }
             if (capturing) {
                 op = new OpCapture(op, group);
                 captures.add(closeParens);
+            } else if (marker == '=' || marker == '!') {
+                if (lookbehind) {
+                    op = new OpLookbehind(op, marker=='=');
+                } else {
+                    op = new OpLookahead(op, marker == '=');
+                }
             }
         } else {
             op = makeSequence(op, new OpEndProgram());
