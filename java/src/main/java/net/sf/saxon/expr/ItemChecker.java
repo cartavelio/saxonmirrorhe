@@ -304,16 +304,7 @@ public final class ItemChecker extends UnaryExpression {
         ItemType operandType = getBaseExpression().getItemType();
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
         Affinity relationship = th.relationship(requiredItemType, operandType);
-        switch (relationship) {
-            case OVERLAPS:
-            case SUBSUMES:
-            case SAME_TYPE:
-                return operandType;
-            case SUBSUMED_BY:
-            case DISJOINT: // can't happen but never mind
-            default:
-                return requiredItemType;
-        }
+        return relationship == Affinity.SUBSUMES ? operandType : requiredItemType;
     }
 
     /**
