@@ -1147,6 +1147,11 @@ public class SerializerFactory {
                 case OutputKeys.ENCODING:
                     // no constraints
                     break;
+                case SaxonOutputKeys.ESCAPE_SOLIDUS:
+                    if (value != null) {
+                        value = checkYesOrNo(key, value);
+                    }
+                    break;
                 case SaxonOutputKeys.HTML_VERSION:
                     if (value != null) {
                         checkDecimal(key, value);

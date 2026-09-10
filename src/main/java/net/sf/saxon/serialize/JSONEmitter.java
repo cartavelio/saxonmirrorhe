@@ -211,14 +211,14 @@ public class JSONEmitter {
     /**
      * Append a singleton string value to the output
      *
-     * @param string the string value to be appended
+     * @param str the string value to be appended
      * @throws XPathException if the operation fails
      */
 
-    public void writeStringValue(String string) throws XPathException {
+    public void writeStringValue(String str) throws XPathException {
         conditionalComma(false);
         emit('"');
-        emit(escape(string));
+        emit(escape(str));
         emit('"');
     }
 
