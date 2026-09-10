@@ -397,21 +397,33 @@
     <!-- Also used for feature keys -->
     <xsl:template name="scrollpage">
         <xsl:param name="id"/>
-        <xsl:variable name="subnode"
-            select="(ixsl:page()/html/body/(./div[@id = 'wrap']/div[@id = 'main']/div[@class
-            = 'section']/div[@class = 'method']/h3[. eq $id], .//*[@id = $id]))[1]"
-            as="node()?"/>
-        <!-- Note that scroll to overpopulated method just goes to first one  -->
-        
+
+        <xsl:variable name="scrollTop" select="ixsl:call(ixsl:window(), 'getViewerScrollState', [])"/>
+
         <xsl:choose>
-            <xsl:when test="exists($subnode)">
+          <xsl:when test="$scrollTop gt 0">
+            <ixsl:set-property
+                object="ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main']"
+                name="scrollTop" select="$scrollTop"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:variable name="subnode"
+                          select="(ixsl:page()/html/body/(./div[@id = 'wrap']/div[@id = 'main']/div[@class
+                                  = 'section']/div[@class = 'method']/h3[. eq $id], .//*[@id = $id]))[1]"
+                          as="node()?"/>
+            <!-- Note that scroll to overpopulated method just goes to first one  -->
+        
+            <xsl:choose>
+              <xsl:when test="exists($subnode)">
                 <xsl:sequence select="ixsl:call($subnode, 'scrollIntoView', [true()])"/>
-            </xsl:when>
-            <xsl:otherwise>
+              </xsl:when>
+              <xsl:otherwise>
                 <ixsl:set-property
                     object="ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main']"
                     name="scrollTop" select="0"/>
-            </xsl:otherwise>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
     
@@ -1104,6 +1116,17 @@
 
     <xsl:function name="f:anchor-navigation">
         <xsl:param name="c" as="node()"/>
+
+        <xsl:variable name="doctitle" select="ixsl:get(ixsl:page(), 'title')"/>
+        <xsl:variable name="fragid" select="substring-after(ixsl:location(), '#')"/>
+        <xsl:variable name="scrollTop"
+                      select="ixsl:get(ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main'],
+                                       'scrollTop')"/>
+
+        <xsl:variable name="hstate" select="ixsl:eval('{scrollTop: ' || $scrollTop || '}')"/>
+        <xsl:sequence select="ixsl:call(ixsl:window(),
+                              'history.replaceState', [$hstate, $doctitle, '#'||$fragid])"/>
+
         <xsl:variable name="href">
             <xsl:choose>
                 <xsl:when test="tokenize($c/@class) = ('javalink', 'cslink', 'apilink')">
