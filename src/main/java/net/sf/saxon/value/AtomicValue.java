@@ -360,11 +360,9 @@ public abstract class AtomicValue
      */
     @Override
     public boolean effectiveBooleanValue() throws XPathException {
-        XPathException err = new XPathException("Effective boolean value is not defined for an atomic value of type " +
-                Type.displayTypeName(this));
-        err.setIsTypeError(true);
-        err.setErrorCode("FORG0006");
-        throw err;
+        throw new XPathException("Effective boolean value is not defined for an atomic value of type " +
+                Type.displayTypeName(this))
+                .asTypeError().withErrorCode("FORG0006");
         // unless otherwise specified in a subclass
     }
 

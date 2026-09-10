@@ -73,9 +73,7 @@ public class JsonDoc extends SystemFunction  {
         try {
             content = UnparsedTextFunction.readFile(checker, reader);
         } catch (java.io.UnsupportedEncodingException encErr) {
-            XPathException e = new XPathException("Unknown encoding " + Err.wrap(encoding), encErr);
-            e.setErrorCode("FOUT1190");
-            throw e;
+            throw new XPathException("Unknown encoding " + Err.wrap(encoding), encErr).withErrorCode("FOUT1190");
         } catch (java.io.IOException ioErr) {
 //            System.err.println("ProxyHost: " + System.getProperty("http.proxyHost"));
 //            System.err.println("ProxyPort: " + System.getProperty("http.proxyPort"));

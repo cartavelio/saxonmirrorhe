@@ -147,12 +147,10 @@ public class TypeChecker {
                             shortItemType = suppliedItemType.toString();
                         }
                         RoleDiagnostic role = roleSupplier.get();
-                        XPathException err = new XPathException(
+                        throw new XPathException(
                                 "An atomic value is required for the " + role.getMessage() +
-                                        ", but the supplied type is " + shortItemType + ", which cannot be atomized", "FOTY0013", supplied.getLocation());
-                        err.setIsTypeError(true);
-                        err.setFailingExpression(supplied);
-                        throw err;
+                                        ", but the supplied type is " + shortItemType + ", which cannot be atomized", "FOTY0013", supplied.getLocation())
+                                .asTypeError().withFailingExpression(supplied);
                     }
 
                     if (exp.getRetainedStaticContext() == null) {
@@ -197,11 +195,10 @@ public class TypeChecker {
                             exp = cexp;
                         }
                     } catch (XPathException err) {
-                        err.maybeSetLocation(exp.getLocation());
-                        err.setFailingExpression(supplied);
-                        err.setErrorCode(roleSupplier.get().getErrorCode());
-                        err.setIsStaticError(true);
-                        throw err;
+                        throw err.maybeWithLocation(exp.getLocation())
+                                .withFailingExpression(supplied)
+                                .withErrorCode(roleSupplier.get().getErrorCode())
+                                .asStaticError();
                     }
                     itemTypeOK = true;
                     suppliedItemType = reqItemType;
@@ -233,9 +230,7 @@ public class TypeChecker {
                         }
                         suppliedItemType = exp.getItemType();
                     } catch (XPathException err) {
-                        err.maybeSetLocation(exp.getLocation());
-                        err.setIsStaticError(true);
-                        throw err;
+                        throw err.maybeWithLocation(exp.getLocation()).asStaticError();
                     }
                 }
 
@@ -254,9 +249,7 @@ public class TypeChecker {
                         try {
                             exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
                         } catch (XPathException err) {
-                            err.maybeSetLocation(exp.getLocation());
-                            err.setIsStaticError(true);
-                            throw err;
+                            throw err.maybeWithLocation(exp.getLocation()).asStaticError();
                         }
                         suppliedItemType = BuiltInAtomicType.DOUBLE;
                         suppliedCard = -1;
@@ -273,10 +266,9 @@ public class TypeChecker {
                         try {
                             exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
                         } catch (XPathException err) {
-                            err.maybeSetLocation(exp.getLocation());
-                            err.setFailingExpression(supplied);
-                            err.setIsStaticError(true);
-                            throw err;
+                            throw err.maybeWithLocation(exp.getLocation())
+                                    .asStaticError()
+                                    .withFailingExpression(supplied);
                         }
                         suppliedItemType = BuiltInAtomicType.FLOAT;
                         suppliedCard = -1;
@@ -296,10 +288,9 @@ public class TypeChecker {
                         try {
                             exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
                         } catch (XPathException err) {
-                            err.maybeSetLocation(exp.getLocation());
-                            err.setFailingExpression(supplied);
-                            err.setIsStaticError(true);
-                            throw err;
+                            throw err.maybeWithLocation(exp.getLocation())
+                                    .withFailingExpression(supplied)
+                                    .asStaticError();
                         }
                         suppliedItemType = BuiltInAtomicType.STRING;
                         suppliedCard = -1;
@@ -318,10 +309,9 @@ public class TypeChecker {
                             try {
                                 exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
                             } catch (XPathException err) {
-                                err.maybeSetLocation(exp.getLocation());
-                                err.setFailingExpression(supplied);
-                                err.setIsStaticError(true);
-                                throw err;
+                                throw err.maybeWithLocation(exp.getLocation())
+                                        .asStaticError()
+                                        .withFailingExpression(supplied);
                             }
                             suppliedItemType = reqItemType;
                         }
@@ -385,10 +375,9 @@ public class TypeChecker {
         // If the supplied value is () and () isn't allowed, fail now
         if (suppliedCard == StaticProperty.EMPTY && ((reqCard & StaticProperty.ALLOWS_ZERO) == 0)) {
             RoleDiagnostic role = roleSupplier.get();
-            XPathException err = new XPathException("An empty sequence is not allowed as the " + role.getMessage(), role.getErrorCode(), supplied.getLocation());
-            err.setIsTypeError(role.isTypeError());
-            err.setFailingExpression(supplied);
-            throw err;
+            throw new XPathException("An empty sequence is not allowed as the " + role.getMessage(), role.getErrorCode(), supplied.getLocation())
+                    .asTypeErrorIf(role.isTypeError())
+                    .withFailingExpression(supplied);
         }
 
         // Try a static type check. We only throw it out if the call cannot possibly succeed, unless
@@ -413,10 +402,9 @@ public class TypeChecker {
                 }
             } else {
                 String msg = role.composeErrorMessage(reqItemType, supplied, th);
-                XPathException err = new XPathException(msg, role.getErrorCode(), supplied.getLocation());
-                err.setIsTypeError(role.isTypeError());
-                err.setFailingExpression(supplied);
-                throw err;
+                throw new XPathException(msg, role.getErrorCode(), supplied.getLocation())
+                        .asTypeErrorIf(role.isTypeError())
+                        .withFailingExpression(supplied);
             }
         }
 
@@ -643,43 +631,35 @@ public class TypeChecker {
 
     /*@Nullable*/
     public static XPathException testConformance(
-            Sequence val, SequenceType requiredType, XPathContext context)
-            throws XPathException {
+            Sequence val, SequenceType requiredType, XPathContext context) {
         ItemType reqItemType = requiredType.getPrimaryType();
         SequenceIterator iter = val.iterate();
         int count = 0;
         for (Item item; (item = iter.next()) != null; ) {
             count++;
             if (!reqItemType.matches(item, context.getConfiguration().getTypeHierarchy())) {
-                XPathException err = new XPathException("Required type is " + reqItemType +
-                                                                "; supplied value has type " + UType.getUType(val.materialize()));
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0004");
-                return err;
+                return new XPathException("Required type is " + reqItemType +
+                                                                "; supplied value has type " + UType.getUType(val.materialize()))
+                        .asTypeError().withErrorCode("XPTY0004");
             }
         }
 
         int reqCardinality = requiredType.getCardinality();
         if (count == 0 && !Cardinality.allowsZero(reqCardinality)) {
-            XPathException err = new XPathException(
-                    "Required type does not allow empty sequence, but supplied value is empty");
-            err.setIsTypeError(true);
-            err.setErrorCode("XPTY0004");
-            return err;
+            return new XPathException(
+                    "Required type does not allow empty sequence, but supplied value is empty")
+                    .asTypeError().withErrorCode("XPTY0004");
         }
         if (count > 1 && !Cardinality.allowsMany(reqCardinality)) {
-            XPathException err = new XPathException(
-                    "Required type requires a singleton sequence; supplied value contains " + count + " items");
-            err.setIsTypeError(true);
-            err.setErrorCode("XPTY0004");
-            return err;
+            return new XPathException(
+                    "Required type requires a singleton sequence; supplied value contains " + count + " items")
+                    .asTypeError().withErrorCode("XPTY0004");
         }
         if (count > 0 && reqCardinality == StaticProperty.EMPTY) {
-            XPathException err = new XPathException(
-                    "Required type requires an empty sequence, but supplied value is non-empty");
-            err.setIsTypeError(true);
-            err.setErrorCode("XPTY0004");
-            return err;
+            return new XPathException(
+                    "Required type requires an empty sequence, but supplied value is non-empty")
+                    .asTypeError()
+                    .withErrorCode("XPTY0004");
         }
         return null;
     }
@@ -705,12 +685,10 @@ public class TypeChecker {
                 th.relationship(t, BuiltInAtomicType.UNTYPED_ATOMIC) == DISJOINT &&
                 th.relationship(t, NumericType.getInstance()) == DISJOINT &&
                 !(t instanceof JavaExternalObjectType)) {
-            XPathException err = new XPathException(
+            return new XPathException(
                     "Effective boolean value is defined only for sequences containing " +
-                            "booleans, strings, numbers, URIs, or nodes");
-            err.setErrorCode("FORG0006");
-            err.setIsTypeError(true);
-            return err;
+                            "booleans, strings, numbers, URIs, or nodes")
+                    .withErrorCode("FORG0006").asTypeError();
         }
         return null;
     }

@@ -248,10 +248,10 @@ public class TypeCheckingFilter extends ProxyOutputter {
 
     public void finalCheck() throws XPathException {
         if (count == 0 && !Cardinality.allowsZero(cardinality)) {
-            XPathException err = new XPathException("An empty sequence is not allowed as the " +
-                                                            roleDiagnostic.getMessage());
             String errorCode = roleDiagnostic.getErrorCode();
-            err.setErrorCode(errorCode);
+            XPathException err = new XPathException("An empty sequence is not allowed as the " +
+                                                            roleDiagnostic.getMessage())
+                    .withErrorCode(errorCode);
             if (!"XPDY0050".equals(errorCode)) {
                 err.setIsTypeError(true);
             }
@@ -347,8 +347,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
             message = roleDiagnostic.composeErrorMessage(itemType, item, typeHierarchy);
         }
         String errorCode = roleDiagnostic.getErrorCode();
-        XPathException err = new XPathException(message);
-        err.setErrorCode(errorCode);
+        XPathException err = new XPathException(message, errorCode);
         if (!"XPDY0050".equals(errorCode)) {
             err.setIsTypeError(true);
         }

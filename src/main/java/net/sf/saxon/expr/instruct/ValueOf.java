@@ -324,8 +324,7 @@ public final class ValueOf extends SimpleNodeConstructor {
             Item content = getSelect().makeElaborator().elaborateForItem().eval(context);
             return makeTextNode(content, noNodeIfEmpty, isDisableOutputEscaping(), context);
         } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            throw err;
+            throw err.maybeWithLocation(getLocation()).maybeWithContext(context);
         }
     }
 

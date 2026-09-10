@@ -136,14 +136,14 @@ public class ErrorExpression extends Expression {
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
         // copy the exception for thread-safety, because we want to add context information
-        XPathException err = new XPathException(exception.getMessage());
-        err.setLocation(exception.getLocation());
-        err.maybeSetLocation(getLocation());
+        XPathException err = new XPathException(exception.getMessage())
+                .withLocation(exception.getLocation())
+                .maybeWithLocation(getLocation())
+                .maybeWithContext(context)
+                .asTypeErrorIf(exception.isTypeError());
         if (exception.getErrorCode() != null) {
             err.setErrorCodeQName(exception.getErrorCode().getStructuredQName());
         }
-        err.maybeSetContext(context);
-        err.setIsTypeError(exception.isTypeError());
         throw err;
 
     }
@@ -249,14 +249,14 @@ public class ErrorExpression extends Expression {
             ErrorExpression expr = (ErrorExpression)getExpression();
             XmlProcessingError exception = expr.getException();
             return context -> {
-                XPathException err = new XPathException(exception.getMessage());
-                err.setLocation(exception.getLocation());
-                err.maybeSetLocation(expr.getLocation());
+                XPathException err = new XPathException(exception.getMessage())
+                        .withLocation(exception.getLocation())
+                        .maybeWithLocation(expr.getLocation())
+                        .maybeWithContext(context)
+                        .asTypeErrorIf(exception.isTypeError());
                 if (exception.getErrorCode() != null) {
                     err.setErrorCodeQName(exception.getErrorCode().getStructuredQName());
                 }
-                err.maybeSetContext(context);
-                err.setIsTypeError(exception.isTypeError());
                 throw err;
             };
         }

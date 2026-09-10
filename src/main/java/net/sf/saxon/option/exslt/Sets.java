@@ -106,9 +106,8 @@ public abstract class Sets {
                     }
                 }
             } else {
-                XPathException e = new XPathException("Operand of leading() contains an item that is not a node");
-                e.setXPathContext(context);
-                throw e;
+                throw new XPathException("Operand of leading() contains an item that is not a node")
+                        .withXPathContext(context);
             }
         }
 
@@ -162,9 +161,8 @@ public abstract class Sets {
                     }
                 }
             } else {
-                XPathException e = new XPathException("Operand of trailing() contains an item that is not a node");
-                e.setXPathContext(context);
-                throw e;
+                throw new XPathException("Operand of trailing() contains an item that is not a node")
+                        .withXPathContext(context);
             }
         }
 

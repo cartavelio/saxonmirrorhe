@@ -149,11 +149,10 @@ public final class ItemChecker extends UnaryExpression {
             } else {
                 RoleDiagnostic role = roleSupplier.get();
                 String message = role.composeErrorMessage(requiredItemType, operand, th);
-                XPathException err = new XPathException(message);
-                err.setErrorCode(role.getErrorCode());
-                err.setLocation(this.getLocation());
-                err.setIsTypeError(role.isTypeError());
-                throw err;
+                throw new XPathException(message)
+                        .withErrorCode(role.getErrorCode())
+                        .withLocation(this.getLocation())
+                        .asTypeErrorIf(role.isTypeError());
             }
         }
         return this;
@@ -251,10 +250,10 @@ public final class ItemChecker extends UnaryExpression {
                 RoleDiagnostic role = roleSupplier.get();
                 String message = role.composeErrorMessage(requiredItemType, item, th);
                 String errorCode = role.getErrorCode();
-                XPathException te = new XPathException(message, errorCode);
-                te.setFailingExpression(baseExpr);
-                te.setLocator(baseExpr.getLocation());
-                te.setIsTypeError(!"XPDY0050".equals(errorCode));
+                XPathException te = new XPathException(message, errorCode)
+                        .withFailingExpression(baseExpr)
+                        .withLocation(baseExpr.getLocation())
+                        .asTypeErrorIf(!"XPDY0050".equals(errorCode));
                 throw new UncheckedXPathException(te);
             }
         };

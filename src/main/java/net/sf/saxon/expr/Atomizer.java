@@ -411,11 +411,11 @@ public final class Atomizer extends UnaryExpression {
                 throw e;
             } else {
                 String message = expandMessage(e.getMessage());
-                XPathException e2 = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
-                e2.setErrorCodeQName(e.getErrorCodeQName());
-                e2.setXPathContext(context);
-                e2.maybeSetLocation(getLocation());
-                throw e2;
+                throw new XPathException(message)
+                        .withErrorCode(e.getErrorCodeQName())
+                        .withLocation(e.getLocator())
+                        .withXPathContext(context)
+                        .maybeWithLocation(getLocation());
             }
         }
     }
@@ -685,11 +685,11 @@ public final class Atomizer extends UnaryExpression {
                         throw e;
                     } else {
                         String message = expr.expandMessage(e.getMessage());
-                        XPathException e2 = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
-                        e2.setErrorCodeQName(e.getErrorCodeQName());
-                        e2.setXPathContext(context);
-                        e2.maybeSetLocation(expr.getLocation());
-                        throw e2;
+                        throw new XPathException(message)
+                                .withErrorCode(e.getErrorCodeQName())
+                                .withLocation(e.getLocator())
+                                .withXPathContext(context)
+                                .maybeWithLocation(expr.getLocation());
                     }
                 }
             };

@@ -904,9 +904,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         try {
             return ExpressionTool.effectiveBooleanValue(iterate(context));
         } catch (XPathException e) {
-            e.maybeSetFailingExpression(this);
-            e.maybeSetContext(context);
-            throw e;
+            throw e.maybeWithFailingExpression(this).maybeWithContext(context);
         }
     }
 
@@ -964,14 +962,12 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
                 throw new AssertionError("process() is not implemented in the subclass " + getClass());
             }
         } catch (UncheckedXPathException unxe) {
-            XPathException e = unxe.getXPathException();
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            throw e;
+            throw unxe.getXPathException()
+                    .maybeWithLocation(getLocation())
+                    .maybeWithContext(context);
         } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            throw e;
+            throw e.maybeWithLocation(getLocation())
+                    .maybeWithContext(context);
         }
     }
 
@@ -1457,10 +1453,9 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     protected void dynamicError(String message, String code, XPathContext context) throws XPathException {
-        XPathException err = new XPathException(message, code, getLocation());
-        err.setXPathContext(context);
-        err.setFailingExpression(this);
-        throw err;
+        throw new XPathException(message, code, getLocation())
+                .withXPathContext(context)
+                .withFailingExpression(this);
     }
 
     /**
@@ -1473,11 +1468,10 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     protected void typeError(String message, String errorCode, XPathContext context) throws XPathException {
-        XPathException e = new XPathException(message, errorCode, getLocation());
-        e.setIsTypeError(true);
-        e.setXPathContext(context);
-        e.setFailingExpression(this);
-        throw e;
+        throw new XPathException(message, errorCode, getLocation())
+                .asTypeError()
+                .withXPathContext(context)
+                .withFailingExpression(this);
     }
 
     public String getTracingTag() {

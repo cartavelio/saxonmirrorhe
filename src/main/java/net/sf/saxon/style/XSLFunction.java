@@ -181,7 +181,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             try {
                 resultType = makeSequenceType(asAtt);
             } catch (XPathException e) {
-                compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "as");
+                compileErrorInAttribute(e, "as");
             }
         }
 
@@ -190,7 +190,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             try {
                 extraResultType = makeExtendedSequenceType(extraAsAtt);
             } catch (XPathException e) {
-                compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "saxon:as");
+                compileErrorInAttribute(e, "saxon:as");
                 extraResultType = resultType;
             }
             if (asAtt != null) {

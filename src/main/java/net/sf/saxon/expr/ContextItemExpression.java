@@ -137,11 +137,9 @@ public class ContextItemExpression extends Expression {
         // In XSLT, we don't catch this error at the typeCheck() phase because it's done one XPath expression
         // at a time. So we repeat the check here.
         if (contextItemType == null) {
-            XPathException err = new XPathException("The context item is undefined at this point");
-            err.setErrorCode(getErrorCodeForUndefinedContext());
-            err.setIsTypeError(absentContextIsTypeError);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("The context item is undefined at this point")
+                    .withErrorCode(getErrorCodeForUndefinedContext()).withLocation(getLocation())
+                    .asTypeErrorIf(absentContextIsTypeError);
         }
         return this;
     }

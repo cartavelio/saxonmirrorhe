@@ -143,10 +143,9 @@ public class PreparedStylesheet extends Executable {
             if (entry.getValue().isRequiredParam()) {
                 StructuredQName req = entry.getKey();
                 if (getCompileTimeParams().get(req) == null && (params == null || params.get(req) == null)) {
-                    XPathException err = new XPathException("No value supplied for required parameter " +
-                                                                    req.getDisplayName());
-                    err.setErrorCode(getHostLanguage() == HostLanguage.XQUERY ? "XPDY0002" : "XTDE0050");
-                    throw err;
+                    throw new XPathException("No value supplied for required parameter " +
+                                                                    req.getDisplayName())
+                            .withErrorCode(getHostLanguage() == HostLanguage.XQUERY ? "XPDY0002" : "XTDE0050");
                 }
             }
         }

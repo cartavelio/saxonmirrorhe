@@ -461,9 +461,8 @@ public class ContentHandlerProxy implements Receiver {
      */
 
     protected void notifyNotWellFormed() throws XPathException {
-        XPathException err = new XPathException("The result tree cannot be supplied to the ContentHandler because it is not well-formed XML");
-        err.setErrorCode(SaxonErrorCode.SXCH0002);
-        throw err;
+        throw new XPathException("The result tree cannot be supplied to the ContentHandler because it is not well-formed XML")
+                .withErrorCode(SaxonErrorCode.SXCH0002);
     }
 
 
@@ -546,9 +545,7 @@ public class ContentHandlerProxy implements Receiver {
         } else if (nested instanceof SchemaException) {
             throw new XPathException(nested);
         } else {
-            XPathException de = new XPathException(err);
-            de.setErrorCode(SaxonErrorCode.SXCH0003);
-            throw de;
+            throw new XPathException(err).withErrorCode(SaxonErrorCode.SXCH0003);
         }
     }
 

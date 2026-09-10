@@ -564,9 +564,7 @@ public class SortKeyDefinition extends PseudoExpression {
                             : NumericComparer11.getInstance();
                     break;
                 default:
-                    XPathException err = new XPathException("data-type on xsl:sort must be 'text' or 'number'");
-                    err.setErrorCode("XTDE0030");
-                    throw err;
+                    throw new XPathException("data-type on xsl:sort must be 'text' or 'number'", "XTDE0030");
             }
         }
 
@@ -576,9 +574,7 @@ public class SortKeyDefinition extends PseudoExpression {
             if (s.equals("yes") || s.equals("no") || s.equals("true") || s.equals("false") || s.equals("1") || s.equals("0")) {
                 // no action
             } else {
-                XPathException err = new XPathException("Value of 'stable' on xsl:sort must be yes|no|true|false|1|0");
-                err.setErrorCode("XTDE0030");
-                throw err;
+                throw new XPathException("Value of 'stable' on xsl:sort must be yes|no|true|false|1|0", "XTDE0030");
             }
         }
 
@@ -588,9 +584,7 @@ public class SortKeyDefinition extends PseudoExpression {
             case "descending":
                 return new DescendingComparer(atomicComparer);
             default:
-                XPathException err1 = new XPathException("order must be 'ascending' or 'descending'");
-                err1.setErrorCode("XTDE0030");
-                throw err1;
+                throw new XPathException("order must be 'ascending' or 'descending'", "XTDE0030");
         }
     }
 

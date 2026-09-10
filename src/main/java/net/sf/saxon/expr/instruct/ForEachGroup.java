@@ -364,17 +364,13 @@ public class ForEachGroup extends Instruction
                     setCollationNameExpression(new StringLiteral(collationNameString));
                     collator = visitor.getConfiguration().getCollation(collationNameString);
                     if (collator == null) {
-                        XPathException err = new XPathException("Unknown collation " + Err.wrap(collationURI.toString(), Err.URI));
-                        err.setErrorCode("XTDE1110");
-                        err.setLocation(getLocation());
-                        throw err;
+                        throw new XPathException("Unknown collation " + Err.wrap(collationURI.toString(), Err.URI))
+                                .withErrorCode("XTDE1110").withLocation(getLocation());
                     }
                 }
             } catch (URISyntaxException err) {
-                XPathException e = new XPathException("Collation name '" + getCollationNameExpression() + "' is not a valid URI");
-                e.setErrorCode("XTDE1110");
-                e.setLocation(getLocation());
-                throw e;
+                throw new XPathException("Collation name '" + getCollationNameExpression() + "' is not a valid URI")
+                        .withErrorCode("XTDE1110").withLocation(getLocation());
             }
         }
         return this;

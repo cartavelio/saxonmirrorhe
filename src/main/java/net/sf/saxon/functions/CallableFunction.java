@@ -39,7 +39,7 @@ public class CallableFunction extends AbstractFunction {
     }
 
     public CallableFunction(int arity, Callable callable, FunctionItemType type) {
-        this.name = new SymbolicName.F(new StructuredQName("", NamespaceUri.ANONYMOUS, "anon"), arity);
+        this.name = new SymbolicName.F(NamespaceUri.ANONYMOUS.qName("anon"), arity);
         this.callable = callable;
         this.type = type;
     }

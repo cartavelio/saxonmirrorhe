@@ -204,10 +204,9 @@ public class NextMatch extends ApplyNextMatchingTemplate {
 
                 Rule currentRule = context.getCurrentTemplateRule();
                 if (currentRule == null) {
-                    XPathException e = new XPathException("There is no current template rule", "XTDE0560");
-                    e.setXPathContext(context);
-                    e.setLocation(loc);
-                    throw e;
+                    throw new XPathException("There is no current template rule", "XTDE0560")
+                            .withXPathContext(context)
+                            .withLocation(loc);
                 }
                 Component.M modeComponent = context.getCurrentMode();
                 if (modeComponent == null) {

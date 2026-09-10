@@ -51,11 +51,8 @@ public class RootExpression extends Expression {
     public Expression typeCheck(ExpressionVisitor visitor, /*@Nullable*/ ContextItemStaticInfo contextInfo) throws XPathException {
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         if (contextInfo == null || contextInfo.getItemType() == null || contextInfo.getItemType().equals(ErrorType.getInstance())) {
-            XPathException err = new XPathException(noContextMessage() + ": the context item is absent");
-            err.setErrorCode("XPDY0002");
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException(noContextMessage() + ": the context item is absent")
+                    .withErrorCode("XPDY0002").asTypeError().withLocation(getLocation());
         } else if (!doneWarnings && contextInfo.isParentless()
                 && th.relationship(contextInfo.getItemType(),NodeKindTest.DOCUMENT) == Affinity.DISJOINT) {
             visitor.issueWarning(noContextMessage() + ": the context item is parentless and is not a document node", SaxonErrorCode.SXWN9026, getLocation());
@@ -72,11 +69,10 @@ public class RootExpression extends Expression {
 
         Affinity relation = th.relationship(contextInfo.getItemType(), AnyNodeTest.getInstance());
         if (relation == Affinity.DISJOINT) {
-            XPathException err = new XPathException(noContextMessage() + ": the context item is not a node");
-            err.setErrorCode("XPTY0020");
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException(noContextMessage() + ": the context item is not a node")
+                    .withErrorCode("XPTY0020")
+                    .asTypeError()
+                    .withLocation(getLocation());
         }
         return this;
     }

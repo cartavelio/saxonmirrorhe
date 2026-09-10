@@ -431,8 +431,7 @@ public abstract class IntegerValue extends DecimalValue {
         try {
             return div(other);
         } catch (XPathException err) {
-            err.maybeSetLocation(locator);
-            throw err;
+            throw err.maybeWithLocation(locator);
         }
     }
 
@@ -459,8 +458,7 @@ public abstract class IntegerValue extends DecimalValue {
         try {
             return mod(other);
         } catch (XPathException err) {
-            err.maybeSetLocation(locator);
-            throw err;
+            throw err.maybeWithLocation(locator);
         }
     }
 
@@ -487,8 +485,7 @@ public abstract class IntegerValue extends DecimalValue {
         try {
             return idiv(other);
         } catch (XPathException err) {
-            err.maybeSetLocation(locator);
-            throw err;
+            throw err.maybeWithLocation(locator);
         }
     }
 

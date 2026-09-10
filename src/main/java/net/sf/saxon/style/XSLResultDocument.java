@@ -216,7 +216,7 @@ public class XSLResultDocument extends StyleElement {
 
     }
 
-    public static StructuredQName METHOD = new StructuredQName("", NamespaceUri.NULL, "method");
+    public static StructuredQName METHOD = NamespaceUri.NULL.qName("method");
     public static StructuredQName BUILD_TREE = new StructuredQName("", NamespaceUri.NULL, "build-tree");
 
     /*@Nullable*/
@@ -290,11 +290,10 @@ public class XSLResultDocument extends StyleElement {
                         method = s;
                     }
                 } catch (XPathException e) {
-                    if (NamespaceUri.SAXON.equals(e.getErrorCodeNamespace())) {
+                    if (e.getErrorCodeQName().hasURI(NamespaceUri.SAXON)) {
                         compileWarning(e.getMessage(), e.getErrorCodeQName());
                     } else {
-                        e.setErrorCode("XTSE0020");
-                        compileError(e);
+                        compileError(e.withErrorCode("XTSE0020"));
                     }
                 }
             }

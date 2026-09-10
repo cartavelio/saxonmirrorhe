@@ -337,9 +337,7 @@ public final class DateTimeValue extends CalendarValue
         int tz1 = date.getTimezoneInMinutes();
         int tz2 = time.getTimezoneInMinutes();
         if (tz1 != NO_TIMEZONE && tz2 != NO_TIMEZONE && tz1 != tz2) {
-            XPathException err = new XPathException("Supplied date and time are in different timezones");
-            err.setErrorCode("FORG0008");
-            throw err;
+            throw new XPathException("Supplied date and time are in different timezones", "FORG0008");
         }
 
         MutableDateTimeValue v = date.toDateTime().makeMutableCopy();
@@ -1252,10 +1250,8 @@ public final class DateTimeValue extends CalendarValue
             return new DateTimeValue(y, (byte) m, (byte) d,
                     hour, minute, second, nanosecond, hasNoYearZero, getTimezoneInMinutes(), BuiltInAtomicType.DATE_TIME);
         } else {
-            XPathException err = new XPathException("DateTime arithmetic is not supported on xs:duration, only on its subtypes");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException("DateTime arithmetic is not supported on xs:duration, only on its subtypes")
+                    .withErrorCode("XPTY0004").asTypeError();
         }
     }
 
@@ -1272,10 +1268,8 @@ public final class DateTimeValue extends CalendarValue
     @Override
     public DayTimeDurationValue subtract(/*@NotNull*/ CalendarValue other, XPathContext context) throws XPathException {
         if (!(other instanceof DateTimeValue)) {
-            XPathException err = new XPathException("First operand of '-' is a dateTime, but the second is not");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException("First operand of '-' is a dateTime, but the second is not")
+                    .withErrorCode("XPTY0004").asTypeError();
         }
         return super.subtract(other, context);
     }

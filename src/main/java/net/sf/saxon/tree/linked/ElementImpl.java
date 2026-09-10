@@ -329,8 +329,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             try {
                 checkNotNamespaceSensitiveElement(getSchemaType());
             } catch (CopyNamespaceSensitiveException e) {
-                e.setErrorCode(out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
-                throw e;
+                throw e.withErrorCode(out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
             }
         }
 
@@ -343,8 +342,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
                     try {
                         checkNotNamespaceSensitiveAttribute(attributeType, att);
                     } catch (CopyNamespaceSensitiveException e) {
-                        e.setErrorCode(out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
-                        throw e;
+                        throw e.withErrorCode(out.getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
                     }
                 }
             }

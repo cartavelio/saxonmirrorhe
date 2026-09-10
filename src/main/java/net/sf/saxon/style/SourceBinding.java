@@ -237,7 +237,7 @@ public class SourceBinding {
             try {
                 declaredType = sourceElement.makeSequenceType(asAtt);
             } catch (XPathException e) {
-                sourceElement.compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "as");
+                sourceElement.compileErrorInAttribute(e.getMessage(), e.showErrorCode(), "as");
             }
         }
 
@@ -246,7 +246,7 @@ public class SourceBinding {
             try {
                 extraResultType = sourceElement.makeExtendedSequenceType(extraAsAtt);
             } catch (XPathException e) {
-                sourceElement.compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "saxon:as");
+                sourceElement.compileErrorInAttribute(e.getMessage(), e.showErrorCode(), "saxon:as");
                 extraResultType = SequenceType.ANY_SEQUENCE;
             }
             if (asAtt != null) {

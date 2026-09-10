@@ -320,13 +320,12 @@ public class DynamicFunctionCall extends Expression {
                 FunctionItemType fit = fn.getFunctionItemType();
                 if (fn.getArity() != argEvaluators.length) {
                     String errorCode = "XPTY0004";
-                    XPathException err = new XPathException(
+                    throw new XPathException(
                             "Number of arguments required for dynamic call to " + fn.getDescription() + " is " + fn.getArity() +
-                                    "; number supplied = " + argEvaluators.length, errorCode);
-                    err.setIsTypeError(true);
-                    err.setXPathContext(context);
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                                    "; number supplied = " + argEvaluators.length, errorCode)
+                            .asTypeError()
+                            .withXPathContext(context)
+                            .withLocation(expr.getLocation());
                 }
 
                 Sequence[] argValues = new Sequence[argEvaluators.length];

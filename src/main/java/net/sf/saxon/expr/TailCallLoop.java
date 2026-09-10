@@ -155,9 +155,7 @@ public final class TailCallLoop extends UnaryExpression {
         try {
             return userFunction.getBodyEvaluator().evaluate(cm);
         } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            err.maybeSetContext(cm);
-            throw err;
+            throw err.maybeWithLocation(getLocation()).maybeWithContext(cm);
         }
     }
 
@@ -223,10 +221,9 @@ public final class TailCallLoop extends UnaryExpression {
                         }
                     }
                 } catch (UncheckedXPathException e) {
-                    XPathException xpe = e.getXPathException();
-                    xpe.maybeSetContext(context);
-                    xpe.maybeSetLocation(expr.getLocation());
-                    throw xpe;
+                    throw e.getXPathException()
+                            .maybeWithContext(context)
+                            .maybeWithLocation(expr.getLocation());
                 }
             };
         }

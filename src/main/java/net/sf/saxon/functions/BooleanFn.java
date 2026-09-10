@@ -130,9 +130,7 @@ public class BooleanFn extends SystemFunction {
                 try {
                     return getArg(0).effectiveBooleanValue(c);
                 } catch (XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    e.maybeSetContext(c);
-                    throw e;
+                    throw e.maybeWithLocation(getLocation()).maybeWithContext(c);
                 }
             }
 

@@ -296,8 +296,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         try {
             result = function.call(context, argValues).iterate();
         } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            throw e;
+            throw e.maybeWithLocation(getLocation());
         }
         if (!definition.trustResultType()) {
             int card = resultType.getCardinality();
@@ -341,16 +340,14 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         try {
             result = function.call(context, argValues).head();
         } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            throw e;
+            throw e.maybeWithLocation(getLocation());
         }
         if (!definition.trustResultType()) {
             final ItemType type = resultType.getPrimaryType();
             if (result == null ? !Cardinality.allowsZero(resultType.getCardinality()) : !type.matches(result, th)) {
                 String msg = role.composeErrorMessage(type, result, th);
-                XPathException err = new XPathException(msg, "XPTY0004");
-                err.setLocation(getLocation());
-                throw err;
+                throw new XPathException(msg, "XPTY0004")
+                    .withLocation(getLocation());
             }
             if (result instanceof NodeInfo && !config.isCompatible(((NodeInfo) result).getConfiguration())) {
                 throw new XPathException(
@@ -381,8 +378,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         try {
             return function.effectiveBooleanValue(context, argValues);
         } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            throw e;
+            throw e.maybeWithLocation(getLocation());
         }
     }
 

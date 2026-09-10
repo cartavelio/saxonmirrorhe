@@ -90,9 +90,8 @@ public class OrderByClausePull extends TuplePull {
                     return a.originalPosition - b.originalPosition;
                 });
             } catch (ClassCastException e) {
-                XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
-                err.setErrorCode("XPTY0004");
-                throw err;
+                throw new XPathException("Non-comparable types found while sorting: " + e.getMessage())
+                        .withErrorCode("XPTY0004").asTypeError();
             }
         }
 

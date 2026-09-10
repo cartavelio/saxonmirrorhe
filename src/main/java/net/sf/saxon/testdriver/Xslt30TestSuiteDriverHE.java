@@ -948,7 +948,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         } catch (SaxonApiException err) {
             if (err.getCause() instanceof XPathException &&
                     !((XPathException) err.getCause()).hasBeenReported()) {
-                System.err.println("Thrown exception " + ((XPathException) err.getCause()).getErrorCodeLocalPart() +
+                System.err.println("Thrown exception " + ((XPathException) err.getCause()).showErrorCode() +
                         ": " + err.getCause().getMessage());
             }
             outcome.setException(err.getErrorCode());

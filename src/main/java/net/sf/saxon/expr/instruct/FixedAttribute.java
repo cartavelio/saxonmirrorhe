@@ -120,12 +120,10 @@ public final class FixedAttribute extends AttributeCreator {
             if (validation == Validation.STRICT) {
                 SchemaDeclaration decl = config.getAttributeDeclaration(nodeName.getStructuredQName());
                 if (decl == null) {
-                    XPathException se = new XPathException(
+                    throw new XPathException(
                             "Strict validation fails: there is no global attribute declaration for " +
-                                    nodeName.getDisplayName());
-                    se.setErrorCode("XTTE1510");
-                    se.setLocation(getLocation());
-                    throw se;
+                                    nodeName.getDisplayName())
+                            .withErrorCode("XTTE1510").withLocation(getLocation());
                 }
                 schemaType = (SimpleType) decl.getType();
                 errorCode = "XTTE1510";
@@ -148,12 +146,11 @@ public final class FixedAttribute extends AttributeCreator {
             ValidationFailure err = schemaType.validateContent(
                     value, DummyNamespaceResolver.getInstance(), rules);
             if (err != null) {
-                XPathException se = new XPathException("Attribute value " + Err.wrap(value, Err.VALUE) +
+                throw new XPathException("Attribute value " + Err.wrap(value, Err.VALUE) +
                         " does not the match the required type " +
                         schemaType.getDescription() + ". " +
-                        err.getMessage());
-                se.setErrorCode(errorCode);
-                throw se;
+                        err.getMessage())
+                        .withErrorCode(errorCode);
             }
         }
 
@@ -235,10 +232,10 @@ public final class FixedAttribute extends AttributeCreator {
         }
         if (parentType instanceof SimpleType) {
             XPathException err = new XPathException("Attribute " + nodeName.getDisplayName() +
-                    " is not permitted in the content model of the simple type " + parentType.getDescription());
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            err.setErrorCode(getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027");
+                    " is not permitted in the content model of the simple type " + parentType.getDescription())
+                    .asTypeError()
+                    .withLocation(getLocation())
+                    .withErrorCode(getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027");
             throw err;
         }
         SchemaType type;
@@ -248,20 +245,18 @@ public final class FixedAttribute extends AttributeCreator {
             throw new XPathException(e);
         }
         if (type == null) {
-            XPathException err = new XPathException("Attribute " + nodeName.getDisplayName() +
-                    " is not permitted in the content model of the complex type " + parentType.getDescription());
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            err.setErrorCode(getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027");
-            throw err;
+            throw new XPathException("Attribute " + nodeName.getDisplayName() +
+                    " is not permitted in the content model of the complex type " + parentType.getDescription())
+                    .asTypeError()
+                    .withLocation(getLocation())
+                    .withErrorCode(getPackageData().isXSLT() ? "XTTE1510" : "XQDY0027");
         }
 
         try {
             // When select is a SimpleContentConstructor, this does nothing
             getSelect().checkPermittedContents(type, true);
         } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            throw e;
+            throw e.maybeWithLocation(getLocation());
         }
     }
 

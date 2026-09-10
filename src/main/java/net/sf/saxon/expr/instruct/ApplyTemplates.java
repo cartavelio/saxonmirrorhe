@@ -207,17 +207,14 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
             selectOp.typeCheck(visitor, contextInfo);
         } catch (XPathException e) {
             if (implicitSelect) {
-                String code = e.getErrorCodeLocalPart();
-                if ("XPTY0020".equals(code) || "XPTY0019".equals(code)) {
-                    XPathException err = new XPathException("Cannot apply-templates to child nodes when the context item is an atomic value");
-                    err.setErrorCode("XTTE0510");
-                    err.setIsTypeError(true);
-                    throw err;
-                } else if ("XPDY0002".equals(code)) {
-                    XPathException err = new XPathException("Cannot apply-templates to child nodes when the context item is absent");
-                    err.setErrorCode("XTTE0510");
-                    err.setIsTypeError(true);
-                    throw err;
+                if (e.hasErrorCode("XPTY0020", "XPTY0019")) {
+                    throw new XPathException("Cannot apply-templates to child nodes when the context item is an atomic value")
+                            .withErrorCode("XTTE0510")
+                            .asTypeError();
+                } else if (e.hasErrorCode("XPDY0002")) {
+                    throw new XPathException("Cannot apply-templates to child nodes when the context item is absent")
+                            .withErrorCode("XTTE0510")
+                            .asTypeError();
                 }
             }
             throw e;
@@ -653,11 +650,10 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
                         TailCall tc = thisMode.applyTemplates(params, tunnels, separator, output, c2, expr.getLocation());
                         dispatchTailCall(tc);
                     } catch (StackOverflowError e) {
-                        XPathException err = new XPathException.StackOverflow(
+                        throw new XPathException.StackOverflow(
                                 "Too many nested apply-templates calls. The stylesheet may be looping.",
-                                SaxonErrorCode.SXLM0001, expr.getLocation());
-                        err.setXPathContext(context);
-                        throw err;
+                                SaxonErrorCode.SXLM0001, expr.getLocation())
+                                .withXPathContext(context);
                     }
                     pipe.setXPathContext(context);
                     return null;

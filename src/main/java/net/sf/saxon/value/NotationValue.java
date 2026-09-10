@@ -38,15 +38,11 @@ public final class NotationValue extends QualifiedNameValue {
     public NotationValue(String prefix, NamespaceUri uri, String localName, boolean check) throws XPathException {
         super(new StructuredQName(prefix, uri, localName), BuiltInAtomicType.NOTATION);
         if (check && !NameChecker.isValidNCName(localName)) {
-            XPathException err = new XPathException("Malformed local name in NOTATION: '" + localName + '\'');
-            err.setErrorCode("FORG0001");
-            throw err;
+            throw new XPathException("Malformed local name in NOTATION: '" + localName + '\'', "FORG0001");
         }
         prefix = prefix == null ? "" : prefix;
         if (check && uri.isEmpty() && prefix.length() != 0) {
-            XPathException err = new XPathException("NOTATION has null namespace but non-empty prefix");
-            err.setErrorCode("FOCA0002");
-            throw err;
+            throw new XPathException("NOTATION has null namespace but non-empty prefix", "FOCA0002");
         }
     }
 

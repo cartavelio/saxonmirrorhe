@@ -112,11 +112,8 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
         }
 
         if (t0.getUType().union(t1.getUType()).overlaps(UType.EXTENSION)) {
-            XPathException err = new XPathException("Cannot perform comparisons involving external objects");
-            err.setIsTypeError(true);
-            err.setErrorCode("XPTY0004");
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("Cannot perform comparisons involving external objects")
+                    .asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
         }
 
         BuiltInAtomicType pt0 = (BuiltInAtomicType) t0.getPrimitiveItemType();

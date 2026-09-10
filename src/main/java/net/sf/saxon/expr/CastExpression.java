@@ -73,11 +73,10 @@ public class CastExpression extends CastingExpression implements Callable {
             if (allowsEmpty()) {
                 return Literal.makeEmptySequence();
             } else {
-                XPathException err = new XPathException("Cast does not allow an empty sequence as input");
-                err.setErrorCode("XPTY0004");
-                err.setLocation(getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                throw new XPathException("Cast does not allow an empty sequence as input")
+                        .withErrorCode("XPTY0004")
+                        .withLocation(getLocation())
+                        .asTypeError();
             }
         }
 
@@ -96,12 +95,11 @@ public class CastExpression extends CastingExpression implements Callable {
             if (sourceType.isAtomicType() && sourceType != BuiltInAtomicType.ANY_ATOMIC) {
                 converter = rules.getConverter((AtomicType)sourceType, getTargetType());
                 if (converter == null) {
-                    XPathException err = new XPathException("Casting from " + sourceType + " to " + getTargetType() +
-                            " can never succeed");
-                    err.setErrorCode("XPTY0004");
-                    err.setLocation(getLocation());
-                    err.setIsTypeError(true);
-                    throw err;
+                    throw new XPathException("Casting from " + sourceType + " to " + getTargetType() +
+                            " can never succeed")
+                            .withErrorCode("XPTY0004")
+                            .withLocation(getLocation())
+                            .asTypeError();
                 } else {
                     if (getTargetType().isNamespaceSensitive()) {
                         converter = converter.setNamespaceResolver(getRetainedStaticContext());
@@ -362,11 +360,10 @@ public class CastExpression extends CastingExpression implements Callable {
             if (allowsEmpty()) {
                 return null;
             } else {
-                XPathException e = new XPathException("Cast does not allow an empty sequence");
-                e.setXPathContext(context);
-                e.setLocation(getLocation());
-                e.setErrorCode("XPTY0004");
-                throw e;
+                throw new XPathException("Cast does not allow an empty sequence")
+                        .withXPathContext(context)
+                        .withLocation(getLocation())
+                        .withErrorCode("XPTY0004");
             }
         }
 
@@ -375,11 +372,11 @@ public class CastExpression extends CastingExpression implements Callable {
             ConversionRules rules = context.getConfiguration().getConversionRules();
             converter = rules.getConverter(value.getPrimitiveType(), getTargetType());
             if (converter == null) {
-                XPathException e = new XPathException("Casting from " + value.getPrimitiveType() + " to " + getTargetType() + " is not permitted");
-                e.setXPathContext(context);
-                e.setLocation(getLocation());
-                e.setErrorCode("XPTY0004");
-                throw e;
+                throw new XPathException("Casting from " + value.getPrimitiveType() +
+                                                 " to " + getTargetType() + " is not permitted")
+                        .withXPathContext(context)
+                        .withLocation(getLocation())
+                        .withErrorCode("XPTY0004");
             }
             if (getTargetType().isNamespaceSensitive()) {
                 converter = converter.setNamespaceResolver(getRetainedStaticContext());
@@ -388,10 +385,9 @@ public class CastExpression extends CastingExpression implements Callable {
         ConversionResult result = converter.convert(value);
         if (result instanceof ValidationFailure) {
             ValidationFailure err = (ValidationFailure) result;
-            XPathException xe = err.makeException();
-            xe.maybeSetErrorCode("FORG0001");
-            xe.maybeSetLocation(getLocation());
-            throw xe;
+            throw err.makeException()
+                    .maybeWithErrorCode("FORG0001")
+                    .maybeWithLocation(getLocation());
         }
         return (AtomicValue) result;
     }

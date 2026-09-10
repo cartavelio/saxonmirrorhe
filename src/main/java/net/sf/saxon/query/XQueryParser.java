@@ -953,8 +953,7 @@ public class XQueryParser extends XPathParser {
                 applySchemaImport(imp);
             } catch (XPathException err) {
                 if (!err.hasBeenReported()) {
-                    err.maybeSetLocation(makeLocation(imp.offset));
-                    throw err;
+                    throw err.maybeWithLocation(makeLocation(imp.offset));
                 }
             }
         }
@@ -963,8 +962,7 @@ public class XQueryParser extends XPathParser {
                 applyModuleImport(imp);
             } catch (XPathException err) {
                 if (!err.hasBeenReported()) {
-                    err.maybeSetLocation(makeLocation(imp.offset));
-                    throw err;
+                    throw err.maybeWithLocation(makeLocation(imp.offset));
                 }
             }
         }
@@ -1434,8 +1432,7 @@ public class XQueryParser extends XPathParser {
                         baseURI, executable, (QueryModule) env, queryText, mImport.namespaceURI
                 );
             } catch (XPathException err) {
-                err.maybeSetLocation(makeLocation());
-                reportError(err);
+                reportError(err.maybeWithLocation(makeLocation()));
             }
         }
     }
@@ -1549,8 +1546,7 @@ public class XQueryParser extends XPathParser {
                     try {
                         dfs.setZeroDigit(propertyValue);
                     } catch (XPathException err) {
-                        err.setErrorCode("XQST0097");
-                        throw err;
+                        throw err.withErrorCode("XQST0097");
                     }
                     break;
                 case "digit":
@@ -3573,10 +3569,9 @@ public class XQueryParser extends XPathParser {
                     setQNameParser(oldQP);
                     elemName.obtainFingerprint(env.getConfiguration().getNamePool());
                 } catch (XPathException staticError) {
-                    String code = staticError.getErrorCodeLocalPart();
-                    if ("XPST0008".equals(code) || "XPST0081".equals(code)) {
+                    if (staticError.hasErrorCode("XPST0008", "XPST0081")) {
                         staticError.setErrorCode("XQDY0074");
-                    } else if ("XPST0003".equals(code)) {
+                    } else if (staticError.hasErrorCode("XPST0003")) {
                         //staticError.setErrorCode("XQDY0074");
                         grumble("Invalid QName in element constructor: " + lex, "XQDY0074", offset);
                         return new ErrorExpression();
@@ -3706,11 +3701,10 @@ public class XQueryParser extends XPathParser {
                     attributeName = makeNodeName(lex, false);
                     setQNameParser(oldQP);
                 } catch (XPathException staticError) {
-                    String code = staticError.getErrorCodeLocalPart();
                     staticError.setLocator(makeLocation());
-                    if ("XPST0008".equals(code) || "XPST0081".equals(code)) {
+                    if (staticError.hasErrorCode("XPST0008", "XPST0081")) {
                         staticError.setErrorCode("XQDY0074");
-                    } else if ("XPST0003".equals(code)) {
+                    } else if (staticError.hasErrorCode("XPST0003")) {
                         grumble("Invalid QName in attribute constructor: " + lex, "XQDY0074", offset);
                         return new ErrorExpression();
                     }

@@ -60,10 +60,9 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
 
     public static void checkNotNull(String collectionURI, XPathContext context) throws XPathException {
         if (collectionURI == null) {
-            XPathException err = new XPathException("No default collection has been defined");
-            err.setErrorCode("FODC0002");
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException("No default collection has been defined")
+                    .withErrorCode("FODC0002")
+                    .withXPathContext(context);
         }
     }
 

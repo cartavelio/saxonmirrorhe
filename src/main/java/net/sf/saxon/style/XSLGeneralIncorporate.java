@@ -7,9 +7,7 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.DocumentFn;
-import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.DocumentKey;
 import net.sf.saxon.om.NodeName;
@@ -166,9 +164,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
             return incModule;
 
         } catch (XPathException err) {
-            err.setErrorCode("XTSE0165");
-            err.setIsStaticError(true);
-            compileError(err);
+            compileError(err.withErrorCode("XTSE0165").asStaticError());
             return null;
         }
     }

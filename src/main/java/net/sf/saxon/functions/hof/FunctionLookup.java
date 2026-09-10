@@ -121,7 +121,7 @@ public class FunctionLookup extends ContextAccessorFunction {
             }
             return fi;
         } catch (XPathException e) {
-            if ("XPST0017".equals(e.getErrorCodeLocalPart())) {
+            if (e.hasErrorCode("XPST0017")) {
                 return null;
             }
             throw e;

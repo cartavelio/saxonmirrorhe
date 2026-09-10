@@ -135,13 +135,9 @@ public class StructuredQName implements IdentityComparable {
             NamespaceUri uri = resolver.getURIForPrefix(parts[0], useDefault);
             if (uri == null) {
                 if (NameChecker.isValidNCName(parts[0])) {
-                    XPathException de = new XPathException("Namespace prefix '" + parts[0] + "' has not been declared");
-                    de.setErrorCode("FONS0004");
-                    throw de;
+                    throw new XPathException("Namespace prefix '" + parts[0] + "' has not been declared", "FONS0004");
                 } else {
-                    XPathException de = new XPathException("Invalid namespace prefix '" + parts[0] + "'");
-                    de.setErrorCode("FOCA0002");
-                    throw de;
+                    throw new XPathException("Invalid namespace prefix '" + parts[0] + "'", "FOCA0002");
                 }
             }
             return new StructuredQName(parts[0], uri, parts[1]);

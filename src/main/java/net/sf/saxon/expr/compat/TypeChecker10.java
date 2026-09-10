@@ -75,9 +75,7 @@ public class TypeChecker10 extends TypeChecker {
             try {
                 return fn.typeCheck(visitor, config.getDefaultContextItemStaticInfo());
             } catch (XPathException err) {
-                err.maybeSetLocation(supplied.getLocation());
-                err.setIsStaticError(true);
-                throw err;
+                throw err.maybeWithLocation(supplied.getLocation()).asStaticError();
             }
         }
 
@@ -90,9 +88,7 @@ public class TypeChecker10 extends TypeChecker {
             try {
                 return fn.typeCheck(visitor, config.getDefaultContextItemStaticInfo());
             } catch (XPathException err) {
-                err.maybeSetLocation(supplied.getLocation());
-                err.setIsStaticError(true);
-                throw err;
+                throw err.maybeWithLocation(supplied.getLocation()).asStaticError();
             }
         }
         return super.staticTypeCheck(supplied, req, roleSupplier, visitor);

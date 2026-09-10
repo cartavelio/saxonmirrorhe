@@ -167,11 +167,8 @@ public class ComputedElement extends ElementCreator {
             if (th.relationship(supplied, BuiltInAtomicType.STRING) == Affinity.DISJOINT &&
                     th.relationship(supplied, BuiltInAtomicType.UNTYPED_ATOMIC) == Affinity.DISJOINT &&
                     th.relationship(supplied, BuiltInAtomicType.QNAME) == Affinity.DISJOINT) {
-                XPathException de = new XPathException("The name of a constructed element must be a string, QName, or untypedAtomic");
-                de.setErrorCode("XPTY0004");
-                de.setIsTypeError(true);
-                de.setLocation(getLocation());
-                throw de;
+                throw new XPathException("The name of a constructed element must be a string, QName, or untypedAtomic")
+                        .withErrorCode("XPTY0004").asTypeError().withLocation(getLocation());
             }
         } else {
             if (!th.isSubType(getNameExp().getItemType(), BuiltInAtomicType.STRING)) {
@@ -188,24 +185,18 @@ public class ComputedElement extends ElementCreator {
                         String prefix = parts[0];
                         NamespaceUri uri = getNamespaceResolver().getURIForPrefix(prefix, true);
                         if (uri == null) {
-                            XPathException se = new XPathException("Prefix " + prefix + " has not been declared");
-                            se.setErrorCode("XPST0081");
-                            se.setIsStaticError(true);
-                            throw se;
+                            throw new XPathException("Prefix " + prefix + " has not been declared")
+                                    .withErrorCode("XPST0081").asStaticError();
                         }
                         setNamespaceExp(new StringLiteral(uri.toString()));
                     }
                 }
             } catch (XPathException e) {
-                String code = e.getErrorCodeLocalPart();
-                if (code == null || code.equals("FORG0001")) {
-                    e.setErrorCode(isXSLT() ? "XTDE0820" : "XQDY0074");
-                } else if (code.equals("XPST0081")) {
-                    e.setErrorCode(isXSLT() ? "XTDE0830" : "XQDY0074");
-                }
-                e.maybeSetLocation(getLocation());
-                e.setIsStaticError(true);
-                throw e;
+                throw e.maybeWithErrorCode(isXSLT() ? "XTDE0820" : "XQDY0074")
+                        .replacingErrorCode("FORG0001", isXSLT() ? "XTDE0820" : "XQDY0074")
+                        .replacingErrorCode("XPST0081", isXSLT() ? "XTDE0830" : "XQDY0074")
+                        .maybeWithLocation(getLocation())
+                        .asStaticError();
             }
         }
         return super.typeCheck(visitor, contextInfo);
@@ -671,9 +662,7 @@ public class ComputedElement extends ElementCreator {
                     out.endElement();
 
                 } catch (XPathException e) {
-                    e.maybeSetLocation(expr.getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
+                    throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                 }
                 return null;
             };

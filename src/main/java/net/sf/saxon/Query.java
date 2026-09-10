@@ -865,8 +865,7 @@ public class Query {
                     if (e instanceof XPathException) {
                         throw new SaxonApiException(e);
                     } else {
-                        XPathException xe = new XPathException("Exception in ModuleURIResolver: ", e);
-                        xe.setErrorCode("XQST0059");
+                        XPathException xe = new XPathException("Exception in ModuleURIResolver: ", "XQST0059");
                         throw new SaxonApiException(xe);
                     }
                 }

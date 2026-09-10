@@ -123,9 +123,7 @@ public class SQLExecute extends ExtensionInstruction {
                 }
 
             } catch (SQLException ex) {
-                XPathException de = new XPathException("(SQL) " + ex.getMessage());
-                de.setXPathContext(context);
-                throw de;
+                throw new XPathException("(SQL) " + ex.getMessage()).withXPathContext(context);
             }
 
             return EmptySequence.getInstance();

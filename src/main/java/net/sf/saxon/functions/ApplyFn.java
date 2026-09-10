@@ -142,9 +142,9 @@ public class ApplyFn extends SystemFunction  {
             String errorCode = isDynamicFunctionCall() ? "XPTY0004" : "FOAP0001";
             XPathException err = new XPathException(
                     "Number of arguments required for dynamic call to " + function.getDescription() + " is " + function.getArity() +
-                            "; number supplied = " + args.arrayLength(), errorCode);
+                            "; number supplied = " + args.arrayLength(), errorCode)
+                    .withXPathContext(context);
             err.setIsTypeError(isDynamicFunctionCall());
-            err.setXPathContext(context);
             throw err;
         }
 

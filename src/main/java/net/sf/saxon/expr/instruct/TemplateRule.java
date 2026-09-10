@@ -395,14 +395,9 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
             ensureBodyEvaluatorExists();
             return bodyEvaluator.processLeavingTail(output, context);
         } catch (UncheckedXPathException e) {
-            XPathException xe = e.getXPathException();
-            xe.maybeSetLocation(this);
-            xe.maybeSetContext(context);
-            throw xe;
+            throw e.getXPathException().maybeWithLocation(this).maybeWithContext(context);
         } catch (XPathException e) {
-            e.maybeSetLocation(this);
-            e.maybeSetContext(context);
-            throw e;
+            throw e.maybeWithLocation(this).maybeWithContext(context);
         } catch (Exception e2) {
             String message = "Internal error evaluating template rule "
                     + (getLineNumber() > 0 ? " at line " + getLineNumber() : "")

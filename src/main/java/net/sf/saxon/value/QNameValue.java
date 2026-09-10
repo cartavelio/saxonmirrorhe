@@ -91,15 +91,11 @@ public class QNameValue extends QualifiedNameValue {
 
     private static StructuredQName buildStructuredQName(String prefix, NamespaceUri uri, String localName, boolean check) throws XPathException {
         if (check && !NameChecker.isValidNCName(localName)) {
-            XPathException err = new XPathException("Malformed local name in QName: '" + localName + '\'');
-            err.setErrorCode("FORG0001");
-            throw err;
+            throw new XPathException("Malformed local name in QName: '" + localName + '\'', "FORG0001");
         }
         prefix = prefix == null ? "" : prefix;
         if (check && uri.isEmpty() && prefix.length() != 0) {
-            XPathException err = new XPathException("QName has null namespace but non-empty prefix");
-            err.setErrorCode("FOCA0002");
-            throw err;
+            throw new XPathException("QName has null namespace but non-empty prefix", "FOCA0002");
         }
         return new StructuredQName(prefix, uri, localName);
     }

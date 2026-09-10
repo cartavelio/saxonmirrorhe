@@ -126,12 +126,10 @@ public class SerializationParamsHandler {
                     ResultDocument.setSerializationProperty(properties, uri, lname, value,
                         child.getAllNamespaces(), false, node.getConfiguration());
                 } catch (XPathException err) {
-                    if ("XQST0109".equals(err.getErrorCodeLocalPart()) || "SEPM0016".equals(err.getErrorCodeLocalPart())) {
+                    if (err.hasErrorCode("XQST0109", "SEPM0016")) {
                         if (uri.isEmpty()) {
-                            XPathException e2 = new XPathException("Unknown serialization parameter " +
-                                Err.depict(child), "SEPM0017");
-                            e2.setLocator(locator);
-                            throw e2;
+                            throw new XPathException("Unknown serialization parameter " +
+                                Err.depict(child), "SEPM0017", locator);
                         }
                         // Unknown serialization parameter - no action, ignore the error
                     } else {
@@ -187,7 +185,7 @@ public class SerializationParamsHandler {
     public SerializationProperties getSerializationProperties() {
         CharacterMapIndex index = new CharacterMapIndex();
         if (characterMap != null) {
-            index.putCharacterMap(new StructuredQName("", NamespaceUri.NULL, "charMap"), characterMap);
+            index.putCharacterMap(NamespaceUri.NULL.qName("charMap"), characterMap);
             properties.setProperty(SaxonOutputKeys.USE_CHARACTER_MAPS, "charMap");
         }
         return new SerializationProperties(properties, index);

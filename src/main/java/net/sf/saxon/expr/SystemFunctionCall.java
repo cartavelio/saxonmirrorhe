@@ -596,9 +596,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                         try {
                             return fn.call(context, StackFrame.EMPTY_ARRAY_OF_SEQUENCE).iterate();
                         } catch (XPathException err) {
-                            err.maybeSetContext(context);
-                            err.maybeSetLocation(expr.getLocation());
-                            throw err;
+                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     };
                 case 1:
@@ -606,9 +604,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                         try {
                             return fn.call(context, new Sequence[]{argumentEvaluators[0].evaluate(context)}).iterate();
                         } catch (XPathException err) {
-                            err.maybeSetContext(context);
-                            err.maybeSetLocation(expr.getLocation());
-                            throw err;
+                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     };
                 case 2:
@@ -620,9 +616,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                                                    argumentEvaluators[1].evaluate(context)
                                            }).iterate();
                         } catch (XPathException err) {
-                            err.maybeSetContext(context);
-                            err.maybeSetLocation(expr.getLocation());
-                            throw err;
+                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     };
                 default:
@@ -630,9 +624,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                         try {
                             return fn.call(context, evaluateArguments(context)).iterate();
                         } catch (XPathException err) {
-                            err.maybeSetContext(context);
-                            err.maybeSetLocation(expr.getLocation());
-                            throw err;
+                            throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     };
             }
@@ -672,10 +664,9 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                     try {
                         ((PushableFunction) fn).process(output, context, actualArgs);
                     } catch (XPathException e) {
-                        e.maybeSetLocation(expr.getLocation());
-                        e.maybeSetContext(context);
-                        e.maybeSetFailingExpression(expr);
-                        throw e;
+                        throw e.maybeWithLocation(expr.getLocation())
+                                .maybeWithFailingExpression(expr)
+                                .maybeWithContext(context);
                     }
                     return null;
                 };

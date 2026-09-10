@@ -122,12 +122,9 @@ public final class AxisExpression extends Expression {
             // which is a type error and therefore can be thrown statically. But many test cases expect
             // XPDY0002 ("Context item absent") which for inexplicable reasons is a dynamic error rather than
             // a type error, and therefore cannot be raised until execution time.
-            XPathException err = new XPathException("Axis step " + this +
-                                                            " cannot be used here: the context item is absent");
-            //err.setIsTypeError(true);
-            err.setErrorCode("XPDY0002");
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("Axis step " + this + " cannot be used here: the context item is absent")
+                    .withErrorCode("XPDY0002")
+                    .withLocation(getLocation());
         } else {
             staticInfo = contextInfo;
         }
@@ -137,12 +134,11 @@ public final class AxisExpression extends Expression {
             TypeHierarchy th = config.getTypeHierarchy();
             Affinity relation = th.relationship(contextItemType, AnyNodeTest.getInstance());
             if (relation == Affinity.DISJOINT) {
-                XPathException err = new XPathException("Axis step " + this +
-                                                                " cannot be used here: the context item is not a node");
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0020");
-                err.setLocation(getLocation());
-                throw err;
+                throw new XPathException("Axis step " + this +
+                                                                " cannot be used here: the context item is not a node")
+                        .asTypeError()
+                        .withErrorCode("XPTY0020")
+                        .withLocation(getLocation());
             } else if (relation == Affinity.OVERLAPS || relation == Affinity.SUBSUMES) {
                 // need to insert a dynamic check of the context item type
                 Expression thisExp = checkPlausibility(visitor, contextInfo, !noWarnings);
@@ -1082,13 +1078,11 @@ public final class AxisExpression extends Expression {
         Item item = context.getContextItem();
         if (item == null) {
             // Might as well do the test anyway, whether or not contextMaybeUndefined is set
-            XPathException err = new XPathException("The context item for axis step " +
-                                                            this + " is absent");
-            err.setErrorCode("XPDY0002");
-            err.setXPathContext(context);
-            err.setLocation(getLocation());
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException("The context item for axis step " + this + " is absent")
+                    .withErrorCode("XPDY0002")
+                    .withXPathContext(context)
+                    .withLocation(getLocation())
+                    .asTypeError();
         }
         try {
             if (test == null) {
@@ -1097,19 +1091,16 @@ public final class AxisExpression extends Expression {
                 return ((NodeInfo) item).iterateAxis(axis, test);
             }
         } catch (ClassCastException cce) {
-            XPathException err = new XPathException("The context item for axis step " +
-                                                            this + " is not a node");
-            err.setErrorCode("XPTY0020");
-            err.setXPathContext(context);
-            err.setLocation(getLocation());
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException("The context item for axis step " + this + " is not a node")
+                    .withErrorCode("XPTY0020")
+                    .withXPathContext(context)
+                    .withLocation(getLocation())
+                    .asTypeError();
         } catch (UnsupportedOperationException err) {
             if (err.getCause() instanceof XPathException) {
-                XPathException ec = (XPathException) err.getCause();
-                ec.maybeSetLocation(getLocation());
-                ec.maybeSetContext(context);
-                throw ec;
+                throw ((XPathException) err.getCause())
+                    .maybeWithLocation(getLocation())
+                    .maybeWithContext(context);
             } else {
                 // the namespace axis is not supported for all tree implementations
                 dynamicError(err.getMessage(), "XPST0010", context);
@@ -1228,23 +1219,21 @@ public final class AxisExpression extends Expression {
     public static class AxisExpressionElaborator extends PullElaborator {
 
         private void reportDoesNotExist(Expression expression, XPathContext context) throws XPathException {
-            XPathException err = new XPathException("The context item for axis step " +
-                                                            expression + " is absent");
-            err.setErrorCode("XPDY0002");
-            err.setXPathContext(context);
-            err.setLocation(expression.getLocation());
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException("The context item for axis step " +
+                                                            expression + " is absent")
+                    .withErrorCode("XPDY0002")
+                    .withXPathContext(context)
+                    .withLocation(expression.getLocation())
+                    .asTypeError();
         }
 
         private void reportIsNotNode(Expression expression, XPathContext context) throws XPathException {
-            XPathException err = new XPathException("The context item for axis step " +
-                                                            expression + " is not a node");
-            err.setErrorCode("XPTY0020");
-            err.setXPathContext(context);
-            err.setLocation(expression.getLocation());
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException("The context item for axis step " +
+                                                            expression + " is not a node")
+                    .withErrorCode("XPTY0020")
+                    .withXPathContext(context)
+                    .withLocation(expression.getLocation())
+                    .asTypeError();
         }
 
         @SuppressWarnings("DuplicatedCode")

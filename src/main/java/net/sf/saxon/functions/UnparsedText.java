@@ -50,11 +50,9 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
         try {
             return SequenceTool.itemOrEmpty(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
         } catch (XPathException e) {
-            if (e.getErrorCodeQName() == null) {
-                e.setErrorCode("FOUT1170");
-            }
-            if (getArity() == 2 && e.getErrorCodeLocalPart().equals("FOUT1200")) {
-                e.setErrorCode("FOUT1190");
+            e.maybeSetErrorCode("FOUT1170");
+            if (getArity() == 2) {
+                throw e.replacingErrorCode("FOUT1200", "FOUT1190");
             }
             throw e;
         }
@@ -79,7 +77,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                 readFile(absoluteURI, encoding, consumer, context);
                 consumer.close();
             } catch (XPathException e) {
-                if (getArity() == 2 && e.getErrorCodeLocalPart().equals("FOUT1200")) {
+                if (getArity() == 2 && e.hasErrorCode("FOUT1200")) {
                     e.setErrorCode("FOUT1190");
                 }
                 throw e;

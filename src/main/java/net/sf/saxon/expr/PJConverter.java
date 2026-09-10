@@ -573,13 +573,11 @@ public abstract class PJConverter {
                 try {
                     list = (Collection<Object>)targetClass.newInstance();
                 } catch (InstantiationException e) {
-                    XPathException de = new XPathException("Cannot instantiate collection class " + targetClass);
-                    de.setXPathContext(context);
-                    throw de;
+                    throw new XPathException("Cannot instantiate collection class " + targetClass)
+                            .withXPathContext(context);
                 } catch (IllegalAccessException e) {
-                    XPathException de = new XPathException("Cannot access collection class " + targetClass);
-                    de.setXPathContext(context);
-                    throw de;
+                    throw new XPathException("Cannot access collection class " + targetClass)
+                            .withXPathContext(context);
                 }
             }
             Configuration config = context.getConfiguration();
@@ -837,10 +835,9 @@ public abstract class PJConverter {
             if (str.length() == 1) {
                 return str.charAt(0);
             } else {
-                XPathException de = new XPathException("Cannot convert xs:string to Java char unless length is 1");
-                de.setXPathContext(context);
-                de.setErrorCode(SaxonErrorCode.SXJE0005);
-                throw de;
+                throw new XPathException("Cannot convert xs:string to Java char unless length is 1")
+                        .withXPathContext(context)
+                        .withErrorCode(SaxonErrorCode.SXJE0005);
             }
         }
 

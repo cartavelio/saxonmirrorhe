@@ -217,9 +217,7 @@ public class LocalVariableReference extends VariableReference {
                     }
                     return null;
                 } catch (XPathException e) {
-                    e.maybeSetLocation(getExpression().getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
+                    throw e.maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
                 }
             };
         }
@@ -232,9 +230,7 @@ public class LocalVariableReference extends VariableReference {
                 try {
                     return context.evaluateLocalVariable(slot).head();
                 } catch (XPathException e) {
-                    e.maybeSetLocation(getExpression().getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
+                    throw e.maybeWithLocation(getExpression().getLocation()).maybeWithContext(context);
                 }
             };
         }

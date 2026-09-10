@@ -91,9 +91,7 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
     public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression[] arguments) throws XPathException {
         super.supplyTypeInformation(visitor, contextInfo, arguments);
         if (contextInfo.getItemType() == ErrorType.getInstance()) {
-            XPathException err = new XPathException("The context item is absent at this point");
-            err.setErrorCode("XPDY0002");
-            throw err;
+            throw new XPathException("The context item is absent at this point", "XPDY0002");
         } else {
             contextPossiblyUndefined = contextInfo.isPossiblyAbsent();
         }
@@ -135,10 +133,8 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
         public Int64Value evaluateItem(XPathContext c) throws XPathException {
             FocusIterator currentIterator = c.getCurrentIterator();
             if (currentIterator == null) {
-                XPathException e = new XPathException("The context item is absent, so position() is undefined");
-                e.setXPathContext(c);
-                e.setErrorCode("XPDY0002");
-                throw e;
+                throw new XPathException("The context item is absent, so position() is undefined")
+                        .withXPathContext(c).withErrorCode("XPDY0002");
             }
             return Int64Value.makeIntegerValue(currentIterator.position());
         }
@@ -162,11 +158,8 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
                     return context -> {
                         FocusIterator focus = context.getCurrentIterator();
                         if (focus == null) {
-                            XPathException e = new XPathException("The context item is absent, so position() is undefined");
-                            e.setXPathContext(context);
-                            e.setLocation(sfc.getLocation());
-                            e.setErrorCode("XPDY0002");
-                            throw e;
+                            throw new XPathException("The context item is absent, so position() is undefined")
+                                    .withXPathContext(context).withLocation(sfc.getLocation()).withErrorCode("XPDY0002");
                         }
                         return Int64Value.makeIntegerValue(focus.position());
                     };
@@ -212,11 +205,10 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
                     return context -> {
                         FocusIterator focus = context.getCurrentIterator();
                         if (focus == null) {
-                            XPathException e = new XPathException("The context item is absent, so last() is undefined");
-                            e.setXPathContext(context);
-                            e.setLocation(sfc.getLocation());
-                            e.setErrorCode("XPDY0002");
-                            throw e;
+                            throw new XPathException("The context item is absent, so last() is undefined")
+                                    .withXPathContext(context)
+                                    .withLocation(sfc.getLocation())
+                                    .withErrorCode("XPDY0002");
                         }
                         return Int64Value.makeIntegerValue(context.getLast());
                     };

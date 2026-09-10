@@ -144,9 +144,7 @@ public abstract class Instruction extends Expression /*implements TailCallReturn
             TailCall tc = makeElaborator().elaborateForPush().processLeavingTail(output, context);
             dispatchTailCall(tc);
         } catch (XPathException err) {
-            err.maybeSetFailingExpression(this);
-            err.maybeSetContext(context);
-            throw err;
+            throw err.maybeWithFailingExpression(this).maybeWithContext(context);
         }
     }
 
@@ -175,9 +173,7 @@ public abstract class Instruction extends Expression /*implements TailCallReturn
         if (error instanceof TerminationException) {
             return error;
         }
-        error.maybeSetLocation(loc);
-        error.maybeSetContext(context);
-        return error;
+        return error.maybeWithLocation(loc).maybeWithContext(context);
     }
 
     /**

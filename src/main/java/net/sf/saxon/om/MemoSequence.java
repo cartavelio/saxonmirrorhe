@@ -104,9 +104,7 @@ public class MemoSequence implements Sequence {
             case BUSY:
                 // recursive entry: can happen if there is a circularity involving variable and function definitions
                 // Can also happen if variable evaluation is attempted in a debugger, hence the cautious message
-                XPathException de = new XPathException("Attempt to access a variable while it is being evaluated");
-                de.setErrorCode("XTDE0640");
-                //de.setXPathContext(context);
+                XPathException de = new XPathException("Attempt to access a variable while it is being evaluated", "XTDE0640");
                 throw new UncheckedXPathException(de);
 
             case EMPTY:

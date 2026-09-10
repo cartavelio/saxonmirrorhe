@@ -514,9 +514,7 @@ public class SequenceTool {
         try {
             supply(value.iterate(), (ItemConsumer<? super Item>) it -> output.append(it, locationId, ReceiverOption.ALL_NAMESPACES));
         } catch (UncheckedXPathException e) {
-            XPathException xpe = e.getXPathException();
-            xpe.maybeSetLocation(locationId);
-            throw xpe;
+            throw e.getXPathException().maybeWithLocation(locationId);
         }
     }
 

@@ -163,11 +163,11 @@ public class LookupExpression extends BinaryExpression {
                     visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " +
                                                  containerType, SaxonErrorCode.SXWN9026, getLocation());
                 } else {
-                    XPathException err = new XPathException("The left-hand operand of '?' must be a map or an array; the supplied expression is of type " + containerType, "XPTY0004");
-                    err.setLocation(getLocation());
-                    err.setIsTypeError(true);
-                    err.setFailingExpression(this);
-                    throw err;
+                    throw new XPathException("The left-hand operand of '?' must be a map or an array; "
+                                                     + "the supplied expression is of type " + containerType, "XPTY0004")
+                            .withLocation(getLocation())
+                            .asTypeError()
+                            .withFailingExpression(this);
                 }
             }
         }
@@ -440,12 +440,11 @@ public class LookupExpression extends BinaryExpression {
     }
 
     protected static void mustBeArrayOrMap(Expression exp, Item baseItem) throws XPathException {
-        XPathException exception = new XPathException("The items on the LHS of the '?' operator must be maps or arrays; but value (" +
-                                                              baseItem.toShortString() + ") was supplied", "XPTY0004");
-        exception.setIsTypeError(true);
-        exception.setLocation(exp.getLocation());
-        exception.setFailingExpression(exp);
-        throw exception;
+        throw new XPathException("The items on the LHS of the '?' operator must be maps or arrays; but value (" +
+                                                              baseItem.toShortString() + ") was supplied", "XPTY0004")
+                .asTypeError()
+                .withLocation(exp.getLocation())
+                .withFailingExpression(exp);
     }
 
     /**
@@ -592,13 +591,12 @@ public class LookupExpression extends BinaryExpression {
                                         GroundedValue member = ((ArrayItem) baseItem).get(subscript);
                                         return member.iterate();
                                     } else {
-                                        XPathException exception = new XPathException(
+                                        throw new XPathException(
                                                 "An item on the LHS of the '?' operator (" + expr.getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
-                                                        baseItem.toShortString() + ") is not an integer", "XPTY0004");
-                                        exception.setIsTypeError(true);
-                                        exception.setLocation(expr.getLocation());
-                                        exception.setFailingExpression(expr);
-                                        throw exception;
+                                                        baseItem.toShortString() + ") is not an integer", "XPTY0004")
+                                                .asTypeError()
+                                                .withLocation(expr.getLocation())
+                                                .withFailingExpression(expr);
                                     }
                                 });
                                 SequenceIterator rhsIter = rhsVal.iterate();
@@ -612,13 +610,12 @@ public class LookupExpression extends BinaryExpression {
                             }
                             case EXTERNAL: {
                                 if (!(rhsVal instanceof StringValue)) {
-                                    XPathException exception = new XPathException(
+                                    throw new XPathException(
                                             "An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator (" +
-                                                    baseItem.toShortString() + ") is not a singleton string", "XPTY0004");
-                                    exception.setIsTypeError(true);
-                                    exception.setLocation(expr.getLocation());
-                                    exception.setFailingExpression(expr);
-                                    throw exception;
+                                                    baseItem.toShortString() + ") is not a singleton string", "XPTY0004")
+                                            .asTypeError()
+                                            .withLocation(expr.getLocation())
+                                            .withFailingExpression(expr);
                                 }
                                 String key = ((StringValue) rhsVal).getStringValue();
                                 return context.getConfiguration().externalObjectAsMap(

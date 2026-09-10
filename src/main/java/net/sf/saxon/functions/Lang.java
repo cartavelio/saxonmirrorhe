@@ -91,16 +91,14 @@ public class Lang extends SystemFunction  {
         NodeInfo target;
         Item current = context.getContextItem();
         if (current == null) {
-            XPathException err = new XPathException("The context item for lang() is absent");
-            err.setErrorCode("XPDY0002");
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException("The context item for lang() is absent")
+                    .withErrorCode("XPDY0002")
+                    .withXPathContext(context);
         }
         if (!(current instanceof NodeInfo)) {
-            XPathException err = new XPathException("The context item for lang() is not a node");
-            err.setErrorCode("XPTY0004");
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException("The context item for lang() is not a node")
+                    .withErrorCode("XPTY0004")
+                    .withXPathContext(context);
         }
         target = (NodeInfo) current;
         return target;

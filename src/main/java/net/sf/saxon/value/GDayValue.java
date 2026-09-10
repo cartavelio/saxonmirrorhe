@@ -109,9 +109,7 @@ public class GDayValue extends GDateValue {
 
     @Override
     public CalendarValue add(DurationValue duration) throws XPathException {
-        XPathException err = new XPathException("Cannot add a duration to an xs:gDay");
-        err.setErrorCode("XPTY0004");
-        throw err;
+        throw new XPathException("Cannot add a duration to an xs:gDay", "XPTY0004").asTypeError();
     }
 
     /**

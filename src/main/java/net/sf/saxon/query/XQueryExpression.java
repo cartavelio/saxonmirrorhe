@@ -805,8 +805,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             try {
                 return base.next();
             } catch (UncheckedXPathException e1) {
-                XPathException xe = e1.getXPathException();
-                xe.maybeSetLocation(location);
+                XPathException xe = e1.getXPathException().maybeWithLocation(location);
                 XmlProcessingException err = new XmlProcessingException(xe);
                 reporter.report(err);
                 xe.setHasBeenReported(true);

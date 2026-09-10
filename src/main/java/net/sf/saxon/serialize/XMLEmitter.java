@@ -250,17 +250,14 @@ public class XMLEmitter extends Emitter {
                     if (unfailing) {
                         version = "1.0";
                     } else {
-                        XPathException err = new XPathException("XML version must be 1.0 or 1.1");
-                        err.setErrorCode("SESU0013");
-                        throw err;
+                        throw new XPathException("XML version must be 1.0 or 1.1").withErrorCode("SESU0013");
                     }
                 }
                 if (!version.equals("1.0") && omitXMLDeclaration.equals("yes") &&
                         outputProperties.getProperty(OutputKeys.DOCTYPE_SYSTEM) != null) {
                     if (!unfailing) {
-                        XPathException err = new XPathException("Values of 'version', 'omit-xml-declaration', and 'doctype-system' conflict");
-                        err.setErrorCode("SEPM0009");
-                        throw err;
+                        throw new XPathException("Values of 'version', 'omit-xml-declaration', and 'doctype-system' conflict")
+                                .withErrorCode("SEPM0009");
                     }
                 }
             }
@@ -274,9 +271,8 @@ public class XMLEmitter extends Emitter {
                 if (unfailing) {
                     undeclareNamespaces = false;
                 } else {
-                    XPathException err = new XPathException("Cannot undeclare namespaces with XML version 1.0");
-                    err.setErrorCode("SEPM0010");
-                    throw err;
+                    throw new XPathException("Cannot undeclare namespaces with XML version 1.0")
+                            .withErrorCode("SEPM0010");
                 }
             }
 
@@ -288,9 +284,8 @@ public class XMLEmitter extends Emitter {
             if (standalone != null) {
                 requireWellFormed = true;
                 if (omitXMLDeclaration.equals("yes") && !unfailing) {
-                    XPathException err = new XPathException("Values of 'standalone' and 'omit-xml-declaration' conflict");
-                    err.setErrorCode("SEPM0009");
-                    throw err;
+                    throw new XPathException("Values of 'standalone' and 'omit-xml-declaration' conflict")
+                            .withErrorCode("SEPM0009");
                 }
             }
 
@@ -428,10 +423,9 @@ public class XMLEmitter extends Emitter {
         if (!started) {
             openDocument();
         } else if (requireWellFormed && elementStack.isEmpty() && startedElement && !unfailing) {
-            XPathException err = new XPathException("When 'standalone' or 'doctype-system' is specified, " +
-                                                            "the document must be well-formed; but this document contains more than one top-level element");
-            err.setErrorCode("SEPM0004");
-            throw err;
+            throw new XPathException("When 'standalone' or 'doctype-system' is specified, " +
+                                                            "the document must be well-formed; but this document contains more than one top-level element")
+                    .withErrorCode("SEPM0004");
         }
         startedElement = true;
 
@@ -439,10 +433,9 @@ public class XMLEmitter extends Emitter {
         if (!allCharactersEncodable) {
             int badchar = testCharacters(StringView.of(displayName));
             if (badchar != 0) {
-                XPathException err = new XPathException("Element name contains a character (decimal + " +
-                                                                badchar + ") not available in the selected encoding");
-                err.setErrorCode("SERE0008");
-                throw err;
+                throw new XPathException("Element name contains a character (decimal + " +
+                                                                badchar + ") not available in the selected encoding")
+                        .withErrorCode("SERE0008");
             }
         }
 
@@ -517,10 +510,9 @@ public class XMLEmitter extends Emitter {
             } else {
                 int badchar = testCharacters(StringView.of(nsprefix));
                 if (badchar != 0) {
-                    XPathException err = new XPathException("Namespace prefix contains a character (decimal + " +
-                                                                    badchar + ") not available in the selected encoding");
-                    err.setErrorCode("SERE0008");
-                    throw err;
+                    throw new XPathException("Namespace prefix contains a character (decimal + " +
+                                                                    badchar + ") not available in the selected encoding")
+                            .withErrorCode("SERE0008");
                 }
                 if (undeclareNamespaces || !nsuri.isEmpty()) {
                     if (isFirst) {
@@ -557,10 +549,9 @@ public class XMLEmitter extends Emitter {
                 if (unfailing) {
                     displayName = convertToAscii(StringView.of(displayName)).toString();
                 } else {
-                    XPathException err = new XPathException("Attribute name contains a character (decimal + " +
-                                                                    badchar + ") not available in the selected encoding");
-                    err.setErrorCode("SERE0008");
-                    throw err;
+                    throw new XPathException("Attribute name contains a character (decimal + " +
+                                                                    badchar + ") not available in the selected encoding")
+                            .withErrorCode("SERE0008");
                 }
             }
         }
@@ -743,10 +734,9 @@ public class XMLEmitter extends Emitter {
         }
 
         if (requireWellFormed && elementStack.isEmpty() && !Whitespace.isAllWhite(chars) && !unfailing) {
-            XPathException err = new XPathException("When 'standalone' or 'doctype-system' is specified, " +
-                                                            "the document must be well-formed; but this document contains a top-level text node");
-            err.setErrorCode("SEPM0004");
-            throw err;
+            throw new XPathException("When 'standalone' or 'doctype-system' is specified, " +
+                                                            "the document must be well-formed; but this document contains a top-level text node")
+                    .withErrorCode("SEPM0004");
         }
 
         try {
@@ -814,10 +804,9 @@ public class XMLEmitter extends Emitter {
             if (unfailing) {
                 target = convertToAscii(StringView.of(target)).toString();
             } else {
-                XPathException err = new XPathException("Character in processing instruction name cannot be represented " +
-                                                                "in the selected encoding (code " + x + ')');
-                err.setErrorCode("SERE0008");
-                throw err;
+                throw new XPathException("Character in processing instruction name cannot be represented " +
+                                                                "in the selected encoding (code " + x + ')')
+                        .withErrorCode("SERE0008");
             }
         }
         x = testCharacters(data);
@@ -825,10 +814,9 @@ public class XMLEmitter extends Emitter {
             if (unfailing) {
                 data = convertToAscii(data);
             } else {
-                XPathException err = new XPathException("Character in processing instruction data cannot be represented " +
-                                                                "in the selected encoding (code " + x + ')');
-                err.setErrorCode("SERE0008");
-                throw err;
+                throw new XPathException("Character in processing instruction data cannot be represented " +
+                                                                "in the selected encoding (code " + x + ')')
+                        .withErrorCode("SERE0008");
             }
         }
         try {
@@ -897,10 +885,9 @@ public class XMLEmitter extends Emitter {
                 disabled = !disabled;
             } else if (disabled) {
                 if (c > 127 && !characterSet.inCharset(c)) {
-                    XPathException de = new XPathException("Character " + c + " (x" + Integer.toHexString(c) +
-                                                                   ") is not available in the chosen encoding");
-                    de.setErrorCode("SERE0008");
-                    throw de;
+                    throw new XPathException("Character " + c + " (x" + Integer.toHexString(c) +
+                                                                   ") is not available in the chosen encoding")
+                            .withErrorCode("SERE0008");
                 }
                 writeCodePoint(c);
             } else if (c < 127) {
@@ -971,10 +958,9 @@ public class XMLEmitter extends Emitter {
             if (unfailing) {
                 chars = convertToAscii(chars);
             } else {
-                XPathException err = new XPathException("Character in comment cannot be represented " +
-                                                                "in the selected encoding (code " + x + ')');
-                err.setErrorCode("SERE0008");
-                throw err;
+                throw new XPathException("Character in comment cannot be represented " +
+                                                                "in the selected encoding (code " + x + ')')
+                        .withErrorCode("SERE0008");
             }
         }
         try {

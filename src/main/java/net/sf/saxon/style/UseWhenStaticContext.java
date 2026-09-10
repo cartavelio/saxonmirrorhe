@@ -15,7 +15,6 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
-import net.sf.saxon.functions.registry.UseWhen30FunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamespaceResolver;
@@ -126,12 +125,10 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
         if (val != null) {
             return Literal.makeLiteral(val);
         } else {
-            XPathException err = new XPathException
-                    ("Variables (other than XSLT 3.0 static variables) cannot be used in a static expression: " +
-                            qName.getDisplayName());
-            err.setErrorCode("XPST0008");
-            err.setIsStaticError(true);
-            throw err;
+            throw new XPathException(
+                    "Variables (other than XSLT 3.0 static variables) cannot be used in a static expression: " +
+                            qName.getDisplayName())
+                    .withErrorCode("XPST0008").asStaticError();
         }
     }
 

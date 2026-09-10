@@ -524,8 +524,7 @@ public final class CardinalityChecker extends UnaryExpression {
                     try {
                         filter.finalCheck();
                     } catch (XPathException e) {
-                        e.maybeSetLocation(expr.getLocation());
-                        throw e;
+                        throw e.maybeWithLocation(expr.getLocation());
                     }
                     return null;
                 };

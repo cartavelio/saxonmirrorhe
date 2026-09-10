@@ -238,12 +238,11 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
                 Configuration config = context.getConfiguration();
                 ann = config.validateAttribute(attName.getStructuredQName(), value, validationAction);
             } catch (ValidationException e) {
-                XPathException err = XPathException.makeXPathException(e);
-                err.maybeSetErrorCode(validationAction == Validation.STRICT ? "XTTE1510" : "XTTE1515");
-                err.setXPathContext(context);
-                err.maybeSetLocation(getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                throw XPathException.makeXPathException(e)
+                        .maybeWithErrorCode(validationAction == Validation.STRICT ? "XTTE1510" : "XTTE1515")
+                        .withXPathContext(context)
+                        .maybeWithLocation(getLocation())
+                        .asTypeError();
             }
         } else {
             ann = BuiltInAtomicType.UNTYPED_ATOMIC;

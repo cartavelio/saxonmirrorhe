@@ -22,8 +22,7 @@ public class TerminationException extends XPathException {
      */
 
     public TerminationException(String message) {
-        super(message);
-        setErrorCode("XTMM9000");
+        super(message, "XTMM9000");
     }
 
 }

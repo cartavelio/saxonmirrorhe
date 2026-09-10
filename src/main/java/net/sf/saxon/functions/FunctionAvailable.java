@@ -104,9 +104,7 @@ public class FunctionAvailable extends SystemFunction {
                         getRetainedStaticContext());
             }
         } catch (XPathException e) {
-            e.setErrorCode("XTDE1400");
-            e.setXPathContext(context);
-            throw e;
+            throw e.withErrorCode("XTDE1400").withXPathContext(context);
         }
 
         final FunctionLibrary lib = context.getController().getExecutable().getFunctionLibrary();

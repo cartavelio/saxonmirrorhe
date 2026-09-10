@@ -392,10 +392,10 @@ public class LiteralResultElement extends StyleElement {
             } else {
                 message = "The supplied file does not appear to be a stylesheet";
             }
-            XPathException err = new XPathException(message);
-            err.setLocation(allocateLocation());
-            err.setErrorCode("XTSE0150");
-            err.setIsStaticError(true);
+            XPathException err = new XPathException(message)
+                    .withLocation(allocateLocation())
+                    .withErrorCode("XTSE0150")
+                    .asStaticError();
             //noinspection EmptyCatchBlock
             compileError(err);
             throw err;
@@ -407,10 +407,10 @@ public class LiteralResultElement extends StyleElement {
 
         String version = getAttributeValue(NamespaceUri.XSLT, "version");
         if (version == null) {
-            XPathException err = new XPathException("Simplified stylesheet: xsl:version attribute is missing");
-            err.setErrorCode("XTSE0150");
-            err.setIsStaticError(true);
-            err.setLocation(allocateLocation());
+            XPathException err = new XPathException("Simplified stylesheet: xsl:version attribute is missing")
+                    .withErrorCode("XTSE0150")
+                    .asStaticError()
+                    .withLocation(allocateLocation());
             //noinspection EmptyCatchBlock
             compileError(err);
             throw err;

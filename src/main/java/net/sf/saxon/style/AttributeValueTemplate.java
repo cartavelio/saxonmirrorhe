@@ -65,10 +65,8 @@ public abstract class AttributeValueTemplate {
                 break;
             } else if (i8 >= 0 && (i0 < 0 || i8 < i0)) {             // found a "}"
                 if (i8 != i9) {                        // a "}" that isn't a "}}"
-                    XPathException err = new XPathException("Closing curly brace in attribute value template \"" + avt.substring(0, len) + "\" must be doubled");
-                    err.setErrorCode("XTSE0370");
-                    err.setIsStaticError(true);
-                    throw err;
+                    throw new XPathException("Closing curly brace in attribute value template \"" + avt.substring(0, len) + "\" must be doubled")
+                            .withErrorCode("XTSE0370").asStaticError();
                 }
                 addStringComponent(components, avt, last, i8 + 1);
                 last = i8 + 2;

@@ -259,8 +259,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
                 checkAnnotations((FunctionItem)item, requiredItemType, config);
                 return new CoercedFunction((FunctionItem)item, requiredItemType);
             } catch (XPathException err) {
-                err.maybeSetLocation(locator);
-                throw err;
+                throw err.maybeWithLocation(locator);
             }
         }
 

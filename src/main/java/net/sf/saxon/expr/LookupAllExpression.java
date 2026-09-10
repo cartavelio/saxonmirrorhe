@@ -118,11 +118,11 @@ public class LookupAllExpression extends UnaryExpression {
                     visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "
                                                  + containerType, SaxonErrorCode.SXWN9026, getLocation());
                 } else {
-                    XPathException err = new XPathException("The left-hand operand of '?' must be a map or an array; the supplied expression is of type " + containerType, "XPTY0004");
-                    err.setLocation(getLocation());
-                    err.setIsTypeError(true);
-                    err.setFailingExpression(this);
-                    throw err;
+                    throw new XPathException("The left-hand operand of '?' must be a map or an array; "
+                                                     + "the supplied expression is of type " + containerType, "XPTY0004")
+                            .withLocation(getLocation())
+                            .asTypeError()
+                            .withFailingExpression(this);
                 }
             }
         }

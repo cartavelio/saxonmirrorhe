@@ -216,10 +216,8 @@ public abstract class Minimax extends CollatingFunctionFixed {
                     prim = min;
                     foundDouble = true;
                 } catch (NumberFormatException e) {
-                    XPathException de = new XPathException("Failure converting " + Err.wrap(min.getUnicodeStringValue()) + " to a number");
-                    de.setErrorCode("FORG0001");
-                    de.setXPathContext(context);
-                    throw de;
+                    throw new XPathException("Failure converting " + Err.wrap(min.getUnicodeStringValue()) + " to a number")
+                            .withErrorCode("FORG0001").withXPathContext(context);
                 }
             } else {
                 if (prim instanceof DoubleValue) {
@@ -244,11 +242,8 @@ public abstract class Minimax extends CollatingFunctionFixed {
                 }
             } else {
                 if (!prim.getPrimitiveType().isOrdered(false)) {
-                    XPathException de = new XPathException("Type " + prim.getPrimitiveType() + " is not an ordered type");
-                    de.setErrorCode("FORG0006");
-                    de.setIsTypeError(true);
-                    de.setXPathContext(context);
-                    throw de;
+                    throw new XPathException("Type " + prim.getPrimitiveType() + " is not an ordered type")
+                            .withErrorCode("FORG0006").asTypeError().withXPathContext(context);
                 }
                 break;          // process the rest of the sequence
             }
@@ -270,10 +265,8 @@ public abstract class Minimax extends CollatingFunctionFixed {
                     prim = test2;
                     foundDouble = true;
                 } catch (NumberFormatException e) {
-                    XPathException de = new XPathException("Failure converting " + Err.wrap(test.getStringValue()) + " to a number");
-                    de.setErrorCode("FORG0001");
-                    de.setXPathContext(context);
-                    throw de;
+                    throw new XPathException("Failure converting " + Err.wrap(test.getStringValue()) + " to a number")
+                            .withErrorCode("FORG0001").withXPathContext(context);
                 }
             } else {
                 if (prim instanceof DoubleValue) {
@@ -307,11 +300,8 @@ public abstract class Minimax extends CollatingFunctionFixed {
                         // internal error
                         throw err;
                     } else {
-                        XPathException de = new XPathException("Cannot compare " + min.getItemType() + " with " + test2.getItemType());
-                        de.setErrorCode("FORG0006");
-                        de.setIsTypeError(true);
-                        de.setXPathContext(context);
-                        throw de;
+                        throw new XPathException("Cannot compare " + min.getItemType() + " with " + test2.getItemType())
+                                .withErrorCode("FORG0006").asTypeError().withXPathContext(context);
                     }
                 }
             }

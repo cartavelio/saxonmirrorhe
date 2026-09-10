@@ -62,9 +62,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                     decimalFormatName = StructuredQName.fromLexicalQName(lexicalName, false,
                                                                          true, getRetainedStaticContext());
                 } catch (XPathException e) {
-                    XPathException err = new XPathException("Invalid decimal format name. " + e.getMessage());
-                    err.setErrorCode("FODF1280");
-                    throw err;
+                    throw new XPathException("Invalid decimal format name. " + e.getMessage(), "FODF1280");
                 }
             }
             if (decimalFormatName == null) {
@@ -95,9 +93,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         int[] picture4 = StringTool.expand(StringView.of(picture));
         SubPicture[] pics = new SubPicture[2];
         if (picture4.length == 0) {
-            XPathException err = new XPathException("format-number() picture is zero-length");
-            err.setErrorCode("FODF1310");
-            throw err;
+            throw new XPathException("format-number() picture is zero-length", "FODF1310");
         }
         int sep = -1;
         for (int c = 0; c < picture4.length; c++) {
@@ -923,16 +919,12 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             qName = StructuredQName.fromLexicalQName(lexicalName, false,
                                                      true, getRetainedStaticContext());
         } catch (XPathException e) {
-            XPathException err = new XPathException("Invalid decimal format name. " + e.getMessage());
-            err.setErrorCode("FODF1280");
-            throw err;
+            throw new XPathException("Invalid decimal format name. " + e.getMessage(), "FODF1280");
         }
 
         dfs = dfm.getNamedDecimalFormat(qName);
         if (dfs == null) {
-            XPathException err = new XPathException("format-number function: decimal-format '" + lexicalName + "' is not defined");
-            err.setErrorCode("FODF1280");
-            throw err;
+            throw new XPathException("format-number function: decimal-format '" + lexicalName + "' is not defined", "FODF1280");
         }
         return dfs;
     }

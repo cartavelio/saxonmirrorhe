@@ -226,8 +226,7 @@ public class EarlyEvaluationContext implements XPathContext {
 
     @Override
     public int getLast() throws UncheckedXPathException {
-        XPathException err = new XPathException("The context item is absent");
-        err.setErrorCode("XPDY0002");
+        XPathException err = new XPathException("The context item is absent", "XPDY0002");
         throw new UncheckedXPathException(err);
     }
 

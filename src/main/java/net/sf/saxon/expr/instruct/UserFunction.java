@@ -618,8 +618,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
                 exp2 = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(exp2, resultType, role, visitor);
             }
         } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            throw err;
+            throw err.maybeWithLocation(getLocation());
         }
         if (exp2 != exp) {
             setBody(exp2);
@@ -674,14 +673,9 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         try {
             result = bodyEvaluator.evaluate(c2);
         } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            err.maybeSetContext(c2);
-            throw err;
+            throw err.maybeWithLocation(getLocation()).maybeWithContext(c2);
         } catch (UncheckedXPathException uxe) {
-            XPathException err = uxe.getXPathException();
-            err.maybeSetLocation(getLocation());
-            err.maybeSetContext(c2);
-            throw err;
+            throw uxe.getXPathException().maybeWithLocation(getLocation()).maybeWithContext(c2);
         } catch (Exception err2) {
             String message = "Internal error evaluating function "
                     + (functionName == null ? "(unnamed)" : functionName.getDisplayName())
@@ -753,8 +747,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         try {
             getBody().makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
         } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            throw err;
+            throw err.maybeWithLocation(getLocation()).maybeWithContext(context);
         }
     }
 
@@ -876,18 +869,16 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
      */
     @Override
     public boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
-        XPathException err = new XPathException("Cannot compare functions using deep-equal", "FOTY0015");
-        err.setIsTypeError(true);
-        err.setXPathContext(context);
-        throw err;
+        throw new XPathException("Cannot compare functions using deep-equal", "FOTY0015")
+                .asTypeError()
+                .withXPathContext(context);
     }
 
     @Override
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
-        XPathException err = new XPathException("Cannot compare functions using deep-equal", "FOTY0015");
-        err.setIsTypeError(true);
-        err.setXPathContext(context);
-        throw err;
+        throw new XPathException("Cannot compare functions using deep-equal", "FOTY0015")
+                .asTypeError()
+                .withXPathContext(context);
     }
 
     /**

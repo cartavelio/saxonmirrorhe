@@ -39,8 +39,7 @@ public class TypeAvailable extends SystemFunction {
                         getRetainedStaticContext());
             }
         } catch (XPathException e) {
-            e.setErrorCode("XTDE1428");
-            throw e;
+            throw e.withErrorCode("XTDE1428");
         }
 
         NamespaceUri uri = qName.getNamespaceUri();

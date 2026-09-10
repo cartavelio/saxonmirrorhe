@@ -172,11 +172,10 @@ public class ArithmeticExpression10 extends ArithmeticExpression implements Call
                 ArithmeticExpression.mapOpCode(operator), mustResolve);
 
         if (calculator == null) {
-            XPathException de = new XPathException("Arithmetic operator is not defined for arguments of types (" +
-                    type0.getDescription() + ", " + type1.getDescription() + ")");
-            de.setLocation(getLocation());
-            de.setErrorCode("XPTY0004");
-            throw de;
+            throw new XPathException("Arithmetic operator is not defined for arguments of types (" +
+                    type0.getDescription() + ", " + type1.getDescription() + ")")
+                    .withLocation(getLocation())
+                    .withErrorCode("XPTY0004");
         }
         return calculator;
     }

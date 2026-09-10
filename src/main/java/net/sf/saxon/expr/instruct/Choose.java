@@ -417,9 +417,8 @@ public class Choose extends Instruction implements ConditionalInstruction {
             conditionOps[i].typeCheck(visitor, contextInfo);
             XPathException err = TypeChecker.ebvError(getCondition(i), th);
             if (err != null) {
-                err.setLocator(getCondition(i).getLocation());
-                err.maybeSetFailingExpression(getCondition(i));
-                throw err;
+                throw err.withLocation(getCondition(i).getLocation())
+                        .maybeWithFailingExpression(getCondition(i));
             }
         }
         // Check that each of the action branches satisfies the expected type. This is a stronger check than checking the
@@ -434,24 +433,24 @@ public class Choose extends Instruction implements ConditionalInstruction {
             try {
                 actionOps[i].typeCheck(visitor, contextInfo);
             } catch (XPathException err) {
-                err.maybeSetLocation(getLocation());
-                err.maybeSetFailingExpression(getAction(i));
+                XPathException e2 = err.maybeWithLocation(getLocation())
+                        .maybeWithFailingExpression(getAction(i));
                 // mustn't throw the error unless the branch is actually selected, unless its a static or type error
-                if (err.isStaticError()) {
-                    throw err;
-                } else if (err.isTypeError()) {
+                if (e2.isStaticError()) {
+                    throw e2;
+                } else if (e2.isTypeError()) {
                     // if this is an "empty" else branch, don't be draconian about the error handling. It might be
                     // the user knows the otherwise branch isn't needed because one of the when branches will always
                     // be satisfied.
                     // Also, don't throw a type error if the branch will never be executed; this can happen with
                     // a typeswitch where the purpose of the condition is to test the type.
                     if (Literal.isEmptySequence(getAction(i)) || Literal.hasEffectiveBooleanValue(getCondition(i), false)) {
-                        setAction(i, new ErrorExpression(new XmlProcessingException(err)));
+                        setAction(i, new ErrorExpression(new XmlProcessingException(e2)));
                     } else {
-                        throw err;
+                        throw e2;
                     }
                 } else {
-                    setAction(i, new ErrorExpression(new XmlProcessingException(err)));
+                    setAction(i, new ErrorExpression(new XmlProcessingException(e2)));
                 }
             }
             if (Literal.hasEffectiveBooleanValue(getCondition(i), true)) {

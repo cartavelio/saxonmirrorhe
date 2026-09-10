@@ -300,10 +300,9 @@ public class MessageInstr extends Instruction {
                         abort = true;
                         break;
                     default:
-                        XPathException e = new XPathException("The terminate attribute of xsl:message must be yes|true|1 or no|false|0");
-                        e.setXPathContext(context);
-                        e.setErrorCode("XTDE0030");
-                        throw e;
+                        throw new XPathException("The terminate attribute of xsl:message must be yes|true|1 or no|false|0")
+                                .withXPathContext(context)
+                                .withErrorCode("XTDE0030");
                 }
 
                 String code;
@@ -338,7 +337,7 @@ public class MessageInstr extends Instruction {
                     TailCall tc = select.processLeavingTail(cco, context);
                     dispatchTailCall(tc);
                 } catch (XPathException e) {
-                    cco.append(StringValue.bmp("Error " + e.getErrorCodeLocalPart() +
+                    cco.append(StringValue.bmp("Error " + e.showErrorCode() +
                                                        " while evaluating xsl:message at line "
                                                        + expr.getLocation().getLineNumber() + " of " + expr.getLocation().getSystemId() +
                                                        ": " + e.getMessage()));

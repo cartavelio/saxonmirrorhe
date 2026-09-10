@@ -221,8 +221,7 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
             } else if (nested instanceof RuntimeException) {
                 throw (RuntimeException) nested;
             } else {
-                XPathException de = new XPathException(err);
-                de.setErrorCode(SaxonErrorCode.SXXP0003);
+                XPathException de = new XPathException(err).withErrorCode(SaxonErrorCode.SXXP0003);
                 de.setHasBeenReported(true);
                 throw de;
             }

@@ -158,8 +158,7 @@ public class XSLPreserveSpace extends StyleElement {
 
             }
         } catch (XPathException e) {
-            e.maybeSetLocation(allocateLocation());
-            compileError(e);
+            compileError(e.maybeWithLocation(allocateLocation()));
         }
     }
 

@@ -581,10 +581,9 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         int kind = item.getNodeKind();
         if (requireDocumentOrElement &&
                 !(kind == Type.ELEMENT || kind == Type.DOCUMENT)) {
-            XPathException e = new XPathException("Operand of validate expression must be a document or element node");
-            e.setXPathContext(context);
-            e.setErrorCode("XQTY0030");
-            throw e;
+            throw new XPathException("Operand of validate expression must be a document or element node")
+                    .withXPathContext(context)
+                    .withErrorCode("XQTY0030");
         }
         final Configuration config = controller.getConfiguration();
         switch (kind) {
@@ -643,19 +642,19 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             }
             case Type.ATTRIBUTE:
                 if (schemaType != null && schemaType.isComplexType()) {
-                    XPathException e = new XPathException("When copying an attribute with schema validation, the requested type must not be a complex type");
-                    e.setLocation(getLocation());
-                    e.setXPathContext(context);
-                    e.setErrorCode("XTTE1535");
+                    XPathException e = new XPathException("When copying an attribute with schema validation, the requested type must not be a complex type")
+                            .withLocation(getLocation())
+                            .withXPathContext(context)
+                            .withErrorCode("XTTE1535");
                     throw dynamicError(getLocation(), e, context);
                 }
                 try {
                     copyAttribute(item, (SimpleType) schemaType, validation, this, out, context, rejectDuplicateAttributes);
                 } catch (NoOpenStartTagException err) {
-                    XPathException e = new XPathException(err.getMessage());
-                    e.setLocation(getLocation());
-                    e.setXPathContext(context);
-                    e.setErrorCodeQName(err.getErrorCodeQName());
+                    XPathException e = new XPathException(err.getMessage())
+                            .withLocation(getLocation())
+                            .withXPathContext(context)
+                            .withErrorCode(err.getErrorCodeQName());
                     throw dynamicError(getLocation(), e, context);
                 }
                 break;
@@ -679,9 +678,9 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 try {
                     out.namespace(item.getLocalPart(), NamespaceUri.of(item.getStringValue()), ReceiverOption.NONE);
                 } catch (NoOpenStartTagException err) {
-                    XPathException e = new XPathException(err.getMessage());
-                    e.setXPathContext(context);
-                    e.setErrorCodeQName(err.getErrorCodeQName());
+                    XPathException e = new XPathException(err.getMessage())
+                            .withXPathContext(context)
+                            .withErrorCode(err.getErrorCodeQName());
                     throw dynamicError(getLocation(), e, context);
                 }
                 break;
@@ -772,12 +771,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         try {
             output.attribute(NameOfNode.makeName(source), annotation, value.toString(), instruction.getLocation(), opt);
         } catch (XPathException e) {
-            e.maybeSetContext(context);
-            e.maybeSetLocation(instruction.getLocation());
-            if (instruction.getPackageData().getHostLanguage() == HostLanguage.XQUERY && e.getErrorCodeLocalPart().equals("XTTE0950")) {
+            if (instruction.getPackageData().getHostLanguage() == HostLanguage.XQUERY && e.hasErrorCode("XTTE0950")) {
                 e.setErrorCode("XQTY0086");
             }
-            throw e;
+            throw e.maybeWithLocation(instruction.getLocation())
+                    .maybeWithContext(context);
         }
     }
 

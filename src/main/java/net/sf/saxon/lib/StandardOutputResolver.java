@@ -94,25 +94,18 @@ public class StandardOutputResolver implements OutputURIResolver {
 
             return createResult(absoluteURI);
         } catch (URISyntaxException err) {
-            XPathException xe = new XPathException("Invalid syntax for " + which + " URI");
-            xe.setErrorCode(SaxonErrorCode.SXRD0001);
-            throw xe;
+            throw new XPathException("Invalid syntax for " + which + " URI", SaxonErrorCode.SXRD0001);
         } catch (IllegalArgumentException err2) {
-            XPathException xe = new XPathException("Invalid " + which + " URI syntax");
-            xe.setErrorCode(SaxonErrorCode.SXRD0001);
-            throw xe;
+            throw new XPathException("Invalid " + which + " URI syntax", SaxonErrorCode.SXRD0001);
         } catch (MalformedURLException err3) {
-            XPathException xe = new XPathException("Resolved URL is malformed", err3);
-            xe.setErrorCode(SaxonErrorCode.SXRD0001);
-            throw xe;
+            throw new XPathException("Resolved URL is malformed", err3)
+                    .withErrorCode(SaxonErrorCode.SXRD0001);
         } catch (UnknownServiceException err4) {
-            XPathException xe = new XPathException("Specified protocol does not allow output", err4);
-            xe.setErrorCode(SaxonErrorCode.SXRD0001);
-            throw xe;
+            throw new XPathException("Specified protocol does not allow output", err4)
+                    .withErrorCode(SaxonErrorCode.SXRD0001);
         } catch (IOException err5) {
-            XPathException xe = new XPathException("Cannot open connection to specified URL", err5);
-            xe.setErrorCode(SaxonErrorCode.SXRD0001);
-            throw xe;
+            throw new XPathException("Cannot open connection to specified URL", err5)
+                    .withErrorCode(SaxonErrorCode.SXRD0001);
         }
     }
 
@@ -154,9 +147,8 @@ public class StandardOutputResolver implements OutputURIResolver {
                 try {
                     stream.close();
                 } catch (java.io.IOException err) {
-                    XPathException xe = new XPathException("Failed while closing output file", err);
-                    xe.setErrorCode(SaxonErrorCode.SXRD0003);
-                    throw xe;
+                    throw new XPathException("Failed while closing output file", err)
+                            .withErrorCode(SaxonErrorCode.SXRD0003);
                 }
             }
             Writer writer = ((StreamResult) result).getWriter(); // Path not used, but there for safety
@@ -164,9 +156,8 @@ public class StandardOutputResolver implements OutputURIResolver {
                 try {
                     writer.close();
                 } catch (java.io.IOException err) {
-                    XPathException xe = new XPathException("Failed while closing output file", err);
-                    xe.setErrorCode(SaxonErrorCode.SXRD0003);
-                    throw xe;
+                    throw new XPathException("Failed while closing output file", err)
+                            .withErrorCode(SaxonErrorCode.SXRD0003);
                 }
             }
         }

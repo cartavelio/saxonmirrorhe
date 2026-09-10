@@ -562,8 +562,7 @@ public class MergeInstr extends Instruction {
             c3.trackFocus(inputIterator);
             return new ContextMappingIterator(cxt -> getAction().iterate(cxt), c3);
         } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            throw e;
+            throw e.maybeWithLocation(getLocation());
         }
     }
 
@@ -918,8 +917,7 @@ public class MergeInstr extends Instruction {
                     //noinspection Convert2MethodRef
                     return new ContextMappingIterator(cxt -> actionPull.iterate(cxt), c3);
                 } catch (XPathException e) {
-                    e.maybeSetLocation(expr.getLocation());
-                    throw e;
+                    throw e.maybeWithLocation(expr.getLocation());
                 }
             };
         }
@@ -934,10 +932,7 @@ public class MergeInstr extends Instruction {
                     SequenceTool.supply(iter, /*(ItemConsumer<? super Item>)*/ it -> output.append(it, expr.getLocation(), ReceiverOption.ALL_NAMESPACES));
                 } catch (UncheckedXPathException err) {
                     iter.close();
-                    XPathException e = err.getXPathException();
-                    e.maybeSetLocation(expr.getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
+                    throw err.getXPathException().maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                 } finally {
                     iter.close();
                 }

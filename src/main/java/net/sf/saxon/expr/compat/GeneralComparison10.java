@@ -350,10 +350,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
                         }
                         seq1.add(item1);
                     } catch (XPathException e) {
-                        // re-throw the exception with location information added
-                        e.maybeSetLocation(getLocation());
-                        e.maybeSetContext(context);
-                        throw e;
+                        throw e.maybeWithLocation(getLocation()).maybeWithContext(context);
                     }
                 }
             } else {

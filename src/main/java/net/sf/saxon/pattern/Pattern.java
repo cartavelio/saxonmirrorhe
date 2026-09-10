@@ -160,7 +160,7 @@ public abstract class Pattern extends PseudoExpression {
      */
 
     protected void handleDynamicError(XPathException ex, XPathContext context) throws XPathException {
-        if ("XTDE0640".equals(ex.getErrorCodeLocalPart())) {
+        if (ex.hasErrorCode("XTDE0640")) {
             // Treat circularity error as fatal (test error213)
             throw ex;
         }

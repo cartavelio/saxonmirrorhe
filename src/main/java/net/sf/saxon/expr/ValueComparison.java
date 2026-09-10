@@ -197,11 +197,8 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         PlainType t1 = getRhsExpression().getItemType().getAtomizedItemType();
 
         if (t0.getUType().union(t1.getUType()).overlaps(UType.EXTENSION)) {
-            XPathException err = new XPathException("Cannot perform comparisons involving external objects");
-            err.setIsTypeError(true);
-            err.setErrorCode("XPTY0004");
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("Cannot perform comparisons involving external objects")
+                    .asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
         }
 
         BuiltInAtomicType p0 = (BuiltInAtomicType) t0.getPrimitiveItemType();
@@ -242,11 +239,8 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             } else {
                 String message = "In {" + toShortString() + "}: cannot compare " +
                         t0 + " to " + t1;
-                XPathException err = new XPathException(message);
-                err.setIsTypeError(true);
-                err.setErrorCode("XPTY0004");
-                err.setLocation(getLocation());
-                throw err;
+                throw new XPathException(message)
+                        .asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
             }
         }
         if (!(operator == Token.FEQ || operator == Token.FNE)) {
@@ -258,11 +252,10 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
     private void mustBeOrdered(PlainType t1, BuiltInAtomicType p1) throws XPathException {
         if (!p1.isOrdered(true)) {
-            XPathException err = new XPathException("Type " + t1.toString() + " is not an ordered type");
-            err.setErrorCode("XPTY0004");
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("Type " + t1.toString() + " is not an ordered type")
+                    .withErrorCode("XPTY0004")
+                    .asTypeError()
+                    .withLocation(getLocation());
         }
     }
 
@@ -400,11 +393,8 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             throws XPathException {
         if (checkTypes &&
                 !Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), Token.isOrderedOperator(op))) {
-            XPathException e2 = new XPathException("Cannot compare " + Type.displayTypeName(v0) +
-                    " to " + Type.displayTypeName(v1));
-            e2.setErrorCode("XPTY0004");
-            e2.setIsTypeError(true);
-            throw e2;
+            throw new XPathException("Cannot compare " + Type.displayTypeName(v0) +
+                    " to " + Type.displayTypeName(v1)).withErrorCode("XPTY0004").asTypeError();
         }
         if (v0.isNaN() || v1.isNaN()) {
             return op == Token.FNE;
@@ -430,11 +420,8 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             throw err.getReason();
         } catch (ClassCastException err) {
             //err.printStackTrace();
-            XPathException e2 = new XPathException("Cannot compare " + Type.displayTypeName(v0) +
-                    " to " + Type.displayTypeName(v1));
-            e2.setErrorCode("XPTY0004");
-            e2.setIsTypeError(true);
-            throw e2;
+            throw new XPathException("Cannot compare " + Type.displayTypeName(v0) +
+                    " to " + Type.displayTypeName(v1)).withErrorCode("XPTY0004").asTypeError();
         }
     }
 

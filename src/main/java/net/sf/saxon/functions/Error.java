@@ -64,9 +64,9 @@ public class Error extends SystemFunction implements Callable {
         } else {
             description = "Error signalled by application call on error()";
         }
-        XPathException e = new UserDefinedXPathException(description);
-        e.setErrorCodeQName(qname.getStructuredQName());
-        e.setXPathContext(context);
+        XPathException e = new UserDefinedXPathException(description)
+                .withErrorCode(qname.getStructuredQName())
+                .withXPathContext(context);
         if (getArity() > 2 && errObject != null) {
             GroundedValue errorObject = SequenceTool.toGroundedValue(errObject);
             if (errorObject.getLength() == 1) {

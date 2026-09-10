@@ -242,17 +242,14 @@ public class NumberSequenceFormatter extends Expression {
                 int n = Integer.parseInt(tok);
                 list.add(n);
             } catch (NumberFormatException err) {
-                XPathException e = new XPathException("Invalid start-at value: non-integer component {" + tok + "}");
-                e.setErrorCode("XTDE0030");
-                e.setLocation(getLocation());
-                throw e;
+                throw new XPathException("Invalid start-at value: non-integer component {" + tok + "}")
+                        .withErrorCode("XTDE0030")
+                        .withLocation(getLocation());
             }
         }
         if (list.isEmpty()) {
-            XPathException e = new XPathException("Invalid start-at value: no numeric components found");
-            e.setErrorCode("XTDE0030");
-            e.setLocation(getLocation());
-            throw e;
+            throw new XPathException("Invalid start-at value: no numeric components found")
+                    .withErrorCode("XTDE0030").withLocation(getLocation());
         }
         return list;
     }
@@ -382,11 +379,10 @@ public class NumberSequenceFormatter extends Expression {
                             vec.add("NaN");
                         } else {
                             vec.add(val.getUnicodeStringValue());
-                            XPathException e = new XPathException("Cannot convert supplied value to an integer. " + err.getMessage());
-                            e.setErrorCode("XTDE0980");
-                            e.setLocation(expr.getLocation());
-                            e.setXPathContext(context);
-                            throw e;
+                            throw new XPathException("Cannot convert supplied value to an integer. " + err.getMessage())
+                                    .withErrorCode("XTDE0980")
+                                    .withLocation(expr.getLocation())
+                                    .withXPathContext(context);
                         }
                     }
                 }
@@ -404,11 +400,10 @@ public class NumberSequenceFormatter extends Expression {
                     try {
                         gpsize = Integer.parseInt(g);
                     } catch (NumberFormatException err) {
-                        XPathException e = new XPathException("grouping-size must be numeric");
-                        e.setXPathContext(context);
-                        e.setErrorCode("XTDE0030");
-                        e.setLocation(expr.getLocation());
-                        throw e;
+                        throw new XPathException("grouping-size must be numeric")
+                                .withXPathContext(context)
+                                .withErrorCode("XTDE0030")
+                                .withLocation(expr.getLocation());
                     }
                 }
 
@@ -442,11 +437,10 @@ public class NumberSequenceFormatter extends Expression {
                 } else {
                     letterVal = letterValueEvaluator.eval(context).toString();
                     if (!("alphabetic".equals(letterVal) || "traditional".equals(letterVal))) {
-                        XPathException e = new XPathException("letter-value must be \"traditional\" or \"alphabetic\"");
-                        e.setXPathContext(context);
-                        e.setErrorCode("XTDE0030");
-                        e.setLocation(expr.getLocation());
-                        throw e;
+                        throw new XPathException("letter-value must be \"traditional\" or \"alphabetic\"")
+                                .withXPathContext(context)
+                                .withErrorCode("XTDE0030")
+                                .withLocation(expr.getLocation());
                     }
                 }
 

@@ -537,11 +537,10 @@ public class Copy extends ElementCreator {
                 Controller controller = context.getController();
                 Item item = context.getContextItem();
                 if (item == null) {
-                    XPathException err = new XPathException("There is no context item for xsl:copy", "XTTE0945");
-                    err.setIsTypeError(true);
-                    err.setLocation(expr.getLocation());
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new XPathException("There is no context item for xsl:copy", "XTTE0945")
+                            .asTypeError()
+                            .withLocation(expr.getLocation())
+                            .withXPathContext(context);
                 }
 
                 if (!(item instanceof NodeInfo)) {
@@ -595,9 +594,7 @@ public class Copy extends ElementCreator {
                             output.endElement();
 
                         } catch (XPathException e) {
-                            e.maybeSetLocation(expr.getLocation());
-                            e.maybeSetContext(context);
-                            throw e;
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                         return null;
 
@@ -609,8 +606,7 @@ public class Copy extends ElementCreator {
                             CopyOf.copyAttribute(source, (SimpleType) expr.getSchemaType(),
                                                  expr.getValidationAction(), expr, output, context, false);
                         } catch (NoOpenStartTagException err) {
-                            err.setXPathContext(context);
-                            throw dynamicError(expr.getLocation(), err, context);
+                            throw dynamicError(expr.getLocation(), err.withXPathContext(context), context);
                         }
                         break;
 

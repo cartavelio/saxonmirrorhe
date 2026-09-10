@@ -40,9 +40,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
         UnicodeString s = Whitespace.trim(in);
         int len32 = s.length32();
         if ((len32 & 1) != 0) {
-            XPathException err = new XPathException("A hexBinary value must contain an even number of characters");
-            err.setErrorCode("FORG0001");
-            throw err;
+            throw new XPathException("A hexBinary value must contain an even number of characters", "FORG0001");
         }
         binaryValue = new byte[len32 / 2];
         for (int i = 0; i < binaryValue.length; i++) {
@@ -123,9 +121,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
             d = d - 6;
         }
         if (d < 0) {
-            XPathException err = new XPathException("Invalid hexadecimal digit '" + c + "'");
-            err.setErrorCode("FORG0001");
-            throw err;
+            throw new XPathException("Invalid hexadecimal digit '" + c + "'", "FORG0001");
         }
         return d;
     }

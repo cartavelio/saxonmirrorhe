@@ -21,10 +21,10 @@ import java.util.List;
  */
 public class Annotation {
 
-    public static final StructuredQName UPDATING = new StructuredQName("", NamespaceUri.XQUERY, "updating");
-    public static final StructuredQName SIMPLE = new StructuredQName("", NamespaceUri.XQUERY, "simple");
-    public static final StructuredQName PRIVATE = new StructuredQName("", NamespaceUri.XQUERY, "private");
-    public static final StructuredQName PUBLIC = new StructuredQName("", NamespaceUri.XQUERY, "public");
+    public static final StructuredQName UPDATING = NamespaceUri.XQUERY.qName("updating");
+    public static final StructuredQName SIMPLE = NamespaceUri.XQUERY.qName("simple");
+    public static final StructuredQName PRIVATE = NamespaceUri.XQUERY.qName("private");
+    public static final StructuredQName PUBLIC = NamespaceUri.XQUERY.qName("public");
 
 
     // The name of the annotation

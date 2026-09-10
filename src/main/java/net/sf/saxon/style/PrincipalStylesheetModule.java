@@ -541,10 +541,9 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         for (int i = topLevel.size() - 1; i >= 0; i--) {
             ComponentDeclaration decl = topLevel.get(i);
             if (decl.getSourceElement() instanceof XSLImportSchema) {
-                XPathException xe = new XPathException("xsl:import-schema requires Saxon-EE");
-                xe.setErrorCode("XTSE1650");
-                xe.setLocator(decl.getSourceElement());
-                throw xe;
+                throw new XPathException("xsl:import-schema requires Saxon-EE")
+                        .withErrorCode("XTSE1650")
+                        .withLocation(decl.getSourceElement());
             }
         }
 

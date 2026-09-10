@@ -127,9 +127,8 @@ public final class Comment extends SimpleNodeConstructor {
             try {
                 return checkContentXQuery(comment);
             } catch (XPathException err) {
-                err.setXPathContext(context);
-                err.setLocation(getLocation());
-                throw err;
+                throw err.withXPathContext(context)
+                        .withLocation(getLocation());
             }
         }
     }

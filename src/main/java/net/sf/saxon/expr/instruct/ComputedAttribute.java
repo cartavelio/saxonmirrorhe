@@ -199,12 +199,9 @@ public final class ComputedAttribute extends AttributeCreator {
                     th.relationship(nameItemType, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT;
             boolean maybeQName = th.relationship(nameItemType, BuiltInAtomicType.QNAME) != Affinity.DISJOINT;
             if (!(maybeString || maybeQName)) {
-                XPathException err = new XPathException(
-                        "The attribute name must be either an xs:string, an xs:QName, or untyped atomic");
-                err.setErrorCode("XPTY0004");
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new XPathException(
+                        "The attribute name must be either an xs:string, an xs:QName, or untyped atomic")
+                        .withErrorCode("XPTY0004").asTypeError().withLocation(getLocation());
             }
         } else {
             if (!th.isSubType(getNameExp().getItemType(), BuiltInAtomicType.STRING)) {
@@ -225,27 +222,21 @@ public final class ComputedAttribute extends AttributeCreator {
                     if (getNamespaceExp() == null) {
                         NamespaceUri uri = getNamespaceResolver().getURIForPrefix(parts[0], false);
                         if (uri == null) {
-                            XPathException se = new XPathException("Prefix " + parts[0] + " has not been declared");
+                            String message = "Prefix " + parts[0] + " has not been declared";
                             if (isXSLT()) {
-                                se.setErrorCode("XTDE0860");
-                                se.setIsStaticError(true);
-                                throw se;
+                                throw new XPathException(message, "XTDE0860").asStaticError();
                             } else {
-                                se.setErrorCode("XQDY0074");
-                                se.setIsStaticError(false);
-                                throw se;
+                                throw new XPathException(message, "XQDY0074");
                             }
                         }
                         setNamespace(new StringLiteral(uri.toString()));
                     }
                 }
             } catch (XPathException e) {
-                if (e.getErrorCodeQName() == null || e.getErrorCodeLocalPart().equals("FORG0001")) {
+                if (e.getErrorCodeQName() == null || e.hasErrorCode("FORG0001")) {
                     e.setErrorCode(isXSLT() ? "XTDE0850" : "XQDY0074");
                 }
-                e.maybeSetLocation(getLocation());
-                e.setIsStaticError(true);
-                throw e;
+                throw e.maybeWithLocation(getLocation()).asStaticError();
             }
         }
     }

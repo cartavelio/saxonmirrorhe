@@ -116,7 +116,7 @@ public class DirectoryCollection extends AbstractResourceCollection {
                      if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_FAIL) {
                          return new FailedResource(in, e);
                      } else if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_WARNING) {
-                         context.getController().warning("collection(): failed to parse " + in + ": " + e.getMessage(), e.getErrorCodeLocalPart(), null);
+                         context.getController().warning("collection(): failed to parse " + in + ": " + e.getMessage(), e.showErrorCode(), null);
                          return null;
                      } else {
                          return null;

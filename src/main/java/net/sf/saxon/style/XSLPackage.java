@@ -124,7 +124,7 @@ public class XSLPackage extends XSLModuleRoot {
             try {
                 packageVersion = new PackageVersion(packageVersionAtt);
             } catch (XPathException ex) {
-                compileErrorInAttribute(ex.getMessage(), ex.getErrorCodeLocalPart(), "package-version");
+                compileErrorInAttribute(ex, "package-version");
             }
         }
 

@@ -275,13 +275,8 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
         try {
             Arrays.sort(values, 0, count, new SortComparer(comparators));
         } catch (ClassCastException e) {
-            XPathException err = new XPathException("Non-comparable types found while sorting: " + e.getMessage());
-            if (hostLanguage == HostLanguage.XSLT) {
-                err.setErrorCode("XTDE1030");
-            } else {
-                err.setErrorCode("XPTY0004");
-            }
-            throw err;
+            throw new XPathException("Non-comparable types found while sorting: " + e.getMessage())
+                    .withErrorCode(hostLanguage == HostLanguage.XSLT ? "XTDE1030" : "XPTY0004");
         }
     }
 

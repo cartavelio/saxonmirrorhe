@@ -143,9 +143,7 @@ public class Matches extends RegexFunction {
                                 arg2eval.eval(context),
                                 context);
                     } catch (XPathException err) {
-                        err.maybeSetLocation(fnc.getLocation());
-                        err.maybeSetContext(context);
-                        throw err;
+                        throw err.maybeWithLocation(fnc.getLocation()).maybeWithContext(context);
                     }
                 };
             } else {

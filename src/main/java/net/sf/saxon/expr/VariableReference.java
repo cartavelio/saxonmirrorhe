@@ -588,8 +588,7 @@ public abstract class VariableReference extends Expression implements BindingRef
             assert actual != null;
             return actual.iterate();
         } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            throw err;
+            throw err.maybeWithLocation(getLocation());
         } catch (NullPointerException err) {
             //err.printStackTrace();
             String msg = "Internal error: no value for variable $" + getDisplayName() +
@@ -612,8 +611,7 @@ public abstract class VariableReference extends Expression implements BindingRef
             assert actual != null;
             return actual.head();
         } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            throw err;
+            throw err.maybeWithLocation(getLocation()).maybeWithContext(c);
         }
     }
 
@@ -624,12 +622,12 @@ public abstract class VariableReference extends Expression implements BindingRef
             Location loc = getLocation();
             SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> output.append(item, loc, ReceiverOption.ALL_NAMESPACES));
         } catch (UncheckedXPathException uxe) {
-            XPathException xpe = uxe.getXPathException();
-            xpe.maybeSetLocation(getLocation());
-            throw xpe;
+            throw uxe.getXPathException()
+                    .maybeWithLocation(getLocation())
+                    .maybeWithContext(c);
         } catch (XPathException err) {
-            err.maybeSetLocation(getLocation());
-            throw err;
+            throw err.maybeWithLocation(getLocation())
+                    .maybeWithContext(c);
         }
     }
 

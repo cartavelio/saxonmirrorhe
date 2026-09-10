@@ -248,7 +248,7 @@ public class XSLMode extends StyleElement {
             try {
                 extraResultType = makeExtendedSequenceType(asAtt);
             } catch (XPathException e) {
-                compileErrorInAttribute(e.getMessage(), e.getErrorCodeLocalPart(), "saxon:as");
+                compileErrorInAttribute(e, "saxon:as");
                 extraResultType = SequenceType.ANY_SEQUENCE; // error recovery
             }
             mode.setDefaultResultType(extraResultType);

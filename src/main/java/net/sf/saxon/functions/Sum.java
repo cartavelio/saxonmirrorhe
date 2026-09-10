@@ -99,8 +99,7 @@ public class Sum extends FoldingFunction {
             SequenceTool.supply(in, (ItemConsumer<? super Item>) fold::processItem);
             return (AtomicValue)fold.result().head();
         } catch (XPathException e) {
-            e.maybeSetLocation(locator);
-            throw e;
+            throw e.maybeWithLocation(locator).maybeWithContext(context);
         }
     }
 
@@ -141,13 +140,11 @@ public class Sum extends FoldingFunction {
                     data = next;
                     return;
                 } else {
-                    XPathException err = new XPathException(
+                    throw new XPathException(
                         "Input to sum() contains a value of type " +
                                 next.getPrimitiveType().getDisplayName() +
-                                " which is neither numeric, nor a duration");
-                    err.setXPathContext(context);
-                    err.setErrorCode("FORG0006");
-                    throw err;
+                                " which is neither numeric, nor a duration")
+                            .withXPathContext(context).withErrorCode("FORG0006");
                 }
             }
 
@@ -155,34 +152,26 @@ public class Sum extends FoldingFunction {
                 if (next.isUntypedAtomic()) {
                     next = toDouble.convert(next).asAtomic();
                 } else if (!(next instanceof NumericValue)) {
-                    XPathException err = new XPathException("Input to sum() contains a mix of numeric and non-numeric values");
-                    err.setXPathContext(context);
-                    err.setErrorCode("FORG0006");
-                    throw err;
+                    throw new XPathException("Input to sum() contains a mix of numeric and non-numeric values")
+                            .withXPathContext(context).withErrorCode("FORG0006");
                 }
                 data = ArithmeticExpression.compute(data, Calculator.PLUS, next, context);
             } else if (data instanceof DurationValue) {
                 if (!((data instanceof DayTimeDurationValue) || (data instanceof YearMonthDurationValue))) {
-                    XPathException err = new XPathException("Input to sum() contains a duration that is neither a dayTimeDuration nor a yearMonthDuration");
-                    err.setXPathContext(context);
-                    err.setErrorCode("FORG0006");
-                    throw err;
+                    throw new XPathException("Input to sum() contains a duration that is neither a dayTimeDuration nor a yearMonthDuration")
+                        .withXPathContext(context).withErrorCode("FORG0006");
                 }
                 if (!(next instanceof DurationValue)) {
-                    XPathException err = new XPathException("Input to sum() contains a mix of duration and non-duration values");
-                    err.setXPathContext(context);
-                    err.setErrorCode("FORG0006");
-                    throw err;
+                    throw new XPathException("Input to sum() contains a mix of duration and non-duration values")
+                            .withXPathContext(context).withErrorCode("FORG0006");
                 }
                 data = ((DurationValue) data).add((DurationValue) next);
             } else {
-                XPathException err = new XPathException(
+                throw new XPathException(
                         "Input to sum() contains a value of type " +
                                 data.getPrimitiveType().getDisplayName() +
-                                " which is neither numeric, nor a duration");
-                err.setXPathContext(context);
-                err.setErrorCode("FORG0006");
-                throw err;
+                                " which is neither numeric, nor a duration")
+                        .withXPathContext(context).withErrorCode("FORG0006");
             }
         }
 

@@ -471,11 +471,10 @@ public final class EvaluateInstr extends Expression {
                 } else if ("no".equals(schemaAwareAttr) || "false".equals(schemaAwareAttr) || "0".equals(schemaAwareAttr)) {
                     isSchemaAware = false;
                 } else {
-                    XPathException err = new XPathException("The schema-aware attribute of xsl:evaluate must be yes|no|true|false|0|1");
-                    err.setErrorCode("XTDE0030");
-                    err.setLocation(instr.getLocation());
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new XPathException("The schema-aware attribute of xsl:evaluate must be yes|no|true|false|0|1")
+                            .withErrorCode("XTDE0030")
+                            .withLocation(instr.getLocation())
+                            .withXPathContext(context);
                 }
 
                 Expression expr = null;
@@ -602,11 +601,10 @@ public final class EvaluateInstr extends Expression {
                     try {
                         expr = ExpressionTool.make(exprText, env, 0, Token.EOF, null);
                     } catch (XPathException e) {
-                        XPathException err = new XPathException("Static error in XPath expression supplied to xsl:evaluate: " +
-                                                                        e.getMessage() + ". Expression: {" + exprText + "}");
-                        err.setErrorCode("XTDE3160");
-                        err.setLocation(instr.getLocation());
-                        throw err;
+                        throw new XPathException("Static error in XPath expression supplied to xsl:evaluate: " +
+                                                                        e.getMessage() + ". Expression: {" + exprText + "}")
+                                .withErrorCode("XTDE3160")
+                                .withLocation(instr.getLocation());
                     }
 
                     // Type check, and allocate slots for variables

@@ -102,10 +102,8 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
             return new StreamSource[]{source};
         }
         if (locations.length == 0) {
-            XPathException err = new XPathException("Cannot locate module for namespace " + moduleURI);
-            err.setErrorCode("XQST0059");
-            err.setIsStaticError(true);
-            throw err;
+            throw new XPathException("Cannot locate module for namespace " + moduleURI)
+                    .withErrorCode("XQST0059").asStaticError();
         }
 
         // One or more locations given: import modules from all these locations
@@ -183,10 +181,8 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
             Source src = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
             return src == null ? null : toStreamSource(src);
         } catch (URISyntaxException err) {
-            XPathException se = new XPathException("Cannot resolve relative URI " + rr.relativeUri, err);
-            se.setErrorCode("XQST0059");
-            se.setIsStaticError(true);
-            throw se;
+            throw new XPathException("Cannot resolve relative URI " + rr.relativeUri, err)
+                    .withErrorCode("XQST0059").asStaticError();
         }
     }
 

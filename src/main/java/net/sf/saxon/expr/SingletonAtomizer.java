@@ -116,10 +116,9 @@ public final class SingletonAtomizer extends UnaryExpression {
                 err = new XPathException(
                         "Cannot atomize an element that is defined in the schema to have element-only content", "FOTY0012");
             }
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            err.setFailingExpression(getParentExpression());
-            throw err;
+            throw err.asTypeError()
+                    .withLocation(getLocation())
+                    .withFailingExpression(getParentExpression());
         }
         return this;
     }
@@ -246,7 +245,6 @@ public final class SingletonAtomizer extends UnaryExpression {
 //                    RoleDiagnostic role = roleSupplier.get();
 //                    String message = e.getMessage() + ". Failed while atomizing the " + role.getMessage();
 //                    XPathException e2 = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
-//                    e2.setErrorCodeQName(e.getErrorCodeQName());
 //                    e2.setXPathContext(context);
 //                    e2.maybeSetLocation(getLocation());
 //                    throw e2;
@@ -402,11 +400,10 @@ public final class SingletonAtomizer extends UnaryExpression {
                         } else {
                             RoleDiagnostic role = expr.roleSupplier.get();
                             String message = e.getMessage() + ". Failed while atomizing the " + role.getMessage();
-                            XPathException e2 = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
-                            e2.setErrorCodeQName(e.getErrorCodeQName());
-                            e2.setXPathContext(context);
-                            e2.maybeSetLocation(expr.getLocation());
-                            throw e2;
+                            throw new XPathException(message)
+                                    .withErrorCode(e.getErrorCodeQName())
+                                    .withLocation(e.getLocator())
+                                    .withXPathContext(context);
                         }
                     }
                     found += seq.getLength();

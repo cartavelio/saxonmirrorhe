@@ -424,9 +424,8 @@ public class ConditionalBlock extends Instruction {
                                 break;
                         }
                     } catch (XPathException e) {
-                        e.maybeSetLocation(expr.operanda[i].getChildExpression().getLocation());
-                        e.maybeSetContext(context);
-                        throw e;
+                        throw e.maybeWithLocation(expr.operanda[i].getChildExpression().getLocation())
+                                .maybeWithContext(context);
                     }
                 }
 

@@ -139,11 +139,9 @@ public class XmlResource implements Resource {
                 doc = config.buildDocumentTree(source, options).getRootNode();
             } catch (XPathException e) {
                 if (details.onError == URIQueryParameters.ON_ERROR_FAIL) {
-                    XPathException e2 = new XPathException("collection(): failed to parse XML file " + source.getSystemId() + ": " + e.getMessage(),
-                                                           e.getErrorCodeLocalPart());
-                    throw e2;
+                    throw e.withMessage("collection(): failed to parse XML file " + source.getSystemId() + ": " + e.getMessage());
                 } else if (details.onError == URIQueryParameters.ON_ERROR_WARNING) {
-                    context.getController().warning("collection(): failed to parse XML file " + source.getSystemId() + ": " + e.getMessage(), e.getErrorCodeLocalPart(), null);
+                    context.getController().warning("collection(): failed to parse XML file " + source.getSystemId() + ": " + e.getMessage(), e.showErrorCode(), null);
                 }
                 doc = null;
             } finally {

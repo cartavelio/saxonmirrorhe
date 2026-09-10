@@ -443,7 +443,8 @@ public class Controller implements ContextOriginator {
      * Report a run-time warning
      *
      * @param message   the warning message
-     * @param errorCode the local part of the error code (in the ERR namespace). May be null.
+     * @param errorCode the error code. If unprefixed, this is assumed to be in the ERR namespace.
+     *                  For a different namespace, use <code>Q{uri}local</code> format. May be null.
      * @param locator   the location in the source code. May be null.
      */
 
