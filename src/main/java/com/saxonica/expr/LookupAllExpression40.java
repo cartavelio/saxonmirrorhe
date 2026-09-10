@@ -290,10 +290,10 @@ public class LookupAllExpression40 extends LookupAllExpression {
 
     @Override
     public Elaborator getElaborator() {
-        return new LookupAllElaborator();
+        return new LookupAll40Elaborator();
     }
 
-    public static class LookupAllElaborator extends PullElaborator {
+    public static class LookupAll40Elaborator extends PullElaborator {
 
         public PullEvaluator elaborateForPull() {
             LookupAllExpression40 expr = (LookupAllExpression40) getExpression();
@@ -304,9 +304,9 @@ public class LookupAllExpression40 extends LookupAllExpression {
                 SequenceIterator lhs = baseEval.iterate(context);
                 SequenceIterator entries = new MappingIterator(lhs, item -> {
                     if (item instanceof ArrayItem) {
-                        return new ArrayEntriesIterator((ArrayItem) item);
+                        return new ArrayEntriesIterator40((ArrayItem) item);
                     } else if (item instanceof MapItem) {
-                        return new MapEntriesIterator((MapItem) item);
+                        return new MapEntriesIterator40((MapItem) item);
                     } else {
                         throw new XPathException("The value on the LHS of `?` must be a map or an array")
                                 .withErrorCode("XPTY0004")
@@ -341,13 +341,13 @@ public class LookupAllExpression40 extends LookupAllExpression {
      * Iterator over a sequence of entries in an array, delivering them in the form
      * required by $array?entry::*
      */
-    public static class ArrayEntriesIterator implements SequenceIterator {
+    public static class ArrayEntriesIterator40 implements SequenceIterator {
 
         final ArrayItem container;
         final Iterator<GroundedValue> baseIterator;
         int index = 0;
 
-        public ArrayEntriesIterator(ArrayItem arrayItem) {
+        public ArrayEntriesIterator40(ArrayItem arrayItem) {
             baseIterator = arrayItem.members().iterator();
             container = arrayItem;
         }
@@ -368,12 +368,12 @@ public class LookupAllExpression40 extends LookupAllExpression {
      * Iterator over a sequence of entries in a map, delivering them in the form
      * required by $map?entry::*
      */
-    public static class MapEntriesIterator implements SequenceIterator {
+    public static class MapEntriesIterator40 implements SequenceIterator {
 
         final MapItem container;
         final Iterator<KeyValuePair> baseIterator;
 
-        public MapEntriesIterator(MapItem mapItem) {
+        public MapEntriesIterator40(MapItem mapItem) {
             baseIterator = mapItem.keyValuePairs().iterator();
             container = mapItem;
         }

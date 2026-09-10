@@ -48,13 +48,7 @@ import java.util.function.Supplier;
 public class LookupExpression40 extends LookupExpression {
 
     private boolean isClassified = false;
-    protected boolean isArrayLookup = false;
-    protected boolean isMapLookup = false;
-    protected boolean isSingleContainer = false;
-    protected boolean isSingleEntry = false;
 
-
-    protected Modifier modifier;
 
     /**
      * Constructor
