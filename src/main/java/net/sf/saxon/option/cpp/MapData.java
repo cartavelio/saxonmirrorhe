@@ -48,7 +48,7 @@ public class MapData {
 
 
 
-    @CEntryPoint(name = "j_createXdmMap", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_makeXdmMap", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_createXdmMap(IsolateThread thread, ObjectHandle mapDataRef) {
         MapData mapData = SaxonCAPI.objectHandles.get(mapDataRef);
         XdmMap xdmMap = XdmMap.makeMap(mapData.primitiveMap);
