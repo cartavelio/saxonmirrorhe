@@ -34,14 +34,14 @@ import java.util.StringTokenizer;
 
 public class Validate {
 
-    protected Processor processor;
-    protected EnterpriseConfiguration config;
-    protected boolean useURLs = false;
-    protected boolean showTime = false;
-    protected int repeat = 1;   // for performance testing
-    protected String validationMode = "strict";
-    protected int xsdLanguageVersion = Configuration.XSD11;
-    /*@Nullable*/ protected String topLevelElementName = null;
+    private Processor processor;
+    private EnterpriseConfiguration config;
+    private boolean useURLs = false;
+    private boolean showTime = false;
+    private int repeat = 1;   // for performance testing
+    private String validationMode = "strict";
+    private int xsdLanguageVersion = Configuration.XSD11;
+    private String topLevelElementName = null;
     private boolean allowExit = true;
 
     /**

@@ -27,7 +27,7 @@ public class QueryLibraryImpl extends QueryLibrary {
         for (XQueryFunction fn : lib.getFunctionDefinitions()) {
             importer.getTopLevelModule().getGlobalFunctionLibrary().declareFunction(fn);
         }
-        for (GlobalVariable libvar : getGlobalVariables()) {
+        for (GlobalVariable libvar : getImportedGlobalVariables()) {
             // Need to create a copy of the variable, because its slot number will be different for each query
             // that the variable is used in
             GlobalVariable newvar = libvar instanceof GlobalParam ? new GlobalParam() : new GlobalVariable();

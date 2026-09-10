@@ -53,6 +53,7 @@ import java.util.concurrent.*;
  * only the subset of the PSVI properties featured in the XDM data model.</p>
  */
 
+@CSharpModifiers(code={"internal"})
 public class SchemaValidatorImpl extends SchemaValidator {
 
     private final Processor processor;
@@ -64,10 +65,13 @@ public class SchemaValidatorImpl extends SchemaValidator {
     private boolean expandAttributeDefaults = true;
     private boolean useXsiSchemaLocation;
     private boolean keepStatistics;
+    //#if CSHARP==false
     private ValidationStatistics latestStatistics = null;
+    //#endif
     private final GlobalParameterSet suppliedParams = new GlobalParameterSet();
     private int threadCount = Runtime.getRuntime().availableProcessors();
 
+    @CSharpModifiers(code = {"internal"})
     public SchemaValidatorImpl(Processor processor) {
         this.processor = processor;
         this.useXsiSchemaLocation = processor.getConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION);
@@ -177,8 +181,10 @@ public class SchemaValidatorImpl extends SchemaValidator {
 
     @Override
     public void setCollectStatistics(boolean collect) {
+        //#if CSHARP==false
         this.keepStatistics = collect;
         latestStatistics = null;
+        //#endif
     }
 
     /**
@@ -205,9 +211,11 @@ public class SchemaValidatorImpl extends SchemaValidator {
 
     @Override
     public void reportValidationStatistics(Destination destination) throws SaxonApiException {
+        //#if CSHARP==false
         if (latestStatistics != null) {
             latestStatistics.report(processor, destination);
         }
+        //#endif
     }
 
     /**
@@ -768,10 +776,12 @@ public class SchemaValidatorImpl extends SchemaValidator {
             throw new SaxonApiException(e);
         }
         options.setCheckEntityReferences(true);
+        //#if CSHARP==false
         if (keepStatistics) {
             latestStatistics = new ValidationStatistics();
             options.setValidationStatisticsRecipient(latestStatistics.getRecipient());
         }
+        //#endif
         Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, config.obtainDefaultSerializationProperties());
         output.setPipelineConfiguration(pipe);
 

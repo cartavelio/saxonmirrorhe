@@ -12,15 +12,12 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.JavaExternalObjectType;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.lang.reflect.Type;
 import java.lang.reflect.*;
 
 
@@ -162,10 +159,14 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), 0);
                 setArg(0, tc.staticTypeCheck(getArg(0), st, role, visitor));
                 argumentConverters[0] = PJConverter.UnwrapExternalObject.INSTANCE;
+            } else if (theClass.equals(java.lang.Object.class)) {
+                // if the declared class is "Object" (bug 5044), then we unwrap the supplied value if it
+                // is a wrapped Java external object, or use it as is otherwise
+                argumentConverters[0] = PJConverter.ConditionalUnwrapExternalObject.INSTANCE;
             } else {
                 st = PJConverter.getEquivalentSequenceType(theClass);
                 argumentConverters[0] = PJConverter.allocate(
-                    config, getArg(0).getItemType(), getArg(0).getCardinality(), theClass);
+                    config, at, getArg(0).getCardinality(), theClass);
                 if (st != null) {
                     RoleDiagnostic role = new RoleDiagnostic(
                             RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), 0);
@@ -555,6 +556,10 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                     argValues[0] = argValues[0].materialize(); // bug 3723
                     theInstance = getTargetInstance(argValues[0], context);
                     // this fails if the first argument is not of a suitable class
+                    if (theInstance == null) {
+                        // bug 5044
+                        throw new XPathException("First argument to instance method must not be an empty sequence", SaxonErrorCode.SXJE0001, getLocation());
+                    }
                 } catch (XPathException err) {
                     err.maybeSetLocation(getLocation());
                     throw err;

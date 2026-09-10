@@ -142,6 +142,17 @@ public class FleetingNode implements NodeInfo {
         }
     }
 
+    @Override
+    public int hashCode() {
+        switch (getNodeKind()) {
+            case Type.ATTRIBUTE:
+                case Type.NAMESPACE:
+                return getParent().hashCode() ^ getLocalPart().hashCode();
+            default:
+                return super.hashCode();
+        }
+    }
+
     /**
      * Get the System ID for the node. Note this is not the
      * same as the base URI: the base URI can be modified by xml:base, but
