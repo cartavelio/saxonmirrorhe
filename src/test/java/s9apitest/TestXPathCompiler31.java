@@ -1,10 +1,14 @@
 package s9apitest;
 
+import net.sf.saxon.lib.Logger;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -294,6 +298,32 @@ public class TestXPathCompiler31 {
             selector.setVariable(new QName("x"), new XdmAtomicValue(23));
             XdmItem result = selector.evaluateSingle();
             assertEquals("24", result.getStringValue());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testTraceFunction() {
+        try {
+            HashMap<String, Integer> map = new HashMap<>();
+            map.put("x", 42);
+            Processor p = new Processor(false);
+            XPathCompiler c = p.newXPathCompiler();
+            c.setLanguageVersion("3.1");
+            XPathExecutable exec = c.compile("23 + trace(?x)");
+            XPathSelector selector = exec.load();
+            List<String> messages = new ArrayList<>();
+            selector.setTraceFunctionDestination(new Logger() {
+                public void println(String message, int severity) {
+                    messages.add(message);
+                }
+            });
+            selector.setContextItem(XdmMap.makeMap(map));
+            XdmItem result = selector.evaluateSingle();
+            assertEquals("65", result.getStringValue());
+            assertEquals(1, messages.size());
+            assertTrue(messages.get(0).contains("42"));
         } catch (Exception e) {
             fail();
         }

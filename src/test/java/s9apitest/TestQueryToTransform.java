@@ -131,6 +131,38 @@ public class TestQueryToTransform {
             assertTrue(dynamicErrors.get(0).getMessage().contains("division by zero"));
         }
     }
+
+    /**
+     * Test that message reporter is passed through fn:transform, bug 6524
+     */
+    @Test
+    public void testFnTransformMessageReporter() {
+        List<Message> messages = new ArrayList<>();
+        try {
+            Processor proc = new Processor(true);
+            String xsl1 = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+                    "<xsl:param name='xsl2' as='node()' select='.'/>" +
+                    "<xsl:template name='xsl:initial-template'><out><xsl:message>MESSAGE_1</xsl:message>" +
+                    "<xsl:sequence select='transform(map{\"stylesheet-node\":$xsl2})?output'/></out>" +
+                    "</xsl:template></xsl:transform>";
+
+            String xsl2 = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+                    "<xsl:template name='xsl:initial-template'><in><xsl:message>MESSAGE_2</xsl:message>" +
+                    "<xsl:text>INNER_TEXT</xsl:text></in>" +
+                    "</xsl:template></xsl:transform>";
+
+            XdmNode xsl2Doc = proc.newDocumentBuilder().build(new StreamSource(new StringReader(xsl2)));
+            XsltCompiler comp = proc.newXsltCompiler();
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl1)));
+            Xslt30Transformer trans = exec.load30();
+            trans.setGlobalContextItem(xsl2Doc);
+            trans.setMessageHandler(messages::add);
+            trans.callTemplate(null);
+            assertEquals(2, messages.size());
+        } catch (SaxonApiException e) {
+            fail(e);
+        }
+    }
 }
 
 

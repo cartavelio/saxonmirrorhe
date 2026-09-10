@@ -70,6 +70,7 @@ public class TestInvalidityHandler {
         public int count;
         @Override
         public void startReporting(String s) throws XPathException {
+            System.err.println("startRep");
         }
 
         @Override
@@ -79,6 +80,7 @@ public class TestInvalidityHandler {
 
         @Override
         public Sequence endReporting() throws XPathException {
+            System.err.println("endRep");
             return null;
         }
     }

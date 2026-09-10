@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -263,16 +264,18 @@ public class TestCollections {
     public void testStrictValidation() {
         try {
             Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION, true);
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("collection(.)/* instance of element(*, xs:untyped)");
             XPathSelector eval = exec.load();
             eval.setContextItem(composeURI(configTest.getDataDir(), "?select=books.xml;recurse=no;validation=strict"));
             XdmValue val = eval.evaluate();
-            assertEquals(false, ((XdmAtomicValue) val).getBooleanValue());
+            assertFalse(((XdmAtomicValue) val).getBooleanValue());
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
     }
+    
 
     @Test
     public void testNoValidation() {
