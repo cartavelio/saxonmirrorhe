@@ -18,7 +18,7 @@
       </description>
       <status>
          <p>Introduced in Saxon 9.9. Designed to supersede the extension instruction <a class="bodylink code"
-            href="/sql-extension/instructions/connect">sql:connect</a>. The <code>saxon-sql-10.#.jar</code> file,
+            href="/sql-extension/instructions/connect">sql:connect</a>. The <code>saxon-sql-13.#.jar</code> file,
             distributed alongside the main JAR file, must be added to the classpath when these SQL extension functions
             are used. Changed in 10.5 to allow the JDBC driver name to be omitted, and to allow a DataSource
             name to be provided.</p>
@@ -125,7 +125,7 @@
       </description>
       <status>
          <p>Introduced in Saxon 9.9. Designed to supersede the extension instruction <a class="bodylink code"
-           href="/sql-extension/instructions/delete">sql:delete</a>. The <code>saxon-sql-10.#.jar</code> file,
+           href="/sql-extension/instructions/delete">sql:delete</a>. The <code>saxon-sql-13.#.jar</code> file,
             distributed alongside the main JAR file, must be added to the classpath when these SQL extension functions
             are used.</p>
       </status>
@@ -162,7 +162,7 @@
       </description>
       <status>
          <p>Introduced in Saxon 9.9. Designed to supersede the extension instruction <a class="bodylink code"
-           href="/sql-extension/instructions/execute">sql:execute</a>. The <code>saxon-sql-10.#.jar</code> file,
+           href="/sql-extension/instructions/execute">sql:execute</a>. The <code>saxon-sql-13.#.jar</code> file,
             distributed alongside the main JAR file, must be added to the classpath when these SQL extension functions
             are used.</p>
       </status>
@@ -202,7 +202,7 @@
       </description>
       <status>
          <p>Introduced in Saxon 9.9. Designed to supersede the extension instruction <a class="bodylink code"
-           href="/sql-extension/instructions/insert">sql:insert</a>. The <code>saxon-sql-10.#.jar</code> file,
+           href="/sql-extension/instructions/insert">sql:insert</a>. The <code>saxon-sql-13.#.jar</code> file,
             distributed alongside the main JAR file, must be added to the classpath when these SQL extension functions
             are used.</p>
       </status>
@@ -356,7 +356,7 @@
       </description>
       <status>
          <p>Introduced in Saxon 9.9. Designed to supersede the extension instruction <a class="bodylink code"
-           href="/sql-extension/instructions/query">sql:query</a>. The <code>saxon-sql-10.#.jar</code> file,
+           href="/sql-extension/instructions/query">sql:query</a>. The <code>saxon-sql-13.#.jar</code> file,
             distributed alongside the main JAR file, must be added to the classpath when these SQL extension functions
             are used.</p>
       </status>
@@ -411,7 +411,7 @@
       </description>
       <status>
          <p>Introduced in Saxon 9.9. Designed to supersede the extension instruction <a class="bodylink code"
-            href="/sql-extension/instructions/update">sql:update</a>. The <code>saxon-sql-10.#.jar</code> file,
+            href="/sql-extension/instructions/update">sql:update</a>. The <code>saxon-sql-13.#.jar</code> file,
             distributed alongside the main JAR file, must be added to the classpath when these SQL extension functions
             are used.</p>
       </status>

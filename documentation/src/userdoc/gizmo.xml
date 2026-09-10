@@ -19,7 +19,7 @@
     tab key.</p>
     <p>The JLine2 library is delivered with the Saxon product, but as a separate JAR file. To run Gizmo
       from the command line, the classpath must contain both the standard Saxon JAR file (for example
-      <code>saxon-pe-10.0.jar</code>), and also the JLine2 JAR file, which is named <code>jline-2.14.6.jar</code>.</p></aside>
+      <code>saxon-pe-13.0.jar</code>), and also the JLine2 JAR file, which is named <code>jline-2.14.6.jar</code>.</p></aside>
   
   <h2 class="subtitle">Command line syntax</h2>
   

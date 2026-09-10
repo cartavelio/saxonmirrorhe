@@ -7,7 +7,7 @@
    <div class="javaonly">
    <aside>Requires Saxon-PE or Saxon-EE. </aside>
    
-   <p>The <code>saxon-sql-10.#.jar</code> file, distributed alongside the main JAR file, includes a set of XSLT extension
+   <p>The <code>saxon-sql-13.#.jar</code> file, distributed alongside the main JAR file, includes a set of XSLT extension
       instructions, and from Saxon 9.9 also a set of extension functions, providing access to SQL databases. The JAR
       must be added to the classpath when these extensions are used.</p>
    
