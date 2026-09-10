@@ -33,7 +33,7 @@ public class XPathProcessor extends SaxonCAPI {
     private XPathCompiler compiler = null;
     //private XPathSelector selector = null;
     //private XdmItem contextItem = null;
-
+                                                                   
     public XPathProcessor() {
         super();
         compiler = processor.newXPathCompiler();
