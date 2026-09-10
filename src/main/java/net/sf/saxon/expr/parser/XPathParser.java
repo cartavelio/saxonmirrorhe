@@ -2958,6 +2958,7 @@ public class XPathParser {
             nextToken();
             result = lookupStar(lhs);
         } else if (token == Token.LPAR) {
+            t.setState(Tokenizer.DEFAULT_STATE);
             result = lookup(this, lhs, parseParenthesizedExpression());
         } else if (token == Token.STRING_LITERAL) {
             checkLanguageVersion40();
