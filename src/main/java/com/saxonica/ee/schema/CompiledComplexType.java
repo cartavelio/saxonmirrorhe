@@ -809,7 +809,7 @@ public class CompiledComplexType {
         //System.err.println("Compiling type " + getDescription() + " (" + this + ")");
 
         if (debug) {
-            Logger err = compiler.getConfiguration().getLogger();
+            Logger err = getConfiguration().getLogger();
             err.info("==== Compiling complex type " + type.getDescription());
             err.info("  simple content: " + type.isSimpleContent());
             err.info("  complex content: " + type.isComplexContent());
@@ -840,7 +840,7 @@ public class CompiledComplexType {
                 }
             }
         }
-        type.makeCombinedAttributeGroup(compiler);
+        type.makeCombinedAttributeGroup();
         PreparedSchema schema = compiler.getPreparedSchema();
         makeContextDeterminedTypeMapForAttributes(schema);
         makeContextDeterminedTypeMapForElements(schema);

@@ -253,22 +253,21 @@ public class UserComplexType extends UserDefinedType
      * Determine the list of attribute uses and attribute wildcards allowed on this
      * complex type, by combining those defined on this type with those defined on the base type
      *
-     * @param compiler used for error reporting. May be null if the schema is known to be valid.
      * @return true if successful, false if the attribute groups are inconsistent with each other
      * @throws SchemaException if the error listener throws an exception
      */
 
-    public boolean makeCombinedAttributeGroup(SchemaCompiler compiler) throws SchemaException {
+    public boolean makeCombinedAttributeGroup() throws SchemaException {
         if (extendedAttributes != null) {
             return true;
         } else if (getDerivationMethod() == Derivation.DERIVATION_EXTENSION) {
             boolean result;
-            if (compiler != null) {
-                result = attributes.validate(compiler);
-                if (!result) {
-                    return false;
-                }
-            }
+//            if (compiler != null) {
+//                result = attributes.validate(compiler);
+//                if (!result) {
+//                    return false;
+//                }
+//            }
             SchemaType base = getBaseType();
             if (base.isSimpleType()) {
                 // if derived by extension from a simple type, there are no
@@ -317,12 +316,12 @@ public class UserComplexType extends UserDefinedType
         } else {
             // Derived by restriction
             boolean result;
-            if (compiler != null) {
-                result = attributes.validate(compiler);
-                if (!result) {
-                    return false;
-                }
-            }
+//            if (compiler != null) {
+//                result = attributes.validate(compiler);
+//                if (!result) {
+//                    return false;
+//                }
+//            }
             SchemaType base = getBaseType();
             extendedAttributes = new AttributeGroupDecl(getConfiguration());
             extendedAttributes.setLocator(this);
