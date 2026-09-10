@@ -62,6 +62,8 @@ not_run = 0
 wrong_error_results = 0
 debug = False
 
+test_case_found = False
+
 run_test = None
 '''"streamable"'''
 run_test_case_name = None
@@ -80,6 +82,7 @@ def process_catalog(path: str, catalogi):
     global test_report
     global saxon_version
     global results_path
+    global test_case_found
     cat_builder = driver_proc.new_document_builder()
     xpc = driver_proc.new_xpath_processor()
     '''xpc.set_lanaguage("3.1")'''
@@ -108,6 +111,8 @@ def process_catalog(path: str, catalogi):
                         if run_test is not None and att_name != run_test or att_name in exceptionList:
                             continue
                         process_test_set(cat_builder, driver_proc, path + att_file)
+                        if test_case_found:
+                            break
                     else:
                         print("Node for test-set is None")
                 else:
@@ -128,6 +133,8 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
     global localEnvironments
     global not_run
     global test_report
+    global test_case_found
+
     localEnvironments.clear()
     if os.path.exists(test_set_file):
 
@@ -181,10 +188,12 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
                         if test_case.is_node:
                             test_casei = test_case.get_node_value()
                             test_case_name = test_casei.get_attribute_value("name")
-                            if (
-                                    run_test_case_name is None or test_case_name == run_test_case_name) and test_set_name not in exceptionList:
+                            if (run_test_case_name is None or test_case_name == run_test_case_name) and test_set_name not in exceptionList:
                                 print("-s:" + test_set_name + " -t:" + test_case_name)
                                 run_test_case(test_case, xpathProcForEnv)
+                                if run_test_case_name is not None:
+                                    test_case_found = True
+                                    break
                         else:
                             print("Error test_case is not a node")
 
@@ -540,6 +549,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     '''Get config for XSLT Processor'''
     stylesheet = xpath_proc.evaluate_single("stylesheet[not(@role = 'secondary')]")
     output_uri = xpath_proc.evaluate_single("string(output/@file)")
+    serialize_check = xpath_proc.evaluate_single("string(output/@serialize)")
     base_output_uri = ""
     if path is not None:
         base_output_uri = "file:/" + abspath(str(path) + "results/output.xml")
@@ -617,8 +627,13 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
             init_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
                                                  False, False)
             environment.sheet.set_initial_template_parameters(False, init_params)
-            result = environment.sheet.call_template_returning_value(
-                initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
+            if serialize_check is not None and str(serialize_check) == "yes":
+                outcome.serialized_result = environment.sheet.call_template_returning_string(
+                    initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
+                outcome.base_uri = base_output_uri
+            else:
+                result = environment.sheet.call_template_returning_value(
+                    initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
 
         elif initial_function is not None:
             initial_function_node = initial_function.get_node_value()
@@ -648,17 +663,38 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                     print(nodex)
                     if nodex.name == "param":
                         exit()
-
-            result = environment.sheet.call_function_returning_value(initial_function_name, [])
+            if serialize_check is not None and str(serialize_check) == "yes":
+                outcome.serialized_result = environment.sheet.call_function_returning_string(initial_function_name, [])
+                outcome.base_uri = base_output_uri
+            else:
+                result = environment.sheet.call_function_returning_value(initial_function_name, [])
         elif environment.context_item is not None:
-            result = environment.sheet.apply_templates_returning_value(xdm_value=environment.context_item,
+            if serialize_check is not None and str(serialize_check) == "yes":
+                outcome.serialized_result = environment.sheet.apply_templates_returning_string(xdm_value=environment.context_item,
+                                                                   base_output_uri=base_output_uri)
+                outcome.base_uri = base_output_uri
+            else:
+                result = environment.sheet.apply_templates_returning_value(xdm_value=environment.context_item,
                                                                        base_output_uri=base_output_uri)
         else:
-            result = environment.sheet.call_template_returning_value(base_output_uri=base_output_uri)
+            if serialize_check is not None and str(serialize_check) == "yes":
+                outcome.serialized_result = environment.sheet.call_template_returning_string(base_output_uri=base_output_uri)
+                outcome.base_uri = base_output_uri
+            else:
+                result = environment.sheet.call_template_returning_value(base_output_uri=base_output_uri)
         outcome.result_documents = environment.sheet.get_result_documents()
         outcome.xsl_messages = environment.sheet.get_xsl_messages()
         '''print(environment.sheet.get_xsl_messages())'''
         '''print('Result = ' + str(result))'''
+
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+            if result is not None:
+                print("Result = " + str(result))
+            elif outcome.serialized_result is not None:
+                print("Serialized Result = " + outcome.serialized_result)
+            else:
+                print("No result available")
+
 
 
     except PySaxonApiError as ex:
@@ -678,7 +714,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     assert_xpc.declare_variable("result")
     global assert_set
     '''TODO add method  - assert_xpc.set_base_uri(assertion.getBaseURI())'''
-    if result is not None:
+    if result is not None or outcome.serialized_result is not None:
         success = outcome.test_assertion(assertion, result, None, environment.proc, assert_xpc, xpath_proc,
                                          assert_set)
         if success:
