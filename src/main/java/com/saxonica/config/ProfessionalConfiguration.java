@@ -942,7 +942,7 @@ public class ProfessionalConfiguration extends Configuration {
      * Set a namespace used to refer to a library of XSLT extension elements
      *
      * @param namespace the namespace used for the extension elements
-     * @param creator the an instance of {}@link ExtensionElementCreator}
+     * @param creator an instance of {@link ExtensionElementCreator}
      *                  that instantiates extension elements in this namespace
      * @throws net.sf.saxon.trans.XPathException if (for example) the namespace is reserved
      * @since 12.0
