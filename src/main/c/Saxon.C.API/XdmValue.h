@@ -187,9 +187,9 @@ protected:
     xdmSize = 0;
     toStringValue = nullptr;
     values_cap = 1;
-    values = new XdmItem*[values_cap];
-    relinquished_values = new char[values_cap];
-    relinquished_values[0] = 0;
+    values = null;
+    relinquished_values = null;
+    //relinquished_values[0] = 0;
   }
 
   char *valueType; /*!< Cached. The type of the XdmValue */
