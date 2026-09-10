@@ -24,6 +24,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.DecimalSymbols;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.PrecompiledSchemaSource;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -489,7 +490,9 @@ public class Environment implements ResourceResolver {
                 String href = schema.attribute("file");
                 String ns = schema.attribute("uri");
                 if (NamespaceConstant.FN.equals(ns)) {
+                    Configuration config = xpc.getProcessor().getUnderlyingConfiguration();
                     compiler.setXsdVersion("1.1");
+                    sourceList.add(new PrecompiledSchemaSource(config.getSchemaForBuiltInNamespace(NamespaceUri.FN)));
                 }
                 if (href == null) {
                     try {

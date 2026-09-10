@@ -1,6 +1,6 @@
-package com.saxonica.ee.schema;
+package net.sf.saxon.type;
 
-import net.sf.saxon.type.Schema;
+import com.saxonica.ee.schema.SchemaCompiler;
 
 import javax.xml.transform.Source;
 
@@ -11,18 +11,16 @@ import javax.xml.transform.Source;
  * that expect a Source object.
  */
 
-public class CachedSchemaSource implements Source {
+public class PrecompiledSchemaSource implements Source {
 
     private final Schema schema;
-    public CachedSchemaSource(Schema schema) {
-        this.schema = (PreparedSchema)schema;
+    public PrecompiledSchemaSource(Schema schema) {
+        this.schema = schema;
     }
 
     public Schema getSchema() {
         return schema;
     }
-
-
 
     /**
      * Set the system identifier for this Source.
