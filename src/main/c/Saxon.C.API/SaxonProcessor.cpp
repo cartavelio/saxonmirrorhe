@@ -79,6 +79,7 @@ sxnc_environment *SaxonProcessor::sxn_environ = 0;
 int SaxonProcessor::jvmCreatedCPP = 0;
 
 bool SaxonProcessor::exceptionOccurred() {
+    SaxonProcessor::attachCurrentThread();
     return SaxonProcessor::sxn_environ->env->ExceptionCheck() || exception != nullptr;
 }
 
@@ -91,6 +92,7 @@ const char *SaxonProcessor::checkException() {
 
 
 SaxonApiException *SaxonProcessor::checkAndCreateException(jclass cppClass) {
+    SaxonProcessor::attachCurrentThread();
     if (SaxonProcessor::sxn_environ->env->ExceptionCheck()) {
         SaxonApiException *exception = checkForExceptionCPP(SaxonProcessor::sxn_environ->env, cppClass, nullptr);
 #ifdef DEBUG
@@ -102,6 +104,7 @@ SaxonApiException *SaxonProcessor::checkAndCreateException(jclass cppClass) {
 }
 
 const char *SaxonProcessor::getErrorMessage() {
+    SaxonProcessor::attachCurrentThread();
     if(exception == nullptr) {
         exception =  SaxonProcessor::checkForExceptionCPP(SaxonProcessor::sxn_environ->env,
                                                                             saxonCAPIClass,nullptr);
@@ -111,6 +114,7 @@ const char *SaxonProcessor::getErrorMessage() {
 }
 
 void SaxonProcessor::exceptionClear() {
+    SaxonProcessor::attachCurrentThread();
     if(exceptionOccurred()) {
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     }
@@ -293,6 +297,29 @@ SaxonProcessor::SaxonProcessor(bool l) {
 #endif
 }
 
+void SaxonProcessor::attachCurrentThread() {
+    jint envResult = SaxonProcessor::sxn_environ->jvm->GetEnv((void **)&(SaxonProcessor::sxn_environ->env), JNI_VERSION_1_2);
+    if (envResult  != JNI_OK) {
+#ifdef DEBUG
+        std::cerr<<"SaxonProcessor::sxn_environ->env not OK - attaching to thread"<<std::endl;
+#endif
+        SaxonProcessor::sxn_environ->jvm->AttachCurrentThread((void **)&(SaxonProcessor::sxn_environ->env), NULL);
+    }
+#ifdef DEBUG
+    else {
+        std::cerr<<"SaxonProcessor::sxn_environ->env OK - running in current thread"<<std::endl;
+    }
+#endif
+
+}
+
+void SaxonProcessor::detachCurrentThread(){
+#ifdef DEBUG
+    std::cerr<<"detachCurrentThread called"<<std::endl;
+#endif
+    (SaxonProcessor::sxn_environ->jvm)->DetachCurrentThread();
+}
+
 SaxonProcessor::SaxonProcessor(const char *configFile) {
     cwd = "";
     proc = nullptr;
@@ -347,6 +374,7 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 }
 
 SaxonProcessor::~SaxonProcessor() {
+    SaxonProcessor::attachCurrentThread();
     clearConfigurationProperties();
     if(proc != nullptr) {
     	SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
@@ -360,6 +388,7 @@ SaxonProcessor::~SaxonProcessor() {
 
 
 bool SaxonProcessor::isSchemaAwareProcessor() {
+    SaxonProcessor::attachCurrentThread();
     if (!licensei) {
         return false;
     } else {
@@ -378,6 +407,7 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
 }
 
 void SaxonProcessor::applyConfigurationProperties() {
+    SaxonProcessor::attachCurrentThread();
     if (configProperties.size() > 0) {
         int size = configProperties.size();
         jclass stringClass = lookForClass(SaxonProcessor::sxn_environ->env, "java/lang/String");
@@ -593,7 +623,8 @@ JParameters SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValu
 
 
 SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
-std::cerr<<"created new = SaxonProcessor"<<std::endl;
+    SaxonProcessor::attachCurrentThread();
+
     versionClass = other.versionClass;
     procClass = other.procClass;
     saxonCAPIClass = other.saxonCAPIClass;
@@ -624,6 +655,7 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
 
 
 DocumentBuilder * SaxonProcessor::newDocumentBuilder(){
+    SaxonProcessor::attachCurrentThread();
     static jmethodID docBuilderID = nullptr;
 	if (docBuilderID == nullptr) {
 			docBuilderID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(procClass,
@@ -679,6 +711,7 @@ SchemaValidator *SaxonProcessor::newSchemaValidator() {
 
 
 const char *SaxonProcessor::version() {
+
     if (versionStr.empty()) {
 
         static jmethodID MID_version = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass,
@@ -696,12 +729,15 @@ const char *SaxonProcessor::version() {
 
         jstring jstr = (jstring) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, MID_version,
                                                                                            proc));
+        if(!jstr) {
+            std::cerr<<"version NULL found"<<std::endl;
+            return nullptr;
+        }
+
         versionStr += SaxonProcessor::sxn_environ->env->GetStringUTFChars(jstr, nullptr);
         SaxonProcessor::sxn_environ->env->DeleteLocalRef(jstr);
 
-
     }
-
     return versionStr.c_str();
 }
 
@@ -734,6 +770,7 @@ void SaxonProcessor::setResourcesDirectory(const char* dir){
 
 
 void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
+    SaxonProcessor::attachCurrentThread();
     jclass xmlResolverClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/trans/XmlCatalogResolver");
     static jmethodID catalogMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(xmlResolverClass, "setCatalog",
                                                                                       "(Ljava/lang/String;Lnet/sf/saxon/Configuration;Z)V");
@@ -777,6 +814,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
 
 
 XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator * validator) {
+    SaxonProcessor::attachCurrentThread();
     jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlString",
                                                                                     "(Ljava/lang/String;Lnet/sf/saxon/s9api/Processor;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {
@@ -812,6 +850,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator 
 }
 
 int SaxonProcessor::getNodeKind(jobject obj) {
+    SaxonProcessor::attachCurrentThread();
     jclass xdmNodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmNode;");
     static jmethodID nodeKindMID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmNodeClass,
                                                                                              "getNodeKind",
@@ -847,7 +886,7 @@ int SaxonProcessor::getNodeKind(jobject obj) {
 
 
 XdmNode *SaxonProcessor::parseXmlFromFile(const char *source, SchemaValidator * validator) {
-
+    SaxonProcessor::attachCurrentThread();
     jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
                                                                                     "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {
@@ -872,7 +911,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *source, SchemaValidator * 
 }
 
 XdmNode *SaxonProcessor::parseXmlFromUri(const char *source, SchemaValidator * validator) {
-
+    SaxonProcessor::attachCurrentThread();
     jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlFile",
                                                                                     "(Lnet/sf/saxon/s9api/Processor;Ljava/lang/String;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {
@@ -936,7 +975,7 @@ void SaxonProcessor::release() {
 /* ========= Factory method for Xdm ======== */
 
 XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
-
+    SaxonProcessor::attachCurrentThread();
 
     jobject obj2 = (jobject) createSaxonProcessor2(SaxonProcessor::sxn_environ->env, xdmAtomicClass, "(Ljava/lang/String;)V", SaxonProcessor::sxn_environ->env->NewStringUTF(str));
 
@@ -948,7 +987,7 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
 
 
 XdmAtomicValue *SaxonProcessor::makeStringValue2(std::string str) {
-
+    SaxonProcessor::attachCurrentThread();
     jclass xdmAtomicClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 
     jobject obj = getJavaStringValue(SaxonProcessor::sxn_environ, str.c_str());
@@ -968,6 +1007,7 @@ XdmAtomicValue *SaxonProcessor::makeStringValue2(std::string str) {
 }
 
 XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str) {
+    SaxonProcessor::attachCurrentThread();
     jobject obj = getJavaStringValue(SaxonProcessor::sxn_environ, str.c_str());
     static jmethodID msID_atomic = nullptr;
     if (msID_atomic == nullptr) {
@@ -985,6 +1025,7 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str) {
 }
 
 XdmAtomicValue *SaxonProcessor::makeIntegerValue(int i) {
+    SaxonProcessor::attachCurrentThread();
     //jobject obj = integerValue(*SaxonProcessor::sxn_environ, i);
     static jmethodID miiID_atomic = nullptr;
     if (miiID_atomic == nullptr) {
@@ -1001,6 +1042,7 @@ XdmAtomicValue *SaxonProcessor::makeIntegerValue(int i) {
 }
 
 XdmAtomicValue *SaxonProcessor::makeDoubleValue(double d) {
+    SaxonProcessor::attachCurrentThread();
     //jobject obj = doubleValue(*SaxonProcessor::sxn_environ, d);
     static jmethodID mdID_atomic = nullptr;
     if (mdID_atomic == nullptr) {
@@ -1013,6 +1055,7 @@ XdmAtomicValue *SaxonProcessor::makeDoubleValue(double d) {
 }
 
 XdmAtomicValue *SaxonProcessor::makeFloatValue(float d) {
+    SaxonProcessor::attachCurrentThread();
     //jobject obj = doubleValue(*SaxonProcessor::sxn_environ, d);
     static jmethodID mfID_atomic = nullptr;
     if (mfID_atomic == nullptr) {
@@ -1025,6 +1068,7 @@ XdmAtomicValue *SaxonProcessor::makeFloatValue(float d) {
 }
 
 XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
+    SaxonProcessor::attachCurrentThread();
     //jobject obj = longValue(*SaxonProcessor::sxn_environ, l);
     static jmethodID mlID_atomic = nullptr;
     if (mlID_atomic == nullptr) {
@@ -1037,6 +1081,7 @@ XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
 }
 
 XdmAtomicValue *SaxonProcessor::makeBooleanValue(bool b) {
+    SaxonProcessor::attachCurrentThread();
     //jobject obj = booleanValue(*SaxonProcessor::sxn_environ, b);
     static jmethodID mID_atomic = nullptr;
     if (mID_atomic == nullptr) {
@@ -1049,6 +1094,7 @@ XdmAtomicValue *SaxonProcessor::makeBooleanValue(bool b) {
 }
 
 XdmAtomicValue *SaxonProcessor::makeQNameValue(const char *str) {
+    SaxonProcessor::attachCurrentThread();
     jobject val = xdmValueAsObj(SaxonProcessor::sxn_environ, "QName", str);
     XdmAtomicValue *value = new XdmAtomicValue(val, "QName");
     SaxonProcessor::sxn_environ->env->DeleteLocalRef(val);
@@ -1056,6 +1102,7 @@ XdmAtomicValue *SaxonProcessor::makeQNameValue(const char *str) {
 }
 
 XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *strValue) {
+    SaxonProcessor::attachCurrentThread();
     jobject obj = xdmValueAsObj(SaxonProcessor::sxn_environ, typei, strValue);
     XdmAtomicValue *value = new XdmAtomicValue(obj, typei);
     SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
@@ -1079,6 +1126,7 @@ const char *SaxonProcessor::getStringValue(XdmItem *item) {
 #if CVERSION_API_NO >= 123
 
 XdmArray *SaxonProcessor::makeArray(short *input, int length) {
+    SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
         std::cerr << "Error found when converting string to XdmArray" << std::endl;
         return nullptr;
@@ -1121,6 +1169,7 @@ XdmArray *SaxonProcessor::makeArray(short *input, int length) {
 
 
 XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
+    SaxonProcessor::attachCurrentThread();
     jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
 
     jclass xdmValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmValue");
@@ -1171,6 +1220,7 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
 
 XdmArray *SaxonProcessor::makeArray(int *input, int length) {
+    SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
         std::cerr << "Error found when converting string to XdmArray";
         return nullptr;
@@ -1213,6 +1263,7 @@ XdmArray *SaxonProcessor::makeArray(int *input, int length) {
 }
 
 XdmArray *SaxonProcessor::makeArray(long *input, int length) {
+    SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
         std::cerr << "Error found when converting string to XdmArray";
         return nullptr;
@@ -1255,6 +1306,7 @@ XdmArray *SaxonProcessor::makeArray(long *input, int length) {
 
 
 XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
+    SaxonProcessor::attachCurrentThread();
     if (input == nullptr) {
         std::cerr << "Error found when converting string to XdmArray";
         return nullptr;
@@ -1299,6 +1351,7 @@ XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
 
 
 XdmArray *SaxonProcessor::makeArray(const char **input, int length) {
+    SaxonProcessor::attachCurrentThread();
     if (input == nullptr || length <= 0) {
         std::cerr << "Error found when converting string to XdmArray";
         return nullptr;
@@ -1340,6 +1393,7 @@ XdmArray *SaxonProcessor::makeArray(const char **input, int length) {
 
 
 XdmMap *SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
+    SaxonProcessor::attachCurrentThread();
     jobjectArray keyArray = nullptr;
     jobjectArray valueArray = nullptr;
     jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
@@ -1393,6 +1447,7 @@ XdmMap *SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) 
 
 
 XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
+    SaxonProcessor::attachCurrentThread();
     jobjectArray keyArray = nullptr;
     jobjectArray valueArray = nullptr;
     XdmAtomicValue ** atomicArray = nullptr;
@@ -1455,6 +1510,7 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
 
 
     XdmMap *SaxonProcessor::makeMap3(XdmAtomicValue ** keys, XdmValue ** values, int size) {
+        SaxonProcessor::attachCurrentThread();
     jobjectArray keyArray = nullptr;
     jobjectArray valueArray = nullptr;
 

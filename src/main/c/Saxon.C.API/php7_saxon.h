@@ -202,6 +202,8 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SaxonProcessor,  parseXmlFromFile);
     PHP_METHOD(SaxonProcessor,  parseXmlFromUri);
     PHP_METHOD(SaxonProcessor,  setcwd);
+    PHP_METHOD(SaxonProcessor,  attachCurrentThread);
+    PHP_METHOD(SaxonProcessor,  detachCurrentThread);
 
     PHP_METHOD(SaxonProcessor,  setCatalog);
     PHP_METHOD(SaxonProcessor,  registerPHPFunctions);

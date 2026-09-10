@@ -520,7 +520,7 @@ void setParameter(sxnc_parameter **parameters, int * parLen, int * parCap, const
 	char *newName = malloc(sizeof(char)*nameLen);
     int namespaceLen = 0;
     char *newNamespace =  NULL;
-    if(namespacei>0) {
+    if(strlen(namespacei)>0) {
         namespaceLen = strlen(namespacei);
         newNamespace = malloc(sizeof(char)*namespaceLen);
         snprintf(newNamespace, namespaceLen, "%s", name);
@@ -530,7 +530,7 @@ void setParameter(sxnc_parameter **parameters, int * parLen, int * parCap, const
 	snprintf(newName, nameLen, "%s%s", "param:", name);
 
 	(*parameters)[(*parLen) - 1].name = (char*)newName;
-    if(namespacei>0) {
+    if(strlen(namespacei)>0) {
         (*parameters)[(*parLen) - 1].namespacei = (char *) newNamespace;
     }
 	(*parameters)[(*parLen) - 1].value = (jobject)value;
