@@ -670,7 +670,6 @@ public class PackageLoaderHE implements IPackageLoader {
         function.setResultType(parseAlphaCode(functionElement, "as"));
         function.setDeclaredStreamability(FunctionStreamability.UNCLASSIFIED);
         function.incrementReferenceCount(); // ensure it's exported in any re-export
-        int evalMode = getIntegerAttribute(functionElement, "eval");
 
         if (flags.contains("p")) {
             function.setDeterminism(UserFunction.Determinism.PROACTIVE);
@@ -1078,7 +1077,7 @@ public class PackageLoaderHE implements IPackageLoader {
         }
     }
 
-    private static ARegularExpression allNumeric = ARegularExpression.compile("[0-9]+", "");
+    private final static ARegularExpression allNumeric = ARegularExpression.compile("[0-9]+", "");
 
 
     /**
@@ -1862,7 +1861,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 AtomicValue val = at.getStringConverter(loader.config.getConversionRules())
                         .convertString(StringView.of(valAtt).tidy()).asAtomic();
                 return Literal.makeLiteral(val);
-            } else if (type instanceof EnumerationUnionType enut) {
+            } else if (type instanceof EnumerationUnionType) {
                 return Literal.makeLiteral(new StringValue(valAtt));
             } else {
                 throw new IllegalStateException("Unrecognized atomic type: " + type);
@@ -2339,7 +2338,6 @@ public class PackageLoaderHE implements IPackageLoader {
             }
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             boolean textOnly = flags != null && flags.contains("t");
-            String base = element.getAttributeValue(NamespaceUri.NULL, "base");
             String constantText = element.getAttributeValue(NamespaceUri.NULL, "text");
             Expression body = loader.getFirstChildExpression(element);
             DocumentInstr inst = new DocumentInstr(textOnly, constantText == null ? null : StringView.tidy(constantText));
@@ -2369,17 +2367,7 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         eMap.put("dott", (loader, element) -> {
-            ContextValueExpression cie = new ContextValueExpression();
-            /*SequenceType st = loader.parseAlphaCode(element, "type");
-            ItemType type = st.getPrimaryType();
-            boolean maybeAbsent = "a".equals(element.getAttributeValue(NamespaceUri.NULL, "flags"));
-            ContextItemStaticInfo info = loader.getConfiguration()
-                    .makeContextItemStaticInfo(type, maybeAbsent ? Optionality.OPTIONAL : Optionality.REQUIRED);
-            if (maybeAbsent) {
-                info = info.withStatusUnknown();
-            }
-            cie.setStaticInfo(info);*/
-            return cie;
+            return new ContextValueExpression();
         });
 
         eMap.put("dynCall", (loader, element) -> {
@@ -2814,7 +2802,6 @@ public class PackageLoaderHE implements IPackageLoader {
                     exp.setRetainedStaticContext(loader.makeRetainedStaticContext(element));
                 } else {
                     loader.needsPELicense("Saxon extension functions");
-                    exp = null;
                 }
             }
             if (exp == null) {
@@ -2981,12 +2968,6 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("lookupAll", (loader, element) -> {
             Expression select = loader.getFirstChildExpression(element);
-            SequenceType type = SequenceType.ANY_SEQUENCE;
-            String typeAtt = element.getAttributeValue(NamespaceUri.NULL, "type");
-            if (typeAtt != null) {
-                final StylesheetPackage pack = loader.getPackStack().peek();
-                type = AlphaCode.toSequenceType(typeAtt, loader.getConfiguration(), pack.getImportedSchema(""));
-            }
             return new LookupAllExpression(select);
         });
 
