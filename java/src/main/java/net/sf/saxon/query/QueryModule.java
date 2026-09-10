@@ -90,6 +90,8 @@ public class QueryModule implements StaticContext {
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private final Set<QueryModule> importedModules = new HashSet<>();
+    private Map<StructuredQName, ItemType> locallyVisibleItemTypes = new HashMap<>();
+    private Map<StructuredQName, ItemType> publicItemTypes = new HashMap<>();
 
     /**
      * Create a QueryModule for a main module, copying the data that has been set up in a
@@ -1679,7 +1681,7 @@ public class QueryModule implements StaticContext {
 
     @Override
     public ItemType resolveTypeAlias(StructuredQName typeName) {
-        return getPackageData().obtainTypeAliasManager().getItemType(typeName);
+        return locallyVisibleItemTypes.get(typeName);
     }
 
     /**
@@ -1693,6 +1695,32 @@ public class QueryModule implements StaticContext {
         } else {
             return var.countReferences();
         }
+    }
+
+    public void declareItemType(StructuredQName name, ItemType definition, boolean isPublic) throws XPathException {
+        if (locallyVisibleItemTypes.containsKey(name)) {
+            throw new XPathException("Duplicate type alias: " + name.getEQName(), "XQST0146");
+        }
+        locallyVisibleItemTypes.put(name, definition);
+        if (isPublic) {
+            if (!isMainModule() && !name.hasURI(getModuleNamespace())) {
+                throw new XPathException("Declared item type " + name.getEQName()
+                                                 + " is public but is not in the module namespace", "XQST0048");
+            }
+            publicItemTypes.put(name, definition);
+        }
+    }
+
+    public Map<StructuredQName, ItemType> getLocallyVisibleItemTypes() {
+        return locallyVisibleItemTypes;
+    }
+
+    public void setLocallyVisibleItemTypes(Map<StructuredQName, ItemType> locallyVisibleItemTypes) {
+        this.locallyVisibleItemTypes = locallyVisibleItemTypes;
+    }
+
+    public Map<StructuredQName, ItemType> getPublicItemTypes() {
+        return publicItemTypes;
     }
 
 

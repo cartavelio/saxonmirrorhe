@@ -30,7 +30,6 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
@@ -389,10 +388,9 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         ExpressionVisitor visitor = ExpressionVisitor.make(env);
         processAllFunctions(fn -> {
             try {
-                Map<StructuredQName, ItemType> aliases = env.getPackageData().obtainTypeAliasManager().getTypeAliases();
                 for (int i = 0; i < fn.getNumberOfParameters(); i++) {
                     UserFunctionParameter p = fn.getParameterDefinitions()[i];
-                    p.setRequiredType(p.getRequiredType().resolveAliases(aliases, new Stack<>()));
+                    p.setRequiredType(p.getRequiredType().resolveAliases(env, new Stack<>()));
                     Supplier<Expression> init = fn.getDefaultValueExpression(i);
                     if (init != null) {
                         Expression initExp = init.get();
@@ -402,7 +400,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                         }
                     }
                 }
-                fn.setResultType(fn.getResultType().resolveAliases(aliases, new Stack<>()));
+                fn.setResultType(fn.getResultType().resolveAliases(env, new Stack<>()));
                 fn.compile();
                 Expression body = fn.getBody();
                 Expression e2 = body.simplify();

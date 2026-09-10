@@ -85,8 +85,6 @@ public class XQueryParser extends XPathParser {
     private final Set<StructuredQName> outputPropertiesSeen = new HashSet<>(4);
     private Properties parameterDocProperties;
 
-    private final List<DraftItemType> draftItemTypes = new ArrayList<>(5);
-
 
 
     /**
@@ -111,12 +109,6 @@ public class XQueryParser extends XPathParser {
         qp.setLanguage(language, languageVersion);
         qp.setParserExtension(parserExtension);
         return qp;
-    }
-
-    public ItemType newDraftItemType(StructuredQName qname) {
-        DraftItemType dt = new DraftItemType(qname);
-        draftItemTypes.add(dt);
-        return dt;
     }
 
     /**
@@ -189,19 +181,37 @@ public class XQueryParser extends XPathParser {
 
             // Replace every declared item type by its full expansion
 
-            TypeAliasManager typeAliasManager = env.getPackageData().obtainTypeAliasManager();
-            Map<StructuredQName, ItemType> resolvedItemTypes = typeAliasManager.getTypeAliases();
-            Map<StructuredQName, ItemType> expandedItemTypes =  new HashMap<>(resolvedItemTypes);
-            for (Map.Entry<StructuredQName, ItemType> entry : resolvedItemTypes.entrySet()) {
-                Stack<StructuredQName> stack = new Stack<>();
-                ItemType expandedItemType = entry.getValue().resolveAliases(resolvedItemTypes, stack);
-                expandedItemTypes.put(entry.getKey(), expandedItemType);
+            Map<StructuredQName, ItemType> visibleItemTypes = ((QueryModule)env).getLocallyVisibleItemTypes();
+            for (QueryModule imp : ((QueryModule)env).getImportedModules()) {
+                Map<StructuredQName, ItemType> publicItemTypes = imp.getPublicItemTypes();
+                for (Map.Entry<StructuredQName, ItemType> entry : publicItemTypes.entrySet()) {
+                    if (visibleItemTypes.containsKey(entry.getKey())) {
+                        throw new XPathException("Imported public item type "
+                                                         + entry.getKey().getEQName()
+                                                         + " is already defined in the importing module", "XQST0146");
+                    }
+                    visibleItemTypes.put(entry.getKey(), entry.getValue());
+                }
             }
-            typeAliasManager.setTypeAliases(expandedItemTypes);
+
+            ((QueryModule) env).setLocallyVisibleItemTypes(visibleItemTypes);
+
+
+            Map<StructuredQName, ItemType> expandedItemTypes = new HashMap<>();
+            for (Map.Entry<StructuredQName, ItemType> entry : visibleItemTypes.entrySet()) {
+                ItemType expanded = entry.getValue().resolveAliases(env, new Stack());
+                expandedItemTypes.put(entry.getKey(), expanded);
+            }
+
+            ((QueryModule) env).setLocallyVisibleItemTypes(expandedItemTypes);
+
+
+
+            //typeAliasManager.setTypeAliases(expandedItemTypes);
 
             for (GlobalVariable var : env.getPackageData().getGlobalVariableList()) {
                 if (languageVersion >= 40 && var.getRequiredType() != SequenceType.ANY_SEQUENCE) {
-                    var.setRequiredType(var.getRequiredType().resolveAliases(expandedItemTypes, new Stack<>()));
+                    var.setRequiredType(var.getRequiredType().resolveAliases(env, new Stack<>()));
                     TypeChecker checker = env.getConfiguration().getTypeChecker(false);
                     ExpressionVisitor visitor = ExpressionVisitor.make(env);
                     Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, var.getVariableQName().getDisplayName(), 0);
@@ -1966,7 +1976,7 @@ public class XQueryParser extends XPathParser {
             grumble("Item type alias duplicates an existing type name in the static context: "
                             + typeName.getEQName(), "XQST0146");
         }
-        getStaticContext().getPackageData().obtainTypeAliasManager().registerTypeAlias(typeName, typeDef);
+        ((QueryModule)env).declareItemType(typeName, typeDef, !annotations.includes(Annotation.PRIVATE));
     }
 
     /**

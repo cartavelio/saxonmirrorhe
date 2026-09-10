@@ -8,6 +8,7 @@
 package net.sf.saxon.type;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.hof.CoercedFunction;
@@ -540,12 +541,12 @@ public class SpecificFunctionType extends AnyFunctionType {
     }
 
     @Override
-    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
         SequenceType[] a2 = new SequenceType[argTypes.length];
         for (int i = 0; i < a2.length; i++) {
-            a2[i] = argTypes[i].resolveAliases(aliases, path);
+            a2[i] = argTypes[i].resolveAliases(env, path);
         }
-        SequenceType r2 = resultType.resolveAliases(aliases, path);
+        SequenceType r2 = resultType.resolveAliases(env, path);
         return new SpecificFunctionType(a2, r2,annotations);
     }
 }

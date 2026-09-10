@@ -1,9 +1,9 @@
 package net.sf.saxon.type;
 
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 
-import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -35,15 +35,15 @@ public class DraftItemType extends ErrorType {
     /**
      * Resolve the item type alias to a real item type
      *
-     * @param aliases map from QNames of named item types to their definitions (which may
-     *                themselves contain references to other named item types)
-     * @param path    stack of names being resolved, used to detect cycles
+     * @param env  map from QNames of named item types to their definitions (which may
+     *             themselves contain references to other named item types)
+     * @param path stack of names being resolved, used to detect cycles
      * @return the item type after resolving any item type name references
      */
 
     @Override
-    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
-        ItemType target = aliases.get(getTargetName());
+    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
+        ItemType target = env.resolveTypeAlias(getTargetName());
         if (target == null) {
             throw new XPathException("Item type " + name.getEQName() + " is not defined in the static context " + getTargetName(), "XPST0051");
         }
@@ -51,7 +51,7 @@ public class DraftItemType extends ErrorType {
             throw new XPathException("Definition of item type " + name.getEQName() + " is cyclic " + getTargetName(), "XQST0140");
         }
         path.push(getTargetName());
-        ItemType finalTarget = target.resolveAliases(aliases, path);
+        ItemType finalTarget = target.resolveAliases(env, path);
         path.pop();
         return finalTarget;
     }

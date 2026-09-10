@@ -7,6 +7,7 @@
 
 package net.sf.saxon.type;
 
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
@@ -197,7 +198,7 @@ public class EnumerationUnionType extends LocalUnionType {
     }
 
     @Override
-    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
         return this;
     }
 

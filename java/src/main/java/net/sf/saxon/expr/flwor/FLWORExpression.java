@@ -14,7 +14,6 @@ import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -23,7 +22,6 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 import java.util.function.Supplier;
 
@@ -181,16 +179,12 @@ public class FLWORExpression extends Expression {
 
         OperandProcessor typeChecker = op -> op.typeCheck(visitor, contextInfo);
 
-        Map<StructuredQName, ItemType> aliases =
-                visitor.getStaticContext().getPackageData().obtainTypeAliasManager().getTypeAliases();
         for (int i = 0; i < clauses.size(); i++) {
             clauses.get(i).processOperands(typeChecker);
 
             LocalVariableBinding[] bindings = clauses.get(i).getRangeVariables();
-            if (!aliases.isEmpty()) {
-                for (LocalVariableBinding b : bindings) {
-                    b.setRequiredType(b.getRequiredType().resolveAliases(aliases, new Stack<>()));
-                }
+            for (LocalVariableBinding b : bindings) {
+                b.setRequiredType(b.getRequiredType().resolveAliases(visitor.getStaticContext(), new Stack<>()));
             }
 
             clauses.get(i).typeCheck(visitor, contextInfo);

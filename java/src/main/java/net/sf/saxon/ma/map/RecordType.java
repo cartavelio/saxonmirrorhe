@@ -8,6 +8,7 @@
 package net.sf.saxon.ma.map;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
@@ -806,12 +807,12 @@ public class RecordType implements FunctionItemType {
     }
 
     @Override
-    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
         List<SequenceType> fieldTypes2 = new ArrayList<>(fieldTypes.size());
         boolean changed = false;
         for (String s : fieldNamesInOrder) {
             SequenceType oldType = fieldTypes.get(s);
-            SequenceType newType = oldType.resolveAliases(aliases, path);
+            SequenceType newType = oldType.resolveAliases(env, path);
             if (oldType != newType) {
                 changed = true;
             }

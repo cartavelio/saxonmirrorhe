@@ -84,8 +84,7 @@ public final class InstanceOfExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        targetType = targetType.resolveAliases(
-                visitor.getStaticContext().getPackageData().obtainTypeAliasManager().getTypeAliases(), new Stack<>());
+        targetType = targetType.resolveAliases(visitor.getStaticContext(), new Stack<>());
         getOperand().typeCheck(visitor, contextInfo);
         Expression operand = getBaseExpression();
         if (operand instanceof Literal) {

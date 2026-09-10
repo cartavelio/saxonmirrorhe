@@ -276,11 +276,12 @@ public interface StaticContext {
     KeyManager getKeyManager();
 
     /**
-     * Get type alias. This is a Saxon extension. A type alias is a QName which can
+     * Resolve a type alias for an item type. A type alias is a QName which can
      * be used as a shorthand for an itemtype, using the syntax ~typename anywhere that
      * an item type is permitted.
      * @param typeName the name of the type alias
-     * @return the corresponding item type, if the name is recognised; otherwise null.
+     * @return the corresponding item type, if the name is recognised; otherwise null. The result must be
+     * fully expanded, that is, it must not contain any further references to named item types.
      */
 
     ItemType resolveTypeAlias(StructuredQName typeName);

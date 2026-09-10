@@ -8,6 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
@@ -21,7 +22,6 @@ import net.sf.saxon.type.coercion.ArrayCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.function.Function;
@@ -326,8 +326,8 @@ public class ArrayItemType extends AnyFunctionType {
     }
 
     @Override
-    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
-        SequenceType m2  = memberType.resolveAliases(aliases, path);
+    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
+        SequenceType m2  = memberType.resolveAliases(env, path);
         if (m2 != memberType) {
             return new ArrayItemType(m2);
         }

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.type;
 
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
@@ -470,11 +471,11 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     }
 
     @Override
-    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
         List<ItemType> members = new ArrayList<>(memberTypes);
         boolean changed = false;
         for (ItemType member : memberTypes) {
-            ItemType m2 = member.resolveAliases(aliases, path);
+            ItemType m2 = member.resolveAliases(env, path);
             if (m2 != member) {
                 changed = true;
             }

@@ -2042,7 +2042,7 @@ public class XPathParser {
                     return it;
                 } else if (this instanceof XQueryParser qp) {
                     // In XQuery, it might be a forwards reference
-                    return qp.newDraftItemType(sq);
+                    return new DraftItemType(sq);
                 }
             }
             grumble("Unknown item type " + qname, "XPST0051");
