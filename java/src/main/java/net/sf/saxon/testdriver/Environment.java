@@ -920,7 +920,7 @@ public class Environment implements ResourceResolver {
                     environment.streamedSecondaryDocs.put(file.toURI().toString(), validation);
                     res.file = file;
                 }
-            } else {
+            } else if (select == null) {
                 Source ss;
                 File file = null;
                 FileInputStream fileInputStream = null;
@@ -1000,7 +1000,7 @@ public class Environment implements ResourceResolver {
 
                     if (selectedTreeModel.getName().equals("DOM")) {
                         NodeInfo root = new DocumentWrapper(doc, res.uri, environment.processor.getUnderlyingConfiguration()).getRootNode();
-                        res.doc = (XdmNode)XdmValue.wrap(root);
+                        res.doc = (XdmNode) XdmValue.wrap(root);
                     } else {
                         res.doc = driver.makeDominoTree(doc, environment.processor.getUnderlyingConfiguration(), res.uri);
                     }
@@ -1021,11 +1021,6 @@ public class Environment implements ResourceResolver {
                 builder.setTreeModel(selectedTreeModel);
 
                 XdmItem selectedItem = res.doc;
-                if (select != null) {
-                    XPathSelector selector = environment.xpathCompiler.compile(select).load();
-                    selector.setContextItem(selectedItem);
-                    selectedItem = selector.evaluateSingle();
-                }
 
 
                 if (role != null) {
@@ -1040,6 +1035,24 @@ public class Environment implements ResourceResolver {
                         }
                     }
                 }
+            } else {
+                XPathSelector selector = environment.xpathCompiler.compile(select).load();
+                XdmItem selectedItem = selector.evaluateSingle();
+                if (role != null) {
+                    if (".".equals(role)) {
+                        environment.contextItem = selectedItem;
+                    } else if (role.startsWith("$")) {
+                        String varName = role.substring(1);
+                        environment.params.put(new QName(varName), selectedItem);
+                        environment.xpathCompiler.declareVariable(new QName(varName));
+                        if (!isTrue("declared").test(source)) {
+                            environment.paramDeclarations.append("declare variable $" + varName + " external; ");
+                        }
+                    }
+                }
+                selector.setContextItem(selectedItem);
+
+
             }
             String definesStylesheet = source.attribute("defines-stylesheet");
             if (definesStylesheet != null) {

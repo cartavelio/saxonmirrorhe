@@ -546,6 +546,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                     ini.initialTemplate = initialTemplate.orElse(null);
                     ini.initialModeName = initialModeName;
                     ini.initialMatchSelection = initialMatchSelection;
+                    if (initialMatchSelection == null && contextItem != null) {
+                        ini.initialMatchSelection = contextItem;
+                    }
                     ini.initialTemplateName = initialTemplateName;
                     ini.baseOutputUri = baseOutputURI;
 
@@ -764,7 +767,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         // For overriding in Javascript driver
     }
 
-    private static class InitialTransformDetails {
+    protected static class InitialTransformDetails {
         public String xsltLanguageVersion;
         public XdmItem contextItem;
         public XdmNode initialMode;
@@ -802,14 +805,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 serializationDeclared = serializeAtt.equals(Optional.of("yes"));
             }
             boolean resultSerialized = serializationDeclared || assertsSerial;
-
-//                    if (assertsSerial) {
-//                        String comment = outcome.getComment();
-//                        comment = (comment == null ? "" : comment) + "*Serialization " + (serializationDeclared ? "declared* " : "required* ");
-//                        outcome.setComment(comment);
-//                    }
-
-
+            
             Xslt30Transformer transformer = sheet.load30();
             transformer.setResourceResolver(env);
             if (env.unparsedTextResolver != null) {
@@ -872,15 +868,15 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 src = new StreamSource(env.streamedFile);
             } else if (env.streamedContent != null) {
                 src = new StreamSource(new StringReader(env.streamedContent), "inlineDoc");
-            } else if (ini.initialTemplate == null && ini.contextItem != null) {
-                src = ((XdmNode) ini.contextItem).getUnderlyingNode();
+            } else if (ini.initialTemplate == null && ini.contextItem instanceof XdmNode contextNode) {
+                src = contextNode.getUnderlyingNode();
             }
             if (src != null && !"skip".equals(env.streamedInputValidation)) {
                 SchemaValidator validator = env.xsdSchema.newValidator();
                 src = validator.asSource(src);
             }
 
-            if (src == null && ini.initialFunction == null && ini.initialTemplateName == null && ini.initialModeName == null) {
+            if (src == null && ini.initialMatchSelection == null && ini.initialFunction == null && ini.initialTemplateName == null && ini.initialModeName == null) {
                 ini.initialTemplateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
             }
 
