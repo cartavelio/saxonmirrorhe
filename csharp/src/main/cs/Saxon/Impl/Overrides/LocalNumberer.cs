@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+#if EE
 using ICU4N;
 using ICU4N.Globalization;
+#endif
 using Saxon.Hej.expr.number;
+
+// Note that we use #if EE in this class to separate the EE version that
+// uses ICU4N from the HE version which does not.
 
 namespace Saxon.Impl.Overrides {
     
@@ -18,18 +23,26 @@ namespace Saxon.Impl.Overrides {
     public class LocalNumberer : Numberer_en {
 
         private readonly CultureInfo culture;     // Standard .NET version
+
+#if EE        
         private readonly UCultureInfo uCulture;   // ICU4N version
-        
         private readonly Dictionary<string, string> ordinalParamIndex = new ();
+#else
+        private readonly Numberer_en numberer = new Numberer_en();
+#endif
 
         public LocalNumberer(string language, string country) {
             try {
                 culture = CultureInfo.GetCultureInfo(language);
+#if EE
                 uCulture = UCultureInfo.GetCultureInfoByIetfLanguageTag(language);
+#endif
             }
             catch (System.Globalization.CultureNotFoundException) {
                 culture = CultureInfo.GetCultureInfo("en-US");
+#if EE
                 uCulture = UCultureInfo.GetCultureInfoByIetfLanguageTag("en-US");
+#endif
             }
         }
         
@@ -58,6 +71,7 @@ namespace Saxon.Impl.Overrides {
            return name;
         }
 
+#if EE
         public override string toWords(string cardinal, long number) {
             string ruleSetName = null;
             if (cardinal != "") {
@@ -139,7 +153,16 @@ namespace Saxon.Impl.Overrides {
             
             return number.ToString();
         }
-  
+#else
+        public override string toWords(string cardinal, long number) {
+            return numberer.toWords(cardinal, number);
+        }
+
+        public override string toOrdinalWords(string ordinalParam, long number, int wc) {
+            return numberer.toOrdinalWords(ordinalParam, number, wc);
+        }
+#endif
+
         private String wordCase(string s, int wc) {
             return wc switch {
                 UPPER_CASE => s.ToUpper(),

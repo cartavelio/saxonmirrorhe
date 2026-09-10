@@ -32,8 +32,6 @@
 
 <xsl:variable name="common-packages" as="element()*"
               select="f:package-reference(('AngleSharp',
-                                           'ICU4N',
-                                           'ICU4N.Resources',
                                            'NSec.Cryptography',
                                            'Microsoft.AspNetCore.StaticFiles',
                                            'Singulink.Numerics.BigDecimal',
@@ -44,10 +42,16 @@
                                            'Microsoft.Extensions.Configuration',
                                            'Microsoft.Extensions.Configuration.Json',
                                            'Microsoft.Extensions.Configuration.Xml',
+                                           'System.Private.Uri',
                                            'System.Text.Encoding.CodePages',
+                                           'J2N',
                                            'XmlResolver',
                                            'XmlResolverData'))"/>
-
+<xsl:variable name="edition-packages" as="map(xs:string, element()*)"
+              select="map {
+                        'ee': f:package-reference(('ICU4N', 'ICU4N.Resources')),
+                        'he': ()
+                      }"/>
 <xsl:template name="xsl:initial-template">
   <xsl:variable name="outputPath" select="current-output-uri()"/>
   <xsl:variable name="solutionName"
@@ -181,6 +185,7 @@ EndGlobal
 
       <ItemGroup>
         <xsl:sequence select="$common-packages"/>
+        <xsl:sequence select="$edition-packages($edition)"/>
       </ItemGroup>
 
       <xsl:if test="$edition != 'ee'">
@@ -220,6 +225,7 @@ EndGlobal
                                                        'NUnit.Analyzers',
                                                        'NUnit3TestAdapter'))"/>
             <xsl:sequence select="$common-packages"/>
+            <xsl:sequence select="$edition-packages($edition)"/>
           </ItemGroup>
           <ItemGroup>
             <Using Include="NUnit.Framework"/>
@@ -249,6 +255,7 @@ EndGlobal
                                                        'NUnit.Analyzers',
                                                        'NUnit3TestAdapter'))"/>
             <xsl:sequence select="$common-packages"/>
+            <xsl:sequence select="$edition-packages($edition)"/>
           </ItemGroup>
           <ItemGroup>
             <Using Include="NUnit.Framework"/>
@@ -316,13 +323,13 @@ EndGlobal
             <xsl:when test="exists($releaseBuild)">
               <ItemGroup>
                 <Compile Include="..\..\generated\**"/>
-                <Compile Include="..\..\..\..\src\main\cs\**"/>
+                <Compile Include="..\..\cs\**"/>
                 <Compile Include="..\..\..\..\..\featurekeys\build\cs\**"/>
                 <Compile Remove="..\..\..\..\**\.DS_Store"/>
                 <xsl:if test="$edition != 'ee'">
-                  <Compile Remove="..\..\..\..\src\main\cs\Saxon\Api\Support\Xsd*"/>
-                  <Compile Remove="..\..\..\..\src\main\cs\Saxon\Impl\Overrides\Verifier.cs"/>
-                  <Compile Remove="..\..\..\..\src\main\cs\Saxon\Impl\Parallel\**"/>
+                  <Compile Remove="..\..\cs\Saxon\Api\Support\Xsd*"/>
+                  <Compile Remove="..\..\cs\Saxon\Impl\Overrides\Verifier.cs"/>
+                  <Compile Remove="..\..\cs\Saxon\Impl\Parallel\**"/>
                 </xsl:if>
               </ItemGroup>
             </xsl:when>
@@ -501,8 +508,14 @@ EndGlobal
       <xsl:when test=". = 'System.Net.Http'">
         <PackageReference Include="System.Net.Http" Version="4.3.4" />
       </xsl:when>
+      <xsl:when test=". = 'System.Private.Uri'">
+        <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+      </xsl:when>
       <xsl:when test=". = 'System.Text.Encoding.CodePages'">
         <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.11" />
+      </xsl:when>
+      <xsl:when test=". = 'J2N'">
+        <PackageReference Include="J2N" Version="2.1.0" />
       </xsl:when>
       <xsl:when test=". = 'XmlResolver'">
         <PackageReference Include="XmlResolver" Version="6.0.24" />
