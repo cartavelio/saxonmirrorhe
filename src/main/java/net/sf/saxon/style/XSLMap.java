@@ -7,6 +7,7 @@
 
 package net.sf.saxon.style;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StaticProperty;
@@ -20,6 +21,7 @@ import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.QNameValue;
@@ -74,11 +76,16 @@ public class XSLMap extends StyleElement {
             NodeName attName = att.getNodeName();
             String f = attName.getDisplayName();
             String value = att.getValue();
-            if (attName.hasURI(NamespaceConstant.SAXON)) {
-                if (isExtensionAttributeAllowed(attName.getDisplayName())) {
-                    if (attName.getLocalPart().equals("on-duplicates")) {
-                        requireXslt40("on-duplicates");
+            if (attName.getLocalPart().equals("on-duplicates")) {
+                if (attName.getURI().isEmpty()) {
+                    requireXslt40("on-duplicates");
+                    onDuplicates = makeExpression(value, att);
+                } else if (attName.hasURI(NamespaceConstant.SAXON)) {
+                    if (getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                         onDuplicates = makeExpression(value, att);
+                    } else {
+                        compileWarning("saxon:on-duplicates ignored - requires Saxon-PE license",
+                                       SaxonErrorCode.SXWN9013);
                     }
                 }
             } else {
