@@ -1,9 +1,9 @@
 <exceptions>
 
-  <exception test-case="axes-090" run="false" when="xom">
+  <exception test-case="axes-090" run="false" when="xom dom4j">
     <created by="Norm Tovey-Walsh" on="2026-05-06"/>
     <reason>XOM won’t allow whitespace-only text nodes to be added to a document node
-    (before the document element, for example).</reason>
+    (before the document element, for example). DOM4J has a bug where it ignores them.</reason>
   </exception>
 
   <exception test-case="axes-197" run="false" when="axiom dom dom4j domino jdom2">
