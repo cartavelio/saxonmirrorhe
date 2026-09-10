@@ -144,7 +144,7 @@ namespace Saxon.Api {
                 if (value != null) {
                     SchemaAware = true;
                     Implementation.getUnderlyingStaticContext().getPackageData()
-                        .setImportedSchema(value.UnderlyingSchema);
+                        .setImportedSchema("", value.UnderlyingSchema);
                     _usedSchema = value;
                 }
             }
