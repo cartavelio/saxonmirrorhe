@@ -10,11 +10,13 @@ package net.sf.saxon.expr.flwor;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.expr.sort.ItemToBeSorted;
 import net.sf.saxon.expr.sort.SortKeyDefinitionList;
+import net.sf.saxon.expr.sort.ThingToBeSorted;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
 
@@ -30,7 +32,7 @@ public class OrderByClausePush extends TuplePush {
     private final AtomicComparer[] comparers;
     private final XPathContext context;
     private int position = 0;
-    private final ArrayList<ItemToBeSorted> tupleArray = new ArrayList<>(100);
+    private final ArrayList<ThingToBeSorted> tupleArray = new ArrayList<>(100);
 
     public OrderByClausePush(Outputter outputter, TuplePush destination, TupleExpression tupleExpr, OrderByClause orderBy, XPathContext context) {
         super(outputter);
@@ -53,12 +55,10 @@ public class OrderByClausePush extends TuplePush {
     public void processTuple(XPathContext context) throws XPathException {
         FlworTuple<Sequence> tuple = tupleExpr.evaluateItem(context);
         SortKeyDefinitionList sortKeyDefinitions = orderByClause.getSortKeyDefinitions();
-        ItemToBeSorted itbs = new ItemToBeSorted(sortKeyDefinitions.size());
-        itbs.value = tuple;
+        ThingToBeSorted itbs = new ThingToBeSorted(tuple, new GroundedValue[sortKeyDefinitions.size()]);
         for (int i = 0; i < sortKeyDefinitions.size(); i++) {
-            itbs.sortKeyValues[i] = orderByClause.evaluateSortKey(i, context);
+            itbs.sortkeys()[i] = orderByClause.evaluateSortKey(i, context);
         }
-        itbs.originalPosition = ++position;
         tupleArray.add(itbs);
 
     }
@@ -73,7 +73,7 @@ public class OrderByClausePush extends TuplePush {
                 try {
                     for (int i = 0; i < comparers.length; i++) {
                         int comp = comparers[i].compareAtomicValues(
-                                a.sortKeyValues[i], b.sortKeyValues[i]);
+                                (AtomicValue)a.sortkeys()[i], (AtomicValue)b.sortkeys()[i]);
                         if (comp != 0) {
                             // we have found a difference, so we can return
                             return comp;
@@ -82,17 +82,14 @@ public class OrderByClausePush extends TuplePush {
                 } catch (NoDynamicContextException e) {
                     throw new AssertionError("Sorting without dynamic context: " + e.getMessage());
                 }
-
-                // all sort keys equal: return the items in their original order
-                // TODO: unnecessary, we are now using a stable sort routine
-                return a.originalPosition - b.originalPosition;
+                return 0;
             });
         } catch (ClassCastException e) {
             throw new XPathException("Non-comparable types found while sorting: " + e.getMessage(), "XPTY0004");
         }
 
-        for (ItemToBeSorted itbs : tupleArray) {
-            tupleExpr.setCurrentTuple(context, (FlworTuple<Sequence>) itbs.value);
+        for (ThingToBeSorted itbs : tupleArray) {
+            tupleExpr.setCurrentTuple(context, (FlworTuple<Sequence>) itbs.thing());
             destination.processTuple(context);
         }
         destination.close();

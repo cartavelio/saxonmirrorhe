@@ -16,7 +16,9 @@ import net.sf.saxon.functions.SortBy;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.Parcel;
-import net.sf.saxon.ma.map.*;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.RecordType;
+import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
@@ -24,7 +26,6 @@ import net.sf.saxon.type.EnumerationUnionType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,8 @@ public class ArraySortBy extends SystemFunction {
     public static Shape keyDefinition =
             new Shape(new Twine8("key"), new Twine8("collation"), new Twine8("order"));
 
+
+
     /**
      * Evaluate the expression
      *
@@ -62,11 +65,11 @@ public class ArraySortBy extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
 
-        GroundedValue details = arguments[1].materialize();
+        GroundedValue sortKeyDefinitions = arguments[1].materialize();
         List<Callable> sortKeys = new ArrayList<>();
         List<AtomicComparer> comparers = new ArrayList<>();
 
-        if (details.getLength() == 0) {
+        if (sortKeyDefinitions.getLength() == 0) {
             sortKeys.add(dataFn);
             String collationName = getRetainedStaticContext().getDefaultCollationName();
             StringCollator collator = context.getConfiguration().getCollation(collationName);
@@ -78,15 +81,15 @@ public class ArraySortBy extends SystemFunction {
                             collator, StandardNames.XS_ANY_ATOMIC_TYPE, 40, context));
         } else {
 
-            for (Item f : details.asIterable()) {
-                Callable k = (FunctionItem) ((MapItem) f).get(new StringValue("key")).head();
+            for (Item f : sortKeyDefinitions.asIterable()) {
+                Callable k = (FunctionItem) ((MapItem) f).getU(SortBy.KEY).head();
                 sortKeys.add(k == null ? dataFn : k);
 
-                Item c = ((MapItem) f).get(new StringValue("collation")).head();
+                Item c = ((MapItem) f).getU(SortBy.COLLATION).head();
                 String collation = c == null
                         ? getRetainedStaticContext().getDefaultCollationName()
                         : c.getStringValue();
-                Item o = ((MapItem) f).get(new StringValue("order")).head();
+                Item o = ((MapItem) f).getU(SortBy.ORDER).head();
                 boolean descending = o != null && o.getStringValue().equals("descending");
                 StringCollator collator = context.getConfiguration().getCollation(collation);
                 if (collator == null) {

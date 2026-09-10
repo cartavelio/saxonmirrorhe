@@ -13,8 +13,10 @@ import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.ObjectValue;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * A SortedGroupIterator is a modified SortedIterator. It sorts a sequence of groups,
@@ -35,6 +37,20 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
         setHostLanguage(HostLanguage.XSLT);
     }
 
+    public record Group (GroundedValue content, AtomicSequence groupingKey) {};
+
+    public static class GroupParcel extends ObjectValue<Group> {
+        public GroupParcel(GroundedValue content, AtomicSequence groupingKey) {
+            super(new Group(content, groupingKey));
+        }
+        public GroundedValue getContent() {
+            return getObject().content();
+        }
+        public AtomicSequence getGroupingKey() {
+            return getObject().groupingKey();
+        }
+    }
+
     /**
      * Override the method that builds the array of values and sort keys.
      *
@@ -46,7 +62,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
         SequenceIterator base = getBaseIterator();
         int allocated = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 100;
 
-        values = new ObjectToBeSorted[allocated];
+        values = new ArrayList<>(allocated);
         count = 0;
 
         XPathContextMajor c2 = context.newContext();
@@ -58,47 +74,48 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
 
         Item item;
         while ((item = base.next()) != null) {
-            if (count == allocated) {
-                allocated *= 2;
-                values = Arrays.copyOf(values, allocated);
-            }
-            GroupToBeSorted gtbs = new GroupToBeSorted(comparators.length);
-            values[count] = gtbs;
-            gtbs.value = item;
+
+            AtomicSequence[] sortKeyValues = new AtomicValue[comparators.length];
             for (int n = 0; n < comparators.length; n++) {
-                gtbs.sortKeyValues[n] = sortKeyEvaluator.evaluateSortKey(n, c2);
+                sortKeyValues[n] = sortKeyEvaluator.evaluateSortKey(n, c2);
             }
-            gtbs.originalPosition = count++;
-            gtbs.currentGroupingKey = groupIter.getCurrentGroupingKey();
-            gtbs.currentGroup = groupIter.currentGroup();
+            GroupParcel parcel = new GroupParcel(groupIter.currentGroup(), groupIter.getCurrentGroupingKey());
+            ThingToBeSorted gtbs = new ThingToBeSorted(parcel, sortKeyValues);
+            values.add(gtbs);
         }
+    }
+
+    @Override
+    public Item next() {
+        GroupParcel parcel = (GroupParcel)super.next();
+        return parcel == null ? null : parcel.getContent().head();
     }
 
     /*@Nullable*/
     @Override
     public AtomicSequence getCurrentGroupingKey() {
-        return ((GroupToBeSorted) values[position - 1]).currentGroupingKey;
+        return ((GroupParcel) values.get(position - 1).thing()).getGroupingKey();
     }
 
     @Override
     public GroundedValue currentGroup() throws XPathException {
-        return ((GroupToBeSorted) values[position - 1]).currentGroup;
+        return ((GroupParcel) values.get(position - 1).thing()).getContent();
     }
 
     //#if EE==true
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
-        GroupToBeSorted thisGroup = (GroupToBeSorted)values[position - 1];
-        ManualGroupIterator iter = new ManualGroupIterator(thisGroup.value, position);
-        iter.setCurrentGroup(thisGroup.currentGroup);
-        iter.setCurrentGroupingKey(thisGroup.currentGroupingKey);
-        iter.setLengthFinder(() -> values.length);
+        GroupParcel thisGroup = (GroupParcel)values.get(position - 1).thing();
+        ManualGroupIterator iter = new ManualGroupIterator(thisGroup, position);
+        iter.setCurrentGroup(thisGroup.getContent());
+        iter.setCurrentGroupingKey(thisGroup.getGroupingKey());
+        iter.setLengthFinder(() -> values.size());
         return iter;
     }
 
 
-//#endif
+    //#endif
 
 }
 

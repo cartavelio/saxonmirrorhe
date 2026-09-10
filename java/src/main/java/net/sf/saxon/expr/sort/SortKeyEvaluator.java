@@ -8,8 +8,8 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
 
 /**
  * Callback interface used to evaluate sort keys. An instance of this class is passed to the
@@ -28,6 +28,6 @@ public interface SortKeyEvaluator {
      */
 
     /*@Nullable*/
-    AtomicValue evaluateSortKey(int n, XPathContext context) throws XPathException;
+    AtomicSequence evaluateSortKey(int n, XPathContext context) throws XPathException;
 }
 

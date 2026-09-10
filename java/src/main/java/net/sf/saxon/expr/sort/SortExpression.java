@@ -9,10 +9,11 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.om.AtomicArray;
+import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -23,6 +24,9 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -37,9 +41,8 @@ public class SortExpression extends Expression
     private final Operand sortOp;
     private AtomicComparer[] comparators = null;
     // created early if all comparators can be created statically
-    // transient because Java RuleBasedCollator is not serializable
 
-    private ItemEvaluator[] sortKeyEvaluators;
+    private PullEvaluator[] sortKeyEvaluators;
 
     /**
      * Create a sort expression
@@ -123,7 +126,7 @@ public class SortExpression extends Expression
         selectOp.typeCheck(visitor, contextInfo);
 
         Expression select2 = getSelect();
-        if (select2 != getSelect()) {
+        if (select2 != getSelect()) {            // MHK 2026-07-09 this makes no sense
             adoptChildExpression(select2);
             setSelect(select2);
         }
@@ -158,10 +161,12 @@ public class SortExpression extends Expression
             if (sortKeyDef.isBackwardsCompatible()) {
                 sortKey = FirstItemExpression.makeFirstItemExpression(sortKey);
             } else /*if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40 )*/ {
-                // TODO: allow composite sort keys in 4.0
+                int langVersion = visitor.getStaticContext().getXPathVersion();
                 Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0, "XTTE1020");
-                sortKey = tc.staticTypeCheck(sortKey, SequenceType.OPTIONAL_ATOMIC, role, visitor);
+                sortKey = tc.staticTypeCheck(sortKey,
+                                             langVersion >= 40 ? SequenceType.ATOMIC_SEQUENCE : SequenceType.OPTIONAL_ATOMIC,
+                                             role, visitor);
             }
             sortKeyDef.setSortKey(sortKey, sortKeyDef.isSetContextForSortKey());
             sortKeyDef.typeCheck(visitor, contextInfo);
@@ -355,9 +360,9 @@ public class SortExpression extends Expression
     public synchronized void makeSortKeyEvaluators() {
         if (sortKeyEvaluators == null) {
             int len = getSortKeyDefinitionList().size();
-            sortKeyEvaluators = new ItemEvaluator[len];
+            sortKeyEvaluators = new PullEvaluator[len];
             for (int s = 0; s < len; s++) {
-                sortKeyEvaluators[s] = getSortKeyDefinition(s).getSortKey().makeElaborator().elaborateForItem();
+                sortKeyEvaluators[s] = getSortKeyDefinition(s).getSortKey().makeElaborator().elaborateForPull();
             }
         }
     }
@@ -372,8 +377,25 @@ public class SortExpression extends Expression
      */
 
     @Override
-    public AtomicValue evaluateSortKey(int n, XPathContext c) throws XPathException {
-        return (AtomicValue) sortKeyEvaluators[n].eval(c);
+    public AtomicSequence evaluateSortKey(int n, XPathContext c) throws XPathException {
+        PullEvaluator eval = sortKeyEvaluators[n];
+        SequenceIterator iter = eval.iterate(c);
+        AtomicValue first = (AtomicValue)iter.next();
+        if (first == null) {
+            return new AtomicArray(Collections.emptyList());
+        }
+        AtomicValue second = (AtomicValue) iter.next();
+        if (second == null) {
+            return first;
+        }
+        List<AtomicValue> compositeKey = new ArrayList<>();
+        compositeKey.add(first);
+        compositeKey.add(second);
+        AtomicValue it;
+        while ((it = (AtomicValue) iter.next()) != null) {
+            compositeKey.add(it);
+        }
+        return new AtomicArray(compositeKey);
     }
 
     @Override

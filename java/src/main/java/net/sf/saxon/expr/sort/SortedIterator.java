@@ -9,17 +9,15 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.ma.arrays.ArraySort;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
@@ -41,7 +39,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
     // array contains one "record" representing each node: the "record" contains
     // first, the Item itself, then an entry for each of its sort keys, in turn;
     // the last sort key is the position of the Item in the original sequence.
-    protected ObjectToBeSorted[] values;
+    protected ArrayList<ThingToBeSorted> values;
 
     // The number of items to be sorted. -1 means not yet known.
     protected int count = -1;
@@ -155,7 +153,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
             }
         }
         if (position < count) {
-            return (Item) values[position++].value;
+            return values.get(position++).thing();
         } else {
             position = -1;
             return null;
@@ -196,42 +194,26 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
 
     protected void buildArray() throws XPathException {
         int allocated = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 100;
-        values = new ItemToBeSorted[allocated];
+        values = new ArrayList<>(allocated);
         count = 0;
 
         // initialise the array with data
 
         Item item;
         while ((item = base.next()) != null) {
-            if (count == allocated) {
-                allocated *= 2;
-                ObjectToBeSorted[] nk2 = new ObjectToBeSorted[allocated];
-                System.arraycopy(values, 0, nk2, 0, count);
-                values = nk2;
-            }
-            ItemToBeSorted itbs = new ItemToBeSorted(comparators.length);
-            values[count] = itbs;
-            itbs.value = item;
+            ThingToBeSorted itbs = new ThingToBeSorted(item, new GroundedValue[comparators.length]);
+            values.add(itbs);
             // TODO: delay evaluating the sort keys until we know they are needed. Often the 2nd and subsequent
             // sort key values will never be used. The only problem is with sort keys that depend on position().
             for (int n = 0; n < comparators.length; n++) {
-                itbs.sortKeyValues[n] = sortKeyEvaluator.evaluateSortKey(n, context);
+                itbs.sortkeys()[n] = sortKeyEvaluator.evaluateSortKey(n, context);
             }
-            // make the sort stable by adding the record number
-            itbs.originalPosition = count++;
         }
 
-        // If there's lots of unused space, reclaim it
-
-        if (allocated * 2 < count || (allocated - count) > 2000) {
-            ObjectToBeSorted[] nk2 = new ObjectToBeSorted[count];
-            System.arraycopy(values, 0, nk2, 0, count);
-            values = nk2;
-        }
     }
 
 
-    private static class SortComparer implements Comparator<ObjectToBeSorted> {
+    private static class SortComparer implements Comparator<ThingToBeSorted> {
 
         private final AtomicComparer[] comparators;
 
@@ -239,22 +221,20 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
             this.comparators = comparators;
         }
         @Override
-        public int compare(ObjectToBeSorted a, ObjectToBeSorted b) {
+        public int compare(ThingToBeSorted a, ThingToBeSorted b) {
             try {
-                for (int i = 0; i < comparators.length; i++) {
-                    int comp = comparators[i].compareAtomicValues(
-                            a.sortKeyValues[i], b.sortKeyValues[i]);
-                    if (comp != 0) {
-                        // we have found a difference, so we can return
-                        return comp;
+                for (int k = 0; k < comparators.length; k++) {
+                    int result = ArraySort.compareSortKeys(a.sortkeys()[k], b.sortkeys()[k], comparators[k]);
+                    if (result != 0) {
+                        return result;
                     }
                 }
+                return 0;
+
             } catch (NoDynamicContextException e) {
                 throw new AssertionError("Sorting without dynamic context: " + e.getMessage());
             }
-            // all sort keys equal: return the items in their original order
-            // TODO: unnecessary, we are now using a stable sort routine
-            return a.originalPosition - b.originalPosition;
+
         }
 
 
@@ -262,6 +242,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
 
     private void doSort() throws XPathException {
         buildArray();
+        count = values.size();
         if (count < 2) {
             return;
         }
@@ -269,7 +250,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
         // sort the array
 
         try {
-            Arrays.sort(values, 0, count, new SortComparer(comparators));
+            values.sort(new SortComparer(comparators));
         } catch (ClassCastException e) {
             throw new XPathException("Non-comparable types found while sorting: " + e.getMessage())
                     .withErrorCode(hostLanguage == HostLanguage.XSLT ? "XTDE1030" : "XPTY0004");

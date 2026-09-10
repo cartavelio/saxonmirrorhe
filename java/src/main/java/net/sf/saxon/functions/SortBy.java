@@ -14,11 +14,13 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DescendingComparer;
+import net.sf.saxon.expr.sort.ThingToBeSorted;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.arrays.ArraySort;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.EnumerationUnionType;
@@ -39,9 +41,6 @@ import java.util.List;
 
 public class SortBy extends SystemFunction {
 
-    public record ItemToBeSorted (Item value, GroundedValue[] sortKeys) {
-    }
-
     public static final FunctionItemType keyFunctionType =
         new SpecificFunctionType(SequenceType.SINGLE_ITEM, SequenceType.ATOMIC_SEQUENCE);
     
@@ -53,6 +52,10 @@ public class SortBy extends SystemFunction {
 
     public static Callable DATA_FN =
             new CallableDelegate((cxt, args) -> Atomizer.atomize(args[0]));
+
+    public static final Twine8 KEY = new Twine8("key");
+    public static final Twine8 COLLATION = new Twine8("collation");
+    public static final Twine8 ORDER = new Twine8("order");
 
     /**
      * Evaluate the expression
@@ -76,17 +79,17 @@ public class SortBy extends SystemFunction {
         List<AtomicComparer> comparers = new ArrayList<>();
 
         for (Item f : details.asIterable()) {
-            GroundedValue keyValue = ((MapItem) f).get(new StringValue("key"));
+            GroundedValue keyValue = ((MapItem) f).getU(KEY);
             Callable k = (FunctionItem) keyValue.head();
             sortKeys.add(k == null ? DATA_FN : k);
 
-            GroundedValue collationValue = ((MapItem) f).get(new StringValue("collation"));
+            GroundedValue collationValue = ((MapItem) f).getU(COLLATION);
             StringValue c = (StringValue) collationValue.head();
             String collation = c == null
                     ? getRetainedStaticContext().getDefaultCollationName()
                     : c.getStringValue();
 
-            GroundedValue orderValue = ((MapItem) f).get(new StringValue("order"));
+            GroundedValue orderValue = ((MapItem) f).getU(ORDER);
             StringValue o = (StringValue) orderValue.head();
             boolean descending = o != null && o.getStringValue().equals("descending");
             StringCollator collator = context.getConfiguration().getCollation(collation);
@@ -120,21 +123,22 @@ public class SortBy extends SystemFunction {
                                      List<AtomicComparer> comparers,
                                      XPathContext context) throws XPathException {
 
-        final ArrayList<ItemToBeSorted> inputList = new ArrayList<>();
+        final ArrayList<ThingToBeSorted> inputList = new ArrayList<>();
         Item item;
         while ((item = iterator.next()) != null) {
-            ItemToBeSorted member = new ItemToBeSorted(item, new GroundedValue[keyFunctions.size()]);
+            ThingToBeSorted member = new ThingToBeSorted(item, new GroundedValue[keyFunctions.size()]);
             int k = 0;
             for (Callable fn : keyFunctions) {
-                member.sortKeys()[k++] = fn.call(context, new Sequence[]{item}).materialize();
+                member.sortkeys()[k++] = fn.call(context, new Sequence[]{item}).materialize();
             }
             inputList.add(member);
         }
 
+
         try {
-            inputList.sort((ItemToBeSorted a, ItemToBeSorted b) -> {
+            inputList.sort((ThingToBeSorted a, ThingToBeSorted b) -> {
                 for (int k = 0; k < comparers.size(); k++) {
-                    int result = ArraySort.compareSortKeys(a.sortKeys()[k], b.sortKeys()[k], comparers.get(k));
+                    int result = ArraySort.compareSortKeys(a.sortkeys()[k], b.sortkeys()[k], comparers.get(k));
                     if (result != 0) {
                         return result;
                     }
@@ -146,12 +150,14 @@ public class SortBy extends SystemFunction {
                     .asTypeError();
         }
         ArrayList<Item> outputList = new ArrayList<>(inputList.size());
-        for (ItemToBeSorted member : inputList) {
-            outputList.add(member.value);
+        for (ThingToBeSorted member : inputList) {
+            outputList.add(member.thing());
         }
         return new SequenceExtent.Of<>(outputList);
 
     }
+
+
 
     @CSharpReplaceBody(code="return new System.Collections.Generic.List<T>() { element };")
     public static <T> List<T> listOfOne(T element) {
