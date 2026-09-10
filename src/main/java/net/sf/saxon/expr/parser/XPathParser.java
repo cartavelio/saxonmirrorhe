@@ -2170,7 +2170,9 @@ public class XPathParser {
         while (true) {
             if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
                 EnumerationUnionType type = parseEnumType();
-                memberTypes.addAll(type.getMemberTypes());
+                for (ItemType it : type.getAlternatives()) {
+                    memberTypes.add((SingletonEnumType) it);
+                }
             } else {
                 expect(Token.NAME);
                 if (scanOnly) {
@@ -2205,7 +2207,7 @@ public class XPathParser {
             }
         }
         nextToken();
-        return new LocalUnionType<>(memberTypes);
+        return new LocalUnionType(memberTypes);
 
     }
 

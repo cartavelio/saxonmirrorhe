@@ -244,7 +244,7 @@ public class TypeHierarchy {
             } else if (t2 instanceof ChoiceItemType) {
                 boolean allSubsumes = true;
                 boolean allDisjoint = true;
-                for (ItemType it : ((ChoiceItemType<? extends ItemType>)t2).getMemberTypes()) {
+                for (ItemType it : ((ChoiceItemType)t2).getMemberTypes()) {
                     Affinity a0 = relationship(t1, it);
                     if (a0 == SAME_TYPE || a0 == SUBSUMED_BY) {
                         return SUBSUMED_BY;

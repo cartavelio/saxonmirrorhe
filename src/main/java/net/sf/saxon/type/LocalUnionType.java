@@ -27,7 +27,7 @@ import java.util.List;
  * the (Saxon-extension) item-type syntax union(a,b,c), or internally in Java code.
  */
 
-public class LocalUnionType<T extends AtomicType> extends ChoiceItemType<T> implements PlainType, UnionType {
+public class LocalUnionType extends ChoiceItemType implements PlainType, UnionType {
 
     /**
      * Get the genre of this item
@@ -50,14 +50,14 @@ public class LocalUnionType<T extends AtomicType> extends ChoiceItemType<T> impl
      * @param memberTypes the atomic member types of the union
      */
 
-    public LocalUnionType(List<T> memberTypes) {
+    public LocalUnionType(List<? extends AtomicType> memberTypes) {
         super(memberTypes);
     }
 
-    public static LocalUnionType<AtomicType> of(AtomicType... memberTypes) {
+    public static LocalUnionType of(AtomicType... memberTypes) {
         List<AtomicType> members = new ArrayList<>(memberTypes.length);
         Collections.addAll(members, memberTypes);
-        return new LocalUnionType<>(members);
+        return new LocalUnionType(members);
     }
 
     /**

@@ -22,12 +22,12 @@ import java.util.function.Predicate;
  * the (Saxon-extension) item-type syntax union(a,b,c), or internally in Java code.
  */
 
-public class ChoiceItemType<T extends ItemType> implements ItemType, ChoiceType {
+public class ChoiceItemType implements ItemType, ChoiceType {
 
-    public static <T extends ItemType> ItemType makeChoiceItemType(List<T> memberTypes) {
+    public static ItemType makeChoiceItemType(List<? extends ItemType> memberTypes) {
         for (ItemType member : memberTypes) {
             if (member.getGenre() != Genre.ATOMIC) {
-                return new ChoiceItemType<T>(memberTypes);
+                return new ChoiceItemType(memberTypes);
             }
         }
         List<AtomicType> atomicMemberTypes = new ArrayList<>();
@@ -39,20 +39,20 @@ public class ChoiceItemType<T extends ItemType> implements ItemType, ChoiceType 
                     if (at instanceof AtomicType) {
                         atomicMemberTypes.add((AtomicType) at);
                     } else {
-                        return new ChoiceItemType<>(memberTypes);
+                        return new ChoiceItemType(memberTypes);
                     }
                 }
             }
         }
-        return new LocalUnionType<>(atomicMemberTypes);
+        return new LocalUnionType(atomicMemberTypes);
     }
 
-    public static ChoiceItemType<ItemType> of(ItemType... memberTypes) {
+    public static ChoiceItemType of(ItemType... memberTypes) {
         List<ItemType> members = Arrays.asList(memberTypes);
-        return new ChoiceItemType<>(members);
+        return new ChoiceItemType(members);
     }
 
-    protected final List<T> memberTypes;
+    protected final List<? extends ItemType> memberTypes;
 
 
     /**
@@ -61,11 +61,11 @@ public class ChoiceItemType<T extends ItemType> implements ItemType, ChoiceType 
      * @param memberTypes the atomic member types of the union
      */
 
-    public ChoiceItemType(List<T> memberTypes) {
+    public ChoiceItemType(List<? extends ItemType> memberTypes) {
         this.memberTypes = memberTypes;
     }
 
-    public List<T> getMemberTypes() {
+    public List<? extends ItemType> getMemberTypes() {
         return memberTypes;
     }
 
