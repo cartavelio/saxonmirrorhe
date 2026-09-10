@@ -87,7 +87,9 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
             seed = context.getCurrentDateTime().randomSeed();
         } else {
             AtomicValue val = (AtomicValue) arguments[0].head();
-            seed = val == null ? context.getCurrentDateTime().randomSeed() : val.hashCode();
+            seed = val == null ? context.getCurrentDateTime().randomSeed() : val.getUnicodeStringValue().longHashCode();
+            // See bug 7143. Converting to a Unicode string value means we can rely on the hash code being stable
+            // across runs; it also gives us a long hashCode rather than an int.
         }
         return generator(seed);
     }
