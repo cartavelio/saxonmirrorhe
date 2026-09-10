@@ -112,7 +112,12 @@ public class CompressedWhitespace extends WhitespaceString {
     }
 
     public static UnicodeString uncompress(long value) {
-        byte[] bytes = new byte[1000];
+        int size = 0;
+        for (int s = 56; s >= 0; s -= 8) {
+            byte len = (byte) ((value >> s) & 0x3f);
+            size += len;
+        }
+        byte[] bytes = new byte[size];
         int offset = 0;
         for (int s = 56; s >= 0; s -= 8) {
             byte b = (byte) ((value >> s) & 0xff);
@@ -121,8 +126,12 @@ public class CompressedWhitespace extends WhitespaceString {
             }
             byte c = (byte) (WHITE_CHARS[b >> 6 & 0x3] & 0xff);
             int len = b & 0x3f;
-            for (int j = 0; j < len; j++) {
+            if(len == 1) {
                 bytes[offset++] = c;
+            } else {
+                for (int j = 0; j < len; j++) {
+                    bytes[offset++] = c;
+                }
             }
         }
         return new Twine8(Arrays.copyOf(bytes, offset));
