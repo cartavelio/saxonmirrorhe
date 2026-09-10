@@ -223,6 +223,7 @@ public final class EvaluateInstr extends Expression {
                                              getSchemaAwareExpr() == null ? null : getSchemaAwareExpr().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, e2);
         e2.setRetainedStaticContext(getRetainedStaticContext());
+        e2.defaultXPathNamespace = defaultXPathNamespace;
         e2.setActualParams(WithParam.copy(e2, getActualParams(), rebindings));
         if (optionsOp != null) {
             e2.setOptionsExpression(optionsOp.getChildExpression().copy(rebindings));
