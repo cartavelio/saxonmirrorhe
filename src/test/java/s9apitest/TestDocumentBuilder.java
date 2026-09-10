@@ -548,7 +548,7 @@ public class TestDocumentBuilder {
             StringWriter writer = new StringWriter();
             ss.setOutputWriter(writer);
             ss.serializeXdmValue(node);
-            assertTrue(writer.toString().contains("<doc><b> <i/></b><i xml:space=\"preserve\"><sup><i> </i></sup> </i></doc>"));
+            assertTrue(writer.toString().contains("<doc><b> <i/></b><i xml:space=\"preserve\"><sup><i/></sup></i></doc>"));
         } catch (Exception ex) {
             fail(ex.getMessage());
         }
