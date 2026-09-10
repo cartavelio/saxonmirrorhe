@@ -279,6 +279,7 @@ public:
 private:
 
   friend class XsdSchema;
+  friend class DocumentBuilder;
 
 
   SchemaValidator(std::string cwd, int64_t p, int64_t schemaValidatorObject);

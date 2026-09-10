@@ -81,7 +81,7 @@ SchemaValidator::SchemaValidator(const SchemaValidator &other) {
 
 SchemaValidator::~SchemaValidator() {
   if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "~SchemaValidator destructor called: ob ref=" << (this)  << std::endl;
+    std::cerr << "~SchemaValidator destructor called: ob ref=" << (this)  <<" handle ref="<<(int)cppV<< std::endl;
   }
   clearProperties();
   clearParameters();

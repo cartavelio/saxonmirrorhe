@@ -203,9 +203,8 @@ private:
 
   void createException(const char *message = nullptr);
 
-  SchemaValidator *schemaValidator;
   SaxonProcessor *proc;
-  int64_t docBuilderObject;
+  int64_t docBuilderObject, schemaValRef;
   // jclass  docBuilderClass, procClass;
   // jclass saxonCAPIClass;
   std::string baseURI;

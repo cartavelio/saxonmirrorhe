@@ -5,7 +5,7 @@
 #include "saxonc/XdmNode.h"
 
 DocumentBuilder::DocumentBuilder() {
-  schemaValidator = nullptr;
+  schemaValRef = SXN_UNSET;
   proc = new SaxonProcessor(false);
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   docBuilderObject = createDocumentBuilder(thread,(void *)proc->procRef);
@@ -19,7 +19,7 @@ DocumentBuilder::DocumentBuilder(SaxonProcessor *p, int64_t docObject,
   docBuilderObject = docObject;
   lineNumbering = false;
   dtdVal = false;
-  schemaValidator = nullptr;
+  schemaValRef = SXN_UNSET;
   cwdDB = cwd;
   proc = p;
   /*if(!cwd.empty()) {
@@ -31,17 +31,20 @@ DocumentBuilder::DocumentBuilder(const DocumentBuilder &other) {
 
   docBuilderObject = other.docBuilderObject;
   lineNumbering = other.lineNumbering;
-  schemaValidator = other.schemaValidator;
+  schemaValRef = other.schemaValRef;
   dtdVal = other.dtdVal;
   cwdDB = other.cwdDB;
   proc = other.proc;
 }
 
 DocumentBuilder::~DocumentBuilder() {
-  if (docBuilderObject != -1) {
-    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  if (docBuilderObject != SXN_UNSET) {
     j_handles_destroy(thread, (void *)docBuilderObject);
     docBuilderObject = -1;
+  }
+  if (schemaValRef != SXN_UNSET) {
+    j_handles_destroy(thread, (void *)schemaValRef);
   }
   cwdDB.erase();
   baseURI.erase();
@@ -58,11 +61,18 @@ void DocumentBuilder::setLineNumbering(bool option) {
 bool DocumentBuilder::isLineNumbering() { return lineNumbering; }
 
 void DocumentBuilder::setSchemaValidator(SchemaValidator *validator) {
-  schemaValidator = validator;
+  if (validator != nullptr) {
+    if (validator->getUnderlyingValidator() <= SXN_UNSET) {
+      return;
+    }
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    schemaValRef = j_copy_handles(thread, (void *)validator->getUnderlyingValidator());
+  }
 }
 
 SchemaValidator *DocumentBuilder::getSchemaValidator() {
-  return schemaValidator;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  return new SchemaValidator(cwdDB.c_str(), proc->procRef, j_copy_handles(thread, (void *)schemaValRef));
 }
 
 void DocumentBuilder::setDTDValidation(bool option) {
@@ -92,11 +102,12 @@ XdmNode *DocumentBuilder::parseXmlFromString(const char *source,
                                              const char *encoding) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   saxon_error_t r = SAXON_ERROR_DEFAULT;
+
   int64_t result = j_main_parseXmlString(thread,
       (baseURI.empty() ? (char *)nullptr : (char *)baseURI.c_str()),
       (void *)proc->procRef, (void *)docBuilderObject,
-      (schemaValidator != nullptr
-           ? (void *)schemaValidator->getUnderlyingValidator()
+      (schemaValRef != SXN_UNSET
+           ? (void *)schemaValRef
            : (void *)nullptr),
       (char *)source, (char *)encoding, &r);
   if (result > 0) {
@@ -116,8 +127,8 @@ XdmNode *DocumentBuilder::parseXmlFromFile(const char *filename) {
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t result = j_main_parseXmlFile(thread, (char *)cwdDB.c_str(),
       (void *)proc->procRef, (void *)docBuilderObject,
-      (schemaValidator != nullptr
-           ? (void *)schemaValidator->getUnderlyingValidator()
+      (schemaValRef != SXN_UNSET
+           ? (void *)schemaValRef
            : (void *)nullptr),
       (char *)filename, &r);
   if (result > 0) {
@@ -135,8 +146,8 @@ XdmNode *DocumentBuilder::parseXmlFromUri(const char *uri) {
   saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t result = j_main_parseXmlFile(thread, (char *)cwdDB.c_str(),
       (void *)proc->procRef, (void *)docBuilderObject,
-      (schemaValidator != nullptr
-           ? (void *)schemaValidator->getUnderlyingValidator()
+      (schemaValRef != SXN_UNSET
+           ? (void *)schemaValRef
            : (void *)nullptr),
       (char *)uri, &r);
   if (result > 0) {
