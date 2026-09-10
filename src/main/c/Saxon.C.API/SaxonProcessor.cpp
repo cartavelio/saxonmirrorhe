@@ -718,7 +718,6 @@ int SaxonProcessor::getNodeKind(int64_t nodeRef) {
 
 XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename, SchemaValidator * validator) {
     int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *)cwd.c_str(), (void *)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)filename);
-    std::cerr<<"parseXmlFromFile, xdmNodeRef ="<<xdmNodeRef<<std::endl;
     if (xdmNodeRef >= 1) {
         XdmNode *value = nullptr;
         value = new XdmNode(xdmNodeRef);
