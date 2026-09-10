@@ -170,4 +170,4 @@ public abstract class BooleanFnFeed extends ItemFeed {
     }
 }
 
-// Copyright (c) 2018-2020 Saxonica Limited
+// Copyright (c) 2018-2022 Saxonica Limited

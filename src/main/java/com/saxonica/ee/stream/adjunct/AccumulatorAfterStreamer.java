@@ -55,4 +55,4 @@ public class AccumulatorAfterStreamer extends InspectionAdjunct implements FeedM
 
 }
 
-// Copyright (c) 2018-2020 Saxonica Limited
+// Copyright (c) 2018-2022 Saxonica Limited

@@ -134,4 +134,4 @@ public class TraceExprAdjunct extends TransmissionAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2018-2020 Saxonica Limited
+// Copyright (c) 2018-2022 Saxonica Limited

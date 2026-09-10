@@ -111,4 +111,4 @@ public abstract class Starting extends SystemFunction {
 
 }
 
-// Copyright (c) 2018-2020 Saxonica Limited
+// Copyright (c) 2018-2022 Saxonica Limited
