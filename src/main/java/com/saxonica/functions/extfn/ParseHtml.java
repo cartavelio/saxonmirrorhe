@@ -95,25 +95,26 @@ public class ParseHtml extends Parse {
         }
 
         private String lowerCaseAttributeName(String in) {
-            // nu.validator doesn't convert SVG attribute names to lower-case, which it should. But we can't simply
-            // call toLowerCase(), because the name may contains Uxxxxxx escapes that should remain upper-case.
-            if (in.equals(in.toLowerCase())) {
-                return in;
-            } else {
-                StringBuilder sb = new StringBuilder();
-                for (int i=0; i<in.length(); i++) {
-                    char ch = in.charAt(i);
-                    if (Character.isLowerCase(ch)) {
-                        sb.append(ch);
-                    } else if (in.substring(i).matches("U[0-9a-fA-f]{6}")) {
-                        sb.append(in.substring(i, i+7));
-                        i+=6;
-                    } else {
-                        sb.append(Character.toLowerCase(ch));
-                    }
-                }
-                return sb.toString();
-            }
+            return in;
+//            // nu.validator doesn't convert SVG attribute names to lower-case, which it should. But we can't simply
+//            // call toLowerCase(), because the name may contains Uxxxxxx escapes that should remain upper-case.
+//            if (in.equals(in.toLowerCase())) {
+//                return in;
+//            } else {
+//                StringBuilder sb = new StringBuilder();
+//                for (int i=0; i<in.length(); i++) {
+//                    char ch = in.charAt(i);
+//                    if (Character.isLowerCase(ch)) {
+//                        sb.append(ch);
+//                    } else if (in.substring(i).matches("U[0-9a-fA-f]{6}")) {
+//                        sb.append(in.substring(i, i+7));
+//                        i+=6;
+//                    } else {
+//                        sb.append(Character.toLowerCase(ch));
+//                    }
+//                }
+//                return sb.toString();
+//            }
 
         }
 
