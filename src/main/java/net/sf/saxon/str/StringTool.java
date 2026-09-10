@@ -80,6 +80,12 @@ public class StringTool {
         return sb.toUnicodeString();
     }
 
+    /**
+     * Construct a {@code UnicodeString} from a {@link CharSequence} - typically a {@code String}
+     * @param chars the supplied {@code String} or {@code CharSequence}
+     * @return the equivalent {@code UnicodeString}
+     */
+
     public static UnicodeString fromCharSequence(CharSequence chars) {
         int uLength = StringTool.getStringLength(chars);
         if (uLength == chars.length()) {
@@ -104,6 +110,15 @@ public class StringTool {
         }
     }
 
+    /**
+     * Construct a {@code UnicodeString} from a {@code String} that is
+     * known to consist entirely of 8-bit Latin-1 characters.
+     *
+     * @param str the supplied {@code String}: the caller warrants that this contains
+     *            no characters with codepoint higher than 255.
+     * @return the equivalent {@code UnicodeString}
+     */
+
     public static UnicodeString fromLatin1(String str) {
         byte[] bytes = new byte[str.length()];
         for (int i = 0; i<str.length(); i++) {
@@ -111,6 +126,14 @@ public class StringTool {
         }
         return new Twine8(bytes);
     }
+
+    /**
+     * Get an iterator over the codepoints in a {@link CharSequence} - typically a {@code String}
+     * @param value the supplied string
+     * @return an {@code IntIterator} allowing iteration over the codepoints. Note the protocol
+     * for {@code IntIterator} requires exactly one call of {@link IntIterator#hasNext} before
+     * every call of {@link IntIterator#next}
+     */
 
     @CSharpInnerClass(outer=false, extra={"string value"})
     public static IntIterator codePoints(CharSequence value) {
@@ -287,9 +310,7 @@ public class StringTool {
                 array[j++] = (byte)in[i++];
             }
             return new Twine8(array);
-            //Following is slower:
-            //byte[] array = new String(in, offset, len).getBytes(StandardCharsets.ISO_8859_1);
-            //return new Twine8(array);
+            //Use of `new String(in, offset, len).getBytes(StandardCharsets.ISO_8859_1)` is slower
         }
         if (surrogates == 0) {
             char[] array = Arrays.copyOfRange(in, offset, offset + len);

@@ -66,6 +66,27 @@ public class QName {
     }
 
     /**
+     * Construct a QName using a namespace URI and a lexical representation. The lexical representation
+     * may be a local name on its own, or it may be in the form prefix:local-name.
+     * <p>This constructor does not check that the components of the QName are lexically valid.</p>
+     *
+     * @param uri     The namespace URI. Use {@link NamespaceUri#NULL} for names that are not in any namespace.
+     * @param lexical Either the local part of the name, or the prefix and local part in the format prefix:local
+     * @since 12.3
+     */
+
+    public QName(NamespaceUri uri, String lexical) {
+        int colon = lexical.indexOf(':');
+        if (colon < 0) {
+            sqName = new StructuredQName("", uri, lexical);
+        } else {
+            String prefix = lexical.substring(0, colon);
+            String local = lexical.substring(colon + 1);
+            sqName = new StructuredQName(prefix, uri, local);
+        }
+    }
+
+    /**
      * Construct a QName from a localName alone. The localName must not contain a colon.
      * The resulting QName represents a name in no namespace (which therefore has no prefix)
      *
