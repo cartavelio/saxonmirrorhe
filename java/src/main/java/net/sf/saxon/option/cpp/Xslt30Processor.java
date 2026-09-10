@@ -741,7 +741,7 @@ public class Xslt30Processor extends SaxonCAPI {
                         compiler.importPackage(pack);
                     }
 
-                } else if (sparams[i].equals("sa")) {
+                } else if (sparams[i].equals("sa:")) {
                         String value = ((String)values[i]).toLowerCase();
                         if(value.equals("true") || value.equals("on")) {
                             compiler.setSchemaAware(true);
