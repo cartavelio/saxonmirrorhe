@@ -457,16 +457,11 @@ public class Environment implements ResourceResolver {
                     File file = new File(env.getBaseURI().resolve(href));
                     try {
                         sourceList.add(new StreamSource(file));
-                        //manager.load(file);
-//                    } catch (SaxonApiException err) {
-//                        driver.println("*** Failed to load schema: " + href + " - " + err.getMessage());
                     } catch (NullPointerException err) {
                         err.printStackTrace();
                         driver.println("*** NPE: Failed to load schema: " + href + " - " + err.getMessage());
                     }
                 }
-                xpc.importSchemaNamespace(ns);
-                environment.xpathCompiler.importSchemaNamespace(ns);
                 if ("source-reference".equals(role)) {
                     environment.validateSources = true;
                 }

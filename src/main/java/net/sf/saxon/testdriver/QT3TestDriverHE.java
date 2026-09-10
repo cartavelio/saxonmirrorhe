@@ -673,9 +673,10 @@ public class QT3TestDriverHE extends TestDriver {
 
                             try {
                                 // If query is inline, set the baseline line number...
-                                if (fileName == null) {
+                                if (fileName == null && !testCaseName.startsWith("try-catch")) {
+                                    // Avoid doing this for try-catch tests which expect a local line number
                                     testXqc.getUnderlyingStaticContext().setModuleLocation(
-                                            new Loc(queryBaseUri.toString(), testCase.getLineNumber(), -1));
+                                            new Loc(queryBaseUri.toString(), testQuery.getLineNumber(), -1));
                                 }
                                 XQueryExecutable q = null;
                                 try {
