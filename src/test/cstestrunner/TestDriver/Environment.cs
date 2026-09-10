@@ -30,7 +30,7 @@ using Saxon.Eej.ee.stream;
 using Saxon.Impl.Helpers;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using Processor = Saxon.Api.Processor;
-using UriUtils = Org.XmlResolver.Utils.UriUtils;
+using UriUtils = XmlResolver.Utils.UriUtils;
 using XPathCompiler = Saxon.Api.XPathCompiler;
 using XPathSelector = Saxon.Api.XPathSelector;
 using XQueryCompiler = Saxon.Api.XQueryCompiler;
@@ -810,7 +810,7 @@ namespace TestDriver {
                 else {
                     // Some tests, notably test-catalog tests, don't declare the documents they use
                     try {
-                        Stream stream = UriUtils.GetStream(uri);
+                        Stream stream = null; //TODO //UriUtils.GetStream(uri);
                         return new TextResource(stream, uri);
                     }
                     catch (FileNotFoundException) {
