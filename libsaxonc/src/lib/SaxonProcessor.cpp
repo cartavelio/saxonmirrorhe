@@ -77,21 +77,21 @@ void SaxonProcessor::getInfo() {
 
 #endif
 
-extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, void * pythonFunc, void * func, int langFlag, int useProc, int useNativeTypes, int numOfArguments, void ** arguments) {
+extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, void * pythonFunc, void * func, int langFlag, int useNativeTypes, int numOfArguments, void ** arguments) {
   if (getenv("SAXONC_DEBUG_FLAG")) {
     fprintf(stdout, "We are in a c function. calling function name= %s\n", functionName);
   }
 
   void * userFuncResult = nullptr;
 
-  if (langFlag == 1) {
+  if (langFlag == SXN_PHP) {
     //PHP logic
     if (getenv("SAXONC_DEBUG_FLAG")) {
       fprintf(stdout, "We are in a c function. calling PHP logic ");
     }
     phpExtensionFunction func1 = phpExtensionFunction(func);
 
-    userFuncResult = func1(functionName, proc, func, useProc, useNativeTypes, numOfArguments, arguments);   // call of the user function
+    userFuncResult = func1(functionName, proc, func, useNativeTypes, numOfArguments, arguments);   // call of the user function
 
     for(int i =0; i< numOfArguments; i++) {
       j_handles_destroy((graal_isolatethread_t *)thread, arguments[i]);
@@ -101,7 +101,7 @@ extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, v
 
 
 
-  } else if (langFlag == 2) {
+  } else if (langFlag == SXN_PYTHON) {
     //Python logic
     if (getenv("SAXONC_DEBUG_FLAG")) {
       fprintf(stdout, "We are in a c function. calling Python logic ");
@@ -109,7 +109,7 @@ extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, v
 
     pythonExtensionFunction func1 = pythonExtensionFunction(pythonFunc);
 
-    userFuncResult = func1(proc, func, useProc, useNativeTypes, numOfArguments, arguments);
+    userFuncResult = func1(proc, func, useNativeTypes, numOfArguments, arguments);
 
   } else {
     if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -122,7 +122,7 @@ extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, v
       }
       arguments1[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)arguments[i]);
     }
-    userFuncResult  = userFunctionNativeCall(functionName, proc, func, useProc, useNativeTypes, numOfArguments, arguments1);
+    userFuncResult  = userFunctionNativeCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
 
     for(int i =0; i< numOfArguments; i++) {
 
@@ -509,7 +509,7 @@ const char * SaxonProcessor::getSaxonEdition() {
   return j_c_getSaxonEdition(thread, (void *)procRef);
 }
 
-void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useProc, bool useNativeTypes) {
+void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useNativeTypes) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   XdmValue * signatureValue = parseJsonFromString(signature);
 
@@ -526,7 +526,7 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
 
 
   long status = j_registerFunctionDefinition(thread,(void *)procRef, (char *) ns1,
-                                             (void *)signatureValue->getUnderlyingValue(), python_procPtr, func, (void *) alloc, (int)useProc, (int)useNativeTypes);
+                                             (void *)signatureValue->getUnderlyingValue(), python_procPtr, func, (void *) alloc, (int)useNativeTypes);
 
 
   if(signatureValue != nullptr) {
@@ -537,10 +537,10 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
   }
 }
 
-void SaxonProcessor::registerUserFunction(const char * ns1, XdmValue * (*func)(int, XdmValue **), const char * signature, bool useProc, bool isNativeTypes)
+void SaxonProcessor::registerUserFunction(const char * ns1, XdmValue * (*func)(int, XdmValue **), const char * signature, bool isNativeTypes)
 {
 
-    registerUserFunctionWithProcessor(nullptr, ns1, (void *)func,signature, useProc, isNativeTypes);
+    registerUserFunctionWithProcessor(nullptr, ns1, (void *)func,signature, isNativeTypes);
 
 }
 

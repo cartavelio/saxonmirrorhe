@@ -34,9 +34,9 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         const char* getcwd()
 
-        void registerUserFunction(const char * ns, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON, bool useProc, bool useNativeTypes) except +handle_saxonc_api_exceptions
+        void registerUserFunction(const char * ns, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON, bool useNativeTypes) except +handle_saxonc_api_exceptions
 
-        void registerUserFunctionWithProcessor(void * proc_ptr, const char * ns, void * func, const char * signatureJSON, bool useProc, bool useNativeTypes) except +handle_saxonc_api_exceptions
+        void registerUserFunctionWithProcessor(void * proc_ptr, const char * ns, void * func, const char * signatureJSON, bool useNativeTypes) except +handle_saxonc_api_exceptions
 
         void attachCurrentThread() except +handle_saxonc_api_exceptions
 

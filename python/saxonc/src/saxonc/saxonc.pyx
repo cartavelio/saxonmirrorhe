@@ -761,7 +761,7 @@ cdef class PySaxonProcessor:
         cdef char * c_str_ = py_value_string if str_ is not None else ""
         return self.wrap_atomic_value(self.thisptr.makeQNameValue(c_str_))
 
-    def register_user_function(self, ns, func, signatureJSON, encoding=None, use_python_types=False):
+    def register_user_function(self, ns, func, signature_text=None, signature_map=None, encoding=None, use_python_types=False):
 
         '''PyObject_CallNoArgs(func)'''
         '''TODO handle PyDict as alternative to JSON'''
@@ -773,11 +773,38 @@ cdef class PySaxonProcessor:
         cdef void *proc_ptr
         cdef void *python_func_ptr
         cdef bool useNativeTypes = use_python_types
-        py_signatureJSON_str = signatureJSON.encode(encoding) if signatureJSON is not None else None
-        py_ns_str = ns.encode(encoding) if ns is not None else None
+        if signature_text is None and signature_map is None:
+            return
+        if signature_text is not None and signature_map is not None:
+            raise PySaxonApiError('Error in register_user_function: signature_text and signature_map must be used exclusively.')
 
-        if signatureJSON is not None:
+        if signature_map is not None:
+            if isinstance(signature_map, dict):
+                for key, value in signature_map.items():
+
+                    if isinstance(value, dict):
+                        for sub_key, sub_value in value.items():
+
+                            # Example checks
+                            if sub_key == "param":
+                                if not isinstance(sub_value, list):
+                                    raise PySaxonApiError("    ERROR: 'param' should be a list")
+                                if not all(isinstance(item, str) for item in sub_value):
+                                    raise PySaxonApiError("    ERROR: 'param' should be a list")
+
+                            if sub_key == "arity" and (not isinstance(sub_value, int) or not isinstance(sub_value, str)):
+                                raise PySaxonApiError("    ERROR: 'arity' should be an int or str")
+                py_signature_str = str(signature_map)
+                py_signatureJSON_str = py_signature_str.encode(encoding) if py_signature_str is not None else None
+                c_signatureJSON_str_ = py_signatureJSON_str
+            else:
+                raise PySaxonApiError('Error in register_user_function: signature_map must be a dict type.')
+
+        elif signature_text is not None:
+            py_signatureJSON_str = signature_text.encode(encoding) if signature_text is not None else None
             c_signatureJSON_str_ = py_signatureJSON_str
+
+        py_ns_str = ns.encode(encoding) if ns is not None else None
 
         if ns is not None:
             c_ns_str_ = py_ns_str
@@ -786,7 +813,7 @@ cdef class PySaxonProcessor:
         proc_ptr = <void *>self
         '''Move the line below to Processor constructor'''
         saxoncClasses.setNativePythonFunction()
-        self.thisptr.registerUserFunctionWithProcessor(proc_ptr, c_ns_str_, ptr, c_signatureJSON_str_, True, useNativeTypes)
+        self.thisptr.registerUserFunctionWithProcessor(proc_ptr, c_ns_str_, ptr, c_signatureJSON_str_, useNativeTypes)
 
     def make_atomic_value(self, value_type, value, encoding=None):
         """

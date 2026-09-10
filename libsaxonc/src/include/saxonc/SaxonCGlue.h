@@ -55,6 +55,9 @@ static const bool true = 1;
 
 static const int SXN_EXCEPTION = -2;
 static const int SXN_UNSET = -1;
+static const int SXN_PHP = 1;
+static const int SXN_PYTHON = 2;
+static const int SXN_CPP = 0;
 
 /*!  \file  SaxonCGlue.h
  *   \brief This C header file contains a number of factory functions for
@@ -126,9 +129,9 @@ extern int64_t cpp;
 
 typedef void *(*allocFn)(size_t length);
 //c_nativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments)
-typedef void * (*nativeFn)(void * t, char * functionName, void * proc, void * pythonFunc, void * func, int php, int useProc, int useNativeTypes, int numOfArguments, void ** arguments);
-typedef void * (*nativePHPFn)(char * functionName, void * proc, void * func, int useProc, int useNativeTypes, int numOfArguments, void ** arguments);
-typedef void * (*nativePythonFn)(void * proc, void * func, int useProc, int useNativeTypes, int numOfArguments, void ** arguments);
+typedef void * (*nativeFn)(void * t, char * functionName, void * proc, void * pythonFunc, void * func, int php, int useNativeTypes, int numOfArguments, void ** arguments);
+typedef void * (*nativePHPFn)(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments);
+typedef void * (*nativePythonFn)(void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments);
 
 extern const char *failure;
 

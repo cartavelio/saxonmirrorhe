@@ -1,7 +1,7 @@
 #include "saxonc/UserFunctionHandler.h"
 #include "saxonc/XdmValue.h"
 
-void * userFunctionNativeCall(char * functionName, void * proc, void * func, int useProc, int useNativeTypes, int numOfArguments,  XdmValue ** arguments){
+void * userFunctionNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  XdmValue ** arguments){
     //TODO move this code to a C++ specific method called userFunctionNative
     XdmValue * result = nullptr;
     if (getenv("SAXONC_DEBUG_FLAG")) {

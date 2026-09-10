@@ -679,9 +679,9 @@ public:
    */
   const char *version();
 
-  void registerUserFunction(const char * ns, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON, bool useProc=false, bool useNativeTypes=false);
+  void registerUserFunction(const char * ns, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON, bool useNativeTypes=false);
 
-  void registerUserFunctionWithProcessor(void * procPtr, const char * ns, void * func, const char * signatureJSON, bool useProc=false, bool useNativeTypes=false);
+  void registerUserFunctionWithProcessor(void * procPtr, const char * ns, void * func, const char * signatureJSON, bool useNativeTypes=false);
 
   //! Add a native method.
   /**

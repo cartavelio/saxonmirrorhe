@@ -515,7 +515,7 @@ PyObject *makePythonValue(void * proc, void * value){
     Py_RETURN_NONE;
 }
 
-void * userFunctionPythonNativeCall(void * proc, void * func, int useProc, int useNativeTypes, int numOfArguments,  void ** argumentsi){
+void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes, int numOfArguments,  void ** argumentsi){
     //PyObject_CallNoArgs((PyObject *)func);
     XdmValue ** arguments;
     //PyObject* argsList = nullptr;

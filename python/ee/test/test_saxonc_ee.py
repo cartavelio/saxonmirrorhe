@@ -151,7 +151,7 @@ def check_none(**kwargs):
 def testUserFunction():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
-        proc.register_user_function("http://www.example.com", user_function, "{ \"myFunc\": {"
+        proc.register_user_function("http://www.example.com", user_function, signature_text="{ \"myFunc\": {"
                                                                              "      \"as\": \"xs:integer?\","
                                                                              "      \"param\": ["
                                                                              "        \"xs:integer\""
@@ -175,7 +175,7 @@ def testUserFunction():
 def testUserFunctionWithFloat():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
-        proc.register_user_function("http://www.float.com", float_value_test, "{ \"float_value_test\": {"
+        proc.register_user_function("http://www.float.com", float_value_test, signature_text="{ \"float_value_test\": {"
                                                                             "      \"as\": \"xs:float\","
                                                                             "      \"param\": ["
                                                                             "        \"xs:float\""
@@ -201,7 +201,7 @@ def testUserFunctionWithFloat():
 def testUserFunctionWithLists():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
-        proc.register_user_function("http://www.fruits.com", list_example, "{ \"list_example\": {"
+        proc.register_user_function("http://www.fruits.com", list_example, signature_text="{ \"list_example\": {"
                                                                            "      \"as\": \"array(*)\","
                                                                            "      \"param\": ["
                                                                            "        \"xs:string\""
@@ -226,7 +226,7 @@ def testUserFunctionWithLists():
 def testUserFunctionList2():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
-        proc.register_user_function("http://www.example.com", user_function2, "{ \"myFunc2\": {"
+        proc.register_user_function("http://www.example.com", user_function2, signature_text="{ \"myFunc2\": {"
                                                                               "      \"as\": \"xs:integer?\","
                                                                               "      \"param\": ["
                                                                               "        \"xs:integer\""
@@ -255,7 +255,7 @@ def list_example(value_str, **kwargs):
 def test_user_function_with_list():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
-        proc.register_user_function("http://www.fruits.com", list_example, "{ \"list_example\": {"
+        proc.register_user_function("http://www.fruits.com", list_example, signature_text="{ \"list_example\": {"
                                                                            "      \"as\": \"array(*)\","
                                                                            "      \"param\": ["
                                                                            "        \"xs:string\""
@@ -285,7 +285,7 @@ def list_example2(value_str, **kwargs):
 def test_list2_return_none():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
-        proc.register_user_function("http://www.fruits.com", list_example2, "{ \"list_example2\": {"
+        proc.register_user_function("http://www.fruits.com", list_example2, signature_text="{ \"list_example2\": {"
                                                                             "      \"as\": \"xs:string?\","
                                                                             "      \"param\": ["
                                                                             "        \"xs:string\""
@@ -321,7 +321,7 @@ def returning_set_example(fruit, **kwargs):
 def test_dict_and_set():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
-        proc.register_user_function("http://www.example.com", returning_dict_example, "{ \"returning_dict_example\": {"
+        proc.register_user_function("http://www.example.com", returning_dict_example, signature_text="{ \"returning_dict_example\": {"
                                                                                       "      \"as\": \"map(*)\","
                                                                                       "      \"param\": ["
                                                                                       "        \"xs:string\", \"xs:int\""
@@ -331,7 +331,7 @@ def test_dict_and_set():
                                                                                       "}", use_python_types=True)
 
 
-        proc.register_user_function("http://www.fruits.com", returning_set_example, "{ \"returning_set_example\": {"
+        proc.register_user_function("http://www.fruits.com", returning_set_example, signature_text="{ \"returning_set_example\": {"
                                                                                     "      \"as\": \"xs:string*\","
                                                                                     "      \"param\": ["
                                                                                     "        \"xs:string\""
@@ -351,11 +351,10 @@ def test_dict_and_set():
         assert map_item1.get_atomic_value().integer_value == 2
         assert str(result_map.get_map_value().get('c')) == '3'
 
+        '''Sets in python are unordered'''
         result_val = xpath_processor.evaluate("fr:returning_set_example('pear')")
 
-        item1 = result_val.item_at(1)
-
-        assert str(item1) == 'banana'
+        assert 'pear' in str(result_val)
 
 
 
@@ -378,7 +377,7 @@ def tuple_example(itemi, **kwargs):
 def test_user_function_with_tuple():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
-        proc.register_user_function("http://www.example.com", tuple_example, "{ \"tuple_example\": {"
+        proc.register_user_function("http://www.example.com", tuple_example, signature_text="{ \"tuple_example\": {"
                                                                              "      \"as\": \"xs:integer*\","
                                                                              "      \"param\": ["
                                                                              "        \"xs:integer\""
@@ -434,7 +433,7 @@ def two_sequence_param3(values1, values2, **kwargs):
 def test_sequence():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
-        proc.register_user_function("http://www.example.com", sum_as_sequence, "{ \"sum_as_sequence\": {"
+        proc.register_user_function("http://www.example.com", sum_as_sequence, signature_text="{ \"sum_as_sequence\": {"
                                                                                     "      \"as\": \"xs:integer?\","
                                                                                     "      \"param\": ["
                                                                                     "        \"array(xs:integer*)\""
@@ -444,7 +443,7 @@ def test_sequence():
                                                                                     "}", use_python_types=True)
 
 
-        proc.register_user_function("http://www.example.com", two_sequence_param2, "{ \"two_sequence_param2\": {"
+        proc.register_user_function("http://www.example.com", two_sequence_param2, signature_text="{ \"two_sequence_param2\": {"
                                                                                     "      \"as\": \"item()*\","
                                                                                     "      \"param\": ["
                                                                                     "        \"xs:string*\", \"xs:integer*\""
@@ -453,7 +452,7 @@ def test_sequence():
                                                                                     "    }"
                                                                                     "}", use_python_types=True)
 
-        proc.register_user_function("http://www.example.com", two_sequence_param3, "{ \"two_sequence_param3\": {"
+        proc.register_user_function("http://www.example.com", two_sequence_param3, signature_text="{ \"two_sequence_param3\": {"
                                                                                     "      \"as\": \"item()*\","
                                                                                     "      \"param\": ["
                                                                                     "        \"xs:string*\", \"xs:integer*\""

@@ -1956,7 +1956,7 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
 }
 
 
-void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, int useProc, int useNativeTypes, int numOfArguments,  void ** argumentsi)
+void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  void ** argumentsi)
 {
     if(functionName == NULL) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -2219,7 +2219,7 @@ XtOffsetOf(saxonProcessor_object, std));
     try {
         j_setPHPNative(thread1); //TODO move this method call to avoid repeated calls
         nativePHPFn fn1 = userFunctionPHPNativeCall;
-        saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, (void *)fn1, (const char *)signature, true, useNativeTypes);
+        saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, (void *)fn1, (const char *)signature, useNativeTypes);
     } catch (SaxonApiException &e) {
         zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
