@@ -1089,6 +1089,7 @@ public class AlphaCode {
                 result.name = ((ContentTypeTest) primary).getQNameTest().exportQNameTest();
             }
             result.content = ((ContentTypeTest) primary).getContentType().getEQName();
+            result.nillable = ((ContentTypeTest) primary).isNillable();
         } else if (primary instanceof DocumentNodeTest) {
             ItemType content = ((DocumentNodeTest) primary).getElementTest();
             result.elementType = makeTree(content);

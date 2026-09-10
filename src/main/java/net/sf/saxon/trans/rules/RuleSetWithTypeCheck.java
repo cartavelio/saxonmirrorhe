@@ -41,6 +41,10 @@ public class RuleSetWithTypeCheck implements BuiltInRuleSet {
         return baseRuleSet;
     }
 
+    public SequenceType getRequiredType() {
+        return requiredType;
+    }
+
     /**
      * Perform the built-in template action for a given item.
      * @param item         the item to be matched

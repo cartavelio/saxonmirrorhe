@@ -752,10 +752,12 @@ public class PackageLoaderHE implements IPackageLoader {
         int patternSlots = getIntegerAttribute(modeElement, "patternSlots");
         mode.allocatePatternSlots(patternSlots);
 
-        String onNoMatch = modeElement.getAttributeValue(NamespaceUri.NULL,"onNo");
+        String onNoMatch = modeElement.getAttributeValue(NamespaceUri.NULL, "onNo");
         BuiltInRuleSet base;
         if (onNoMatch != null) {
-            base = mode.getBuiltInRuleSetForCode(onNoMatch);
+            String asAtt = modeElement.getAttributeValue(NamespaceUri.NULL, "as");
+            SequenceType requiredType = asAtt == null ? SequenceType.ANY_SEQUENCE : AlphaCode.toSequenceType(asAtt, config);
+            base = mode.getBuiltInRuleSetForCode(onNoMatch, requiredType);
             mode.setBuiltInRuleSet(base);
         }
 

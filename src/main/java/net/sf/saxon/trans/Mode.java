@@ -637,6 +637,8 @@ public abstract class Mode extends Actor {
             return "TC";
         } else if (builtInRuleSet instanceof RuleSetWithWarnings) {
             return getCodeForBuiltInRuleSet(((RuleSetWithWarnings) builtInRuleSet).getBaseRuleSet()) + "+W";
+        } else if (builtInRuleSet instanceof RuleSetWithTypeCheck) {
+            return getCodeForBuiltInRuleSet(((RuleSetWithTypeCheck) builtInRuleSet).getBaseRuleSet()) + "+C";
         } else {
             return "???";
         }
@@ -648,7 +650,7 @@ public abstract class Mode extends Actor {
      * @param code the code used in export
      * @return a suitable ruleset
      */
-    public BuiltInRuleSet getBuiltInRuleSetForCode(String code) {
+    public BuiltInRuleSet getBuiltInRuleSetForCode(String code, SequenceType requiredType) {
         BuiltInRuleSet base;
         if (code.startsWith("SC")) {
             base = ShallowCopyRuleSet.getInstance();
@@ -667,8 +669,11 @@ public abstract class Mode extends Actor {
         } else {
             throw new IllegalArgumentException(code);
         }
-        if (code.endsWith("+W")) {
+        if (code.contains("+W")) {
             base = new RuleSetWithWarnings(base);
+        }
+        if (code.contains("+C")) {
+            base = new RuleSetWithTypeCheck(base, requiredType);
         }
         return base;
     }
@@ -680,6 +685,9 @@ public abstract class Mode extends Actor {
             presenter.emitAttribute("name", getModeName());
         }
         presenter.emitAttribute("onNo", getCodeForBuiltInRuleSet(getBuiltInRuleSet()));
+        if (getBuiltInRuleSet() instanceof RuleSetWithTypeCheck) {
+            presenter.emitAttribute("as", ((RuleSetWithTypeCheck)getBuiltInRuleSet()).getRequiredType().toAlphaCode());
+        }
         String flags = "";
         if (isDeclaredStreamable()) {
             flags += "s";
