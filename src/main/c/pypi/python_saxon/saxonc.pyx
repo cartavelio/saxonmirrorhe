@@ -23,7 +23,6 @@ from libc.string cimport memcpy
 from cython import Py_ssize_t
 
 
-
 def create_xdm_dict(proc, mmap):
     """
     create_xdm_dict(proc, mmap)
@@ -3984,10 +3983,10 @@ cdef class PyXdmNode(PyXdmItem):
      def node_kind(self):
         """
         node_kind(self)
-        Node kind property. This will be a value such as net.sf.saxon.type.Type#ELEMENT or
-        net.sf.saxon.type.Type#ATTRIBUTE.
-        There are seven kinds of node: documents, elements, attributes, text, comments, processing-instructions,
-        and namespaces.
+        Node kind property. This will be a value such as ELEMENT=1 or
+        ATTRIBUTE=2.
+        There are seven kinds of node: document=9, element=1, attribute=2, text=3, comment=8, processing-instruction=7,
+        and namespace=13.
         Returns:
             int: an integer identifying the kind of node. These integer values are the same as those used in the DOM
         """
@@ -4004,21 +4003,22 @@ cdef class PyXdmNode(PyXdmItem):
         """
         cdef str kind
         cdef int nk = self.derivednptr.getNodeKind()
-        if nk == DOCUMENT:
+
+        if nk ==9:
             return 'document'
-        elif nk == ELEMENT:
+        elif nk == 1:
             return 'element'
-        elif nk == ATTRIBUTE:
+        elif nk == 2:
             return 'attribute'
-        elif nk == TEXT:
+        elif nk == 3:
             return 'text'
-        elif nk == COMMENT:
+        elif nk == 8:
             return 'comment'
-        elif nk == PROCESSING_INSTRUCTION:
+        elif nk == 7:
             return 'processing-instruction'
-        elif nk == NAMESPACE:
+        elif nk == 13:
             return 'namespace'
-        elif nk == UNKNOWN:
+        elif nk == 0:
             return 'unknown'
         else:
             raise ValueError('Unknown node kind: %d' % nk)
