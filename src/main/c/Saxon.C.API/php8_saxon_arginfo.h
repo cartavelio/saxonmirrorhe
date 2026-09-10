@@ -471,6 +471,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setQueryContent,       0, 
 ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setStreaming,       0, 0, 1)
+ZEND_ARG_INFO(0, item)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_isStreaming,       0, 0, 0)
+ZEND_ARG_INFO(0, item)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setContextItem,       0, 0, 1)
 ZEND_ARG_INFO(0, item)
 ZEND_END_ARG_INFO()

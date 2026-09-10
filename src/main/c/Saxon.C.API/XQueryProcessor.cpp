@@ -328,6 +328,20 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 	   setProperty("q", ofile);
     }
 
+    void XQueryProcessor::void setStreaming(bool option){
+        streaming = option;
+        if(option) {
+         	setProperty("-streaming", "1");
+        } else {
+            setProperty("-streaming", "0");
+        }
+    }
+
+    void XQueryProcessor::void isStreaming(bool option){
+        return streaming;
+    }
+
+
    void XQueryProcessor::setQueryContent(const char* content){
 	  // outputfile1 = std::string(content); 
 	   setProperty("qs", content);

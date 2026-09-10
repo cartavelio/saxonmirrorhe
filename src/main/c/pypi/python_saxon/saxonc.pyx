@@ -2603,6 +2603,27 @@ cdef class PyXQueryProcessor:
             self.thisxqptr.setContextItem(xdm_item.derivedptr)
         else:
           raise Exception(py_error_message)
+
+     def set_streaming(self, bool option):
+         """
+         set_streaming(self, bool option)
+         Say whether the query should be compiled and evaluated to use streaming. Option requires saxoncee
+         Args:
+             option (bool): option if true, the compiler will attempt to compile a query to be capable of executing in streaming mode. If the query cannot be streamed, a
+             compile-time exception is reported. In streaming mode, the source document is supplied as a stream, and no tree is built in memory. The default is false.
+         """
+         cdef bool c_option
+         c_option = option
+         return self.thisxqptr.setStreaming(c_option)
+
+     def is_streaming(self):
+         """
+         is_streaming(self, bool option)
+         Ask whether the streaming option has been set.
+         Returns:
+               true if the streaming option has been set.
+         """
+         return self.thisxqptr.isStreaming()
          
      def set_output_file(self, output_file):
         """

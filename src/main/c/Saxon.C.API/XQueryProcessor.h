@@ -73,6 +73,25 @@ public:
      */
     void setParameter(const char * name, XdmValue*value);
 
+    //! Say whether the query should be compiled and evaluated to use streaming.
+    /**
+    * This affects subsequent calls on the compile() methods. This option requires Saxon-EE.
+    * @param option if true, the compiler will attempt to compile a query to be capable of executing in streaming mode. If the query cannot be streamed, a
+    * compile-time exception is reported. In streaming mode, the source document is supplied as a stream, and no tree is built in memory. The default is false.
+    * When setStreaming(true) is specified, this has the additional side-effect of setting the required context item type to "document-node()"
+    */
+    void setStreaming(bool option);
+
+    //! Ask whether the streaming option has been set
+    /**
+     * Ask whether the streaming option has been set, that is, whether
+     * subsequent calls on compile() will compile queries to be capable
+     * of executing in streaming mode.
+     *
+     * @return true if the streaming option has been set.
+     */
+    bool isStreaming();
+
 
     //! Remove a parameter (name, value) pair
     /**
@@ -265,7 +284,7 @@ public:
 private:
 
     void createException(const char * message=nullptr);
-
+    bool streaming;
     std::string cwdXQ; /*!< current working directory */
 	SaxonProcessor * proc;
 
