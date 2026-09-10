@@ -140,7 +140,8 @@ public class StubFunctionLibrary implements FunctionLibrary {
                 expect(arityValue instanceof ArrayItem, "In " + name + ", as must exist and be an array");
                 for (GroundedValue arity : ((ArrayItem)arityValue).members()) {
                     expect(arity instanceof NumericValue, "In " + name + ", arity must be a number");
-                    int arityInt = ((NumericValue)arity).asSubscript();
+                    int arityInt = (int)((NumericValue) arity).getDoubleValue();
+                    expect(arityInt >= 0, "In " + name + " arity is less than zero");
                     SymbolicName.F functionName = new SymbolicName.F(name, arityInt);
                     expect(arityInt <= paramTypes.size(), "In " + name + " arity exceeds number of params");
                     SequenceType[] st = new SequenceType[arityInt];
