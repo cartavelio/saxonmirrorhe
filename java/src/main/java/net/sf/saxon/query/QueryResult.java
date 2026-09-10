@@ -239,7 +239,7 @@ public class QueryResult {
                 // OK
                 break;
             case Type.ELEMENT:
-                NodeInfo parent = doc.getParent();
+                NodeInfo parent = (NodeInfo)doc.getParent();
                 if (parent != null && parent.getNodeKind() != Type.DOCUMENT) {
                     throw new XPathException("Cannot rewrite an element node unless it is top-level");
                 }

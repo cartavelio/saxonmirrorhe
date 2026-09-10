@@ -119,25 +119,6 @@ public abstract class NodeTest implements NodePredicate {
                                                && test(tree.getNode(nodeNr)));
     }
 
-//    /**
-//     * Test whether this node test is satisfied by a given node. This method is only
-//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-//     * node tests where the node kind is known to be an attribute.
-//     *
-//     * @param nodeKind   The kind of node to be matched
-//     * @param name       identifies the expanded name of the node to be matched.
-//     *                   The value should be null for a node with no name.
-//     * @param annotation The actual content type of the node. Null means no constraint.
-//     * @return true if the node matches this node test
-//     */
-//
-//    public abstract boolean matches(int nodeKind, NodeName name, SchemaType annotation);
-
     /**
      * Test whether this node test is satisfied by a given node. This alternative
      * method is used in the case of nodes where calculating the fingerprint is expensive,
@@ -147,39 +128,6 @@ public abstract class NodeTest implements NodePredicate {
      */
     
     public abstract boolean test(GNode node);
-
-//    /**
-//     * Get the content type allowed by this NodeTest (that is, the type annotation of the matched nodes).
-//     * Return AnyType if there are no restrictions. The default implementation returns AnyType.
-//     *
-//     * @return the type annotation that all nodes matching this NodeTest must satisfy
-//     */
-//
-//    @CSharpSuppressWarnings("UnsafeIteratorConversion")
-//    public SchemaType getContentType() {
-//        Set<PrimitiveUType> m = getUType().decompose();
-//        Iterator<PrimitiveUType> it = m.iterator();
-//        if (m.size() == 1 && it.hasNext()) {
-//            PrimitiveUType p = it.next();
-//            switch (p) {
-//                case DOCUMENT:
-//                    return AnyType.getInstance();
-//                case ELEMENT:
-//                    return AnyType.getInstance();
-//                case ATTRIBUTE:
-//                    return AnySimpleType.getInstance();
-//                case COMMENT:
-//                    return BuiltInAtomicType.STRING;
-//                case TEXT:
-//                    return BuiltInAtomicType.UNTYPED_ATOMIC;
-//                case PI:
-//                    return BuiltInAtomicType.STRING;
-//                case NAMESPACE:
-//                    return BuiltInAtomicType.STRING;
-//            }
-//        }
-//        return AnyType.getInstance();
-//    }
 
     /**
      * Get the set of node names allowed by this NodeTest. This is returned as a set of Integer fingerprints.

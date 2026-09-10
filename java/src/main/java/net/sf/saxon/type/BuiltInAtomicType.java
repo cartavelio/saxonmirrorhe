@@ -1190,7 +1190,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
             converter = getStringConverter(node.getConfiguration().getConversionRules());
             if (isNamespaceSensitive()) {
                 NodeInfo container =
-                        node.getNodeKind() == Type.ELEMENT ? node : node.getParent();
+                        node.getNodeKind() == Type.ELEMENT ? node : (NodeInfo)node.getParent();
                 converter = (StringConverter) converter.setNamespaceResolver(container.getAllNamespaces());
             }
         }

@@ -37,7 +37,7 @@ public class Lang extends SystemFunction implements IContextAccessorFunction {
             if (doclang != null) {
                 break;
             }
-            node = node.getParent();
+            node = (NodeInfo)node.getParent();
             if (node == null) {
                 return false;
             }

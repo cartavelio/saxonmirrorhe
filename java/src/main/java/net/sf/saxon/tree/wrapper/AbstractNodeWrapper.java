@@ -20,8 +20,6 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
 
-import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
-
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
  * <p>This implementation of the NodeInfo interface contains common code used by many "wrapper" implementations
@@ -29,7 +27,7 @@ import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
  *
  */
 
-public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
+public abstract class AbstractNodeWrapper implements VirtualNode {
 
     protected TreeInfo treeInfo;
 
@@ -157,7 +155,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
         }
         NodeInfo n = this;
         if (getNodeKind() != Type.ELEMENT) {
-            n = getParent();
+            n = (NodeInfo)getParent();
         }
         // Look for an xml:base attribute
         while (n != null) {
@@ -165,7 +163,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
             if (xmlbase != null) {
                 return xmlbase;
             }
-            n = n.getParent();
+            n = (NodeInfo)n.getParent();
         }
         // if not found, return the base URI of the document node
         return getRoot().getSystemId();
@@ -262,7 +260,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
     @Override
     public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
-        return iterateAttributes(nodeTestFromPredicate(predicate));
+        return iterateAttributes(Navigator.nodeTestFromPredicate(predicate));
     }
 
     /**
@@ -284,7 +282,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        return iterateChildren(nodeTestFromPredicate(predicate));
+        return iterateChildren(Navigator.nodeTestFromPredicate(predicate));
     }
 
     /**
@@ -313,7 +311,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
             case Type.NAMESPACE:
                 return EmptyIterator.getInstance();
             default:
-                return iterateSiblings(nodeTestFromPredicate(predicate), true);
+                return iterateSiblings(Navigator.nodeTestFromPredicate(predicate), true);
         }
     }
 
@@ -332,7 +330,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
             case Type.NAMESPACE:
                 return EmptyIterator.getInstance();
             default:
-                return iterateSiblings(nodeTestFromPredicate(predicate), false);
+                return iterateSiblings(Navigator.nodeTestFromPredicate(predicate), false);
         }
     }
 
@@ -363,7 +361,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-        return iterateDescendants(nodeTestFromPredicate(predicate), false);
+        return iterateDescendants(Navigator.nodeTestFromPredicate(predicate), false);
     }
 
     /**
@@ -375,7 +373,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
     @Override
     public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
-        return iterateDescendants(nodeTestFromPredicate(predicate), true);
+        return iterateDescendants(Navigator.nodeTestFromPredicate(predicate), true);
     }
 
     /**
@@ -431,7 +429,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     public NodeInfo getRoot() {
         NodeInfo p = this;
         while (true) {
-            NodeInfo q = p.getParent();
+            NodeInfo q = (NodeInfo)p.getParent();
             if (q==null) {
                 return p;
             }

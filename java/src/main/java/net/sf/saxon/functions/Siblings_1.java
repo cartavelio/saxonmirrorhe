@@ -10,9 +10,8 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.LazySequence;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -55,11 +54,11 @@ public class Siblings_1 extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        NodeInfo node = (NodeInfo) arguments[0].head();
+        GNode node = (GNode) arguments[0].head();
         if (node == null) {
             return EmptySequence.getInstance();
         }
-        NodeInfo parent = node.getParent();
+        GNode parent = node.getParent();
         if (parent == null || node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {
             return node;
         }

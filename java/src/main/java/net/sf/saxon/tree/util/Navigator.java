@@ -93,7 +93,7 @@ public final class Navigator {
         while (node != null) {
             String value = node.getAttributeValue(uri, localName);
             if (value == null) {
-                node = node.getParent();
+                node = (NodeInfo)node.getParent();
             } else {
                 return value;
             }
@@ -142,7 +142,7 @@ public final class Navigator {
     /*@Nullable*/
     public static String getBaseURI(/*@NotNull*/ NodeInfo node) {
         return getBaseURI(node, n -> {
-            NodeInfo parent = n.getParent();
+            NodeInfo parent = (NodeInfo)n.getParent();
             return parent == null || !parent.getSystemId().equals(n.getSystemId());
         });
     }
@@ -172,7 +172,7 @@ public final class Navigator {
                 if (baseURI.isAbsolute()) {
                     return xmlBase;
                 } else {
-                    NodeInfo parentNode = node.getParent();
+                    NodeInfo parentNode = (NodeInfo)node.getParent();
                     if (parentNode == null) {
                         // We have a parentless element with a relative xml:base attribute.
                         // See for example test XQTS fn-base-uri-10 and base-uri-27
@@ -206,7 +206,7 @@ public final class Navigator {
         if (startSystemId == null) {
             return null;
         }
-        NodeInfo parent = node.getParent();
+        NodeInfo parent = (NodeInfo)node.getParent();
         if (parent == null) {
             return startSystemId;
         }
@@ -251,7 +251,7 @@ public final class Navigator {
         }
         String pre;
         boolean streamed = node.getConfiguration().isStreamedNode(node);
-        NodeInfo parent = node.getParent();
+        NodeInfo parent = (NodeInfo)node.getParent();
         // System.err.println("node = " + node + " parent = " + parent);
 
         switch (node.getNodeKind()) {
@@ -312,7 +312,7 @@ public final class Navigator {
             path.addFirst(new AbsolutePath.PathElement(node.getNodeKind(),
                                                      NameOfNode.makeName(node),
                                                      streamed ? -1 : getNumberSimple(node, null)));
-            node = node.getParent();
+            node = (NodeInfo)node.getParent();
         }
         AbsolutePath a = new AbsolutePath(path);
         a.setSystemId(sysId);
@@ -433,7 +433,7 @@ public final class Navigator {
                         // see whether there is an ancestor node that matches the from pattern
                         NodeInfo anc = target;
                         while (!from.matchesItem(anc, context)) {
-                            anc = anc.getParent();
+                            anc = (NodeInfo)anc.getParent();
                             if (anc == null) {
                                 // there's no ancestor that matches the "from" pattern
                                 return 0;
@@ -446,7 +446,7 @@ public final class Navigator {
                     // if we find something that matches "from" before we find something that matches "count", exit
                     return 0;
                 } else {
-                    target = target.getParent();
+                    target = (NodeInfo)target.getParent();
                     if (target == null) {
                         // found the root before finding a match on either "count" or "from"
                         return 0;
@@ -612,7 +612,7 @@ public final class Navigator {
             if (from != null && from.matchesItem(curr, context)) {
                 break;
             }
-            curr = curr.getParent();
+            curr = (NodeInfo)curr.getParent();
             if (curr == null) {
                 break;
             }
@@ -930,7 +930,7 @@ public final class Navigator {
      * @since 9.5
      */
 
-    public static int comparePosition(/*@NotNull*/ NodeInfo first, /*@NotNull*/ NodeInfo second) {
+    public static int comparePosition(GNode first, GNode second) {
 
         if (first.getNodeKind() == Type.ATTRIBUTE || first.getNodeKind() == Type.NAMESPACE ||
                 second.getNodeKind() == Type.ATTRIBUTE || second.getNodeKind() == Type.NAMESPACE) {
@@ -942,13 +942,13 @@ public final class Navigator {
             return AxisInfo.SELF;
         }
 
-        NodeInfo firstParent = first.getParent();
+        GNode firstParent = first.getParent();
         if (firstParent == null) {
             // first node is the root
             return AxisInfo.ANCESTOR;
         }
 
-        NodeInfo secondParent = second.getParent();
+        GNode secondParent = second.getParent();
         if (secondParent == null) {
             // second node is the root
             return AxisInfo.DESCENDANT;
@@ -966,8 +966,8 @@ public final class Navigator {
         // find the depths of both nodes in the tree
         int depth1 = 0;
         int depth2 = 0;
-        NodeInfo p1 = first;
-        NodeInfo p2 = second;
+        GNode p1 = first;
+        GNode p2 = second;
         while (p1 != null) {
             depth1++;
             p1 = p1.getParent();

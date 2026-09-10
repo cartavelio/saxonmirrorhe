@@ -62,7 +62,7 @@ public abstract class XSLBreakOrContinue extends StyleElement {
                     isLast = false;
                 }
             }
-            inst = inst.getParent();
+            inst = (NodeInfo)inst.getParent();
             if (inst instanceof XSLIterate) {
                 xslIterate = (XSLIterate) inst;
                 break;

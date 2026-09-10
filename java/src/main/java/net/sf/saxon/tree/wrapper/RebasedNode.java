@@ -151,7 +151,7 @@ public class RebasedNode extends AbstractVirtualNode implements WrappingFunction
     @Override
     public NodeInfo getParent() {
         if (parent == null) {
-            NodeInfo realParent = node.getParent();
+            NodeInfo realParent = (NodeInfo)node.getParent();
             if (realParent != null) {
                 parent = makeWrapper(realParent, (RebasedDocument) docWrapper, null);
             }

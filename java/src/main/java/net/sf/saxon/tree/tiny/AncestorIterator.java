@@ -32,9 +32,9 @@ final public class AncestorIterator implements SequenceIterator {
         if (current == null) {
             return null;
         }
-        NodeInfo node = current.getParent();
+        NodeInfo node = (NodeInfo)current.getParent();
         while (node != null && test != null && !test.test(node)) {
-            node = node.getParent();
+            node = (NodeInfo)node.getParent();
         }
         return current = node;
     }

@@ -141,7 +141,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
         @Override
         public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             NodeInfo child = (NodeInfo) arguments[0].head();
-            NodeInfo parent = child.getParent();
+            NodeInfo parent = (NodeInfo)child.getParent();
             return BooleanValue.get(
                     parent == null || parent.getNodeKind() == Type.DOCUMENT ||
                     child.getAllNamespaces() != parent.getAllNamespaces());

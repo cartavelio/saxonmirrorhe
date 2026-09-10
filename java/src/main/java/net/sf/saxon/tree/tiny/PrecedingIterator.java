@@ -60,7 +60,7 @@ final class PrecedingIterator implements SequenceIterator {
             return null;
         }
         if (current instanceof TinyTextualElement.TinyTextualElementText) {
-            current = current.getParent();
+            current = (NodeInfo)current.getParent();
         }
         int nextNodeNr = ((TinyNodeImpl) current).nodeNr;
         while (true) {

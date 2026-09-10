@@ -13,7 +13,6 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -251,7 +250,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getParentNode() {
-        return wrap(node.getParent());
+        return wrap((NodeInfo)node.getParent());
     }
 
     /**

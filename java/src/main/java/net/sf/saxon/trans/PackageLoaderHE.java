@@ -1317,7 +1317,7 @@ public class PackageLoaderHE implements IPackageLoader {
             if (val != null) {
                 return val;
             }
-            element = element.getParent();
+            element = (NodeInfo)element.getParent();
         }
         return null;
     }

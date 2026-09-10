@@ -49,7 +49,7 @@ class DOMAttributeMap implements NamedNodeMap {
     private NamespaceBinding[] getNamespaceDeltas() {
         NamespaceMap allNamespaces = element.getAllNamespaces();
         NamespaceBinding[] bindings;
-        NodeInfo parent = element.getParent();
+        NodeInfo parent = (NodeInfo)element.getParent();
         if (parent != null && parent.getNodeKind() == Type.ELEMENT) {
             bindings = allNamespaces.getDifferences(parent.getAllNamespaces(), !excludeNamespaceUndeclarations);
         } else {

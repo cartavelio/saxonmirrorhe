@@ -259,11 +259,11 @@ public final class AncestorQualifiedPattern extends Pattern {
                 return upperPattern.matchesBeneathAnchor(node, anchor, context);
 
             case AxisInfo.PARENT:
-                NodeInfo par = node.getParent();
+                NodeInfo par = (NodeInfo)node.getParent();
                 return par != null && upperPattern.matchesBeneathAnchor(par, anchor, context);
 
             case AxisInfo.ANCESTOR: {
-                NodeInfo anc = node.getParent();
+                NodeInfo anc = (NodeInfo)node.getParent();
                 return hasMatchingAncestor(anchor, anc, context);
             }
             case AxisInfo.ANCESTOR_OR_SELF: {
@@ -283,7 +283,7 @@ public final class AncestorQualifiedPattern extends Pattern {
             if (anc.equals(anchor)) {
                 return false;
             }
-            anc = anc.getParent();
+            anc = (NodeInfo)anc.getParent();
         }
         return false;
     }

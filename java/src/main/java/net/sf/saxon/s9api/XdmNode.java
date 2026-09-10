@@ -366,7 +366,7 @@ public class XdmNode extends XdmItem {
      */
 
     public XdmNode getParent() {
-        NodeInfo p = getUnderlyingNode().getParent();
+        NodeInfo p = (NodeInfo)getUnderlyingNode().getParent();
         return p == null ? null : (XdmNode) XdmValue.wrap(p);
     }
 

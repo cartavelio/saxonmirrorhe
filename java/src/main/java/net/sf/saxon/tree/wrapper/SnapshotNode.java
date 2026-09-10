@@ -109,7 +109,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
     @Override
     public NodeInfo getParent() {
         if (parent == null) {
-            NodeInfo basep = original.getParent();
+            NodeInfo basep = (NodeInfo)original.getParent();
             if (basep == null) {
                 return null;
             }
@@ -376,7 +376,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
         switch (sourceNode.getNodeKind()) {
             case Type.ATTRIBUTE:
             case Type.NAMESPACE:
-                return isIncludedInCopy(sourceNode.getParent());
+                return isIncludedInCopy((NodeInfo)sourceNode.getParent());
             default:
                 return Navigator.isAncestorOrSelf(pivot, sourceNode) || Navigator.isAncestorOrSelf(sourceNode, pivot);
         }

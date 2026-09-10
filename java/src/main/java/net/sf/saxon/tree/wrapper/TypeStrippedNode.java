@@ -158,7 +158,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
     @Override
     public NodeInfo getParent() {
         if (parent == null) {
-            NodeInfo realParent = node.getParent();
+            NodeInfo realParent = (NodeInfo)node.getParent();
             if (realParent != null) {
                 parent = makeWrapper(realParent, (TypeStrippedDocument) docWrapper, null);
             }

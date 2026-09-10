@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -41,7 +42,7 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
      */
 
     public UnionEnumeration(SequenceIterator p1, SequenceIterator p2,
-                            Comparator<? super NodeInfo> comparer) throws XPathException {
+                            Comparator<? super GNode> comparer) throws XPathException {
         this.e1 = p1;
         this.e2 = p2;
         this.comparer = comparer;

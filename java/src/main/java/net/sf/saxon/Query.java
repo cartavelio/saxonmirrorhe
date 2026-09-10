@@ -11,7 +11,6 @@ package net.sf.saxon;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.instruct.TerminationException;
-import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryReader;
@@ -192,8 +191,6 @@ public class Query {
                                     "Display version and timing information");
         options.addRecognizedOption("T", CommandLineOptions.TYPE_CLASSNAME,
                                     "Use named TraceListener class, or standard TraceListener");
-        options.addRecognizedOption("TC", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
-                "Write coverage data to specified output file");
         options.addRecognizedOption("TJ", CommandLineOptions.TYPE_BOOLEAN,
                                     "Debug binding and execution of extension functions");
         options.setPermittedValues("TJ", new String[]{"on", "off"}, "on");
@@ -658,30 +655,12 @@ public class Query {
 
         value = options.getOptionValue("T");
         if (value != null) {
-            if (value.isEmpty()) {
+            if ("".equals(value)) {
                 makeXQueryTraceListener(options);
             } else {
                 config.setTraceListenerClass(value);
             }
             config.setLineNumbering(true);
-        }
-
-        value = options.getOptionValue("TC");
-        if (value != null) {
-            XQueryCoverageCodeInjector injector = new XQueryCoverageCodeInjector();
-            CoverageTraceListener listener = new CoverageTraceListener(injector.histograms);
-            processor.setConfigurationProperty(Feature.TRACE_LISTENER, listener);
-            processor.setConfigurationProperty(Feature.LINE_NUMBERING, true);
-            config.setLineNumbering(true);
-            config.getDefaultStaticQueryContext().setCodeInjector(injector);
-            if (!value.isEmpty()) {
-                try {
-                    listener.setOutputDestination(
-                            new StandardLogger(new File(value)));
-                } catch (FileNotFoundException e) {
-                    throw new SaxonApiException(e);
-                }
-            }
         }
 
         value = options.getOptionValue("Tout");
@@ -1140,7 +1119,7 @@ public class Query {
                 // OK
                 break;
             case Type.ELEMENT:
-                NodeInfo parent = doc.getParent();
+                NodeInfo parent = (NodeInfo)doc.getParent();
                 if (parent != null && parent.getNodeKind() != Type.DOCUMENT) {
                     throw new SaxonApiException("Cannot rewrite an element node unless it is top-level");
                 }

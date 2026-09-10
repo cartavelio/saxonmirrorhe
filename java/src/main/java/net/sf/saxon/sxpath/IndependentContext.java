@@ -212,7 +212,7 @@ public class IndependentContext extends AbstractStaticContext
         if (kind == Type.ATTRIBUTE || kind == Type.TEXT ||
                 kind == Type.COMMENT || kind == Type.PROCESSING_INSTRUCTION ||
                 kind == Type.NAMESPACE) {
-            node = node.getParent();
+            node = (NodeInfo)node.getParent();
         }
         if (node == null) {
             return;

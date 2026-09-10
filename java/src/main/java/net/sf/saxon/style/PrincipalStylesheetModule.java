@@ -1037,7 +1037,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             if (!(parent instanceof XSLOverride)) {
                 bad = true;
             } else {
-                NodeInfo grandParent = parent.getParent();
+                NodeInfo grandParent = (NodeInfo)parent.getParent();
                 if (!(grandParent instanceof XSLUsePackage)) {
                     bad = true;
                 } else {

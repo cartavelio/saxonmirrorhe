@@ -17,6 +17,7 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.*;
@@ -466,19 +467,27 @@ public class DeepEqual extends CollatingFunctionFixed {
                     continue;
                 }
 
-                if (item1 instanceof NodeInfo) {
-                    if (item2 instanceof NodeInfo) {
-                        String message = deepEqual((NodeInfo) item1, (NodeInfo) item2, context, options);
-                        if (message != null) {
-                            result = false;
-                            reason = "nodes at position " + pos1 + " differ: " + message;
-                            break;
-                        }
-                    } else {
+                if (item1 instanceof NodeInfo && item2 instanceof NodeInfo) {
+                    String message = deepEqual((NodeInfo) item1, (NodeInfo) item2, context, options);
+                    if (message != null) {
                         result = false;
-                        reason = "comparing a node to an atomic value at position " + pos1;
+                        reason = "nodes at position " + pos1 + " differ: " + message;
                         break;
                     }
+                    continue;
+                }
+
+                if (item1 instanceof JNode && item2 instanceof JNode) {
+                    boolean OK = deepEqual(((JNode) item1).getContent().iterate(),
+                                               ((JNode) item2).getContent().iterate(),
+                                               context, options);
+                    if (!OK) {
+                        result = false;
+                        reason = "JNodes at position " + pos1 + " have different content";
+                        break;
+                    }
+                    continue;
+
                 } else {
                     if (item2 instanceof NodeInfo) {
                         result = false;
@@ -987,7 +996,7 @@ public class DeepEqual extends CollatingFunctionFixed {
             if (att != null) {
                 return Whitespace.normalize(att).equals("preserve");
             }
-            node = node.getParent();
+            node = (NodeInfo)node.getParent();
         }
         return false;
     }

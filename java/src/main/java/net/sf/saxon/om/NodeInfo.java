@@ -407,13 +407,16 @@ public interface NodeInfo extends GNode, Location
     /**
      * Get the NodeInfo object representing the parent of this node
      *
+     * <p>The result will always be of type <code>NodeInfo</code>; however, we cannot
+     * declare it as such because C# does not allow covariant return types on interface
+     * methods. </p>
+     *
      * @return the parent of this node; null if this node has no parent
      * @since 8.4
      */
 
     /*@Nullable*/
-    NodeInfo getParent();
-
+    GNode getParent();
 
     /**
      * Get the string value of a given attribute of this node

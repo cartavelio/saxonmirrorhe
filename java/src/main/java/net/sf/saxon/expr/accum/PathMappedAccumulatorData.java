@@ -54,7 +54,7 @@ public class PathMappedAccumulatorData implements IAccumulatorData {
             NodeInfo ancestor = node;
             while (ancestor != null) {
                 path.push(Navigator.getSiblingPosition(ancestor, NodeTypeTest.GNODE, Integer.MAX_VALUE));
-                ancestor = ancestor.getParent();
+                ancestor = (NodeInfo)ancestor.getParent();
             }
             NodeInfo target = origin;
             while (!path.isEmpty()) {

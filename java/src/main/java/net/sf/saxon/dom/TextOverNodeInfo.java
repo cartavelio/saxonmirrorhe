@@ -219,7 +219,7 @@ public class TextOverNodeInfo extends NodeOverNodeInfo implements Text, Comment 
         if (!Whitespace.isAllWhite(node.getUnicodeStringValue())) {
             return false;
         }
-        NodeInfo parent = node.getParent();
+        NodeInfo parent = (NodeInfo)node.getParent();
         if (parent == null) {
             return false;
         }

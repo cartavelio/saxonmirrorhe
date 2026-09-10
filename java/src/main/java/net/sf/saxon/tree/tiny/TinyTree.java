@@ -1297,7 +1297,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         }
         NodeInfo node = idTable.get(id);
         if (node != null && getParent && node.isId() && node.getStringValue().equals(id)) {
-            node = node.getParent();
+            node = (NodeInfo)node.getParent();
         }
         return node;
     }

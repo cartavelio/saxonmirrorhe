@@ -16,6 +16,7 @@ import net.sf.saxon.functions.ResolveQName;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Step;
@@ -1527,7 +1528,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             } else if (val.contains(":")){
                 try {
                     QNameValue qn = ResolveQName.resolveQName(
-                            val, att.get().getUnderlyingNode().getParent());
+                            val, (NodeInfo)att.get().getUnderlyingNode().getParent());
                     return new QName(qn.getStructuredQName());
                 } catch (XPathException e) {
                     e.printStackTrace();

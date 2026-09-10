@@ -327,7 +327,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
     public NodeInfo getRoot() {
         NodeInfo p = this;
         while (true) {
-            NodeInfo q = p.getParent();
+            NodeInfo q = (NodeInfo)p.getParent();
             if (q == null) {
                 return p;
             }

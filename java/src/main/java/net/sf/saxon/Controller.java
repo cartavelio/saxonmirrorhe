@@ -1385,7 +1385,7 @@ public class Controller implements ContextOriginator {
             if (docInfo.getSpaceStrippingRule() != spaceStrippingRule) {  // if not already space-stripped
                 SpaceStrippedDocument strippedDoc = new SpaceStrippedDocument(docInfo, spaceStrippingRule);
                 // Edge case: the global context item might itself be a whitespace text node that is stripped
-                if (!SpaceStrippedNode.isPreservedNode(start, strippedDoc, start.getParent())) {
+                if (!SpaceStrippedNode.isPreservedNode(start, strippedDoc, (NodeInfo)start.getParent())) {
                     return null;
                 }
                 start = strippedDoc.wrap(start);

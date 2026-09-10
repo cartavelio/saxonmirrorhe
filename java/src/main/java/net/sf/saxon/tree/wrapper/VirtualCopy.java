@@ -418,7 +418,7 @@ public class VirtualCopy implements NodeInfo {
             return null;
         }
         if (parent == null) {
-            NodeInfo basep = original.getParent();
+            NodeInfo basep = (NodeInfo)original.getParent();
             if (basep == null) {
                 return null;
             }
@@ -561,7 +561,7 @@ public class VirtualCopy implements NodeInfo {
     public NodeInfo getRoot() {
         NodeInfo n = this;
         while (true) {
-            NodeInfo p = n.getParent();
+            NodeInfo p = (NodeInfo)n.getParent();
             if (p == null) {
                 return n;
             }

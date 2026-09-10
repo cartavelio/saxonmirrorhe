@@ -7,6 +7,7 @@
 
 package net.sf.saxon.dom;
 
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -142,7 +143,7 @@ public class AttrOverNodeInfo extends NodeOverNodeInfo implements Attr {
     @Override
     public Element getOwnerElement() {
         if (node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {
-            return (Element) wrap(node.getParent());
+            return (Element) wrap((NodeInfo)node.getParent());
         } else {
             throw new UnsupportedOperationException(
                     "This method is defined only on attribute and namespace nodes");

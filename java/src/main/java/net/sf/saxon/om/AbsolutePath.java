@@ -65,7 +65,7 @@ public class AbsolutePath {
         while (node != null && node.getNodeKind() != Type.DOCUMENT) {
             PathElement pe = new PathElement(node.getNodeKind(), NameOfNode.makeName(node), Navigator.getNumberSimple(node, null));
             list.addFirst(pe);
-            node = node.getParent();
+            node = (NodeInfo)node.getParent();
         }
         return new AbsolutePath(list);
     }

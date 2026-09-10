@@ -621,8 +621,8 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
         }
         assert idTable != null;
         NodeInfo node = idTable.get(id);
-        if (node != null && getParent && node.isId() && node.getUnicodeStringValue().equals(id)) {
-            node = node.getParent();
+        if (node != null && getParent && node.isId() && node.getStringValue().equals(id)) {
+            node = (NodeInfo)node.getParent();
         }
         return node;
     }

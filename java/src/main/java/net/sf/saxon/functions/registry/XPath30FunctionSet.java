@@ -10,6 +10,10 @@ package net.sf.saxon.functions.registry;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.PortableNamedType;
+import net.sf.saxon.pattern.qname.PortableQNameTest;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.DocumentNodeType;
@@ -44,9 +48,11 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        ItemType analyzeStringReturnType = NodeKindType.ELEMENT;
-        // new PortableNamedType(
-        //        Type.ELEMENT, NamespaceUri.FN, "analyze-string-result");
+        ItemType analyzeStringReturnType =
+                     new PortableNamedType(
+                             Type.ELEMENT,
+                             new PortableQNameTest(
+                                     new StructuredQName("", NamespaceUri.FN, "analyze-string-result")));
         register("analyze-string", 3, e -> e.populate( AnalyzeStringFn::new, analyzeStringReturnType,
                  ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)

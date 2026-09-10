@@ -124,7 +124,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
                         break;
                     }
                 }
-                p = p.getParent();
+                p = (NodeInfo)p.getParent();
             }
         }
 
@@ -138,7 +138,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
                 if (t instanceof ComplexType && ((ComplexType) t).hasAssertions()) {
                     return true;
                 }
-                p = p.getParent();
+                p = (NodeInfo)p.getParent();
             }
         }
 
@@ -245,7 +245,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     @Override
     public NodeInfo getParent() {
         if (parent == null) {
-            NodeInfo realParent = node.getParent();
+            NodeInfo realParent = (NodeInfo)node.getParent();
             if (realParent != null) {
                 parent = makeWrapper(realParent, (SpaceStrippedDocument) docWrapper, null);
             }
@@ -566,7 +566,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
                 return true;
             }
             NodeInfo actualParent =
-                    parent == null ? nextRealNode.getParent() : parent.node;
+                    parent == null ? (NodeInfo)nextRealNode.getParent() : parent.node;
             return isPreservedNode(nextRealNode, docWrapper, actualParent);
         }
 

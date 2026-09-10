@@ -336,7 +336,7 @@ public abstract class StyleElement extends ElementImpl {
         int v = defaultValidation;
         NodeInfo p = this;
         while (v == Validation.DEFAULT) {
-            p = p.getParent();
+            p = (NodeInfo)p.getParent();
             if (!(p instanceof StyleElement)) {
                 return Validation.STRIP;
                 //return getCompilation().isSchemaAware() ? Validation.PRESERVE : Validation.STRIP;
@@ -493,7 +493,7 @@ public abstract class StyleElement extends ElementImpl {
                 if (parent.getFingerprint() == fingerprint) {
                     return (StyleElement) parent;
                 } else {
-                    parent = parent.getParent();
+                    parent = (NodeInfo)parent.getParent();
                 }
             } else {
                 return null;
@@ -1361,7 +1361,7 @@ public abstract class StyleElement extends ElementImpl {
             if (((StyleElement) anc).definesExtensionElement(uri)) {
                 return true;
             }
-            anc = anc.getParent();
+            anc = (NodeInfo)anc.getParent();
         }
         return false;
     }
@@ -1408,7 +1408,7 @@ public abstract class StyleElement extends ElementImpl {
             if (((StyleElement) anc).definesExcludedNamespace(uri)) {
                 return true;
             }
-            anc = anc.getParent();
+            anc = (NodeInfo)anc.getParent();
         }
         return false;
     }
@@ -1440,7 +1440,7 @@ public abstract class StyleElement extends ElementImpl {
             if (x != null) {
                 return x;
             }
-            anc = anc.getParent();
+            anc = (NodeInfo)anc.getParent();
         }
         return compilation.getCompilerInfo().getDefaultElementNamespace();
     }
@@ -1462,7 +1462,7 @@ public abstract class StyleElement extends ElementImpl {
             if (x != null) {
                 return x;
             }
-            anc = anc.getParent();
+            anc = (NodeInfo)anc.getParent();
         }
         return "";
     }
@@ -2694,7 +2694,7 @@ public abstract class StyleElement extends ElementImpl {
             if (parent instanceof XSLElement || parent instanceof LiteralResultElement || parent instanceof XSLDocument || parent instanceof XSLCopy) {
                 return true;
             }
-            parent = parent.getParent();
+            parent = (NodeInfo)parent.getParent();
         }
     }
 
@@ -2761,13 +2761,13 @@ public abstract class StyleElement extends ElementImpl {
         if (!isTopLevel()) {
             while (curr instanceof StyleElement && !((StyleElement) curr).seesAvuncularVariables()) {
                 // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
-                curr = curr.getParent();
+                curr = (NodeInfo)curr.getParent();
             }
             SequenceIterator preceding = curr.iteratePrecedingSiblingAxis(null);
             while (true) {
                 curr = (NodeInfo)preceding.next();
                 while (curr == null) {
-                    curr = prev.getParent();
+                    curr = (NodeInfo)prev.getParent();
                     if (curr instanceof StyleElement) {
                         implicit = ((StyleElement) curr).hasImplicitBinding(variableName, null);
                         if (implicit != null) {
@@ -2776,7 +2776,7 @@ public abstract class StyleElement extends ElementImpl {
                     }
                     while (curr instanceof StyleElement && !((StyleElement) curr).seesAvuncularVariables()) {
                         // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
-                        curr = curr.getParent();
+                        curr = (NodeInfo)curr.getParent();
                     }
                     prev = curr;
                     if (curr.getParent() instanceof XSLModuleRoot) {
