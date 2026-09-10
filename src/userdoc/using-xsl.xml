@@ -61,9 +61,9 @@
                <dfn>classpath</dfn>. See <a class="bodylink" href="/about/installationjava"
                >Installation</a> for details of how to set up the classpath.</p>
    
-         <p >If you are are not using any additional Java libraries, you can use the simpler form of
-            command (this example is for Saxon-HE 10.0):</p>
-         <kbd>java  -jar <i>dir</i>/saxon-he-10.0.jar [options] [params]</kbd>
+         <p>If you are are not using any additional Java libraries, you can use the simpler form of
+            command (this example is for Saxon-HE 12.0):</p>
+         <kbd>java  -jar <i>dir</i>/saxon-he-12.0.jar [options] [params]</kbd>
    
          <p>
             <i>Note, however, that this does not work if you need to load user-written extension
@@ -1810,9 +1810,9 @@
          strictly needed at execution time.</p>
       
       <p>The simplest way to generate an export file is from the command line, for example with
-         Saxon-EE 11.0:</p>
+         Saxon-EE 12.0:</p>
       
-      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-11.0.jar -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
+      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-12.0.jar -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
       <kbd class="csonly">dotnet SaxonCS transform -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
       
       <p>Here, the option <code>-nogo</code> suppresses any attempt to execute the stylesheet.</p>
@@ -1831,7 +1831,7 @@
       <p>A stylesheet export file for a complete stylesheet (as distinct from a library package) is accepted
       by any Saxon interface that accepts a source stylesheet. For example, from the command line:</p>
       
-      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-10.0.jar -xsl:stylesheet.sef -s:source.xml</kbd>
+      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-12.0.jar -xsl:stylesheet.sef -s:source.xml</kbd>
       <kbd class="csonly">dotnet SaxonCS transform -xsl:stylesheet.sef -s:source.xml</kbd>
       
       <aside><p>This means that you can generally use a stylesheet export file transparently with third-party tools,

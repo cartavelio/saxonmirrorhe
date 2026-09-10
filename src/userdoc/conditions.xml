@@ -95,7 +95,7 @@
   is supplied in a suitable form, and if a contribution agreement is signed.</p>
  
   
-  <p>SaxonJ-HE includes a separate JAR file, <code>saxon-xqj-11.x.jar</code>, which contains Saxon's
+  <p>SaxonJ-HE includes a separate JAR file, <code>saxon-xqj-12.x.jar</code>, which contains Saxon's
     support for the XQJ interface, a standard API for access to XQuery engines from Java. In
     previous Saxon releases this was made available as part of the main JAR file. It has been
     decoupled because it has been pointed out that the license under which Oracle distributes XQJ is
@@ -103,7 +103,7 @@
     specifically, it does not allow modifications, and it does not allow redistribution except as
     part of a product that satisfies all the compatibility tests. Saxon satisfies these conditions,
     but some users are only prepared to use code that conforms to OSI-approved licenses. If you fall
-    into this category, please delete the <code>saxon-xqj-11.x.jar</code> file. (In SaxonJ-PE and
+    into this category, please delete the <code>saxon-xqj-12.x.jar</code> file. (In SaxonJ-PE and
     SaxonJ-EE, the XQJ components are delivered as part of the main Saxon JAR file.)</p>
   
   <aside><p>Although Saxonica complies with all the terms of the XQJ license, Saxonica takes
