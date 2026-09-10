@@ -379,15 +379,15 @@
       <xsl:choose>
          <xsl:when test="exists($specialTypes($degen))">
             <xsl:sequence select="$specialTypes($degen)"/>
-            <xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
+<!--            <xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
                <xsl:message>Mapped {$degen} to {$specialTypes($degen)}</xsl:message>
-            </xsl:if>
+            </xsl:if>-->
          </xsl:when>
          <xsl:otherwise>
             <xsl:sequence select="f:adjustTypeNamespace($degen)"/>
-            <xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
+            <!--<xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
                <xsl:message>Mapped {$degen} to {f:adjustTypeNamespace($degen)}</xsl:message>
-            </xsl:if>
+            </xsl:if>-->
          </xsl:otherwise>
       </xsl:choose>
    </xsl:function>

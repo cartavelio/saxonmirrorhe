@@ -94,6 +94,7 @@
       </xsl:value-of>
    </xsl:function>
    
+ 
    <xsl:function name="f:applyFormat" as="xs:string">
       <xsl:param name="methodCall" as="element(*)"/>
       <xsl:param name="rules" as="map(xs:string, xs:string)"/>
@@ -107,13 +108,6 @@
       <xsl:sequence select="f:formatCall($methodCall, $rule)"/>
    </xsl:function>
    
-   <!--<xsl:template match="iterable[@nodeType='MethodCallExpr']
-                                [starts-with(@RESOLVED_TYPE, 'java.util.Map')]
-                                [name/@identifier='entrySet']" 
-                                priority="30" mode="methods">
-      <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-      <xsl:text>/* .entrySet() */</xsl:text>
-   </xsl:template>-->
    
    <xsl:template match="*[name/@identifier='getClass'][empty(arguments/argument)]" priority="100" mode="methods">
       <xsl:choose>

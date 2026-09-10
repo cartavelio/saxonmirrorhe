@@ -1247,6 +1247,64 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
+   <!-- Convert `A != null ? A : B` to `A ?? B` -->
+   
+   <xsl:template match="*[@nodeType='ConditionalExpr']
+                         [condition[@nodeType='BinaryExpr']
+                                   [@operator='NOT_EQUALS']
+                                   [right/@nodeType='NullLiteralExpr']]
+                         [f:sameExpression(condition/left, thenExpr)]" priority="50">
+      <xsl:text>(</xsl:text>
+      <xsl:apply-templates select="condition/left"/>
+      <xsl:text> ?? </xsl:text>
+      <xsl:apply-templates select="elseExpr"/>
+      <xsl:text>)</xsl:text>
+   </xsl:template>
+   
+   <!-- Convert `A==null ? null : A.method(X)` to `A ?. method(X)` -->
+   
+   <xsl:template match="*[@nodeType='ConditionalExpr']
+                         [condition[@nodeType='BinaryExpr']
+                                   [@operator='EQUALS']
+                                   [left/@nodeType='NameExpr']
+                                   [right/@nodeType='NullLiteralExpr']]
+                         [thenExpr/@nodeType='NullLiteralExpr']          
+                         [elseExpr/@nodeType='MethodCallExpr']
+                         [f:sameExpression(condition/left, elseExpr/scope)]" priority="50">
+      <xsl:variable name="methodCall" as="xs:string">
+         <xsl:value-of>
+            <xsl:apply-templates select="elseExpr"/>
+         </xsl:value-of>
+      </xsl:variable>
+      <xsl:choose>
+         <xsl:when test="starts-with($methodCall, condition/left/name/@identifier || '.')">
+            <xsl:value-of select="(substring-before($methodCall, '.') 
+                                    || '?.' || substring-after($methodCall, '.')) "/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+      
+   </xsl:template>
+   
+   <!--<expression nodeType="ConditionalExpr">
+                           <condition nodeType="BinaryExpr" operator="EQUALS">
+                              <left nodeType="NameExpr" RESOLVED_TYPE="net.sf.saxon.expr.Operand">
+                                 <name nodeType="SimpleName" identifier="matchingOp"/>
+                              </left>
+                              <right nodeType="NullLiteralExpr"/>
+                           </condition>
+                           <elseExpr nodeType="MethodCallExpr" RETURN="net.sf.saxon.expr.Expression"
+                              RESOLVED_TYPE="net.sf.saxon.expr.Operand">
+                              <name nodeType="SimpleName" identifier="getChildExpression"/>
+                              <scope nodeType="NameExpr" RESOLVED_TYPE="net.sf.saxon.expr.Operand">
+                                 <name nodeType="SimpleName" identifier="matchingOp"/>
+                              </scope>
+                           </elseExpr>
+                           <thenExpr nodeType="NullLiteralExpr"/>
+                        </expression>-->
+   
    <xsl:function name="f:sameExpression" as="xs:boolean">
       <xsl:param name="left"/>
       <xsl:param name="right"/>
