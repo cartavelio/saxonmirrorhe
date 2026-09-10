@@ -112,7 +112,7 @@ public abstract class GNodeType implements ItemTypeWithSequenceTypeCache, ItemTy
 
 
     /**
-     * Test whether a given item conforms to this type (to implement {@link NodePredicate)}
+     * Test whether a given item conforms to this type (to implement {@link NodePredicate})
      *
      * @param node The item to be tested
      * @return true if the item is an instance of this type; false otherwise

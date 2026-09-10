@@ -32,7 +32,7 @@ import java.util.function.IntPredicate;
 
 /**
  * A SelectorTest represents an axis step written as {@code ./NNN} or {@code ./axis::NNN}
- * where {@code NNN} is either an EQName or a wildcard (such as {@code prefix:*} or {@code {*:prefix}.
+ * where {@code NNN} is either an EQName or a wildcard (such as {@code prefix:*} or {@code *:prefix}).
  * The semantics depend on whether we are selecting JNodes or XNodes, which we don't know
  * in advance (except in the case where the axis is the attribute or namespace axis).
  *
