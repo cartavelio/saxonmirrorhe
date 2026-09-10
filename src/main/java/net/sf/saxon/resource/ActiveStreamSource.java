@@ -11,8 +11,11 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.Validation;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import javax.xml.transform.stream.StreamSource;
@@ -56,6 +59,11 @@ public class ActiveStreamSource extends StreamSource implements ActiveSource {
             parser = config.getSourceParser();
             if (options.getEntityResolver() != null /*&& parser.getEntityResolver() == null*/) {
                 parser.setEntityResolver(options.getEntityResolver());
+            }
+            try {
+                parser.setFeature("http://xml.org/sax/features/validation", options.getDTDValidationMode() == Validation.STRICT);
+            } catch (SAXException err) {
+                throw new XPathException("The XML parser does not support DTD-based validation", SaxonErrorCode.SXXP0003);
             }
             reuseParser = true;
         }
