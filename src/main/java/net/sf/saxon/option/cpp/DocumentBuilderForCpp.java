@@ -41,7 +41,13 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
             DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);
             if(baseUri != WordFactory.nullPointer()) {
                 try {
-                    URI cwdURI = new File(CTypeConversion.toJavaString(baseUri)).toURI();
+                    String userDir = System.getProperty("user.dir");
+                    char separatorChar = '/';
+                    if (File.separatorChar != '/') {
+                        userDir.replace(File.separatorChar, separatorChar);
+                    }
+                    URI cwdURI = new File(userDir).toURI();
+                    cwdURI = cwdURI.resolve(CTypeConversion.toJavaString(baseUri));
                     builder.setBaseURI(cwdURI);
                 } catch (Exception e) {
                     throw new SaxonApiException(e);

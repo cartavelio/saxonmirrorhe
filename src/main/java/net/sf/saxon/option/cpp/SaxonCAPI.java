@@ -940,10 +940,18 @@ public class SaxonCAPI {
                 cwd = cwd.concat("/");
             }
             source.setSystemId(cwd);
+            if(debug) {
+                System.err.println("DEBUG: source.setSystemId(cwd) cwd= " + cwd);
+            }
         }
 
         XdmNode doc = builder.build(source);
+
+
         if (debug) {
+            if(doc.getBaseURI() != null) {
+                System.err.println("DEBUG: builder.getBaseURI= " + doc.getBaseURI());
+            }
             System.err.println("xmlParseString, Processor: " + System.identityHashCode(proci));
             System.err.println("documentBuilder obj: " + System.identityHashCode(builder));
             if (doc != null) {
@@ -1046,7 +1054,7 @@ public class SaxonCAPI {
      * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_main_parseXmlFile", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_main_parseXmlFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle builderRef, ObjectHandle procRef, ObjectHandle validatorRef, CCharPointer cfilename) throws SaxonApiException {
+    public static long j_main_parseXmlFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle procRef, ObjectHandle builderRef, ObjectHandle validatorRef, CCharPointer cfilename) throws SaxonApiException {
         DocumentBuilder builder = null;
         Processor proci = null;
         String cwd = null;
@@ -1339,7 +1347,7 @@ public class SaxonCAPI {
         return serializer;
     }
 
-    /* public static void testj() throws SaxonApiException {
+     /*public static void testj() throws SaxonApiException, URISyntaxException {
 
         String xml = "<out><person att1='value1' att2='value2'>text1</person>\n" +
                 "        <person>text2</person>\n" +
@@ -1351,10 +1359,32 @@ public class SaxonCAPI {
 
         Source source = new SAXSource(new InputSource(reader));
 
-        source.setSystemId("file:///example");
+        source.setSystemId(null);
+
+         String userDir = System.getProperty("user.dir");
+
+         char separatorChar = '/';
+         if (File.separatorChar != '/') {
+             userDir.replace(File.separatorChar, separatorChar);
+         }
+
+         if(userDir.endsWith("/")) {
+             userDir += "/";
+         }
+         System.out.println("userDir="+userDir);
+         URI cwdURI = new File(userDir).toURI();
+         String baseUri = "file";
+         cwdURI = cwdURI.resolve(baseUri);
+         builder.setBaseURI(cwdURI);
 
 
+          System.out.println("baseUri="+baseUri);
+         System.out.println("cwdUri="+cwdURI);
+
+          System.out.println(builder.getBaseURI());
         XdmNode doc = builder.build(source);
+
+        System.err.println("doc.getBaseURI = "+ doc.getBaseURI());
         XdmNode node= doc.children().iterator().next();
         System.err.println("outer node="+node.toString());
         Iterator<XdmNode> iterx = node.children().iterator();
@@ -1381,9 +1411,11 @@ public class SaxonCAPI {
 
 
 
-    }
+    }  */
 
-    public static void main(String [] args) throws SaxonApiException {
+
+
+    /*public static void main(String [] args) throws SaxonApiException, URISyntaxException {
           SaxonCAPI.testj();
 
     }    */
