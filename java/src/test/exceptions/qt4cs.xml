@@ -24,6 +24,11 @@
     <created by="Michael Kay" on="2021-08-23"/>
     <reason>Saxon-CS does not implement XInclude</reason>
   </exception>
+   
+   <exception test-set="fn-parse-xml" test-case="parse-xml-470" run="false" report="known restriction">
+    <created by="Michael Kay" on="2026-01-22"/>
+    <reason>Saxon-CS does not implement XInclude</reason>
+  </exception>
   
    
    <exception test-set="fn-graphemes" 
