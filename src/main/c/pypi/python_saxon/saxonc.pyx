@@ -23,7 +23,7 @@ from cython import Py_ssize_t
 
 from cpython.ref cimport PyObject
 
-cdef class PySaxonApiError(RuntimeError):
+class PySaxonApiError(RuntimeError):
   pass
 
 cdef public PyObject* pysaxonapierror = <PyObject*>PySaxonApiError
