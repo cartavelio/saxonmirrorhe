@@ -34,6 +34,11 @@ namespace java.util {
         public Enumeration<string> propertyNames() {
             throw new UnsupportedOperationException("not yet implemented");
         }
+
+        public bool isEmpty() {
+            // TODO: check the semantics - what about defaults?
+            return dict.Count == 0;
+        }
     }
 
 }

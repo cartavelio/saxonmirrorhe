@@ -18,6 +18,15 @@ namespace java.util {
         public bool isPresent() {
             return _value != null;
         }
+
+        public static Optional<T> empty() {
+            return new Optional<T>(default(T));
+        }
+        
+        public static Optional<T> of(T value) {
+            // TODO: require non-null?
+            return new Optional<T>(value);
+        }
     }
 
 }

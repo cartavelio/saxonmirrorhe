@@ -1,15 +1,33 @@
-using System;
-using System.Collections.Generic;
+using Sys = System;
+using SysCollGen = System.Collections.Generic;
 namespace java.util {
-    public interface Map<K, V>  {
+    public interface Map<K, V> : java.lang.Iterable<java.util.Map_Entry<K, V>> {
         int size();
         bool isEmpty();
         V get(object key);
+        bool containsKey(object key);
         V put(K key, V value);
+        void remove(K key);
         Set<K> keySet();
-        Collection<K> values();
+        Collection<V> values();
         Set<Map_Entry<K, V>> entries();
+        void putAll(Map<K, V> map);
     }
-    public interface Map_Entry<K, V> {
+    public class Map_Entry<K, V> {
+        private K _key;
+        private V _value;
+
+        public Map_Entry(K key, V value) {
+            this._key = key;
+            this._value = value;
+        }
+
+        public K getKey() {
+            return _key;
+        }
+
+        public V getValue() {
+            return _value;
+        }
     }
 }

@@ -15,5 +15,9 @@ namespace java.lang {
         public static int compare(long x, long y) {
             return x.CompareTo(y);
         }
+
+        public static int signum(long x) {
+            return compare(x, 0);
+        }
     }
 }

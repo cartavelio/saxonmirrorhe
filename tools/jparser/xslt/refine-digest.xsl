@@ -76,9 +76,6 @@
       <xsl:param name="override-methods" tunnel="yes" as="map(*)" select="map{}"/>
       <xsl:param name="csReturns" tunnel="yes" as="map(*)" select="map{'dummy':()}"/>
       <xsl:variable name="full-name" select="f:full-method-name(.)"/>
-      <xsl:if test="ends-with($full-name, 'evaluateItem')">
-         <xsl:message>aggregated csReturns: {serialize($csReturns, map{'method':'adaptive'})}</xsl:message>
-      </xsl:if>
       <xsl:copy>
          <xsl:copy-of select="@*"/>
          <xsl:if test="$virtual-methods($full-name)">
@@ -102,9 +99,9 @@
          <xsl:variable name="superclass" select="key('classKey', @name)" as="element(*)?"/>
          <xsl:choose>
             <xsl:when test="empty($superclass)">
-               <xsl:if test="matches(@name, '^(com\.saxonica|net\.sf\.saxon)')">
+               <!--<xsl:if test="matches(@name, '^(com\.saxonica|net\.sf\.saxon)')">
                   <xsl:message>*** Class {@name} not found ***</xsl:message>
-               </xsl:if>
+               </xsl:if>-->
             </xsl:when>
             <xsl:otherwise>
                <xsl:variable name="supermethod"

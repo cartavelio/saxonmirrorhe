@@ -65,6 +65,9 @@
             <xsl:attribute name="delegate" select="1"/>
          </xsl:if>
          <xsl:apply-templates select="extendedTypes/extendedType"/>
+         <xsl:for-each select="annotations/annotation[name/@identifier='CSharpExtendInterface']/pairs/pair/value">
+            <extends name="{@value}"/>
+         </xsl:for-each>
          <xsl:apply-templates select="members/member[@nodeType='MethodDeclaration']">
             <xsl:with-param name="isInterface" select="true()" tunnel="yes"/>
          </xsl:apply-templates>
@@ -81,8 +84,8 @@
          <xsl:apply-templates select="members/member[@nodeType='MethodDeclaration']">
             <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
          </xsl:apply-templates>
-         <xsl:apply-templates select="members/member[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='false']">
-            <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
+         <xsl:apply-templates select="members/member[@nodeType='ClassOrInterfaceDeclaration']">
+            <xsl:with-param name="isInterface" select="@isInterface='true'" tunnel="yes"/>
          </xsl:apply-templates>
          <xsl:apply-templates select="members/member[@nodeType='EnumDeclaration']">
             <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>

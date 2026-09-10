@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using java.lang;
 
 /**
  * A C# emulation of java.util.HashMap, incomplete but sufficient for use in Saxon
@@ -13,6 +14,10 @@ namespace java.util {
         }
         public HashMap(int size) {
             dict = new Dictionary<K, V>(size);
+        }
+        public HashMap(Map<K, V> existing) {
+            dict = new Dictionary<K, V>(existing.size());
+            addAll(existing);
         }
         public int size() {
             return dict.Count;
@@ -37,14 +42,26 @@ namespace java.util {
             dict.Add(key, value);
             return current;
         }
+
+        public void remove(K key) {
+            dict.Remove(key);
+        }
         public Set<K> keySet() {
             return null; // TODO
         }
-        public Collection<K> values() {
+
+        public void clear() {
+            dict.Clear();
+        }
+        public Collection<V> values() {
             return null; // TODO
         }
         public Set<Map_Entry<K, V>> entries() {
             return null; // TODO
+        }
+
+        public void putAll(Map<K, V> map) {
+            throw new UnsupportedOperationException();
         }
     }
 

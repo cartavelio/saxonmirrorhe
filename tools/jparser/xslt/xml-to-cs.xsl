@@ -36,25 +36,32 @@
    <xsl:variable name="renamings" as="map(xs:string, xs:string)" select="map{
       'equals':'Equals',
       'hashCode':'GetHashCode',
-      'toString':'ToString',      
+      'toString':'ToString',
+      'getClass':'GetType',     
       'java.lang.System#out' : 'Out',
       'java.lang.System#in' : 'In' (:,
       'java.util.Map#get' : 'Get',
       'java.util.Map#put' : 'Put' :)}"/>
    
    <xsl:variable name="specialTypes" as="map(xs:string, xs:string)" select="map{
-      'java.lang.CharSequence': 'string',
+      'java.lang.ArrayIndexOutOfBoundsException': 'System.IndexOutOfRangeException',
       'java.lang.Boolean': 'System.Boolean',
+      'java.lang.CharSequence': 'string',
       'java.lang.Class': 'System.Type',
       'java.lang.Exception': 'System.Exception',
+      'java.lang.IndexOutOfBoundsException': 'System.IndexOutOfRangeException',
       'java.lang.Integer': 'System.Int32',
       'java.lang.Long': 'System.Int64',
       'java.lang.Object': 'System.Object',
       'java.lang.RuntimeException': 'System.Exception',
+      'java.lang.StackOverflowError': 'System.StackOverflowException',
+      'java.lang.String': 'string',
       'java.lang.System': 'System.Console',
+      'java.lang.InterruptedException': 'System.Threading.ThreadInterruptedException',
       'java.lang.Throwable': 'System.Exception',
       'java.util.function.Function': 'System.Func',
-      'java.util.function.Predicate': 'System.Predicate'
+      'java.util.function.Predicate': 'System.Predicate',
+      'java.util.Map.Entry': 'java.util.Map_Entry'
       }"/>
    
    <xsl:variable name="dropTypeParameters" as="xs:string*" select="tokenize('System.Type')"/>
@@ -148,16 +155,29 @@
    <xsl:function name="f:rename-type" as="xs:string">
       <xsl:param name="identifier" as="xs:string"/>
       <xsl:variable name="degen" select="f:degenerify($identifier)" as="xs:string"/>
-      <xsl:if test="$degen = 'java.util.function.Predicate'">
+      <!--<xsl:if test="$degen = 'java.util.function.Predicate'">
          <xsl:message>Renaming {$degen} to {$specialTypes($degen)}</xsl:message>
          <xsl:message>$specialTypes = {serialize($specialTypes, map{'method':'json'})}</xsl:message>
-      </xsl:if>
+      </xsl:if>-->
       <xsl:sequence select="($specialTypes($degen), $degen)[1]"/>
+   </xsl:function>
+   
+   <xsl:function name="f:rename-generic-type" as="xs:string">
+      <xsl:param name="identifier" as="xs:string"/>
+      <xsl:value-of>
+         <xsl:text>{f:rename-type($identifier)}</xsl:text>
+         <xsl:if test="contains($identifier, '&lt;')">
+            <xsl:text>&lt;</xsl:text>
+            <xsl:value-of select="($identifier => substring-after('&lt;') => substring-before('>') => tokenize(',')) ! f:rename-type(.)"
+               separator=", "/>
+            <xsl:text>&gt;</xsl:text>
+         </xsl:if>
+      </xsl:value-of>
    </xsl:function>
    
    <xsl:function name="f:degenerify" as="xs:string?">
       <xsl:param name="nameOfType" as="xs:string?"/>
-      <xsl:sequence select="replace($nameOfType, '&lt;.*$', '') => f:escapeDottedName()"/>
+      <xsl:sequence select="replace($nameOfType, '^\? (extends|super) ', '') => replace('&lt;.*$', '') => f:escapeDottedName()"/>
    </xsl:function>
    
    <xsl:function name="f:escapeSimpleName" as="xs:string">
@@ -313,6 +333,7 @@
    
    <xsl:template match="*[@nodeType = 'ClassOrInterfaceType'][@RESOLVED_TYPE]" priority="21">
       <xsl:variable name="renamed" as="xs:string" select="f:rename-type(@RESOLVED_TYPE)"/>
+      <!--<xsl:message>Type {@RESOLVED_TYPE} renamed as {$renamed}</xsl:message>-->
       <xsl:value-of select="$renamed"/>
       <xsl:if test="not($dropTypeParameters = $renamed)">
          <xsl:apply-templates select="typeArguments"/>
@@ -340,9 +361,14 @@
                      <name nodeType="SimpleName" identifier="IEnumerable"/>
                      <xsl:copy-of select="typeArguments"/>
                   </implementedType>
-               </xsl:if>
+               </xsl:if>              
             </xsl:for-each>
+            <xsl:for-each select="annotations/annotation[name/@identifier='CSharpExtendInterface']/pairs/pair/value">
+               <xsl:message>Extending with {@value}</xsl:message>
+               <implementedType nodeType="ClassOrInterfaceType" RESOLVED_TYPE="{@value}"/>                    
+            </xsl:for-each>  
          </xsl:variable>
+         
          <xsl:if test="extendedTypes/extendedType, implementedTypes/implementedType, $additionalSuperTypes">
             <xsl:text> : </xsl:text>
             <xsl:for-each select="extendedTypes/extendedType, implementedTypes/implementedType, $additionalSuperTypes">
@@ -362,6 +388,11 @@
             <xsl:call-template name="indent-extra"/>
             <xsl:text>}}{$NL}</xsl:text>
          </xsl:if>
+         <xsl:for-each select="annotations/annotation[name/@identifier='CSharpInjectMembers']//value[@nodeType='StringLiteralExpr']">
+            <!--<xsl:message>Extending with {@value}</xsl:message>-->
+            <xsl:text>        {@value}{$NL}</xsl:text>                    
+         </xsl:for-each>  
+         
          <xsl:apply-templates select="members/member">
             <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
          </xsl:apply-templates>
@@ -372,16 +403,7 @@
          <xsl:if test="not(@isInterface='true')">
             <xsl:call-template name="expand-defaulted-methods"/>
          </xsl:if>
-<!--         <xsl:variable name="implementsIterator" 
-            select="implementedTypes/implementedType[starts-with(@RESOLVED_TYPE, 'java.lang.Iterable')]"/>
-         <xsl:if test="$implementsIterator">
-            <!-\- A Java Iterable becomes a C# IEnumerable, so it needs to implement GetEnumerator -\->
-            <xsl:text>{$NL}</xsl:text>
-            <xsl:call-template name="indent"/>
-            <xsl:text>public {replace($implementsIterator/@RESOLVED_TYPE, 'java.lang.Iterable', 'System.Collections.Generic.IEnumerator')} GetEnumerator() {{{$NL}</xsl:text>
-            <xsl:text>    return new com.saxonica.glue.EnumeratorFromIterator(this.iterator());</xsl:text>
-            <xsl:text>}}{$NL}</xsl:text>
-         </xsl:if>-->
+         <xsl:call-template name="indent"/>
          <xsl:text>}}{$NL}</xsl:text>
       </xsl:if>
    </xsl:template>
@@ -418,8 +440,12 @@
    
    <xsl:template match="*[@nodeType='FieldDeclaration']">
       <xsl:call-template name="indent"/>
-      <xsl:variable name="isConstant" select="count(variables/variable)=1 
-         and variables/variable/initializer and f:isConstantExpression(variables/variable/initializer)"/>
+      <xsl:variable name="isConstant" select="
+         count(variables/variable)=1 
+         and variables/variable/initializer 
+         and f:isConstantExpression(variables/variable/initializer)
+         and modifiers/modifier[@keyword='STATIC']
+         and modifiers/modifier[@keyword='FINAL']"/>
       <xsl:call-template name="modifiers">
          <xsl:with-param name="isConstant" select="$isConstant" tunnel="yes"/>
       </xsl:call-template>
@@ -458,11 +484,17 @@
       <!-- If there's a method to implement java.lang.Iterable, then add a method to implement IEnumerable as well -->
       <xsl:next-match/>
       <xsl:call-template name="indent"/>
-      <xsl:text>// Extra method to make the class IEnumerable as well as Iterable{$NL}</xsl:text>
+      <xsl:text>// Extra methods to make the class IEnumerable as well as Iterable{$NL}</xsl:text>
       <xsl:call-template name="indent"/>
       <xsl:text>public {replace(type/@RESOLVED_TYPE, 'java\.util\.Iterator', 'System.Collections.Generic.IEnumerator')} GetEnumerator() {{{$NL}</xsl:text>
       <xsl:call-template name="indent-extra"/>
       <xsl:text>return new com.saxonica.glue.EnumeratorFromIterator{replace(type/@RESOLVED_TYPE, '^[^&lt;]+', '')}(iterator());{$NL}</xsl:text>
+      <xsl:call-template name="indent"/>
+      <xsl:text>}}{$NL}</xsl:text>
+      <xsl:call-template name="indent"/>
+      <xsl:text>System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {{{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>return GetEnumerator();{$NL}</xsl:text>
       <xsl:call-template name="indent"/>
       <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
@@ -472,12 +504,13 @@
       <xsl:param name="expanding-defaults" select="false()" tunnel="yes" as="xs:boolean"/>
       <xsl:call-template name="indent"/>
       <xsl:variable name="full-name" select="f:full-method-name(.)"/>
+      <xsl:variable name="plain-full-name" select="translate($full-name, '@', '')"/>
       <!--<xsl:message>Method {name/@identifier} = {$full-name}</xsl:message>-->
-      <xsl:variable name="digestMethod" select="key('digestMethodKey', $full-name, $digest)[1]"/>
+      <xsl:variable name="digestMethod" select="key('digestMethodKey', $plain-full-name, $digest)[1]"/>
       <xsl:if test="empty($digestMethod)">
-         <xsl:message>*** Digest not found for method {name/@identifier} full name {$full-name}</xsl:message>
+         <xsl:message>*** Digest not found for method {name/@identifier} full name {$plain-full-name}</xsl:message>
       </xsl:if>
-      <xsl:if test="count(key('digestMethodKey', $full-name, $digest)) gt 1">
+      <xsl:if test="count($digestMethod) gt 1">
          <xsl:message>*** Multiple digests found for method name {$full-name} - using the first</xsl:message>
       </xsl:if>
       <xsl:if test="body and $expanding-defaults and not(modifiers/modifier/@keyword[. = 'PUBLIC'])">public </xsl:if>
@@ -516,6 +549,39 @@
          </xsl:when>
          <xsl:otherwise>;{$NL}</xsl:otherwise>
       </xsl:choose>
+   </xsl:template>
+   
+   <!-- Handle singleton enum classes. These are not true enumerations, it's
+      a coding pattern for implementing singleton classes that are never instantiated.
+      We generate a regular class with a private constructor -->
+     
+   <xsl:template match="*[@nodeType='EnumDeclaration'][count(entries/entrie) = 1]" priority="20">
+      <xsl:param name="indent" as="xs:integer" tunnel="yes"/>
+      <xsl:call-template name="indent"/>
+      <xsl:call-template name="modifiers"/>
+      <xsl:text>class {name/@identifier}</xsl:text>
+      <xsl:if test="extendedTypes/extendedType, implementedTypes/implementedType">
+         <xsl:text> : </xsl:text>
+         <xsl:for-each select="extendedTypes/extendedType, implementedTypes/implementedType">
+            <xsl:if test="position() ne 1">, </xsl:if>
+            <xsl:apply-templates select="."/>
+         </xsl:for-each>
+      </xsl:if>
+      <xsl:text> {{{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>// Private constructor (generated for singleton enum class){$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>private {name/@identifier}() {{}}{$NL}{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>// Singleton instance (generated for singleton enum class){$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>public static {name/@identifier} {entries/entrie/name/@identifier} = new {name/@identifier}();{$NL}{$NL}</xsl:text>
+      
+      <xsl:apply-templates select="members/member">
+         <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
+      </xsl:apply-templates>
+      <xsl:call-template name="indent"/>
+      <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
    
    <xsl:template match="*[@nodeType='EnumDeclaration']">
@@ -650,13 +716,20 @@
       <xsl:for-each select="parameter">
          <xsl:if test="position() ne 1">, </xsl:if>
          <xsl:if test="@isVarArgs='true'">params </xsl:if>
-         <xsl:apply-templates select="type"/>
-         <xsl:if test="@isVarArgs='true'">[] </xsl:if>
+         <xsl:choose>
+            <xsl:when test="annotations/annotation[name/@identifier='CSharpParameterType']">
+               <xsl:text>{annotations/annotation[name/@identifier='CSharpParameterType']/pairs/pair[name/@identifier='key']/value/@value}</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:apply-templates select="type"/>
+               <xsl:if test="@isVarArgs='true'">[] </xsl:if>
+            </xsl:otherwise>
+         </xsl:choose>         
          <xsl:text> </xsl:text>
          <xsl:apply-templates select="name"/>
       </xsl:for-each>
    </xsl:template>
-   
+ 
    <xsl:template match="statements">
       <xsl:apply-templates select="statement"/>
    </xsl:template>
@@ -946,12 +1019,16 @@
                   'REMAINDER': '%',
                   'LOGICAL_COMPLEMENT': '!'
                   }"/>
-   
+ 
    <xsl:template match="*[@nodeType='UnaryExpr']" priority="10">
       <xsl:text>{($operators(@operator), @operator)[1]}</xsl:text>
       <xsl:text>(</xsl:text>
       <xsl:apply-templates select="expression"/>
       <xsl:text>)</xsl:text>
+   </xsl:template>
+   
+   <xsl:template match="*[@nodeType='UnaryExpr'][@operator='MINUS'][expression/@nodeType='IntegerLiteralExpr']" priority="12">
+      <xsl:text>-{expression/@value}</xsl:text>
    </xsl:template>
    
    <xsl:template match="*[@nodeType='UnaryExpr'][@operator='POSTFIX_INCREMENT']" priority="20">
@@ -1050,11 +1127,13 @@
       </xsl:choose>
    </xsl:template>
 
-   <xsl:template match="iterable[@nodeType='MethodCallExpr'][name/@identifier='entrySet']" priority="30">
+   <xsl:template match="iterable[@nodeType='MethodCallExpr']
+         [starts-with(@RESOLVED_TYPE, 'java.util.Map')]
+         [name/@identifier='entrySet']" priority="30">
       <xsl:apply-templates select="scope/*"/>
-      <xsl:text>(</xsl:text>
+ <!--     <xsl:text>(</xsl:text>
       <xsl:apply-templates select="arguments"/>
-      <xsl:text>)</xsl:text>
+      <xsl:text>)</xsl:text>-->
    </xsl:template>
    
    <!-- Convert first character of a string to upper-case -->
@@ -1066,12 +1145,33 @@
    <!-- Convert calls on delegate methods -->
    <!-- For example 'consumer.accept(item)' becomes 'consumer(item)' if consumer is a functional interface
         that converts to a C# delegate -->
-   <xsl:template match="*[@nodeType='MethodCallExpr'][key('digestClassKey', f:degenerify(@RESOLVED_TYPE), $digest)/@isDelegate='1']" priority="30">      
+   <xsl:template match="*[@nodeType='MethodCallExpr'][key('digestClassKey', f:degenerify(@RESOLVED_TYPE), $digest)/@delegate='1']" priority="30">      
       <xsl:apply-templates select="scope"/>
       <xsl:text>(</xsl:text>
       <xsl:apply-templates select="arguments"/>
       <xsl:text>)</xsl:text>
    </xsl:template>
+   
+   <!-- Calls on a system-supplied delegate type such as java.util.functions.Consumer -->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][starts-with(@RESOLVED_TYPE, 'java.util.function.')]" priority="28">      
+      <xsl:apply-templates select="scope"/>
+      <xsl:text>(</xsl:text>
+      <xsl:apply-templates select="arguments"/>
+      <xsl:text>)</xsl:text>
+   </xsl:template>
+   
+   <!-- A method call of the form CSharp.emitCode("goto case 3") is recognised as indicating fall-through in a switch -->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][@RESOLVED_TYPE=('net.sf.saxon.transpile.CSharp')]" priority="30">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'emitCode'">
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:message terminate="yes">*** Unknown method CSharp.{name/@identifier} in {base-uri()}***</xsl:message>
+         </xsl:otherwise>
+      </xsl:choose>
+      <xsl:text>{arguments/argument[1]/@value}</xsl:text>
+   </xsl:template>
+   
    
    <!-- Convert method calls applied to java.lang.String -->
    <xsl:template match="*[@nodeType='MethodCallExpr'][@RESOLVED_TYPE=('java.lang.String','java.lang.CharSequence')]" priority="30">
@@ -1137,8 +1237,114 @@
       </xsl:choose>
    </xsl:template>
    
+   <!-- Convert method calls applied to java.lang.Class (which becomes System.Type) -->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][starts-with(@RESOLVED_TYPE, 'java.lang.Class')]" priority="30">
+      <xsl:variable name="renamedMethods" as="map(*)" select="map{}"/>
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'getName'">
+            <xsl:apply-templates select="scope"/>
+            <xsl:text>.Name</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'getSuperClass'">
+            <xsl:apply-templates select="scope"/>
+            <xsl:text>.BaseType</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'isArray'">
+            <xsl:apply-templates select="scope"/>
+            <xsl:text>.IsArray</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'isInterface'">
+            <xsl:apply-templates select="scope"/>
+            <xsl:text>.IsInterface</xsl:text>
+         </xsl:when>
+ 
+         <xsl:otherwise>
+            <xsl:apply-templates select="scope"/>
+            <xsl:text>.</xsl:text>
+            <xsl:apply-templates select="f:capitalize(name/@identifier)"/>
+            <xsl:text>(</xsl:text>
+            <xsl:apply-templates select="arguments"/>
+            <xsl:text>)</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Special-case EnumSet.noneOf(Class<E> x) and EnumSet.of(Class.ENUM)-->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][starts-with(@RESOLVED_TYPE, 'java.util.EnumSet')]" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'noneOf' and arguments/argument[1]/@nodeType='ClassExpr'">
+            <xsl:text>java.util.EnumSet&lt;{arguments/argument[1]/type/@RESOLVED_TYPE}>.noneOf()</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'of'  and arguments/argument[1]/@nodeType='FieldAccessExpr'">
+            <xsl:text>java.util.EnumSet&lt;{arguments/argument[1]/@RESOLVED_TYPE}>.of(</xsl:text>
+            <xsl:apply-templates select="arguments"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Special-case Collections.emptyIterator() and similar methods -->
+   <!-- Currently handled only when appearing in a return statement, the type is taken from the containing method declaration -->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][@RESOLVED_TYPE = 'java.util.Collections']" priority="20">
+      <xsl:variable name="targetClass" as="xs:string?">
+         <xsl:choose>
+            <xsl:when test="../@nodeType='ReturnStmt'">
+               <xsl:sequence select="ancestor::member/type/typeArguments/typeArgument[1]/@RESOLVED_TYPE ! string()"/>
+            </xsl:when>
+         </xsl:choose>
+      </xsl:variable>
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'emptyIterator' and $targetClass">
+            <xsl:text>java.util.Collections.emptyIterator&lt;{f:rename-generic-type($targetClass)}>()</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'emptyList' and $targetClass">
+            <xsl:text>java.util.Collections.emptyList&lt;{f:rename-generic-type($targetClass)}>()</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'emptySet' and $targetClass">
+            <xsl:text>java.util.Collections.emptySet&lt;{f:rename-generic-type($targetClass)}>()</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'emptyMap' and $targetClass">
+            <xsl:variable name="targetClass2" select="ancestor::member/type/typeArguments/typeArgument[2]/@RESOLVED_TYPE ! string()"/>
+            <xsl:text>java.util.Collections.emptyMap&lt;{f:rename-generic-type($targetClass), f:rename-generic-type($targetClass2)}>()</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier = 'singleton' and $targetClass">
+            <xsl:text>java.util.Collections.singleton&lt;{f:rename-generic-type($targetClass)}>(</xsl:text>
+            <xsl:apply-templates select="arguments"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Special-case Optionial.empty() and Optional.of() -->
+   <!-- Currently handled only when appearing in a return statement, the type is taken from the containing method declaration -->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][starts-with(@RESOLVED_TYPE, 'java.util.Optional')]" priority="20">
+      <xsl:variable name="targetClass" as="xs:string?">
+         <xsl:choose>
+            <xsl:when test="../@nodeType='ReturnStmt'">
+               <xsl:sequence select="ancestor::member/type/typeArguments/typeArgument[1]/@RESOLVED_TYPE ! string()"/>
+            </xsl:when>
+         </xsl:choose>
+      </xsl:variable>
+      <xsl:choose>
+         <xsl:when test="name/@identifier = ('empty', 'of') and $targetClass">
+            <xsl:text>java.util.Optional&lt;{f:rename-generic-type($targetClass)}>.{name/@identifier}(</xsl:text>
+            <xsl:apply-templates select="arguments"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
    <xsl:template match="*[@nodeType='MethodCallExpr']" priority="10">
-      <xsl:variable name="digestMethod" select="key('digestMethodKey', @RESOLVED_TYPE||'.'||name/@identifier, $digest)"/>
+      <xsl:variable name="digestMethod" select="key('digestMethodKey', (@RESOLVED_TYPE,@DECLARING_TYPE)[1]||'.'||name/@identifier, $digest)"/>
       <!-- Be prepared to cast the result to the required type in the case where the C# method returns a supertype of 
            the return type of the corresponding Java method -->
       <xsl:variable name="optionalCast" 
@@ -1233,6 +1439,7 @@
          <xsl:when test="$digestMethod/@override='1'">override </xsl:when>
          <xsl:when test="$digestMethod[@virtual='1' and not(@abstract='1')]">virtual </xsl:when>
       </xsl:choose>
+      
     
       <!--<xsl:if test="annotations/annotation/name/@identifier = 'Virtual'">virtual </xsl:if>-->
    </xsl:template>
@@ -1290,7 +1497,7 @@
               [variables/variable[name/@identifier=$expr/name/@identifier and f:isConstantExpression(initializer)]]))"/>
    </xsl:function>
          
-   <xsl:template match="*[@nodeType='FieldDeclaration'][variables/variable/initializer[contains(@nodeType, 'Literal')]]/modifiers/modifier[@keyword = 'STATIC']" priority="20"/>  
+<!--   <xsl:template match="*[@nodeType='FieldDeclaration'][variables/variable/initializer[contains(@nodeType, 'Literal')]]/modifiers/modifier[@keyword = 'STATIC']" priority="20">/* skipped static field */</xsl:template>  -->
    
    <xsl:template match="*[@nodeType=('MethodDeclaration')]/modifiers/modifier[@keyword = 'FINAL']" priority="20"/>
 
@@ -1375,6 +1582,28 @@
          <xsl:with-param name="implicit-type-arguments" select="type/typeArguments" tunnel="yes"/>
       </xsl:next-match>
    </xsl:template>
+   
+   <!-- A variable declaration of the form "String csharp_fall_through_N = "case 'x'" is recognised as indicating fall-through in a switch -->
+   <xsl:template match="variable[starts-with(name/@identifier, 'csharp_fall_through')]" priority="20">
+      <xsl:text>goto {initializer/@value}</xsl:text>
+   </xsl:template>
+   
+   <!--<statement nodeType="ExpressionStmt">
+      <expression nodeType="VariableDeclarationExpr">
+         <variables>
+            <variable nodeType="VariableDeclarator">
+               <initializer nodeType="StringLiteralExpr"
+                  value="case &apos; &apos;"/>
+               <name nodeType="SimpleName"
+                  identifier="csharp_fall_through_0"/>
+               <type nodeType="ClassOrInterfaceType"
+                  RESOLVED_TYPE="java.lang.String">
+                  <name nodeType="SimpleName" identifier="String"/>
+               </type>
+            </variable>
+         </variables>
+      </expression>
+   </statement>-->
 
    <xsl:template match="variable">
       <xsl:apply-templates select="type"/>
@@ -1427,8 +1656,12 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
+   <!-- Handle an inline anonymous class, typically `new SomeInterface(x, y, z) { class body }` -->
+   <!-- We generate a named static inner class (in a second pass), and at this point we
+        generate a call on its constructor, with an extra argument `this` -->
    <xsl:template match="*[@nodeType='ObjectCreationExpr'][anonymousClassBody]" priority="20">
-      <xsl:text>new {f:allocateInnerClassName(.)}(</xsl:text>
+      <xsl:text>new {f:allocateInnerClassName(.)}(this</xsl:text>
+      <xsl:if test="exists(arguments/argument)">, </xsl:if>
       <xsl:apply-templates select="arguments"/>
       <xsl:text>)</xsl:text>
    </xsl:template>
@@ -1454,6 +1687,9 @@
       </xsl:choose>
    </xsl:function>
    
+   <!-- For an anonymous inline inner class, generate a named inner class; in C# this is effectively static,
+        so we pass a reference to the outer class as an extra argument in the constructor. The tricky part
+        is binding references to methods and fields of the outer class to be scoped on this variable -->
    <xsl:template match="anonymousClassBody">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:variable name="allocatedName" as="xs:string" select="f:allocateInnerClassName(..)"/>
@@ -1464,8 +1700,27 @@
       <xsl:variable name="containingClass" select="ancestor::type[@nodeType='ClassOrInterfaceDeclaration'][1]/name/@identifier" as="xs:string"/>
       <xsl:text>private readonly {$containingClass} outerInstance;{$NL}</xsl:text>
       <xsl:call-template name="indent-extra"/>
-      <xsl:text>public {$allocatedName}({$containingClass} outerInstance /*...*/)</xsl:text>
-      <xsl:text> : base(outerInstance /*, ...*/) {{{$NL}</xsl:text>
+      <xsl:text>public {$allocatedName}({$containingClass} outerInstance</xsl:text>
+      <xsl:for-each select="../arguments/argument">
+         <xsl:choose>
+            <xsl:when test="@RESOLVED_TYPE">, {f:escapeDottedName(@RESOLVED_TYPE)}</xsl:when>
+            <xsl:when test="@nodeType='ThisExpr'">, {$containingClass}</xsl:when>
+            <xsl:otherwise>, /* UNKNOWN ARG TYPE */ object</xsl:otherwise>
+         </xsl:choose>
+         <xsl:text> arg{position()}</xsl:text>
+         <!--<xsl:apply-templates select="."/>-->
+      </xsl:for-each>
+      <xsl:text>)</xsl:text>
+      <xsl:if test="exists(../arguments/argument)">
+         <xsl:text> : base(</xsl:text>
+         <xsl:for-each select="../arguments/argument">
+            <xsl:if test="position() ne 1">, </xsl:if>
+            <xsl:text>arg{position()}</xsl:text>
+         </xsl:for-each>
+         <!--<xsl:value-of select="../arguments/argument/name/@identifier" separator=", "/>-->
+         <xsl:text>)</xsl:text>
+      </xsl:if>
+      <xsl:text> {{{$NL}</xsl:text>
       <xsl:call-template name="indent-plus-two"/>
       <xsl:text>this.outerInstance = outerInstance;{$NL}</xsl:text>
       <xsl:call-template name="indent-extra"/>
@@ -1475,6 +1730,70 @@
       </xsl:apply-templates>
       <xsl:call-template name="indent"/>
       <xsl:text>}}{$NL}</xsl:text>
+   </xsl:template>
+   
+   <!-- Try to resolve an unscoped name appearing within an anonymous class body -->
+   <!-- Note: we don't try to handle anonymous classes nested within anonymous classes -->
+   <xsl:template match="anonymousClassBody//name[@identifier][..[not(scope or self::type or self::variable 
+         or self::annotation or self::parameter or @nodeType=('MethodDeclaration', 'FieldDeclaration'))]]" priority="40">
+      <xsl:variable name="identifier" select="@identifier" as="xs:string"/>
+      <xsl:variable name="containingClass" select="ancestor::anonymousClassBody[1]" as="element(anonymousClassBody)"/>
+      <xsl:variable name="outerMethod" select="$containingClass/ancestor::*[@nodeType='MethodDeclaration'][1]"/>
+      <xsl:variable name="outerClass" select="$containingClass/ancestor::*[@nodeType='ClassOrInterfaceDeclaration'][1]"/>
+      <xsl:choose>
+         <xsl:when test="ancestor::catchClause//parameter[name/@identifier = $identifier]">
+            <!-- The name matches an exception variable in a catch clause -->
+            <xsl:text>/*exception*/ {$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="ancestor::anonymousClassBod[1]//variable[name/@identifier = $identifier]">
+            <!-- The name matches a local variable within the same method -->
+            <xsl:text>/*localvar*/ {$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="ancestor::anonymousClassBod[1]/parameters/parameter[name/@identifier = $identifier]">
+            <!-- The name matches a parameter of the containing method declaration -->
+            <xsl:text>/*localparam*/ {$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="$containingClass/*[@nodeType='FieldDeclaration']/variables/variable/name[@identifier=$identifier]">
+            <!-- The name matches a field of the containing anonymous class -->
+            <xsl:text>/*field*/ {$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="$containingClass/*[@nodeType='MethodDeclaration']/name[@identifier=$identifier]">
+            <!-- The name matches a method of the containing anonymous class -->
+            <xsl:text>/*method*/ {$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="$outerMethod//variable[name/@identifier = $identifier]">
+            <!-- The name matches a local variable within the outer containing method. We can't handle this case -->
+            <xsl:text>/* CONVERSION PROBLEM: Reference from anonymous inner class to a local variable outside the class*/ {$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="$outerMethod/parameters/parameter[name/@identifier = $identifier]">
+            <!-- The name matches a parameter of the containing method declaration -->
+            <xsl:text>/* CONVERSION PROBLEM: Reference from anonymous inner class to a local parameter outside the class*/{$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="$outerClass/members/member[@nodeType='FieldDeclaration'][modifiers/modifier/@keyword='STATIC']/variables/variable/name[@identifier=$identifier]">
+            <!-- The name matches a static field of the outer containing class -->
+            <xsl:text>/*outerStaticField*/ {$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="$outerClass/members/member[@nodeType='FieldDeclaration']/variables/variable/name[@identifier=$identifier]">
+            <!-- The name matches an instance field of the outer containing class -->
+            <xsl:text>outerInstance.{$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="$outerClass/members/member[@nodeType='MethodDeclaration'][modifiers/modifier/@keyword='STATIC']/name[@identifier=$identifier]">
+            <!-- The name matches a static method of the containing anonymous class -->
+            <xsl:text>/*outerStaticMethod*/ {$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:when test="$outerClass/members/member[@nodeType='MethodDeclaration']/name[@identifier=$identifier]">
+            <!-- The name matches an instance method of the containing anonymous class -->
+            <xsl:text>outerInstance.{$identifier}</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>/*misc*/{$identifier}</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Within an anonymous class body, resolve an expression of the form OuterClass.this -->
+   <xsl:template match="anonymousClassBody//*[@nodeType='ThisExpr'][typeName/@identifier=ancestor::*[@nodeType='ClassOrInterfaceDeclaration'][1]/name/@identifier]" priority="40">
+      <xsl:text>this.outerInstance</xsl:text>
    </xsl:template>
    
    <xsl:template match="*[@nodeType=('IntegerLiteralExpr', 'BooleanLiteralExpr', 'DoubleLiteralExpr', 'LongLiteralExpr')]">
@@ -1556,6 +1875,11 @@
       <xsl:value-of select="f:refactor-property-reference(., name/@identifier)"/>
    </xsl:template>
    
+   <!-- static field accessor for a field in a generic type such as Feature -->
+   <xsl:template match="*[@nodeType='FieldAccessExpr'][@FIELD_TYPE]" priority="25">
+      <xsl:text>{f:rename-generic-type(@FIELD_TYPE)}.{name/@identifier}</xsl:text>
+   </xsl:template>
+   
    <xsl:template match="*[@nodeType='VariableDeclarationExpr']">
       <xsl:apply-templates select="variables"/>
    </xsl:template>
@@ -1621,6 +1945,16 @@
       <xsl:text>)</xsl:text>
       <xsl:apply-templates select="expression"/>
    </xsl:template>
+   
+   <!-- match enumeration constants and qualify them with the enumeration class name -->
+   <xsl:template match="*[@nodeType='NameExpr'][@ENUM_TYPE]" priority="20">
+      <xsl:text>{@ENUM_TYPE}.{name/@identifier}</xsl:text>
+   </xsl:template>
+   
+   <!-- match a reference to a field of an outer class -->
+   <!--<xsl:template match="*[@nodeType='NameExpr'][@OUTER_FIELD='1']" priority="20">
+      <xsl:text>outerInstance.{name/@identifier}</xsl:text>
+   </xsl:template>-->
    
    <xsl:template match="*[@nodeType='NameExpr']">
       <xsl:apply-templates select="name"/>

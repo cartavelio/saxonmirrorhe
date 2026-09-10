@@ -9,7 +9,7 @@ namespace java.lang {
         public Throwable(string str) {
             _inner = new SysEx(str);
         }
-        public Throwable(string str, Throwable cause) {
+        public Throwable(string str, SysEx cause) {
             _inner = new SysEx(str, cause);
         }
 

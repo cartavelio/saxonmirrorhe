@@ -33,7 +33,11 @@ to resolve methods/properties that implicitly refer to "this" in an inherited cl
 the outer class, or in a superclass of the outer class, or in an outer class of the outer
 class, etc.
 
-* Enums. Conversion code written but it's complex.
+Now handling most things with the exception of references to local/variables parameters in the
+containing method. Can't see any way to handle that. Also not handling a nesting depth for inner
+classes > 1. Many uses of anonymous classes can be replaced by lambda expressions.
+
+* Enums. Conversion code written but it's complex and not handling all cases.
 
 * Default methods in interfaces. No equivalent in C#. We're expanding the default methods into
 all the derived types.
@@ -61,6 +65,13 @@ and generating a cast of the result on calls where it's needed.
 works fine (the FI is translated to a delegate), but you can't have classes that subclass such an interface. So NodeTest
 implementing Predicate<> seems to be not possible, instead we'll try having NodeTest.asPredicate() to get the predicate
 when needed.
+
+* Ternary operators. C# has stricter rules about the types of the then/else branches being the same. I haven't found a way
+to deal with this, so we simply have to avoid using ternary operators that break the rules. (We could consider expanding all
+ternary expressions into if/then/else, but I think that's messy in general).
+
+* Visibility/accessibility. Java allows a public method/class to override a private one; C# doesn't. Changing the code
+to follow the C# rules.
 
 
 
