@@ -84,7 +84,7 @@ with PySaxonProcessor(license=False) as proc:
 It will print something like this:
 
 ```bash
-SaxonC-@@edition@@ @@VERSION@@ from Saxonica
+SaxonC-@@EDITION@@ @@VERSION@@ from Saxonica
 ```
 
 **Note**: `license=False` requests the open-source version of Saxon, whereas 
