@@ -3,6 +3,10 @@ buildscript {
     mavenCentral()
     mavenLocal()
   }
+
+  dependencies {
+    classpath 'com.palantir.gradle.revapi:gradle-revapi:1.7.0'
+  }
 }
 
 plugins {
@@ -15,6 +19,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+//apply plugin: 'com.palantir.revapi'
 
 // These plugins are in buildSrc
 apply plugin: JarSignPlugin
@@ -284,6 +289,14 @@ tasks.withType(Test) {
     'com.oracle.xqj.tck.datasource': "${projectDir}/tools/xqj/tck/examples/saxon.properties"
   ]
 }
+
+/*
+revapi {
+    oldGroup = 'net.sf.saxon'
+    oldName = 'Saxon-HE'
+    oldVersion = '11.4'
+}
+*/
 
 docker_container.configure {
   workingDir = "docker"
