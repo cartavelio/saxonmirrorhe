@@ -61,7 +61,7 @@ public class ImportIncludeWithFragIdTest {
 			// Check result
 			Assertions.assertEquals("<out>Transformation completed successfully using happy-path and happy-path-dep stylesheets.</out>", result.toString());
 		} catch (Exception e) {
-			fail();
+			Assertions.fail("An error was thrown but none was expected: " + e.getClass() + ", " + e.getMessage());
 		}
 	}
 
@@ -83,7 +83,7 @@ public class ImportIncludeWithFragIdTest {
 			// Check result
 			Assertions.assertEquals("<out>Transformation completed successfully using happy-path and happy-path-dep stylesheets.</out>", result.toString());
 		} catch (Exception e) {
-			fail();
+			Assertions.fail("An error was thrown but none was expected: " + e.getClass() + ", " + e.getMessage());
 		}
 	}
 
@@ -105,7 +105,7 @@ public class ImportIncludeWithFragIdTest {
 			// Check result
 			Assertions.assertEquals("<out>Transformation completed successfully using principal stylesheet and dependency stylesheet.</out>", result.toString());
 		} catch (Exception e) {
-			Assertions.fail("An error was thrown but none was expected.");
+			Assertions.fail("An error was thrown but none was expected: " + e.getClass() + ", " + e.getMessage());
 		}
 	}
 
@@ -127,7 +127,7 @@ public class ImportIncludeWithFragIdTest {
 			// Check result
 			Assertions.assertEquals("<out>Transformation completed successfully using principal stylesheet and dependency stylesheet.</out>", result.toString());
 		} catch (Exception e) {
-			Assertions.fail("An error was thrown but none was expected.");
+			Assertions.fail("An error was thrown but none was expected: " + e.getClass() + ", " + e.getMessage());
 		}
 	}
 
@@ -161,7 +161,7 @@ public class ImportIncludeWithFragIdTest {
 
 		} catch (Exception e) {
 
-			Assertions.fail("An error was thrown but it wasn't the one expected.");
+			Assertions.fail("Expected XTSE0165 but got " + e.getClass() + ", " + e.getMessage());
 
 		}
 	}
@@ -196,7 +196,7 @@ public class ImportIncludeWithFragIdTest {
 
 		} catch (Exception e) {
 
-			Assertions.fail("An error was thrown but it wasn't the one expected.");
+			Assertions.fail("Expected XTSE0165 but got " + e.getClass() + ", " + e.getMessage());
 
 		}
 	}
@@ -232,7 +232,7 @@ public class ImportIncludeWithFragIdTest {
 
 		} catch (Exception e) {
 
-			Assertions.fail("An error was thrown but it wasn't the one expected.");
+			Assertions.fail("Expected XTSE0165 but got " + e.getClass() + ", " + e.getMessage());
 
 		}
 	}
@@ -267,7 +267,7 @@ public class ImportIncludeWithFragIdTest {
 
 		} catch (Exception e) {
 
-			Assertions.fail("An error was thrown but it wasn't the one expected.");
+			Assertions.fail("Expected XTSE0165 but got " + e.getClass() + ", " + e.getMessage());
 
 		}
 	}
