@@ -342,17 +342,10 @@ TODO: rethink redefines and override
   
     </category>
     
-    <category name="command-line">
-        
-        <p>The <code>Transform</code> command acquires a new option <code>-stublib:filename</code>.
-        This is intended primarily for use when compiling stylesheets to SEF files for execution
-        under SaxonJS. It allows a file of stub function definitions to be loaded in JSON format,
-        representing external Javascript functions that will be available for calling in the
-        target environment. Any attempt to call the functions from SaxonJ or SaxonCS will fail with
-        a dynamic error.</p>
+    <!--<category name="command-line">
         
  
-    </category>
+    </category>-->
     
     <category name="extensions">
         
