@@ -10,84 +10,69 @@ package net.sf.saxon.option.cpp;
 import net.sf.saxon.s9api.SaxonApiException;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.ObjectHandles;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.WordFactory;
 
 /**
  * * This class is to use with Saxon on C++
  */
-public class SaxonCException {
-    private SaxonApiException saxonException = null;
+public class SaxonCException  {
 
-    public SaxonCException(Throwable cause) {
-        if(cause instanceof SaxonApiException) {
-            this.saxonException = (SaxonApiException) cause;
-        }  else {
-            saxonException = new SaxonApiException(cause);
-        }
+    Throwable throwable;
 
+    public SaxonCException(Throwable e) {
+        throwable = e;
     }
 
-   /*public static SaxonCException makeSaxonCException(Throwable cause){
-        SaxonCException cException = new SaxonCException(cause);
-        if(cause instanceof XPathException) {
-            StructuredQName qname = ((XPathException) cause).getErrorCodeQName();
-              if(qname != null) {
-                  cException.set
+    public static long addException(SaxonApiException exception){
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(new SaxonCException(exception));
 
-              }
-        }
-    }    */
+        return handle.rawValue();
+    }
 
+    public String getMessage(){
+        return throwable.getMessage();
+    }
 
-
-    /**
-     * Create a SaxonApiException
-     *
-     * @param message the message
-     */
-
-    public SaxonCException(String message) {
-        saxonException = new SaxonApiException(message);
-
+    public Throwable getThrowable(){
+        return throwable;
     }
 
 
-
-
-
-    public String getErrorCodeString(){
-
-            return "";
-
-
-    }
-
-    public String getErrorMessage(){
-        if(saxonException != null) {
-            return saxonException.getMessage();
-        }
-        return "";
-    }
 
     @CEntryPoint(name = "j_getErrorMessage")
-    public static String j_getErrorMessage(IsolateThread thread, ObjectHandle exceptionRef){
+    public static CCharPointer j_getErrorMessage(IsolateThread thread, ObjectHandle exceptionRef){
         SaxonCException exception = SaxonCAPI.objectHandles.get(exceptionRef);
-        return exception.getErrorMessage();
+        
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(exception.getMessage());
+        return holder.get();
     }
 
-    /*public int getLinenumber(){
-        return linenumber;
+    @CEntryPoint(name = "j_getLineNumber")
+    public static int getLinenumber(IsolateThread thread, ObjectHandle exceptionRef){
+        SaxonCException exception = SaxonCAPI.objectHandles.get(exceptionRef);
+        Throwable throwable = exception.getThrowable();
+        if(throwable instanceof SaxonApiException) {
+            return ((SaxonApiException)throwable).getLineNumber();
+        }
+        return -1;
     }
 
-    public boolean isGlobalError(){
-        return isGlobalError;
+
+    @CEntryPoint(name = "j_getErroCode")
+    public static CCharPointer getErroCode(IsolateThread thread, ObjectHandle exceptionRef){
+        SaxonCException exception = SaxonCAPI.objectHandles.get(exceptionRef);
+        Throwable throwable = exception.getThrowable();
+        if(throwable instanceof SaxonApiException) {
+            String qnameStr =  ((SaxonApiException)throwable).getErrorCode().getClarkName();
+            final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(qnameStr);
+            return holder.get();
+        }
+        return WordFactory.nullPointer();
     }
 
-     public boolean isTypeError(){
-        return isTypeError;
-    }
 
-    public boolean isStaticError(){
-        return isStaticError;
-    }  */
 }

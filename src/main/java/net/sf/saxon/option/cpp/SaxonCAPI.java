@@ -65,9 +65,8 @@ public class SaxonCAPI {
     public static boolean debug = false;
     protected boolean schemaAware = false;
     public static String RESOURCES_DIR = null;
-    public static boolean exceptionCheck =false;
+    protected long exceptionCheck = -1;
 
-    public static SaxonCException exceptionThrown;
 
     public static ObjectHandles objectHandles = ObjectHandles.create();
 
@@ -114,11 +113,8 @@ public class SaxonCAPI {
 //#endif
     }
 
-    @CEntryPoint(name = "createSaxonProcessor")
+    @CEntryPoint(name = "createSaxonProcessor", exceptionHandler = SaxonCExceptionHandler.class)
     public static long createSaxonProcessor(IsolateThread thread, int license) {
-           /*Properties systemProperties = System.getProperties();
-           systemProperties.put ("xml.catalog.defaultLoggerLogLevel", "debug");
-           System.setProperties (systemProperties); */
         boolean licensei = CTypeConversion.toBoolean(license);
         if(debug && licensei) {
             System.err.println("Flag is true to create SaxonProcessor with license");
@@ -127,17 +123,21 @@ public class SaxonCAPI {
         return handle.rawValue();
     }
 
+    @CEntryPoint(name = "j_handles_destroy", exceptionHandler = SaxonCExceptionHandler.class)
+   	public static void destroy(IsolateThread thread, ObjectHandle handle) {
+   		objectHandles.destroy(handle);
+   	}
 
-    @CEntryPoint(name = "createDocumentBuilder")
-    public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef) {
+
+    @CEntryPoint(name = "createDocumentBuilder", exceptionHandler = SaxonCExceptionHandler.class)
+    public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef) throws SaxonApiException {
         if(processorRef != WordFactory.nullPointer()) {
             Processor processor = objectHandles.get(processorRef);
 
             ObjectHandle handle = objectHandles.create(processor.newDocumentBuilder());
             return handle.rawValue();
         }
-        exceptionThrown = new SaxonCException(new SaxonApiException("Cannot create DocumentBuilder - Processor is null"));
-        return -1;
+        throw new SaxonApiException("Cannot create DocumentBuilder - Processor is null");
     }
 
     public static class DataWrapper{
@@ -184,7 +184,7 @@ public class SaxonCAPI {
      * static method to create String object 
      * @return
      */
-    @CEntryPoint(name = "j_createStringObject")
+    @CEntryPoint(name = "j_createStringObject", exceptionHandler = SaxonCExceptionHandler.class)
     public static long createStringObject(IsolateThread thread, CCharPointer cValue){
         if(cValue != WordFactory.nullPointer()) {
             String value = CTypeConversion.toJavaString(cValue);
@@ -203,7 +203,7 @@ public class SaxonCAPI {
      *
      * @param cconfigFile - name of the configuration file
      */
-    @CEntryPoint(name = "createSaxonProcessorWithConfigurationFile")
+    @CEntryPoint(name = "createSaxonProcessorWithConfigurationFile", exceptionHandler = SaxonCExceptionHandler.class)
     public static long createSaxonProcessorWithConfigurationFile(IsolateThread thread, CCharPointer cconfigFile) throws SaxonApiException {
         Configuration config = null;
         if(cconfigFile != WordFactory.nullPointer()) {
@@ -281,7 +281,7 @@ public class SaxonCAPI {
         return holder.get();
     }
 
-    @CEntryPoint(name = "setCatalogFile")
+    @CEntryPoint(name = "setCatalogFile", exceptionHandler = SaxonCExceptionHandler.class)
     public static void setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) throws SaxonApiException {
         Processor processor = objectHandles.get(processorRef);
         if(catalogFile == WordFactory.nullPointer()) {
@@ -302,7 +302,7 @@ public class SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "j_applyToConfiguration")
+    @CEntryPoint(name = "j_applyToConfiguration", exceptionHandler = SaxonCExceptionHandler.class)
     public static synchronized void applyToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef) throws SaxonApiException {
 
         Processor processor = objectHandles.get(processorRef);
@@ -667,7 +667,7 @@ public class SaxonCAPI {
 
     }
 
-    @CEntryPoint(name = "createXdmAtomicItem")
+    @CEntryPoint(name = "createXdmAtomicItem", exceptionHandler = SaxonCExceptionHandler.class)
     public static long createXdmAtomicItem(IsolateThread thread, CCharPointer ctypeStr, CCharPointer cvalueStr) throws SaxonApiException {
         String valueStr = CTypeConversion.toJavaString(cvalueStr);
         String typeStr = CTypeConversion.toJavaString(ctypeStr);
