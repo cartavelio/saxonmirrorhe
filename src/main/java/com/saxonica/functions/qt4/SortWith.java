@@ -5,9 +5,10 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -39,20 +40,27 @@ public class SortWith extends SystemFunction {
             inputList.add(it);
         }
         GroundedValue comparatorFunctions = arguments[1].materialize();
-        inputList.sort((a,b) -> {
-            for (Item item : comparatorFunctions.asIterable()) {
-                try {
-                    Sequence result = ((FunctionItem) item).call(context, new Sequence[]{a, b});
-                    int c = Long.signum(((IntegerValue) result.head()).longValue());
-                    if (c != 0) {
-                        return c;
+        try {
+            inputList.sort((a,b) -> {
+                Sequence[] comparands = new Sequence[]{a, b};
+                for (Item item : comparatorFunctions.asIterable()) {
+                    try {
+                        // call the user-supplied comparator function
+                        Sequence result = ((FunctionItem) item).call(context, comparands);
+                        // convert xs:integer result to Java int
+                        int c = Long.signum(((IntegerValue) result.head()).longValue());
+                        if (c != 0) {
+                            return c;
+                        }
+                    } catch (XPathException e) {
+                        throw new UncheckedXPathException(e);
                     }
-                } catch (XPathException e) {
-                    throw new UncheckedXPathException(e);
                 }
-            }
-            return 0;
-        });
+                return 0;
+            });
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
         return SequenceExtent.makeSequenceExtent(inputList);
     }
 
