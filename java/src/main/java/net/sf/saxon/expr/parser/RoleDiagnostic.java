@@ -78,11 +78,11 @@ public class RoleDiagnostic {
         this.operand = operand;
     }
 
-    public RoleDiagnostic(int kind, String operation, int operand, String errorCode) {
+    public RoleDiagnostic(int kind, String operation, int operand, String errorCodeIn) {
         this.kind = kind;
         this.operation = operation;
         this.operand = operand;
-        this.errorCode = errorCode;
+        this.errorCode = errorCodeIn;
     }
 
     /**
