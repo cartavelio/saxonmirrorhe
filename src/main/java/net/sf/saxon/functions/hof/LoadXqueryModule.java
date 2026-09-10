@@ -133,6 +133,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         staticQueryContext.setModuleURIResolver(moduleURIResolver);
         String baseURI = getRetainedStaticContext().getStaticBaseUriString();
         staticQueryContext.setBaseURI(baseURI);
+        staticQueryContext.preLoadSchema(getRetainedStaticContext().getPackageData().getImportedSchema());
         StreamSource[] streamSources;
         try {
             String[] hints = locationHints.toArray(new String[0]);

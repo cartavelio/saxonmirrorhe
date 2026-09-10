@@ -990,7 +990,9 @@ public class XQueryParser extends XPathParser {
             ((QueryModule) env).setDefaultCollationName(collationName);
         }
 
-        applySchemaImports(schemaImports);
+        if (!schemaImports.isEmpty()) {
+            applySchemaImports(schemaImports);
+        }
 
         for (Import imp : moduleImports) {
             try {
