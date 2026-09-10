@@ -241,7 +241,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             level--;
         } else {
             throw new XPathException("JSON serialization: cannot handle a sequence of length "
-                                             + len + Err.depictSequence(seq), "SERE0023");
+                                             + len + " " + Err.depictSequence(seq), "SERE0023");
         }
     }
 
