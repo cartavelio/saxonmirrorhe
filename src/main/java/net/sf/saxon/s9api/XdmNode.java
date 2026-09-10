@@ -378,6 +378,30 @@ public class XdmNode extends XdmItem {
     }
 
     /**
+     * Get the outermost element of the tree containing this node.
+     *
+     * <p>If this node is a document node, the method returns the first child node
+     * that is an element (ignoring any subsequent element nodes); if there is no
+     * element child, the method returns null. In other words, the method returns
+     * <code>child::*[1]</code></p>
+     *
+     * <p>In all other cases, the method finds the outermost ancestor-of-self element whose
+     * parent is either a document node or absent: that is, it returns
+     * <code>ancestor-or-self::*[last()]</code>. If there is no such ancestor, the
+     * method returns null.</p>
+     *
+     * @since 12.0
+     */
+
+    public XdmNode getOutermostElement() {
+        if (getNodeKind() == XdmNodeKind.DOCUMENT) {
+            return select(Steps.child("*")).firstItem();
+        } else {
+            return select(Steps.ancestorOrSelf("*")).lastItem();
+        }
+    }
+
+    /**
      * Get the string value of a named attribute of this element
      *
      * @param name the name of the required attribute
