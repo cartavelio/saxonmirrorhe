@@ -205,7 +205,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
 
     private boolean needToExport(Component c) {
         if (c.getVisibility() == Visibility.HIDDEN) {
-            return needToExport(c.getBaseComponent());
+            return c.getBaseComponent() != null && needToExport(c.getBaseComponent());
         } else if (overriddenComponents.containsKey(c.getActor().getSymbolicName())) {
             return true;
         } else if (c.getVisibility() == Visibility.PRIVATE) {

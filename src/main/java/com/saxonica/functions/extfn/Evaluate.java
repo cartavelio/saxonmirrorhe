@@ -20,6 +20,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.XPathException;
@@ -58,7 +59,7 @@ public class Evaluate extends SystemFunction {
         }
 
         // Copy the function library list, except for XSLT-defined system functions
-        FunctionLibraryList libraryList0 = context.getController().getExecutable().getFunctionLibrary();
+        FunctionLibraryList libraryList0 = ((StylesheetPackage) getRetainedStaticContext().getPackageData()).getFunctionLibrary();
         FunctionLibraryList libraryList1 = new FunctionLibraryList();
         for (FunctionLibrary lib : libraryList0.getLibraryList()) {
             if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceConstant.FN)) {
@@ -86,8 +87,8 @@ public class Evaluate extends SystemFunction {
         Executable exec = context.getController().getExecutable();
         env.setExecutable(exec);
         env.setXPathLanguageLevel(30);
-        env.setFunctionLibrary(exec.getFunctionLibrary());
-
+        //env.setFunctionLibrary(exec.getFunctionLibrary());
+        //env.setFunctionLibrary(((StylesheetPackage) getRetainedStaticContext().getPackageData()).getFunctionLibrary());
         env.setAllowUndeclaredVariables(true);
         PreparedExpression pexpr = new PreparedExpression();
         pexpr.expStaticContext = env;

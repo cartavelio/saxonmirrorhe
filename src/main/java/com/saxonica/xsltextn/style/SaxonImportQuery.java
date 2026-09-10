@@ -10,6 +10,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.query.*;
 import net.sf.saxon.style.*;
 import net.sf.saxon.trans.CompilerInfo;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
@@ -66,6 +67,7 @@ public class SaxonImportQuery extends StyleElement {
 
         try {
             PrincipalStylesheetModule top1 = getPrincipalStylesheetModule();
+            top1.getStylesheetPackage().markNonExportable("Uses saxon:import-query", SaxonErrorCode.SXST0069);
             QueryModule importedModule = getQueryLibrary(moduleURI);
             if (importedModule == null) {
                 if (href == null) {
