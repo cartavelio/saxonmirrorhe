@@ -6,6 +6,7 @@ import org.gradle.api.tasks.JavaExec
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.nio.charset.StandardCharsets
 import groovy.util.slurpersupport.GPathResult
 
 class TestSuite {
@@ -179,6 +180,8 @@ class TestSuite {
 
         doFirst {
           println("Redirecting output to .../${options['reportFilename']}.{out,err}")
+          stderr.write("${options['class']} ${testargs.join(' ')}\n"
+                       .getBytes(StandardCharsets.UTF_8))
         }
 
         doLast {
@@ -313,6 +316,8 @@ class TestSuite {
 
         doFirst {
           println("Redirecting output to .../${options['reportFilename']}.{out,err}")
+          stderr.write("${options['class']} ${testargs.join(' ')}\n"
+                       .getBytes(StandardCharsets.UTF_8))
         }
 
         doLast {
@@ -417,6 +422,8 @@ class TestSuite {
 
         doFirst {
           println("Redirecting output to .../${options['reportFilename']}.{out,err}")
+          stderr.write("${testargs.join(' ')}\n"
+                       .getBytes(StandardCharsets.UTF_8))
         }
 
         doLast {
@@ -538,36 +545,43 @@ class TestSuite {
                StandardCopyOption.REPLACE_EXISTING)
   }
 
+  private HashMap findTests(GPathResult root) {
+    def results = [:]
+
+    def tests = root.'**'.findAll { it.name() == "test-case" }
+    tests.each { t ->
+      def parent = t.parent()
+      while (parent && parent.name() != 'test-set') {
+        parent = parent.parent()
+      }
+
+      def setName = parent.attributes()['name']
+
+      def testName = t.attributes()['name']
+      def result = t.attributes()['result']
+      results["${setName}/${testName}"] = result
+    }
+
+    return results
+  }
+
   private boolean compareTheResults(options, File previous, File current) {
     def slurper = new XmlSlurper()
     GPathResult root = slurper.parse(previous)
       .declareNamespace(fots: "http://www.w3.org/2012/08/qt-fots-results")
 
-    def prevPass = [:]
-
-    def sets = root.'**'.findAll { it.name() == "test-set" }
-    sets.each { tset ->
-      def setName = tset.attributes()['name']
-      def tests = tset.'**'.findAll { it.name() == 'test-case' }
-      tests.each { t->
-        def testName = t.attributes()['name']
-        def result = t.attributes()['result']
-        prevPass["${setName}/${testName}"] = result
-      }
-    }
+    def prevPass = findTests(root)
 
     root = slurper.parse(current)
       .declareNamespace(fots: "http://www.w3.org/2012/08/qt-fots-results")
 
+    def curPass = findTests(root)
+
     int failing = 0
-    sets = root.'**'.findAll { it.name() == "test-set" }
-    sets.each { tset ->
-      def setName = tset.attributes()['name']
-      def tests = tset.'**'.findAll { it.name() == 'test-case' }
-      tests.each { t->
-        def testName = t.attributes()['name']
-        def result = t.attributes()['result']
-        def prevResult = prevPass["${setName}/${testName}"]
+    curPass.each { key ->
+      def result = curPass[key]
+      if (key in prevPass) {
+        prevResult = prevPass[key]
         if (prevResult == "pass" && result != "pass") {
           def msg = "👎 ${setName}/${testName} was ${prevResult} is now ${result}"
           println(msg)
