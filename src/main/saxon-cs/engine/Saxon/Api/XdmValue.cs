@@ -197,6 +197,16 @@ namespace Saxon.Api {
         }
 
         /// <summary>
+        /// Ask whether this value is an instance of a supplied SequenceType
+        /// </summary>
+        /// <param name="type">the type to be tested</param>
+        /// <returns>true if the this value conforms to the supplied SequenceType</returns>
+
+        public bool Matches(XdmSequenceType type) {
+            return type.Matches(this);
+        }
+        
+        /// <summary>
         /// Ask whether any item in this <c>XdmValue</c> matches the provided predicate.
         /// Might not evaluate the predicate on all items if not necessary for 
         /// determining the result. 
