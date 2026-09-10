@@ -376,9 +376,12 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             } else if (node instanceof Attribute) {
                 parent = makeWrapper(((Attribute) node).getParent(), getTreeInfo());
             } else if (node instanceof Document) {
+                //noinspection ConstantConditions
                 parent = null;
             } else if (node instanceof Namespace) {
                 throw new UnsupportedOperationException("Cannot find parent of JDOM namespace node");
+            } else if (node instanceof List) {
+                parent = makeWrapper(((Text) ((List<?>)node).get(0)).getParent(), getTreeInfo());
             } else {
                 throw new IllegalStateException("Unknown JDOM node type " + node.getClass());
             }
@@ -479,7 +482,19 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     @Override
     protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         Iterator<? extends Content> descendants;
-        if (nodeTest.getUType() == UType.ELEMENT) {
+        final UType uType = nodeTest.getUType();
+        if (uType.overlaps(UType.TEXT)) {
+            // if selecting text nodes, we have to handle adjacent sibling text nodes. The best way
+            // to achieve this is by using the recursive implementation of the descendant axis available
+            // in the Navigator class, which works in terms of the child axis only. See bug #5348.
+            AxisIterator allDescendants = new Navigator.DescendantEnumeration(this, includeSelf, true);
+            if (nodeTest == AnyNodeTest.getInstance()) {
+                return allDescendants;
+            } else {
+                return new Navigator.AxisFilter(allDescendants, nodeTest);
+            }
+        }
+        if (uType == UType.ELEMENT) {
             // only select element nodes
             descendants = ((Parent) node).getDescendants(new ElementFilter());
         } else {
@@ -492,7 +507,6 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             }
         };
         AxisIterator wrappedDescendants = new DescendantWrappingIterator<Content>(descendants, wrappingFunct);
-
         if (includeSelf && nodeTest.test(this)) {
             wrappedDescendants = new PrependAxisIterator(this, wrappedDescendants);
         }
@@ -685,8 +699,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             return false;
         }
     }
-
-
+    
     ///////////////////////////////////////////////////////////////////////////////
     // Axis enumeration classes
     ///////////////////////////////////////////////////////////////////////////////
