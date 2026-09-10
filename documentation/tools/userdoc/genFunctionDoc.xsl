@@ -18,6 +18,8 @@
     doc:doc="The namespace for these functions"/>
   <xsl:variable name="spec" select="section/@spec"
     doc:doc="The specification within which this set of functions is defined"/>
+  <xsl:variable name="id" select="section/@id"
+    doc:doc="The specification within which this set of functions is defined"/>
 
   <xsl:variable name="defaults" select="section/defaults"
     doc:doc="Default values for parts of the descriptions of each function"/>
@@ -36,8 +38,8 @@
     select="map:merge($implementation/saxon ! map:entry(string(@version),xs:string(.)))"/>
   <xsl:variable name="implement.xpath" as="map(xs:string,xs:string)"
     select="map:merge($implementation/xpath ! map:entry(string(@version),xs:string(.)))"/>
-  <xsl:variable name="default.saxon" select="$implementation/default[@id = $spec]/@saxon"/>
-  <xsl:variable name="default.xpath" select="$implementation/default[@id = $spec]/@xpath"/>
+  <xsl:variable name="default.saxon" select="$implementation/default[@id = $id]/@saxon"/>
+  <xsl:variable name="default.xpath" select="$implementation/default[@id = $id]/@xpath"/>
 
   <xsl:template match="section">
     <xsl:copy>
@@ -50,13 +52,16 @@
   </xsl:template>
   <xsl:template match="function[@name]">
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <xsl:sequence select="@class"/>
       <xsl:variable name="args" select="map:merge(($args, (args/* !
         map:entry(name(.),xs:string(.)))), $use-last)"/>
+      <xsl:variable name="fn-spec" select="string((@spec,$spec)[1])"/>
       <name namespace="{$namespace}">
         <xsl:value-of select="@name"/>
       </name>
       <xsl:apply-templates select="$catalog//fos:function[@name=current()/@name]">
         <xsl:with-param name="args" select="$args" tunnel="yes"/>
+        <xsl:with-param name="fn-spec" select="$fn-spec" tunnel="yes"/>
       </xsl:apply-templates>
 
       <xsl:for-each select="status">
@@ -68,6 +73,9 @@
         <xsl:value-of select="(@xpath,$default.xpath,'default')[1]"/>
       </xpath>
       <saxon-edition>
+        <xsl:if test="string(@saxon) eq 'NOT_IMPLEMENTED'">
+          <xsl:attribute name="platform" select="'NONE'"/>
+        </xsl:if>
         <xsl:value-of select="(@saxon,$default.saxon,' ')[1]"/>
       </saxon-edition>
     </function>
@@ -81,7 +89,8 @@
       <xsl:apply-templates select="@*|*|text()" mode="#current"/>
     </xsl:element>
   </xsl:template>
-  <xsl:template match="fos:rules | fos:examples | fos:errors | fos:notes "/>
+  <xsl:template match="fos:rules | fos:examples | fos:errors | fos:notes | fos:properties |
+    fos:equivalent | fos:changes "/>
   <xsl:template match="fos:function">
     <xsl:apply-templates select="*" mode="#current"/>
   </xsl:template>
@@ -91,14 +100,16 @@
     </description>
   </xsl:template>
   <xsl:template match="loc">
-    <a xmlns="http://www.saxonica.com/ns/doc/functions">
+    <xsl:apply-templates select="text()" mode="#current"/>
+    <!--<a xmlns="http://www.saxonica.com/ns/doc/functions">
       <xsl:apply-templates select="@*|*|text()" mode="#current"/>
-    </a>
+    </a>-->
   </xsl:template>
   <xsl:template match="fos:proto">
+    <xsl:param name="fn-spec" tunnel="yes"/>
     <proto xmlns="http://www.saxonica.com/ns/doc/functions">
       <xsl:apply-templates select="(@* except @name),*" mode="#current"/>
-      <xsl:for-each select="tokenize($spec,'\s+')">
+      <xsl:for-each select="tokenize($fn-spec,'\s+')">
         <in-spec>
           <xsl:value-of select="."/>
         </in-spec>
@@ -114,13 +125,6 @@
       </xsl:if>
       <xsl:apply-templates select="*" mode="#current"/>
     </arg>
-  </xsl:template>
-  
-  <!-- Fix a link on the file:parent() page  -->
-  <xsl:template match="loc[@href='#fn.resolve-path']">
-    <a xmlns="http://www.saxonica.com/ns/doc/functions" href="../resolve-path">
-      <xsl:apply-templates select="(@* except @href)|*|text()" mode="#current"/>
-    </a>
   </xsl:template>
 
 

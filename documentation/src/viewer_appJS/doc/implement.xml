@@ -23,9 +23,10 @@
     <default id='instructions' saxon="PE/EE"/> <!-- saxon extension instructions -->
     <default id='sql-extension' saxon="PE/EE" platform="J"/> <!-- saxon SQL extension instructions -->
     
-    <xpath version="2.0"> Available whether or not support for XPath 3.0 is enabled.</xpath> <!-- Expath functions message -->
-    <xpath version="3.0"> Requires support for XPath 3.0 to be enabled.</xpath> <!-- Expath functions message -->
-    <xpath version="default"> Not implemented thus far in XPath.</xpath> <!-- Expath functions message -->
+    <xpath version="2.0"> Available in XPath 2.0 and later versions.</xpath> <!-- Expath functions message -->
+    <xpath version="3.0"> Available in XPath 3.0 and later versions.</xpath> <!-- Expath functions message -->
+    <xpath version="4.0"> Available in XPath 4.0 and later versions.</xpath> <!-- Expath functions message -->
+    <xpath version="default"> Not implemented in Saxon.</xpath> <!-- Expath functions message -->
     
     <spec value="xpath40"> Available in XPath 4.0, XSLT 4.0, and XQuery 4.0.</spec>
     <spec value="xpath31"> Available in XPath 3.1, XSLT 3.0, XQuery 3.1, and later versions.</spec>

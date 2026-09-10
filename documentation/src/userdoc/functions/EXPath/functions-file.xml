@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section id="expath-file" spec="expath-file" title="Namespace expath-file"
+<section id="expath-file" spec="expath-file10 expath-file40" title="Namespace expath-file"
   catalog="catalog-file.xml"
   namespace="http://expath.org/ns/file" xmlns:doc="http://www.saxonica.com/ns/doc">
   <defaults doc:doc="Default values across the set.">
@@ -7,19 +7,18 @@
       doc:doc="Descriptions of arguments, keyed by the name. In theory we could also key by type.">
       <path>Path to file/directory</path>
       <file>Path to file</file>
-      <items>Sequence of items to be written</items>
-      <params>Control parameters for serialization - semantics similar to fs:serialize()</params>
-      <value>Base64 binary value to be written</value>
+      <value>Sequence of items to be written</value>
+      <options>Control parameters for serialization - semantics similar to fn:serialize()</options>
       <values>Strings to be written</values>
       <lines>Strings to be written</lines>
       <source>The path to the source file/directory</source>
-      <target>The path to the source file/directory</target>
+      <target>The path to the target file/directory</target>
       <encoding>Encoding used for string-binary conversion</encoding>
       <dir>Path to the directory</dir>
       <prefix>Prefix to be used for the start of a temporary file name</prefix>
       <suffix>Suffix to be used for the end of a temporary file name - conventionally of a '.ext'
         extension form, but need not be</suffix>
-      <recursive>Whether the operation should recurse down though the filesystem tree</recursive>
+      <recursive>Determines whether the operation should recurse down though the filesystem tree</recursive>
       <pattern>A glob pattern to match/filter file names</pattern>
       <offset>Byte offset into the file for reading or writing</offset>
       <length>Byte length of data to be returned</length>
@@ -31,9 +30,18 @@
   <function name="is-dir"/>
   <function name="is-file"/>
   <function name="last-modified"/>
-  <function name="size"/>
+  <function name="size">
+    <args>
+      <recursive>Determines whether the operation should recurse down though the filesystem
+        tree. (New in EXPath 4.0. Not yet implemented in Saxon.)</recursive>
+    </args>
+  </function>
   <function name="append"/>
-  <function name="append-binary"/>
+  <function name="append-binary">
+    <args>
+      <value>Base64 binary value to be written</value>
+    </args>
+  </function>
   <function name="append-text">
     <args>
       <value>String value to be written</value>
@@ -48,10 +56,26 @@
   <function name="list"/>
   <function name="move"/>
   <function name="read-binary"/>
-  <function name="read-text"/>
-  <function name="read-text-lines"/>
+  <function name="read-text">
+    <args>
+      <options>Options for reading the file. In EXPath 1.0, the argument is a string, providing
+        the encoding to be used for string-binary conversion. From Saxon 13.0, in EXPath 4.0 a
+        map can be provided.</options>
+    </args>
+  </function>
+  <function name="read-text-lines">
+    <args>
+      <options>Options for reading the file. In EXPath 1.0, the argument is a string, providing
+        the encoding to be used for string-binary conversion. From Saxon 13.0, in EXPath 4.0 a
+        map can be provided.</options>
+    </args>
+  </function>
   <function name="write"/>
-  <function name="write-binary"/>
+  <function name="write-binary">
+    <args>
+      <value>Base64 binary value to be written</value>
+    </args>
+  </function>
   <function name="write-text">
     <args>
       <value>String value to be written</value>
@@ -63,7 +87,11 @@
   <function name="children" saxon="9.6 PE/EE"/>
   <function name="path-to-native"/>
   <function name="path-to-uri"/>
-  <function name="resolve-path"/>
+  <function name="resolve-path">
+    <args>
+      <base>Base path. (New in EXPath 4.0. Not yet implemented in Saxon.)</base>
+    </args>
+  </function>
   <function name="dir-separator"/>
   <function name="line-separator"/>
   <function name="path-separator"/>
@@ -84,10 +112,20 @@
       system property <code>user.dir</code> is used.</p>
     </status>
   </function>
+  <function name="is-absolute" class="qt4" saxon="NOT_IMPLEMENTED" xpath="4.0" spec="expath-binary40">
+    <status>
+      <p>New in EXPath File Module 4.0. Not yet implemented in Saxon.</p>
+    </status>
+  </function>
+  <function name="list-roots" class="qt4" saxon="NOT_IMPLEMENTED" xpath="4.0" spec="expath-binary40">
+    <status>
+      <p>New in EXPath File Module 4.0. Not yet implemented in Saxon.</p>
+    </status>
+  </function>
+  <function name="descendants" class="qt4" saxon="NOT_IMPLEMENTED" xpath="4.0" spec="expath-binary40">
+    <status>
+      <p>New in EXPath File Module 4.0. Not yet implemented in Saxon.</p>
+    </status>
+  </function>
 
-  <!--<function name="shift">
-    <args>
-      <size>The number of bit positions to shift left or right</size>
-    </args>
-  </function>-->
 </section>

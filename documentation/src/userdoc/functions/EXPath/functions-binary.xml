@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section id="expath-binary" spec="expath-binary" title="Namespace expath-binary"
+<section id="expath-binary" spec="expath-binary10 expath-binary40" title="Namespace expath-binary"
   catalog="catalog-binary.xml"
   namespace="http://expath.org/ns/binary" xmlns:doc="http://www.saxonica.com/ns/doc">
   <defaults doc:doc="Default values across the set.">
     <arg-descriptions
       doc:doc="Descriptions of arguments, keyed by the name. In theory we could also key by type.">
-      <in>Input binary data</in>
+      <value>Input binary data</value>
       <offset>Offset in octets into the input data</offset>
       <size>Size in octets to operate over</size>
-      <octet-order>The order (most/least significant first) in which to pack or unpack
-        octets</octet-order>
-      <a>Binary data</a>
-      <b>Binary data</b>
+      <order>The order (most/least significant first) in which to pack or unpack
+        octets</order>
+      <value1>Binary data</value1>
+      <value2>Binary data</value2>
       <encoding>The encoding type to be used</encoding>
     </arg-descriptions> 
   </defaults>
@@ -19,50 +19,54 @@
   <h1 xmlns="">Namespace expath-binary</h1>
   <function name="hex">
     <args>
-      <in>The data written as a string sequence of hexadecimal digits</in>
+      <value>The data written as a string sequence of hexadecimal digits</value>
     </args>
   </function>
   <function name="bin">
     <args>
-      <in>The data written as a string sequence of binary digits</in>
+      <value>The data written as a string sequence of binary digits</value>
     </args>
   </function>
   <function name="octal">
     <args>
-      <in>The data written as a string sequence of octal digits</in>
+      <value>The data written as a string sequence of octal digits</value>
     </args>
   </function>
   <function name="to-octets"/>
   <function name="from-octets">
     <args>
-      <in>The data written as a sequence of per-octet numbers</in>
+      <values>The data written as a sequence of per-octet numbers</values>
     </args>
   </function>
   <function name="part"/>
-  <function name="insert-before"/>
+  <function name="insert-before">
+    <args>
+      <extra>Binary data to be added</extra>
+    </args>
+  </function>
   <function name="length"/>
   <function name="join">
     <args>
-      <in>The sequence of binary data items to be joined</in>
+      <values>The sequence of binary data items to be joined</values>
     </args>
   </function>
   <function name="pad-left">
     <args>
-      <size>The number of octets to pad</size>
+      <count>The number of octets to pad</count>
       <octet>Octet value to use in the padding</octet>
     </args>
   </function>
   <function name="pad-right">
     <args>
-      <size>The number of octets to pad</size>
+      <count>The number of octets to pad</count>
       <octet>Octet value to use in the padding</octet>
     </args>
   </function>
   <function name="find">
     <args>
-      <in>Binary data to be searched</in>
+      <value>Binary data to be searched</value>
       <offset>Offset in octets to start searching from</offset>
-      <pattern>Binary data to be searched for</pattern>
+      <search>Binary data to be searched for</search>
     </args>
   </function>
   <function name="decode-string">
@@ -79,17 +83,17 @@
   </function>
   <function name="pack-double">
     <args>
-      <in>The value to pack</in>
+      <value>The value to pack</value>
     </args>
   </function>
   <function name="pack-float">
     <args>
-      <in>The value to pack</in>
+      <value>The value to pack</value>
     </args>
   </function>
   <function name="pack-integer">
     <args>
-      <in>The value to pack</in>
+      <value>The value to pack</value>
       <size>The octet length to pack within</size>
     </args>
   </function>
@@ -111,7 +115,8 @@
   <function name="not"/>
   <function name="shift">
     <args>
-      <size>The number of bit positions to shift left or right</size>
+      <by>The number of bit positions to shift left or right</by>
     </args>
   </function>
+  <function name="infer-encoding" class="qt4" saxon="13 PE/EE" xpath="4.0" spec="expath-binary40"/>
 </section>

@@ -145,8 +145,10 @@
             <xsl:when test="$p = 'xslt40'">XSLT 4.0 Specification</xsl:when>
             <xsl:when test="$p = 'xquery-update10'">XQuery Update 1.0</xsl:when>
             <xsl:when test="$p = 'expath-archive'">EXPath Archive Module</xsl:when>
-            <xsl:when test="$p = 'expath-binary'">EXPath Binary Module</xsl:when>
-            <xsl:when test="$p = 'expath-file'">EXPath File Module</xsl:when>
+            <xsl:when test="$p = 'expath-binary10'">EXPath Binary Module 1.0</xsl:when>
+            <xsl:when test="$p = 'expath-binary40'">EXPath Binary Module 4.0</xsl:when>
+            <xsl:when test="$p = 'expath-file10'">EXPath File Module 1.0</xsl:when>
+            <xsl:when test="$p = 'expath-file40'">EXPath File Module 4.0</xsl:when>
             <xsl:when test="$p = 'exslt-common'">EXSLT Common Module</xsl:when>
             <xsl:when test="$p = 'exslt-math'">EXSLT Math Module</xsl:when>
             <xsl:when test="$p = 'exslt-random'">EXSLT Random Module</xsl:when>
@@ -178,8 +180,12 @@
                     >https://www.w3.org/TR/xquery-update-10/#id-func-</xsl:when>
                 <xsl:when test="$p = 'expath-archive'"
                     >http://www.expath.org/spec/archive/editor#fn.</xsl:when>
-                <xsl:when test="$p = 'expath-binary'">http://www.expath.org/spec/binary#</xsl:when>
-                <xsl:when test="$p = 'expath-file'">http://www.expath.org/spec/file#</xsl:when>
+                <xsl:when test="$p = 'expath-binary10'">http://www.expath.org/spec/binary#</xsl:when>
+                <xsl:when test="$p = 'expath-binary40'"
+                    >https://qt4cg.org/specifications/expath-binary-40/Overview.html#func-bin-</xsl:when>
+                <xsl:when test="$p = 'expath-file10'">http://www.expath.org/spec/file#</xsl:when>
+                <xsl:when test="$p = 'expath-file40'"
+                    >https://qt4cg.org/specifications/expath-file-40/Overview.html#func-file-</xsl:when>
                 <xsl:when test="$p = 'exslt-common'">https://exslt.github.io/exsl/functions/</xsl:when>
                 <xsl:when test="$p = 'exslt-math'">https://exslt.github.io/math/functions/</xsl:when>
                 <xsl:when test="$p = 'exslt-random'"
@@ -216,7 +222,7 @@
                         </xsl:otherwise>
                     </xsl:choose>
                 </xsl:when>
-                <xsl:when test="$p = 'expath-file'">
+                <xsl:when test="$p = 'expath-file10'">
                     <xsl:choose>
                         <xsl:when
                             test="
