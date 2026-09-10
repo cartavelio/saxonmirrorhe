@@ -1,0 +1,71 @@
+from setuptools import setup, Extension
+from Cython.Build import cythonize
+import shutil
+
+# This file is copied to build/pypi before running; internal
+# paths are relative to that location
+
+# read the long_description from a file.
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
+# include platform specific dynamic lib in the wheel.
+from platform import system
+from distutils.dir_util import copy_tree
+
+extra_link_args = []
+
+if system() == 'Darwin':
+    extra_link_args.append('-Llibs/darwin')
+else:
+    extra_link_args.append('-Llibs/nix')
+
+# extented modules
+ext_modules = [Extension(
+                        "saxonc", 
+                        sources=[
+                            "python_saxon/saxonc.pyx", 
+                            "Saxon.C.API/SaxonProcessor.cpp",
+                            "Saxon.C.API/SaxonCGlue.c",
+                            "Saxon.C.API/SaxonCXPath.c",
+                            "Saxon.C.API/XdmValue.cpp",
+                            "Saxon.C.API/XdmItem.cpp",
+                            "Saxon.C.API/XdmNode.cpp",
+                            "Saxon.C.API/XdmAtomicValue.cpp",
+                            "Saxon.C.API/XdmFunctionItem.cpp",
+                            "Saxon.C.API/XdmMap.cpp",
+                            "Saxon.C.API/XdmArray.cpp",
+                            "Saxon.C.API/DocumentBuilder.cpp",
+                            "Saxon.C.API/Xslt30Processor.cpp",
+                            "Saxon.C.API/XsltExecutable.cpp",
+                            "Saxon.C.API/XQueryProcessor.cpp",
+                            "Saxon.C.API/XPathProcessor.cpp",
+                            "Saxon.C.API/SchemaValidator.cpp",
+                            "Saxon.C.API/SaxonApiException.cpp"],
+                        language="c++",
+                        include_dirs = ['Saxon.C.API/graalvm',],
+                         extra_link_args = extra_link_args,
+                       libraries=['saxon-@@edition@@c-@@VERSION@@']
+                        ),
+                    "python_saxon/nodekind.py",
+                ]
+setup(
+    name='saxonc@@edition@@',
+    version='0.0.1',
+    description='A python package for the SaxonC-@@EDITION@@ @@VERSION@@, an XSLT 3.0, XQuery 3.1, XPath 3.1 and Schema Validator processor by Saxonica.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    author='ONeil Delpratt',
+    author_email='oneil@saxonica.com',
+    include_package_data=True,
+    url='https://github.com/tennom/saxonpy',     # TODO change github project
+    # packages=find_packages(),
+    package_dir={'saxonc@@edition@@':'src'},
+    packages=['saxonc@@edition@@'],
+    python_requires='>=3.6',                # Minimum version requirement of the package
+    ext_modules=cythonize(ext_modules,
+                          compiler_directives={'language_level': 3},
+                          ),
+
+)
