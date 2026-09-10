@@ -157,6 +157,9 @@ public class Doc extends SystemFunction implements Callable {
         if (hrefVal == null) {
             return EmptySequence.INSTANCE;
         }
+        if (!context.getMajorContext().isTrusted()) {
+            throw new XPathException("External resource access is disallowed in this context", "FODC0002");
+        }
         String href = hrefVal.getStringValue();
         PackageData packageData = getRetainedStaticContext().getPackageData();
 

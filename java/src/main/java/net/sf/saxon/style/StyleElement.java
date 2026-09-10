@@ -2627,7 +2627,7 @@ public abstract class StyleElement extends ElementImpl {
      */
     protected boolean requireXslt40Attribute(String attributeName) {
         Objects.requireNonNull(attributeName);
-        if (compilation.getCompilerInfo().getXsltVersion() != 40) {
+        if (compilation.getCompilerInfo().getXsltVersion() < 40) {
             if (forwardsCompatibleModeIsEnabled()) {
                 compileWarning("Attribute " + getDisplayName() + "/@" + attributeName + " is ignored in forwards compatibility mode " +
                                        "(running an XSLT 3.0 processor against an XSLT 4.0 stylesheet)", "XTSE0090");

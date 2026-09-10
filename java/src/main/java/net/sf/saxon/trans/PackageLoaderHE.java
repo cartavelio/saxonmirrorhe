@@ -2462,9 +2462,13 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression schemaAware = loader.getExpressionWithRole(element, "sa");
             Expression dynamicParams = loader.getExpressionWithRole(element, "wp");
             Expression optionsOp = loader.getExpressionWithRole(element, "options");
+            Expression trusted = loader.getExpressionWithRole(element, "trusted");
+            if (trusted == null) {
+                trusted = Literal.makeLiteral(BooleanValue.TRUE);
+            }
 
             EvaluateInstr inst =
-                    new EvaluateInstr(xpath, required, contextItem, baseUri, namespaceContext, schemaAware);
+                    new EvaluateInstr(xpath, required, contextItem, baseUri, namespaceContext, schemaAware, trusted);
             if (optionsOp != null) {
                 inst.setOptionsExpression(optionsOp);
             }

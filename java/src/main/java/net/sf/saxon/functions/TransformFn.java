@@ -546,6 +546,9 @@ public class TransformFn extends SystemFunction implements Callable {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        if (!context.getMajorContext().isTrusted()) {
+            throw new XPathException("Cannot access external resources in this context", "FOXT0002");
+        }
         int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         ProcessedOptions options =
                 getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context, version);

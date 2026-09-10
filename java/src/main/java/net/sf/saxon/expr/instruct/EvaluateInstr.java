@@ -58,6 +58,7 @@ public final class EvaluateInstr extends Expression {
     private Operand baseUriOp;
     private Operand namespaceContextOp;
     private Operand schemaAwareOp;
+    private Operand trustedOp;
     private Operand optionsOp;
     private WithParam[] actualParams;
     private Operand dynamicParamsOp;
@@ -75,11 +76,14 @@ public final class EvaluateInstr extends Expression {
      *                             static namespace context for the XPath expression
      * @param schemaAwareExpr      an expression whose value is true if the XPath expression is to be treated as schema
      *                             aware, or false otherwise
+     * @param trustedExpr          an expression whose value is the string "true|yes|1" if the expression is
+     *                             trusted to access external resources, or "false|no|0" otherwise.
      */
 
     public EvaluateInstr(Expression xpath, SequenceType requiredType,
                          Expression contextItemExpr, Expression baseUriExpr,
-                         Expression namespaceContextExpr, Expression schemaAwareExpr) {
+                         Expression namespaceContextExpr, Expression schemaAwareExpr,
+                         Expression trustedExpr) {
         if (xpath != null) {
             xpathOp = new Operand(this, xpath, OperandRole.SINGLE_ATOMIC);
         }
@@ -95,6 +99,7 @@ public final class EvaluateInstr extends Expression {
         if (schemaAwareExpr != null) {
             schemaAwareOp = new Operand(this, schemaAwareExpr, OperandRole.SINGLE_ATOMIC);
         }
+        trustedOp = new Operand(this, trustedExpr, OperandRole.SINGLE_ATOMIC);
         this.requiredType = requiredType;
 
     }
@@ -190,6 +195,7 @@ public final class EvaluateInstr extends Expression {
         if (optionsOp != null) {
             sub.add(optionsOp);
         }
+        sub.add(trustedOp);
         WithParam.gatherOperands(this, getActualParams(), sub);
         return sub;
     }
@@ -220,7 +226,8 @@ public final class EvaluateInstr extends Expression {
                                              getContextItemExpr().copy(rebindings),
                                              getBaseUriExpr() == null ? null : getBaseUriExpr().copy(rebindings),
                                              getNamespaceContextExpr() == null ? null : getNamespaceContextExpr().copy(rebindings),
-                                             getSchemaAwareExpr() == null ? null : getSchemaAwareExpr().copy(rebindings));
+                                             getSchemaAwareExpr() == null ? null : getSchemaAwareExpr().copy(rebindings),
+                                             getTrustedExpr().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, e2);
         e2.setRetainedStaticContext(getRetainedStaticContext());
         e2.defaultXPathNamespace = defaultXPathNamespace;
@@ -350,6 +357,10 @@ public final class EvaluateInstr extends Expression {
         }
     }
 
+    public Expression getTrustedExpr() {
+        return trustedOp.getChildExpression();
+    }
+
     public WithParam[] getActualParams() {
         return actualParams;
     }
@@ -408,9 +419,11 @@ public final class EvaluateInstr extends Expression {
             ItemEvaluator namespaceContextEval = instr.getNamespaceContextExpr() == null
                     ? null : instr.getNamespaceContextExpr().makeElaborator().elaborateForItem();
             StringEvaluator schemaAwareEval = instr.getSchemaAwareExpr().makeElaborator().elaborateForString(false);
+            StringEvaluator trustedEval = instr.getTrustedExpr().makeElaborator().elaborateForString(false);
             ItemEvaluator dynamicParamsEval = instr.getDynamicParams() == null
                     ? null : instr.getDynamicParams().makeElaborator().elaborateForItem();
             ItemEvaluator optionsEval = instr.optionsOp == null ? null : instr.optionsOp.getChildExpression().makeElaborator().elaborateForItem();
+
             return context -> {
                 Configuration config = context.getConfiguration();
                 if (config.getBooleanProperty(Feature.DISABLE_XSL_EVALUATE)) {
@@ -440,6 +453,8 @@ public final class EvaluateInstr extends Expression {
                             .withLocation(instr.getLocation())
                             .withXPathContext(context);
                 }
+
+                boolean trusted = MessageInstr.evaluateBooleanAVT(context, trustedEval, "trusted", "xsl:evaluate");
 
                 Expression expr = null;
                 SlotManager slotMap = null;
@@ -615,6 +630,9 @@ public final class EvaluateInstr extends Expression {
                     ManualIterator mono = new ManualIterator(focus);
                     c2.setCurrentIterator(mono);
                 }
+                if (!trusted) {
+                    c2.setUntrusted();
+                }
                 c2.openStackFrame(slotMap);
 
                 if (instr.getActualParams() != null) {
@@ -657,7 +675,7 @@ public final class EvaluateInstr extends Expression {
                 try {
                     return expr.iterate(c2);
                 } catch (XPathException err) {
-                    throw err.withMessage("Dynamic error in expression {" + exprText + "} called using xsl:evaluate")
+                    throw err.withMessage("Dynamic error in expression {" + exprText + "} called using xsl:evaluate: " + err.getMessage())
                             .withLocation(instr.getLocation());
                 }
             };

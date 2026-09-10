@@ -60,6 +60,11 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+
+        if (!context.getMajorContext().isTrusted()) {
+            throw new XPathException("External resource access is disallowed in this context", "FODC0002");
+        }
+
         StringValue hrefVal = (StringValue) arguments[0].head();
         String encoding = null;
         boolean normalizeNewlines = false;

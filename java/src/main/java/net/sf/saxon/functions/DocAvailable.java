@@ -35,6 +35,9 @@ public class DocAvailable extends SystemFunction  {
      */
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+        if (!context.getMajorContext().isTrusted()) {
+            return BooleanValue.FALSE;
+        }
         boolean result = false;
         AtomicValue hrefVal = (AtomicValue) arguments[0].head();
         if (hrefVal != null) {

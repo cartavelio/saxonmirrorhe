@@ -129,6 +129,9 @@ public class DocumentFn extends SystemFunction implements Callable {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        if (!context.getMajorContext().isTrusted()) {
+            throw new XPathException("Cannot access external resources in this context", "FODC0002");
+        }
         int numArgs = getArity();
         Item arg1 = numArgs > 1 ? arguments[1].head() : null;
         SequenceIterator hrefSequence = arguments[0].iterate();

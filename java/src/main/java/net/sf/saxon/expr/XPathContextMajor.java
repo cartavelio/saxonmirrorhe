@@ -50,7 +50,8 @@ public class XPathContextMajor extends XPathContextMinor {
     private ResourceResolver resourceResolver;
     private ErrorReporter errorReporter;
     private Component currentComponent;
-    XPathException currentException;
+    private XPathException currentException;
+    private boolean trusted = true;
 
 
     /**
@@ -124,6 +125,7 @@ public class XPathContextMajor extends XPathContextMinor {
         c.currentComponent = currentComponent;
         c.errorReporter = errorReporter;
         c.resourceResolver = resourceResolver;
+        c.trusted = trusted;
         return c;
     }
 
@@ -157,6 +159,7 @@ public class XPathContextMajor extends XPathContextMinor {
         c.currentException = p.currentException;
         c.resourceResolver = p.resourceResolver;
         c.temporaryOutputState = prev.temporaryOutputState;
+        c.trusted = p.trusted;
         return c;
     }
 
@@ -575,14 +578,34 @@ public class XPathContextMajor extends XPathContextMinor {
         boolean checked = params.isTypeChecked(index);
         return checked ? ParameterSet.SUPPLIED_AND_CHECKED : ParameterSet.SUPPLIED;
     }
+
+    /**
+     * Indicate that code running under this context is untrusted. This prevents
+     * all external resource access using functions such as doc(), collection(),
+     * unparsed-text(), json-doc(), etc.
+     */
+
+    public void setUntrusted() {
+        trusted = false;
+    }
+
+    /**
+     * Ask whether code running under this context is trusted to access
+     * external resources
+     * @return true if external resource access is allowed
+     */
+
+    public boolean isTrusted() {
+        return trusted;
+    }
     
     public void setResourceResolver(ResourceResolver resolver) {
         resourceResolver = resolver;
     }
 
     /**
-     * Get the resource resolver. This gets the local URIResolver set in the XPathContext if there
-     * is one; if not, it gets the URIResolver from the Controller (which itself defaults to the
+     * Get the resource resolver. This gets the local ResourceResolver set in the XPathContext if there
+     * is one; if not, it gets the ResourceResolver from the Controller (which itself defaults to the
      * one set in the Configuration).
      *
      * @return the user-supplied URI resolver if there is one, or null otherwise.

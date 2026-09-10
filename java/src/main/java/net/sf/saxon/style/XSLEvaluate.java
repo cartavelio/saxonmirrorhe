@@ -21,6 +21,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
@@ -49,6 +50,7 @@ public class XSLEvaluate extends StyleElement {
     Expression schemaAware = null;
     Expression withParams = null;
     Expression options = null;
+    Expression trusted = null;
     boolean hasFallbackChildren;
 
     /**
@@ -106,6 +108,7 @@ public class XSLEvaluate extends StyleElement {
         String namespaceContextAtt = null;
         String schemaAwareAtt = null;
         String withParamsAtt = null;
+        String trustedAtt = null;
 
         for (AttributeInfo att : atts) {
             final NodeName attName = att.getNodeName();
@@ -137,6 +140,11 @@ public class XSLEvaluate extends StyleElement {
                 case "with-params":
                     withParamsAtt = att.getValue();
                     withParams = makeExpression(withParamsAtt, att);
+                    break;
+                case "trusted":
+                    requireXslt40Attribute("trusted");
+                    trustedAtt = att.getValue();
+                    trusted = makeAttributeValueTemplate(trustedAtt, att);
                     break;
                 default:
                     if (attName.getLocalPart().equals("options") && attName.getNamespaceUri().equals(NamespaceUri.SAXON)) {
@@ -177,6 +185,14 @@ public class XSLEvaluate extends StyleElement {
             withParams = makeExpression(withParamsAtt, null);
         }
 
+        if (trustedAtt == null) {
+            if (getCompilation().getCompilerInfo().getXsltVersion() < 40) {
+                trusted = new StringLiteral(StringConstants.TRUE);
+            } else  {
+                trusted = new StringLiteral(StringConstants.FALSE);
+            }
+        }
+
         if (options == null) {
             options = makeExpression("map{}", null);
         }
@@ -196,6 +212,7 @@ public class XSLEvaluate extends StyleElement {
         schemaAware = typeCheck("schema-aware", schemaAware);
         withParams = typeCheck("with-params", withParams);
         options = typeCheck("options", options);
+        trusted = typeCheck("trusted", trusted);
 
         for (NodeInfo child : children()) {
             if (child instanceof XSLWithParam) {
@@ -259,6 +276,10 @@ public class XSLEvaluate extends StyleElement {
 
     public Expression getSchemaAwareExpression() {
         return schemaAware;
+    }
+
+    public Expression getTrustedExpression() {
+        return trusted;
     }
 
     public Expression getWithParamsExpression() {
@@ -325,7 +346,8 @@ public class XSLEvaluate extends StyleElement {
         Expression namespaceContext = getNamespaceContextExpression();
         Expression schemaAware = getSchemaAwareExpression();
         Expression withParams = getWithParamsExpression();
-        EvaluateInstr inst = new EvaluateInstr(xpath, requiredType, contextItem, baseUri, namespaceContext, schemaAware);
+        Expression trusted = getTrustedExpression();
+        EvaluateInstr inst = new EvaluateInstr(xpath, requiredType, contextItem, baseUri, namespaceContext, schemaAware, trusted);
         inst.setRetainedStaticContext(makeRetainedStaticContext());
         WithParam[] params = getWithParamInstructions(inst, getCompilation(), decl, false);
         inst.setActualParams(params);

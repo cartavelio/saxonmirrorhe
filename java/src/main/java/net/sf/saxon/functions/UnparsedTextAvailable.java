@@ -30,6 +30,9 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
      */
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+        if (!context.getMajorContext().isTrusted()) {
+            return BooleanValue.FALSE;
+        }
         StringValue hrefVal = (StringValue) arguments[0].head();
         if (hrefVal == null) {
             return BooleanValue.FALSE;

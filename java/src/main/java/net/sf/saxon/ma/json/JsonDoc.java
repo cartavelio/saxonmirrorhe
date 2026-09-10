@@ -46,6 +46,11 @@ public class JsonDoc extends SystemFunction  {
         if (arg0 == null) {
             return EmptySequence.INSTANCE;
         }
+
+        if (!context.getMajorContext().isTrusted()) {
+            throw new XPathException("External resource access is disallowed in this context", "FODC0002");
+        }
+
         String href = arg0.getStringValue();
 
         final Configuration config = context.getConfiguration();

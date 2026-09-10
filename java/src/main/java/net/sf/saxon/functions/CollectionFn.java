@@ -207,8 +207,12 @@ public class CollectionFn extends SystemFunction implements Callable {
      */
 
     @Override
-    //@CSharpReplaceBody(code="throw new NotImplementedException();")
     public Sequence call(final XPathContext context, Sequence[] arguments) throws XPathException {
+
+        if (!context.getMajorContext().isTrusted()) {
+            throw new XPathException("External resource access is disallowed in this context", "FODC0002");
+        }
+
         String href;
         if (getArity() == 0) {
             // No arguments supplied: this gets the default collection
