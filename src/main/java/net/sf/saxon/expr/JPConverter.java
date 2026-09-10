@@ -203,9 +203,13 @@ public abstract class JPConverter {
 
         List<ExternalObjectModel> externalObjectModels = config.getExternalObjectModels();
         for (ExternalObjectModel model : externalObjectModels) {
-            JPConverter converter = model.getJPConverter(javaClass, config);
-            if (converter != null) {
-                return converter;
+            try {
+                JPConverter converter = model.getJPConverter(javaClass, config);
+                if (converter != null) {
+                    return converter;
+                }
+            } catch (Exception e) {
+                config.deregisterExternalObjectModel(model);
             }
         }
 
