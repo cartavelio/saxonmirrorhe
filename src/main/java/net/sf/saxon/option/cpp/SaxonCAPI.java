@@ -172,6 +172,10 @@ public class SaxonCAPI {
         }
 //#if EE==true || PE==true
         boolean isNativeType = CTypeConversion.toBoolean(c_useNativeTypes);
+
+        if(isNativeType) {
+            System.err.println("Java DEBUG  isNativeType is TRue");
+        }
         if (procRef == WordFactory.nullPointer() || c_funcName == WordFactory.nullPointer()) {
             return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
         }

@@ -439,6 +439,10 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
 
     allocFn alloc = operator new;
 
+                     if(useNativeTypes) {
+                         std::cerr<<"useNativeTypes is True in C++"<<std::endl;
+                     }
+
     long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1, (char *)functionName,
                                                (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc, (int)useNativeTypes);
 

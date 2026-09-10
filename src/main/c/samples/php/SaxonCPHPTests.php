@@ -909,13 +909,15 @@ public function testSingle()
 
 
 // define an extension function
-function userFunction($param , $param2)
+function userFunction($param2)
 {
+print("start of userfunction cp0");
   if(is_numeric($param2)){
-    echo("userspace function called cp1\n");
+    echo("userfunction called cp1\n");
     $result = $param2*2;
     return $result;
   }
+  return 0;
 }
 
     public function testUserDefinedFunction(): void

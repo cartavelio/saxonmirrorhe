@@ -10,7 +10,7 @@ if test $PHP_SAXON != "no"; then
     PHP_SUBST(PHP_SAXONC_API)
     PHP_ADD_LIBRARY(stdc++, 1, SAXON_SHARED_LIBADD)
     PHP_ADD_LIBRARY(dl, 1, SAXON_SHARED_LIBADD)
-    PHP_ADD_LIBRARY(saxon-@@edition@@c-@@VERSION@@, 1, SAXON_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH(saxon-@@edition@@c-@@VERSION@@, ../libs/darwin, SAXON_SHARED_LIBADD)
     PHP_NEW_EXTENSION(saxon, php8_saxon.cpp SaxonProcessor.cpp DocumentBuilder.cpp XQueryProcessor.cpp  XsltExecutable.cpp Xslt30Processor.cpp XPathProcessor.cpp SchemaValidator.cpp XdmValue.cpp XdmItem.cpp XdmNode.cpp XdmAtomicValue.cpp XdmFunctionItem.cpp XdmMap.cpp XdmArray.cpp SaxonApiException.cpp SaxonCGlue.c SaxonCProcessor.c  SaxonCXPath.c, $ext_shared,, [-Wall -DPHP_SAXONC_API], true)
 fi
 
