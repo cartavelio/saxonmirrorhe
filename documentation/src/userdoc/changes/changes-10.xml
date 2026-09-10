@@ -822,7 +822,6 @@
         a pattern, or a <code>SequenceType</code>. It does not apply to unprefixed type names or to names used in a <code>SchemaElementTest</code>
         (that is, <code>schema-element(name)</code>).</p>
         
-        <!--<p>TODO: document this somewhere....</p>-->
         
         
         

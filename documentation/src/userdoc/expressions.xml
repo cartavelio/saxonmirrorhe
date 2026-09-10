@@ -2355,13 +2355,13 @@ return `{$key}={$value}`]]></code></pre>
 		<?source https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types ?>
 
 		<p>There are two main categories of type: schema types and item types.</p>
-		<p>TODO add more of an introduction to what is included in this section.</p>
+		<!--<p>TODO add more of an introduction to what is included in this section.</p>-->
 		
 		<p class="qt4">From XPath 4.0, for the purpose of comparing atomic items, the primitive atomic types are
 			divided into a number of type families: atomic items belonging to types in the same family are
 			mutually comparable, items belonging to different type families are not.</p>
-		<p>TODO In the table below, "comparison families" includes families for nodes, and function types
-			not just atomic types, this reflects comparisons using <code>fn:deep-equal</code></p>
+		<!--<p>TODO In the table below, "comparison families" includes families for nodes, and function types
+			not just atomic types, this reflects comparisons using <code>fn:deep-equal</code></p>-->
 
 		<h2>Pre-defined types</h2>
 
@@ -2542,8 +2542,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
 			<h2>Built-in record types</h2>
 			
-			<p>TODO What details do we want to include here?</p>
-			<p>In XPath 4.0, there are 5 built-in named record types:</p>
+			
+			<p>In XPath 4.0, there are a number of built-in named record types, including:</p>
 			
 			<ul>
 				<li><a
@@ -2565,8 +2565,19 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				<li><a
 					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#uri-structure-record"
 					><code>fn:uri-structure-record</code></a> - represents the
-						components of a URI</li>
+						components of a URI (used by the new <code>fn:build-uri</code> and <code>fn:parse-uri</code>
+				functions)</li>
+				
+				<li><a
+					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#dateTime-record"
+					><code>fn:dateTime-record</code></a> - represents the seven components of an <code>xs:dateTime</code>
+				value (used by the new <code>fn:build-dateTime</code> and <code>fn:parts-of-dateTime</code> functions)</li>
 			</ul>
+			
+			<p>These types are used to define the argument and/or result types of functions in the standard
+			function library. In principle they can also be used directly as type names, or as constructor
+			functions to create instance records, but this is not well developed in the specifications,
+			in the test suite, or in the Saxon 13 implementation.</p>
 
 		</section>
 
@@ -2874,7 +2885,6 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 		<p>Many new functions are available, for details see the <a class="bodylink"
 			href="/functions">Functions library</a>.</p>
 		
-		<p>TODO where does the following information belong?? What is implemented in Saxon?</p> 
 		<p>The XPath language specification now includes a section on <i>External Resources and
 			Security</i>, which introduces the following changes:</p>
 		<ul>
@@ -2900,6 +2910,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 					<code>fn:doc</code>, <code>fn:parse-xml</code></p>
 			</li>
 		</ul>
+		
+		<p>The <code>trusted</code> option is only partially implemented in Saxon 13: see the specifications
+		of individual functions for details.</p>
 	</section>
 
 </article>

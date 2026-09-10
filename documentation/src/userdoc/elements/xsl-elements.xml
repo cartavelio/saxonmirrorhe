@@ -3899,7 +3899,9 @@
                 <attribute name="byte-order-mark" use="optional">Indicates whether UTF-8/UTF-16
                     output is to start with a byte order mark. The default is
                     <code>no</code>.</attribute>
-                <attribute name="canonical" class="qt4">FIXME:</attribute>
+                <attribute name="canonical" class="qt4">Indicates whether output is required
+                in canonical form. Fully implemented in Saxon 13 for canoncical XML; not implemented
+                for canonical XHTML; partially implemented for canonical JSON (on SaxonJ only, not SaxonCS).</attribute>
                 <attribute name="cdata-section-elements" use="optional">Used only for XML output.
                     The value is a whitespace-separated list of element names. Character data
                     belonging to these output elements will be written within CDATA
@@ -4191,7 +4193,7 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition platform="NONE">NOT_IMPLEMENTED</saxon-edition>
             <status>
-                <p>New in XSLT 4.0. Not yet implemented in Saxon.</p>
+                <p>New in XSLT 4.0. Not yet implemented in Saxon 13.</p>
             </status>
         </xsl-element>
     </section>
@@ -4457,7 +4459,7 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition platform="NONE">NOT_IMPLEMENTED</saxon-edition>
             <status>
-                <p>New in XSLT 4.0. Not yet implemented in Saxon.</p>
+                <p>New in XSLT 4.0. Not yet implemented in Saxon 13.</p>
             </status>
             <see-also name="field" type="xsl-elements"/>
         </xsl-element>
@@ -4476,7 +4478,8 @@
                     more information.</attribute>
                 <attribute name="byte-order-mark" use="optional">Serialization attribute, see
                     Details for more information.</attribute>
-                <attribute name="canonical" class="qt4">FIXME:</attribute>
+                <attribute name="canonical" class="qt4">Serialization attribute, see
+                    Details for more information.</attribute>
                 <attribute name="cdata-section-elements" use="optional">Serialization attribute, see
                     Details for more information.</attribute>
                 <attribute name="doctype-public" use="optional">Serialization attribute, see Details

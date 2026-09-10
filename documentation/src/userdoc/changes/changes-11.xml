@@ -165,7 +165,6 @@
             than Java-like methods: for example <code>ValidationFailure.LineNumber</code> replaces
             <code>ValidationFailure.GetLineNumber()</code>.</p>
         
-        <!-- TODO Below duplicates above. Are there other examples to document, or not? -->
         <p>A number of getter and setter methods (such as <code>ValidationFailure.GetLineNumber()</code>) have been changed
             to properties: <code>ValidationFailure.LineNumber</code> in this case.</p>
             

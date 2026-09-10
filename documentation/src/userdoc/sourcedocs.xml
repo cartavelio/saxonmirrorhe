@@ -1273,8 +1273,9 @@
     <p>The conversion of lexical XML to a tree in memory is called <i>parsing</i>, and is performed
     by a software component called an <i>XML Parser</i>. Saxon does not include its own XML parser,
     rather it provides interfaces that invoke XML parsers supplied by third parties. Platforms
-    such as Java and .NET typically include a built-in XML parser that Saxon uses by default.</p>
-    <!-- TODO SaxonC includes the third party Xerces XML parser built-in??? -->
+    such as Java and .NET typically include a built-in XML parser that Saxon uses by default.
+    On SaxonC, the XML parser provided by GraalVM is used.</p>
+
 
     <p>A source document can be built using the <code>DocumentBuilder</code> class
       (<code>PyDocumentBuilder</code> in Python), which is created using the factory method
