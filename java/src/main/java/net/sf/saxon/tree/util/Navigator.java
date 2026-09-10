@@ -19,9 +19,10 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.PrependIterator;
-import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.tree.iter.PrependAxisIterator;
+import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.jiter.WrappingJavaIterator;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
@@ -121,7 +122,7 @@ public final class Navigator {
 
     /*@Nullable*/
     public static NodeInfo getOutermostElement(/*@NotNull*/ TreeInfo doc) {
-        return (NodeInfo)doc.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
+        return doc.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
     }
 
     /**
@@ -351,11 +352,11 @@ public final class Navigator {
         }
 
         Controller controller = context == null ? null : context.getController();
-        SequenceIterator preceding = node.iteratePrecedingSiblingAxis(same);
+        AxisIterator preceding = node.iterateAxis(AxisInfo.PRECEDING_SIBLING, same);
 
         int i = 1;
         while (true) {
-            NodeInfo prev = (NodeInfo)preceding.next();
+            NodeInfo prev = preceding.next();
             if (prev == null) {
                 break;
             }
@@ -454,7 +455,7 @@ public final class Navigator {
         // we've found the ancestor to count from
 
         SequenceIterator preceding =
-                target.iteratePrecedingSiblingAxis(getNodeTestForPattern(count));
+                target.iterateAxis(AxisInfo.PRECEDING_SIBLING, getNodeTestForPattern(count));
         // pass the filter condition down to the axis enumeration where possible
         boolean alreadyChecked = count instanceof NodeTestPattern;
         int i = 1;
@@ -533,14 +534,15 @@ public final class Navigator {
         } else if (from.getUType() == UType.ELEMENT && count.getUType() == UType.ELEMENT) {
             filter = NodeKindTest.ELEMENT;
         } else {
-            filter = AnyXNodeTest.getInstance();
+            filter = AnyNodeTest.getInstance();
         }
 
         if (from != null && from.matchesItem(node, context)) {
             return num;
         }
 
-        SequenceIterator preceding = iteratePrecedingOrAncestorAxis(node, filter);
+        SequenceIterator preceding =
+                node.iterateAxis(AxisInfo.PRECEDING_OR_ANCESTOR, filter);
 
         while (true) {
             NodeInfo prev = (NodeInfo) preceding.next();
@@ -633,8 +635,8 @@ public final class Navigator {
         ItemType type = pattern.getItemType();
         if (type instanceof NodeTest) {
             return (NodeTest) type;
-        } else if (pattern.getUType().overlaps(UType.XNODE)) {
-            return AnyXNodeTest.getInstance();
+        } else if (pattern.getUType().overlaps(UType.ANY_NODE)) {
+            return AnyNodeTest.getInstance();
         } else {
             return ErrorType.getInstance();
         }
@@ -678,7 +680,11 @@ public final class Navigator {
                     nsMap = node.getAllNamespaces();
                 } else {
                     // Bug #5861 - we need to ensure the namespaces used in element and attribute names are declared
-                    nsMap = NamespaceMap.of(elementName.getPrefix(), elementName.getNamespaceUri());
+                    if (elementName.getPrefix().isEmpty() && elementName.hasURI(NamespaceUri.NULL)) {
+                        nsMap = NamespaceMap.emptyMap();   // Bug 6866
+                    } else {
+                        nsMap = NamespaceMap.of(elementName.getPrefix(), elementName.getNamespaceUri());
+                    }
                     for (AttributeInfo att : node.attributes()) {
                         NodeName attName = att.getNodeName();
                         if (!attName.getPrefix().isEmpty()) {
@@ -1147,9 +1153,6 @@ public final class Navigator {
      */
 
     public static NodeTest nodeTestFromPredicate(NodePredicate predicate) {
-        if (predicate == null) {
-            return AnyGNodeTest.getInstance();
-        }
         if (predicate instanceof NodeTest) {
             return (NodeTest)predicate;
         } else {
@@ -1162,93 +1165,26 @@ public final class Navigator {
      * otherwise return an empty iterator
      *
      * @param node     the singleton node, or null if the node does not exist
-     * @param nodeTest the test to be applied, or null if the node is to be selected unconditionally
+     * @param nodeTest the test to be applied
      * @return an iterator over the node if it exists and matches the test.
      */
 
     /*@NotNull*/
-    public static SequenceIterator filteredSingleton(GNode node, NodePredicate nodeTest) {
-        if (node != null && (nodeTest == null || nodeTest.test(node))) {
-            return SingletonIterator.makeIterator(node);
+    public static AxisIterator filteredSingleton(NodeInfo node,
+                                                 NodePredicate nodeTest) {
+        if (node != null && nodeTest.test(node)) {
+            return SingleNodeIterator.makeIterator(node);
         } else {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.ofNodes();
         }
     }
 
-    public static SequenceIterator orSelf(GNode origin, SequenceIterator iter, NodePredicate predicate) {
-        if (iter == EmptyIterator.getInstance()) {
-            return filteredSingleton(origin, predicate);
-        } else if (predicate == null || predicate.test(origin)) {
-            return new PrependIterator(origin, iter);
+    public static AxisIterator orSelfIterator(NodeInfo node, int axis, NodePredicate nodeTest) {
+        int continuationAxis = AxisInfo.excludeSelfAxis[axis];
+        if (nodeTest.test(node)) {
+            return new PrependAxisIterator(node, node.iterateAxis(continuationAxis, nodeTest));
         } else {
-            return iter;
-        }
-    }
-
-    /**
-     * Static helper method to iterate over an axis identified dynamically by axis number
-     * @param origin the origin node
-     * @param axisNumber the axis number
-     * @param predicate condition that the nodes on the axis must satisfy
-     * @return an iterator over the selected nodes, in axis order
-     */
-
-    public static SequenceIterator iterateAxis(GNode origin, int axisNumber, NodePredicate predicate) {
-        switch (axisNumber) {
-            case AxisInfo.ANCESTOR:
-                return origin.iterateAncestorAxis(predicate);
-
-            case AxisInfo.ANCESTOR_OR_SELF:
-                return origin.iterateAncestorOrSelfAxis(predicate);
-
-            case AxisInfo.ATTRIBUTE:
-                return origin.iterateAttributeAxis(predicate);
-
-            case AxisInfo.CHILD:
-                return origin.iterateChildAxis(predicate);
-
-            case AxisInfo.DESCENDANT:
-                return origin.iterateDescendantAxis(predicate);
-
-            case AxisInfo.DESCENDANT_OR_SELF:
-                return origin.iterateDescendantOrSelfAxis(predicate);
-
-            case AxisInfo.FOLLOWING:
-                return origin.iterateFollowingAxis(predicate);
-
-            case AxisInfo.FOLLOWING_OR_SELF:
-                return origin.iterateFollowingOrSelfAxis(predicate);
-
-            case AxisInfo.FOLLOWING_SIBLING:
-                return origin.iterateFollowingSiblingAxis(predicate);
-
-            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-                return origin.iterateFollowingSiblingOrSelfAxis(predicate);
-
-            case AxisInfo.NAMESPACE:
-                return origin.iterateNamespaceAxis(predicate);
-
-            case AxisInfo.PARENT:
-                return origin.iterateParentAxis(predicate);
-
-            case AxisInfo.PRECEDING:
-                return origin.iteratePrecedingAxis(predicate);
-
-            case AxisInfo.PRECEDING_OR_SELF:
-                return origin.iteratePrecedingOrSelfAxis(predicate);
-
-            case AxisInfo.PRECEDING_SIBLING:
-                return origin.iteratePrecedingSiblingAxis(predicate);
-
-            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
-                return origin.iteratePrecedingSiblingOrSelfAxis(predicate);
-
-            case AxisInfo.SELF:
-                return origin.iterateSelfAxis(predicate);
-
-            default:
-                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-
+            return node.iterateAxis(continuationAxis, nodeTest);
         }
     }
 
@@ -1264,10 +1200,10 @@ public final class Navigator {
      */
 
     public static int getSiblingPosition(NodeInfo node, NodeTest nodeTest, int max) {
-        if (node instanceof SiblingCountingNode && nodeTest instanceof AnyXNodeTest) {
+        if (node instanceof SiblingCountingNode && nodeTest instanceof AnyNodeTest) {
             return ((SiblingCountingNode)node).getSiblingPosition();
         }
-        SequenceIterator prev = node.iteratePrecedingSiblingAxis(nodeTest);
+        AxisIterator prev = node.iterateAxis(AxisInfo.PRECEDING_SIBLING, nodeTest);
         int count = 1;
         while (prev.next() != null) {
             if (++count > max) {
@@ -1296,25 +1232,23 @@ public final class Navigator {
 
         @Override
         public Iterator<NodeInfo> iterator() {
-            SequenceIterator basis = parent.iterateChildAxis(filter);
+            AxisIterator basis;
+            if (filter == null) {
+                basis = parent.iterateAxis(AxisInfo.CHILD);
+            } else {
+                basis = parent.iterateAxis(AxisInfo.CHILD, filter);
+            }
             return new WrappingJavaIterator<NodeInfo>(basis);
         }
     }
 
-    public static SequenceIterator filter(SequenceIterator base, NodePredicate predicate) {
-        if (predicate == null) {
-            return base;
-        }
-        return new AxisFilter(base, predicate);
-    }
-
     /**
      * AxisFilter is an iterator that applies a NodeTest filter to
-     * the nodes returned by an underlying SequenceIterator.
+     * the nodes returned by an underlying AxisIterator.
      */
 
-    private static class AxisFilter implements SequenceIterator {
-        private final SequenceIterator base;
+    public static class AxisFilter implements AxisIterator {
+        private final AxisIterator base;
         private final NodePredicate nodeTest;
 
         /**
@@ -1327,16 +1261,16 @@ public final class Navigator {
          *             returned by the AxisFilter
          */
 
-        public AxisFilter(SequenceIterator base, NodePredicate test) {
+        public AxisFilter(AxisIterator base, NodePredicate test) {
             this.base = base;
             nodeTest = test;
         }
 
         /*@Nullable*/
         @Override
-        public GNode next() {
+        public NodeInfo next() {
             while (true) {
-                GNode next = (GNode)base.next();
+                NodeInfo next = base.next();
                 if (next == null) {
                     return null;
                 }
@@ -1353,8 +1287,8 @@ public final class Navigator {
      * nodes returned by an underlying AxisIterator.
      */
 
-    public static class EmptyTextFilter implements SequenceIterator {
-        private final SequenceIterator base;
+    public static class EmptyTextFilter implements AxisIterator {
+        private final AxisIterator base;
 
         /**
          * Construct an EmptyTextFilter
@@ -1363,7 +1297,7 @@ public final class Navigator {
          *             a required axis. This must not be an atomizing iterator
          */
 
-        public EmptyTextFilter(SequenceIterator base) {
+        public EmptyTextFilter(AxisIterator base) {
             this.base = base;
         }
 
@@ -1371,7 +1305,7 @@ public final class Navigator {
         @Override
         public NodeInfo next() {
             while (true) {
-                NodeInfo next = (NodeInfo)base.next();
+                NodeInfo next = base.next();
                 if (next == null) {
                     return null;
                 }
@@ -1387,11 +1321,11 @@ public final class Navigator {
      * General-purpose implementation of the ancestor and ancestor-or-self axes
      */
 
-    public static final class AncestorIterator implements SequenceIterator {
+    public static final class AncestorIterator implements AxisIterator {
 
         private final boolean includeSelf;
         private boolean atStart;
-        private GNode current;
+        private NodeInfo current;
 
         /**
          * Create an iterator over the ancestor or ancestor-or-self axis
@@ -1400,14 +1334,14 @@ public final class Navigator {
          * @param includeSelf true if the "self" node is to be included
          */
 
-        public AncestorIterator(GNode start, boolean includeSelf) {
+        public AncestorIterator(NodeInfo start, boolean includeSelf) {
             this.includeSelf = includeSelf;
             current = start;
             atStart = true;
         }
 
         @Override
-        public final GNode next() {
+        public final NodeInfo next() {
             if (atStart) {
                 atStart = false;
                 if (includeSelf) {
@@ -1417,7 +1351,7 @@ public final class Navigator {
             return current = current == null ? null : current.getParent();
         }
 
-    } // end of class AncestorIterator
+    } // end of class AncestorEnumeration
 
     /**
      * General-purpose implementation of the descendant and descendant-or-self axes,
@@ -1428,11 +1362,11 @@ public final class Navigator {
      * returned first.
      */
 
-    public static final class DescendantIterator implements SequenceIterator {
+    public static final class DescendantIterator implements AxisIterator {
 
         private SequenceIterator children = null;
-        private SequenceIterator descendants = null;
-        private final GNode start;
+        private AxisIterator descendants = null;
+        private final NodeInfo start;
         private final boolean includeSelf;
         private final boolean forwards;
         private boolean atEnd = false;
@@ -1445,7 +1379,7 @@ public final class Navigator {
          * @param forwards    true for a forwards iteration, false for reverse order
          */
 
-        public DescendantIterator(GNode start,
+        public DescendantIterator(NodeInfo start,
                                   boolean includeSelf, boolean forwards) {
             this.start = start;
             this.includeSelf = includeSelf;
@@ -1453,9 +1387,9 @@ public final class Navigator {
         }
 
          @Override
-         public GNode next() {
+         public final NodeInfo next() {
             if (descendants != null) {
-                GNode nextd = (GNode)descendants.next();
+                NodeInfo nextd = descendants.next();
                 if (nextd != null) {
                     return nextd;
                 } else {
@@ -1463,7 +1397,7 @@ public final class Navigator {
                 }
             }
             if (children != null) {
-                GNode n = (GNode)children.next();
+                NodeInfo n = (NodeInfo)children.next();
                 if (n != null) {
                     if (n.hasChildNodes()) {
                         if (forwards) {
@@ -1491,12 +1425,12 @@ public final class Navigator {
             } else {
                 // we're just starting...
                 if (start.hasChildNodes()) {
-                    children = start.iterateChildAxis(null);
+                    children = start.iterateAxis(AxisInfo.CHILD);
                     if (!forwards) {
                         children = Reverse.getReverseIterator(children);
                     }
                 } else {
-                    children = EmptyIterator.getInstance();
+                    children = EmptyIterator.ofNodes();
                 }
                 if (forwards && includeSelf) {
                     return start;
@@ -1517,10 +1451,10 @@ public final class Navigator {
      * ancestor, child, and following-sibling axes
      */
 
-    public static final class FollowingIterator implements SequenceIterator {
-        private final SequenceIterator ancestorEnum;
-        private SequenceIterator siblingEnum;
-        private SequenceIterator descendEnum = null;
+    public static final class FollowingIterator implements AxisIterator {
+        /*@NotNull*/ private final AxisIterator ancestorEnum;
+        /*@Nullable*/ private AxisIterator siblingEnum;
+        /*@Nullable*/ private AxisIterator descendEnum = null;
 
         /**
          * Create an iterator over the "following" axis
@@ -1528,30 +1462,30 @@ public final class Navigator {
          * @param start the initial context node
          */
 
-        public FollowingIterator(/*@NotNull*/ GNode start) {
+        public FollowingIterator(/*@NotNull*/ NodeInfo start) {
             ancestorEnum = new AncestorIterator(start, false);
             switch (start.getNodeKind()) {
                 case Type.ELEMENT:
                 case Type.TEXT:
                 case Type.COMMENT:
                 case Type.PROCESSING_INSTRUCTION:
-                case Type.JNODE:
+                    //siblingEnum = new NodeWrapper.ChildEnumeration(start, false, true);
                     // gets following siblings
-                    siblingEnum = start.iterateFollowingSiblingAxis(null);
+                    siblingEnum = start.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
                     break;
                 case Type.ATTRIBUTE:
                 case Type.NAMESPACE:
                     //siblingEnum = new NodeWrapper.ChildEnumeration((NodeWrapper)start.getParent(), true, true);
                     // gets children of the attribute's parent node
-                    NodeInfo parent = (NodeInfo)start.getParent();
+                    NodeInfo parent = start.getParent();
                     if (parent == null) {
-                        siblingEnum = EmptyIterator.getInstance();
+                        siblingEnum = EmptyIterator.ofNodes();
                     } else {
-                        siblingEnum = parent.iterateChildAxis(null);
+                        siblingEnum = parent.iterateAxis(AxisInfo.CHILD);
                     }
                     break;
                 default:
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.ofNodes();
                     break;
             }
         }
@@ -1559,7 +1493,7 @@ public final class Navigator {
         @Override
         public final NodeInfo next() {
             if (descendEnum != null) {
-                NodeInfo nextd = (NodeInfo)descendEnum.next();
+                NodeInfo nextd = descendEnum.next();
                 if (nextd != null) {
                     return nextd;
                 } else {
@@ -1567,7 +1501,7 @@ public final class Navigator {
                 }
             }
             if (siblingEnum != null) {
-                NodeInfo nexts = (NodeInfo)siblingEnum.next();
+                NodeInfo nexts = siblingEnum.next();
                 if (nexts != null) {
                     if (nexts.hasChildNodes()) {
                         descendEnum = new DescendantIterator(nexts, false, true);
@@ -1580,12 +1514,13 @@ public final class Navigator {
                     siblingEnum = null;
                 }
             }
-            NodeInfo nexta = (NodeInfo)ancestorEnum.next();
+            NodeInfo nexta = ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.ofNodes();
                 } else {
-                    siblingEnum = nexta.iterateFollowingSiblingAxis(null);
+                    //siblingEnum = new NodeWrapper.ChildEnumeration(next, false, true);
+                    siblingEnum = nexta.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
                 }
                 return next();
             } else {
@@ -1596,42 +1531,28 @@ public final class Navigator {
     } // end of class FollowingEnumeration
 
     /**
-     * Iterate over all preceding and ancestor nodes, in reverse document order.
-     * This is the union of the preceding axis and the ancestor axis, and is
-     * used internally by xsl:number and a few other constructs
-     */
-
-    public static SequenceIterator iteratePrecedingOrAncestorAxis(GNode origin, NodePredicate predicate) {
-        PrecedingIterator iter = new PrecedingIterator(origin, true);
-        if (predicate != null && predicate != AnyGNodeTest.getInstance()) {
-            return new AxisFilter(iter, predicate);
-        }
-        return iter;
-    }
-
-    /**
      * Helper method to iterate over the preceding axis, or Saxon's internal
      * preceding-or-ancestor axis, by making use of the ancestor, descendant, and
      * preceding-sibling axes.
      */
 
-    public static final class PrecedingIterator implements SequenceIterator {
+    public static final class PrecedingIterator implements AxisIterator {
 
-        /*@NotNull*/ private final SequenceIterator ancestorEnum;
-        /*@Nullable*/ private SequenceIterator siblingEnum;
-        /*@Nullable*/ private SequenceIterator descendEnum = null;
+        /*@NotNull*/ private final AxisIterator ancestorEnum;
+        /*@Nullable*/ private AxisIterator siblingEnum;
+        /*@Nullable*/ private AxisIterator descendEnum = null;
         private final boolean includeAncestors;
 
         /**
          * Create an iterator for the preceding or "preceding-or-ancestor" axis (the latter being
-         * used internally to support xsl:number)
+         * used internall to support xsl:number)
          *
          * @param start            the initial context node
          * @param includeAncestors true if ancestors of the initial context node are to be included
          *                         in the result
          */
 
-        public PrecedingIterator(/*@NotNull*/ GNode start, boolean includeAncestors) {
+        public PrecedingIterator(/*@NotNull*/ NodeInfo start, boolean includeAncestors) {
             this.includeAncestors = includeAncestors;
             ancestorEnum = new AncestorIterator(start, false);
             switch (start.getNodeKind()) {
@@ -1639,12 +1560,11 @@ public final class Navigator {
                 case Type.TEXT:
                 case Type.COMMENT:
                 case Type.PROCESSING_INSTRUCTION:
-                case Type.JNODE:
                     // get preceding-sibling enumeration
-                    siblingEnum = start.iteratePrecedingSiblingAxis(null);
+                    siblingEnum = start.iterateAxis(AxisInfo.PRECEDING_SIBLING);
                     break;
                 default:
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.ofNodes();
                     break;
             }
         }
@@ -1652,7 +1572,7 @@ public final class Navigator {
         @Override
         public final NodeInfo next() {
             if (descendEnum != null) {
-                NodeInfo nextd = (NodeInfo)descendEnum.next();
+                NodeInfo nextd = descendEnum.next();
                 if (nextd != null) {
                     return nextd;
                 } else {
@@ -1660,7 +1580,7 @@ public final class Navigator {
                 }
             }
             if (siblingEnum != null) {
-                NodeInfo nexts = (NodeInfo)siblingEnum.next();
+                NodeInfo nexts = siblingEnum.next();
                 if (nexts != null) {
                     if (nexts.hasChildNodes()) {
                         descendEnum = new DescendantIterator(nexts, true, false);
@@ -1674,12 +1594,12 @@ public final class Navigator {
                     siblingEnum = null;
                 }
             }
-            NodeInfo nexta = (NodeInfo)ancestorEnum.next();
+            NodeInfo nexta = ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.ofNodes();
                 } else {
-                    siblingEnum = nexta.iteratePrecedingSiblingAxis(null);
+                    siblingEnum = nexta.iterateAxis(AxisInfo.PRECEDING_SIBLING);
                 }
                 if (!includeAncestors) {
                     return next();

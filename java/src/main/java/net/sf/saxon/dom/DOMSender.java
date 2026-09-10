@@ -167,13 +167,20 @@ public class DOMSender {
     private void sendElement(Element startNode) throws XPathException {
         List<Element> ancestors = new ArrayList<>();
         NamespaceMap inScopeNamespaces = NamespaceMap.emptyMap();
-        Node parent = startNode;
-        while (parent != null && parent.getNodeType() == Type.ELEMENT) {
-            ancestors.add((Element) parent);
-            parent = parent.getParentNode();
-        }
-        for (int i=ancestors.size()-1; i>=0; i--) {
-            inScopeNamespaces = inScopeNamespaces.applyDifferences(gatherNamespaces(ancestors.get(i)));
+
+        // Bug 6866 - if there are no local namespace declarations, reuse the parent namespace map
+        NamespaceDeltaMap delta = gatherNamespaces(startNode);
+        if (delta.isEmpty() && !namespaces.isEmpty()) {
+            inScopeNamespaces = namespaces.peek();
+        } else {
+            Node parent = startNode;
+            while (parent != null && parent.getNodeType() == Type.ELEMENT) {
+                ancestors.add((Element) parent);
+                parent = parent.getParentNode();
+            }
+            for (int i = ancestors.size() - 1; i >= 0; i--) {
+                inScopeNamespaces = inScopeNamespaces.applyDifferences(gatherNamespaces(ancestors.get(i)));
+            }
         }
 
         namespaces.push(inScopeNamespaces);
