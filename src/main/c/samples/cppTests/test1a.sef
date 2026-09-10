@@ -1,38 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package xmlns='http://ns.saxonica.com/xslt/export' xmlns:fn='http://www.w3.org/2005/xpath-functions' xmlns:java-type='http://saxon.sf.net/java-type' xmlns:vv='http://saxon.sf.net/generated-variable' xmlns:xs='http://www.w3.org/2001/XMLSchema' when='2021-10-13T07:13:43.305+01:00' id='0' version='20' packageVersion='1' saxonProduct='SAXON-EE' saxonVersion='10.6' buildDateTime='2021-10-13T07:13:43.305+01:00' target='EE' targetVersion='1' relocatable='false' implicit='true'>
+<package xmlns='http://ns.saxonica.com/xslt/export' xmlns:fn='http://www.w3.org/2005/xpath-functions' xmlns:java-type='http://saxon.sf.net/java-type' xmlns:vv='http://saxon.sf.net/generated-variable' xmlns:xs='http://www.w3.org/2001/XMLSchema' when='2021-10-21T12:13:09.11+01:00' id='0' version='30' packageVersion='1' saxonProduct='SAXON-EE' saxonVersion='11.0' buildDateTime='2021-10-21T12:13:09.111+01:00' target='EE' targetVersion='1' relocatable='false' implicit='true'>
  <co id='0' binds='1'>
-  <globalVariable name='Q{http://saxon.sf.net/generated-variable}gg1670113648' as='?AS' line='13' module='file:///home/ond1/work/repository/saxondev/src/main/c/samples/cppTests/test.xsl' visibility='PRIVATE'>
-   <convert baseUri='file:///home/ond1/work/repository/saxondev/src/main/c/samples/cppTests/test.xsl' ns='xsl=~ xml=~' line='13' from='A' to='AS'>
-    <arith op='*' calc='a*a'>
-     <cvUntyped to='AO'>
-      <atomSing card='?' diag='1|0||*'>
-       <gVarRef name='Q{}numParam' bSlot='0'/>
-      </atomSing>
-     </cvUntyped>
-     <int val='2'/>
-    </arith>
-   </convert>
-  </globalVariable>
- </co>
- <co id='1' binds=''>
-  <globalParam name='Q{}numParam' as='*' line='4' module='file:///home/ond1/work/repository/saxondev/src/main/c/samples/cppTests/test.xsl' visibility='PUBLIC'>
-   <int val='2'/>
-  </globalParam>
- </co>
- <co id='2' binds=''>
-  <template name='Q{}custom' flags='os' line='19' module='file:///home/ond1/work/repository/saxondev/src/main/c/samples/cppTests/test.xsl' slots='0'>
-   <elem role='body' baseUri='file:///home/ond1/work/repository/saxondev/src/main/c/samples/cppTests/test.xsl' ns='xsl=~ xml=~' line='20' name='out' nsuri=''>
-    <valueOf flags='Sl'>
-     <str val='text1'/>
-    </valueOf>
-   </elem>
-  </template>
- </co>
- <co id='3' binds='0'>
   <mode onNo='TC' flags='dW' patternSlots='0'>
-   <templateRule prec='0' prio='-0.5' seq='0' rank='0' minImp='0' slots='0' matches='NE' flags='s' line='7' module='file:///home/ond1/work/repository/saxondev/src/main/c/samples/cppTests/test.xsl'>
+   <templateRule prec='0' prio='-0.5' seq='0' rank='0' minImp='0' slots='0' matches='NE' flags='s' line='7' module='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl'>
     <p.nodeTest role='match' test='NE'/>
-    <sequence role='action' baseUri='file:///home/ond1/work/repository/saxondev/src/main/c/samples/cppTests/test.xsl' ns='xsl=~ xml=~' line='8'>
+    <sequence role='action' baseUri='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl' ns='xsl=~ xml=~' line='8'>
      <elem name='output' nsuri=''>
       <sequence line='10'>
        <forEach>
@@ -49,7 +21,7 @@
        </forEach>
        <elem line='13' name='out' nsuri='' flags='l'>
         <valueOf flags='l'>
-         <gVarRef name='Q{http://saxon.sf.net/generated-variable}gg1670113648' bSlot='0'/>
+         <gVarRef name='Q{http://saxon.sf.net/generated-variable}gg243080944' bSlot='0'/>
         </valueOf>
        </elem>
       </sequence>
@@ -72,12 +44,40 @@
    </templateRule>
   </mode>
  </co>
+ <co id='1' binds='2'>
+  <globalVariable name='Q{http://saxon.sf.net/generated-variable}gg243080944' as='?AS' line='13' module='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl' visibility='PRIVATE'>
+   <convert baseUri='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl' ns='xsl=~ xml=~' line='13' from='A' to='AS'>
+    <arith op='*' calc='a*a'>
+     <cvUntyped to='AO'>
+      <atomSing card='?' diag='1|0||*'>
+       <gVarRef name='Q{}numParam' bSlot='0'/>
+      </atomSing>
+     </cvUntyped>
+     <int val='2'/>
+    </arith>
+   </convert>
+  </globalVariable>
+ </co>
+ <co id='3' binds=''>
+  <template name='Q{}custom' flags='os' line='19' module='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl' slots='0'>
+   <elem role='body' baseUri='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl' ns='xsl=~ xml=~' line='20' name='out' nsuri=''>
+    <valueOf flags='Sl'>
+     <str val='text1'/>
+    </valueOf>
+   </elem>
+  </template>
+ </co>
+ <co id='2' binds=''>
+  <globalParam name='Q{}numParam' as='*' line='4' module='file:///home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/test.xsl' visibility='PUBLIC'>
+   <int val='2'/>
+  </globalParam>
+ </co>
  <overridden/>
  <output>
   <property name='indent' value='yes'/>
-  <property name='Q{http://saxon.sf.net/}stylesheet-version' value='20'/>
+  <property name='Q{http://saxon.sf.net/}stylesheet-version' value='30'/>
   <property name='method' value='xml'/>
  </output>
  <decimalFormat/>
 </package>
-<?Σ 9918cc1b?>
+<?Σ ac29ef1b?>

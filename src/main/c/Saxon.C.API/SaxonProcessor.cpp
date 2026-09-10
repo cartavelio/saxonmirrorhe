@@ -705,7 +705,7 @@ const char *SaxonProcessor::version() {
         const char *tempVersionStr = SaxonProcessor::sxn_environ->env->GetStringUTFChars(jstr, nullptr);
         int verLen = strlen(tempVersionStr) + 22 + strlen(CVERSION) + 1;
         versionStr = new char[verLen];
-        snprintf(versionStr, verLen, "Saxon/C %s %s %s", CVERSION, "running with", tempVersionStr);
+        snprintf(versionStr, verLen, "SaxonC %s %s %s", CVERSION, "running with", tempVersionStr);
         SaxonProcessor::sxn_environ->env->ReleaseStringUTFChars(jstr, tempVersionStr);
 
 
@@ -936,7 +936,7 @@ void SaxonProcessor::release() {
         /*clearParameters();
         clearProperties();*/
     } else {
-#ifdef DEBUG                                           s
+#ifdef DEBUG                                           
         std::cerr << "SaxonProc: JVM finalize not called!" << std::endl;
 #endif
     }
