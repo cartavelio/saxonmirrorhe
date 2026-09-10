@@ -28,14 +28,14 @@
       this, and can be hidden using the "C" checkbox at the bottom of the page.</p>
    
    <h2 class="subtitle">XML technologies</h2>
-   
-   <p class="qt4">Saxon 13 includes implementations of many new features in the draft 4.0
-      specifications produced by the QT4 Community Group. See <a class="bodylink"
-         href="/v4extensions">QT4 extensions</a> for more details.</p>
 
    <p>Saxon 13 includes highly conformant implementations of the current W3C Recommendations: XSLT
       3.0, XQuery 3.1, XPath 3.1, and XSD 1.1. See <a class="bodylink" href="/conformance">Standards
          conformance</a> for more details.</p>
+   
+   <p class="qt4">Saxon 13 also includes implementations of many new features in the draft 4.0
+      specifications produced by the QT4 Community Group. See <a class="bodylink"
+         href="/v4extensions">QT4 extensions</a> for more details.</p>
 
    <p>Support for older specifications such as XSLT 2.0 and XQuery 1.0 has been dropped, but of course
       the newer specifications have a high level of backwards compatibility so existing code should
