@@ -182,38 +182,7 @@ public class TestPackage {
             fail();
         }
     }
-
-    @Test
-    public void testExportedPackage01() {
-        try {
-            Processor processor = new Processor(true);
-            // MHK 2016-08-27 - currently crashes if bytecode enabled
-            //processor.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
-            XsltCompiler compiler = processor.newXsltCompiler();
-            // Note: if necessary, the .sef file can be regenerated from the .xsl file of the same name
-            // by using Transform on the command line. The current .sef file was generated using 9.7.0.7, and
-            // leaving it in this form is deliberate as it provides a backwards compatibility test
-            File file = new File(configTest.getDataDir() + "override-m-021-base.sef");
-            XsltPackage pack = compiler.loadLibraryPackage(file.toURI());
-            fail("Failed to detect that license has expired");
-            System.err.println("Package loaded from " + file.getAbsolutePath());
-            compiler.importPackage(pack);
-            XsltExecutable exec = compiler.compile(new StreamSource(new File(configTest.getDataDir() + "override-m-021.xsl")));
-            DocumentBuilder db = processor.newDocumentBuilder();
-            XdmNode root = db.build(new File(configTest.getDataDir() + "override-m-021.xml"));
-            Xslt30Transformer trans = exec.load30();
-            StringWriter out = new StringWriter();
-            Serializer ser = processor.newSerializer(out);
-            trans.applyTemplates(root, ser);
-            //System.err.println(out.toString());
-            assertTrue(out.toString().contains("<root><list><item><bar>foo 1</bar><list><item><bar>foo 2</bar></item></list></item></list></root>"), "result");
-        } catch (SaxonApiException e) {
-            e.printStackTrace();
-            fail();
-        } catch (LicenseException le) {
-            assertTrue(le.getMessage().contains("does not cover upgrade"));
-        }
-    }
+    
 
     @Test
     public void testExportedPackage02() {

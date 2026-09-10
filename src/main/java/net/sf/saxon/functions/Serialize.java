@@ -71,7 +71,7 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption("suppress-indentation", listOfQNames);
         //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
         op.addAllowedOption("undeclare-prefixes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        op.addAllowedOption("use-character-maps", SequenceType.one(MapType.ANY_MAP_TYPE));
+        op.addAllowedOption("use-character-maps", SequenceType.SINGLE_MAP);
         //use-character-maps-param-type
         op.addAllowedOption("version", SequenceType.SINGLE_STRING);
 
@@ -156,7 +156,7 @@ public class Serialize extends SystemFunction implements Callable {
         requiredTypes.put("suppress-indentation", BuiltInAtomicType.QNAME.zeroOrMore());
         //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
         requiredTypes.put("undeclare-prefixes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("use-character-maps", SequenceType.one(MapType.ANY_MAP_TYPE));
+        requiredTypes.put("use-character-maps", SequenceType.SINGLE_MAP);
         //use-character-maps-param-type
         requiredTypes.put("version", SequenceType.SINGLE_STRING); //string-param-type
     }

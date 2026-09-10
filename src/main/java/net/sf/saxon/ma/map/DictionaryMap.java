@@ -259,7 +259,7 @@ public class DictionaryMap extends StringMap {
      * Get the lowest common item type of the keys in the map
      *
      * @return the most specific type to which all the keys belong. If the map is
-     * empty, return UType.VOID
+     * empty, return {@link UType#VOID}
      */
     @Override
     public UType getKeyUType() {

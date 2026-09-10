@@ -38,11 +38,14 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.query.XQueryFunctionLibrary;
+import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeChar;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.PackageVersion;
 import net.sf.saxon.style.StylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetPackage;
@@ -1015,13 +1018,20 @@ public class PackageLoaderHE implements IPackageLoader {
             NodeInfo att;
             while ((att = attributeIter.next()) != null) {
                 if (DecimalSymbols.isValidPropertyName(att.getLocalPart())) {
-                    symbols.setProperty(att.getLocalPart(), att.getUnicodeStringValue());
+                    // In releases before 13.x, single-character properties were output as a decimal codepoint.
+                    UnicodeString val = att.getUnicodeStringValue();
+                    if (val.length() >= 2 && allNumeric.matches(val)) {
+                        val = new UnicodeChar(Integer.parseInt(val.toString()));
+                    }
+                    symbols.setProperty(att.getLocalPart(), val);
                 }
             }
             symbols.setHostLanguage(HostLanguage.XSLT, 31);
 
         }
     }
+
+    private static ARegularExpression allNumeric = ARegularExpression.compile("[0-9]+", "");
 
 
     /**

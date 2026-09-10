@@ -2657,7 +2657,7 @@ public class XQueryParser extends XPathParser {
         for (LocalVariableBinding b : ungroupedBindings) {
             ItemType itemType = b.getRequiredType().getPrimaryType();
             bindings[k] = new LocalVariableBinding(b.getVariableQName(),
-                                                   SequenceType.makeSequenceType(itemType, StaticProperty.ALLOWS_ZERO_OR_MORE));
+                                                   SequenceType.zeroOrMore(itemType));
             //declareRangeVariable(bindings[k]);
             k++;
         }

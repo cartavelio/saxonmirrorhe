@@ -108,8 +108,7 @@ public class QuantifiedExpression extends Assignation {
                     .asTypeError().withLocation(getLocation());
         }
 
-        SequenceType sequenceType = SequenceType.makeSequenceType(decl.getPrimaryType(),
-                StaticProperty.ALLOWS_ZERO_OR_MORE);
+        SequenceType sequenceType = SequenceType.zeroOrMore(decl.getPrimaryType());
         Supplier<RoleDiagnostic> role =
                 () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
 

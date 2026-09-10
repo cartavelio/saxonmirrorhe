@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -327,14 +328,11 @@ public final class SequenceType {
      * A type that allows an optional numeric value
      */
 
-    public static final SequenceType OPTIONAL_NUMERIC =
-            makeSequenceType(NumericType.getInstance(), StaticProperty.ALLOWS_ZERO_OR_ONE);
+    public static final SequenceType OPTIONAL_NUMERIC = optional(NumericType.getInstance());
 
-    public static final SequenceType SINGLE_NUMERIC =
-            makeSequenceType(NumericType.getInstance(), StaticProperty.EXACTLY_ONE);
+    public static final SequenceType SINGLE_NUMERIC = one(NumericType.getInstance());
 
-    public static final SequenceType NUMERIC_SEQUENCE =
-            makeSequenceType(NumericType.getInstance(), StaticProperty.ALLOWS_ZERO_OR_MORE);
+    public static final SequenceType NUMERIC_SEQUENCE = zeroOrMore(NumericType.getInstance());
 
     /**
      * A type that allows zero or one nodes
@@ -374,20 +372,24 @@ public final class SequenceType {
      * A type that allows a single function item
      */
 
-    public static final SequenceType SINGLE_FUNCTION =
-            makeSequenceType(AnyFunctionType.ANY_FUNCTION, StaticProperty.EXACTLY_ONE);
+    public static final SequenceType SINGLE_FUNCTION = one(AnyFunctionType.ANY_FUNCTION);
 
     /**
      * A type that allows a sequence of zero or one function items
      */
-    public static final SequenceType OPTIONAL_FUNCTION_ITEM =
-            makeSequenceType(AnyFunctionType.getInstance(), StaticProperty.ALLOWS_ZERO_OR_ONE);
+    public static final SequenceType OPTIONAL_FUNCTION_ITEM = optional(AnyFunctionType.getInstance());
 
     /**
      * A type that allows a sequence of zero or mode function items
      */
-    public static final SequenceType FUNCTION_ITEM_SEQUENCE =
-            makeSequenceType(AnyFunctionType.getInstance(), StaticProperty.ALLOWS_ZERO_OR_MORE);
+    public static final SequenceType FUNCTION_ITEM_SEQUENCE = zeroOrMore(AnyFunctionType.getInstance());
+
+    /**
+     * A type that allows a single map item
+     */
+    public static final SequenceType SINGLE_MAP = one(MapType.ANY_MAP_TYPE);
+    public static final SequenceType OPTIONAL_MAP = optional(MapType.ANY_MAP_TYPE);
+    public static final SequenceType MAP_SEQUENCE = zeroOrMore(MapType.ANY_MAP_TYPE);
 
 
     /**

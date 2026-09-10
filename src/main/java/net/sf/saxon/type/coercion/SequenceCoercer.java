@@ -66,6 +66,9 @@ public final class SequenceCoercer extends UnaryExpression {
             }
             return result;
         }
+        if (requiredItemType.isAtomicType() && sequence.getItemType().getGenre() == Genre.NODE) {
+            sequence = new Atomizer(sequence, role);
+        }
         return new SequenceCoercer(sequence, requiredType, role, allow40);
     }
 

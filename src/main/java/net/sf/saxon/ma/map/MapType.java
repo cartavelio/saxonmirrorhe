@@ -34,13 +34,6 @@ public class MapType extends AnyFunctionType {
     // The type of a map with no entries. It's handled specially in some static type inferencing rules
     public final static MapType EMPTY_MAP_TYPE = new MapType(BuiltInAtomicType.ANY_ATOMIC, SequenceType.ANY_SEQUENCE, true);
 
-    /**
-     * A type that allows a sequence of zero or one map items
-     */
-    public static final SequenceType OPTIONAL_MAP_ITEM = SequenceType.optional(ANY_MAP_TYPE);
-    public static final SequenceType SINGLE_MAP_ITEM = SequenceType.one(ANY_MAP_TYPE);
-    public static final SequenceType SEQUENCE_OF_MAPS = SequenceType.zeroOrMore(ANY_MAP_TYPE);
-
     private final PlainType keyType;
     private final SequenceType valueType;
     private final boolean mustBeEmpty;

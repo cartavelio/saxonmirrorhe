@@ -10,7 +10,6 @@ package net.sf.saxon.expr;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ExternalObjectModel;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeString;
@@ -92,7 +91,7 @@ public abstract class PJConverter {
         jpmap.put(Base64BinaryValue.class, SequenceType.OPTIONAL_BASE64_BINARY);
         jpmap.put(HexBinaryValue.class, SequenceType.OPTIONAL_HEX_BINARY);
         jpmap.put(FunctionItem.class, SequenceType.OPTIONAL_FUNCTION_ITEM);
-        jpmap.put(MapItem.class, MapType.OPTIONAL_MAP_ITEM);
+        jpmap.put(MapItem.class, SequenceType.OPTIONAL_MAP);
         jpmap.put(NodeInfo.class, SequenceType.OPTIONAL_NODE);
         jpmap.put(TreeInfo.class, SequenceType.OPTIONAL_DOCUMENT_NODE);
 

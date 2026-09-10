@@ -13,7 +13,6 @@ import net.sf.saxon.Version;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.lib.*;
@@ -21,7 +20,6 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.CharacterMap;
@@ -83,30 +81,31 @@ public class TransformFn extends SystemFunction implements Callable {
         op.addAllowedOption("stylesheet-text", SequenceType.SINGLE_STRING);
         op.addAllowedOption("stylesheet-base-uri", SequenceType.SINGLE_STRING);
         op.addAllowedOption("base-output-uri", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("stylesheet-params", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
+        op.addAllowedOption("stylesheet-params", SequenceType.SINGLE_MAP);
         op.addAllowedOption("source-node", SequenceType.SINGLE_NODE);
         op.addAllowedOption("source-location", SequenceType.SINGLE_STRING); // Saxon extension (feature 3619)
         op.addAllowedOption("initial-mode", SequenceType.SINGLE_QNAME);
         op.addAllowedOption("initial-match-selection", SequenceType.ANY_SEQUENCE);
         op.addAllowedOption("initial-template", SequenceType.SINGLE_QNAME);
         op.addAllowedOption("delivery-format", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("serialization-params", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
-        op.addAllowedOption("vendor-options", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
+        op.addAllowedOption("serialization-params", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("vendor-options", SequenceType.SINGLE_MAP);
         op.addAllowedOption("cache", SequenceType.SINGLE_BOOLEAN);
         op.addAllowedOption("package-name", SequenceType.SINGLE_STRING);
         op.addAllowedOption("package-version", SequenceType.SINGLE_STRING);
         op.addAllowedOption("package-node", SequenceType.SINGLE_NODE);
         op.addAllowedOption("package-location", SequenceType.SINGLE_STRING);
-        op.addAllowedOption("static-params", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
+        op.addAllowedOption("static-params", SequenceType.SINGLE_MAP);
         op.addAllowedOption("global-context-item", SequenceType.SINGLE_ITEM);
-        op.addAllowedOption("template-params", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
-        op.addAllowedOption("tunnel-params", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
+        op.addAllowedOption("template-params", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("tunnel-params", SequenceType.SINGLE_MAP);
         op.addAllowedOption("initial-function", SequenceType.SINGLE_QNAME);
         op.addAllowedOption("function-params", ArrayItemType.SINGLE_ARRAY);
-        op.addAllowedOption("requested-properties", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
-        op.addAllowedOption("post-process", SequenceType.makeSequenceType(
-                new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_STRING, SequenceType.ANY_SEQUENCE}, SequenceType.ANY_SEQUENCE),
-                StaticProperty.EXACTLY_ONE));
+        op.addAllowedOption("requested-properties", SequenceType.SINGLE_MAP);
+        op.addAllowedOption("post-process", SequenceType.one(
+                new SpecificFunctionType(
+                        new SequenceType[]{SequenceType.SINGLE_STRING, SequenceType.ANY_SEQUENCE},
+                        SequenceType.ANY_SEQUENCE)));
                 // function(xs:string, item()*) as item()*
         return op;
     }
