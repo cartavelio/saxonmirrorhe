@@ -124,9 +124,9 @@
             installation dependencies.</p>
          <ol>
             <li>
-               <p>Ensure that Java is installed. SaxonJ 12 requires Java 11 or later. If for some
-                  reason you need to run with an earlier Java release, SaxonJ 9.8 ran with Java SE 6 or later,
-                  while SaxonJ 11 ran with Java 8 or later.
+               <p>Ensure that Java is installed. SaxonJ 12 is built and tested using Java 11, but should still
+                  be usable with Java 8 or later. If for some reason you need to run with an earlier Java
+                  release, SaxonJ 9.8 ran with Java SE 6 or later, while SaxonJ 11 ran with Java 8 or later.
                   To check that Java is installed, try typing <code>java -version</code>
                   at the command prompt. If it is not installed, you can <a
                      href="https://www.oracle.com/java/technologies/downloads/"
