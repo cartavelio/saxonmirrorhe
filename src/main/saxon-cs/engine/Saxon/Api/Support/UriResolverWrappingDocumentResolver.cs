@@ -71,10 +71,14 @@ namespace Saxon.Api.Support {
             if (resource is TextResource text) {
                 return StandardURIResolver.ConvertToActiveSource(text, text.ResourceUri, config);
             }
-            else {
-                XdmNode node = (XdmNode)resource.GetXdmItem();
-                return new NodeSource(node.Implementation);
+            if (resource != null) {
+                XdmItem item = resource.GetXdmItem();
+                if (item is XdmNode node) {
+                    return new NodeSource(node.Implementation);
+                }
             }
+
+            return null;
         }
     }
 }

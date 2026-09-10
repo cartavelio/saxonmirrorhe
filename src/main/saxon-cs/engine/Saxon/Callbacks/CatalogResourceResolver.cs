@@ -15,7 +15,7 @@ namespace Saxon.Callbacks {
     /// API for resolving URIs, as well as implementing the (highly fragile) .NET XmlResolver interface.
     /// </summary>
     public class CatalogResourceResolver : CommonResourceResolver {
-        private readonly Org.XmlResolver.Resolver resolver;
+        private readonly Org.XmlResolver.Resolver catalogBasedResolver;
 
         /// <summary>
         /// Create a CatalogResourceResolver using a default catalog resolver
@@ -24,7 +24,7 @@ namespace Saxon.Callbacks {
             XmlResolverConfiguration resolverConfig = new(null, new List<string>());
             // Enable searching of the XmlResolverData library, which holds copies of well-known W3C resources such as DTDs
             resolverConfig.SetFeature(ResolverFeature.ASSEMBLY_CATALOGS, "XmlResolverData.dll");
-            resolver = new(resolverConfig);
+            catalogBasedResolver = new(resolverConfig);
         }
         
         /// <summary>
@@ -33,11 +33,11 @@ namespace Saxon.Callbacks {
         /// </summary>
 
         public CatalogResourceResolver(Org.XmlResolver.Resolver resolver) {
-            this.resolver = resolver;
+            this.catalogBasedResolver = resolver;
         }
 
         public override CommonResourceResolver NewInstance() {
-            CommonResourceResolver newResolver = new CatalogResourceResolver();
+            CommonResourceResolver newResolver = new CatalogResourceResolver(catalogBasedResolver);
             newResolver.CopyFrom(this);
             return newResolver;
         }
@@ -51,17 +51,17 @@ namespace Saxon.Callbacks {
         /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
         /// resource.</returns>
         public override IResource Resolve(ResourceRequest request) {
-            if (resolver != null) {
+            if (catalogBasedResolver != null) {
                 try {
                     ResolvedResource rr;
                     if (request.UriIsNamespace) {
-                        rr = resolver.CatalogResolver.ResolveNamespace(
+                        rr = catalogBasedResolver.CatalogResolver.ResolveNamespace(
                             request.Uri.ToString(), null, request.Nature, request.Purpose);
                     }
                     else {
                         string href = request.RelativeUri ?? request.Uri.ToString();
                         Uri baseUri = request.BaseUri ?? request.Uri;
-                        rr = resolver.CatalogResolver.ResolveUri(href, baseUri.ToString());
+                        rr = catalogBasedResolver.CatalogResolver.ResolveUri(href, baseUri.ToString());
                         
                     }
                     if (rr != null) {
@@ -91,15 +91,15 @@ namespace Saxon.Callbacks {
         }
 
         public override void SetFeature(ResolverFeature feature, object value) {
-            if (resolver == null) {
+            if (catalogBasedResolver == null) {
                 throw new NullReferenceException();
             }
 
-            resolver.GetConfiguration().SetFeature(feature, value);
+            catalogBasedResolver.GetConfiguration().SetFeature(feature, value);
         }
 
         public override object GetFeature(ResolverFeature resolverFeature) {
-            return resolver?.GetConfiguration().GetFeature(resolverFeature);
+            return catalogBasedResolver?.GetConfiguration().GetFeature(resolverFeature);
         }
 
         public override XmlResolver GetEntityResolver() {
@@ -118,7 +118,7 @@ namespace Saxon.Callbacks {
 
             public override object GetEntity(System.Uri absoluteUri, string role, System.Type ofObjectToReturn) {
                 object result = null;
-                Org.XmlResolver.Resolver resolver = _commonResourceResolver.resolver;
+                Org.XmlResolver.Resolver resolver = _commonResourceResolver.catalogBasedResolver;
                 if (resolver != null) {
                     CatalogResolver catalogResolver = resolver.CatalogResolver;
                     string arg = absoluteUri.ToString();
@@ -162,7 +162,7 @@ namespace Saxon.Callbacks {
                     return new Uri(relativeUri, UriKind.Relative);
                 }
 
-                Org.XmlResolver.Resolver resolver = _commonResourceResolver.resolver;
+                Org.XmlResolver.Resolver resolver = _commonResourceResolver.catalogBasedResolver;
                 if (resolver != null) {
                     result = resolver.ResolveUri(baseUri, relativeUri);
                 }
