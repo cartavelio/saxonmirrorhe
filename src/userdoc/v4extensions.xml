@@ -61,7 +61,7 @@
          <section id="union-types" title="Union types">
             <h1>Union types</h1>
 
-            <aside>Requires SaxonCS or Saxon-EE, with syntax extensions enabled.</aside>
+            <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 9.8.</aside>
 
             <p>A construct of the form <code class="bold"
                   >union(type1, type2, type3)</code> can be used to define simple 
