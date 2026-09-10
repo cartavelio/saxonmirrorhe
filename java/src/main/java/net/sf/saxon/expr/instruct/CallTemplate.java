@@ -378,7 +378,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         c2.setCurrentComponent(target);
         c2.setOrigin(this);
         c2.openStackFrame(t.getStackFrameMap());
-        c2.setLocalParameters(assembleParams(context, actualParams));
+        c2.setLocalParameters(assembleParams(context, actualParams, false));
         c2.setTunnelParameters(assembleTunnelParams(context, tunnelParams));
         if (isWithinDeclaredStreamableConstruct) {
             c2.setCurrentGroupIterator(null);
@@ -587,7 +587,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
 
                     // handle parameters if any
 
-                    ParameterSet params = assembleParams(context, expr.actualParams);
+                    ParameterSet params = assembleParams(context, expr.actualParams, false);
                     ParameterSet tunnels = assembleTunnelParams(context, expr.tunnelParams);
 
                     // Call the named template. Actually, don't call it; rather construct a call package
@@ -622,7 +622,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
                     c2.setCurrentComponent(target);
                     c2.setOrigin(expr);
                     c2.openStackFrame(t.getStackFrameMap());
-                    c2.setLocalParameters(assembleParams(context, expr.actualParams));
+                    c2.setLocalParameters(assembleParams(context, expr.actualParams, false));
                     c2.setTunnelParameters(assembleTunnelParams(context, expr.tunnelParams));
                     if (expr.isWithinDeclaredStreamableConstruct) {
                         c2.setCurrentGroupIterator(null);

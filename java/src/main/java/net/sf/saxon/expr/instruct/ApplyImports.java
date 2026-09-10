@@ -57,6 +57,7 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
         ApplyImports ai2 = new ApplyImports();
         ai2.setActualParams(WithParam.copy(ai2, getActualParams(), rebindings));
         ai2.setTunnelParams(WithParam.copy(ai2, getTunnelParams(), rebindings));
+        ai2.setEffectiveVersion(effectiveVersion);
         ExpressionTool.copyLocationInfo(this, ai2);
         return ai2;
     }
@@ -102,12 +103,13 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
         public PushEvaluator elaborateForPush() {
             ApplyImports expr = (ApplyImports) getExpression();
             Location loc = expr.getLocation();
+            boolean supplyAllParams = expr.effectiveVersion >= 40;
             return (output, context) -> {
                 Controller controller = context.getController();
                 assert controller != null;
 
                 // handle parameters if any
-                ParameterSet params = assembleParams(context, expr.getActualParams());
+                ParameterSet params = assembleParams(context, expr.getActualParams(), supplyAllParams);
                 ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
 
                 Rule currentTemplateRule = context.getCurrentTemplateRule();

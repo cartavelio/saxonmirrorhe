@@ -26,8 +26,27 @@ public abstract class ApplyNextMatchingTemplate extends Instruction implements I
 
     private WithParam[] actualParams;
     private WithParam[] tunnelParams;
+    protected int effectiveVersion = 30;
 
     public ApplyNextMatchingTemplate() {
+    }
+
+    /**
+     * Set the effective version (from the version attribute of the stylesheet)
+     * The effective version (40 for XSLT 4.0)
+     */
+
+    public void setEffectiveVersion(int effectiveVersion) {
+        this.effectiveVersion = effectiveVersion;
+    }
+
+    /**
+     * Get the effective version
+     * @return the version from the version attribute of the stylesheet (times 10)
+     */
+
+    public int getEffectiveVersion() {
+        return effectiveVersion;
     }
 
     /**
@@ -75,7 +94,7 @@ public abstract class ApplyNextMatchingTemplate extends Instruction implements I
 
     @Override
     public Iterable<Operand> operands() {
-        List<Operand> operanda = new ArrayList<Operand>(actualParams.length + tunnelParams.length);
+        List<Operand> operanda = new ArrayList<>(actualParams.length + tunnelParams.length);
         WithParam.gatherOperands(this, actualParams, operanda);
         WithParam.gatherOperands(this, tunnelParams, operanda);
         return operanda;

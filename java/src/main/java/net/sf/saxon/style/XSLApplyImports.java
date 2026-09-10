@@ -75,6 +75,7 @@ public class XSLApplyImports extends StyleElement {
         ApplyImports inst = new ApplyImports();
         WithParam[] nonTunnels = getWithParamInstructions(inst, exec, decl, false);
         WithParam[] tunnels = getWithParamInstructions(inst, exec, decl, true);
+        inst.setEffectiveVersion(getEffectiveVersion());
         inst.setActualParams(nonTunnels);
         inst.setTunnelParams(tunnels);
         inst.setLocation(saveLocation());

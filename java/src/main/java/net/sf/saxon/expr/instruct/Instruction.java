@@ -189,12 +189,21 @@ public abstract class Instruction extends Expression /*implements TailCallReturn
      */
 
     public static ParameterSet assembleParams(XPathContext context,
-                                              WithParam[] actualParams)
+                                              WithParam[] actualParams, boolean passAllParams)
             throws XPathException {
-        if (actualParams == null || actualParams.length == 0) {
+        if ((actualParams == null || actualParams.length == 0) && !passAllParams) {
             return null;
         }
         ParameterSet params = new ParameterSet(actualParams.length);
+        if (passAllParams) {
+            ParameterSet existingParams = context.getLocalParameters();
+            for (int i=0; i<existingParams.size(); i++) {
+                params.put(existingParams.getParameterNames()[i], existingParams.getValue(i), true);
+            }
+        }
+        if (actualParams == null || actualParams.length == 0) {
+            return params;
+        }
         for (WithParam actualParam : actualParams) {
             params.put(actualParam.getVariableQName(),
                     actualParam.getSelectValue(context),
@@ -220,7 +229,7 @@ public abstract class Instruction extends Expression /*implements TailCallReturn
             throws XPathException {
         ParameterSet existingParams = context.getTunnelParameters();
         if (existingParams == null) {
-            return assembleParams(context, actualParams);
+            return assembleParams(context, actualParams, false);
         }
         if (actualParams == null || actualParams.length == 0) {
             return existingParams;

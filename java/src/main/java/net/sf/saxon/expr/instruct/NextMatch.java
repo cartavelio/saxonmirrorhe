@@ -65,6 +65,7 @@ public class NextMatch extends ApplyNextMatchingTemplate {
     @Override
     public Expression copy(RebindingMap rebindings) {
         NextMatch nm2 = new NextMatch(useTailRecursion);
+        nm2.setEffectiveVersion(effectiveVersion);
         nm2.setActualParams(WithParam.copy(nm2, getActualParams(), rebindings));
         nm2.setTunnelParams(WithParam.copy(nm2, getTunnelParams(), rebindings));
         ExpressionTool.copyLocationInfo(this, nm2);
@@ -194,13 +195,14 @@ public class NextMatch extends ApplyNextMatchingTemplate {
         public PushEvaluator elaborateForPush() {
             NextMatch expr = (NextMatch) getExpression();
             Location loc = expr.getLocation();
+            boolean passAllParams = expr.effectiveVersion >= 40;
             return (output, context) -> {
                 Controller controller = context.getController();
                 assert controller != null;
 
                 // handle parameters if any
-
-                ParameterSet params = assembleParams(context, expr.getActualParams());
+                
+                ParameterSet params = assembleParams(context, expr.getActualParams(), passAllParams);
                 ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
 
                 Rule currentRule = context.getCurrentTemplateRule();

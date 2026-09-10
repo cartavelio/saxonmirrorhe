@@ -86,6 +86,7 @@ public class XSLNextMatch extends StyleElement {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         NextMatch inst = new NextMatch(useTailRecursion);
+        inst.setEffectiveVersion(getEffectiveVersion());
         inst.setLocation(allocateLocation());
         inst.setActualParams(getWithParamInstructions(inst, exec, decl, false));
         inst.setTunnelParams(getWithParamInstructions(inst, exec, decl, true));

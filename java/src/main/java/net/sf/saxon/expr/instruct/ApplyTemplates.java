@@ -571,7 +571,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
 
                     // handle parameters if any
 
-                    ParameterSet params = assembleParams(context, expr.getActualParams());
+                    ParameterSet params = assembleParams(context, expr.getActualParams(), false);
                     ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
 
                     XPathContextMajor context2 = context.newContext();
@@ -607,7 +607,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
 
                     // handle parameters if any
 
-                    ParameterSet params = assembleParams(context, expr.getActualParams());
+                    ParameterSet params = assembleParams(context, expr.getActualParams(), false);
                     ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
 
                     // process the selected nodes now
