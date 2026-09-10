@@ -114,7 +114,9 @@ void SaxonProcessor::exceptionClear() {
     if (exception != nullptr) {
         delete exception;
         exception = nullptr;
+
     }
+    j_clearException(sxn_environ->thread);
 
 }
 
@@ -257,10 +259,6 @@ void SaxonProcessor::initialize(bool l) {
         SaxonProcessor::sxn_environ = new sxnc_environment;//(sxnc_environment *)malloc(sizeof(sxnc_environment));
 
 
-        /*
-         * First of all, load required component.
-         * By the time of JET initialization, all components should be loaded.
-         */
 
 
         /*
@@ -298,52 +296,39 @@ void SaxonProcessor::detachCurrentThread(){
 }
 
 SaxonProcessor::SaxonProcessor(const char *configFile) {
-    /*
     cwd = "";
-    proc = nullptr;
-    if (SaxonProcessor::jvmCreatedCPP == 0) {
-        SaxonProcessor::jvmCreatedCPP = 1;
-        //SaxonProcessor::sxn_environ= new sxnc_environment;
-        SaxonProcessor::sxn_environ = (sxnc_environment *) malloc(sizeof(sxnc_environment));
-
-
-
-        SaxonProcessor::sxn_environ->myDllHandle = loadDefaultDll();
-
-
-        initDefaultJavaRT(SaxonProcessor::sxn_environ);
-    }
-
-    versionClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/Version");
-
-    procClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/Processor");
-    saxonCAPIClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/SaxonCAPI");
-
-    static jmethodID mIDcreateProc = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass,
-                                                                                                     "createSaxonProcessor",
-                                                                                                     "(Ljava/lang/String;)Lnet/sf/saxon/s9api/Processor;");
-    if (!mIDcreateProc) {
-        std::cerr << "Error: SaxonDll." << "getPrimitiveTypeName"
-                  << " not found\n" << std::endl;
-        return;
-    }
-    jobject proci = SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(saxonCAPIClass, mIDcreateProc,
-                                                                             SaxonProcessor::sxn_environ->env->NewStringUTF(
-                                                                                     configFile));
-    proc = SaxonProcessor::sxn_environ->env->NewGlobalRef(proci);
-    if (proc==nullptr) {
-        checkAndCreateException(saxonCAPIClass);
-        std::cerr << "Error: " << getDllname() << ". processor is nullptr in constructor(configFile)" << std::endl;
-        return;
-    }
 
     licensei = true;
-#ifdef DEBUG
+    exception = nullptr;
+    procRef = -1;
+    if (SaxonProcessor::jvmCreatedCPP == 0) {
+        SaxonProcessor::jvmCreatedCPP = 1;
+        SaxonProcessor::sxn_environ = new sxnc_environment;//(sxnc_environment *)malloc(sizeof(sxnc_environment));
 
-    std::cerr<<"SaxonProc constructor(configFile)"<<std::endl;
+
+
+
+        /*
+         * InitializeGraalvm run-time.
+         */
+
+        create_graalvm_isolate(SaxonProcessor::sxn_environ);
+    } else {
+#ifdef DEBUG
+        std::cerr<<"SaxonProc constructor: jvm exists! jvmCreatedCPP="<<jvmCreatedCPP<<std::endl;
 #endif
-    xdmAtomicClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-    */
+
+    }
+    procRef = createSaxonProcessorWithConfigurationFile((SaxonProcessor::sxn_environ->thread), (char *)configFile);
+    if(procRef<0) {
+        exception = new SaxonApiException();
+        //std::cerr<<"SaxonProcessor error procRef= "<<((long)procRef)<<std::endl;
+        std::cerr<<"SaxonProcessor error procRef= "<<exception->getMessage()<<std::endl;
+    }
+
+#ifdef DEBUG
+    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+#endif
 }
 
 SaxonProcessor::~SaxonProcessor() {

@@ -362,13 +362,12 @@ std::map<std::string,std::string>& XPathProcessor::getProperties(){
 }
 
 void XPathProcessor::exceptionClear(){
-    SaxonProcessor::attachCurrentThread();
 
     if(exception != nullptr) {
         delete exception;
         exception = nullptr;
-
     }
+    j_clearException(SaxonProcessor::sxn_environ->thread);
 
 }
 

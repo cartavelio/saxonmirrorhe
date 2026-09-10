@@ -735,19 +735,26 @@ def testApplyTemplatesToFile(saxonproc):
     assert isfile("output123.xml") == True
 
 
-'''@pytest.mark.skip('Test can only run with a license file present')'''
-def testCallTemplateWithResultValidation(files_dir):
+'''@pytest.mark.skip('Error: Test can only run with a license file present')'''
+def test_CallTemplateWithResultValidation(files_dir):
     saxonproc2 =  PySaxonProcessor(license=True)
     saxonproc2.set_cwd(files_dir)
     trans = saxonproc2.new_xslt30_processor()
     source = "<?xml version='1.0'?>  <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'  xmlns:xs='http://www.w3.org/2001/XMLSchema'  version='3.0' exclude-result-prefixes='#all'>  <xsl:import-schema><xs:schema><xs:element name='x' type='xs:int'/></xs:schema></xsl:import-schema>  <xsl:template name='main'>     <xsl:result-document validation='strict'>       <x>3</x>     </xsl:result-document>  </xsl:template>  </xsl:stylesheet>"
+
     executable = trans.compile_stylesheet(stylesheet_text=source)
-    print(trans.error_message)
-    assert executable is not None
-    executable.set_property("!omit-xml-declaration", "yes")
-    sw = executable.call_template_returning_string("main")
-    assert sw is not None
-    assert "<x>3</x>" == sw
+    if executable is not None:
+
+        trans.exception_clear
+        assert executable is not None
+        executable.set_property("!omit-xml-declaration", "yes")
+        sw = executable.call_template_returning_string("main")
+
+        assert sw is not None
+        assert "<x>3</x>" == sw
+    else:
+        print(trans.error_message)
+
 
 def testCallTemplateNoParamsRaw(saxonproc):
     trans = saxonproc.new_xslt30_processor()

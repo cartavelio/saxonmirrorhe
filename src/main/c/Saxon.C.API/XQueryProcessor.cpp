@@ -353,10 +353,8 @@ void XQueryProcessor::exceptionClear(){
 		delete exception;
 		exception = nullptr;
 	}
+    j_clearException(SaxonProcessor::sxn_environ->thread);
 
-
-   
- 
 }
 
 bool XQueryProcessor::exceptionOccurred(){
