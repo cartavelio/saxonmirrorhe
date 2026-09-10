@@ -369,10 +369,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
     public void setProperty(String name, Object object) throws SAXNotRecognizedException, SAXNotSupportedException {
         switch (name) {
             case XMLConstants.ACCESS_EXTERNAL_SCHEMA:
-                ResourceResolver resolver = config.getResourceResolver();
-                if (resolver instanceof StandardURIResolver) {
-                    ((StandardURIResolver)resolver).setAllowedUriTest(ProtocolRestricter.make(object.toString()));
-                }
+                config.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, object.toString());
                 return;
             default:
         }
