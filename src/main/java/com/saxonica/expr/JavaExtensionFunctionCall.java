@@ -649,8 +649,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                     xe.setErrorCodeQName(JavaExternalObjectType.classNameToQName(ex.getClass().getName()));
                     Object value = isStatic ? theClass : theInstance;
                     xe.setErrorObject(new ObjectValue<>(value));
-                    xe.setLocation(getLocation());
-                    throw xe;
+                    throw xe.withLocation(getLocation());
                 }
             }
         } else if (theMethod instanceof Field) {
