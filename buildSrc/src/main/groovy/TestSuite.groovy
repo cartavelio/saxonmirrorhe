@@ -629,7 +629,7 @@ class TestSuite {
       } else {
         results[result] = 1
       }
-      if (result != "n/a") {
+      if (result != "n/a" && result != "notRun") {
         total += 1
         if (result == "pass") {
           pass += 1
