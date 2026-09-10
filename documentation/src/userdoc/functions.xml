@@ -7981,6 +7981,53 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
       </details>
 
     </function>
+    
+    
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://saxon.sf.net/">generate-sequence</name>
+      <description>
+        <p>Returns a sequence based on a start item and a function that computes the next item.</p>
+      </description>
+      <signatures>
+        <proto return-type="item()*">
+          <arg name="start" type="item()" desc="The first item"/>
+          <arg name="step" type="fn(item(), xs:integer) as item()?" desc="Function to compute the next item"/>
+        </proto>
+      </signatures>
+      <status>
+        <p>Available since Saxon 13. Originally proposed as a new standard QT4 function (see PR2350)
+        but not (yet) accepted for inclusion in the spec.</p>
+      </status>
+      <saxon-edition>PE/EE 13</saxon-edition>
+      <details>
+        <div>
+          <p>This function returns a sequence obtained by successive evaluations of the <code>$step</code>
+            function. Each call on <code>$step</code> gets two arguments, (a) the current item in the sequence,
+            and (b) the 1-based position in the sequence. The first item in the sequence is <code>$start</code>.</p>
+          
+          <p>Using this function requires care because it can return an infinite sequence. It is evaluated lazily.
+            Evaluation terminates either when the <code>$step</code> function returns the empty sequence, or when
+            no further items from the result sequence are required.</p>
+
+          <p>For example, the call:</p>
+          
+          <pre><code class="language-xpath">saxon:generate-sequence(20, fn{.+1}) [1 to 10]</code></pre>
+          
+          <p>returns the first 10 numbers in the infinite sequence <code>(10, 11, 12, ...)</code>.</p>
+          
+          <p>Similarly, </p>
+          
+          <pre><code class="language-xpath">(saxon:generate-sequence([1,1], fn{[?2, ?1+?2]}) ?1) [ 1 to $N ]</code></pre>
+
+          <p>generates the first <code>$N</code> numbers in the Fibonacci sequence (1, 1, 2, 3, 5, 8, 13, ...).</p>
+          
+          <p>These examples rely on lazy evaluation, and on the fact that Saxon recognizes the predicate
+          <code>[1 to $N]</code> and will not evaluate more items than are needed to satisfy this predicate.</p>
+
+        </div>
+      </details>
+
+    </function>
 
 
 
