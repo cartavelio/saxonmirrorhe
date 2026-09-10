@@ -64,7 +64,7 @@ public class ExtensionTest {
             comp.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
             XQueryExecutable exec = comp.compile("declare variable $in as map(*) external; $in('abc')");
             XQueryEvaluator eval = exec.load();
-            eval.setExternalVariable(new QName("in"), new ItemTypeFactory(proc).newMap(map));
+            eval.setExternalVariable(new QName("in"), XdmMap.makeMap(map));
             XdmItem result = eval.evaluateSingle();
             assertTrue(result.getStringValue().equals("x"));
         } catch (SaxonApiException e) {

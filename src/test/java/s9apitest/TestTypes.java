@@ -6,6 +6,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.IntegerValue;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -235,6 +237,179 @@ public class TestTypes {
         net.sf.saxon.s9api.SequenceType st2 =
                 net.sf.saxon.s9api.SequenceType.fromUnderlyingSequenceType(new Processor(false), st);
         assertEquals(OccurrenceIndicator.ONE, st2.getOccurrenceIndicator(), "a3");
+    }
+
+    @Test
+    public void testParse() {
+        try {
+            Processor p  = new Processor(true);
+            ItemTypeFactory itf = new ItemTypeFactory(p);
+            ItemType it = itf.parseItemType("xs:string");
+            assertEquals(it, ItemType.STRING);
+            it = itf.parseItemType("map(xs:string, xs:integer)");
+            XdmMap map = new XdmMap();
+            assertTrue(map.matches(it));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testParseRecordType() {
+        try {
+            Processor p = new Processor(true);
+            ItemTypeFactory itf = new ItemTypeFactory(p);
+            ItemType it1 = itf.parseItemType("record(x as xs:double, y as xs:double)");
+            ItemType it2 = itf.parseItemType("record(x as xs:double, y as xs:double, *)");
+            ItemType it3 = itf.parseItemType("record(x as xs:double, y as xs:double, z as xs:string)");
+            XdmMap map = new XdmMap();
+            map = map.put(new XdmAtomicValue("x"), new XdmAtomicValue(1.23));
+            map = map.put(new XdmAtomicValue("y"), new XdmAtomicValue(3.45));
+            assertTrue(it1.matches(map));
+            assertTrue(map.matches(it1));
+            assertTrue(it2.matches(map));
+            assertTrue(map.matches(it2));
+            assertFalse(it3.matches(map));
+            assertFalse(map.matches(it3));
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testParseUnionType() {
+        try {
+            Processor p = new Processor(true);
+            ItemTypeFactory itf = new ItemTypeFactory(p);
+            ItemType it1 = itf.parseItemType("union(xs:double, xs:string)");
+            assertTrue(it1.matches(new XdmAtomicValue(1.23)));
+            assertTrue(it1.matches(new XdmAtomicValue("banana")));
+            assertFalse(it1.matches(new XdmAtomicValue(true)));
+            assertFalse(it1.matches(new XdmMap()));
+            assertFalse(it1.matches(new XdmNode(new Orphan(p.getUnderlyingConfiguration()))));
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testParseError() {
+        try {
+            Processor p = new Processor(true);
+            ItemTypeFactory itf = new ItemTypeFactory(p);
+            ItemType it1 = itf.parseItemType("onion(xs:double, xs:string)");
+            fail("Error not detected");
+        } catch (SaxonApiException e) {
+            // OK
+        }
+    }
+
+
+    @Test
+    public void testSequenceType() {
+        try {
+            Processor p = new Processor(true);
+            ItemTypeFactory itf = new ItemTypeFactory(p);
+            SequenceType it = itf.parseItemType("xs:string").oneOrMore();
+            XdmValue v1 = new XdmAtomicValue("banana");
+            assertTrue(v1.matches(it));
+            it = itf.parseItemType("map(xs:string, xs:integer)").one();
+            XdmMap map = new XdmMap();
+            assertTrue(map.matches(it));
+            assertFalse(map.matches(it.getItemType().with(OccurrenceIndicator.ZERO)));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testFunctionType() {
+        try {
+            Processor p = new Processor(true);
+            ItemTypeFactory itf = new ItemTypeFactory(p);
+            ItemType constructedItemType = itf.getFunctionType(
+                    ItemType.STRING.one(),
+                    ItemType.ANY_ATOMIC_VALUE.zeroOrMore(),
+                    ItemType.STRING.one());
+            ItemType parsedItemType = itf.parseItemType("function(xs:anyAtomicType*, xs:string) as xs:string");
+            assertEquals(constructedItemType, parsedItemType);
+            XdmFunctionItem stringJoin = XdmFunctionItem.getSystemFunction(
+                    p,new QName(NamespaceConstant.FN, "string-join"), 2);
+            assertNotNull(stringJoin);
+            assertEquals(constructedItemType, itf.getItemType(stringJoin));
+            assertTrue(constructedItemType.matches(stringJoin));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testFunctionSubsumption() {
+        try {
+            Processor p = new Processor(true);
+            ItemTypeFactory itf = new ItemTypeFactory(p);
+            ItemType one = itf.parseItemType("function(xs:anyAtomicType*, xs:string) as xs:string+");
+            ItemType two = itf.parseItemType("function(xs:string, xs:string) as xs:string+");
+            ItemType three = itf.parseItemType("function(xs:anyAtomicType*, xs:string) as xs:string*");
+            assertTrue(two.subsumes(one));
+            assertTrue(three.subsumes(one));
+            assertFalse(one.subsumes(two));
+            assertFalse(one.subsumes(three));
+            assertFalse(two.subsumes(three));
+            assertFalse(three.subsumes(two));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testItemTypeToString() {
+        try {
+            Processor p = new Processor(true);
+            ItemTypeFactory itf = new ItemTypeFactory(p);
+            assertEquals("xs:boolean", ItemType.BOOLEAN.toString());
+            assertEquals("xs:QName", ItemType.QNAME.toString());
+            assertEquals("item()", ItemType.ANY_ITEM.toString());
+            assertEquals("xs:anyAtomicType", ItemType.ANY_ATOMIC_VALUE.toString());
+            assertEquals("node()", ItemType.ANY_NODE.toString());
+            assertEquals("element()", ItemType.ELEMENT_NODE.toString());
+            assertEquals("comment()", ItemType.COMMENT_NODE.toString());
+            assertEquals("map(*)", ItemType.ANY_MAP.toString());
+            assertEquals("array(*)", ItemType.ANY_ARRAY.toString());
+            assertEquals("function(*)", ItemType.ANY_FUNCTION.toString());
+            XdmFunctionItem nameFn = XdmFunctionItem.getSystemFunction(p, new QName(NamespaceConstant.FN, "name"), 1);
+            assertNotNull(nameFn);
+            ItemType nameFnType = itf.getItemType(nameFn);
+            assertEquals("(function(node()?) as xs:string)", nameFnType.toString());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testSequenceTypeToString() {
+        try {
+            Processor p = new Processor(true);
+            ItemTypeFactory itf = new ItemTypeFactory(p);
+            assertEquals("xs:boolean", ItemType.BOOLEAN.toString());
+            assertEquals("xs:QName", ItemType.QNAME.toString());
+            assertEquals("item()", ItemType.ANY_ITEM.toString());
+            assertEquals("xs:anyAtomicType", ItemType.ANY_ATOMIC_VALUE.toString());
+            assertEquals("node()", ItemType.ANY_NODE.toString());
+            assertEquals("element()", ItemType.ELEMENT_NODE.toString());
+            assertEquals("comment()", ItemType.COMMENT_NODE.toString());
+            assertEquals("map(*)", ItemType.ANY_MAP.toString());
+            assertEquals("array(*)", ItemType.ANY_ARRAY.toString());
+            assertEquals("function(*)", ItemType.ANY_FUNCTION.toString());
+            XdmFunctionItem nameFn = XdmFunctionItem.getSystemFunction(p, new QName(NamespaceConstant.FN, "name"), 1);
+            assertNotNull(nameFn);
+            ItemType nameFnType = itf.getItemType(nameFn);
+            assertEquals("(function(node()?) as xs:string)", nameFnType.toString());
+        } catch (Exception e) {
+            fail();
+        }
     }
 }
 
