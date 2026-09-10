@@ -6,6 +6,7 @@ import net.sf.saxon.Version;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -67,6 +68,7 @@ public class StandardSchemaResolver implements SchemaURIResolver {
      * @param resolver the ResourceResolver to be used
      */
 
+    @CSharpModifiers(code={"internal"})
     public void setResourceResolver(ResourceResolver resolver) {
         this.resourceResolver = resolver;
     }

@@ -5,6 +5,7 @@ import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.serialize.XMLEmitter;
 import net.sf.saxon.serialize.XMLIndenter;
+import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.*;
@@ -30,6 +31,7 @@ public class XMLIndenterPE extends XMLIndenter {
      */
 
     @Override
+    @CSharpReplaceException(from = "java.lang.NumberFormatException", to = "System.FormatException")
     public void setOutputProperties(Properties props) {
         super.setOutputProperties(props);
         String s = props.getProperty(SaxonOutputKeys.INDENT_SPACES);

@@ -10,6 +10,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.CollectionFn;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.lib.ResourceResolverDelegate;
 import net.sf.saxon.om.*;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
@@ -297,9 +298,10 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
      */
 
     public static void setDocumentsAndCollections(final Configuration config, XPathDynamicContext context) {
-        context.setResourceResolver(request -> {
-                throw new XPathException("Use of doc() function within an assertion is not allowed", "FODC0002");
-        });
+        context.setResourceResolver(new ResourceResolverDelegate(request -> {
+                throw new UncheckedXPathException(
+                        new XPathException("Use of doc() function within an assertion is not allowed", "FODC0002"));
+        }));
         context.getXPathContextObject().getController().setDefaultCollection(CollectionFn.EMPTY_COLLECTION_URI);
         context.setCollectionFinder((context1, collectionURI) -> {
             if (collectionURI.equals(CollectionFn.EMPTY_COLLECTION_URI)) {
