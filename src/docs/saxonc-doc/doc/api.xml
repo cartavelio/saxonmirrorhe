@@ -260,6 +260,33 @@
             </tr>
             <tr>
                <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">Saxon\XdmAtomicValue</a>
+               </td>
+               <td>
+                  <span class="signature">createQNameValue(string $val)</span>
+                  <div class="fcomment">Create an QName Xdm value from string representation in clark notation.</div>
+               </td>
+            </tr>  
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">Saxon\XdmArray</a>
+               </td>
+               <td>
+                  <span class="signature">createXdmArrayValue($val)</span>
+                  <div class="fcomment">Make an XdmArray whose argument is a PHP array_map with keys as integer and values as type XdmValue. Values can be of sub-classes of XdmValue.</div>
+               </td>
+            </tr> 
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmatomicvalue">Saxon\XdmMap</a>
+               </td>
+               <td>
+                  <span class="signature">createXdmMapValue($val)</span>
+                  <div class="fcomment">Make an XdmMap whose argument is a PHP array_map with key and value pair as (string, XdmValue). Values can be of sub-classes of XdmValue.</div>
+               </td>
+            </tr>             
+            <tr>
+               <td>
                   <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
                </td>
                <td>
@@ -283,6 +310,17 @@
             </tr>
             <tr>
                <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
+               </td>
+               <td>
+                  <span class="signature">parseXmlFromUri(string $fileName)</span>
+                  <div class="fcomment">Create an <a class="bodylink code"
+                     href="../saxon_c_php_xdmnode">XdmNode</a> object by parsing an XML document,
+                     as available by URI.</div>
+               </td>
+            </tr>            
+            <tr>
+               <td>
                   <code>void</code>
                </td>
                <td>
@@ -303,7 +341,7 @@
                      absolute. If relative the cwd is used to resolve the file.</div>
                </td>
             </tr>
-            <tr>
+            <!-- <tr>
                <td>
                   <code>void</code>
                </td>
@@ -312,8 +350,8 @@
                   <div class="fcomment">Set the resources directory of where Saxon can locate the
                      data folder.</div>
                </td>
-            </tr>
-            <tr>
+            </tr> -->
+            <tr>f
                <td>
                   <code>void</code>
                </td>
@@ -385,7 +423,7 @@
                </td>
                <td>
                   <span class="signature">version()</span>
-                  <div class="fcomment">Report the Java Saxon version.</div>
+                  <div class="fcomment">Report the Saxon version.</div>
                </td>
             </tr>
             <tr>
@@ -630,7 +668,7 @@
                </tr>
             </thead>
 
-            <tr>
+            <!-- <tr>
                <td>
                   <code>void</code>
                </td>
@@ -639,7 +677,332 @@
                   <div class="fcomment">File names to XSLT packages stored on filestore are added to
                      a set of packages, which will be imported later for use when compiling.</div>
                </td>
+            </tr> -->
+
+
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">compileFromAssociatedFile(string $xmlFileName)</span>
+                  <div class="fcomment">Get the stylesheet associated via the xml-stylesheet
+                     processing instruction (see <a href="http://www.w3.org/TR/xml-stylesheet/"
+                        target="_blank">http://www.w3.org/TR/xml-stylesheet/</a>) in the document
+                     specified in the $xmlFileName argument, and that match the given criteria. If
+                     there are several suitable xml-stylesheet processing instructions, then the
+                     returned source will identify a synthesized stylesheet module that imports all
+                     the referenced stylesheet modules.</div>
+               </td>
             </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">compileFromFile(string $fileName)</span>
+                  <div class="fcomment">Compile a stylesheet supplied as a file as specified by the
+                     $fileName argument.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">compileFromString(string $str)</span>
+                  <div class="fcomment">Compile a stylesheet received as a string.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">compileFromValue(<a class="bodylink code"
+                        href="../saxon_c_php_xdmnode">XdmNode</a> $node)</span>
+                  <div class="fcomment">Compile a stylesheet received as an <a class="bodylink code"
+                        href="../saxon_c_php_xdmnode">XdmNode</a>.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">compileFromFileAndSave(string $fileName, string
+                     $outputFileName)</span>
+                  <div class="fcomment">Compile a stylesheet supplied as a file as specified by the
+                     $fileName argument, and save as an exported file (SEF).</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">compileFromStringAndSave(string $str, string
+                     $outputFileName)</span>
+                  <div class="fcomment">Compile a stylesheet received as a string and save as an
+                     exported file (SEF).</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">compileFromValueAndSave(<a class="bodylink code"
+                        href="../saxon_c_php_xdmnode">XdmNode</a> $node, string
+                     $outputFileName)</span>
+                  <div class="fcomment">Compile a stylesheet received as an <a class="bodylink code"
+                        href="../saxon_c_php_xdmnode">XdmNode</a> and save as an exported file
+                     (SEF).</div>
+               </td>
+            </tr>
+
+
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">transformFileToFile(string $sourceFileName, string
+                     $stylesheetFileName, string $outputFileName)</span>
+                  <div class="fcomment">Perform a one shot transformation, saving the results to the
+                     file specified in the $outputFileName argument.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
+               </td>
+               <td>
+                  <span class="signature">transformFileToValue(string $fileName)</span>
+                  <div class="fcomment">Perform a one shot transformation. The result is returned as
+                     an <a class="bodylink code" href="../saxon_c_php_xdmvalue">XdmValue</a>.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">transformFileToString(string $fileName)</span>
+                  <div class="fcomment">Perform a one shot transformation. The result is returned as
+                     a string.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">transformToFile(<a class="bodylink code"
+                        href="../saxon_c_php_xdmnode">XdmNode</a> $context)</span>
+                  <div class="fcomment">Perform a one shot transformation, saving the results to the
+                     file as previously set (e.g. using <code>setOutputFile()</code>). The global
+                     context item may be supplied in the $context argument, but this is optional -
+                     the method will also execute without any arguments.</div>
+               </td>
+            </tr>
+
+
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setInitialTemplateParameters(array $parameters, bool
+                     $tunnel)</span>
+                  <div class="fcomment">Set parameters to be passed to the initial template. These
+                     are used whether the transformation is invoked by applying templates to an
+                     initial context item, or by invoking a named template. The parameters in
+                     question are the <code>xsl:param</code> elements appearing as children of the
+                        <code>xsl:template</code> element. The $tunnel argument should be set to
+                     true if these values are to be used for setting tunnel parameters.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setInitialMatchSelection(<a class="bodylink code"
+                        href="../saxon_c_php_xdmvalue">XdmValue</a> $value)</span>
+                  <div class="fcomment">Set the initial value to which templates are to be applied
+                     (equivalent to the 'select' attribute of
+                     <code>xsl:apply-templates</code>).</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setInitialMatchSelectionAsFile(string $fileName)</span>
+                  <div class="fcomment">Set the initial value to which templates are to be applied
+                     (equivalent to the 'select' attribute of <code>xsl:apply-templates</code>).
+                     This initial match selection is supplied as a file as specified by the
+                     $fileName argument.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setGlobalContextItem(<a class="bodylink code"
+                        href="../saxon_c_php_xdmitem">XdmItem</a> $item)</span>
+                  <div class="fcomment">Supply the context item to be used when evaluating global
+                     variables and parameters.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setGlobalContextFromFile(string $fileName)</span>
+                  <div class="fcomment">Supply the context item to be used when evaluating global
+                     variables and parameters, as a file as specified by the $fileName
+                     argument.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setOutputFile(string $fileName)</span>
+                  <div class="fcomment">Set the output file to which the transformation result will
+                     be sent.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setParameter(string $name, <a class="bodylink code"
+                        href="../saxon_c_php_xdmvalue">XdmValue</a> $value)</span>
+                  <div class="fcomment">Set the parameters required for the XSLT stylesheet.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setProperty(string $name, string $value)</span>
+                  <div class="fcomment">Set properties for the XSLT processor.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setJustInTimeCompilation(bool $value)</span>
+                  <div class="fcomment">Say whether just-in-time compilation of template rules
+                     should be used.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setResultAsRawValue(bool $value)</span>
+                  <div class="fcomment">Set true if the result of a transformation should be
+                     returned as a raw <a class="bodylink code" href="../saxon_c_php_xdmvalue"
+                        >XdmValue</a> result, rather than as a result tree (an <a
+                        class="bodylink code" href="../saxon_c_php_xdmnode">XdmNode</a> object with
+                     a Document node as its root).</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">clearParameters()</span>
+                  <div class="fcomment">Clear parameter values set.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">clearProperties()</span>
+                  <div class="fcomment">Clear property values set.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">exceptionClear()</span>
+                  <div class="fcomment">Clear any exceptions thrown.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getErrorCode(int $i)</span>
+                  <div class="fcomment">Get the i'th error code if there are any errors.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getErrorMessage()</span>
+                  <div class="fcomment">Get the error message if there is an error.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>int</code>
+               </td>
+               <td>
+                  <span class="signature">getExceptionCount()</span>
+                  <div class="fcomment">Get the number of errors during execution or evaluation of a
+                     stylesheet.</div>
+               </td>
+            </tr>
+
+         </table>
+      </section>
+      
+      
+      
+            <section id="saxon_c_php_xslt30processor" title="Saxon\XsltExecutable">
+         <h1>Saxon\XsltExecutable Class</h1>
+
+         <table>
+            <thead>
+               <tr>
+                  <td>Return</td>
+                  <td>Function name and Description</td>
+               </tr>
+            </thead>
+
+            <!-- <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">addPackages(array $packageFileNames)</span>
+                  <div class="fcomment">File names to XSLT packages stored on filestore are added to
+                     a set of packages, which will be imported later for use when compiling.</div>
+               </td>
+            </tr> -->
             <tr>
                <td>
                   <code>void</code>
@@ -1089,8 +1452,8 @@
                   <code>string</code>
                </td>
                <td>
-                  <span class="signature">getErrorMessage(int $i)</span>
-                  <div class="fcomment">Get the i'th error message if there are any errors.</div>
+                  <span class="signature">getErrorMessage()</span>
+                  <div class="fcomment">Get the error message if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1106,6 +1469,10 @@
 
          </table>
       </section>
+      
+      
+      
+      
 
       <section id="saxon_c_php_xqueryprocessor" title="Saxon\XQueryProcessor">
          <h1>Saxon\XQueryProcessor Class</h1>
@@ -1273,8 +1640,8 @@
                   <code>string</code>
                </td>
                <td>
-                  <span class="signature">getErrorMessage(int $i)</span>
-                  <div class="fcomment">Get the i'th error message if there are any errors.</div>
+                  <span class="signature">getErrorMessage()</span>
+                  <div class="fcomment">Get the error message if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1440,8 +1807,8 @@
                   <code>string</code>
                </td>
                <td>
-                  <span class="signature">getErrorMessage(int $i)</span>
-                  <div class="fcomment">Get the i'th error message if there are any errors.</div>
+                  <span class="signature">getErrorMessage()</span>
+                  <div class="fcomment">Get the i'th error message if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1628,8 +1995,8 @@
                   <code>string</code>
                </td>
                <td>
-                  <span class="signature">getErrorMessage(int $i)</span>
-                  <div class="fcomment">Get the i'th error message if there are any errors.</div>
+                  <span class="signature">getErrorMessage()</span>
+                  <div class="fcomment">Get the error message if there is an error.</div>
                </td>
             </tr>
             <tr>
