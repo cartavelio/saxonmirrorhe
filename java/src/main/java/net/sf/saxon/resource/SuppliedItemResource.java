@@ -7,100 +7,52 @@
 
 package net.sf.saxon.resource;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
-import net.sf.saxon.lib.ResourceFactory;
-import net.sf.saxon.ma.json.ParseJsonFn;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.str.Latin1;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringValue;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.function.Supplier;
 
 /**
- * A Resource (that is, an item in a collection) holding JSON content
+ * A Resource (that is, an item in a collection) that constructs or retrieves the
+ * item on demand using an {@code Supplier<Item>} provided by the caller
  */
 
-public class JSONResource implements Resource {
-    private final Configuration config;
-    private final String href;
-    private UnicodeString jsonStr;
-    private Item item;
-    private final XPathContext context;
-    private AbstractResourceCollection.InputDetails details;
-
-    public final static ResourceFactory FACTORY = (context, details) -> new JSONResource(context, details);
+public class SuppliedItemResource implements Resource {
+    private final Supplier<? extends Item> itemSupplier;
+    private final String resourceUri;
 
     /**
      * Create the resource
      *
-     * @param context XPath dynamic context
-     * @param details the input stream holding the JSON content plus details of encoding etc
+     * @param itemSupplier Function to retrieve or construct an item on demand
+     * @param resourceUri URI identifying the resource
      */
 
-    public JSONResource(XPathContext context, AbstractResourceCollection.InputDetails details) {
-        this.config = context.getConfiguration();
-        this.href = details.resourceUri;
-        this.context = context;
-        if (details.encoding == null) {
-            details.encoding = "UTF-8";
-        }
-        this.details = details;
+    public SuppliedItemResource(Supplier<? extends Item> itemSupplier, String resourceUri) {
+        this.itemSupplier = itemSupplier;
+        this.resourceUri = resourceUri;
     }
-
-//    public JSONResource(String uri, MapItem map) {
-//        this.item = map;
-//        this.href = uri;
-//    }
-//
-//    public JSONResource(String uri, ArrayItem array) {
-//        this.item = array;
-//        this.href = uri;
-//    }
 
 
     @Override
     public String getResourceURI() {
-        return href;
+        return resourceUri;
     }
 
     @Override
     public Item getItem() throws XPathException {
-        if (item != null) {
-            return item;
-        }
-        if (jsonStr == null) {
-            jsonStr = StringView.of(details.obtainCharacterContent(config));
-            if (jsonStr == null) {
-                // implies errors are being ignored
-                return null;
-            }
-        }
-        Map<String, GroundedValue> options = new HashMap<>();
-        options.put("liberal", BooleanValue.FALSE);
-        options.put("duplicates", SV_USE_FIRST);
-        options.put("escape", BooleanValue.FALSE);
-        return item = ParseJsonFn.parse(jsonStr.codePoints(), options, context);
+        return itemSupplier.get();
     }
-
-    private final static StringValue SV_USE_FIRST = new StringValue(Latin1.of("use-first"));
 
     /**
      * Get the media type (MIME type) of the resource if known
-     *
-     * @return the string "application/json"
+     * @return null
      */
 
     @Override
     public String getContentType() {
-        return "application/json";
+        return null;
     }
 
 

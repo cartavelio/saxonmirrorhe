@@ -13,6 +13,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.resource.AbstractResourceCollection;
 import net.sf.saxon.resource.DirectoryCollection;
+import net.sf.saxon.resource.SuppliedItemResource;
 import net.sf.saxon.resource.XmlResource;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -30,13 +31,11 @@ import java.io.StringReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -876,4 +875,89 @@ public class TestCollections {
             return "application/xml";
         }
     }
+
+    @Test
+    public void testCollectionDupDoc2() {
+        try {
+            Processor p = new Processor(true);
+            Configuration config = p.getUnderlyingConfiguration();
+
+            config.setDefaultCollection("http://example.com/collection");
+
+            ByteArrayInputStream bais = new ByteArrayInputStream("<doc/>".getBytes(StandardCharsets.UTF_8));
+            InputSource source = new InputSource(bais);
+            source.setSystemId("http://example.com/doc.xml");
+
+            DocumentBuilder builder = p.newDocumentBuilder();
+            XdmNode doc = builder.build(new SAXSource(source));
+
+            CollectionFinder finder = new TestCollectionFinder2(doc);
+            config.setCollectionFinder(finder);
+
+            XPathCompiler compiler = p.newXPathCompiler();
+            XPathExecutable exec = compiler.compile("count(collection())");
+            XPathSelector select = exec.load();
+            XdmValue result = select.evaluate();
+
+            XdmAtomicValue item = (XdmAtomicValue) result.itemAt(0);
+
+            Assertions.assertEquals(3L, item.getLongValue());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private static class TestCollectionFinder2 implements CollectionFinder {
+        final XdmNode doc;
+
+        TestCollectionFinder2(XdmNode doc) {
+            this.doc = doc;
+        }
+
+        @Override
+        public TestResourceCollection2 findCollection(XPathContext context, String collectionURI) throws XPathException {
+            return new TestResourceCollection2(doc);
+        }
+    }
+
+    private static class TestResourceCollection2 implements ResourceCollection {
+        final List<XdmNode> collection;
+
+        TestResourceCollection2(XdmNode doc) {
+            collection = new ArrayList<>();
+            collection.add(doc);
+            collection.add(doc);
+            collection.add(doc);
+        }
+
+        @Override
+        public String getCollectionURI() {
+            return "http://example.com/collection2";
+        }
+
+        @Override
+        public Iterator<String> getResourceURIs(XPathContext context) throws XPathException {
+            ArrayList<String> uris = new ArrayList<>();
+            for (XdmNode node : collection) {
+                uris.add(node.getBaseURI().toString());
+            }
+            return uris.iterator();
+        }
+
+        @Override
+        public Iterator<? extends Resource> getResources(XPathContext context) {
+            ArrayList<Resource> resources = new ArrayList<>();
+            for (XdmNode node : collection) {
+                resources.add(new SuppliedItemResource(node::getUnderlyingNode, node.getDocumentURI().toString()));
+            }
+            return resources.iterator();
+        }
+
+        @Override
+        public boolean isStable(XPathContext context) {
+            return true;
+        }
+    }
+
+
 }
