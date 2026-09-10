@@ -1,0 +1,26 @@
+services:
+  saxondev:
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    build:
+      context: .
+      args:
+        UID: "${UID}"
+        GID: "${GID}"
+    volumes:
+      - ../:/opt/saxonica/saxondev
+      - gradle:/opt/saxonica/gradle
+      - pyenv-versions:/opt/saxonica/pyenv/versions
+      - pyenv-shims:/opt/saxonica/pyenv/shims
+      - gradle-cache:/opt/saxonica/saxondev/.gradle
+      - gradle-build:/opt/saxonica/saxondev/build
+      - buildsrc-gradle-cache:/opt/saxonica/saxondev/buildSrc/.gradle
+      - buildsrc-gradle-build:/opt/saxonica/saxondev/buildSrc/build
+volumes:
+  gradle:
+  pyenv-versions:
+  pyenv-shims:
+  gradle-cache:
+  gradle-build:
+  buildsrc-gradle-cache:
+  buildsrc-gradle-build:
