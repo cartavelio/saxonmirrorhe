@@ -225,7 +225,7 @@ task product_jeljavadoc(
   outputs.files fileTree(dir: "${buildDir}/jeljavadoc")
 
   def cp = ""
-  configurations.documentation.resolve().each { path ->
+  configurations.jeldoclet.resolve().each { path ->
     cp = cp + System.getProperty("path.separator") + path
   }
 
@@ -278,11 +278,10 @@ task product_xmljavadoc(
   // do the right thing with package descriptions and it's completely
   // unclear why.
   inputs.files fileTree(dir: "${buildDir}/javadoc_src")
-  inputs.file "${projectDir}/lib/jeldoc.jar"
   outputs.files fileTree(dir: "${buildDir}/xmljavadoc")
 
   def cp = ""
-  configurations.documentation.resolve().each { path ->
+  configurations.xmldoclet.resolve().each { path ->
     cp = cp + System.getProperty("path.separator") + path
   }
 
