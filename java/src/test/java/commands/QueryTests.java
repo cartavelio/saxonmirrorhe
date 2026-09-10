@@ -15,9 +15,11 @@ import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XQueryExecutable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -127,10 +129,10 @@ public class QueryTests {
 
 
     @Test
-    public void testQueryUpdate() {
+    public void testQueryUpdate(@TempDir Path tempDir) {
         // This is an update test; copy the file into temp
 
-        File tempfn = Testdata.tempFile("books.xml");
+        File tempfn = tempDir.resolve("books.xml").toFile();
         File origfn = Testdata.file("books.xml");
         InputStream instream = null;
         OutputStream outstream = null;
