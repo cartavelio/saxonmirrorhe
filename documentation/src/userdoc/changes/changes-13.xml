@@ -184,7 +184,7 @@ TODO: rethink redefines and override
         </ul>
         
         <p>If a schema-aware stylesheet is exported to a SEF file, the SCM representation of any schema imported by
-        the stylesheet is included in the SEF file and is automatically incorparated in any compiled stylesheet
+        the stylesheet is included in the SEF file and is automatically incorporated in any compiled stylesheet
         reconstituted from the SEF file.</p>
         
         <p>The <code>schemaDocument</code> and <code>schemaComponentModel</code> elements in a configuration file

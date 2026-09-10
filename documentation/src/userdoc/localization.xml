@@ -357,12 +357,12 @@ config.setLocalizerFactory(new LocalizerFactory() {
           collation that affect the outcome are <code>lang</code> and <code>strength</code>. 
           The same applies to <code>fn:collation-key</code>, and other operations
         that use collation keys, for example <code>fn:distinct-values</code> and <code>xsl:for-each-group</code>.</p>
-        </p></li>
-        <li class="csonly">       
-          <p>On SaxonCS-EE, Saxon uses the collation facilities available from the ICU4N library,
+      </li>
+      <li class="csonly">       
+        <p>On SaxonCS-EE, Saxon uses the collation facilities available from the ICU4N library,
           which is a port to C# of a subset of ICU4J. The current version of ICU4N is an alpha release,
           but its support for collations appears to be reasonably comprehensive.</p>
-        </li>
+      </li>
     </ul>
 
     <p>This feature is requested by using a collation (specified either as a <code>collation</code> attribute
