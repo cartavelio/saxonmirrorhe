@@ -995,7 +995,7 @@ namespace SaxonCS_NUnit {
                 XdmNode wrappedResultDoc = builder.Wrap(result.XmlDocument);
                 XdmNode wrappedDocumentElement = builder.Wrap(wrappedResultDoc, result.XmlDocument.DocumentElement);
 
-                XdmFunctionItem deepEqual = XdmFunctionItem.getSystemFunction(proc,
+                XdmFunctionItem deepEqual = proc.GetSystemFunction(
                     new QName("http://www.w3.org/2005/xpath-functions", "deep-equal"), 2);
                 XdmValue comparison = deepEqual.Invoke(new XdmValue[] {source, wrappedDocumentElement}, proc);
                 Assert.That(((XdmAtomicValue) comparison).AsBoolean(), "Copy is not deep-equal");
