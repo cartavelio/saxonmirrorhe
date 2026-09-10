@@ -16,8 +16,12 @@
      <xsl:template match="section|article" mode="primary">
           <xsl:apply-templates select="." mode="post-primary"/>
      </xsl:template>
+     
+     <xsl:template match="@*" mode="secondary">
+          <xsl:copy/>
+     </xsl:template>
 
-     <xsl:template match="node()|@*" mode="secondary">
+     <xsl:template match="node()" mode="secondary">
           <xsl:copy>
                <xsl:apply-templates select="node()|@*" mode="secondary"/>
           </xsl:copy>

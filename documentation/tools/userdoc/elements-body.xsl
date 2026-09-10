@@ -29,8 +29,12 @@
             <xsl:apply-templates select="*" mode="#current"/>
         </xsl:copy>
     </xsl:template>
+    
+    <xsl:template match="@*">
+        <xsl:copy/>
+    </xsl:template>
 
-    <xsl:template match="node()|@*">
+    <xsl:template match="node()">
         <xsl:copy>
             <xsl:apply-templates select="node()|@*" mode="#current"/>
         </xsl:copy>

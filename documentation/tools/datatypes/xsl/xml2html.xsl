@@ -216,8 +216,11 @@
 	
 	<xsl:template match="processing-instruction()" priority="1" />
 	
+	<xsl:template match="attribute()">
+		<xsl:copy/>
+	</xsl:template>
 	
-	<xsl:template match="node() | attribute()">
+	<xsl:template match="node()">
 		<xsl:copy>
 			<xsl:apply-templates select="@*, node()" />
 		</xsl:copy>

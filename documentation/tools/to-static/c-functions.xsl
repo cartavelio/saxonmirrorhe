@@ -39,8 +39,12 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
+    
+    <xsl:template match="@*">
+        <xsl:copy/>
+    </xsl:template>
 
-    <xsl:template match="@* | node()">
+    <xsl:template match="node()">
         <xsl:copy>
             <xsl:apply-templates select="@*, node()"/>
         </xsl:copy>
