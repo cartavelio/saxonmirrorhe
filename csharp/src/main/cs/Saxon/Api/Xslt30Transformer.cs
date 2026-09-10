@@ -790,7 +790,7 @@ namespace Saxon.Api {
             /// <exception cref="Saxon.Hej.trans.XPathException">If the encoding is not available,
             /// or if the returned resource is not a text resource.</exception>
 
-            public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
+            public TextReader resolve(Uri absoluteURI, string encoding, Configuration config, bool fallback) {
                 Encoding enc;
                 if (encoding == null) {
                     enc = null;

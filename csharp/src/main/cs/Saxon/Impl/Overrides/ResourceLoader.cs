@@ -131,14 +131,23 @@ namespace Saxon.Impl.Overrides {
                 resourceEncoding = "UTF-8";
             }
 
-            return getReaderFromStream(inputStream, resourceEncoding);
+            return getReaderFromStream(inputStream, resourceEncoding, false);
         }
 
-        public static TextReader getReaderFromStream(Stream input, string encoding) {
+        public static TextReader getReaderFromStream(Stream input, string encoding, bool fallback) {
             if (encoding.ToLowerInvariant() == "utf-16") {
                 encoding = "utf-16be";
             }
 
+            if (fallback)
+            {
+                return new StreamReader(input,
+                    System.Text.Encoding.GetEncoding(encoding,
+                        new EncoderReplacementFallback("\uFFFD"),
+                        new DecoderReplacementFallback("\uFFFD")),
+                    detectEncodingFromByteOrderMarks: false );
+            }
+            
             return new StreamReader(input,
                 System.Text.Encoding.GetEncoding(encoding,
                     new EncoderExceptionFallback(),

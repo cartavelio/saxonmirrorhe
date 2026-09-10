@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- exceptions file for the QT4 Test Suite -->
 <exceptions>
+   <exception test-set="fn-unparsed-text"
+              test-case="fn-unparsed-text-fallback-006"
+              run="false" report="n/a">
+     <created by="Norm Tovey-Walsh" on="2026-03-12"/>
+     <reason>Incompatible with C# test driver design.</reason>
+   </exception>
+
+   <exception test-set="fn-unparsed-text-lines"
+              test-case="fn-unparsed-text-lines-fallback-006"
+              run="false" report="n/a">
+     <created by="Norm Tovey-Walsh" on="2026-03-12"/>
+     <reason>Incompatible with C# test driver design.</reason>
+   </exception>
    
    <exception test-set="fn-deep-equal" 
       test-case="deep-equal-40-functions-001

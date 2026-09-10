@@ -277,12 +277,20 @@ namespace Saxon.Ejava.io {
             return new(fileName, SysIO.FileMode.Append, SysIO.FileAccess.Write);
         }
 
-        public SysIO.TextReader getInputStreamReader(string encodingName) {
+        public SysIO.TextReader getInputStreamReader(string encodingName, bool fallback) {
             SysIO.Stream stream = SysIO.File.OpenRead(fileName);
             Encoding encoding;
             try {
-                encoding = Encoding.GetEncoding(encodingName, EncoderFallback.ExceptionFallback,
-                    DecoderFallback.ExceptionFallback);
+                if (fallback)
+                {
+                    encoding = Encoding.GetEncoding(encodingName, EncoderFallback.ReplacementFallback,
+                        new DecoderReplacementFallback("\uFFFD"));
+                }
+                else
+                {
+                    encoding = Encoding.GetEncoding(encodingName, EncoderFallback.ExceptionFallback,
+                        DecoderFallback.ExceptionFallback);
+                }
             }
             catch (System.ArgumentException) {
                 throw new IOException("Unknown encoding " + encodingName);

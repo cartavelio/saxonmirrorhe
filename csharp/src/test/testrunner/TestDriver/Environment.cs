@@ -322,7 +322,7 @@ namespace TestDriver {
                 Console.WriteLine("Sandpit: " + sandpit);
                 
                 environment.initialWorkingDirectory = Directory.GetCurrentDirectory();
-                Directory.SetCurrentDirectory(tempdir);
+                Directory.SetCurrentDirectory(sandpit);
             }
         }
 
@@ -620,6 +620,10 @@ namespace TestDriver {
                 string href = ((XdmNode)resource).GetAttributeValue(new QName("file"));
                 string encoding = ((XdmNode)resource).GetAttributeValue(new QName("encoding"));
                 string mediaType = ((XdmNode)resource).GetAttributeValue(new QName("media-type"));
+
+                string fallbackValue = ((XdmNode)resource).GetAttributeValue(new QName("fallback"));
+                bool fallback = fallbackValue == "true" || fallbackValue == "yes";
+
                 if (mediaType == "application/octet-stream" || mediaType == "application/binary") {
                     environment.binaryResources[nominalUriStr] = res.ResolveUri(env.BaseUri, href).AbsolutePath;
                 }
@@ -628,9 +632,20 @@ namespace TestDriver {
                         encoding = "utf-8"; // TODO: should infer from content etc?
                     }
 
-                    Encoding enc1 = Encoding.GetEncoding(encoding,
-                        EncoderFallback.ExceptionFallback,
-                        new DecoderExceptionFallback());
+                    Encoding enc1;
+                    if (fallback)
+                    {
+                        enc1 = Encoding.GetEncoding(encoding,
+                            EncoderFallback.ReplacementFallback,
+                            new DecoderReplacementFallback("\uFFFD"));
+                    }
+                    else
+                    {
+                        enc1 = Encoding.GetEncoding(encoding,
+                            EncoderFallback.ExceptionFallback,
+                            new DecoderExceptionFallback());
+                    }
+                    
                     if (href != null) {
                         if (href.StartsWith("http")) {
                             resources.Add(nominalUri, () => {
@@ -736,7 +751,7 @@ namespace TestDriver {
                     }
                 }
                 else {
-                    System.IO.TextReader reader = fallbackResolver.resolve(absoluteURI, encoding==null ? null : encoding.WebName, config);
+                    System.IO.TextReader reader = fallbackResolver.resolve(absoluteURI, encoding==null ? null : encoding.WebName, config, false);
                     return new TextResource(reader, absoluteURI);
                 }
 
