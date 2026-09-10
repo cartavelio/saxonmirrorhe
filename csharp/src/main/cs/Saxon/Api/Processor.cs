@@ -529,7 +529,7 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Copy an <c>XdmValue</c> to an <c>XmlDestination</c>
+        /// Copy an <c>XdmValue</c> to an <c>IDestination</c>
         /// </summary>
         /// <remarks>
         /// In principle this method can be used to copy any kind of <c>XdmValue</c> to any kind
