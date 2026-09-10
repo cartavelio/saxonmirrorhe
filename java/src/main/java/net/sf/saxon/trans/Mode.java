@@ -449,13 +449,14 @@ public abstract class Mode extends Actor {
         Controller controller = context.getController();
         SequenceIterator iterator = context.getCurrentIterator();
         TailCall tc = null;
-        TraceListener traceListener = controller.isTracing() ? controller.getTraceListener() : null;
+        TraceListener traceListener = null;
+        if (controller.isTracing()) {
+            traceListener = controller.getTraceListener();
+        }
 
         // Iterate over this sequence
 
-        LookaheadIterator lookaheadIter = (iterator instanceof LookaheadIterator li && li.supportsHasNext())
-                        ? li
-                        : null;
+        boolean lookahead = iterator instanceof LookaheadIterator && ((LookaheadIterator)iterator).supportsHasNext();
         TemplateRule previousTemplate = null;
         boolean first = true;
 
@@ -468,7 +469,7 @@ public abstract class Mode extends Actor {
             // space. In other cases, we need to execute the outstanding tail calls before moving the iterator
 
             if (tc != null) {
-                if (lookaheadIter != null && !lookaheadIter.hasNext()) {
+                if (lookahead && !((LookaheadIterator) iterator).hasNext()) {
                     break;
                 }
                 do {
@@ -535,11 +536,11 @@ public abstract class Mode extends Actor {
 
     private void checkMustBeTyped(Item item) throws XPathException
     {
-        if (item instanceof NodeInfo node) {
-            int kind = node.getNodeKind();
+        if (item instanceof NodeInfo) {
+            int kind = ((NodeInfo) item).getNodeKind();
             if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
-                SchemaType annotation = node.getSchemaType();
-                if (annotation == Untyped.INSTANCE || annotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
+                SchemaType annotation = ((NodeInfo) item).getSchemaType();
+                if (annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
                     throw new XPathException(getModeTitle(true) + " requires typed nodes, but the input is untyped", "XTTE3100");
                 }
             }
@@ -548,11 +549,11 @@ public abstract class Mode extends Actor {
 
     private void checkMustByUntyped(Item item) throws XPathException
     {
-        if (item instanceof NodeInfo node) {
-            int kind = node.getNodeKind();
+        if (item instanceof NodeInfo) {
+            int kind = ((NodeInfo) item).getNodeKind();
             if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
-                SchemaType annotation = node.getSchemaType();
-                if (!(annotation == Untyped.INSTANCE || annotation == BuiltInAtomicType.UNTYPED_ATOMIC)) {
+                SchemaType annotation = ((NodeInfo) item).getSchemaType();
+                if (!(annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC)) {
                     throw new XPathException(getModeTitle(true) + " requires untyped nodes, but the input is typed", "XTTE3110");
                 }
             }
