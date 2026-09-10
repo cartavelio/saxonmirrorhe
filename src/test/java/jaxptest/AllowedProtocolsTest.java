@@ -230,7 +230,7 @@ public class AllowedProtocolsTest {
     public void testExternalProtocolsRunTime011() {
         externalProtocolsRunTime("data:///" + ConfigTest.DATA_DIR + "dummy.xsl",
                                  "<xsl:sequence select=\"document('data:text/xml;base64,PGRvYy8+')/*/local-name()\"/>",
-                                 "file data",
+                                 "file, data",
                                  true);
     }
 
@@ -238,7 +238,7 @@ public class AllowedProtocolsTest {
     public void testExternalProtocolsRunTime012() {
         externalProtocolsRunTime("data:///" + ConfigTest.DATA_DIR + "dummy.xsl",
                                  "<xsl:sequence select=\"document('data:text/xml;base64,PGRvYy8+')/*/local-name()\"/>",
-                                 "file http https",
+                                 "file, http, https",
                                  false);
     }
 
@@ -246,7 +246,7 @@ public class AllowedProtocolsTest {
     public void testExternalProtocolsRunTime013() {
         externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
                                  "<xsl:sequence select=\"unparsed-text('classpath:saxon-license.lic')\"/>",
-                                 "file data classpath",
+                                 "file, data, classpath",
                                  true);
     }
 
@@ -254,7 +254,7 @@ public class AllowedProtocolsTest {
     public void testExternalProtocolsRunTime014() {
         externalProtocolsRunTime("file:///" + ConfigTest.DATA_DIR + "dummy.xsl",
                                  "<xsl:sequence select=\"unparsed-text('classpath:saxon-license.lic')\"/>",
-                                 "file http https",
+                                 "file, http, https",
                                  false);
     }
 
