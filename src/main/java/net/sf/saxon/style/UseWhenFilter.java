@@ -146,14 +146,8 @@ public class UseWhenFilter extends ProxyReceiver {
 
             boolean ignore = false;
 
-            int version = Integer.MIN_VALUE;
-            if (pa.versionAtt != null && fp != StandardNames.XSL_OUTPUT) {
-                version = processVersionAttribute(pa.versionAtt);
-            }
+            int version = getVersion(pa, fp);
 
-            if (version == Integer.MIN_VALUE) {
-                version = versionStack.isEmpty() ? 30 : versionStack.peek();
-            }
             versionStack.push(version);
 
             if (inXsltNamespace && defaultNamespaceStack.size() == 2
@@ -170,37 +164,75 @@ public class UseWhenFilter extends ProxyReceiver {
                 }
             }
 
-            if (!ignore) {
-                if (pa.useWhenAtt != null) {
-                    AttributeLocation attLoc = new AttributeLocation(
-                            elemName.getStructuredQName(), new StructuredQName("", stdAttUri, "use-when"), location);
-                    boolean use = evaluateUseWhen(pa.useWhenAtt, attLoc, baseUri.toString(), namespaces);
-                    ignore = !use;
-                }
-
-                if (ignore) {
-                    if (fp == StandardNames.XSL_STYLESHEET || fp == StandardNames.XSL_TRANSFORM || fp == StandardNames.XSL_PACKAGE) {
-                        emptyStylesheetElement = true;
-                    } else {
-                        depthOfHole = 1;
-                        return;
-                    }
+            if (!ignore)
+            {
+                if (checkUseEvaluateWhen(pa, fp, location, baseUri, namespaces, elemName, stdAttUri))
+                {
+                    return;
                 }
             }
 
             if (inXsltNamespace) {
+                includedDoc = handleInXsltNamespace(elemName, baseUri, fp,pa, attributes, namespaces, location);
+            }
 
-          includedDoc = handleInXsltNamespace(elemName, baseUri, fp,pa, attributes, namespaces, location);
-            }
             dropUnderscoredAttributes = inXsltNamespace;
+
             nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
-            if (includedDoc != null) {
-                XSLGeneralIncorporate node = (XSLGeneralIncorporate) treeBuilder.getCurrentParentNode();
-                node.setTargetDocument(includedDoc);
-            }
+
+            checkTargetDocument(includedDoc);
         } else {
             depthOfHole++;
         }
+    }
+
+    private void checkTargetDocument(DocumentImpl includedDoc)
+    {
+        if (includedDoc != null) {
+            XSLGeneralIncorporate node = (XSLGeneralIncorporate) treeBuilder.getCurrentParentNode();
+            node.setTargetDocument(includedDoc);
+        }
+    }
+
+    private boolean checkUseEvaluateWhen(ParsedAttributes pa, int fp, Location location, URI baseUri, NamespaceMap namespaces,
+            NodeName elemName, NamespaceUri stdAttUri) throws XPathException
+    {
+        boolean ignore = false;
+
+        if (pa.useWhenAtt != null)
+        {
+            AttributeLocation attLoc = new AttributeLocation(elemName.getStructuredQName(),
+                    new StructuredQName("", stdAttUri, "use-when"), location);
+
+            if (!evaluateUseWhen(pa.useWhenAtt, attLoc, baseUri.toString(), namespaces))
+            {
+                if (fp == StandardNames.XSL_STYLESHEET || fp == StandardNames.XSL_TRANSFORM || fp == StandardNames.XSL_PACKAGE)
+                {
+                    emptyStylesheetElement = true;
+                }
+                else
+                {
+                    depthOfHole = 1;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private int getVersion(ParsedAttributes pa, int fp) throws XPathException
+    {
+        int version = Integer.MIN_VALUE;
+        if (pa.versionAtt != null && fp != StandardNames.XSL_OUTPUT) {
+            version = processVersionAttribute(pa.versionAtt);
+        }
+
+        if (version == Integer.MIN_VALUE) {
+            version = versionStack.isEmpty() ? 30 : versionStack.peek();
+        }
+
+        return version;
     }
 
     private DocumentImpl processIncludeImport(
