@@ -558,8 +558,8 @@ val downloadSignedMavenJars = if (signedReleaseArtifacts) {
 } else {
   tasks.register<UnsignedArtifactFakeDownloadTask>("downloadSignedMavenJars") {
     dependsOn(signingMavenJars)
-      inputDir = signingDownloadJars.map { it.destinationDir }
-      outputDir = layout.buildDirectory.dir("signed-download")
+      inputDir = signingMavenJars.map { it.destinationDir }
+      outputDir = layout.buildDirectory.dir("signed-maven")
   }
 }
 
