@@ -9,6 +9,7 @@ package net.sf.saxon.pattern.qname;
 
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.type.Affinity;
 
 /**
  * Interface for tests against a QName. This is implemented by a subset of NodeTests, specifically
@@ -50,5 +51,12 @@ public interface QNameTest {
      */
 
     String exportQNameTest();
+
+    /**
+     * Determine the relationship of this QNameTest to another QNameTest: one of
+     * (same, subsumes, subsumed-by, overlaps, disjoint)
+     */
+
+    Affinity relationship(QNameTest other);
 
 }

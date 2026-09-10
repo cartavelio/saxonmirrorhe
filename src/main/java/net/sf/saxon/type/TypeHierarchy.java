@@ -15,9 +15,10 @@ import net.sf.saxon.lib.FunctionAnnotationHandler;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.*;
-import net.sf.saxon.pattern.qname.LocalQNameTest;
-import net.sf.saxon.pattern.qname.NamespaceQNameTest;
+import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.DocumentNodeTest;
+import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
@@ -532,31 +533,10 @@ public class TypeHierarchy {
     }
 
     private static Affinity nameTestRelationship(QNameTest t1, QNameTest t2) {
-        if (t1.equals(t2)) {
-            return SAME_TYPE;
-        }
-        if (t2 instanceof NameTest) {
-            return t1.matches(((NameTest) t2).getMatchingNodeName()) ? SUBSUMES : DISJOINT;
-        }
-        if (t1 instanceof NameTest) {
-            return t2.matches(((NameTest) t1).getMatchingNodeName()) ? SUBSUMED_BY : DISJOINT;
-        }
-        if (t2 instanceof SameNameTest) {
-            return t1.matches(((SameNameTest) t2).getMatchingNodeName()) ? SUBSUMES : DISJOINT;
-        }
-        if (t1 instanceof SameNameTest) {
-            return t2.matches(((SameNameTest) t1).getMatchingNodeName()) ? SUBSUMED_BY : DISJOINT;
-        }
-        if (t1 instanceof NamespaceQNameTest && t2 instanceof NamespaceQNameTest) {
-            return DISJOINT;
-        }
-        if (t1 instanceof LocalQNameTest && t2 instanceof LocalQNameTest) {
-            return DISJOINT;
-        }
-        return OVERLAPS;
+        return t1.relationship(t2);
     }
 
-    private static Affinity combineRelationships(Affinity rel1, Affinity rel2) {
+    public static Affinity combineRelationships(Affinity rel1, Affinity rel2) {
         if (rel1 == SAME_TYPE &&
                 rel2 == SAME_TYPE) {
             return SAME_TYPE;
