@@ -110,13 +110,6 @@ public class FunctionLookup extends ContextAccessorFunction {
                 // The function is context-dependent, so it needs to be bound to the
                 // dynamic context of the call on function-lookup
                 return ((IContextAccessorFunction)foundFunction).bindContext(context);
-//                assert functionSupplier.getArity() == 0;
-//                FunctionItem fi = (FunctionItem) functionSupplier.call(context, new Sequence[]{});
-//                if (fi instanceof ContextItemAccessorFunction) {
-//                    return ((ContextItemAccessorFunction) fi).bindContext(context);
-//                } else if (fi instanceof SystemFunction && ((SystemFunction) fi).dependsOnContextItem()) {
-//                    return new SystemFunctionWithBoundContextItem((SystemFunction) fi, context);
-//                }
             } else {
                 // Indicates a function with no dynamic context dependencies
                 if (foundFunction instanceof UserFunction) {

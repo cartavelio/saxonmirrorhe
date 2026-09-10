@@ -1157,6 +1157,16 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         return expandedArgs;
     }
 
+    public boolean hasContextDependentDefaults(int suppliedArity) {
+        for (int i=suppliedArity; i<getArity(); i++) {
+            Expression defaultVal = parameterDefinitions[i].getDefaultValueExpression();
+            if (ExpressionTool.dependsOnFocus(defaultVal)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
 
 

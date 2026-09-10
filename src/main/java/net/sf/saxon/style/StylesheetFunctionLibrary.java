@@ -13,6 +13,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.functions.ContextDependentUserFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StandardNames;
@@ -196,8 +197,11 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
         if (c == null) {
             return null;
         }
-        return (UserFunction)c.getActor();
-        //return pack.getFunction(functionName);
+        UserFunction uf = (UserFunction)c.getActor();
+        if (uf.getArity() > functionName.getArity() && uf.hasContextDependentDefaults(functionName.getArity())) {
+            return new ContextDependentUserFunction(uf, functionName.getArity());
+        }
+        return uf;
     }
 
     /**
