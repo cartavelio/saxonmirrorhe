@@ -687,16 +687,16 @@ public class Gizmo {
                         break;
                     case Type.ATTRIBUTE:
                         ((MutableNodeInfo) target.getParent()).removeAttribute(target);
-                        if (newValue.getLength() == 0) {
-                            // no further action
-                        } else if (newValue.getLength() == 1 &&
-                                newValue.itemAt(0) instanceof NodeInfo &&
-                                ((NodeInfo)newValue.itemAt(0)).getNodeKind() == Type.ATTRIBUTE) {
-                            NodeInfo att = ((NodeInfo) newValue.itemAt(0));
-                            ((MutableNodeInfo) target.getParent()).addAttribute(
-                                    NameOfNode.makeName(att), (SimpleType)att.getSchemaType(), att.getStringValue(), 0, true);
-                        } else {
-                            throw new XPathException("Replacement for an attribute must be an attribute");
+                        if (newValue.getLength() > 0) {
+                            if (newValue.getLength() == 1 &&
+                                    newValue.itemAt(0) instanceof NodeInfo &&
+                                    ((NodeInfo) newValue.itemAt(0)).getNodeKind() == Type.ATTRIBUTE) {
+                                NodeInfo att = ((NodeInfo) newValue.itemAt(0));
+                                ((MutableNodeInfo) target.getParent()).addAttribute(
+                                        NameOfNode.makeName(att), (SimpleType) att.getSchemaType(), att.getStringValue(), 0, true);
+                            } else {
+                                throw new XPathException("Replacement for an attribute must be an attribute");
+                            }
                         }
                     case Type.NAMESPACE:
                     default:
@@ -851,9 +851,8 @@ public class Gizmo {
                     break;
                 } else if (answer.equalsIgnoreCase("n")) {
                     return;
-                } else {
-                    //continue;
                 }
+                //continue;
             }
         }
         StreamResult out = new StreamResult(dest);
