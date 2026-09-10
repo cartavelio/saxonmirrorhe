@@ -508,9 +508,9 @@ public abstract class Type {
      * Determine whether two primitive atomic types are comparable under the rules for ValueComparisons
      * (that is, untyped atomic values treated as strings)
      *
-     * @param t1      the first type to compared.
+     * @param t1      the first type to compare.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param t2      the second type to compared.
+     * @param t2      the second type to compare.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
      * @param ordered true if testing for an ordering comparison (lt, gt, le, ge). False
      *                if testing for an equality comparison (eq, ne)
@@ -554,12 +554,11 @@ public abstract class Type {
      * Determine whether two primitive atomic types are comparable under the rules for ValueComparisons
      * (that is, untyped atomic values treated as strings)
      *
-     * @param t1      the first type to compared.
+     * @param t1      the first type to compare.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param t2      the second type to compared.
+     * @param t2      the second type to compare.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param ordered true if testing for an ordering comparison (lt, gt, le, ge). False
-     *                if testing for an equality comparison (eq, ne)
+     * @param version the XPath language level (either 20, 30, 305, 31 or 40)
      * @return true if the types are guaranteed comparable, as defined by the rules of the "eq" operator,
      *         or if we don't yet know (because some subtypes of the static type are comparable
      *         and others are not). False if they are definitely not comparable.
@@ -601,9 +600,9 @@ public abstract class Type {
      * Determine whether two primitive atomic types are comparable under the rules for GeneralComparisons
      * (that is, untyped atomic values treated as comparable to anything)
      *
-     * @param t1      the first type to compared.
+     * @param t1      the first type to compare.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param t2      the second type to compared.
+     * @param t2      the second type to compare.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
      * @param ordered true if testing for an ordering comparison (lt, gt, le, ge). False
      *                if testing for an equality comparison (eq, ne)
@@ -623,9 +622,9 @@ public abstract class Type {
      * (that is, untyped atomic values treated as comparable to anything). This method returns false if a run-time
      * check is necessary.
      *
-     * @param t1      the first type to compared.
+     * @param t1      the first type to compare.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param t2      the second type to compared.
+     * @param t2      the second type to compare.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
      * @param ordered true if testing for an ordering comparison (lt, gt, le, ge). False
      *                if testing for an equality comparison (eq, ne)
