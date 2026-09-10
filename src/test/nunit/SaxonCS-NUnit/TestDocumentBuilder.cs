@@ -519,7 +519,7 @@ namespace SaxonCS_NUnit {
                 SchemaManager mgr = proc.SchemaManager;
                 mgr.Compile(new XmlTextReader(ConfigTest.DATA_DIR + "books.xsd"));
                 SchemaValidator v = mgr.NewSchemaValidator();
-                v.ExpendAttributeDefaults = expandDefaults;
+                v.ExpandAttributeDefaults = expandDefaults;
 
                 Serializer serializer = proc.NewSerializer();
                 serializer.SetOutputProperty(Serializer.METHOD, "xml");
