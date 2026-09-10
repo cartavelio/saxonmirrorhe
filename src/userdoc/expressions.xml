@@ -15,12 +15,12 @@
          API for .NET</a> section for the .NET interface.</aside>
    
    <aside>Saxon provides further extensions to the XPath expression syntax (these require Saxon-PE
-      or higher), for details see <a class="bodylink" href="/v4extensions">Experimental 4.0 Extensions</a>.</aside>
+      or higher), for details see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</aside>
 
    <h3 class="subtitle">New features in XPath 3.0 and 3.1</h3>
 
-   <p>There are summaries of <a class="bodylink" href="xpath30new">New Features in XPath 3.0</a>
-      (originally published as XPath 2.1) and <a class="bodylink" href="xpath31new">New Features in
+   <p>There are summaries of <a class="bodylink" href="xpath30new">New features in XPath 3.0</a>
+      (originally published as XPath 2.1) and <a class="bodylink" href="xpath31new">New features in
          XPath 3.1</a>, and information about the implementation in Saxon.</p>
 
    <p>An important new feature in XPath 3.1 is the definition of maps and arrays. These features
@@ -46,7 +46,7 @@
    <h3 class="subtitle">XPath syntax</h3>
 
    <p>The functions provided in the XPath function library are listed separately: see the <a
-         class="bodylink" href="/functions">Function Library</a> section. This section summarizes
+         class="bodylink" href="/functions">Function library</a> section. This section summarizes
       the following syntactic constructs and operators provided in XPath 2.0 and higher:</p>
 
    <nav except="xpath30new xpath31new">
@@ -130,14 +130,14 @@
          the function name is a QName. A library of core functions is defined in the XPath and XSLT
          specifications (in versions 2.0, 3.0, and 3.1). For details of these functions, including
          notes on their implementation in this Saxon release, see the <a class="bodylink"
-            href="/functions">Function Library</a>. Additional functions are available (in a special
+            href="/functions">Function library</a>. Additional functions are available (in a special
          namespace) as Saxon extensions: these are also listed in the <a class="bodylink"
-            href="/functions">Function Library</a>, with some further information in the <a
+            href="/functions">Function library</a>, with some further information in the <a
             class="bodylink" href="/extensions">Extensions</a> section. Further functions may be
          implemented by the user, either as XSLT <i>stylesheet functions</i> (see <a
             class="bodylink code" href="/xsl-elements/function">xsl:function</a>), as XQuery
          functions, or as Java <i>extension functions</i> (see the <a class="bodylink"
-            href="/extensibility">Extensibility Mechanisms</a> section).</p>
+            href="/extensibility">Extensibility mechanisms</a> section).</p>
 
       <p>XPath 3.0 introduces dynamic function calls: <code>EXPR ( arg1, arg2, ...)</code> where
             <code>EXPR</code> is an expression that evaluates to a function item.</p>
@@ -999,7 +999,7 @@
             <code>for-each</code>, <code>filter</code>, <code>for-each-pair</code>, <code>pi</code>,
             <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>asin</code>,
             <code>acos</code>, <code>atan</code>, <code>sqrt</code>, <code>format-integer</code>,
-         and others. For details see the <a class="bodylink" href="/functions">Functions</a>
+         and others. For details see the <a class="bodylink" href="/functions">Functions library</a>
          section.</p>
 
 
@@ -1030,7 +1030,7 @@
                   >Maps in XPath</a>). They provide a similar capability to "objects" in Javascript,
                or "associative arrays" in some other languages. But as befits a function language
                like XPath, they are immutable. A collection of functions is available to operate on
-               maps (see the <a class="bodylink" href="/functions/map">Function Library</a>), and in
+               maps (see the <a class="bodylink" href="/functions/map">Function library</a>), and in
                addition there is new syntax for a map constructor (of the form <code>map{ key :
                   value, key : value }</code>) where both the keys and values are arbitrary
                expressions. There is a sequence type for maps <code>map(K, V)</code>, defining the
@@ -1047,7 +1047,7 @@
                nested. The members of an array can be arbitrary values, including sequences and arrays. An array
                is an item, so some care is needed: the syntax <code>$A[1]</code> returns the array item unchanged
                rather than selecting a member of the array. A library of functions is available to operate
-               on arrays ((see the <a class="bodylink" href="/functions/array">Function Library</a>). The expression
+               on arrays ((see the <a class="bodylink" href="/functions/array">Function library</a>). The expression
                <code>[1, 5, 7, (10 to 20)]</code> can be used to construct an array where the number of members is known
                statically (this example creates an array with four members, of which the last is a sequence of 11 items), and the
                expression <code>array{ 1, 5, 7, (10 to 20)}</code> can be used to construct an array with a variable number of 
@@ -1059,7 +1059,7 @@
       <p>A number of new functions are available, including <code>random-number-generator()</code>,
             <code>sort()</code>, <code>parse-ietf-date()</code>, and functions to read and write
          data in JSON format. For details see the <a class="bodylink" href="/functions">Functions
-            Library</a>.</p>
+            library</a>.</p>
 
    </section>
    <section id="xpath30maps" title="Maps in XPath">
@@ -1129,7 +1129,7 @@
             <code>map:get($M, $K)</code>.</p>
 
       <p>The summary of the full list of functions that operate on maps is as follows; for full
-         details see the <a class="bodylink" href="/functions/map">Functions Library</a>. The prefix
+         details see the <a class="bodylink" href="/functions/map">Functions library</a>. The prefix
             <code>map</code> represents the namespace URI
             <code>http://www.w3.org/2005/xpath-functions/map</code>.</p>
 
@@ -1271,7 +1271,7 @@
          <code>saxon:array-member</code>: see <a class="bodylink" href="/extensions/instructions">Extension instructions</a>.</p>
       
       <p>The summary of the full list of functions that operate on arrays is as follows; for full
-         details see the <a class="bodylink" href="/functions/array">Functions Library</a>. The prefix
+         details see the <a class="bodylink" href="/functions/array">Functions library</a>. The prefix
          <code>array</code> represents the namespace URI
          <code>http://www.w3.org/2005/xpath-functions/array</code>.</p>
       

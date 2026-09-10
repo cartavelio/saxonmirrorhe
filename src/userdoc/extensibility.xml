@@ -7,7 +7,7 @@
     queries by adding extension functions, extending the configuration and other user hooks.</p>
   
   <aside><p>For information about built-in Saxon extensions (which are often built using these
-    extensibility mechanisms) see <a class="bodylink" href="/extensions">Saxon Extensions</a>.</p>
+    extensibility mechanisms) see <a class="bodylink" href="/extensions">Saxon extensions</a>.</p>
     <p>For information about extending the facilities for localizing numbers and dates, and collations, see <a
       class="bodylink" href="/localization">Localization</a>.</p></aside>
   
@@ -15,17 +15,20 @@
   in Java or C# that can be invoked from XPath expressions (either free-standing XPath expressions,
   or expressions embedded in XSLT, XQuery, or XSD).</p>
   
-  <p>For general information about extension functions, see <a class="bodylink" href="extension-functions">Extension Functions</a>.</p>
+  <p>For general information about extension functions, see <a class="bodylink"
+    href="extension-functions">Extension functions</a>.</p>
   
-  <p class="javaonly">To write extension functions in Java, see <a class="bodylink" href="extension-functions-J">Extension Functions (Java)</a>.</p>
+  <p class="javaonly">To write extension functions in Java, see <a class="bodylink"
+    href="extension-functions-J">Extension functions (Java)</a>.</p>
 
-  <p class="csonly">To write extension functions in C#, see <a class="bodylink" href="extension-functions-CS">Extension Functions (C#)</a>.</p>
+  <p class="csonly">To write extension functions in C#, see <a class="bodylink"
+    href="extension-functions-CS">Extension functions (C#)</a>.</p>
   
   <p>For other extensibility mechanisms, see the following sections:</p>
   
   <ul>
-    <li class="javaonly"><p><a class="bodylink" href="instructions">Writing XSLT Extension Instructions</a></p></li>
-    <li class="javaonly"><p><a class="bodylink" href="output-filters">Customizing Serialization</a></p></li>
+    <li class="javaonly"><p><a class="bodylink" href="instructions">Writing XSLT extension instructions</a></p></li>
+    <li class="javaonly"><p><a class="bodylink" href="output-filters">Customizing serialization</a></p></li>
     <li><p><a class="bodylink" href="/sourcedocs/resources-and-uris">Resources and URIs</a></p></li>
   </ul>
   
@@ -52,9 +55,11 @@
     
     <p>Saxon provides a variety of APIs for writing extension functions, described in the following sections.</p>
     
-    <p class="javaonly">To write extension functions in Java, see <a class="bodylink" href="../extension-functions-J">Extension Functions (Java)</a>.</p>
+    <p class="javaonly">To write extension functions in Java, see <a class="bodylink"
+      href="../extension-functions-J">Extension functions (Java)</a>.</p>
     
-    <p class="csonly">To write extension functions in C#, see <a class="bodylink" href="../extension-functions-J">Extension Functions (C#)</a>.</p>
+    <p class="csonly">To write extension functions in C#, see <a class="bodylink"
+      href="../extension-functions-J">Extension functions (C#)</a>.</p>
     
   
  
@@ -68,15 +73,15 @@
         <aside>The mechanisms described here work equally well for other JVM-based languages such as Scala.</aside>
         <p>Saxon provides three mechanisms for writing extension functions in Java:</p>
         <ul>
-          <li><p>The <a class="bodylink" href="ext-simple-J">Simple Interface</a> allows you to create an extension function
+          <li><p>The <a class="bodylink" href="ext-simple-J">simple interface</a> allows you to create an extension function
           by writing a class that implements the interface <code class="javalink">net.sf.saxon.s9api.ExtensionFunction</code>,
             and registering your implementation with the <code class="javalink">net.sf.saxon.s9api.Processor</code> object.</p></li>
-          <li><p>The <a class="bodylink" href="ext-full-J">Full Interface</a> allows you to create an extension function
+          <li><p>The <a class="bodylink" href="ext-full-J">full interface</a> allows you to create an extension function
             by writing a class that implements the interface <code class="javalink">net.sf.saxon.s9api.ExtensionFunctionDefinition</code>,
             and registering your implementation with the <code class="javalink">net.sf.saxon.s9api.Processor</code> object. This
           interface is considerably more complex, but it gives more capability: in particular it allows the function full access
           to the XPath static and dynamic context.</p></li>
-          <li><p>The <a class="bodylink" href="reflexive-functions">Reflexive Interface</a> allows you to call arbitrary Java code 
+          <li><p>The <a class="bodylink" href="reflexive-functions">reflexive interface</a> allows you to call arbitrary Java code 
             (public methods in public classes found on the classpath) directly. This mechanism requires Saxon-PE or -EE.
           There are complex rules for mapping XPath function names to Java class and method names, and for converting between
           Java data types and XPath data types.</p> 
@@ -1772,9 +1777,9 @@ public static int lineNumber(XPathContext c) {
     <p>There are two interfaces provided for writing extension functions in C#:</p>
     
     <ul>
-      <li><p>The <a class="bodylink" href="ext-simple-N">Simple Interface</a> allows
+      <li><p>The <a class="bodylink" href="ext-simple-N">simple interface</a> allows
       a function to be implemented using a lambda expression.</p></li>
-      <li><p>The <a class="bodylink" href="ext-fns-N">Full Interface</a> allows
+      <li><p>The <a class="bodylink" href="ext-fns-N">full interface</a> allows
         a function to be written as an implementation of the interface 
         <a class="cslink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a>.</p></li>
     </ul>
@@ -2183,7 +2188,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
     <p>Saxon itself provides a number of stylesheet elements beyond those defined in the XSLT
       specification, including <code>saxon:assign</code>, <code>saxon:entity-ref</code>, and
         <code>saxon:while</code> (see the <a class="bodylink" href="/extensions/instructions">Saxon 
-          Extension Instructions</a> section). To enable these, use the standard XSLT extension mechanism: define
+          extension instructions</a> section). To enable these, use the standard XSLT extension mechanism: define
         <code>extension-element-prefixes="saxon"</code> on the <code>xsl:stylesheet element</code>, or
         <code>xsl:extension-element-prefixes="saxon"</code> on any enclosing literal result
       element.</p>

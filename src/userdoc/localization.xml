@@ -17,14 +17,14 @@
   
   <ul>
     <li><a class="bodylink" href="localizing-numbers-and-dates">Localizing numbers and dates</a></li>
-    <li><a class="bodylink" href="ICU-numbers-and-dates">Numbers and Dates from ICU</a></li>
+    <li><a class="bodylink" href="ICU-numbers-and-dates">Numbers and dates from ICU</a></li>
   </ul>
   
   <p>For further information about using collations see:</p>
   
   <ul>
     <li><a class="bodylink" href="unicode-collation-algorithm">Unicode Collation Algorithm</a></li>
-    <li><a class="bodylink" href="java-collations">Implementing Collations in Java</a></li>
+    <li><a class="bodylink" href="java-collations">Implementing collations in Java</a></li>
   </ul>
 
   <section id="number-formatting" title="Formatting numbers">
@@ -73,7 +73,7 @@
     <p>For more details on numbering using ICU, see TBA</p>
 
     <p>For more details on writing a plug-in for localizing numbers and dates, see <a
-        href="../localizing-numbers-and-dates">Localizing Numbers and Dates</a>.</p>
+        href="../localizing-numbers-and-dates">Localizing numbers and dates</a>.</p>
 
   </section>
 
@@ -122,7 +122,7 @@
       in some cases depends on which version of the JDK is in use.</aside>
 
     <p>For more details on writing a plug-in for localizing numbers and dates, see <a
-        href="../localizing-numbers-and-dates">Localizing Numbers and Dates</a>.</p>
+        href="../localizing-numbers-and-dates">Localizing numbers and dates</a>.</p>
 
   </section>
 

@@ -1653,7 +1653,7 @@
         <p>In Saxon-PE and Saxon-EE, support for a variety of other languages is provided by
           facilities from the <a href="http://site.icu-project.org/">ICU - International Components
             for Unicode</a>. For full details see <a
-            href="/localization/ICU-numbers-and-dates">Numbers and Dates
+            href="/localization/ICU-numbers-and-dates">Numbers and dates
             from ICU</a>.</p>
         <p>Details of additional numbering support for several European languages: specifically
             <code>da</code>, <code>de</code>, <code>fr</code>, <code>fr_BE</code>, <code>he</code>,
@@ -8019,7 +8019,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           
           <p>The type conversions for the arguments and return values of the dynamic functions work in the same way
             as for other reflexive extension functions: see <a class="bodylink"
-              href="/extensibility/extension-functions-J/reflexive-functions/converting-args">Converting Arguments</a>.
+              href="/extensibility/extension-functions-J/reflexive-functions/converting-args">Converting arguments</a>.
             The <code>void=this</code> convention is used: that is, a Java method whose declared return type is <code>void</code>
             is translated to a function that returns the target object as its result, to make it easier to write code that
             uses function chaining.
@@ -9837,7 +9837,7 @@ return saxon:serialize($x, <xsl:output method="xml"
             in which case it is executed in non-streaming mode (that is, the result is simply
             the result of evaluating the argument to the function).</p>
           
-          <p>For further details see <a href="/streaming">Streaming XML Documents</a>.</p>
+          <p>For further details see <a href="/streaming">Streaming XML documents</a>.</p>
         </div>
       </details>
     </function>
@@ -10386,7 +10386,7 @@ return saxon:transform($splitter, $results)]]></samp>
 
           <p>The third argument, <code>$params</code>, gives values of schema parameters declared
             using the <code>saxon:param</code> XSD extension (see <a class="bodylink"
-              href="/schema-processing/extensions11/parameterizing-schemas">Parameterizing Schemas</a>). The keys
+              href="/schema-processing/extensions11/parameterizing-schemas">Parameterizing schemas</a>). The keys
             must be <code>xs:QName</code> values corresponding to the names of declared parameters,
             and the corresponding values are the values to be used for the parameters.</p>
 

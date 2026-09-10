@@ -507,7 +507,7 @@
         <h2>net.sf.saxon.Transform</h2>
         
         <p>A new option <code>-ns</code> is available on the <code>net.sf.saxon.Transform</code> command line (see <a
-            class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a>). It can be used
+            class="bodylink" href="/using-xsl/commandline">XSLT from the command line</a>). It can be used
         to specify the default namespace for elements and types (in effect, a default for the <code>xpath-default-namespace</code>
         attribute). In addition, the value <code>-ns:##any</code> means that unprefixed element names appearing in path expressions and
         match patterns will match elements in any namespace (or none), and the value <code>-ns:##html5</code> simulates the rules
@@ -703,7 +703,7 @@
         
         <h3>Processing all Members of an Array</h3>
         
-        <p>A new <a class="bodylink" href="/v4extensions/other-xpath-extensions/for-member-expression">For-Member</a> expression is available to 
+        <p>A new <a class="bodylink" href="/v4extensions/other-xpath-extensions/for-member-expression">for-member</a> expression is available to 
             process all the members of an array:</p>
         
         <p><code>for member $x in EXPR (, $y in EXPR)* return EXPR</code></p>

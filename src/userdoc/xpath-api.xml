@@ -8,11 +8,11 @@
       the Saxon implementation of the XPath object model. On other pages you will find the <a
          class="bodylink" href="/using-xsl/embedding">API for XSLT transformation</a>, the <a
          class="bodylink" href="/using-xquery/api-query">API for running XQuery</a>, and the <a
-         class="bodylink" href="/schema-processing/validation-api">API for Schema
+         class="bodylink" href="/schema-processing/validation-api">API for schema
       validation.</a></p>
 
    <p>For information about the different ways of loading source documents, see <a class="bodylink"
-         href="/sourcedocs">Handling XML Documents</a>.</p>
+         href="/sourcedocs">Handling XML documents</a>.</p>
 
    <div class="javaonly">
    <p>Saxon supports two public Java APIs for XPath processing, as follows:</p>
@@ -21,7 +21,7 @@
          <p>The preferred interface for XPath processing is Saxon's <strong>s9api</strong> interface
             ("snappy"), which also supports XSLT and XQuery processing, schema validation, and other
             Saxon functionality in an integrated set of interfaces. This is described at <a
-               class="bodylink" href="s9api-xpath">Evaluating XPath Expressions using s9api</a>.
+               class="bodylink" href="s9api-xpath">Evaluating XPath expressions using s9api</a>.
          </p>
       </li>
       <li>
@@ -42,7 +42,7 @@
       <li>
          <p>On .NET, XPath processing is available via classes in the Saxon.Api namespace,
             as described at <a
-               class="bodylink" href="dotnet-xpath">Evaluating XPath Expressions from C#</a>.</p>
+               class="bodylink" href="dotnet-xpath">Evaluating XPath expressions from C#</a>.</p>
       </li>
    </ul>
    </div>
@@ -330,8 +330,8 @@
          directory after downloading the <code>saxon-resources</code> archive.</p>
 
       <p>To run the <code>XPathExample.java</code> application, see the instructions in <a
-            class="bodylink" href="/samples/shakespeare">Shakespeare XPath Sample
-         Application</a>.</p>
+            class="bodylink" href="/samples/shakespeare">Shakespeare XPath sample
+         application</a>.</p>
 
       <p>The <code>XPathExampleSA.java</code> application demonstrates use of schema-aware XPath. It
          is designed to be used with the files <code>books.xml</code> and <code>books.xsd</code> in
@@ -556,8 +556,9 @@ XPath xpath = xpathFactory.newXPath();
          <p>The arguments are therefore supplied as a list. Each item in this list represents one
             argument. The rules applied to convert arguments from XDM values to Java objects are the
             same as the rules for Java extension functions described at 
-            <a class="bodylink" href="/extensibility/extension-functions-J/reflexive-functions/converting-args">Converting Arguments to
-            Java Extension Functions</a>.</p> 
+            <a class="bodylink"
+               href="/extensibility/extension-functions-J/reflexive-functions/converting-args">Converting arguments to
+            Java extension functions</a>.</p> 
          
          <p>Similarly, the return value is converted to an XDM value
             using the rules given at <a class="bodylink" href="/extensibility/java-to-xdm-conversion">Converting Java values to

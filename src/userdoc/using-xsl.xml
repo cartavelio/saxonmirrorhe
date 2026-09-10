@@ -11,8 +11,8 @@
    </nav>
 
    <p>It also includes useful information on <a class="bodylink" href="compiling">Compiling a
-         Stylesheet</a>, and <a class="bodylink" href="performanceanalysis">Performance
-      Analysis</a>.</p>
+         stylesheet</a>, and <a class="bodylink" href="performanceanalysis">Performance
+      analysis</a>.</p>
 
    <p>Furthermore, a summary description of the current Saxon implementation of <a class="bodylink"
          href="xslt30">XSLT 3.0</a> is provided, with links to other relevant sections of the
@@ -44,8 +44,8 @@
          stylesheet, and the output file respectively.</p>
 
       <p>For a schema-aware transformation, specify the option <code>-sa</code>. For more
-         details see <a class="bodylink" href="/schema-processing/schema-aware-qt/satransformcmd">Schema-Aware
-            Transformations</a>.</p>
+         details see <a class="bodylink" href="/schema-processing/schema-aware-qt/satransformcmd">Schema-aware
+            transformations</a>.</p>
 
       <p>For backwards compatibility with previous releases, the prefixes <code>-s:</code> and
             <code>-xsl:</code> can be omitted provided that the source document and the stylesheet
@@ -97,7 +97,7 @@
                   semicolons; the files are OASIS XML catalogs used to define how public identifiers
                   and system identifiers (URIs) used in a source document, stylesheet, or schema are
                   to be redirected, typically to resources available locally. For more details see
-                  <a class="bodylink" href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML Catalogs</a>.
+                  <a class="bodylink" href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML catalogs</a>.
                </p>
             </td>
          </tr>
@@ -170,7 +170,7 @@
             <td>
                <p>Export the compiled stylesheet, in a form suitable for subsequent execution. For
                   more details, see <a class="bodylink" href="../compiling">Compiling a
-                     Stylesheet</a>.</p>
+                     stylesheet</a>.</p>
             </td>
          </tr>
          <tr>
@@ -618,7 +618,7 @@
                   classname to <code>net.sf.saxon.trace.TimingTraceListener</code>. This creates an
                   output file giving timings for each instruction executed. This output file can
                   subsequently be analyzed to give an execution time profile for the stylesheet. See
-                     <a class="bodylink" href="../performanceanalysis">Performance Analysis</a>.</p>
+                     <a class="bodylink" href="../performanceanalysis">Performance analysis</a>.</p>
             </td>
          </tr>
          <tr>
@@ -701,7 +701,7 @@
                      <code>-traceout:filename</code>; that is, it causes trace profile information
                   to be set to the specified file. This output file can subsequently be analyzed to
                   give an execution time profile for the stylesheet. See <a class="bodylink"
-                     href="../performanceanalysis">Performance Analysis</a>.</p>
+                     href="../performanceanalysis">Performance analysis</a>.</p>
             </td>
          </tr>
          <tr>
@@ -880,7 +880,7 @@
                   features are defined in the Javadoc for class <a class="javalink"
                      href="net.sf.saxon.lib.Feature">Feature</a> (alternatively see 
                   <a class="bodylink" href="/configuration/config-features"
-                     >Configuration Features</a>): the value used here is the
+                     >Configuration features</a>): the value used here is the
                   part of the name after the last "/", for example
                      <code>--allow-external-functions:off</code>. Only features accepting a string
                   or boolean may be set; for booleans the values true/false, on/off, yes/no, and 1/0
@@ -1055,7 +1055,7 @@
             class="bodylink">javax.xml.transform</a> package.</p>
 
       <p>For more information on using this API to invoke the Saxon XSLT processor, see <a
-            href="jaxp-transformation" class="bodylink">Using JAXP for Transformations</a>.</p>
+            href="jaxp-transformation" class="bodylink">Using JAXP for transformations</a>.</p>
 
 
 
@@ -1072,10 +1072,10 @@
       in its power and expressiveness, while being much better integrated with the Java host language.</p>
      
       <p>Saxon 10 introduced further enhancements to provide programmatic tree construction (see
-         <a class="bodylink" href="/sourcedocs/xml-parsing/builder-api">Building XML Trees Programmatically</a>).</p>
+         <a class="bodylink" href="/sourcedocs/xml-parsing/builder-api">Building XML trees programmatically</a>).</p>
 
       <p>For more information on using this API to invoke the Saxon XSLT processor, see <a
-            href="s9api-transformation" class="bodylink">Using s9api for Transformations</a>.</p>
+            href="s9api-transformation" class="bodylink">Using s9api for transformations</a>.</p>
 
       
 
@@ -1192,10 +1192,10 @@
 
           <p>Examples of s9api transformations are included in the <code>saxon-resources</code>
               download file, see the sample application <strong>S9APIExamples.java</strong>, and <a
-                  class="bodylink" href="/samples/s9api">S9API Examples</a> for more information.</p>
+                  class="bodylink" href="/samples/s9api">S9API examples</a> for more information.</p>
          
          <p>For instance, "TransformA" in S9APIExamples tests the following (to run the <a class="bodylink"
-            href="/samples/books">Book List Example</a>):</p>
+            href="/samples/books">Book list example</a>):</p>
          <samp><![CDATA[   Processor processor = new Processor(false);
    XsltCompiler compiler = processor.newXsltCompiler();
    XsltExecutable stylesheet = compiler.compile(new StreamSource(new File("styles/books.xsl")));
@@ -1219,7 +1219,7 @@
          <p>More information and examples relating to the JAXP transformation API can be found in
             the <strong>JAXPExamples.java</strong> example application found in the samples
             directory of the <code>saxon-resources</code> file, see <a class="bodylink"
-                href="/samples/jaxp">JAXP Transformation Examples</a>.</p>
+                href="/samples/jaxp">JAXP transformation examples</a>.</p>
 
          <p>If you want to be sure that Saxon (and not some other XSLT engine) is loaded to perform
             your transformations, you need to know the class name of Saxon's implementation of the
@@ -1545,7 +1545,7 @@
       
       <p>Examples of Saxon.Api transformations are included in the <code>saxon-resources</code>
          download file, see the sample application <strong>Examples.cs</strong>, and <a
-            class="bodylink" href="/samples/dotnetsamples">API Examples for .NET</a> for more information.</p>
+            class="bodylink" href="/samples/dotnetsamples">API examples for .NET</a> for more information.</p>
       
       <p>For instance, <code>XsltSimple2</code> in <code>Examples.cs</code> runs as follows:</p>
 
@@ -1607,7 +1607,7 @@
 ]]></samp>
       
       <p>For a full list of feature names, see <a class="bodylink"
-         href="/configuration/config-features">Configuration Features</a> or the Javadoc
+         href="/configuration/config-features">Configuration features</a> or the Javadoc
          documentation of class <a class="javalink" href="net.sf.saxon.lib.Feature"
             >net.sf.saxon.lib.Feature</a>.</p>
       
@@ -2148,7 +2148,7 @@
          
          <aside>Older interfaces for processing messages remain available for backwards compatibility;
          but from 11.1, the <code>-m</code> option on the command line is ignored, as is the
-            configuration property <a class="feature" href="MESSAGE_EMITTER_CLASS">MESSAGE_EMITTER_CLASS</a>.</aside>
+            configuration property <a class="feature" href="MESSAGE_EMITTER_CLASS"/>.</aside>
       </section>
       
    </section>
@@ -2342,7 +2342,7 @@
 
       <p>For further details of the features implemented in the current Saxon release, and the Saxon
          editions in which they are available see <a
-            class="bodylink" href="/conformance/xslt30">XSLT 3.0 Conformance</a>. Full details of
+            class="bodylink" href="/conformance/xslt30">XSLT 3.0 conformance</a>. Full details of
          these features are in the W3C XSLT and XPath specifications; but further summary
          information about many of them can be found in the relevant sections of the Saxon
          documentation listed below:</p>
@@ -2350,22 +2350,22 @@
       <ul>
          <li>
             <p>
-               <a class="bodylink" href="/functions">Functions Library</a>
+               <a class="bodylink" href="/functions">Functions library</a>
             </p>
          </li>
          <li>
             <p>
-               <a class="bodylink" href="/xsl-elements">XSLT Elements</a>
+               <a class="bodylink" href="/xsl-elements">XSLT elements</a>
             </p>
          </li>
          <li>
             <p>
-               <a class="bodylink" href="/expressions/xpath30new">XPath 3.0 Expressions</a>
+               <a class="bodylink" href="/expressions/xpath30new">XPath 3.0 expressions</a>
             </p>
          </li>
          <li>
             <p>
-               <a class="bodylink" href="/expressions/xpath31new">XPath 3.1 Expressions</a>
+               <a class="bodylink" href="/expressions/xpath31new">XPath 3.1 expressions</a>
             </p>
          </li>
          <li>
@@ -2375,12 +2375,12 @@
          </li>
          <li>
             <p>
-               <a class="bodylink" href="/streaming">Streaming XML Documents</a>
+               <a class="bodylink" href="/streaming">Streaming XML documents</a>
             </p>
          </li>
          <li>
             <p>
-               <a class="bodylink" href="../compiling">Compiling a Stylesheet</a> (for details on
+               <a class="bodylink" href="../compiling">Compiling a stylesheet</a> (for details on
                using packages) </p>
          </li>
       </ul>

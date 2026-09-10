@@ -127,9 +127,9 @@
       <p>SaxonCS corresponds to Saxon-EE on Java.</p>
 
       <p>For information on streaming, see <a class="bodylink" href="/streaming"
-            >Streaming XML Documents</a>.</p>
+            >Streaming XML documents</a>.</p>
 
-      <p>For information on using packages, see <a class="bodylink" href="/using-xsl/compiling">Compiling a Stylesheet</a>.</p>
+      <p>For information on using packages, see <a class="bodylink" href="/using-xsl/compiling">Compiling a stylesheet</a>.</p>
 
 
       <h2 class="subtitle">Non-conformances</h2>
@@ -138,7 +138,7 @@
       
       <ol>
          <li class="csonly"><p>In SaxonCS, there are limitations imposed by use of the Microsoft <code>System.Xml</code>
-            parser: for details see <a class="bodylink" href="/saxon-cs/xmlparsing">XML Parsing in SaxonCS</a>.</p></li>
+            parser: for details see <a class="bodylink" href="/saxon-cs/xmlparsing">XML parsing in SaxonCS</a>.</p></li>
          <li><p>The W3C specification requires that vendor-defined extensions must only change the processor's
          behavior to the extent that the specification leaves the behavior implementation-defined. Some Saxon-defined
          extensions do not follow this rule: they explicitly change the behavior to make it non-conformant.</p>
@@ -224,7 +224,7 @@
                <p>&#x25BA; For information on Saxon's APIs for XSLT transformation, see 
                   <a class="bodylink" href="/using-xsl/embedding">Invoking XSLT from an application</a>.
                   Transformations can also be invoked from the command line (see 
-                  <a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a>).</p>
+                  <a class="bodylink" href="/using-xsl/commandline">XSLT from the command line</a>).</p>
             </li>
             <li>
                <p>
@@ -407,7 +407,7 @@
                </p>
                <p>&#x25BA; Mechanisms provided by the Saxon processor for implementing extension functions
                   and extension instructions are documented at <a class="bodylink"
-                     href="/extensions">Extensibility Mechanisms</a>.
+                     href="/extensions">Extensibility mechanisms</a>.
                   Mechanisms for extending the serialization capability are available via the method
                   <code>Configuration.setSerializerFactory()</code>. Collations can be defined at
                   configuration level either by registering individual collations using <code>Configuration.registerCollation()</code>,
@@ -445,7 +445,7 @@
                </p>
                <p>&#x25BA; Mechanisms provided by the Saxon processor for implementing extension functions
                   and extension instructions are documented at <a class="bodylink"
-                     href="/extensions">Extensibility Mechanisms</a>.</p>
+                     href="/extensions">Extensibility mechanisms</a>.</p>
             </li>
             <li>
                <p>
@@ -587,7 +587,7 @@
                </p>
                <p>&#x25BA; Mechanisms provided by the Saxon processor for implementing extension functions
                   and extension instructions are documented at <a class="bodylink"
-                     href="/extensions">Extensibility Mechanisms</a>.
+                     href="/extensions">Extensibility mechanisms</a>.
                   Mechanisms for extending the serialization capability are available via the method
                   <code>Configuration.setSerializerFactory()</code>. Collations can be defined at
                   configuration level either by registering individual collations using <code>Configuration.registerCollation()</code>,
@@ -1026,7 +1026,7 @@
       <p>Saxon fully implements the final XQuery 3.1 <a
             class="bodylink" href="http://www.w3.org/TR/xquery-31/">Recommendation</a> of 21 March 2017.</p>
 
-      <p>See also <a class="bodylink" href="../xpath31">XPath 3.1 Conformance</a>; all the 
+      <p>See also <a class="bodylink" href="../xpath31">XPath 3.1 conformance</a>; all the 
          features implemented for XPath 3.1 are also available in XQuery 3.1.</p>
       
       <h2 class="subtitle">Test results</h2>
@@ -1101,7 +1101,7 @@
             </p>
             <p>
                ► For details of Saxon Unicode support, see
-               <a class="bodylink" href="../xslt30">XSLT 3.0 Conformance.</a>
+               <a class="bodylink" href="../xslt30">XSLT 3.0 conformance</a>.
             </p>
          </li>
          <li>
@@ -1231,7 +1231,7 @@
             <p>
                ► Saxon-EE recognizes one pragma:
                <code>saxon:validate-type</code>. For details, see
-               <a class="bodylink" href="/using-xquery/extensions">XQuery Extensions</a>.
+               <a class="bodylink" href="/using-xquery/extensions">XQuery extensions</a>.
             </p>
          </li>
          <li>
@@ -1241,7 +1241,7 @@
             </p>
             <p>
                ► See
-               <a class="bodylink" href="/using-xquery/extensibility">XQuery Extensibility</a>.
+               <a class="bodylink" href="/using-xquery/extensibility">XQuery extensibility</a>.
             </p>
          </li>
          <li>
@@ -1251,7 +1251,7 @@
             </p>
             <p>
                ► Java methods can be called as
-               <a class="bodylink" href="/extensibility/extension-functions">Extension Functions</a>.
+               <a class="bodylink" href="/extensibility/extension-functions">Extension functions</a>.
             </p>
          </li>
          <li>
@@ -1818,7 +1818,7 @@
             </i></p>
             <p>&#x25BA; Saxon (PE and EE) defines a number of serialization parameters in the Saxon namespace,
                documented at <a href="/extensions/output-extras/serialization-parameters"
-                  class="bodylink">Extensions: Serialization Parameters</a>. Other parameters 
+                  class="bodylink">Extensions: Serialization parameters</a>. Other parameters 
                in the Saxon namespace are rejected; parameters in other namespaces are generally ignored.</p>
          </li>
          <li>
@@ -1837,7 +1837,7 @@
                a Data Model Instance)</i></p>
             <p>&#x25BA; Saxon (PE and EE) recognizes additional serialization parameters in the Saxon namespace:
                see <a href="/extensions/output-extras/serialization-parameters"
-                  class="bodylink">Extensions: Serialization Parameters</a>.</p>
+                  class="bodylink">Extensions: Serialization parameters</a>.</p>
          </li>
          <li>
             <p><i>The effect of providing an option that allows the encoding phase to be skipped, 

@@ -9,7 +9,7 @@
    <p>This is the documentation for the Saxon version 11 series.</p>
 
    <p>A full history of changes over successive releases appears in the <a class="bodylink" href="/changes">Change
-         History</a>.</p>
+         history</a>.</p>
    
    <h2 class="subtitle">Technology platforms</h2>
    
@@ -31,7 +31,7 @@
 
    <p>Saxon 11 includes highly conformant implementations of the current W3C Recommendations: XSLT
       3.0, XQuery 3.1, XPath 3.1, and XSD 1.1. See <a class="bodylink" href="/conformance">Standards
-         Conformance</a> for more details.</p> 
+         conformance</a> for more details.</p> 
 
    <p>Support for older specifications such as XSLT 2.0 and XQuery 1.0 has been dropped, but of course
       the newer specifications have a high level of backwards compatibility so existing code should
@@ -71,9 +71,9 @@
       for aspects specific to that platform (including full details of the APIs for C/C++, PHP and Python).</p>
    
    <p>The documentation also contains information relevant to SaxonJS (in particular the Reference
-      sections on <a class="bodylink" href="/xsl-elements">XSLT Elements</a>, <a class="bodylink"
-         href="/expressions">XPath Syntax</a>, and <a class="bodylink" href="/functions">Functions
-            Library</a>), but please see the main <a class="bodylink"
+      sections on <a class="bodylink" href="/xsl-elements">XSLT elements</a>, <a class="bodylink"
+         href="/expressions">XPath syntax</a>, and <a class="bodylink" href="/functions">Functions
+            library</a>), but please see the main <a class="bodylink"
                href="http://www.saxonica.com/saxon-js/documentation">SaxonJS documentation</a> for specific
       SaxonJS product information.</p>
    
@@ -108,7 +108,7 @@
       </nav>
       
       <p class="conly">For information on getting started with SaxonC, please see <a class="bodylink"
-         href="http://www.saxonica.com/saxon-c/documentation11/#!about/gettingstarted">Getting Started</a> in
+         href="http://www.saxonica.com/saxon-c/documentation11/#!about/gettingstarted">Getting started</a> in
          the SaxonC documentation.</p>
 
       <section id="gettingstartedjava" title="Getting started with SaxonJ" class="javaonly">
@@ -209,7 +209,7 @@
                      <code>saxon-ee-11.#.jar</code> is found. <i>When running Saxon from the command
                      line, it not usually necessary for the directory containing the license file
                      to be on the classpath. </i> For more details on Saxon license keys, see the <a
-                     class="bodylink" href="../../license">Saxon Licenses</a> section. </p>
+                     class="bodylink" href="../../license">Saxon licenses</a> section. </p>
             </li>
          </ol>
 
@@ -455,7 +455,7 @@
             >feature matrix</a>.</p>
 
       <p>For information on obtaining and setting up a license key, see the <a class="bodylink"
-            href="/about/license">Saxon Licenses</a> section.</p>
+            href="/about/license">Saxon licenses</a> section.</p>
 
 
       <p>For commercial information including prices, terms and conditions, maintenance and upgrade
@@ -1015,7 +1015,7 @@
       
       <p>Details about installing SaxonC and the PHP and Python extensions, on Linux, Mac OS and Windows, is
          contained in the <a class="bodylink"
-            href="https://www.saxonica.com/saxon-c/documentation/index.html#!starting">Getting Started</a>
+            href="https://www.saxonica.com/saxon-c/documentation/index.html#!starting">Getting started</a>
          section of the SaxonC documentation.</p>
       
    </section>
@@ -1417,7 +1417,7 @@
       that's how the reputation of the product grows.</p>
       
       <p>If you're a paid-up user, your entitlement to support is defined in the 
-         <a class="bodylink" href="/conditions">Conditions of Use</a> (or sometimes in a custom contract).</p>
+         <a class="bodylink" href="/conditions">Licensing</a> conditions of use (or sometimes in a custom contract).</p>
 
       <p>Some users like to formalize their support expectations using a Service Level Agreement. We do have
       policies that define our aspirations in terms of service level commitments, but in reality, we've found
