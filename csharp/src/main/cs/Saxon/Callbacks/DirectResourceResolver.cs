@@ -1,13 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using Microsoft.Net.Http.Headers;
-using XmlResolver;
-using XmlResolver.Features;
-using XmlResolver.Utils;
-using Saxon.Api;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.resource;
