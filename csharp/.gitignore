@@ -1,3 +1,9 @@
 /SaxonCS.sln.DotSettings.user
 *.csproj
 *.sln
+he/bin
+he/obj
+pe/bin
+pe/obj
+ee/bin
+ee/obj
