@@ -180,7 +180,8 @@ public class SaxonCAPI {
         if(handle != WordFactory.nullPointer()) {
             objectHandles.destroy(handle);
             if(debug) {
-                objHandlesCreated++;
+                objHandlesCreated--;
+                System.err.println("Destroyed Object Handle.  Current count: "+ objHandlesCreated);
             }
         } else if(SaxonCAPI.debug) {
             System.err.println("ObjectHandle not destroyed: Null found");
