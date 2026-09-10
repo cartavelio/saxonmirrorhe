@@ -621,7 +621,7 @@ public class ForEachGroup extends Instruction
         return groupIterator;
     }
 
-    private void makeSortKeyEvaluators() {
+    private synchronized void makeSortKeyEvaluators() {
         if (sortKeyEvaluators == null && getSortKeyDefinitions() != null) {
             sortKeyEvaluators = new ItemEvaluator[getSortKeyDefinitions().size()];
             for (int s = 0; s < getSortKeyDefinitions().size(); s++) {
