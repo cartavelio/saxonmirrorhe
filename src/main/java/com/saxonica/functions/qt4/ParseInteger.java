@@ -36,10 +36,12 @@ public class ParseInteger extends SystemFunction {
         int radix = 10;
         if (arguments.length == 2) {
             IntegerValue r = (IntegerValue) arguments[1].head();
-            if (r.compareTo(2) < 0 || r.compareTo(36) > 0) {
-                throw new XPathException("Radix in parse-integer must be in range 2..36", "FORG0011");
+            if (r != null) {
+                if (r.compareTo(2) < 0 || r.compareTo(36) > 0) {
+                    throw new XPathException("Radix in parse-integer must be in range 2..36", "FORG0011");
+                }
+                radix = (int) r.longValue();
             }
-            radix = (int) r.longValue();
         }
         String val = Translate.translate(s, ignorables, StringValue.EMPTY_STRING).getStringValue();
         try {
