@@ -211,8 +211,6 @@ int XdmValue::addXdmItemToValue(XdmItem *val) {
     }
 
     values[xdmSize] = val;
-    // values.push_back(val);
-    // val->incrementRefCount();
     int addedItemIndex = xdmSize;
     xdmSize++;
     if (jValues > 0) {

@@ -4424,14 +4424,11 @@ cdef class PyXdmNode(PyXdmItem):
             PyXdmValue: the typed value. If the typed value is a single atomic value, this will be returned
             as an instance of PyXdmAtomicValue
         """
-        cdef PyXdmValue val = None
         cdef saxoncClasses.XdmValue * xdmValue = self.derivednptr.getTypedValue()
         if xdmValue == NULL:
             return None
         else:
-            val = PyXdmValue(self.processor)
-            val.thisvptr = xdmValue
-            return val
+            return self.processor.wrap_value(xdmValue)
 
     @property
     def base_uri(self):

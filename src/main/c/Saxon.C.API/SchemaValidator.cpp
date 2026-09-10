@@ -295,7 +295,6 @@ XdmValue *SchemaValidator::getParameter(const char *name, bool withParam) {
 
 void SchemaValidator::setParameter(const char *name, XdmValue *value,  bool withParam) {
   if (value != nullptr) {
-    // value->incrementRefCount();
     std::string skey = ((withParam ? "param:" : "") + std::string(name));
     std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
     if (it != parameters.end()) {
