@@ -48,9 +48,9 @@
   <exception test-set="fn-format-integer" 
              test-case="format-integer-032 format-integer-032-fr format-integer-032-it
                         format-integer-065 format-integer-066" 
-             run="false" report="not supported">
+             run="false" report="not supported" edition="HE">
     <created by="Michael Kay" on="2021-12-07"/>
-    <reason>SaxonCS doesn't format "numbers as words" for languages other than English.</reason>
+    <reason>SaxonCS-HE doesn't format "numbers as words" for languages other than English.</reason>
   </exception>
   
   <exception test-set="fn-json-to-xml" 

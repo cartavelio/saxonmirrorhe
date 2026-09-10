@@ -192,13 +192,8 @@ namespace TestDriver {
                     return ("true".Equals(value) != inverse);
                 }
                 case "language": {
-                    if (edition.Equals("EE")) {
-                        string[] supported = {"en", "de", "fr", "it"};
-                        return supported.Contains(value) != inverse;
-                    }
-                    else {
-                        return ("en".Equals(value) != inverse);
-                    }
+                    string[] supported = {"en", "de", "fr", "it"};
+                    return supported.Contains(value) != inverse;
                 }
                 case "calendar": {
                     return (("AD".Equals(value) || "ISO".Equals(value)) != inverse);
