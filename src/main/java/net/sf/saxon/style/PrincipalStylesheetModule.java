@@ -1220,15 +1220,12 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
             Timer timer = compilation.timer;
 
-            //PreparedStylesheet pss = getPreparedStylesheet();
             Configuration config = getConfiguration();
 
             // If any XQuery functions were imported, fix up all function calls
             // registered against these functions.
             XQueryFunctionLibrary queryFunctions = stylesheetPackage.getXQueryFunctionLibrary();
-            for (XQueryFunction f : queryFunctions.getFunctionDefinitions()) {
-                f.fixupReferences();
-            }
+            queryFunctions.processAllFunctions(XQueryFunction::fixupReferences);
 
             if (Compilation.TIMING) {
                 timer.report("fixup Query functions");

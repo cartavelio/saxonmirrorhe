@@ -219,7 +219,6 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             }
         }
         // Add functions to the result.
-        MapItem functionsMap = new HashTrieMap();
         XQueryFunctionLibrary functionLib = lib.getGlobalFunctionLibrary();
 
         ExportAgent agent = new ExportAgent() {
@@ -232,7 +231,11 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                 throw err;
             }
         };
-        for (XQueryFunction function : functionLib.getFunctionDefinitions()) {
+
+        MapItem functionsMap = new HashTrieMap();
+        final List<XQueryFunction> list = new ArrayList<>();
+        functionLib.processAllFunctions(fn -> list.add(fn));
+        for (XQueryFunction function : list) {
             MapItem newMap;
             QNameValue functionQName = new QNameValue(function.getFunctionName(), BuiltInAtomicType.QNAME);
             if (functionQName.getNamespaceURI().equals(moduleUri) && !function.isPrivate()) {
@@ -246,7 +249,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                 }
                 functionsMap = functionsMap.addEntry(functionQName, newMap);
             }
-        }
+        };
 
         return new ShapedMap(RESULT_SHAPE, variablesMap, functionsMap);
     }

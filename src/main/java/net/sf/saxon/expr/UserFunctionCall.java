@@ -207,7 +207,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     }
 
     @Override
-    public SymbolicName getSymbolicName() {
+    public SymbolicName.F getSymbolicName() {
         return new SymbolicName.F(getFunctionName(), getArity());
     }
 

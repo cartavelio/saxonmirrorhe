@@ -73,6 +73,7 @@ public class XQueryParser extends XPathParser {
     private boolean foundBaseURIDeclaration = false;
     private boolean foundContextItemDeclaration = false;
     private boolean foundDefaultDecimalFormat = false;
+    private boolean foundFunctionDeclaration = false;
     private boolean preambleProcessed = false;
 
     public final Set<NamespaceUri> importedModules = new HashSet<>(5);
@@ -1012,9 +1013,10 @@ public class XQueryParser extends XPathParser {
                 }
             }
         }
+        boolean reuseFunctionLibrary = !foundFunctionDeclaration && moduleImports.size() == 1;
         for (Import imp : moduleImports) {
             try {
-                applyModuleImport(imp);
+                applyModuleImport(imp, reuseFunctionLibrary);
             } catch (XPathException err) {
                 if (!err.hasBeenReported()) {
                     throw err.maybeWithLocation(makeLocation(imp.offset));
@@ -1376,7 +1378,7 @@ public class XQueryParser extends XPathParser {
         moduleImports.add(mImport);
     }
 
-    private void applyModuleImport(/*@NotNull*/ Import mImport) throws XPathException {
+    private void applyModuleImport(/*@NotNull*/ Import mImport, boolean reuseFunctionLibrary) throws XPathException {
         List<QueryModule> existingModules;
 
         // resolve the location URIs against the base URI
@@ -1972,6 +1974,7 @@ public class XQueryParser extends XPathParser {
 
     public void parseFunctionDeclaration(AnnotationList annotations) throws XPathException {
 
+        foundFunctionDeclaration = true;
         if (annotations.includes(SAXON_MEMO_FUNCTION)) {
             if (env.getConfiguration().getEditionCode().equals("HE")) {
                 warning("saxon:memo-function option is ignored under Saxon-HE", SaxonErrorCode.SXJX0001);

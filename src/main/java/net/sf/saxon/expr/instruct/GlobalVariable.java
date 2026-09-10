@@ -550,9 +550,9 @@ public class GlobalVariable extends Actor
                     ((GlobalVariable) b).lookForCycles(referees, globalFunctionLibrary);
                 }
             }
-            List<SymbolicName> flist = new ArrayList<>();
+            List<SymbolicName.F> flist = new ArrayList<>();
             ExpressionTool.gatherCalledFunctionNames(select, flist);
-            for (SymbolicName s : flist) {
+            for (SymbolicName.F s : flist) {
                 XQueryFunction f = globalFunctionLibrary.getDeclarationByKey(s);
                 if (!referees.contains(f)) {
                     // recursive function calls are allowed
@@ -583,9 +583,9 @@ public class GlobalVariable extends Actor
                 ((GlobalVariable) b).lookForCycles(referees, globalFunctionLibrary);
             }
         }
-        List<SymbolicName> flist = new ArrayList<>();
+        List<SymbolicName.F> flist = new ArrayList<>();
         ExpressionTool.gatherCalledFunctionNames(body, flist);
-        for (SymbolicName s : flist) {
+        for (SymbolicName.F s : flist) {
             XQueryFunction qf = globalFunctionLibrary.getDeclarationByKey(s);
             if (!referees.contains(qf)) {
                 // recursive function calls are allowed

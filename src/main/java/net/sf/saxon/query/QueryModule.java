@@ -18,6 +18,8 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.ma.trie.ImmutableList;
+import net.sf.saxon.ma.trie.ImmutableMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -68,6 +70,7 @@ public class QueryModule implements StaticContext {
     // This is needed *only* to implement the rules banning cyclic imports
     private FunctionLibraryList functionLibraryList;
     private XQueryFunctionLibrary globalFunctionLibrary;      // used only on a top-level module
+    private int globalFunctionLibraryNr;
     private int localFunctionLibraryNr;
     private int importedFunctionLibraryNr;
     private int unboundFunctionLibraryNr;
@@ -563,6 +566,14 @@ public class QueryModule implements StaticContext {
 
     public XQueryFunctionLibrary getGlobalFunctionLibrary() {
         return globalFunctionLibrary;
+    }
+
+    public void setGlobalFunctionLibrary(XQueryFunctionLibrary library) {
+        if (!isMainModule()) {
+            throw new AssertionError();
+        }
+        globalFunctionLibrary = library;
+        functionLibraryList.libraryList.set(localFunctionLibraryNr, library);
     }
 
     /**

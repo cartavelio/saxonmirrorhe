@@ -913,7 +913,7 @@ public class ExpressionTool {
      *             "{uri}local/arity"
      */
 
-    public static void gatherCalledFunctionNames(Expression e, List<SymbolicName> list) {
+    public static void gatherCalledFunctionNames(Expression e, List<SymbolicName.F> list) {
         if (e instanceof UserFunctionCall) {
             list.add(((UserFunctionCall) e).getSymbolicName());
         } else {
