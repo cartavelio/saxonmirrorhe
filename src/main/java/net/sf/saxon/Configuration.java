@@ -264,15 +264,6 @@ public class Configuration implements SourceResolver, NotationSet {
         }
     }
 
-//#if DOTNET==true
-    /**
-     * Declare a mapping from a specific namespace URI to a .NET class
-     * @param uri - the namespace URI of the function name
-     * @param type - the .NET class that implements the functions in this namespace
-     */
-    public void bindExtensions(String uri , cli.System.Type type) { }
-//#endif
-
     /**
      * Factory method to construct a Configuration object by reading a configuration file.
      *

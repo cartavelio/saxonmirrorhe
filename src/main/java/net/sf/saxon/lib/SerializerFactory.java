@@ -436,7 +436,7 @@ public class SerializerFactory {
             } else {
                 return new TreeReceiver(receiver);
             }
-//#if DOTNET == false
+//#if CSHARP == false
         } else if (result instanceof SAXResult) {
             ContentHandlerProxy proxy = newContentHandlerProxy();
             proxy.setUnderlyingContentHandler(((SAXResult) result).getHandler());
