@@ -244,6 +244,7 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
         into(extension.package_name)
 
         if (!saxonBuild.targetHost.get().isWindows) {
+            val injected = project.objects.newInstance<InjectedExecOps>()
             eachFile {
                 val sourcePathObj = sourceRootPath.resolve(sourcePath)
                 val destinationPath = destinationRootPath.resolve(path)
@@ -251,7 +252,7 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
                     exclude()
                     destinationPath.parent.toFile().mkdirs()
                     val linkTarget = Files.readSymbolicLink(sourcePathObj)
-                    project.exec {
+                    injected.execOps.exec {
                         executable = "ln"
                         args("-nsf", linkTarget, destinationPath)
                     }

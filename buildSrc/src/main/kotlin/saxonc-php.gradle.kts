@@ -45,9 +45,9 @@ val phpizeTask = tasks.register<Exec>("phpize") {
   executable("phpize")
 }
 
-open class DefaultWithExec @Inject constructor(@Internal val execOperations: ExecOperations): DefaultTask()
+open class PhpDefaultWithExec @Inject constructor(@Internal val execOperations: ExecOperations): DefaultTask()
 
-val phpConfigureTask = tasks.register<DefaultWithExec>("configure") {
+val phpConfigureTask = tasks.register<PhpDefaultWithExec>("configure") {
   inputs.files(phpizeTask)
   outputs.files(layout.projectDirectory.files(configureOutputs))
   outputs.dir(layout.projectDirectory.dir("modules"))

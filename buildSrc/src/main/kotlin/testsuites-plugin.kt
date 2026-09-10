@@ -189,6 +189,7 @@ abstract class TestSuitesExtension
 //    tasks.named(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
 //      dependsOn(thisSuite)
 //    }   
+    @Suppress("UNCHECKED_CAST")
     return thisSuite as TaskProvider<DefaultTask>
   }
 
@@ -243,6 +244,7 @@ abstract class TestSuitesExtension
 //      dependsOn(thisSuite)
 //    }
 
+    @Suppress("UNCHECKED_CAST")
     return thisSuite as TaskProvider<DefaultTask>
   }
 
@@ -321,6 +323,7 @@ abstract class TestSuitesExtension
 //      dependsOn(thisSuite)
 //    }
 
+    @Suppress("UNCHECKED_CAST")
     return thisSuite as TaskProvider<DefaultTask>
   }
 
@@ -399,6 +402,7 @@ abstract class TestSuitesExtension
 //      dependsOn(thisSuite)
 //    }
 
+    @Suppress("UNCHECKED_CAST")
     return thisSuite as TaskProvider<DefaultTask>
   }
 }

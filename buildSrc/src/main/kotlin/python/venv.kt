@@ -15,7 +15,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import org.gradle.process.ExecSpec
-import org.gradle.process.internal.ExecException
+import org.gradle.process.ProcessExecutionException
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
@@ -63,7 +63,7 @@ abstract class ErrorLoggingExecTask @Inject constructor(private val ex: ExecOper
         }
         try {
             res.assertNormalExitValue()
-        } catch (e: ExecException) {
+        } catch (e: ProcessExecutionException) {
             logger.error(e.message)
             logger.error("Exec context:")
             logger.error(context.toString())
