@@ -375,7 +375,8 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(SchemaValidator, validate); 
     PHP_METHOD(SchemaValidator, validateToNode);
     PHP_METHOD(SchemaValidator, getValidationReport);
-    PHP_METHOD(SchemaValidator, setLax); // new
+    PHP_METHOD(SchemaValidator, setLax);
+    PHP_METHOD(SchemaValidator, registerSchemaFromNode);
     PHP_METHOD(SchemaValidator,  setParameter);
     PHP_METHOD(SchemaValidator,  setProperty);
     PHP_METHOD(SchemaValidator,  clearParameters);

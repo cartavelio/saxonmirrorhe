@@ -44,6 +44,27 @@ PHP_METHOD(SchemaValidator, __destruct)
 
 }
 
+PHP_METHOD(SchemaValidator, registerSchemaFromNode)
+{
+    SchemaValidator *schemaValidator;
+    zval* oth;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), , "O", &oth, xdmNode_ce) == FAILURE) {
+        RETURN_NULL();
+    }
+    zend_object* pobj = Z_OBJ_P(getThis());
+   schemaValidator_object * obj = (schemaValidator_object *)((char *)pobj - XtOffsetOf(schemaValidator_object, std));
+    schemaValidator = obj->schemaValidator;
+    if (schemaValidator != nullptr) {
+        zend_object* vvobj = Z_OBJ_P(oth);
+        xdmNode_object* ooth = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
+        if(ooth != nullptr) {
+            XdmNode * node = ooth->xdmNode;
+
+            schemaValidator->registerSchemaFromNode(node);
+        }
+    }
+}
 
 
 PHP_METHOD(SchemaValidator, registerSchemaFromFile)
@@ -447,6 +468,7 @@ zend_function_entry SchemaValidator_methods[] = {
     PHP_ME(SchemaValidator,  registerSchemaFromString,      arginfo_saxonc_sval_registerSchemaFromString, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  getValidationReport,      arginfo_saxonc_sval_getValidationReport, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  setLax,      arginfo_saxonc_sval_setLax, ZEND_ACC_PUBLIC)
+    PHP_ME(SchemaValidator,  registerSchemaFromNode,      arginfo_saxonc_sval_registerSchemaFromNode, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  setParameter,      arginfo_saxonc_sval_setParameter, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  setProperty,      arginfo_saxonc_sval_setProperty, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  clearParameters,      arginfo_saxonc_sval_clearParameters, ZEND_ACC_PUBLIC)

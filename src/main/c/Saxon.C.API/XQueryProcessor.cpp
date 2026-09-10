@@ -328,7 +328,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 	   setProperty("q", ofile);
     }
 
-    void XQueryProcessor::void setStreaming(bool option){
+    void XQueryProcessor::setStreaming(bool option){
         streaming = option;
         if(option) {
          	setProperty("-streaming", "1");
@@ -337,7 +337,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
         }
     }
 
-    void XQueryProcessor::void isStreaming(bool option){
+    bool XQueryProcessor::isStreaming(){
         return streaming;
     }
 
