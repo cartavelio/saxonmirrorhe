@@ -21,6 +21,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
 
@@ -145,7 +146,11 @@ public class StandardUnparsedTextResolver
                 }
             }
             if (encoding != null) {
-                return ResourceLoader.getReaderFromStream(inputStream, encoding);
+                try {
+                    return ResourceLoader.getReaderFromStream(inputStream, encoding);
+                } catch (UnsupportedEncodingException e) {
+                    throw new XPathException(e);
+                }
             }
         }
 
@@ -160,7 +165,11 @@ public class StandardUnparsedTextResolver
         } catch (IOException e) {
             encoding = "UTF-8";
         }
-        return ResourceLoader.getReaderFromStream(inputStream, encoding);
+        try {
+            return ResourceLoader.getReaderFromStream(inputStream, encoding);
+        } catch (UnsupportedEncodingException e) {
+            throw new XPathException(e).withErrorCode("FOUT1200");
+        }
     }
 
     @CSharpReplaceBody(code="throw new Saxon.Hej.trans.XPathException(\"classpath: URI scheme is not supported on .NET\");")
