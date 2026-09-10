@@ -59,7 +59,7 @@ public class SchemaDocumentTransformer {
             transformer.applyTemplates(input, new TreeReceiver(builder));
             return builder.getCurrentRoot().getTreeInfo();
         } catch (TransformerException e) {
-            System.err.println(e.getMessageAndLocation());
+            //System.err.println(e.getMessageAndLocation());
             throw new SchemaException(e);
         }
 
