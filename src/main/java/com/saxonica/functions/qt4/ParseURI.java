@@ -33,15 +33,23 @@ public class ParseURI extends URIFunctions {
 
         int pos = uristr.indexOf("#");
         if (pos >= 0) {
-            map = map.addEntry(FRAGMENT, new StringValue(DecodeFromURI.decode(uristr.substring(pos + 1))));
+            String fragid = DecodeFromURI.decode(uristr.substring(pos + 1));
+            if (!fragid.trim().isEmpty()) {
+                map = map.addEntry(FRAGMENT, new StringValue(fragid));
+            }
             uristr = uristr.substring(0, pos);
         }
 
         final String query;
         pos = uristr.indexOf("?");
         if (pos >= 0) {
-            query = uristr.substring(pos + 1);
-            map = map.addEntry(QUERY, new StringValue(query));
+            String querystr = uristr.substring(pos + 1).trim();
+            if (querystr.isEmpty()) {
+                query = null;
+            } else {
+                query = querystr;
+                map = map.addEntry(QUERY, new StringValue(query));
+            }
             uristr = uristr.substring(0, pos);
         } else {
             query = null;
