@@ -159,7 +159,9 @@ public class TypeChecker {
                 if (implausibility) {
                     message += ". Set Feature.ALLOW_IMPLAUSIBLE_EXPRESSIONS to suppress this 4.0 error";
                 }
-
+                if (supplied instanceof Literal lit) {
+                    message += ". Supplied value is " + lit.toShortString();
+                }
                 String errorCode = roleSupplier.get().getErrorCode();
                 ItemType suppliedItemType = supplied.getItemType();
                 if (suppliedItemType instanceof FunctionItemType && !(suppliedItemType instanceof ArrayItemType) && reqItemType.isAtomicType()) {
