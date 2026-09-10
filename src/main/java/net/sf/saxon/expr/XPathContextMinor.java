@@ -166,7 +166,7 @@ public class XPathContextMinor implements XPathContext {
     @Override
     public void setCurrentIterator(FocusIterator iter) {
         currentIterator = iter;
-        last = new LastValue(-1);
+        last = null;
     }
 
     /**
@@ -245,7 +245,7 @@ public class XPathContextMinor implements XPathContext {
             e.setErrorCode("XPDY0002");
             throw new UncheckedXPathException(e);
         }
-        if (last.value >= 0) {
+        if (last != null) {
             return last.value;
         }
         try {
