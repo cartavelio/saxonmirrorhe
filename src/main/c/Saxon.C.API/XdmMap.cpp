@@ -6,13 +6,12 @@
 #define new new (__FILE__, __LINE__)
 #endif
 
-XdmMap::XdmMap() : XdmFunctionItem() { map_size = -1; }
+XdmMap::XdmMap() : XdmFunctionItem() { }
 
 XdmMap::XdmMap(const XdmMap &d) {
-  map_size = d.map_size;
 }
 
-XdmMap::XdmMap(int64_t obj) : XdmFunctionItem(obj) { map_size = -1; }
+XdmMap::XdmMap(int64_t obj) : XdmFunctionItem(obj) {}
 
 const char *XdmMap::toString() {
   allocFn fn = operator new;

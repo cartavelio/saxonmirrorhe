@@ -43,14 +43,6 @@ public:
    */
   XdmMap(const XdmMap &d);
 
-
- XdmMap& operator=(const XdmMap &d) {
-  std::cerr << "XdmMap::operator=" << std::endl;
-   XdmItem::operator=(d);
-   map_size = -1;
-   return *this;
- }
-
   //! Destructor.
   /**
    * Destructor for XdmMap
