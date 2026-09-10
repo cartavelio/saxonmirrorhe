@@ -367,7 +367,6 @@
             the fallback action to be taken when no entry is found.</p></li>
         </ul>
         
-
         <p>From Saxon 12.3:</p>
         <ul>
             <li><p>The <code>fn:parse-integer()</code> function is implemented. This allows parsing of integers
@@ -396,7 +395,16 @@
             arbitrary XDM sequence (including, of course, an XML document) to JSON format.</p></li>
             
         </ul>
-
+        
+        <p>For 12.3, there have been changes to the keywords used for arguments to built-in functions,
+        tracking the draft specifications which have adjusted the keywords to give greater consistency.</p>
+        
+        <p>From Saxon 12.4:</p>
+        <ul>
+            <li><p>Functions that accept a collation argument now allow it to be set to an empty sequence,
+            which has the same effect as omitting the argument.</p></li>
+        </ul>
+        
       
         <h2>Dropped or Changed Extension Functions</h2>
         
@@ -501,6 +509,11 @@
         
         <p>From 12.3, some of the constructs in a FLWOR <code>window</code> clause become optional, for example it is no longer
             necessary to say <code>when true()</code>.</p>
+        
+        <p>From 12.3, variables (both global variable declarations and local variables bound in <code>let</code>,
+            <code>for [member]</code> and <code>group by</code> clauses) are subject to type coercion in the 
+            same way as function parameters. For example it becomes possible to say 
+        <code>let $x as xs:double := 1</code> because the integer 1 is now coerced to an <code>xs:double</code>.</p>
         
         <h2>XSLT extensions</h2>
         
