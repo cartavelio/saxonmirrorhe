@@ -3749,9 +3749,16 @@ zend_function_entry xdmNode_methods[] = {
                                            ZEND_ACC_PUBLIC)
                 PHP_ME(
                     XdmNode, getNodeName, arginfo_saxonc_xdmnode_getNodeName,
-                    ZEND_ACC_PUBLIC) PHP_ME(XdmNode, getLocalName,
+                    ZEND_ACC_PUBLIC)
+                PHP_ME(XdmNode, getLocalName,
                                             arginfo_saxonc_xdmnode_getLocalName,
                                             ZEND_ACC_PUBLIC)
+
+        PHP_ME(XdmNode, getColumnNumber, arginfo_saxonc_xdmnode_getColumnNumber,ZEND_ACC_PUBLIC)
+        PHP_ME(XdmNode, getLineNumber,arginfo_saxonc_xdmnode_getLineNumber,ZEND_ACC_PUBLIC)
+
+
+
                     PHP_ME(
                         XdmNode, isAtomic, arginfo_saxonc_xdmnode_isAtomic,
                         ZEND_ACC_PUBLIC) PHP_ME(XdmNode, getChildCount,

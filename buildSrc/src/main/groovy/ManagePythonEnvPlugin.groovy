@@ -32,9 +32,11 @@ class ManagePythonEnvPlugin implements Plugin<Project> {
         def venvBinDirectoryProvider = project.layout.buildDirectory.dir(venvBinDir)
 
         extension.systemPythonBinary.convention(sysPythonBinary)
+
         extension.venvDirPath.convention(project.layout.buildDirectory.file(venvDir).map { it.toString() })
         extension.venvBinPath.convention(venvBinDirectoryProvider.map { it.asFile.toString() })
         extension.venvPip.convention(venvBinDirectoryProvider.map { it.file("pip") }.map { it.toString() })
         extension.venvPython.convention(venvBinDirectoryProvider.map { it.file("python") }.map { it.toString() })
+
     }
 }
