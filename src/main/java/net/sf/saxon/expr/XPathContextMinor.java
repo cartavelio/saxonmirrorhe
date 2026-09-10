@@ -17,6 +17,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trace.ContextStackFrame;
 import net.sf.saxon.trace.ContextStackIterator;
+import net.sf.saxon.trace.ExitCounter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
@@ -240,7 +241,16 @@ public class XPathContextMinor implements XPathContext {
         if (currentIterator == null) {
             return null;
         }
-        return currentIterator.current();
+       // ExitCounter.count(currentIterator.getClass().getSimpleName());
+
+        if (currentIterator instanceof FocusTrackingIterator)
+        {
+            return ((FocusTrackingIterator)currentIterator).current();
+        }
+        else
+        {
+            return currentIterator.current();
+        }
     }
 
     /**
