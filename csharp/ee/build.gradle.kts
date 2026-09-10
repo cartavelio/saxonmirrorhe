@@ -620,7 +620,9 @@ val artifacts = tasks.register("downloadRelease") {
     
     copy {
       into(layout.buildDirectory.dir("releases"))
-      from(layout.buildDirectory.dir("bin/${architectures[0]}/SaxonCS.${saxonBuild.version.get()}.nupkg"))
+      from(layout.buildDirectory.dir("${architectures[0]}/SaxonCS/bin/Release")) {
+        include("*.nupkg")
+      }
     }
   }
 }
@@ -858,6 +860,7 @@ val signingResources = tasks.register<AwsSigningResources>("signingResources") {
 }
 
 val unsignedNugetPkgs = tasks.register<Sync>("unsignedNugetPkgs") {
+  dependsOn("downloadRelease")
   into(layout.buildDirectory.dir("unsignedNugetPkgs"))
   from(tasks.named("downloadRelease")) {
     include("*.nupkg")
