@@ -315,17 +315,17 @@ public class DocumentInstr extends ParentNodeConstructor {
 
         public PushEvaluator elaborateForPush() {
             DocumentInstr expr = (DocumentInstr) getExpression();
-            PushEvaluator content = expr.getContentExpression().makeElaborator().elaborateForPush();
-            if (expr.preservingTypes && !expr.textOnly) {
-                return (output, context) -> {
-                    output.setSystemId(expr.getStaticBaseURIString());
-                    output.startDocument(ReceiverOption.NONE);
-                    TailCall tc = content.processLeavingTail(output, context);
-                    dispatchTailCall(tc);
-                    output.endDocument();
-                    return null;
-                };
-            } else {
+//            PushEvaluator content = expr.getContentExpression().makeElaborator().elaborateForPush();
+//            if (expr.preservingTypes && !expr.textOnly) {
+//                return (output, context) -> {
+//                    output.setSystemId(expr.getStaticBaseURIString());
+//                    output.startDocument(ReceiverOption.NONE);
+//                    TailCall tc = content.processLeavingTail(output, context);
+//                    dispatchTailCall(tc);
+//                    output.endDocument();
+//                    return null;
+//                };
+//            } else {
                 ItemEvaluator evalAsItem = elaborateForItem();
                 Location loc = expr.getLocation();
                 return (output, context) -> {
@@ -335,7 +335,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                     }
                     return null;
                 };
-            }
+//            }
         }
 
         @Override

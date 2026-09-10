@@ -327,6 +327,7 @@ public class MessageInstr extends Instruction {
 
                 Builder builder = controller.makeBuilder();
                 builder.setDurability(Durability.TEMPORARY);
+                builder.setTiming(false);
                 Receiver rec = new MessageAdapter(new TreeReceiver(builder));
                 rec.open();
 
