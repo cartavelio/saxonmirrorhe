@@ -14,7 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.CoercionPlan;
-import net.sf.saxon.type.coercion.EnumerationCoercionPlan;
+import net.sf.saxon.type.coercion.SingletonEnumerationCoercionPlan;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
@@ -192,6 +192,10 @@ public class SingletonEnumType implements AtomicType {
     public boolean matches(Item item, TypeHierarchy th) {
         return item instanceof AtomicValue &&
                 ((AtomicValue) item).getItemType().equals(this);
+    }
+
+    public boolean matchesString(UnicodeString str) {
+        return str.equals(getValue());
     }
 
     /**
@@ -684,7 +688,7 @@ public class SingletonEnumType implements AtomicType {
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        return EnumerationCoercionPlan.INSTANCE;
+        return SingletonEnumerationCoercionPlan.INSTANCE;
     }
 
     /**

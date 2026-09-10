@@ -1,8 +1,7 @@
 package net.sf.saxon.type.coercion;
 
-import net.sf.saxon.expr.ItemMapper;
-import net.sf.saxon.expr.ItemMappingFunction;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.HexBinaryValue;
 
@@ -18,17 +17,12 @@ public class Base64BinaryCoercionPlan extends AtomicCoercionPlan {
     }
 
     @Override
-    public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {
-        if (atomizedType.overlaps(UType.HEX_BINARY)) {
-            return ItemMapper.of(item -> {
-                if (item instanceof HexBinaryValue) {
-                    return new Base64BinaryValue(((HexBinaryValue)item).getBinaryValue());
-                } else {
-                    return item;
-                }
-            });
+    protected AtomicValue promote(AtomicValue item, ItemType requiredType, CoercionRequest request) {
+        if (item instanceof HexBinaryValue) {
+            return new Base64BinaryValue(((HexBinaryValue) item).getBinaryValue());
+        } else {
+            return item;
         }
-        return null;
     }
 
 }

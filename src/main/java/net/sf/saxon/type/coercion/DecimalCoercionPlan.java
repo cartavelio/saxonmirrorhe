@@ -1,8 +1,9 @@
 package net.sf.saxon.type.coercion;
 
-import net.sf.saxon.expr.ItemMapper;
-import net.sf.saxon.expr.ItemMappingFunction;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.ValidationException;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BigDecimalValue;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.FloatValue;
@@ -19,19 +20,18 @@ public class DecimalCoercionPlan extends AtomicCoercionPlan {
     }
 
     @Override
-    public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {
-        if (atomizedType.overlaps(UType.NUMERIC)) {
-            return ItemMapper.of(item -> {
-                if (item instanceof DoubleValue) {
-                    return new BigDecimalValue(((DoubleValue) item).getDecimalValue());
-                } else if (item instanceof FloatValue) {
-                    return new BigDecimalValue(((FloatValue) item).getDecimalValue());
-                } else {
-                    return item;
-                }
-            });
+    protected AtomicValue promote(AtomicValue item, ItemType requiredType, CoercionRequest request) throws XPathException {
+        try {
+            if (item instanceof DoubleValue) {
+                return new BigDecimalValue(((DoubleValue) item).getDecimalValue());
+            } else if (item instanceof FloatValue) {
+                return new BigDecimalValue(((FloatValue) item).getDecimalValue());
+            } else {
+                return item;
+            }
+        } catch (ValidationException e) {
+            throw coercionError(item, requiredType, request);
         }
-        return null;
     }
 
 }

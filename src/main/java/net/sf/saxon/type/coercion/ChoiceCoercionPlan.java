@@ -1,93 +1,76 @@
 package net.sf.saxon.type.coercion;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.ItemMapper;
-import net.sf.saxon.expr.ItemMappingFunction;
-import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.type.*;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.functions.hof.CoercedFunction;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.ChoiceType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.type.TypeHierarchy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Coercion plan for use with 4.0 when the required item type is an enumeration type
  */
-public class UnionCoercionPlan extends AtomicCoercionPlan {
+public class ChoiceCoercionPlan extends AtomicCoercionPlan {
 
-    public final static UnionCoercionPlan INSTANCE = new UnionCoercionPlan();
+    private int version;
 
+    public final static ChoiceCoercionPlan INSTANCE31 = new ChoiceCoercionPlan(31);
+    public final static ChoiceCoercionPlan INSTANCE40 = new ChoiceCoercionPlan(40);
 
-
-    protected ItemMappingFunction getUntypedAtomicPromoter(CoercionRequest request, UType atomizedType) {
-
-        Configuration config = request.config;
-        TypeHierarchy th = config.getTypeHierarchy();
-        ItemType requiredItemType = request.requiredType;
-//        if (!atomizedType.overlaps(UType.UNTYPED_ATOMIC) &&
-//                !th.isSubType(BuiltInAtomicType.UNTYPED_ATOMIC, requiredItemType)) {
-            final boolean nsSensitive = ((PlainType) requiredItemType).isNamespaceSensitive();
-            if (nsSensitive) {
-                return ItemMapper.of(item -> {
-                    if (((AtomicValue) item).isUntypedAtomic()) {
-                        // TODO: this rule should be 4.0-only
-                        StringValue correspondingString = new StringValue(item.getUnicodeStringValue());
-                        if (requiredItemType.matches(correspondingString, th)) {
-                            return correspondingString;
-                        }
-                        RoleDiagnostic role = request.roleSupplier.get();
-                        ValidationFailure vf = new ValidationFailure(
-                                "Failed to convert the " + role.getMessage() + ": " +
-                                        "Implicit conversion of untypedAtomic value to " + requiredItemType +
-                                        " is not allowed");
-                        vf.setErrorCode("XPTY0117");
-                        throw vf.makeException();
-                    } else {
-                        return item;
-                    }
-                });
-
-            } else {
-                final ConversionRules rules = config.getConversionRules();
-                return ItemMapper.of(item -> {
-                    if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
-                        try {
-                            return ((UnionType) requiredItemType).getTypedValue(
-                                    item.getUnicodeStringValue(), null, rules).head();
-                        } catch (ValidationException ve) {
-                            throw ve.withErrorCode("XPTY0004");
-                        }
-                    } else {
-                        return item;
-                    }
-                });
-            } 
-//        }
-//        return null;
+    private ChoiceCoercionPlan(int version) {
+        this.version = version;
     }
 
-
+    /**
+     * Apply the coercion rules (function conversion rules) to a value, given a required type.
+     *
+     * @param item         the value to be converted
+     * @param requiredType the required type
+     * @param request      the input to the coercion
+     * @return the converted value (possibly as a lazily-evaluated sequence)
+     * @throws XPathException if the value cannot be converted to the required type
+     */
     @Override
-    public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {
-        ItemType requiredItemType = request.requiredType.getPrimaryType();
-        UnionType unionType = ((UnionType) requiredItemType);
-        List<? extends PlainType> memberTypes = unionType.getPlainMemberTypes();
-        ConversionRules rules = request.config.getConversionRules();
+    public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
+        ChoiceType reqType = (ChoiceType)requiredType;
         TypeHierarchy th = request.config.getTypeHierarchy();
-        return ItemMapper.of(item -> {
-            for (PlainType memberType : memberTypes) {
-                if (memberType.isAtomicType()) {
-                    AtomicType prim = memberType.getPrimitiveItemType();
-                    if (prim.matches(item, th)
-                            && ((AtomicType) memberType).validate((AtomicValue) item, null, rules) == null) {
-                        return ((AtomicValue) item).withMetadata((AtomicType) memberType);
+        if (requiredType.matches(item, th)) {
+            // Function coercion is needed even if the supplied item matches the required type
+            for (ItemType it : reqType.getAlternatives()) {
+                if (it.matches(item, th)) {
+                    if (it instanceof SpecificFunctionType) {
+                        boolean is40 = version >= 40;
+                        return new CoercedFunction((FunctionItem) item, ((SpecificFunctionType) it), is40, is40);
+                    } else {
+                        return item;
                     }
                 }
             }
-            throw coercionError(item, request);
-        });
+            throw new AssertionError("Item matches the choice type but doesn't match any of the alternatives");
+        }
+        List<XPathException> errors = null;
+        for (ItemType it : reqType.getAlternatives()) {
+            CoercionPlan plan = it.getCoercionPlan(40);
+            try {
+                return plan.coerceItem(item, it, request);
+            } catch (XPathException error) {
+                if (errors == null) {
+                    errors = new ArrayList<>();
+                    errors.add(error);
+                }
+            }
+        }
+        assert errors != null;
+        throw errors.get(0);
     }
+
+
 
 }
 

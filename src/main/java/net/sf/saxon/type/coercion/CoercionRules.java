@@ -4,6 +4,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
@@ -57,9 +58,9 @@ public class CoercionRules {
                            Location locator)
             throws XPathException {
         CoercionPlan plan = requiredType.getPrimaryType().getCoercionPlan(version);
-        CoercionRequest request = new CoercionRequest(
-                value, requiredType, knownType, config, roleSupplier, locator);
-        return plan.coerce(request);
+        CoercionRequest request = new CoercionRequest(knownType, config, roleSupplier, locator);
+        return SequenceTool.toLazySequence(
+                plan.coerceSequence(value.iterate(), requiredType, request));
     }
     
 

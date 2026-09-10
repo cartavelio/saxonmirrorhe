@@ -5,7 +5,7 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.functions.hof;
+package net.sf.saxon.type.coercion;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
@@ -20,8 +20,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.coercion.CoercionPlan;
-import net.sf.saxon.type.coercion.CoercionRequest;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
@@ -218,7 +216,7 @@ public final class SequenceCoercer extends UnaryExpression {
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("coercer", this);
-        destination.emitAttribute("to", requiredType.toAlphaCode());
+        destination.emitAttribute("type", requiredType.toAlphaCode());
         destination.emitAttribute("diag", roleSupplier.get().save());
         String flags = "" + (allow40 ? "4" : "") ;
         if (!flags.isEmpty()) {

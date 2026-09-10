@@ -3,13 +3,15 @@ package net.sf.saxon.type.coercion;
 import net.sf.saxon.functions.hof.CoercedFunction;
 import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 
 /**
- * Coercion plan for use when the required item type is xs:hexBinary
+ * Coercion plan for use when the required item type is a function type
  */
 public class FunctionItemCoercionPlan extends CoercionPlan {
 
@@ -29,21 +31,22 @@ public class FunctionItemCoercionPlan extends CoercionPlan {
     /**
      * Apply the coercion rules (function conversion rules) to a value, given a required type.
      *
-     * @param request the input to the coercion
-     * @return the converted value (possibly as a lazily-evaluated sequence)
+     * @param item         an item to be coerced
+     * @param requiredType the required item type
+     * @param request      the input to the coercion
+     * @return the converted value
      * @throws XPathException if the value cannot be converted to the required type
      */
     @Override
-    public Sequence coerce(CoercionRequest request) throws XPathException {
+    public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         boolean is40 = version >= 40;
-        Sequence value = request.value;
-        if (value instanceof FunctionItem) {
-            FunctionSequenceCoercer.checkAnnotations((FunctionItem) value,
-                                                     (FunctionItemType) request.requiredType.getPrimaryType(),
+        if (item instanceof FunctionItem) {
+            FunctionSequenceCoercer.checkAnnotations((FunctionItem) item,
+                                                     (FunctionItemType) requiredType,
                                                      request.config);
-            return new CoercedFunction((FunctionItem) value, (SpecificFunctionType) request.requiredType.getPrimaryType(), is40, is40);
+            return new CoercedFunction((FunctionItem) item, (SpecificFunctionType) requiredType, is40, is40);
         } else {
-            return value;
+            throw coercionError(item, requiredType, request);
         }
     }
 

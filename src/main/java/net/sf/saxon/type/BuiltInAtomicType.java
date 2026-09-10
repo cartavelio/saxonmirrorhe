@@ -298,10 +298,12 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         ENTITY.coercionPlan40 = DerivedAtomicCoercionPlan.getInstance();
         DECIMAL.coercionPlan40 = DecimalCoercionPlan.getInstance();
         INTEGER.coercionPlan40 = DerivedAtomicCoercionPlan.getInstance();
-        DURATION.coercionPlan40 = DerivedAtomicCoercionPlan.getInstance();
-        G_MONTH.coercionPlan40 = DerivedAtomicCoercionPlan.getInstance();
-        G_MONTH_DAY.coercionPlan40 = DerivedAtomicCoercionPlan.getInstance();
-        G_DAY.coercionPlan40 = DerivedAtomicCoercionPlan.getInstance();
+        DURATION.coercionPlan40 = AtomicCoercionPlan.getInstance();
+        G_YEAR.coercionPlan40 = AtomicCoercionPlan.getInstance();
+        G_YEAR_MONTH.coercionPlan40 = AtomicCoercionPlan.getInstance();
+        G_MONTH.coercionPlan40 = AtomicCoercionPlan.getInstance();
+        G_MONTH_DAY.coercionPlan40 = AtomicCoercionPlan.getInstance();
+        G_DAY.coercionPlan40 = AtomicCoercionPlan.getInstance();
         DAY_TIME_DURATION.coercionPlan40 = DerivedAtomicCoercionPlan.getInstance();
         YEAR_MONTH_DURATION.coercionPlan40 = DerivedAtomicCoercionPlan.getInstance();
         TIME.coercionPlan40 = AtomicCoercionPlan.getInstance();

@@ -28,7 +28,7 @@ import static net.sf.saxon.om.Genre.ATOMIC;
  * currently two, namely ErrorType and NumericType), or a user-defined union type.
  */
 
-public interface UnionType extends ItemType, CastingTarget {
+public interface UnionType extends ItemType, CastingTarget, ChoiceType {
 
     /**
      * Get the name of the type. If the type is unnamed, return an invented
@@ -58,6 +58,10 @@ public interface UnionType extends ItemType, CastingTarget {
      */
 
     List<? extends PlainType> getPlainMemberTypes() throws MissingComponentException;
+
+    default Iterable<? extends ItemType> getAlternatives() {
+        return getPlainMemberTypes();
+    }
 
     /**
      * Get the result type of a cast operation to this union type, as a sequence type.

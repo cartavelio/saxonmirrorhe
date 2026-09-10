@@ -351,7 +351,7 @@ public class DynamicFunctionCall extends Expression {
                             actual = coercionRules.coerce(
                                     actual, expected, suppliedTypes[i], config, role, Loc.NONE);
                         }
-                        argValues[i] = actual;
+                        argValues[i] = actual.makeRepeatable();
                     }
                 }
 

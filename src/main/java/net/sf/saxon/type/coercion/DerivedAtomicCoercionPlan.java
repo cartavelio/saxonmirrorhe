@@ -1,11 +1,10 @@
 package net.sf.saxon.type.coercion;
 
-import net.sf.saxon.expr.ItemMapper;
-import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 
 /**
@@ -20,21 +19,21 @@ public class DerivedAtomicCoercionPlan extends AtomicCoercionPlan {
     }
 
     @Override
-    public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {
-        AtomicType req = (AtomicType) request.requiredType.getPrimaryType();
-        AtomicType prim = (AtomicType) req.getPrimitiveItemType();
+    protected AtomicValue promote(AtomicValue atom, ItemType requiredType, CoercionRequest request) throws XPathException {
+        AtomicType req = (AtomicType) requiredType;
+        AtomicType prim = req.getPrimitiveItemType();
         ConversionRules rules = request.config.getConversionRules();
         TypeHierarchy th = request.config.getTypeHierarchy();
-        return ItemMapper.of(item -> {
-            if (prim.matches(item, th)
-                    && !req.matches(item, th)
-                    && req.validate((AtomicValue) item, null, rules) == null) {
-                return ((AtomicValue) item).withMetadata(req);
-                // TODO: else error?
-            } else {
-                return item;
-            }
-        });
+
+        if (prim.matches(atom, th)
+                && !req.matches(atom, th)
+                && req.validate(atom, null, rules) == null) {
+            return ((AtomicValue) atom).withMetadata(req);
+            // TODO: else error?
+        } else {
+            return atom;
+        }
+
     }
 
 }

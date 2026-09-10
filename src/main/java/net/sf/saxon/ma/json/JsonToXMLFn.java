@@ -32,7 +32,9 @@ public class JsonToXMLFn extends SystemFunction {
 
     public static OptionsParameter makeOptionsParameter(int version) {
         SpecificFunctionType fallbackType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING);
+                new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
+        SpecificFunctionType parserType = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_UNTYPED_ATOMIC}, SequenceType.OPTIONAL_ITEM);
         OptionsParameter jsonToXmlOptions = new OptionsParameter(version);
         jsonToXmlOptions.addAllowedOption("liberal", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, null);
@@ -40,6 +42,7 @@ public class JsonToXMLFn extends SystemFunction {
         jsonToXmlOptions.addAllowedOption("validate", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("fallback", SequenceType.makeSequenceType(fallbackType, StaticProperty.EXACTLY_ONE), null);
+        jsonToXmlOptions.addAllowedOption("number-parser", SequenceType.makeSequenceType(parserType, StaticProperty.EXACTLY_ONE), null);
         return jsonToXmlOptions;
     }
 
@@ -100,6 +103,7 @@ public class JsonToXMLFn extends SystemFunction {
         JsonHandlerXML handler = new JsonHandlerXML(context, getStaticBaseUriString(), flags);
         if (options != null) {
             handler.setFallbackFunction(checkedOptions, context);
+            parser.setNumberParser(checkedOptions, context);
         }
         parser.parse(input, flags, handler, context);
         return handler.getResult();

@@ -188,7 +188,7 @@ public class CoercedFunction extends AbstractFunction {
                 final int pos = i;
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, targetFunction.getDescription(), pos);
-                targetArgs[i] = coercionRules.coerce(gVal, argTypes[i], SequenceType.ANY_SEQUENCE, config, role, Loc.NONE);
+                targetArgs[i] = coercionRules.coerce(gVal, argTypes[i], SequenceType.ANY_SEQUENCE, config, role, Loc.NONE).makeRepeatable();
             }
         }
         // TODO: don't materialize the result if static type checking tells us the result will be OK

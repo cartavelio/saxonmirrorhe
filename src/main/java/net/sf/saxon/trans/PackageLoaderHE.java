@@ -58,6 +58,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 
@@ -1783,24 +1784,6 @@ public class PackageLoaderHE implements IPackageLoader {
             } else {
                 throw new AssertionError("Unknown simple type variety " + flags);
             }
-//            Expression body = loader.getFirstChildExpression(element);
-//            SchemaType st = loader.getTypeAttribute(element, "as");
-//            boolean allowEmpty = element.getAttributeValue(NamespaceUri.NULL,"emptiable").equals("1");
-//            if (st == null) {
-//                throw new AssertionError("Unknown simple type " + element.getAttributeValue(NamespaceUri.NULL,"as"));
-//            } else if (st instanceof AtomicType) {
-//                return new CastableExpression(body, (AtomicType) st, allowEmpty);
-//            } else if (st instanceof ListType) {
-//                NamespaceResolver resolver = element.getAllNamespaces();
-//                ListCastableFunction ucf = new ListCastableFunction((ListType) st, resolver, allowEmpty);
-//                return new StaticFunctionCall(ucf, new Expression[]{body});
-//            } else if (st instanceof UnionType) {
-//                NamespaceResolver resolver = element.getAllNamespaces();
-//                UnionCastableFunction ucf = new UnionCastableFunction((UnionType) st, resolver, allowEmpty);
-//                return new StaticFunctionCall(ucf, new Expression[]{body});
-//            } else {
-//                throw new AssertionError("Unknown simple type variety " + st.getClass());
-//            }
         });
 
         eMap.put("check", (loader, element) -> {
@@ -1848,6 +1831,16 @@ public class PackageLoaderHE implements IPackageLoader {
             }
             return new Choose(conditions.toArray(new Expression[0]),
                               actions.toArray(new Expression[0]));
+        });
+
+        eMap.put("coercer", (loader, element) -> {
+            SequenceType type = loader.parseAlphaCode(element, "type");
+            Expression target = loader.getFirstChildExpression(element);
+            String savedRole = element.getAttributeValue(NamespaceUri.NULL, "diag");
+            Supplier<RoleDiagnostic> role = () -> RoleDiagnostic.reconstruct(savedRole);
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
+            boolean allow40 = flags.contains("4");
+            return new SequenceCoercer(target, type, role, allow40);
         });
 
         eMap.put("coercedFn", (loader, element) -> {

@@ -9,8 +9,8 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.type.coercion.ChoiceCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
-import net.sf.saxon.type.coercion.UnionCoercionPlan;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.function.Predicate;
  * the (Saxon-extension) item-type syntax union(a,b,c), or internally in Java code.
  */
 
-public class ChoiceItemType<T extends ItemType> implements ItemType {
+public class ChoiceItemType<T extends ItemType> implements ItemType, ChoiceType {
 
     public static <T extends ItemType> ItemType makeChoiceItemType(List<T> memberTypes) {
         for (ItemType member : memberTypes) {
@@ -61,6 +61,10 @@ public class ChoiceItemType<T extends ItemType> implements ItemType {
 
     public List<T> getMemberTypes() {
         return memberTypes;
+    }
+
+    public Iterable<? extends ItemType> getAlternatives() {
+        return getMemberTypes();
     }
 
     /**
@@ -258,7 +262,7 @@ public class ChoiceItemType<T extends ItemType> implements ItemType {
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        return UnionCoercionPlan.INSTANCE;
+        return ChoiceCoercionPlan.INSTANCE40;
     }
 
 }
