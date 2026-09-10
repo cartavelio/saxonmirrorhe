@@ -72,7 +72,7 @@ public abstract class SystemFunction extends AbstractFunction {
         Objects.requireNonNull(rsc);
         SystemFunction fn = rsc.getConfiguration().makeSystemFunction(name, arity);
         if (fn == null) {
-            throw new IllegalArgumentException(name + "#" + arity);
+            fn = makeFunction40(name, rsc, arity);
         }
         fn.setRetainedStaticContext(rsc);
         return fn;
