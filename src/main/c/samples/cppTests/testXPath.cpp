@@ -234,7 +234,7 @@ try{
   if(item != nullptr) {
     cout << endl << "Item-String="<<result << endl;
     delete item;
-    operator delete(result);
+    operator delete((char *)result);
   }
   sresult->success++;
   } catch(SaxonApiException e){
