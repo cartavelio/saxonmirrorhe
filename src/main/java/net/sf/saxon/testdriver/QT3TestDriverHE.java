@@ -168,6 +168,13 @@ public class QT3TestDriverHE extends TestDriver {
                 }
             });
             return true;
+        } else if ("saxon:platform".equals(type)) {
+            for (String p : value.split(" ")) {
+                if (p.equals("J")) {
+                    return true;
+                }
+            }
+            return false;
         } else if ("xml-version".equals(type)) {
             if (value.equals("1.0:4-") && !inverse) {
                 // we don't support XML 1.0 4th edition or earlier

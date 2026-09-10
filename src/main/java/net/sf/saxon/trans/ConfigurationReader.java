@@ -148,6 +148,10 @@ public class ConfigurationReader implements Receiver {
             } else {
                 localConfig = pipe.getConfiguration();
             }
+        } else {
+            if (pipe == null) {
+                pipe = localConfig.makePipelineConfiguration();
+            }
         }
         setSystemId(source.getSystemId());
         ActiveSource activeSource = Version.platform.resolveSource(source, localConfig);
@@ -201,14 +205,12 @@ public class ConfigurationReader implements Receiver {
                     case "HE":
                         targetConfig = new Configuration();
                         break;
-                        //#if CSHARP==false
                     case "PE":
                         targetConfig = Configuration.makeLicensedConfiguration(classLoader, "com.saxonica.config.ProfessionalConfiguration");
                         break;
                     case "EE":
                         targetConfig = Configuration.makeLicensedConfiguration(classLoader, "com.saxonica.config.EnterpriseConfiguration");
                         break;
-                        //#endif
                     default:
                         error("configuration", "edition", edition, "HE|PE|EE");
                         targetConfig = new Configuration();
@@ -717,7 +719,7 @@ public class ConfigurationReader implements Receiver {
                                              element + "/@" + attribute);
         } else {
             err = new XmlProcessingIncident("Invalid configuration property " +
-                                             element + "/@" + attribute + ". Supplied value '" + actual + "'. " + required);
+                                             element + "/@" + attribute + ". Supplied value: '" + actual + "'; required: '" + required + "'");
         }
         //err.setLocation(Loc.makeFromSax(locator));
         errors.add(err);

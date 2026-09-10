@@ -26,6 +26,7 @@ import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntIterator;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.TimeZone;
@@ -861,10 +862,10 @@ public class FormatDate extends SystemFunction implements Callable {
     private CalendarValue adjustTimezoneToPlace(CalendarValue value, String place) {
         //#if CSHARP==false
         if (place.contains("/") && value.hasTimezone() && !(value instanceof TimeValue)) {
-            TimeZone zone = NamedTimeZone.getNamedTimeZone(place);
+            ZoneId zone = NamedTimeZone.getNamedTimeZone(place);
             if (zone != null) {
-                int offset = zone.getOffset(value.toDateTime().getCalendar().getTimeInMillis());
-                return value.adjustTimezone(offset / 60000);
+                int offsetSeconds = zone.getRules().getOffset(value.toDateTime().toJavaInstant()).getTotalSeconds();
+                return value.adjustTimezone(offsetSeconds / 60);
             }
         }
         //#endif

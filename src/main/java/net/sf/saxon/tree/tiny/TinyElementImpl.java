@@ -9,14 +9,15 @@ package net.sf.saxon.tree.tiny;
 
 import com.saxonica.ee.validate.SkipValidator;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.CopyInformee;
 import net.sf.saxon.event.CopyNamespaceSensitiveException;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.CompressedWhitespace;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
@@ -257,7 +258,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         Configuration config = tree.getConfiguration();
         NamePool pool = config.getNamePool();
         int next = nodeNr;
-        CopyInformee informee = (CopyInformee) receiver.getPipelineConfiguration().getComponent("net.sf.saxon.event.CopyInformee");
+        java.util.function.Function<NodeInfo, Object> informee = receiver.getPipelineConfiguration().getCopyInformee();
         SchemaType elementType = Untyped.getInstance();
         SimpleType attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
 
@@ -299,7 +300,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                         }
                     }
                     if (informee != null) {
-                        Location loc = (Location)informee.notifyElementNode(tree.getNode(next));
+                        Location loc = (Location)informee.apply(tree.getNode(next));
                         if (loc != null) {
                             location = loc;
                         }
