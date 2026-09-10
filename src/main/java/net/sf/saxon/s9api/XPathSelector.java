@@ -8,10 +8,7 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.ResourceResolver;
-import net.sf.saxon.lib.ResourceResolverWrappingURIResolver;
-import net.sf.saxon.lib.UnparsedTextURIResolver;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.sxpath.XPathDynamicContext;
@@ -218,6 +215,34 @@ public class XPathSelector implements Iterable<XdmItem> {
     public void setErrorReporter(ErrorReporter reporter) {
         dynamicContext.setErrorReporter(reporter);
     }
+
+    /**
+     * Set the destination for output from the fn:trace() function.
+     * By default, the destination is System.err.
+     *
+     * @param stream the Logger to which trace output will be sent. If set to
+     *               null, trace output is suppressed entirely. It is the caller's responsibility
+     *               to close the stream after use.
+     * @since 13
+     */
+
+    public void setTraceFunctionDestination(Logger stream) {
+        dynamicContext.getXPathContextObject().getController().setTraceFunctionDestination(stream);
+    }
+
+    /**
+     * Get the destination for output from the fn:trace() function.
+     *
+     * @return the PrintStream to which trace output will be sent. If no explicitly
+     * destination has been set, returns System.err. If the destination has been set
+     * to null to suppress trace output, returns null.
+     * @since 13
+     */
+
+    public Logger getTraceFunctionDestination() {
+        return dynamicContext.getXPathContextObject().getController().getTraceFunctionDestination();
+    }
+
 
     /**
      * Evaluate the expression, returning the result as an <code>XdmValue</code> (that is,
