@@ -93,7 +93,7 @@ public class CompressedWhitespace extends UnicodeString {
             outlength++;
         }
         while (spaces > 0) {
-            int run = spaces % 63;
+            int run = Math.min(spaces, 63);
             result = (result << 8) | (long)(CODES[32] << 6) | (long)run;
             spaces -= run;
             outlength++;
