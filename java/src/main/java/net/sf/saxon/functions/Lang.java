@@ -9,6 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -129,6 +130,15 @@ public class Lang extends SystemFunction implements IContextAccessorFunction {
             throw new XPathException("The context item for lang() is absent")
                     .withErrorCode("XPDY0002")
                     .withXPathContext(context);
+        }
+        if (current instanceof Parcel parcel) {
+            GroundedValue val = parcel.getValue();
+            if (val.getLength() != 1) {
+                throw new XPathException("The context value for lang() is not a single node")
+                        .withErrorCode("XPTY0004")
+                        .withXPathContext(context);
+            }
+            current = val.head();
         }
         if (!(current instanceof NodeInfo)) {
             throw new XPathException("The context item for lang() is not a node")
