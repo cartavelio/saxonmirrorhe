@@ -18,6 +18,10 @@ namespace Saxon.Ejava.util {
         private TimeZone(TimeZoneInfo info) {
             this.timeZoneInfo = info;
         }
+
+        public static TimeZone getDefault() {
+            return new TimeZone(TimeZoneInfo.Local);
+        }
         
         // Mapping from Olson timezone names to Windows time zone names.
 
@@ -480,8 +484,7 @@ namespace Saxon.Ejava.util {
             {"India Standard Time", "IST"}
         };
 
-        public static readonly int SHORT = 1;
-
+        
         public static TimeZone getTimeZone(string place) {
             // .NET Core uses Olson timezone names on Mac/Linux, and Windows timezone names on Windows.
             // So we try both.
@@ -518,6 +521,15 @@ namespace Saxon.Ejava.util {
             }
 
             return result;
+        }
+        
+        public static bool isAvailableID(string id) {
+            foreach (string tz in olsonToWindows.Keys) {
+                if (tz == id) {
+                    return true;
+                };
+            }
+            return false;
         }
 
         public int getOffset(long millisecsSinceEpoch) {
