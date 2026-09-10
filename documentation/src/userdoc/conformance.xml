@@ -61,9 +61,9 @@
       
       <h2 class="subtitle">Test results</h2>
       
-      <p class="javaonly">SaxonJ 11.1 passes all 11714 applicable tests from the XSLT 3.0 test suite.</p>
+      <p class="javaonly">SaxonJ-EE 13.0 passes all 11811 applicable tests from the XSLT 3.0 test suite.</p>
       
-      <p class="csonly">SaxonCS 11.1 passes all 11475 applicable tests from the XSLT 3.0 test suite.
+      <p class="csonly">SaxonCS-EE 13.0 passes all 11633 applicable tests from the XSLT 3.0 test suite.
          (The totals are different because some tests are applicable to one product
          but not the other, for example because they have dependencies on optional settings such as
          localization.)</p>
@@ -849,8 +849,8 @@
          <li><p>Functions in the standard function library are added to the static context only if they were available in XPath 2.0</p></li>
       </ul>
       
-      <p class="javaonly">SaxonJ-EE 11.1 passes 15338 out of 15341 applicable XPath 2.0 tests in the W3C test suite.</p>
-      <p class="csonly">SaxonCS 11.1 passes 15295 out of 15298 applicable XPath 2.0 tests in the W3C test suite.</p>
+      <p class="javaonly">SaxonJ-EE 13.0 passes 15344 out of 15347 applicable XPath 2.0 tests in the W3C test suite.</p>
+      <p class="csonly">SaxonCS-EE 13.0 passes 15303 out of 15306 applicable XPath 2.0 tests in the W3C test suite.</p>
          
        <p>The failures occur in cases where XPath 3.1 relaxes the rules
       and it is not practical or sensible for Saxon to enforce several different sets of constraints. In particular:</p>
@@ -881,11 +881,11 @@
 
       <p>Saxon implements the final XPath 3.1 Recommendation in its entirety.</p>
 
-      <p class="javaonly">SaxonJ-EE 11.1 passes all 22268 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p class="javaonly">SaxonJ-EE 13.0 passes 22384 out of 22389 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XPath 3.1 processor.
       </p>
       
-      <p class="csonly">SaxonCS 11.1 passes all 21625 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p class="csonly">SaxonCS-EE 13.0 passes 21731 out of 21736 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XPath 3.1 processor.
       </p>
       
@@ -894,6 +894,29 @@
          few require capabilities that are not available in Saxon's XPath API, for example the ability to define
          named decimal formats in the dynamic context.</aside>
       
+      <p>The failures occur in cases where XPath 4.0 introduces some incompatible changes and it is not
+         practical or sensible for Saxon to enforce several different sets of constraints. In such cases Saxon
+         follows the XPath 4.0 rules, since the change was made for good reasons. In particular:</p>
+      
+      <ul>
+         <li>Saxon implements transitive equality even in 3.1 mode.</li>
+         <li>For <code>fn:random-number-generator</code>, the return type of the <code>next()</code> function
+            is a record type, not simply <code>map(xs:string, item)</code>, even when running in 3.1 mode.</li>
+         <li>Saxon implements the tokenization rules in the 4.0 specification, which are much clearer
+            and less ambiguous than the 3.1 rules. Notably, the 3.1 rule <i>When tokenizing, the longest 
+               possible match that is consistent with the EBNF is used."</i> has always proved problematic,
+            and has been clarified in 4.0. An example of an affected expression is <code>map{$m?a:x}</code>;
+            it is possible to read the 3.1 rule as requiring <code>"a"</code> to be treated as a token,
+            because although <code>"a:x"</code> is longer, it is not consistent with the EBNF. Saxon does
+            not accept this expression, whether running in 3.1 or 4.0 mode. A space is needed before or 
+            after the colon.</li>
+      </ul>
+      
+      <p>From Saxon 13, there are a few cases where Saxon at run-time accepts values that are not
+         allowed in XPath 3.1 but are allowed by the draft XPath 4.0 specification. For example,
+         functions such as <code>format-number</code> may accept a <code>URIQualifiedName</code> in the format
+         <code>Q{uri}prefix:local</code>, where the prefix has no effect on the functionality.
+      </p>
       
   
       <p>Although the W3C XQuery Working Group has ceased operation, the W3C QT3 test suite continues to be developed by
@@ -902,21 +925,6 @@
          Tests are labeled to indicate which specifications (XPath/XQuery) and versions they apply to.
          Conformance issues raised by Saxon users typically
          result in new test cases being added to the test suite.</p>
-      
-      <p>From Saxon 13, there are a few cases where Saxon at run-time accepts values that are not
-         allowed in XPath 3.1 but are allowed by the draft XPath 4.0 specification. For example,
-         functions such as <code>format-number</code> may accept a <code>URIQualifiedName</code> in the format
-         <code>Q{uri}prefix:local</code>, where the prefix has no effect on the functionality.
-        </p>
-      
-      <p>Saxon implements the tokenization rules in the 4.0 specification, which are much clearer
-      and less ambiguous than the 3.1 rules. Notably, the 3.1 rule <i>When tokenizing, the longest 
-         possible match that is consistent with the EBNF is used."</i> has always proved problematic,
-      and has been clarified in 4.0. An example of an affected expression is <code>map{$m?a:x}</code>;
-      it is possible to read the 3.1 rule as requiring <code>"a"</code> to be treated as a token,
-      because although <code>"a:x"</code> is longer, it is not consistent with the EBNF. Saxon does
-      not accept this expression, whether running in 3.1 or 4.0 mode. A space is needed before or 
-      after the colon.</p>
       
  
       
@@ -1076,12 +1084,12 @@
       <h2 class="subtitle">Test results</h2>
       
       
-      <p class="javaonly">SaxonJ 11.1 passes all 31291 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p class="javaonly">SaxonJ-EE 13.0 passes 31407 out of 31420 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XQuery 3.1 processor.
       </p>
 
       
-      <p class="csonly">SaxonCS 11.1 passes all 31200 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p class="csonly">SaxonCS-EE 13.0 passes 31299 out of 31312 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XQuery 3.1 processor.
       </p>
       
@@ -1089,6 +1097,16 @@
          not implemented in Saxon), tests for other optional features such as number and date formatting in German or French,
          tests that exceed Saxon limits such as the maximum length of durations, and a handful of tests that cannot
          be conveniently run because they take too much time or memory.</aside>
+      
+      <p>The failures occur in cases where XQuery 4.0 introduces some incompatible changes and it is not
+         practical or sensible for Saxon to enforce several different sets of constraints. In such cases Saxon
+         follows the XQuery 4.0 rules, since the change was made for good reasons. In particular (in addition
+         to the non-conformances listed for XPath 3.1):</p>
+      
+      <ul>
+         <li>For HTML and XHTML output, Saxon outputs the meta tag in HTML5 format despite what the
+            serialization 3.1 spec says.</li>
+      </ul>
       
       
       
