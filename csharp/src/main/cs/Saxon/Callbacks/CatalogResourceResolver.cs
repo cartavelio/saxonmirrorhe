@@ -57,9 +57,9 @@ namespace Saxon.Callbacks {
             if (catalogBasedResolver != null) {
                 try
                 {
-                    ResourceRequest? req = null;
+                    IResourceRequest? req = null;
                     if (request.uriIsNamespace) {
-                        IResolverConfiguration catConfig = catalogBasedResolver.Config;
+                        IResolverConfiguration catConfig = catalogBasedResolver.Configuration;
                         object? feature = catConfig.GetFeature(ResolverFeature.CATALOG_MANAGER);
                         if (feature == null) {
                             return null;
@@ -91,8 +91,8 @@ namespace Saxon.Callbacks {
                             ResolverConstants.ANY_PURPOSE);
                     }
 
-                    ResourceResponse? rr = catalogBasedResolver.Resolve(req);
-                    if (rr.IsResolved && rr.ResolvedUri != null) {
+                    IResourceResponse? rr = catalogBasedResolver.Resolve(req);
+                    if (rr.Resolved && rr.ResolvedUri != null) {
                         TypedStreamSource result = new TypedStreamSource();
                         result.setSystemId(rr.ResolvedUri.ToString());
                         if (rr.Stream != null)
@@ -130,11 +130,11 @@ namespace Saxon.Callbacks {
                 throw new NullReferenceException();
             }
 
-            catalogBasedResolver.Config.SetFeature(feature, value);
+            catalogBasedResolver.Configuration.SetFeature(feature, value);
         }
 
         public virtual object getFeature(ResolverFeature resolverFeature) {
-            return catalogBasedResolver?.Config.GetFeature(resolverFeature)!;
+            return catalogBasedResolver?.Configuration.GetFeature(resolverFeature)!;
         }
 
         public virtual XmlResolver.XmlResolver? GetEntityResolver() {

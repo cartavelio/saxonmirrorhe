@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using NUnit.Framework;
 using Saxon.Hej.value;
 
 /*
