@@ -8,6 +8,7 @@
 package net.sf.saxon.trans;
 
 import net.sf.saxon.expr.instruct.Instruction;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
@@ -76,7 +77,7 @@ public class XmlProcessingException implements XmlProcessingError {
 
     @Override
     public Location getLocation() {
-        return exception.getLocator();
+        return exception.getLocator() == null ? Loc.NONE : exception.getLocator();
     }
 
     @Override

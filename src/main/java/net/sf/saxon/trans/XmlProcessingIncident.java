@@ -7,6 +7,7 @@
 
 package net.sf.saxon.trans;
 
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
@@ -221,7 +222,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
 
     @Override
     public Location getLocation() {
-        return locator;
+        return locator == null ? Loc.NONE : locator;
     }
 
     public void setLocation(Location loc) {
