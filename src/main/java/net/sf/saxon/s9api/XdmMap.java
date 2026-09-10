@@ -40,7 +40,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmMap() {
-        setValue(new HashTrieMap());
+        this(new HashTrieMap());
     }
 
     /**
@@ -49,7 +49,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmMap(MapItem map) {
-        setValue(map);
+        super(map);
     }
 
     /**
@@ -61,11 +61,15 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmMap(Map<? extends XdmAtomicValue, ? extends XdmValue> map) {
+        this(fromJavaMap(map));
+    }
+
+    private static HashTrieMap fromJavaMap(Map<? extends XdmAtomicValue, ? extends XdmValue> map) {
         HashTrieMap val = new HashTrieMap();
         for (Map.Entry<? extends XdmAtomicValue, ? extends XdmValue> entry : map.entrySet()) {
             val.initialPut(entry.getKey().getUnderlyingValue(), entry.getValue().getUnderlyingValue());
         }
-        setValue(val);
+        return val;
     }
 
     /**
@@ -101,9 +105,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmMap put(XdmAtomicValue key, XdmValue value) {
-        XdmMap map2 = new XdmMap();
-        map2.setValue(getUnderlyingValue().addEntry(key.getUnderlyingValue(), value.getUnderlyingValue()));
-        return map2;
+        return new XdmMap(getUnderlyingValue().addEntry(key.getUnderlyingValue(), value.getUnderlyingValue()));
     }
 
     /**
@@ -115,9 +117,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmMap remove(XdmAtomicValue key) {
-        XdmMap map2 = new XdmMap();
-        map2.setValue(getUnderlyingValue().remove(key.getUnderlyingValue()));
-        return map2;
+        return new XdmMap(getUnderlyingValue().remove(key.getUnderlyingValue()));
     }
 
     /**

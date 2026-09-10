@@ -46,7 +46,6 @@ import java.util.stream.Stream;
 @CSharpModifiers(code = {"internal"})
 public class XdmNode extends XdmItem {
 
-    private XdmNode() {}
 
     /**
      * Construct an XdmNode as a wrapper around an existing NodeInfo object
@@ -57,7 +56,7 @@ public class XdmNode extends XdmItem {
      */
 
     public XdmNode(NodeInfo node) {
-        setValue(node);
+        super(node);
     }
 
     /**

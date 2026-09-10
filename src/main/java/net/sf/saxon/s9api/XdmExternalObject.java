@@ -18,8 +18,6 @@ import net.sf.saxon.value.ObjectValue;
  */
 public class XdmExternalObject extends XdmItem {
 
-    private XdmExternalObject(){}
-
     /**
      * Create an XdmExternalObject that wraps a supplied Java object
      * @param value the supplied Java object. Must not be null.

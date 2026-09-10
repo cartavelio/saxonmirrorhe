@@ -35,7 +35,7 @@ public class XdmArray extends XdmFunctionItem {
      */
 
     public XdmArray() {
-        setValue(SimpleArrayItem.EMPTY_ARRAY);
+        this(SimpleArrayItem.EMPTY_ARRAY);
     }
 
     /**
@@ -44,7 +44,7 @@ public class XdmArray extends XdmFunctionItem {
      */
 
     public XdmArray(ArrayItem array) {
-        setValue(array);
+        super(array);
     }
 
     /**
@@ -55,11 +55,15 @@ public class XdmArray extends XdmFunctionItem {
      */
 
     public XdmArray(XdmValue[] members) {
+        this(fromMemberArray(members));
+    }
+
+    private static SimpleArrayItem fromMemberArray(XdmValue[] members) {
         List<GroundedValue> values = new ArrayList<>();
         for (XdmValue member : members) {
             values.add(member.getUnderlyingValue());
         }
-        setValue(new SimpleArrayItem(values));
+        return new SimpleArrayItem(values);
     }
 
     /**
@@ -72,11 +76,15 @@ public class XdmArray extends XdmFunctionItem {
      */
 
     public XdmArray(Iterable<? extends XdmValue> members) {
+        this(fromMemberIterable(members));
+    }
+
+    private static SimpleArrayItem fromMemberIterable(Iterable<? extends XdmValue> members) {
         List<GroundedValue> values = new ArrayList<>();
         for (XdmValue member : members) {
             values.add(member.getUnderlyingValue());
         }
-        setValue(new SimpleArrayItem(values));
+        return new SimpleArrayItem(values);
     }
 
     /**
