@@ -717,7 +717,7 @@ namespace Saxon.Api {
         /// An implementation of <c>UnparsedTextURIResolver</c> that wraps (and delegates to)
         /// a supplied <c>Saxon.Api.ResourceResolver</c>
         /// </summary>
-        private class WrappedTextResolver : UnparsedTextURIResolver {
+        internal class WrappedTextResolver : UnparsedTextURIResolver {
             
             private readonly Saxon.Api.ResourceResolver resolver;
 
