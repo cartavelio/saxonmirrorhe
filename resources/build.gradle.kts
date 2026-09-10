@@ -37,6 +37,16 @@ val saxoncApiDoc by configurations.resolvable("saxoncApiDoc") {
   extendsFrom(saxoncApiDocBucket)
 }
 
+val saxoncDocSefBucket by configurations.dependencyScope("saxoncDocSefBucket")
+val saxoncDocSef by configurations.resolvable("saxoncDocSef") {
+  extendsFrom(saxoncDocSefBucket)
+}
+
+val copySaxoncDocBucket by configurations.dependencyScope("copySaxoncDocBucket")
+val copySaxoncDoc by configurations.resolvable("copySaxoncDoc") {
+  extendsFrom(copySaxoncDocBucket)
+}
+
 val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
 val featureKeysSources = configurations.resolvable("featureKeysSources") {
   extendsFrom(featureKeysBucket)
@@ -62,6 +72,11 @@ dependencies {
                                   "configuration" to "testDriversArtifacts")))
   saxoncApiDocBucket(project(mapOf("path" to ":documentation",
                                    "configuration" to "saxoncApiDocArtifacts")))
+  saxoncDocSefBucket(project(mapOf("path" to ":documentation",
+                                   "configuration" to "saxoncDocSefArtifacts")))
+  copySaxoncDocBucket(project(mapOf("path" to ":documentation",
+                                   "configuration" to "copySaxoncDoc")))
+
   featureKeysBucket(project(mapOf("path" to ":java:keys",
                                   "configuration" to "featureKeys")))
   dotnetDocHtmlBucket(project(mapOf("path" to ":documentation",
@@ -100,6 +115,8 @@ resources { dependsOn(stageTestDriverClasses) }
 val stageSaxoncApiDocZip = tasks.register<Zip>("stageSaxoncApiDoc") {
   group = "Internal"
   destinationDirectory = layout.buildDirectory.dir("stage")
+  dependsOn(saxoncDocSef)
+  dependsOn(copySaxoncDoc)
   archiveFileName = "saxonc-userdoc.zip"
   from(saxoncApiDoc.elements.map { it.first().asFile })
   into("/")
