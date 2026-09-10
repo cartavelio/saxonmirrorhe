@@ -1671,3 +1671,57 @@ def testMap2():
         avar = mmVar.get(3)
         assert avar is not None
         assert avar.head.integer_value == 4
+
+def testXdmArray(saxonproc):
+
+    xslt = '''<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"
+                              xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="#all">
+      <xsl:output method="adaptive"/>
+      <xsl:template match="/">
+        <xsl:sequence select="array { order!items!item!@code!xs:integer(.) }"/>
+      </xsl:template>
+    </xsl:stylesheet>'''
+
+    xml = '''<order id="1021">
+        <items>
+            <item code="11">
+                <quantity>2</quantity>
+                <price>50</price>
+            </item>
+            <item code="21">
+                <quantity>1</quantity>
+                <price>250</price>
+            </item>
+            <item code="13">
+                <quantity>4</quantity>
+                <price>100</price>
+            </item>
+        </items>
+        <status>3</status>
+    </order>'''
+
+    xpath_processor = saxonproc.new_xpath_processor()
+
+    xpath_processor.set_parameter('xslt', saxonproc.make_string_value(xslt))
+    xpath_processor.set_parameter('xml', saxonproc.make_string_value(xml))
+
+    xpath_result = xpath_processor.evaluate('''transform(
+        map {
+            'stylesheet-text' : $xslt,
+            'source-node' : parse-xml($xml),
+            'delivery-format' : 'raw'
+        }
+    )?output''')
+
+    assert isinstance(type(xpath_result), PyXdmValue)
+
+    assert xpath_result.size == 1
+
+    head_item = xpath_result.head
+    assert isinstance(type(head_item), PyXdmFunctionItem)
+
+    array_result = head_item.get_array_value()
+
+    result_list = [item.get_atomic_value() for item in array_result.as_list()]
+
+    assert result_list.size == 3
