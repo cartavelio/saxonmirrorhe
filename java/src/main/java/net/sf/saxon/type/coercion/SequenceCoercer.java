@@ -22,6 +22,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.XNodeType;
@@ -55,6 +56,10 @@ public class SequenceCoercer extends UnaryExpression {
         this.requiredType = requiredType;
         this.roleSupplier = role;
         this.allow40 = allow40;
+        UType itemType = requiredType.getPrimaryType().getUType();
+        if (itemType.overlaps(UType.XNODE)) {
+            getOperand().setOperandRole(getOperand().getOperandRole().withUsage(OperandUsage.TRANSMISSION));
+        }
         ExpressionTool.copyLocationInfo(sequence, this);
     }
 
