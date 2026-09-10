@@ -2270,7 +2270,13 @@
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <status>
+        <p>To support the <code>BLAKE3</code> option, the Saxon implementation uses the Blake3
+          hashing algorithm derived from the implementation in Apache Commons. (See <a
+            class="bodylink" href="/conditions/third-party-components">Third party source
+            components</a> and the <a class="javalink"
+              href="com.saxonica.functions.qt4.Blake3">Blake3</a> java module for details.)</p>
+      </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Returns the results of a specified hash, checksum, or cyclic redundancy check function

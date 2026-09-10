@@ -73,7 +73,6 @@ TODO: rethink redefines and override
             Previously the line and column reported for a text node were that
             of the parent element.</p>
         
-        
         <p>This enables
         more accurate location information to be provided for expressions
         in XSLT text value templates.</p>
@@ -82,6 +81,10 @@ TODO: rethink redefines and override
         <code>saxon:line-number()</code> and <code>saxon:column-number()</code>
         extension functions, as well as diagnostic output including the results
         of schema validation, the output of <code>-T</code> tracing, and so on.</p>
+        
+        <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
+        
+        <p>TODO: the XInclude section of the documentation needs updating to mention fn:doc options.</p>
         
     </category>
     
@@ -106,18 +109,14 @@ TODO: rethink redefines and override
  
     </category>
     
-    <!--<category name="xpath31">
-
- 
-    </category>-->
-    
-    <!-- category name="xpath40">         
-    </category -->
-    
-    <!--<category name="functions31">
-
- 
-    </category>-->
+    <category name="xquery31">
+        
+        <p>Support for document projection is dropped. (Document projection allowed the document building
+            process to filter a document as it was being constructed, to retain only those nodes needed for evaluation
+            of a particular query. In most cases streamed execution of queries provides a more flexible and performant
+            solution for this requirement.)</p>
+        
+    </category>
     
     <category name="s9api" class="javaonly">
         
@@ -198,15 +197,6 @@ TODO: rethink redefines and override
 
         
   
-    </category>
-    
-    <category name="xquery31">
-        
-        <p>Support for document projection is dropped. (Document projection allowed the document building
-        process to filter a document as it was being constructed, to retain only those nodes needed for evaluation
-        of a particular query. In most cases streamed execution of queries provides a more flexible and performant
-        solution for this requirement.)</p>
- 
     </category>
 
     <category name="JAXP" class="javaonly">
@@ -325,9 +315,18 @@ TODO: rethink redefines and override
 
     <category name="serialization">
         
+        <p>The serialization option <code>json-lines="yes"</code> is implemented. (PR 1497, PR 1596)</p>
+        
+        <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
+            as a representation of the JSON null value. (PR 1028) Since QName literals are supported, this can
+            be generated using, for example, <code>&lt;xsl:sequence select="#fn:null"/></code>.</p>
+        
         <p>The adaptive output method now does (fairly crude) indentation of maps and arrays
         if the <code>indent</code> serialization option is set. Previously maps and arrays
         were output without indentation.</p>
+        
+        <p>The adaptive serialization method has changed to output maps as <code>{...}</code>
+            rather than <code>map{...}</code>.</p>
         
         <p>A new Saxon serialization property is introduced: <code>saxon:conditional-cdata</code>.
         If set to true, text is output within a CDATA section only when (a) the containing element
@@ -347,95 +346,212 @@ TODO: rethink redefines and override
  
     </category>-->
     
-    <category name="extensions">
-        
-        <p>The XDM 4.0 specification changes the rules for maps so that 
-        <code>xs:base64Binary</code> and <code>xs:hexBinary</code> become mutually comparable.
-        This has the consequence that <code>xs:base64Binary</code> and <code>xs:hexBinary</code> representations
-            of the same value (for example <code>xs:base64Binary("")</code> and <code>xs:hexBinary("")</code>
-            can no longer coexist in the same map in 4.0, whereas they could coexist in 3.1. This
-            creates a problem because Saxon 13 supports both 3.1 and 4.0 in the same product, 
-            and allows maps to be passed from 3.1 to 4.0 applications and vice versa. 
-            To solve this problem, the version number is held
-        in the map itself, and determines how values are compared when using that map. Generally,
-        the version number in the map is 40 if XPath 4.0 was enabled in the application that 
-        constructed the map, or 31 otherwise. However, maps constructed and returned by Saxon
-        (for example in the result of <code>load-xquery-module</code>) sometimes use 40
-        unconditionally. The choice is only relevant when entries with binary keys 
-        <code>xs:base64Binary</code> or <code>xs:hexBinary</code> are added to the map.</p>
-        
+    <category name="xslt40">
         
         <h2>New features from the 4.0 specifications</h2>
         
         <p>Many new features from the draft 4.0 specifications are implemented in Saxon 13, and they
-        are not all listed individually here. In general, to check whether a new feature is implemented:</p>
+            are not all listed individually here. In general, to check whether a new feature is implemented:</p>
         
         <ol>
             <li><p>Check the blue change entries in the draft specifications listed at 
-            <a href="https://qt4cg.org/">qt4cg.org</a>. In most cases these link to the GitHub
-            issues and pull requests (PRs) that record the progress of each change. For example,
-            section 5.5 of the XSLT 4.0 specification starts with the change entry:</p>
+                <a href="https://qt4cg.org/">qt4cg.org</a>. In most cases these link to the GitHub
+                issues and pull requests (PRs) that record the progress of each change. For example,
+                section 5.5 of the XSLT 4.0 specification starts with the change entry:</p>
                 <quote>The strings used in the formatted number to represent a decimal separator, grouping separator, 
                     exponent separator, percent sign, per mille sign, or minus sign, are no longer 
                     constrained to be single characters.   [Issue 1048 PR 1250 3 June 2024]</quote>
             </li>
             <li><p>Click on the PR number in the spec to find the relevant PR on GitHub.
-            For this example (at the time of writing) the PR carries the labels "Completed", "Tests Added",
-            and "In Saxon13", confirming that the feature is fully implemented and tested in Saxon 13.
-            Be aware, however, that the 4.0 specifications are work in progress, and that the specification
-            and implementation are both subject to change.</p></li>
+                For this example (at the time of writing) the PR carries the labels "Completed", "Tests Added",
+                and "In Saxon13", confirming that the feature is fully implemented and tested in Saxon 13.
+                Be aware, however, that the 4.0 specifications are work in progress, and that the specification
+                and implementation are both subject to change.</p></li>
         </ol>
         
         <p><emph>References of the form </emph>PR nnnn <emph>refer to pull requests against the
-        specifications in <a href="https://github.com/qt4cg/qtspecs/pulls">GitHub</a>.</emph></p>
+            specifications in <a href="https://github.com/qt4cg/qtspecs/pulls">GitHub</a>.</emph></p>
+        
+        <h2>XSLT 4.0 changes</h2>
+        
+        <p>The XSLT-specific function <code>fn:character-map</code> is implemented.</p>
+        
+        <p>In XSLT, the <code>xsl:sequence</code> instruction now allows an <code>@as</code> attribute.</p>
+        
+        <p>In XSLT, <code>xsl:include</code> declarations now allow cycles and "diamond" structures: if
+            the same module is included more than once at the same stylesheet (import) level, all but the first
+            <code>xsl:include</code> declarations are ignored.</p>
+        
+        <p>The experimental attribute <code>break-when</code> for <code>xsl:for-each-group</code> is
+            renamed <code>split-when</code> in XSLT 4.0; for the time being <code>break-when</code> is retained
+            as a synonym.</p>
+        
+        <p>At the time of first release of Saxon 13, there is an inconsistency in the draft 4.0 specifications regarding
+            the processing of arrays using template rules. The <code>array:members</code> function represents each array member
+            as a "value record" (a map with a single entry having the key "value"), while the <code>xsl:array-member</code> instruction
+            represents an array member as a zero-arity function item. The code in Saxon attempts to resolve this by accepting
+            both representations and converting where appropriate; however, this situation is unstable and the specification
+            can be expected to change in this area.</p>
+        
+        <p>In the current 4.0 specification, an XSLT match pattern of the form <code>match="order"</code> is defined to
+            match both an element node with node-name <code>"order"</code>, and a JNode with selector value "order".
+            This has proved troublesome from an implementation viewpoint (it affects type-checking and streamability analysis)
+            and it's not especially intuitive: Saxonica has therefore proposed a change to the specification. In the meantime,
+            in Saxon 13, the pattern <code>match="order"</code> will only match element nodes. JNodes can be matched
+            using a pattern of the form <code>match="~jnode(order)"</code>.</p>
+        
+        <h2>4.0 Features not yet implemented</h2>
+        
+        <p>Here is a list of some of the features in the 4.0 specifications that have NOT yet been implemented.
+            Please check the QT4 GitHub project (https://github.com/qt4cg/qtspecs) for the latest status: 
+            Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
+        
+        <ul>
+            <li><p>PR1355, PR1708 - Named record types in XSLT (<code>xsl:record-type</code>)</p></li>
+            <!--<li><p>PR1856: lookahead/behind in regular expressions. While the basic
+            capability is implemented, captured groups within lookahead expressions
+            aren't fully working. TODO: is this still true?</p></li>-->
+            <li><p>PR1875 - params passed implicitly through <code>xsl:next-match</code> and <code>xsl:apply-imports</code></p></li>
+            <li><p>PR1773 - intersect and except in patterns (especially across different kinds of pattern, e.g. (node() | jnode())</p></li>
+            <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
+            <li><p>PR1622 - XSLT <code>fn:map-for-key</code> function</p></li>
+            <li><p>XSLT <code>fn:regex-groups</code> function</p></li>
+            <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
+            <li><p>PR2051 - merge-when attribute for xsl:for-each-group</p></li>
+            <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
+            <li><p>PR2213 - <code>trusted</code> attribute for <code>xsl:evaluate</code></p></li>
+            <li><p>PR2259 - Canonical XHTML serialization (<code>method="xhtml"</code> wih <code>canonical="yes"</code>code>)</p></li>
+            <li><p>PR2337 - New values for <code>xsl:mode/@typed</code>.</p></li>
+        </ul>
+
+ 
+    </category>
+    
+    <category name="xquery40">
+        
+        <p>In XQuery, the syntax of item type declarations is now <code>declare type</code> rather than
+            <code>declare item-type</code>.</p>
+        
+        <p>In a try/catch expression, the variable <code>err:map</code> is available within the catch clause.</p>
+        
+        <h2>4.0 Features not yet implemented</h2>
+        
+        <p>Here is a list of some of the features in the 4.0 specifications that have NOT yet been implemented.
+            Please check the QT4 GitHub project (https://github.com/qt4cg/qtspecs) for the latest status: 
+            Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
+        
+        <ul>
+            <li><p>Item type declarations in XSLT and XQuery have restrictions:</p>
+                <ul>
+                    <li><p>In XQuery, forwards references to named item type declarations are not allowed.</p></li>
+                    <li><p>In XQuery, self-references within named item type declarations are not allowed.</p></li>
+                    <li><p>In consequence, the declared result type of the function <code>fn:random-number-generator</code>
+                        is an approximation to the type defined in the specification.</p></li>
+                </ul>
+            </li>
+            <li><p>PR1355, PR1708 - Named record types in XQuery (<code>declare record type</code>)</p></li>
+            <li><p>PR1817, PR1853 - Methods</p></li>
+            <li><p>PR1914 - try/catch/finally in XQuery</p></li>
+        </ul>
+        
+    </category>
+    
+    <category name="xpath40">
+        
+        <p>The XDM 4.0 specification changes the rules for maps so that 
+            <code>xs:base64Binary</code> and <code>xs:hexBinary</code> become mutually comparable.
+            This has the consequence that <code>xs:base64Binary</code> and <code>xs:hexBinary</code> representations
+            of the same value (for example <code>xs:base64Binary("")</code> and <code>xs:hexBinary("")</code>
+            can no longer coexist in the same map in 4.0, whereas they could coexist in 3.1. This
+            creates a problem because Saxon 13 supports both 3.1 and 4.0 in the same product, 
+            and allows maps to be passed from 3.1 to 4.0 applications and vice versa. 
+            To solve this problem, the version number is held
+            in the map itself, and determines how values are compared when using that map. Generally,
+            the version number in the map is 40 if XPath 4.0 was enabled in the application that 
+            constructed the map, or 31 otherwise. However, maps constructed and returned by Saxon
+            (for example in the result of <code>load-xquery-module</code>) sometimes use 40
+            unconditionally. The choice is only relevant when entries with binary keys 
+            <code>xs:base64Binary</code> or <code>xs:hexBinary</code> are added to the map.</p>
         
         <h3>Changes to XPath Expressions</h3>
         
         <p>Filter expressions accept a sequence of integer positions, for example <code>$in[3 to 5]</code>
-        or <code>$in[1, 4, 7]</code>.</p>
+            or <code>$in[1, 4, 7]</code>.</p>
         
         <p>The precedence of the <code>otherwise</code> operator has changed. The expression
             <code>@price otherwise @cost * 2</code> now parses as <code>@price otherwise (@cost * 2)</code>,
             not as <code>(@price otherwise @cost) * 2</code>. (PR 1031)</p>
         
         <p>The <code>for</code> and <code>let</code> expressions now accept a larger subset
-        of XQuery <code>FLWOR</code> syntax. Specifically:</p>
+            of XQuery <code>FLWOR</code> syntax. Specifically:</p>
         
         <ul>
             <li><p>Both <code>for</code> and <code>let</code> allow an <code>as</code> clause to
-            declare the variable's type.</p></li>
+                declare the variable's type.</p></li>
             <li><p>The <code>for</code> expression allows an <code>at</code> clause to declare
-            a position variable.</p></li>
+                a position variable.</p></li>
             <li><p><code>for</code> and <code>let</code> clauses can be mixed without an intervening
-            <code>return</code>, for example <code>for $x in $X let $y := $x + 1 return f($y)</code>.</p></li>
+                <code>return</code>, for example <code>for $x in $X let $y := $x + 1 return f($y)</code>.</p></li>
         </ul>
         
         <p>Four new axes are implemented: <code>following-or-self</code>, <code>preceding-or-self</code>,
-        <code>following-sibling-or-self</code>, and <code>preceding-sibling-or-self</code>. (PR 1532)</p>
+            <code>following-sibling-or-self</code>, and <code>preceding-sibling-or-self</code>. (PR 1532)</p>
         
         <p>Both XQuery and XPath now allow the syntax <code>for key $k $value $v in $map</code> to iterate
-        over the entries in a map (in undefined order).</p>
-        
-        <p>In XQuery, the syntax of item type declarations is now <code>declare type</code> rather than
-        <code>declare item-type</code>.</p>
+            over the entries in a map (in undefined order).</p>
         
         <p>Named item types can now be referenced directly by name, rather than using the syntax
             <code>type(alias)</code>.</p>
         
         <p>Choice item types are implemented, for example the required type of a parameter in a function
-        signature can be <code>(map(*) | array(*))</code>. The local union type syntax 
+            signature can be <code>(map(*) | array(*))</code>. The local union type syntax 
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
-        is dropped.</p>
+            is dropped.</p>
         
         <p>Arrays and maps are coerced to the required type using the 4.0 coercion rules. (PR 1501)</p>
         
-        <p>In a try/catch expression, the variable <code>err:map</code> is available within the catch clause.</p>
+        <p>In decimal format properties, it is now possible to set composite values for some properties,
+            for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
+            in the picture string, but the value "pc" will appear in the output. (PR 1250)</p>
         
         
+        <p>The implementation of enumeration types has been aligned with the current specification.
+            Most practical use cases are unaffected, but:</p>
+        
+        <ul>
+            <li><p>Casting a string to an enumeration type is now allowed.</p></li>
+            <li><p>The test <code>"A" instance of enum("A", "B")</code> now returns false;
+                for an <code>instance of</code> test to work, the string must be converted to the
+                enumeration type; this can be done with an explicit cast, or it can be done
+                implicitly by applying the coercion rules.</p></li>
+            <li><p>TODO: is that still the case?</p></li>
+        </ul>
+        
+        <p>The ItemType syntax <code>union(a, b)</code> has been dropped from the 4.0 specification,
+            but remains supported in Saxon for the time being. The replacement syntax is <code>(a|b)</code>
+            (the parentheses are mandatory). This allows, for example, <code>as="(map(*)|array(*))"</code>
+            for a function or variable that accepts either a map or an array.</p>
+        
+        <p>Saxon's implementation of the coercion rules (formerly known as the "function conversion rules") differs from
+            the current 4.0 specification in the case where the required type is a GNode or JNode. In this situation Saxon will automatically
+            wrap a supplied map or array in a root JNode. The specification requires this implicit conversion only for the
+            left-hand operand of the "/" operator.</p>
+        
+        <p>PR1686 - The pipeline operator <code>-></code> is implemented, but there has been limited testing
+            of the case where the context value is not a single item.</p>
+        
+    </category>
+    
+    <category name="functions40">
         <p>A second <code>$position</code> argument is available on many function callbacks, for example those on
-            <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-of</code>, <code>some</code>.</p>
+            <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-where</code>, <code>some</code>.</p>
         
-        <h3>Changes to Functions</h3>
+        <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
+            flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>. (PR 1022)</p>
+        
+        <p>PR2492 - The <code>fn:collation-available</code> function IS implemented, and the $usage parameter has been dropped.</p>
+        
+        <p>PR2492 - Renamed <code>jnode-selector</code> and <code>jnode-content</code> as <code>jkey</code> and <code>jvalue</code>.</p>
         
         
         <p>The following functions are new in 4.0 (some of these were already implemented in Saxon 12):</p>
@@ -622,62 +738,32 @@ TODO: rethink redefines and override
             <li><code>map:merge</code></li> 
             <li><code>map:put</code></li> 
             <li><code>map:remove</code></li> 
-
+            
         </ul>
         
+        <h2>4.0 Features not yet implemented</h2>
         
+        <p>Here is a list of some of the features in the 4.0 specifications that have NOT yet been implemented.
+            Please check the QT4 GitHub project (https://github.com/qt4cg/qtspecs) for the latest status: 
+            Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
         
-        <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
-            flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>. (PR 1022)</p>
-        
-        
-        <p>The serialization option <code>json-lines="yes"</code> is implemented. (PR 1497, PR 1596)</p>
-        
-        <p>In decimal format properties, it is now possible to set composite values for some properties,
-        for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
-        in the picture string, but the value "pc" will appear in the output. (PR 1250)</p>
-        
-        
-        <p>The XSLT-specific function <code>fn:character-map</code> is implemented.</p>
+        <ul>
+            <li><p>PR957 - scan-left and scan-right functions</p></li>
+            <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
+            <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This
+                is due to limitations in the ICU4N library.</p></li>
+        </ul>
+ 
+    </category>
+    
+    <category name="extensions">
         
         <p>In the EXPath binary module, the handling of byte order marks in <code>bin:encode-string</code>
         and <code>bin:decode-string</code> has been clarified in the specification, and this has resulted
         in changes to the Saxon implementation. The changed behaviour applies whether or not 4.0 is enabled.
         (PR 1765)</p>
         
-        <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
-        as a representation of the JSON null value. (PR 1028) Since QName literals are supported, this can
-        be generated using, for example, <code>&lt;xsl:sequence select="#fn:null"/></code>.</p>
-        
-        <p>The implementation of enumeration types has been aligned with the current specification.
-        Most practical use cases are unaffected, but:</p>
-        
-        <ul>
-            <li><p>Casting a string to an enumeration type is now allowed.</p></li>
-            <li><p>The test <code>"A" instance of enum("A", "B")</code> now returns false;
-            for an <code>instance of</code> test to work, the string must be converted to the
-            enumeration type; this can be done with an explicit cast, or it can be done
-            implicitly by applying the coercion rules.</p></li>
-            <li><p>TODO: is that still the case?</p></li>
-        </ul>
-        
-        <p>The ItemType syntax <code>union(a, b)</code> has been dropped from the 4.0 specification,
-        but remains supported in Saxon for the time being. The replacement syntax is <code>(a|b)</code>
-        (the parentheses are mandatory). This allows, for example, <code>as="(map(*)|array(*))"</code>
-        for a function or variable that accepts either a map or an array.</p>
-        
-        <p>The adaptive serialization method has changed to output maps as <code>{...}</code>
-        rather than <code>map{...}</code>.</p>
-        
-        <p>In XSLT, the <code>xsl:sequence</code> instruction now allows an <code>@as</code> attribute.</p>
-        
-        <p>In XSLT, <code>xsl:include</code> declarations now allow cycles and "diamond" structures: if
-        the same module is included more than once at the same stylesheet (import) level, all but the first
-        <code>xsl:include</code> declarations are ignored.</p>
-        
-        <p>The experimental attribute <code>break-when</code> for <code>xsl:for-each-group</code> is
-            renamed <code>split-when</code> in XSLT 4.0; for the time being <code>break-when</code> is retained
-        as a synonym.</p>
+        <p>The new EXPath <code>file:list-roots</code> function is not yet implemented.</p>
         
         <h2>Dropped experimental features</h2>
         
@@ -799,80 +885,6 @@ TODO: rethink redefines and override
    }
 </xsl:select>]]></p>
 
-        <h2>4.0 Features not yet implemented</h2>
-        
-        <p>Here is a list of some of the features in the 4.0 specifications that have NOT yet been implemented.
-        Please check the QT4 GitHub project (https://github.com/qt4cg/qtspecs) for the latest status: 
-        Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
-        
-        <ul>
-            <li><p>Item type declarations in XSLT and XQuery have restrictions:</p>
-              <ul>
-                  <li><p>In XQuery, forwards references to named item type declarations are not allowed.</p></li>
-                  <li><p>In XQuery, self-references within named item type declarations are not allowed.</p></li>
-                  <li><p>In consequence, the declared result type of the function <code>fn:random-number-generator</code>
-                          is an approximation to the type defined in the specification.</p></li>
-              </ul>
-            </li>
-            <li><p>PR1355, PR1708 - Named record types in XSLT (<code>xsl:record-type</code>) and XQuery(<code>declare record type</code>)</p></li>
-            <li><p>PR1817, PR1853 - Methods</p></li>
-            <!--<li><p>PR1856: lookahead/behind in regular expressions. While the basic
-            capability is implemented, captured groups within lookahead expressions
-            aren't fully working. TODO: is this still true?</p></li>-->
-            <li><p>PR1686 - The pipeline operator <code>-></code> is implemented, but there has been limited testing
-                 of the case where the context value is not a single item.</p></li>
-            <li><p>PR1914 - try/catch/finally in XQuery</p></li>
-            <li><p>PR957 - scan-left and scan-right functions</p></li>
-            <li><p>PR1875 - params passed implicitly through <code>xsl:next-match</code> and <code>xsl:apply-imports</code></p></li>
-            <li><p>PR1773 - intersect and except in patterns (especially across different kinds of pattern, e.g. (node() | jnode())</p></li>
-            <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
-            <li><p>PR1622 - XSLT <code>fn:map-for-key</code> function</p></li>
-            <li><p>XSLT <code>fn:regex-groups</code> function</p></li>
-            <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
-            <li><p>PR2051 - merge-when attribute for xsl:for-each-group</p></li>
-            <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
-            <li><p>PR2213 - <code>trusted</code> attribute for <code>xsl:evaluate</code></p></li>
-            <li><p>PR2259 - Canonical XHTML serialization (<code>method="xhtml"</code> wih <code>canonical="yes"</code>code>)</p></li>
-            <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
-            <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This
-            is due to limitations in the ICU4N library.</p></li>
-            <li><p>PR2337 - New values for <code>xsl:mode/@typed</code>.</p></li>
-            <li><p>The new EXPath <code>file:list-roots</code> function is not yet implemented.</p></li>
-            <li><p>PR2492 - The <code>fn:collation-available</code> function IS implemented, and the $usage parameter has been dropped.</p></li>
-        </ul>
-        
-        <p>Some further PRs have been implemented:</p>
-        <ul>
-            <li><p>PR2492 - The <code>fn:collation-available</code> function IS implemented, and the $usage parameter has been dropped.</p></li> 
-            <li><p>PR2492 - Renamed <code>jnode-selector</code> and <code>jnode-content</code> as <code>jkey</code> and <code>jvalue</code>.</p></li> 
-        </ul>
-        
-        <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
-        
-        <p>TODO: the XInclude section of the documentation needs updating to mention fn:doc options.</p>
-        
-        <p>TODO: Note in documentation that we have included the Blake3 hashing algorithm 
-            Adapted from the ISC-licensed O(1) Cryptography library by Matt Sicker and ported from the reference public domain
-            implementation by Jack O'Connor. (See Blake3 java module for details)</p>
-        
-        <p>At the time of first release of Saxon 13, there is an inconsistency in the draft 4.0 specifications regarding
-        the processing of arrays using template rules. The <code>array:members</code> function represents each array member
-        as a "value record" (a map with a single entry having the key "value"), while the <code>xsl:array-member</code> instruction
-        represents an array member as a zero-arity function item. The code in Saxon attempts to resolve this by accepting
-        both representations and converting where appropriate; however, this situation is unstable and the specification
-        can be expected to change in this area.</p>
-        
-        <p>Saxon's implementation of the coercion rules (formerly known as the "function conversion rules") differs from
-        the current 4.0 specification in the case where the required type is a GNode or JNode. In this situation Saxon will automatically
-        wrap a supplied map or array in a root JNode. The specification requires this implicit conversion only for the
-        left-hand operand of the "/" operator.</p>
-        
-        <p>In the current 4.0 specification, an XSLT match pattern of the form <code>match="order"</code> is defined to
-        match both an element node with node-name <code>"order"</code>, and a JNode with selector value "order".
-        This has proved troublesome from an implementation viewpoint (it affects type-checking and streamability analysis)
-        and it's not especially intuitive: Saxonica has therefore proposed a change to the specification. In the meantime,
-        in Saxon 13, the pattern <code>match="order"</code> will only match element nodes. JNodes can be matched
-        using a pattern of the form <code>match="~jnode(order)"</code>.</p>
         
         <p>The serialization parameter <code>saxon:stylesheet-version</code> (which in previous releases was largely
         for internal use) is now renamed <code>saxon:spec-version</code>, and can be used to control which version

@@ -727,8 +727,8 @@
     
     <h2 class="subtitle">B5 Apache Commons Blake3 hashing</h2>
 
-    <p>Saxon's implementation of BLAKE3, used to support the experimental XPath 4.0 <code>fn:hash</code>
-      function, is derived from the implementation in Apache Commons.</p>
+    <p>Saxon's implementation of BLAKE3, used to support the XPath 4.0 <a class="bodylink code"
+      href="/functions/fn/hash">fn:hash</a> function, is derived from the implementation in Apache Commons.</p>
 
     <table border="1">
       <tr>

@@ -6,9 +6,11 @@
       <cat name="installation" title="Packaging, installation, and licensing changes"/>
       <cat name="xslt20" title="XSLT 2.0 implementation"/>
       <cat name="xslt30" title="XSLT 3.0 implementation"/>
+      <cat name="xslt40" title="XSLT 4.0 implementation"/>
       <cat name="xquery10" title="XQuery 1.0 implementation"/>
       <cat name="xquery30" title="XQuery 3.0 implementation"/>
       <cat name="xquery31" title="XQuery 3.1 implementation"/>
+      <cat name="xquery40" title="XQuery 4.0 implementation"/>
       <cat name="xpath20" title="XPath 2.0 implementation"/>
       <cat name="xpath30" title="XPath 3.0 implementation"/>
       <cat name="xpath31" title="XPath 3.1 implementation"/>
@@ -16,6 +18,7 @@
       <cat name="functions20" title="Functions, operators, and data types for XPath 2.0"/>    
       <cat name="functions30" title="Functions, operators, and data types for XPath 3.0"/>
       <cat name="functions31" title="Functions, operators, and data types for XPath 3.1"/>
+      <cat name="functions40" title="Functions, operators, and data types for XPath 4.0"/>
       <cat name="xsd10" title="XML Schema 1.0 implementation"/>
       <cat name="xsd11" title="XML Schema 1.1 implementation"/>
       <cat name="xquery-update" title="XQuery Updates implementation"/>
