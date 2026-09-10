@@ -2,7 +2,7 @@
 
 package com.saxonica.ee.extfn;
 
-import com.saxonica.functions.qt4.ma.OrderedStringMap;
+import net.sf.saxon.ma.map.OrderedStringMap;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Builder;
