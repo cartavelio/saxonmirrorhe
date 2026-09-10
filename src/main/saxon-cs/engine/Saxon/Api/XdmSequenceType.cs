@@ -141,7 +141,7 @@ namespace Saxon.Api {
             return (itemType.ToString() + occurrenceIn).Trim();
         }
 
-        public override bool Equals(object? obj) {
+        public override bool Equals(object obj) {
             if (obj is XdmSequenceType other) {
                 return itemType.Equals(other.itemType) && occurrence == other.occurrence;
             }
