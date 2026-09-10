@@ -265,6 +265,22 @@ public class SquareArrayConstructor extends Expression implements Pingable {
         }
     }
 
+    @Override
+    public String toString() {
+        int n = getOperanda().getNumberOfOperands();
+        switch (n) {
+            case 0:
+                return "[]";
+            case 1:
+                return "[" + getOperanda().getOperand(0).getChildExpression().toString() + "]";
+            case 2:
+                return "[" + getOperanda().getOperand(0).getChildExpression().toString() + ", " +
+                        getOperanda().getOperand(1).getChildExpression().toString() + "]";
+            default:
+                return "[" + getOperanda().getOperand(0).getChildExpression().toString() + ", ...]";
+        }
+    }
+
     /**
      * An implementation of Expression must provide at least one of the methods evaluateItem(), iterate(), or process().
      * This method indicates which of these methods is provided. This implementation provides both iterate() and

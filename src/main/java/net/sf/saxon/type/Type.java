@@ -416,6 +416,12 @@ public abstract class Type {
         ItemType p1 = t1.getPrimitiveItemType();
         ItemType p2 = t2.getPrimitiveItemType();
         if (p1 == p2) {
+            if (t1.getGenre() == Genre.ARRAY && t2.getGenre() == Genre.ARRAY) {
+                return ArrayItemType.ANY_ARRAY_TYPE;
+            }
+            if (t1.getGenre() == Genre.MAP && t2.getGenre() == Genre.MAP) {
+                return MapType.ANY_MAP_TYPE;
+            }
             return p1;
         }
         if ((p1 == BuiltInAtomicType.DECIMAL && p2 == BuiltInAtomicType.INTEGER) ||

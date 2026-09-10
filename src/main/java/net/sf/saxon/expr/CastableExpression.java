@@ -49,7 +49,6 @@ public final class CastableExpression extends CastingExpression {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
-
         SequenceType atomicType = SequenceType.ATOMIC_SEQUENCE;
 
         Configuration config = visitor.getConfiguration();

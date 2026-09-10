@@ -206,7 +206,8 @@ public class AnyFunctionType implements FunctionItemType {
     /*@NotNull*/
     @Override
     public PlainType getAtomizedItemType() {
-        return null;
+        // Bug 6253. Some instances of function(*) can be atomized, so returning null is wrong.
+        return BuiltInAtomicType.ANY_ATOMIC;
     }
 
     /**
