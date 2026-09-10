@@ -51,6 +51,7 @@ public abstract class FoldingFunction extends SystemFunction {
             for (Item item; (item = iter.next()) != null; ) {
                 fold.processItem(item);
                 if (fold.isFinished()) {
+                    iter.close();
                     break;
                 }
             }
