@@ -8,8 +8,9 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.SameNameTest;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
@@ -35,7 +36,8 @@ public class XSLGlobalContextItem extends XSLContextItem {
      */
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-        SequenceIterator prior = iteratePrecedingSiblingAxis(new SameNameTest(this));
+        StructuredQName gci = getQName();
+        SequenceIterator prior = iteratePrecedingSiblingAxis(n -> ((NodeInfo)n).getQName().equals(gci));
         if (prior.next() != null) {
             compileError("xsl:global-context-item must not appear twice within the same stylesheet module", "XTSE3087");
         }

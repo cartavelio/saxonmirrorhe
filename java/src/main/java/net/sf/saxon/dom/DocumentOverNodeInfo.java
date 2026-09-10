@@ -10,7 +10,7 @@ package net.sf.saxon.dom;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.TreeInfo;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.type.Type;
 import org.w3c.dom.*;
 
@@ -197,7 +197,7 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
             return null;
         }
         SequenceIterator children =
-                root.iterateChildAxis(NodeKindTest.ELEMENT);
+                root.iterateChildAxis(NodeTypeTest.ELEMENT);
         return (Element) wrap((NodeInfo)children.next());
     }
 

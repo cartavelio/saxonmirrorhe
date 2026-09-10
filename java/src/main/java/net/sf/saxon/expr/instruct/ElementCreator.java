@@ -13,8 +13,8 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -104,7 +104,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return NodeKindTest.ELEMENT;
+        return NodeKindType.ELEMENT;
     }
 
     @Override

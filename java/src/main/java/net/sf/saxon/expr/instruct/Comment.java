@@ -19,7 +19,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.Twine8;
@@ -55,7 +55,7 @@ public final class Comment extends SimpleNodeConstructor {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return NodeKindTest.COMMENT;
+        return NodeKindType.COMMENT;
     }
 
     @Override

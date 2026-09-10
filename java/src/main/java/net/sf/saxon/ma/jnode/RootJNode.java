@@ -7,8 +7,8 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.value.AtomicValue;
@@ -91,7 +91,7 @@ public class RootJNode extends JNode {
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        if (predicate == null || predicate == NodeKindTest.ELEMENT /* meaning child::*  */ ) {
+        if (predicate == null || predicate == NodeKindType.ELEMENT /* meaning child::*  */ ) {
             return getChildren();
         }
         return Navigator.filter(getChildren(), predicate);

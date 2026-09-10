@@ -9,8 +9,8 @@ package net.sf.saxon.option.xom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -843,7 +843,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         AttributeAxisIterator(XOMNodeWrapper start, NodeTest test) {
             // use lazy instead of eager materialization (performance)
             this.start = start;
-            if (test == AnyXNodeTest.getInstance()) {
+            if (test == NodeTypeTest.GNODE) {
                 test = null;
             }
             nodeTest = test;
@@ -893,8 +893,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
         private ChildAxisIterator(XOMNodeWrapper start, boolean downwards, boolean forwards, NodeTest test) {
             this.forwards = forwards;
-
-            if (test == AnyXNodeTest.getInstance()) {
+            if (test == NodeTypeTest.GNODE) {
                 test = null;
             }
             nodeTest = test;

@@ -7,7 +7,8 @@ import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
@@ -78,7 +79,16 @@ public class ChildJNode extends JNode {
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        throw new UnsupportedOperationException(); // TODO: implement me
+        if (parent.getContent() instanceof MapItem) {
+            Iterator<KeyValuePair> iter = ((MapItem)parent.getContent()).followingKeyValuePairs(getSelector());
+            return new SequenceIteratorOverJavaIterator<>(
+                    iter,
+                    kvp -> new ChildJNode(parent, getPosition(), kvp.key, kvp.value));
+        }
+        if (parent.getContent() instanceof ArrayItem) {
+            throw new UnsupportedOperationException();
+        }
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -90,7 +100,16 @@ public class ChildJNode extends JNode {
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        throw new UnsupportedOperationException(); // TODO: implement me
+        if (parent.getContent() instanceof MapItem) {
+            Iterator<KeyValuePair> iter = ((MapItem) parent.getContent()).precedingKeyValuePairs(getSelector());
+            return new SequenceIteratorOverJavaIterator<>(
+                    iter,
+                    kvp -> new ChildJNode(parent, getPosition(), kvp.key, kvp.value));
+        }
+        if (parent.getContent() instanceof ArrayItem) {
+            throw new UnsupportedOperationException();
+        }
+        throw new UnsupportedOperationException();
     }
 
     private static class JNodeChildIterator implements SequenceIterator {

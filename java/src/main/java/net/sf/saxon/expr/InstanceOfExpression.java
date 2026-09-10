@@ -14,7 +14,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.DocumentNodeTest;
+import net.sf.saxon.type.gnode.DocumentNodeType;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -49,7 +49,7 @@ public final class InstanceOfExpression extends UnaryExpression {
 
     @Override
     protected OperandRole getOperandRole() {
-        return targetType instanceof DocumentNodeTest ?
+        return targetType instanceof DocumentNodeType ?
                 OperandRole.ABSORB : OperandRole.INSPECT;
     }
 

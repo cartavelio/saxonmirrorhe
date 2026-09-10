@@ -9,7 +9,7 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
 abstract class TreeEnumeration implements SequenceIterator, LookaheadIterator {

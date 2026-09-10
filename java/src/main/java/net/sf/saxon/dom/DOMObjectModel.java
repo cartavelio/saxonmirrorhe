@@ -16,7 +16,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ExternalObjectModel;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.ItemType;
@@ -138,7 +138,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
 
                 @Override
                 public ItemType getItemType() {
-                    return AnyXNodeTest.getInstance();
+                    return AnyXNodeType.getInstance();
                 }
             };
         } else if (NodeList.class.isAssignableFrom(sourceClass)) {
@@ -157,7 +157,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
 
                 @Override
                 public ItemType getItemType() {
-                    return AnyXNodeTest.getInstance();
+                    return AnyXNodeType.getInstance();
                 }
 
                 @Override
@@ -174,7 +174,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
 
                 @Override
                 public ItemType getItemType() {
-                    return AnyXNodeTest.getInstance();
+                    return AnyXNodeType.getInstance();
                 }
             };
         } else if (DocumentWrapper.class == sourceClass) {
@@ -186,7 +186,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
 
                 @Override
                 public ItemType getItemType() {
-                    return AnyXNodeTest.getInstance();
+                    return AnyXNodeType.getInstance();
                 }
             };
         } else {

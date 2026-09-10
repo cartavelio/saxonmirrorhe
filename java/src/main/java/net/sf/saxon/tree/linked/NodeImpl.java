@@ -10,9 +10,8 @@ package net.sf.saxon.tree.linked;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodePredicate;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
@@ -549,11 +548,7 @@ public abstract class NodeImpl
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
         NodeTest test = nodeTestFromPredicate(predicate);
-        if (getNodeKind() == Type.DOCUMENT &&
-                test instanceof NameTest &&
-                ((NameTest) test).getPrimitiveType() == Type.ELEMENT) {
-            return ((DocumentImpl) this).getAllElements(((NameTest) test).getFingerprint());
-        } else if (hasChildNodes()) {
+        if (hasChildNodes()) {
             return new SteppingNavigator.DescendantAxisIterator(this, false, test);
         } else {
             return EmptyIterator.getInstance();

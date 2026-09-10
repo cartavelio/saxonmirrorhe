@@ -14,7 +14,7 @@ import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;

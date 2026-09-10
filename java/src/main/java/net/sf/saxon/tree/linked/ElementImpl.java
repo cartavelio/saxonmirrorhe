@@ -12,9 +12,9 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.NodeSelector;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -431,7 +431,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         DocumentImpl root = getPhysicalRoot();
         super.delete();
         if (root != null) {
-            SequenceIterator iter = iterateDescendantOrSelfAxis(NodeKindTest.ELEMENT);
+            SequenceIterator iter = iterateDescendantOrSelfAxis(NodeTypeTest.ELEMENT);
             while (true) {
                 ElementImpl n = (ElementImpl) iter.next();
                 for (AttributeInfo att : attributeMap) {
@@ -499,7 +499,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             NamespaceMap oldMap = namespaceMap;
             namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getNamespaceUri());
             if (inherit && namespaceMap != oldMap) {
-                for (NodeInfo child : children(NodeKindTest.ELEMENT)) {
+                for (NodeInfo child : children(NodeTypeTest.ELEMENT)) {
                     ((ElementImpl) child).inheritParentNamespaces(binding, oldMap, namespaceMap);
                 }
             }
@@ -514,7 +514,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             } else {
                 namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getNamespaceUri());
             }
-            for (NodeInfo child : children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo child : children(NodeTypeTest.ELEMENT)) {
                 ((ElementImpl) child).inheritParentNamespaces(binding, oldMap, namespaceMap);
             }
         }

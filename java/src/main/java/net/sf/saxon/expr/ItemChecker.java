@@ -15,14 +15,12 @@ import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.CombinedNodeTest;
-import net.sf.saxon.pattern.DocumentNodeTest;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.DocumentNodeType;
 import net.sf.saxon.value.Cardinality;
 
 import java.util.ArrayList;
@@ -306,18 +304,11 @@ public final class ItemChecker extends UnaryExpression {
         Affinity relationship = th.relationship(requiredItemType, operandType);
         switch (relationship) {
             case OVERLAPS:
-                if (requiredItemType instanceof NodeTest && operandType instanceof NodeTest) {
-                    return new CombinedNodeTest((NodeTest) requiredItemType, OperatorSymbol.INTERSECT, (NodeTest) operandType);
-                } else {
-                    // we don't know how to intersect atomic types, it doesn't actually happen
-                    return requiredItemType;
-                }
-
             case SUBSUMES:
             case SAME_TYPE:
-                // shouldn't happen, but it doesn't matter
                 return operandType;
             case SUBSUMED_BY:
+            case DISJOINT: // can't happen but never mind
             default:
                 return requiredItemType;
         }
@@ -443,7 +434,7 @@ public final class ItemChecker extends UnaryExpression {
                 card = ((CardinalityChecker) arg).getRequiredCardinality();
                 arg = ((CardinalityChecker) arg).getBaseExpression();
             }
-            if ((arg.getImplementationMethod() & PROCESS_METHOD) != 0 && !(expr.requiredItemType instanceof DocumentNodeTest)) {
+            if ((arg.getImplementationMethod() & PROCESS_METHOD) != 0 && !(expr.requiredItemType instanceof DocumentNodeType)) {
                 Expression finalArg = arg;
                 int finalCard = card;
                 return (output, context) -> {

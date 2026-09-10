@@ -8,14 +8,18 @@
 package net.sf.saxon.type;
 
 import com.saxonica.functions.qt4.pin.LabeledItem;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNode;
-import net.sf.saxon.ma.jnode.JNodeType;
+import net.sf.saxon.ma.jnode.SpecificJNodeType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
+import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.*;
 
 
@@ -86,7 +90,7 @@ public abstract class Type {
 
     public static final short XNODE = 0;
 
-    public static final ItemType XNODE_TYPE = AnyXNodeTest.getInstance();
+    public static final ItemType XNODE_TYPE = AnyXNodeType.getInstance();
 
     public static final int GNODE = 22;
     public static final int JNODE = 23;
@@ -135,7 +139,7 @@ public abstract class Type {
      */
 
     /*@NotNull*/
-    public static ItemType getItemType(/*@NotNull*/ Item item, /*@Nullable*/ TypeHierarchy th) {
+    public static ItemType getItemType(Item item, TypeHierarchy th) {
 
         if (item == null) {
             return AnyItemType.getInstance();
@@ -166,40 +170,34 @@ public abstract class Type {
                         }
                     }
                     if (elementType == null) {
-                        return NodeKindTest.DOCUMENT;
+                        return NodeKindType.DOCUMENT;
                     } else {
-                        return new DocumentNodeTest((NodeTest) elementType);
+                        return new DocumentNodeType((XNodeType) elementType);
                     }
 
-                case Type.ELEMENT:
+                case Type.ELEMENT: {
                     SchemaType eltype = node.getSchemaType();
-                    if (eltype.equals(Untyped.getInstance()) || eltype.equals(AnyType.getInstance())) {
-                        return new SameNameTest(node);
-                    } else {
-                        return new ContentTypeTest(Type.ELEMENT, new SameNameTest(node).getQNameTest(),
-                                                   eltype, false, node.getConfiguration());
-                    }
-
-                case Type.ATTRIBUTE:
-                    SchemaType attype = node.getSchemaType();
-                    if (attype.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                        return new SameNameTest(node);
-                    } else {
-                        return new ContentTypeTest(Type.ATTRIBUTE, new SameNameTest(node).getQNameTest(),
-                                                   attype, false, node.getConfiguration());
-                    }
-
+                    Configuration config = node.getConfiguration();
+                    return new NamedXNodeType(Type.ELEMENT, new SpecificQNameTest(node.getQName(), config.getNamePool()),
+                                              eltype, true, config);
+                }
+                case Type.ATTRIBUTE: {
+                    SchemaType attType = node.getSchemaType();
+                    Configuration config = node.getConfiguration();
+                    return new NamedXNodeType(Type.ATTRIBUTE, new SpecificQNameTest(node.getQName(), config.getNamePool()),
+                                              attType, true, config);
+                }
                 case Type.TEXT:
-                    return NodeKindTest.TEXT;
+                    return NodeKindType.TEXT;
 
                 case Type.COMMENT:
-                    return NodeKindTest.COMMENT;
+                    return NodeKindType.COMMENT;
 
                 case Type.PROCESSING_INSTRUCTION:
-                    return NodeKindTest.PROCESSING_INSTRUCTION;
+                    return NodeKindType.PROCESSING_INSTRUCTION;
 
                 case Type.NAMESPACE:
-                    return NodeKindTest.NAMESPACE;
+                    return NodeKindType.NAMESPACE;
 
                 default:
                     throw new IllegalArgumentException("Unknown node kind " + node.getNodeKind());
@@ -214,8 +212,9 @@ public abstract class Type {
         } else if (item instanceof ArrayItem) {
             return th == null ? ArrayItemType.ANY_ARRAY_TYPE : new ArrayItemType(((ArrayItem) item).getMemberType(th));
         } else if (item instanceof JNode) {
-            return th == null ? JNodeType.ANY_JNODE
-                    : new JNodeType(SequenceTool.getSequenceType(((JNode)item).getContent(), th));
+            return th == null
+                    ? AnyJNodeType.getInstance()
+                    : new SpecificJNodeType(SequenceTool.getSequenceType(((JNode)item).getContent(), th), th);
         } else { //if (item instanceof FunctionItem) {
             return ((FunctionItem) item).getFunctionItemType();
         }
@@ -443,7 +442,7 @@ public abstract class Type {
             return BuiltInAtomicType.ANY_ATOMIC;
         }
         if (t1 instanceof NodeTest && t2 instanceof NodeTest) {
-            return AnyXNodeTest.getInstance();
+            return AnyXNodeType.getInstance();
         }
         //#if CSHARP==false
         if (t1 instanceof JavaExternalObjectType && t2 instanceof JavaExternalObjectType) {

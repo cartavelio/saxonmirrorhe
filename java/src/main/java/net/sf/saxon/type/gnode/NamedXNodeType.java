@@ -5,38 +5,39 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.pattern;
+package net.sf.saxon.type.gnode;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.Nilled_1;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.UnionQNameTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.*;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
-import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Optional;
 
 /**
- * NodeTest is an interface that enables a test of whether a node matches particular
- * conditions. ContentTypeTest tests for an element or attribute node with a particular
- * type annotation, as well as testing the node name.
- * <p>Changed in Saxon 13 to test the node name as well as the type, replacing
- * <code>CombinedNodeTest</code> for this purpose.</p>
+ * {@code NamedXNodeType} is a node type corresponding to the syntax
+ * {@code element(N, T)} or {@code attribute(N, T)} or {@code namespace(N)}
+ * or {@code processing-instruction(N)}.
+ * <p>It tests for a node of a particular kind, whose name matches a
+ * QNameTest (which embraces wildcards and choices) and whose type
+ * annotation matches a given schema type; it is also conditional on whether
+ * the node is nilled.</p>
  */
 
-public class ContentTypeTest extends NodeTest {
+public class NamedXNodeType extends XNodeType {
 
-    private final int kind;          // element or attribute
+    private final int kind;
     private final QNameTest nameTest;
     private final SchemaType schemaType;
-    private final Configuration config;
     private final boolean nillable;
+    private final Configuration config;
 
     /**
-     * Create a ContentTypeTest
+     * Create an NamedNodeKindType
      *
      * @param nodeKind   the kind of nodes to be matched: always elements or attributes
      * @param nameTest   constrains the name of the node
@@ -45,13 +46,53 @@ public class ContentTypeTest extends NodeTest {
      * @param config     the Configuration, supplied because this KindTest needs access to schema information
      */
 
-    public ContentTypeTest(int nodeKind, QNameTest nameTest, SchemaType schemaType, boolean nillable, Configuration config) {
+    public NamedXNodeType(int nodeKind, QNameTest nameTest, SchemaType schemaType, boolean nillable, Configuration config) {
         this.kind = nodeKind;
         this.nameTest = nameTest;
         this.schemaType = schemaType;
         this.config = config;
         this.nillable = nillable;
     }
+
+    /**
+     * Simplified convenience constructor
+     * @param nodeKind   the kind of nodes to be matched: always elements or attributes
+     * @param nameTest   constrains the name of the node
+     * @param config     the Configuration, supplied because this KindTest needs access to schema information
+     */
+    public NamedXNodeType(int nodeKind, QNameTest nameTest, Configuration config) {
+        this.kind = nodeKind;
+        this.nameTest = nameTest;
+        this.schemaType = AnyType.getInstance();
+        this.config = config;
+        this.nillable = true;
+    }
+
+    /**
+     * Simplified convenience constructor
+     *
+     * @param nodeKind the kind of nodes to be matched: always elements or attributes
+     * @param nameTest constrains the name of the node
+     * @param config   the Configuration, supplied because this KindTest needs access to schema information
+     */
+    public NamedXNodeType(int nodeKind, StructuredQName nameTest, Configuration config) {
+        this.kind = nodeKind;
+        this.nameTest = new SpecificQNameTest(nameTest, config.getNamePool());
+        this.schemaType = AnyType.getInstance();
+        this.config = config;
+        this.nillable = true;
+    }
+
+    public static NodeTest make(int nodeKind, NamespaceUri uri, String localName, Configuration config) {
+        NamedXNodeType type = new NamedXNodeType(nodeKind, new StructuredQName("", uri, localName), config);
+        return new NodeTypeTest(type);
+    }
+
+    public static NodeTest make(int nodeKind, int fingerprint, Configuration config) {
+        NamedXNodeType type = new NamedXNodeType(nodeKind, config.getNamePool().getStructuredQName(fingerprint), config);
+        return new NodeTypeTest(type);
+    }
+
 
     /**
      * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
@@ -61,36 +102,67 @@ public class ContentTypeTest extends NodeTest {
      */
     @Override
     public UType getUType() {
-        return kind == Type.ELEMENT ? UType.ELEMENT : UType.ATTRIBUTE;
+        switch (kind) {
+            case Type.ELEMENT:
+                return UType.ELEMENT;
+            case Type.ATTRIBUTE:
+                return UType.ATTRIBUTE;
+            case Type.PROCESSING_INSTRUCTION:
+                return UType.PI;
+            case Type.NAMESPACE:
+                return UType.NAMESPACE;
+            default:
+                return UType.ANY;
+        }
     }
+
+    /**
+     * Get the set of allowed node names that this type if capable
+     * of matching
+     *
+     * @return the allowed node names
+     */
+    @Override
+    public QNameTest getAllowedNodeNames() {
+        return nameTest;
+    }
+
+    /**
+     * For an {@code XNodeType} that can only match one kind of node
+     * and one node name, return that node name, as an integer
+     * fingerprint. In other cases, return -1.
+     *
+     * @param nodeKind the kind of node required. If the {@code XNodeType}
+     *                 does not match this node kind, return -1.
+     * @return an integer fingerprint in the case of a node type that
+     * only matches one node kind and one qualified name. In other
+     * cases return -1.
+     */
+    @Override
+    public int getMatchingFingerprint(int nodeKind) {
+        if (nodeKind == this.kind && nameTest instanceof SpecificQNameTest) {
+            return ((SpecificQNameTest)nameTest).getFingerprint();
+        }
+        return -1;
+    }
+
+    /**
+     * Get the Saxon Configuration to which this type belongs
+     * @return the Saxon configuration
+     */
 
     public Configuration getConfiguration() {
         return config;
     }
 
-    @Override
-    public QNameTest getQNameTest() {
-        return nameTest;
-    }
 
-    @Override
-    public StructuredQName getMatchingNodeName() {
-        if (nameTest instanceof SpecificQNameTest) {
-            return ((SpecificQNameTest)nameTest).getStructuredQName();
-        }
-        if (nameTest instanceof PortableQNameTest) {
-            return ((PortableQNameTest) nameTest).getStructuredQName();
-        }
-        return null;
-    }
-
-    @Override
-    public int getFingerprint() {
-        if (nameTest instanceof SpecificQNameTest) {
-            return ((SpecificQNameTest) nameTest).getFingerprint();
-        }
-        return -1;
-    }
+//    @Override
+//    public int getFingerprint() {
+//        if (nameTest instanceof SpecificQNameTest) {
+//            return ((SpecificQNameTest) nameTest).getFingerprint();
+//        }
+//        return -1;
+//    }
 
     /**
      * The test is nillable if a question mark was specified as the occurrence indicator
@@ -98,7 +170,6 @@ public class ContentTypeTest extends NodeTest {
      * @return true if the test is nillable
      */
 
-    @Override
     public boolean isNillable() {
         return nillable;
     }
@@ -112,55 +183,20 @@ public class ContentTypeTest extends NodeTest {
     }
 
     /**
-     * Test whether this node test is satisfied by a given node. This method is only
-     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-     * node tests where the node kind is known to be an attribute.
+     * Test whether a given item conforms to this type
      *
-     * @param nodeKind   The kind of node to be matched
-     * @param name       identifies the expanded name of the node to be matched.
-     *                   The value should be null for a node with no name.
-     * @param annotation The actual content type of the node
+     * @param item The item to be tested
+     * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-        return kind == nodeKind
-                && nameTest.matches(name.getStructuredQName())
-                && matchesAnnotation(annotation);
-    }
-
-    @Override
-    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
-        final byte[] nodeKindArray = tree.getNodeKindArray();
-        final int[] nameCodeArray = tree.getNameCodeArray();
-        final NamePool namePool = tree.getNamePool();
-        return IntPredicateLambda.of(nodeNr -> (nodeKindArray[nodeNr]&0x0f) == kind &&
-                nameTest.matchesFingerprint(namePool, nameCodeArray[nodeNr] & 0xfffff) &&
-                matchesAnnotation(((TinyTree) tree).getSchemaType(nodeNr)) &&
-                (nillable || !((TinyTree) tree).isNilled(nodeNr)));
-    }
-
-    /**
-     * Test whether this node test is satisfied by a given node. This alternative
-     * method is used in the case of nodes where calculating the fingerprint is expensive,
-     * for example DOM or JDOM nodes.
-     *
-     * @param node the node to be matched
-     */
-
-    @Override
-    public boolean test(GNode node) {
-        if (node instanceof NodeInfo) {
-            NodeInfo n = (NodeInfo) node;
+    public boolean matches(Item item) {
+        if (item instanceof NodeInfo) {
+            NodeInfo n = (NodeInfo) item;
             if (n.getNodeKind() != kind) {
                 return false;
             }
-            if (n.hasFingerprint() && nameTest instanceof NameTest) {
-                return ((NameTest) nameTest).getFingerprint() == n.getFingerprint() &&
+            if (n.hasFingerprint() && nameTest instanceof SpecificQNameTest) {
+                return ((SpecificQNameTest) nameTest).getFingerprint() == n.getFingerprint() &&
                         matchesAnnotation(n.getSchemaType())
                         && (nillable || !Nilled_1.isNilled(n));
             } else {
@@ -172,6 +208,32 @@ public class ContentTypeTest extends NodeTest {
             return false;
         }
     }
+
+//    /**
+//     * Test whether this node test is satisfied by a given node. This method is only
+//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
+//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
+//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
+//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
+//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
+//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
+//     * node tests where the node kind is known to be an attribute.
+//     *
+//     * @param nodeKind   The kind of node to be matched
+//     * @param name       identifies the expanded name of the node to be matched.
+//     *                   The value should be null for a node with no name.
+//     * @param annotation The actual content type of the node
+//     */
+//    @Override
+//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
+//        return kind == nodeKind
+//                && nameTest.matches(name.getStructuredQName())
+//                && matchesAnnotation(annotation);
+//    }
+
+
+
+
 
     private boolean matchesAnnotation(SchemaType annotation) {
         if (annotation == null) {
@@ -200,7 +262,7 @@ public class ContentTypeTest extends NodeTest {
             return 0;
         } else if (nameTest instanceof SpecificQNameTest) {
             return 0.25;
-        } else if (nameTest instanceof NameTestUnion) {
+        } else if (nameTest instanceof UnionQNameTest) {
             return 0.125;
         } else if (nameTest instanceof LocalQNameTest || nameTest instanceof NamespaceQNameTest) {
             return 0.125;
@@ -219,16 +281,6 @@ public class ContentTypeTest extends NodeTest {
     @Override
     public int getPrimitiveType() {
         return kind;
-    }
-
-    /**
-     * Get the content type allowed by this NodeTest (that is, the type annotation of the matched nodes).
-     * @return the required content type; AnyType if there are no restrictions.
-     */
-
-    @Override
-    public SchemaType getContentType() {
-        return schemaType;
     }
 
     /**
@@ -281,9 +333,18 @@ public class ContentTypeTest extends NodeTest {
     }
 
     public String toString() {
-        return (kind == Type.ELEMENT ? "element(" : "attribute(") +
-                nameTest.toString() + ", " +
-                schemaType.getEQName() + ')';
+        switch (kind) {
+            case Type.ELEMENT:
+                return "element(" + nameTest.toString() + ", " + schemaType.getEQName() + ')';
+            case Type.ATTRIBUTE:
+                return "attribute(" + nameTest.toString() + ", " + schemaType.getEQName() + ')';
+            case Type.PROCESSING_INSTRUCTION:
+                return "processing-instruction(" + nameTest.toString() + ")";
+            case Type.NAMESPACE:
+                return "namespace(" + nameTest.toString() + ")";
+            default:
+                return "???";
+        }
     }
 
     /**
@@ -314,11 +375,11 @@ public class ContentTypeTest extends NodeTest {
      * Indicates whether some other object is "equal to" this one.
      */
     public boolean equals(Object other) {
-        return other instanceof ContentTypeTest &&
-                ((ContentTypeTest) other).kind == kind &&
-                ((ContentTypeTest) other).nameTest.equals(nameTest) &&
-                ((ContentTypeTest) other).schemaType == schemaType &&
-                ((ContentTypeTest) other).nillable == nillable;
+        return other instanceof NamedXNodeType &&
+                ((NamedXNodeType) other).kind == kind &&
+                ((NamedXNodeType) other).nameTest.equals(nameTest) &&
+                ((NamedXNodeType) other).schemaType == schemaType &&
+                ((NamedXNodeType) other).nillable == nillable;
     }
 
     /**
@@ -354,6 +415,21 @@ public class ContentTypeTest extends NodeTest {
         }
         return Optional.empty();
     }
+
+    /**
+     * Get an alphabetic code representing the type, or at any rate, the nearest built-in type
+     * from which this type is derived. The codes are designed so that for any two built-in types
+     * A and B, alphaCode(A) is a prefix of alphaCode(B) if and only if A is a supertype of B.
+     *
+     * @return the alphacode for the nearest containing built-in type. For example: for xs:string
+     * return "AS", for xs:boolean "AB", for node() "N", for element() "NE", for map(*) "FM", for
+     * array(*) "FA".
+     */
+    @Override
+    public String getBasicAlphaCode() {
+        return "????";
+    }
+
 
 }
 

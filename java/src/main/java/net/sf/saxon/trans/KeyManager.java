@@ -20,15 +20,15 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.BasePatternWithPredicate;
-import net.sf.saxon.pattern.MultipleNodeKindTest;
-import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ChoiceItemType;
 import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.NumericValue;
@@ -124,7 +124,7 @@ public class KeyManager {
         final StructuredQName qName = StandardNames.getStructuredQName(StandardNames.XS_IDREFS);
         if (keyDefinitions.get(qName) == null) {
             BasePatternWithPredicate pp = new BasePatternWithPredicate(
-                    new NodeTestPattern(new MultipleNodeKindTest(UType.ELEMENT_OR_ATTRIBUTE)),
+                    new ItemTypePattern(ChoiceItemType.of(NodeKindType.ELEMENT, NodeKindType.ATTRIBUTE)),
                     IntegratedFunctionLibrary.makeFunctionCall(new IsIdRef(), new Expression[]{})
             );
             try {

@@ -15,6 +15,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -23,6 +24,7 @@ import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.AlphaCode;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
@@ -228,7 +230,7 @@ public class NodeSetPattern extends Pattern {
         if (itemType instanceof NodeTest) {
             return itemType;
         } else {
-            return AnyXNodeTest.getInstance();
+            return AnyXNodeType.getInstance();
         }
     }
 

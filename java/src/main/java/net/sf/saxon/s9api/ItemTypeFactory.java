@@ -16,12 +16,13 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
 
@@ -340,9 +341,8 @@ public class ItemTypeFactory {
             if (k == Type.PROCESSING_INSTRUCTION && name.getNamespaceUri().isEmpty()) {
                 throw new IllegalArgumentException("The name of a processing instruction must not be in a namespace");
             }
-            NameTest type = new NameTest(k,
-                                         name.getNamespaceUri(), name.getLocalName(), config.getNamePool());
-            return new ConstructedItemType(type, config);
+            NamedXNodeType t = new NamedXNodeType(k, name.getStructuredQName(), config);
+            return new ConstructedItemType(t, config);
         } else {
             throw new IllegalArgumentException("Node kind must be element, attribute, or processing-instruction");
         }
@@ -372,7 +372,7 @@ public class ItemTypeFactory {
             throw new SaxonApiException("No global declaration found for element " + name.getClarkName());
         }
         try {
-            NodeTest test = schema.makeSchemaElementTest(decl.getFingerprint());
+            GNodeType test = schema.makeSchemaElementTest(decl.getFingerprint());
             return new ConstructedItemType(test, config);
         } catch (MissingComponentException|SchemaException e) {
             throw new SaxonApiException(e);
@@ -396,32 +396,8 @@ public class ItemTypeFactory {
      *                           for the given name
      */
 
-    public ItemType getElementTest(/*@Nullable*/ QName name, QName schemaType, boolean nillable) throws SaxonApiException {
-        QNameTest nameTest = null;
-        ContentTypeTest contentTest = null;
-        if (name != null) {
-            int elementFP = config.getNamePool().allocateFingerprint(name.getNamespaceUri(), name.getLocalName());
-            nameTest = new SpecificQNameTest(config.getNamePool(), elementFP);
-        }
-        if (schemaType != null) {
-            requireSchema();
-            StructuredQName name1 = new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName());
-            SchemaType type = schema.getSchemaType(name1);
-            if (type == null) {
-                throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
-            }
-            contentTest = new ContentTypeTest(Type.ELEMENT, nameTest, type, nillable, config);
-        }
-        if (contentTest == null) {
-            if (nameTest == null) {
-                return getNodeKindTest(XdmNodeKind.ELEMENT);
-            } else {
-                NameTest namedNodeTest = new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalName(), config.getNamePool());
-                return new ConstructedItemType(namedNodeTest, config);
-            }
-        } else {
-            return new ConstructedItemType(contentTest, config);
-        }
+    public ItemType getElementTest(QName name, QName schemaType, boolean nillable) throws SaxonApiException {
+        return getElementOrAttributeTest(Type.ELEMENT, name, schemaType, nillable);
     }
 
     /**
@@ -445,7 +421,7 @@ public class ItemTypeFactory {
             throw new SaxonApiException("No global declaration found for attribute " + name.getClarkName());
         }
         try {
-            NodeTest test = schema.makeSchemaAttributeTest(decl.getFingerprint());
+            GNodeType test = schema.makeSchemaAttributeTest(decl.getFingerprint());
             return new ConstructedItemType(test, config);
         } catch (MissingComponentException|SchemaException e) {
             throw new SaxonApiException(e);
@@ -460,32 +436,34 @@ public class ItemTypeFactory {
      *
      * @param name       the element name, or null if there is no constraint on the name (equivalent to
      *                   specifying <code>element(*, type)</code>)
-     * @param schemaTypeName the name of the required schema type, or null of there is no constraint
+     * @param schemaType the name of the required schema type, or null of there is no constraint
      *                   on the type (equivalent to specifying <code>element(name)</code>)
      * @return the constructed ItemType
      * @throws SaxonApiException if the schema does not contain a global element declaration
      *                           for the given name
      */
 
-    public ItemType getAttributeTest(QName name, QName schemaTypeName) throws SaxonApiException {
-        NodeTest nameTest = AnyXNodeTest.getInstance();
-        SchemaType schemaType = null;
-        ContentTypeTest contentTest = null;
-        if (name != null) {
-            int attributeFP = config.getNamePool().allocateFingerprint(name.getNamespaceUri(), name.getLocalName());
-            nameTest = new NameTest(Type.ATTRIBUTE, attributeFP, config.getNamePool());
-        }
-        if (schemaTypeName != null) {
-            schemaType = schema.getSchemaType(
-                    new StructuredQName("", schemaTypeName.getNamespaceUri(), schemaTypeName.getLocalName()));
-            if (schemaType == null) {
-                throw new SaxonApiException("Unknown schema type " + schemaTypeName.getClarkName());
+    public ItemType getAttributeTest(QName name, QName schemaType) throws SaxonApiException {
+        return getElementOrAttributeTest(Type.ATTRIBUTE, name, schemaType, true);
+    }
+
+    private ItemType getElementOrAttributeTest(int nodeKind, QName name, QName schemaType, boolean nillable)
+            throws SaxonApiException{
+        QNameTest namePredicate = AnyQNameTest.getInstance();
+        SchemaType contentType = AnyType.getInstance();
+        if (schemaType != null) {
+            requireSchema();
+            contentType = schema.getSchemaType(schemaType.getStructuredQName());
+            if (contentType == null) {
+                throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
             }
-            contentTest = new ContentTypeTest(
-                    Type.ATTRIBUTE, nameTest.getQNameTest(), schemaType, false, config);
-            return new ConstructedItemType(contentTest, config);
         }
-        return new ConstructedItemType(nameTest, config);
+        if (name != null) {
+            int elementFP = config.getNamePool().allocateFingerprint(name.getNamespaceUri(), name.getLocalName());
+            namePredicate = new SpecificQNameTest(config.getNamePool(), elementFP);
+        }
+        GNodeType resultType = new NamedXNodeType(nodeKind, namePredicate, contentType, nillable, config);
+        return new ConstructedItemType(resultType, config);
     }
 
     /**
@@ -502,23 +480,23 @@ public class ItemTypeFactory {
 
     public ItemType getDocumentTest(ItemType elementTest) {
         net.sf.saxon.type.ItemType test = elementTest.getUnderlyingItemType();
-        if (test.getPrimitiveType() != Type.ELEMENT) {
+        if (!(test instanceof XNodeType) || test.getPrimitiveType() != Type.ELEMENT) {
             throw new IllegalArgumentException("Supplied itemType is not an element test");
         }
-        DocumentNodeTest docTest = new DocumentNodeTest((NodeTest) test);
+        DocumentNodeType docTest = new DocumentNodeType((XNodeType)test);
         return new ConstructedItemType(docTest, config);
     }
 
     //#if CSHARP==false
     /**
-     * Get an ItemType representing the type of a Java object when used as an external object
+     * Get an ItemType representing the XDM type corresponding to the supplied Java class when used as an external object
      * for use in conjunction with calls on extension/external functions.
      *
      * @param externalClass a Java class
      * @return the ItemType representing the type of external objects of this class
      */
 
-    public ItemType getExternalObjectType(Class externalClass) {
+    public ItemType getExternalObjectType(Class<?> externalClass) {
         JavaExternalObjectType result;
         synchronized(config) {
             result = JavaExternalObjectType.of(externalClass);
@@ -613,17 +591,17 @@ public class ItemTypeFactory {
     }
 
     /**
-     * Get an ItemType representing the type of a supplied XdmItem.
+     * Get an {@link ItemType} representing the type of the supplied {@link XdmItem}.
      *
      * <p>Note that the results are to some extent arbitrary, since an item may conform
      * to many different item types, and none of them is necessarily more specific
      * than all the others.</p>
      *
-     * <p>If the supplied item is an atomic value, the returned ItemType will
-     * reflect the most specific atomic type of the item.</p>
+     * <p>If the supplied item is an atomic value, the returned {@link ItemType} will
+     * reflect the most specific atomic type of the item (that is, its type annotation).</p>
      *
      * <p>If the supplied item is a node, the returned item type will reflect the node kind,
-     * and if the node has a name, then its name. It will not reflect the type annotation.</p>
+     * and if the node has a name, then its name. It will also reflect the type annotation.</p>
      *
      * <p>For a map, the result is simply {@link net.sf.saxon.s9api.ItemType#ANY_MAP}. For an array, the result is
      * simply {@link net.sf.saxon.s9api.ItemType#ANY_ARRAY}. For any other function, it is an instance of
@@ -631,7 +609,8 @@ public class ItemTypeFactory {
      *
      * <p>If the item is an external object, a suitable item type object is constructed.</p>
      *
-     * <p>Future versions of Saxon may return a more precise type.</p>
+     * <p>Saxon 13 changes: for nodes, the type annotation is now included in the result.
+     * Future versions of Saxon may return a more precise type.</p>
      *
      * @param item the supplied item whose type is required
      * @return the type of the supplied item
@@ -646,9 +625,14 @@ public class ItemTypeFactory {
             NodeInfo node = (NodeInfo) item.getUnderlyingValue();
             int kind = node.getNodeKind();
             if (node.getLocalPart().isEmpty()) {
-                return new ConstructedItemType(NodeKindTest.makeNodeKindTest(kind), config);
+                return new ConstructedItemType(NodeKindType.makeNodeKindTest(kind), config);
             } else {
-                return new ConstructedItemType(new SameNameTest(node), config);
+                return new ConstructedItemType(
+                        new NamedXNodeType(node.getNodeKind(),
+                                           new SpecificQNameTest(node.getQName(), config.getNamePool()),
+                                           node.getSchemaType(),
+                                           true,
+                                           config), config);
             }
         } else {
             Item it = item.getUnderlyingValue();

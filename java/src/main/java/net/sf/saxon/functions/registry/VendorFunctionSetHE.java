@@ -17,7 +17,7 @@ import net.sf.saxon.ma.map.*;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
@@ -54,18 +54,18 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         // Variant of the doc() function with an options parameter
-        register("doc", 2, e -> e.populate(SaxonDoc::new, NodeKindTest.DOCUMENT, ONE, LATE)
+        register("doc", 2, e -> e.populate(SaxonDoc::new, NodeKindType.DOCUMENT, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
                 .setOptionDetails(SaxonDoc.makeOptionsParameter(31)));
 
         // Ask whether the supplied element node has any local namespace declarations
         register("has-local-namespaces", 1, e -> e.populate(HasLocalNamespaces::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                .arg(0, NodeKindTest.ELEMENT, ONE, null));
+                .arg(0, NodeKindType.ELEMENT, ONE, null));
 
         // Ask whether the supplied element node has consistent in scope namespaces throughout its subtree
         register("has-uniform-namespaces", 1, e -> e.populate(HasUniformNamespaces::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                .arg(0, NodeKindTest.ELEMENT, ONE, null));
+                .arg(0, NodeKindType.ELEMENT, ONE, null));
 
         // Function analogous to map:contains except in the way it handles untyped key values
         register("map-untyped-contains", 2, e -> e.populate(MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)

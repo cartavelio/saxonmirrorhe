@@ -11,7 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -253,10 +253,10 @@ public final class Orphan implements MutableNodeInfo {
         switch (getNodeKind()) {
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
+            case Type.NAMESPACE:
                 return new StringValue(stringValue);
             case Type.TEXT:
             case Type.DOCUMENT:
-            case Type.NAMESPACE:
                 return StringValue.makeUntypedAtomic(getUnicodeStringValue());
             default:
                 if (typeAnnotation == null || typeAnnotation == Untyped.getInstance() ||

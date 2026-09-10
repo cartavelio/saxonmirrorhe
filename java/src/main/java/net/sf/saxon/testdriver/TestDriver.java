@@ -14,7 +14,6 @@ import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.type.Schema;
 import org.w3c.dom.Document;
@@ -30,7 +29,6 @@ import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
 import static net.sf.saxon.s9api.streams.Predicates.hasAttribute;
 import static net.sf.saxon.s9api.streams.Steps.descendant;
 import static net.sf.saxon.s9api.streams.Steps.path;
-import static net.sf.saxon.s9api.streams.XdmCollectors.asString;
 
 public abstract class TestDriver {
 
@@ -707,16 +705,24 @@ public abstract class TestDriver {
                     }
                 }
             }
-            testSet = testSetDocNode.select(Steps.path("/", "test-set", "@name")).collect(asString());
+            //testSet = testSetDocNode.select(Steps.path("/", "test-set", "@name")).collect(asString());
+            // TODO; REINSTATE ABOVE LINE
+            testSet = "???";
+            Iterable<XdmNode> v = testSetDocNode.children("test-set");
+            for (XdmNode n : v) {
+                testSet = n.getAttributeValue(new QName("name"));
+                break;
+            }
+            String testSett = testSet;
             testSetDocNode.select(descendant("test-case")).forEach(testCase -> {
                 String name = testCase.attribute("name");
                 if (testPattern == null || testPattern.matcher(name).matches()) {
-                    println("-s:" + testSet + " -t:" + name);
+                    println("-s:" + testSett + " -t:" + name);
 
                     try {
                         runTestCase(testCase, xpc);
                     } catch (Exception ex) {
-                        noteFailure(testSet, name);
+                        noteFailure(testSett, name);
                         ex.printStackTrace();
                         System.err.println("*** Crashed while running testcase: " + ex.getMessage());
                     }

@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -143,7 +144,7 @@ public class GeneralPositionalPattern extends Pattern {
             return new NodeTestPattern(nodeTest);
         } else if (Literal.isConstantBoolean(positionExpr, false)) {
             // if a filter is constant false, the pattern doesn't match anything
-            return new NodeTestPattern(ErrorType.getInstance());
+            return new ItemTypePattern(ErrorType.getInstance());
         }
 
         if ((positionExpr.getDependencies() & StaticProperty.DEPENDS_ON_POSITION) == 0) {
@@ -153,9 +154,9 @@ public class GeneralPositionalPattern extends Pattern {
         // See if the expression is now known to be non-positional (see bugs 1908, 1992, test mode-0011)
         if (!FilterExpression.isPositionalFilter(positionExpr, config.getTypeHierarchy())) {
             byte axis = AxisInfo.CHILD;
-            if (nodeTest.getPrimitiveType() == Type.ATTRIBUTE) {
+            if (nodeTest.getUType() == UType.ATTRIBUTE) {
                 axis = AxisInfo.ATTRIBUTE;
-            } else if (nodeTest.getPrimitiveType() == Type.NAMESPACE) {
+            } else if (nodeTest.getUType() == UType.NAMESPACE) {
                 axis = AxisInfo.NAMESPACE;
             }
             AxisExpression ae = new AxisExpression(axis, nodeTest);
@@ -301,7 +302,7 @@ public class GeneralPositionalPattern extends Pattern {
 
     @Override
     public ItemType getItemType() {
-        return nodeTest;
+        return nodeTest.getItemType();
     }
 
     /**
@@ -378,7 +379,7 @@ public class GeneralPositionalPattern extends Pattern {
     @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.genPos");
-        presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest));
+        presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest.getItemType()));
         if (!usesPosition) {
             // flag is this way around for backwards compatibility with 9.8
             presenter.emitAttribute("flags", "P");

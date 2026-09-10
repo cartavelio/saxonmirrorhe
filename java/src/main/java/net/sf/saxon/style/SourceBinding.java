@@ -14,7 +14,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Visibility;
@@ -643,10 +643,10 @@ public class SourceBinding {
                         if (atype != null) {
                             return count == 1 ? SequenceType.one(atype) : SequenceType.zeroOrMore(atype);
                         } else {
-                            return SequenceType.one(NodeKindTest.DOCUMENT);
+                            return SequenceType.one(NodeKindType.DOCUMENT);
                         }
                     } else {
-                        return SequenceType.one(NodeKindTest.DOCUMENT);
+                        return SequenceType.one(NodeKindType.DOCUMENT);
                     }
                 } else {
                     return declaredType;

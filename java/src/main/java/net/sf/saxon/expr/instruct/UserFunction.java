@@ -20,7 +20,7 @@ import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.StylesheetPackage;

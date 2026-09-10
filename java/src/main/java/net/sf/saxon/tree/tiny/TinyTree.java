@@ -1005,7 +1005,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * @return an attribute node
      */
 
-    /*@NotNull*/ TinyAttributeImpl getAttributeNode(int nr) {
+    TinyAttributeImpl getAttributeNode(int nr) {
         return new TinyAttributeImpl(this, nr);
     }
 

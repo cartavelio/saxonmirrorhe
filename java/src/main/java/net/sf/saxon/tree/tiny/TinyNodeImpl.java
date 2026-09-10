@@ -9,9 +9,8 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodePredicate;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependIterator;
@@ -391,12 +390,13 @@ public abstract class TinyNodeImpl implements NodeInfo {
     }
 
     @Override
-    public SequenceIterator iterateChildAxis(NodePredicate nodeTest)
-    {
+    public SequenceIterator iterateChildAxis(NodePredicate nodeTest) {
         if (hasChildNodes()) {
-            if (nodeTest instanceof NameTest && ((NameTest) nodeTest).getNodeKind() == Type.ELEMENT) {
+            NodeTest test = nodeTestFromPredicate(nodeTest);
+            int fp = test.getRequiredFingerprint(Type.ELEMENT);
+            if (fp != -1) {
                 // fast path for common case
-                return new NamedChildIterator(tree, this, ((NameTest)nodeTest).getFingerprint());
+                return new NamedChildIterator(tree, this, fp);
             } else {
                 return new SiblingIterator(tree, this, nodeTest, true);
             }
@@ -408,12 +408,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
         NodeTest nodeTest = nodeTestFromPredicate(predicate);
-        // Optimization to use document-level index by element name
-        if (getNodeKind() == Type.DOCUMENT &&
-                nodeTest instanceof NameTest &&
-                nodeTest.getPrimitiveType() == Type.ELEMENT) {
-            return ((TinyDocumentImpl) this).getAllElements(nodeTest.getFingerprint());
-        } else if (hasChildNodes()) {
+        if (hasChildNodes()) {
             if (nodeTest.getUType().overlaps(UType.TEXT)) {
                 return new DescendantIterator(tree, this, nodeTest);
             } else {

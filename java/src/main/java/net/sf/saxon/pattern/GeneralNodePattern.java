@@ -20,10 +20,12 @@ import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 
 /**
  * A GeneralNodePattern represents a pattern which, because of the presence of positional
@@ -34,7 +36,7 @@ import net.sf.saxon.type.*;
 public final class GeneralNodePattern extends Pattern {
 
     private Expression equivalentExpr;
-    private final NodeTest itemType;
+    private final NodeTest nodeTest;
     private Expression topNodeEquivalent = null;
     private PullEvaluator equivalentExprEvaluator;
     private PullEvaluator equivalentTopNodeEvaluator;
@@ -44,12 +46,12 @@ public final class GeneralNodePattern extends Pattern {
      * Create a GeneralNodePattern
      *
      * @param expr     the "equivalent expression"
-     * @param itemType a type that all matched nodes must satisfy
+     * @param nodeTest a condition that all matched nodes must satisfy
      */
 
-    public GeneralNodePattern(Expression expr, NodeTest itemType) {
+    public GeneralNodePattern(Expression expr, NodeTest nodeTest) {
         equivalentExpr = expr;
-        this.itemType = itemType;
+        this.nodeTest = nodeTest;
     }
 
     /**
@@ -121,7 +123,7 @@ public final class GeneralNodePattern extends Pattern {
 
     @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        ContextItemStaticInfo cit = new ContextItemStaticInfo(AnyXNodeTest.getInstance());
+        ContextItemStaticInfo cit = new ContextItemStaticInfo(AnyXNodeType.getInstance());
         equivalentExpr = equivalentExpr.typeCheck(visitor, cit);
         makeTopNodeEquivalent();
         return this;
@@ -218,7 +220,10 @@ public final class GeneralNodePattern extends Pattern {
     @Override
     public boolean matches(Item item, XPathContext context) throws XPathException {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-        if (!itemType.matches(item, th)) {
+        if (!(item instanceof NodeInfo)) {
+            return false;
+        }
+        if (!nodeTest.test(((NodeInfo)item))) {
             return false;
         }
         if (precondition != null && !precondition.matches(item, context)) {
@@ -258,7 +263,7 @@ public final class GeneralNodePattern extends Pattern {
 
     @Override
     public boolean matchesBeneathAnchor(NodeInfo node, NodeInfo anchor, XPathContext context) throws XPathException {
-        if (!itemType.test(node)) {
+        if (!nodeTest.test(node)) {
             return false;
         }
 
@@ -316,7 +321,7 @@ public final class GeneralNodePattern extends Pattern {
      */
     @Override
     public UType getUType() {
-        return itemType.getUType();
+        return nodeTest.getUType();
     }
 
     /**
@@ -328,7 +333,7 @@ public final class GeneralNodePattern extends Pattern {
 
     @Override
     public int getFingerprint() {
-        return itemType.getFingerprint();
+        return nodeTest.getFingerprint();
     }
 
     /**
@@ -337,7 +342,7 @@ public final class GeneralNodePattern extends Pattern {
 
     @Override
     public ItemType getItemType() {
-        return itemType;
+        return nodeTest.getItemType();
     }
 
     public Expression getEquivalentExpr() {
@@ -377,7 +382,7 @@ public final class GeneralNodePattern extends Pattern {
     /*@NotNull*/
     @Override
     public Pattern copy(RebindingMap rebindings) {
-        GeneralNodePattern n = new GeneralNodePattern(equivalentExpr.copy(rebindings), itemType);
+        GeneralNodePattern n = new GeneralNodePattern(equivalentExpr.copy(rebindings), nodeTest);
         ExpressionTool.copyLocationInfo(this, n);
         n.setOriginalText(getOriginalText());
         n.topNodeEquivalent = topNodeEquivalent == null ? null : topNodeEquivalent.copy(rebindings);
@@ -388,7 +393,7 @@ public final class GeneralNodePattern extends Pattern {
     @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.genNode");
-        presenter.emitAttribute("test", AlphaCode.fromItemType(itemType));
+        presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest.getItemType()));
         equivalentExpr.export(presenter);
         presenter.endElement();
     }

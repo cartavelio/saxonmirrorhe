@@ -16,9 +16,9 @@ import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.DocumentNodeTest;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.DocumentNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -89,15 +89,15 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         register("has-children", 1, e -> e.populate( HasChildren_1::new, BuiltInAtomicType.BOOLEAN,
                  ONE, 0)
-                .arg(0, AnyXNodeTest.getInstance(), OPT | INS, null));
+                .arg(0, AnyXNodeType.getInstance(), OPT | INS, null));
 
         register("head", 1, e -> e.populate( HeadFn::new, AnyItemType.getInstance(),
                  OPT, FILTER)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, null));
 
-        register("innermost", 1, e -> e.populate(Innermost::new, AnyXNodeTest.getInstance(),
+        register("innermost", 1, e -> e.populate(Innermost::new, AnyXNodeType.getInstance(),
                                                  STAR, 0)
-                .arg(0, AnyXNodeTest.getInstance(), STAR | NAV, null));
+                .arg(0, AnyXNodeType.getInstance(), STAR | NAV, null));
 
         register("json-doc", 1, e -> e.populate( JsonDoc::new, AnyItemType.getInstance(),
                  OPT, LATE)
@@ -139,7 +139,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(ParseJsonFn.makeOptionsParameter(31)));
 
-        register("parse-xml", 1, e -> e.populate(ParseXml::new, new DocumentNodeTest(NodeKindTest.ELEMENT), OPT, LATE | NEW)
+        register("parse-xml", 1, e -> e.populate(ParseXml::new, new DocumentNodeType(NodeKindType.ELEMENT), OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
         register("random-number-generator", 0, e -> e.populate( RandomNumberGenerator::new, RandomNumberGenerator.RETURN_TYPE, ONE, LATE));
@@ -147,7 +147,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("random-number-generator", 1, e -> e.populate( RandomNumberGenerator::new, RandomNumberGenerator.RETURN_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, OPT, null));
 
-        register("parse-xml-fragment", 1, e -> e.populate( ParseXmlFragment::new, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
+        register("parse-xml-fragment", 1, e -> e.populate(ParseXmlFragment::new, NodeKindType.DOCUMENT, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
         register("serialize", 2, e -> e.populate( Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
@@ -159,7 +159,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         register("snapshot", 0, e -> e.populate( ContextItemAccessorFunction::new, AnyItemType.getInstance(), STAR, CITEM | LATE | NEW));
 
-        register("snapshot", 1, e -> e.populate(SnapshotFn::new, AnyXNodeTest.getInstance(),
+        register("snapshot", 1, e -> e.populate(SnapshotFn::new, AnyXNodeType.getInstance(),
                                                 STAR, NEW)
                 .arg(0, AnyItemType.getInstance(), STAR | ABS, EMPTY));
 
@@ -200,11 +200,11 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         register("xml-to-json", 1, e -> e.populate( XMLToJsonFn::new, BuiltInAtomicType.STRING,
                  OPT, LATE)
-                .arg(0, AnyXNodeTest.getInstance(), OPT | ABS, EMPTY));
+                .arg(0, AnyXNodeType.getInstance(), OPT | ABS, EMPTY));
 
         register("xml-to-json", 2, e -> e.populate( XMLToJsonFn::new, BuiltInAtomicType.STRING,
                  OPT, LATE)
-                .arg(0, AnyXNodeTest.getInstance(), OPT | ABS, EMPTY)
+                .arg(0, AnyXNodeType.getInstance(), OPT | ABS, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE | ABS, null)
                 .setOptionDetails(XMLToJsonFn.makeOptionsParameter(31)));
 

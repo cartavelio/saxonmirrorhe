@@ -27,7 +27,7 @@ import net.sf.saxon.functions.AccumulatorFn;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.SimpleMode;
 import net.sf.saxon.trans.SymbolicName;

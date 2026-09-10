@@ -10,12 +10,10 @@ package net.sf.saxon.functions.registry;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.DocumentNodeTest;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.PortableNameTest;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.DocumentNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -41,13 +39,14 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
 
         importFunctionSet(XPath20FunctionSet.getInstance());
 
-        register("analyze-string", 2, e -> e.populate( RegexFunctionSansFlags::new, NodeKindTest.ELEMENT,
-                 ONE, LATE | NEW)
+        register("analyze-string", 2, e -> e.populate(RegexFunctionSansFlags::new, NodeKindType.ELEMENT,
+                                                      ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        ItemType analyzeStringReturnType = new PortableNameTest(
-                Type.ELEMENT, NamespaceUri.FN, "analyze-string-result");
+        ItemType analyzeStringReturnType = NodeKindType.ELEMENT;
+        // new PortableNamedType(
+        //        Type.ELEMENT, NamespaceUri.FN, "analyze-string-result");
         register("analyze-string", 3, e -> e.populate( AnalyzeStringFn::new, analyzeStringReturnType,
                  ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
@@ -67,10 +66,10 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
         register("document-uri", 0, e -> e.populate( ContextItemAccessorFunction::new,
                  BuiltInAtomicType.ANY_URI, OPT, CITEM | LATE));
 
-        register("element-with-id", 1, e -> e.populate(SuperId.ElementWithId::new, NodeKindTest.ELEMENT, STAR, CITEM | LATE | UO)
+        register("element-with-id", 1, e -> e.populate(SuperId.ElementWithId::new, NodeKindType.ELEMENT, STAR, CITEM | LATE | UO)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY));
 
-        register("element-with-id", 2, e -> e.populate(SuperId.ElementWithId::new, NodeKindTest.ELEMENT, STAR, UO)
+        register("element-with-id", 2, e -> e.populate(SuperId.ElementWithId::new, NodeKindType.ELEMENT, STAR, UO)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY)
                 .arg(1, Type.XNODE_TYPE, ONE, null));
 
@@ -205,33 +204,33 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
 
         register("has-children", 1, e -> e.populate( HasChildren_1::new, BuiltInAtomicType.BOOLEAN,
                  ONE, 0)
-                .arg(0, AnyXNodeTest.getInstance(), OPT | INS, null));
+                .arg(0, AnyXNodeType.getInstance(), OPT | INS, null));
 
         register("head", 1, e -> e.populate( HeadFn::new, AnyItemType.getInstance(),
                  OPT, FILTER)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, null));
 
-        register("innermost", 1, e -> e.populate(Innermost::new, AnyXNodeTest.getInstance(),
+        register("innermost", 1, e -> e.populate(Innermost::new, AnyXNodeType.getInstance(),
                                                  STAR, 0)
-                .arg(0, AnyXNodeTest.getInstance(), STAR | NAV, null));
+                .arg(0, AnyXNodeType.getInstance(), STAR | NAV, null));
 
         register("nilled", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.BOOLEAN, OPT, CITEM | LATE));
 
         register("node-name", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.QNAME, OPT, CITEM | LATE));
 
-        register("outermost", 1, e -> e.populate(Outermost::new, AnyXNodeTest.getInstance(), STAR, AS_ARG0 | FILTER)
-                .arg(0, AnyXNodeTest.getInstance(), STAR | TRA, null));
+        register("outermost", 1, e -> e.populate(Outermost::new, AnyXNodeType.getInstance(), STAR, AS_ARG0 | FILTER)
+                .arg(0, AnyXNodeType.getInstance(), STAR | TRA, null));
 
-        register("parse-xml", 1, e -> e.populate(ParseXml::new, new DocumentNodeTest(NodeKindTest.ELEMENT), OPT, LATE | NEW)
+        register("parse-xml", 1, e -> e.populate(ParseXml::new, new DocumentNodeType(NodeKindType.ELEMENT), OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
-        register("parse-xml-fragment", 1, e -> e.populate( ParseXmlFragment::new, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
+        register("parse-xml-fragment", 1, e -> e.populate(ParseXmlFragment::new, NodeKindType.DOCUMENT, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
         register("path", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, OPT, CITEM | LATE));
 
         register("path", 1, e -> e.populate( Path_1::new, BuiltInAtomicType.STRING, OPT, 0)
-                .arg(0, AnyXNodeTest.getInstance(), OPT | NAV, null));
+                .arg(0, AnyXNodeType.getInstance(), OPT | NAV, null));
 
         register("round", 2, e -> e.populate(Round::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY)

@@ -11,10 +11,10 @@ import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.type.coercion.ChoiceCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.XNodeType;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -42,6 +42,14 @@ public class ChoiceItemType implements ItemType, ChoiceType {
 
     public static ChoiceItemType of(ItemType... memberTypes) {
         List<ItemType> members = Arrays.asList(memberTypes);
+        return new ChoiceItemType(members);
+    }
+
+    public static ChoiceItemType of(UType uType) {
+        List<ItemType> members = new ArrayList<>();
+        for (PrimitiveUType primitive : uType.decompose()) {
+            members.add(primitive.toItemType());
+        }
         return new ChoiceItemType(members);
     }
 
@@ -118,7 +126,8 @@ public class ChoiceItemType implements ItemType, ChoiceType {
 
 
     protected boolean someMemberTypeSatisfies(Predicate<? super ItemType> condition) {
-        for (ItemType member : memberTypes) {
+        for (int i=0; i< memberTypes.size(); i++) {
+            ItemType member = memberTypes.get(i);
             if (condition.test(member)) {
                 return true;
             }
@@ -187,7 +196,12 @@ public class ChoiceItemType implements ItemType, ChoiceType {
      */
     @Override
     public boolean matches(Item item, TypeHierarchy th) {
-        return someMemberTypeSatisfies(at -> at.matches(item, th));
+        for (ItemType member : memberTypes) {
+            if (member.matches(item, th)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -199,6 +213,37 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     /*@NotNull*/
     @Override
     public ItemType getPrimitiveItemType() {
+        Set<ItemType> primitives = new HashSet<>();
+        ItemType lastPrimitive = null;
+        boolean allNumeric = true;
+        boolean allXNodes = true;
+        boolean allAtomic = true;
+        for (ItemType member : memberTypes) {
+            ItemType prim = member.getPrimitiveItemType();
+            primitives.add(prim);
+            lastPrimitive = prim;
+            if (!(prim instanceof AtomicType)) {
+                allAtomic = false;
+            }
+            if (!(prim instanceof NumericType)) {
+                allNumeric = false;
+            }
+            if (!(prim instanceof XNodeType)) {
+                allXNodes = false;
+            }
+        }
+        if (primitives.size() == 1) {
+            return lastPrimitive;
+        }
+        if (allNumeric) {
+            return NumericType.getInstance();
+        }
+        if (allAtomic) {
+            return BuiltInAtomicType.ANY_ATOMIC;
+        }
+        if (allXNodes) {
+            return AnyXNodeType.getInstance();
+        }
         return AnyItemType.getInstance();
     }
 
@@ -210,7 +255,7 @@ public class ChoiceItemType implements ItemType, ChoiceType {
 
     @Override
     public int getPrimitiveType() {
-        return Type.ITEM;
+        return getPrimitiveItemType().getPrimitiveType();
     }
 
     /*@NotNull*/
@@ -221,7 +266,12 @@ public class ChoiceItemType implements ItemType, ChoiceType {
 
     @Override
     public boolean isAtomizable(TypeHierarchy th) {
-        return someMemberTypeSatisfies(t -> isAtomizable(th));
+        for (ItemType member : memberTypes) {
+            if (member.isAtomizable(th)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

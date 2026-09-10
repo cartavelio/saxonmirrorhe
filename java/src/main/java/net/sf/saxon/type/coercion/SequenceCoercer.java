@@ -12,15 +12,15 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.ma.jnode.JNodeType;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyGNodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -83,8 +83,8 @@ public final class SequenceCoercer extends UnaryExpression {
         if (requiredItemType.isAtomicType() && supplied == Genre.XNODE) {
             sequence = new Atomizer(sequence, role);
         }
-        if (requiredItemType == AnyGNodeTest.getInstance() && (supplied == Genre.ARRAY || supplied == Genre.MAP)) {
-            requiredType = SequenceType.makeSequenceType(JNodeType.ANY_JNODE, requiredType.getCardinality());
+        if (requiredItemType == AnyGNodeType.getInstance() && (supplied == Genre.ARRAY || supplied == Genre.MAP)) {
+            requiredType = SequenceType.makeSequenceType(AnyJNodeType.getInstance(), requiredType.getCardinality());
         }
         return new SequenceCoercer(sequence, requiredType, role, allow40);
     }
@@ -285,7 +285,11 @@ public final class SequenceCoercer extends UnaryExpression {
      */
 
     public CoercionPlan getCoercionPlan() {
-        return requiredType.getPrimaryType().getCoercionPlan(getPackageData().getHostLanguageVersion());
+        CoercionPlan plan = requiredType.getPrimaryType().getCoercionPlan(getPackageData().getHostLanguageVersion());
+        if (plan == null) {
+            plan = new IdentityCoercionPlan();
+        }
+        return plan;
     }
 
     /**

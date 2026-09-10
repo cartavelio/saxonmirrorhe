@@ -21,7 +21,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UniStringConsumer;
@@ -166,7 +166,7 @@ public final class ValueOf extends SimpleNodeConstructor {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return NodeKindTest.TEXT;
+        return NodeKindType.TEXT;
     }
 
     @Override

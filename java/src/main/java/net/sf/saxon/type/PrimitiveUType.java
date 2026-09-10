@@ -8,9 +8,9 @@
 package net.sf.saxon.type;
 
 
-import net.sf.saxon.ma.jnode.JNodeType;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.gnode.NodeKindType;
 
 public enum PrimitiveUType {
     
@@ -145,22 +145,22 @@ public enum PrimitiveUType {
     public ItemType toItemType() {
         switch (this) {
             case DOCUMENT:
-                return NodeKindTest.DOCUMENT;
+                return NodeKindType.DOCUMENT;
             case ELEMENT:
-                return NodeKindTest.ELEMENT;
+                return NodeKindType.ELEMENT;
             case ATTRIBUTE:
-                return NodeKindTest.ATTRIBUTE;
+                return NodeKindType.ATTRIBUTE;
             case TEXT:
-                return NodeKindTest.TEXT;
+                return NodeKindType.TEXT;
             case COMMENT:
-                return NodeKindTest.COMMENT;
+                return NodeKindType.COMMENT;
             case PI:
-                return NodeKindTest.PROCESSING_INSTRUCTION;
+                return NodeKindType.PROCESSING_INSTRUCTION;
             case NAMESPACE:
-                return NodeKindTest.NAMESPACE;
+                return NodeKindType.NAMESPACE;
 
             case JNODE:
-                return JNodeType.ANY_JNODE;
+                return AnyJNodeType.getInstance();
 
             case FUNCTION:
                 return AnyFunctionType.getInstance();

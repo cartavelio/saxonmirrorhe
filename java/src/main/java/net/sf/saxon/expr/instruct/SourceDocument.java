@@ -22,7 +22,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AllElementsSpaceStrippingRule;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SpaceStrippingRule;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.QuitParsingException;
@@ -130,7 +130,7 @@ public class SourceDocument extends Instruction {
         hrefOp.setChildExpression(tc.staticTypeCheck(
                 hrefOp.getChildExpression(), SequenceType.SINGLE_STRING, role, visitor));
         ContextItemStaticInfo newType =
-                getConfiguration().makeContextItemStaticInfo(NodeKindTest.DOCUMENT);
+                getConfiguration().makeContextItemStaticInfo(NodeKindType.DOCUMENT);
         newType.setContextPostureStriding();
         bodyOp.typeCheck(visitor, newType);
         return this;
@@ -155,7 +155,7 @@ public class SourceDocument extends Instruction {
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         ContextItemStaticInfo newType =
-                getConfiguration().makeContextItemStaticInfo(NodeKindTest.DOCUMENT);
+                getConfiguration().makeContextItemStaticInfo(NodeKindType.DOCUMENT);
         newType.setContextPostureStriding();
 
         hrefOp.optimize(visitor, contextItemType);

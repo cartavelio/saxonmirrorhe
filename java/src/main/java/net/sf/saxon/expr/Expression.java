@@ -21,7 +21,7 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeSetPattern;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;

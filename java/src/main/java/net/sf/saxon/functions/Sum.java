@@ -43,7 +43,7 @@ public class Sum extends FoldingFunction {
     @Override
     public ItemType getResultItemType(Expression[] args) {
         TypeHierarchy th = getRetainedStaticContext().getConfiguration().getTypeHierarchy();
-        ItemType base = Atomizer.getAtomizedItemType(args[0], false, th);
+        ItemType base = Atomizer.getAtomizedItemType(args[0], false);
         if (base.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
             base = BuiltInAtomicType.DOUBLE;
         }

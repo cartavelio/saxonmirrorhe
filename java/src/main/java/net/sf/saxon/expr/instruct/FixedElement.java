@@ -12,7 +12,10 @@ import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.StringLiteral;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.ComplexNodePushElaborator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PushEvaluator;
@@ -23,8 +26,6 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.ContentTypeTest;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.s9api.Location;
@@ -33,6 +34,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 
 import java.util.function.BiConsumer;
 
@@ -223,9 +225,9 @@ public class FixedElement extends ElementCreator {
                     schemaType = declaredType;
                 }
 
-                itemType = new ContentTypeTest(Type.ELEMENT,
-                                               elementNameTest,
-                                               schemaType, false, config);
+                itemType = new NamedXNodeType(Type.ELEMENT,
+                                              elementNameTest,
+                                              schemaType, false, config);
                 if (xsiType != null || !decl.hasTypeAlternatives()) {
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                     try {
@@ -253,13 +255,13 @@ public class FixedElement extends ElementCreator {
 
                     warning("There is no global element declaration for " +
                             elementName.getDisplayName(), SaxonErrorCode.SXWN9031);
-                    itemType = new NameTest(Type.ELEMENT, fp, config.getNamePool());
+                    itemType = new NamedXNodeType(Type.ELEMENT, elementName.getStructuredQName(), config);
                 } else {
                     schemaType = decl.getType();
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
-                    itemType = new ContentTypeTest(Type.ELEMENT,
-                                                   elementNameTest,
-                                                   instr.getSchemaType(), false, config);
+                    itemType = new NamedXNodeType(Type.ELEMENT,
+                                                  elementNameTest,
+                                                  instr.getSchemaType(), false, config);
                     try {
                         schemaType.analyzeContentExpression(content, Type.ELEMENT, schema);
                     } catch (XPathException e) {
@@ -269,19 +271,19 @@ public class FixedElement extends ElementCreator {
                 }
             } else if (validation == Validation.PRESERVE) {
                 // we know the result will be an element of type xs:anyType
-                itemType = new ContentTypeTest(Type.ELEMENT,
-                                                elementNameTest,
-                                                AnyType.getInstance(), false, config);
+                itemType = new NamedXNodeType(Type.ELEMENT,
+                                              elementNameTest,
+                                              AnyType.getInstance(), false, config);
             } else {
                 // we know the result will be an untyped element
-                itemType = new ContentTypeTest(Type.ELEMENT,
-                                               elementNameTest,
-                                               Untyped.getInstance(), false, config);
+                itemType = new NamedXNodeType(Type.ELEMENT,
+                                              elementNameTest,
+                                              Untyped.getInstance(), false, config);
             }
         } else {
-            itemType = new ContentTypeTest(Type.ELEMENT,
-                                           elementNameTest,
-                                           schemaType, false, config);
+            itemType = new NamedXNodeType(Type.ELEMENT,
+                                          elementNameTest,
+                                          schemaType, false, config);
             try {
                 schemaType.analyzeContentExpression(content, Type.ELEMENT, schema);
             } catch (XPathException e) {

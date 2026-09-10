@@ -7,23 +7,23 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 
 
 /**
@@ -53,12 +53,12 @@ public class RootExpression extends Expression {
             throw new XPathException(noContextMessage() + ": the context item is absent")
                     .withErrorCode("XPDY0002").asTypeError().withLocation(getLocation());
         } else if (!doneWarnings && contextInfo.isParentless()
-                && th.relationship(contextInfo.getItemType(),NodeKindTest.DOCUMENT) == Affinity.DISJOINT) {
+                && th.relationship(contextInfo.getItemType(), NodeKindType.DOCUMENT) == Affinity.DISJOINT) {
             visitor.issueWarning(noContextMessage() + ": the context item is parentless and is not a document node", SaxonErrorCode.SXWN9026, getLocation());
             doneWarnings = true;
         }
         contextMaybeUndefined = contextInfo.getOptionality() != Optionality.REQUIRED;
-        if (th.isSubType(contextInfo.getItemType(), NodeKindTest.DOCUMENT)) {
+        if (th.isSubType(contextInfo.getItemType(), NodeKindType.DOCUMENT)) {
             // this rewrite is important for streamability analysis
             ContextItemExpression cie = new ContextItemExpression();
             ExpressionTool.copyLocationInfo(this, cie);
@@ -66,7 +66,7 @@ public class RootExpression extends Expression {
             return cie;
         }
 
-        Affinity relation = th.relationship(contextInfo.getItemType(), AnyXNodeTest.getInstance());
+        Affinity relation = th.relationship(contextInfo.getItemType(), AnyXNodeType.getInstance());
         if (relation == Affinity.DISJOINT) {
             throw new XPathException(noContextMessage() + ": the context item is not a node")
                     .withErrorCode("XPTY0020")
@@ -152,7 +152,7 @@ public class RootExpression extends Expression {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return NodeKindTest.DOCUMENT;
+        return NodeKindType.DOCUMENT;
     }
 
 
@@ -254,7 +254,7 @@ public class RootExpression extends Expression {
      */
     @Override
     public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
-        return new NodeTestPattern(NodeKindTest.DOCUMENT);
+        return new ItemTypePattern(NodeKindType.DOCUMENT);
     }
 
     /**

@@ -16,7 +16,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NameOfNode;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -169,7 +169,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return NodeKindTest.ATTRIBUTE;
+        return NodeKindType.ATTRIBUTE;
     }
 
     /**

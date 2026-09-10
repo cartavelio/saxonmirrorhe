@@ -17,7 +17,7 @@ import net.sf.saxon.expr.instruct.LocalParamBlock;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;

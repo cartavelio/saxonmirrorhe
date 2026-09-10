@@ -18,8 +18,8 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 
 /**
- * An ItemTypePattern is a pattern that consists simply of an ItemType; although
- * a node test is an item type, this class is used only for non-node item types,
+ * An ItemTypePattern is a pattern that consists simply of an ItemType;
+ * this class is used primarily for non-node item types,
  * such as atomic types, map types, array types etc.
  */
 

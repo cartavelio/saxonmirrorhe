@@ -8,13 +8,13 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.GNode;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.type.*;
-import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntPredicateProxy;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.PrimitiveUType;
+import net.sf.saxon.type.Type;
+import net.sf.saxon.type.UType;
 
 import java.util.LinkedList;
 import java.util.function.Function;
@@ -85,37 +85,37 @@ public final class MultipleNodeKindTest extends NodeTest {
         return AnyQNameTest.getInstance();
     }
 
-    /**
-     * Test whether this node test is satisfied by a given node. This method is only
-     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-     * node tests where the node kind is known to be an attribute.
-     *
-     * @param nodeKind   The kind of node to be matched
-     * @param name       identifies the expanded name of the node to be matched.
-     *                   The value should be null for a node with no name.
-     * @param annotation The actual content type of the node
-     */
-    @Override
-    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-        return (nodeKindMask & (1<<nodeKind)) != 0;
-    }
+//    /**
+//     * Test whether this node test is satisfied by a given node. This method is only
+//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
+//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
+//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
+//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
+//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
+//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
+//     * node tests where the node kind is known to be an attribute.
+//     *
+//     * @param nodeKind   The kind of node to be matched
+//     * @param name       identifies the expanded name of the node to be matched.
+//     *                   The value should be null for a node with no name.
+//     * @param annotation The actual content type of the node
+//     */
+//    @Override
+//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
+//        return (nodeKindMask & (1<<nodeKind)) != 0;
+//    }
 
-    @Override
-    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
-        final byte[] nodeKindArray = tree.getNodeKindArray();
-        return IntPredicateLambda.of(nodeNr -> {
-            int nodeKind = nodeKindArray[nodeNr] & 0x0f;
-            if (nodeKind == Type.WHITESPACE_TEXT) {
-                nodeKind = Type.TEXT;
-            }
-            return (nodeKindMask & (1 << nodeKind)) != 0;
-        });
-    }
+//    @Override
+//    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
+//        final byte[] nodeKindArray = tree.getNodeKindArray();
+//        return IntPredicateLambda.of(nodeNr -> {
+//            int nodeKind = nodeKindArray[nodeNr] & 0x0f;
+//            if (nodeKind == Type.WHITESPACE_TEXT) {
+//                nodeKind = Type.TEXT;
+//            }
+//            return (nodeKindMask & (1 << nodeKind)) != 0;
+//        });
+//    }
 
     /**
      * Test whether this node test is satisfied by a given node. This alternative
@@ -157,17 +157,17 @@ public final class MultipleNodeKindTest extends NodeTest {
         }
         StringBuilder fsb = new StringBuilder(64);
         LinkedList<PrimitiveUType> types = new LinkedList<>(uType.decompose());
-        format(types, fsb, it -> ((NodeKindTest)it).toShortString());
+        format(types, fsb, Object::toString);
         return fsb.toString();
     }
 
-    @Override
-    public String toExportString() {
-        StringBuilder fsb = new StringBuilder(64);
-        LinkedList<PrimitiveUType> types = new LinkedList<>(uType.decompose());
-        format(types, fsb, ItemType::toExportString);
-        return fsb.toString();
-    }
+//    @Override
+//    public String toExportString() {
+//        StringBuilder fsb = new StringBuilder(64);
+//        LinkedList<PrimitiveUType> types = new LinkedList<>(uType.decompose());
+//        format(types, fsb, ItemType::toExportString);
+//        return fsb.toString();
+//    }
 
     private void format(LinkedList<PrimitiveUType> list, StringBuilder fsb, Function<ItemType, String> show) {
         if (list.size() == 1) {

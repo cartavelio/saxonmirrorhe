@@ -7,15 +7,13 @@
 
 package net.sf.saxon.pattern.qname;
 
-import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.Affinity;
 
 /**
  * Interface for tests against a QName. It is only concerned with testing a name.
- * It is used for matching error codes against the codes specified in a try/catch clause,
- * and also to match component names in xsl:accept and xsl:expose.
+ * It is used (among other things) for matching error codes against the codes specified in a try/catch clause,
+ * and to match component names in xsl:accept and xsl:expose.
  */
 
 public interface QNameTest {
@@ -28,16 +26,6 @@ public interface QNameTest {
      */
 
     boolean matches(StructuredQName qname);
-
-    /**
-     * Test whether the QNameTest matches a given fingerprint
-     *
-     * @param namePool the name pool
-     * @param fp       the fingerprint of the QName to be matched
-     * @return true if the name matches, false if not
-     */
-
-    boolean matchesFingerprint(NamePool namePool, int fp);
 
     /**
      * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
@@ -54,11 +42,5 @@ public interface QNameTest {
      */
 
     Affinity relationship(QNameTest other);
-
-    /**
-     * Make a node test that combines this QName test with a test for a specific node kind
-     */
-
-    NodeTest makeNodeTest(int nodeKind);
 
 }

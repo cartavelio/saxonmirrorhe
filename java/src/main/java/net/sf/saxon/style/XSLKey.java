@@ -21,7 +21,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -158,7 +158,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
         match = makePattern(matchAtt, "match");
         if (match == null) {
             // error has been reported
-            match = new NodeTestPattern(ErrorType.getInstance());
+            match = new ItemTypePattern(ErrorType.getInstance());
         }
 
     }

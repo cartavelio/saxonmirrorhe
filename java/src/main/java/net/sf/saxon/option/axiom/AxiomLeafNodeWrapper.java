@@ -11,8 +11,8 @@ import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.NamespaceNode;
@@ -285,14 +285,14 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     @Override
     protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (forwards) {
-            if (nodeTest instanceof AnyXNodeTest) {
+            if (nodeTest == NodeTypeTest.GNODE) {
                 return new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper);
             } else {
                 return Navigator.filter(
                         new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper), nodeTest);
             }
         } else {
-            if (nodeTest instanceof AnyXNodeTest) {
+            if (nodeTest == NodeTypeTest.GNODE) {
                 return new AxiomDocument.PrecedingSiblingIterator(node, parent, docWrapper);
             } else {
                 return Navigator.filter(

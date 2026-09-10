@@ -17,7 +17,7 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.style.StyleElement;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
@@ -290,7 +290,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return NodeKindTest.ATTRIBUTE;
+        return NodeKindType.ATTRIBUTE;
     }
 
 

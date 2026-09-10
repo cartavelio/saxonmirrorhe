@@ -8,9 +8,8 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.GNode;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.UType;
 
 import java.util.function.Predicate;
@@ -49,11 +48,6 @@ public class NodeSelector extends NodeTest {
     @Override
     public double getDefaultPriority() {
         return 0;
-    }
-
-    @Override
-    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-        throw new UnsupportedOperationException("NodePredicate doesn't support this method");
     }
 
     @Override

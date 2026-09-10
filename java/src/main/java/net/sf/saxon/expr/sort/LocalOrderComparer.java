@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.sort;
 
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.NodeInfo;
 
 import java.util.Comparator;
@@ -17,7 +18,7 @@ import java.util.Comparator;
  */
 
 //@CSharpInjectMembers(code = "public override int Compare(net.sf.saxon.om.NodeInfo a, net.sf.saxon.om.NodeInfo b) { return compare(a, b); }")
-public final class LocalOrderComparer implements Comparator<NodeInfo> {
+public final class LocalOrderComparer implements Comparator<GNode> {
 
     private static final LocalOrderComparer instance = new LocalOrderComparer();
 
@@ -33,8 +34,13 @@ public final class LocalOrderComparer implements Comparator<NodeInfo> {
     }
 
     @Override
-    public int compare(NodeInfo a, NodeInfo b) {
-        return a.compareOrder(b);
+    public int compare(GNode a, GNode b) {
+        if (a instanceof NodeInfo && b instanceof NodeInfo) {
+            return ((NodeInfo) a).compareOrder((NodeInfo) b);
+        } else {
+            // TODO: this is temporary
+            return System.identityHashCode(a) - System.identityHashCode(b);
+        }
     }
 }
 

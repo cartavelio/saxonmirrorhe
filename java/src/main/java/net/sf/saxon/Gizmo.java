@@ -18,8 +18,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.query.StaticQueryContext;
@@ -40,6 +39,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.Templates;
@@ -572,7 +572,7 @@ public class Gizmo {
         typed = false;
         Set<String> names = new HashSet<>();
         NodeInfo element;
-        SequenceIterator allElements = currentDoc.iterateDescendantAxis(NodeKindTest.ELEMENT);
+        SequenceIterator allElements = currentDoc.iterateDescendantAxis(NodeTypeTest.ELEMENT);
         while ((element = (NodeInfo)allElements.next()) != null) {
             names.add(element.getLocalPart());
             NodeInfo att;
@@ -788,7 +788,7 @@ public class Gizmo {
                     for (NodeInfo att : replacementAtts) {
                         final NodeName attName = NameOfNode.makeName(att);
                         NodeInfo existing = (NodeInfo)target.iterateAttributeAxis(
-                                new NameTest(Type.ATTRIBUTE, attName, config.getNamePool())).next();
+                                NamedXNodeType.make(Type.ATTRIBUTE, att.getFingerprint(), config)).next();
                         if (existing != null) {
                             target.removeAttribute(existing);
                         }

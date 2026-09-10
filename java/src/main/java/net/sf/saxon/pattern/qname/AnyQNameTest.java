@@ -1,10 +1,11 @@
 package net.sf.saxon.pattern.qname;
 
-import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.Affinity;
+
+/**
+ * A {@code QNameTest} that matches any QName
+ */
 
 public class AnyQNameTest implements QNameTest {
 
@@ -22,12 +23,12 @@ public class AnyQNameTest implements QNameTest {
     }
 
     @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return true;
+    public String exportQNameTest() {
+        return "*";
     }
 
     @Override
-    public String exportQNameTest() {
+    public String toString() {
         return "*";
     }
 
@@ -36,9 +37,5 @@ public class AnyQNameTest implements QNameTest {
         return other instanceof AnyQNameTest ? Affinity.SAME_TYPE : Affinity.SUBSUMES;
     }
 
-    @Override
-    public NodeTest makeNodeTest(int nodeKind) {
-        return NodeKindTest.makeNodeKindTest(nodeKind);
-    }
 }
 

@@ -11,13 +11,13 @@ import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.ma.MapOrArray;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -28,12 +28,15 @@ import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -131,6 +134,57 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      */
 
     abstract public Iterable<KeyValuePair> keyValuePairs();
+
+    /**
+     * Get the sequence of all key-value pairs that follow a given key, in forwards iteration
+     * order of the map.
+     * @param key the starting point of the iteration.
+     * @return an iterator over all the entries in the map that follow the entry for the supplied
+     * key. This key is NOT included in the result. If the key is not present in the map, the method
+     * returns null.
+     */
+
+    public Iterator<KeyValuePair> followingKeyValuePairs(AtomicValue key) {
+        // This is inefficient. VAVR offers nothing better: see https://github.com/vavr-io/vavr/issues/3060
+        AtomicMatchKey matchKey = key.asMapKey();
+        Iterator<KeyValuePair> all = keyValuePairs().iterator();
+        while (all.hasNext()) {
+            KeyValuePair current = all.next();
+            if (current.key.asMapKey().equals(matchKey)) {
+                return all;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the sequence of all key-value pairs that precede a given key, in reverse iteration
+     * order of the map.
+     *
+     * @param key the starting point of the iteration.
+     * @return an iterator over all the entries in the map that follow the entry for the supplied
+     * key. This key is NOT included in the result. If the key is not present in the map, the method
+     * returns null.
+     */
+
+    public Iterator<KeyValuePair> precedingKeyValuePairs(AtomicValue key) {
+        // This is inefficient. VAVR offers nothing better: see https://github.com/vavr-io/vavr/issues/3060
+        if (get(key) == null) {
+            return null;
+        }
+        AtomicMatchKey matchKey = key.asMapKey();
+        Iterator<KeyValuePair> all = keyValuePairs().iterator();
+        List<KeyValuePair> preceding = new LinkedList<>();
+        while (all.hasNext()) {
+            KeyValuePair current = all.next();
+            if (current.key.asMapKey().equals(matchKey)) {
+                break;
+            } else {
+                preceding.add(0, current);
+            }
+        }
+        return preceding.iterator();
+    }
 
     /**
      * Get an iterator over the entries in the map, each represented as a singleton map (representing
@@ -392,7 +446,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
                 if (first instanceof AtomicValue) {
                     type = ((AtomicValue) first).getItemType();
                 } else if (first instanceof NodeInfo) {
-                    type = NodeKindTest.makeNodeKindTest(((NodeInfo) first).getNodeKind());
+                    type = NodeKindType.makeNodeKindTest(((NodeInfo) first).getNodeKind());
                 } else {
                     type = AnyFunctionType.getInstance();
                 }

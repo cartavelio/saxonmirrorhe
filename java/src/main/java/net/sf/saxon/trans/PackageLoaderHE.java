@@ -36,6 +36,8 @@ import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.SimpleMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.regex.ARegularExpression;
@@ -63,6 +65,7 @@ import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.SequenceCoercer;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 
@@ -208,7 +211,7 @@ public class PackageLoaderHE implements IPackageLoader {
             topLevelPackage = pack;
         }
         packStack.push(pack);
-        NodeInfo packageElement = (NodeInfo)doc.iterateChildAxis(NodeKindTest.ELEMENT).next();
+        NodeInfo packageElement = (NodeInfo)doc.iterateChildAxis(NodeTypeTest.ELEMENT).next();
         if (packageElement.getNamespaceUri() != NamespaceUri.SAXON_XSLT_EXPORT) {
             throw new XPathException("Incorrect namespace for XSLT export file", SaxonErrorCode.SXPK0002);
         }
@@ -346,7 +349,7 @@ public class PackageLoaderHE implements IPackageLoader {
         readKeys(packageElement);
         readComponents(packageElement, false);
         NodeInfo overridden = (NodeInfo)packageElement.iterateChildAxis(
-                                                         new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "overridden", config.getNamePool())).next();
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "overridden", config)).next();
         if (overridden != null) {
             readComponents(overridden, true);
         }
@@ -371,7 +374,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
     private void readGlobalContext(NodeInfo packageElement) throws XPathException {
         GlobalContextRequirement req = null;
-        //NameTest condition = new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "glob", config.getNamePool());
+        //NameTest condition = NameTest.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "glob", config.getNamePool());
         for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> ((NodeInfo)n).getLocalPart().equals("glob")))) {
             if (req == null) {
                 req = new GlobalContextRequirement();
@@ -405,7 +408,7 @@ public class PackageLoaderHE implements IPackageLoader {
         StylesheetPackage pack = packStack.peek();
         NodeInfo keyElement;
         SequenceIterator iterator = packageElement.iterateChildAxis(
-                                                           new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "key", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "key", config));
         while ((keyElement = (NodeInfo)iterator.next()) != null) {
             StructuredQName keyName = getQNameAttribute(keyElement, "name");
             SymbolicName symbol = new SymbolicName(StandardNames.XSL_KEY, keyName);
@@ -453,7 +456,7 @@ public class PackageLoaderHE implements IPackageLoader {
         StylesheetPackage pack = packStack.peek();
         NodeInfo child;
         SequenceIterator iterator = packageElement.iterateChildAxis(
-                                                           new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "co", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "co", config));
         while ((child = (NodeInfo)iterator.next()) != null) {
             int id = getIntegerAttribute(child, "id");
             String visAtt = child.getAttributeValue(NamespaceUri.NULL,"vis");
@@ -487,7 +490,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     pack.getRuleManager().obtainMode(baseComponent.getActor().getComponentName(), true);
                 }
             } else {
-                NodeInfo grandchild = (NodeInfo)child.iterateChildAxis( NodeKindTest.ELEMENT).next();
+                NodeInfo grandchild = (NodeInfo)child.iterateChildAxis(NodeTypeTest.ELEMENT).next();
                 Actor cc;
                 String kind = grandchild.getLocalPart();
                 switch (kind) {
@@ -553,7 +556,7 @@ public class PackageLoaderHE implements IPackageLoader {
         if (slots > 0) {
             var.setContainsLocals(new SlotManager(slots));
         }
-        NodeInfo bodyElement = (NodeInfo)varElement.iterateChildAxis( NodeKindTest.ELEMENT).next();
+        NodeInfo bodyElement = (NodeInfo)varElement.iterateChildAxis(NodeTypeTest.ELEMENT).next();
         if (bodyElement == null) {
             var.setBody(Literal.makeEmptySequence());
         } else {
@@ -595,7 +598,7 @@ public class PackageLoaderHE implements IPackageLoader {
         if (slots > 0) {
             var.setContainsLocals(new SlotManager(slots));
         }
-        NodeInfo bodyElement = (NodeInfo)varElement.iterateChildAxis( NodeKindTest.ELEMENT).next();
+        NodeInfo bodyElement = (NodeInfo)varElement.iterateChildAxis(NodeTypeTest.ELEMENT).next();
         if (bodyElement == null) {
             var.setBody(Literal.makeEmptySequence());
         } else {
@@ -710,7 +713,7 @@ public class PackageLoaderHE implements IPackageLoader {
         currentFunction = function;
         List<UserFunctionParameter> params = new ArrayList<>();
         SequenceIterator argIterator = functionElement.iterateChildAxis(
-                                                               new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "arg", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "arg", config));
         NodeInfo argElement;
         int slot = 0;
         while ((argElement = (NodeInfo)argIterator.next()) != null) {
@@ -825,7 +828,7 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         SequenceIterator iterator2 = modeElement.iterateDescendantAxis(
-                                                         new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "templateRule", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "templateRule", config));
         NodeInfo templateRuleElement0;
         LinkedList<NodeInfo> ruleStack = new LinkedList<>();
         while ((templateRuleElement0 = (NodeInfo)iterator2.next()) != null) {
@@ -886,7 +889,7 @@ public class PackageLoaderHE implements IPackageLoader {
         StylesheetPackage pack = packStack.peek();
         NodeInfo accElement;
         SequenceIterator iterator = packageElement.iterateChildAxis(
-                                                           new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "accumulator", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "accumulator", config));
         while ((accElement = (NodeInfo)iterator.next()) != null) {
             StructuredQName accName = getQNameAttribute(accElement, "name");
             Accumulator acc = new Accumulator();
@@ -915,7 +918,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
     private void readAccumulatorRules(Accumulator acc, NodeInfo owner) throws XPathException {
         SequenceIterator iterator = owner.iterateChildAxis(
-                                                  new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "accRule", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "accRule", config));
         NodeInfo accRuleElement;
         boolean preDescent = owner.getLocalPart().equals("pre");
         SimpleMode mode = preDescent ? acc.getPreDescentRules() : acc.getPostDescentRules();
@@ -941,13 +944,13 @@ public class PackageLoaderHE implements IPackageLoader {
         StylesheetPackage pack = packStack.peek();
         NodeInfo outputElement;
         SequenceIterator iterator = packageElement.iterateChildAxis(
-                                                           new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "output", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "output", config));
         while ((outputElement = (NodeInfo)iterator.next()) != null) {
             StructuredQName outputName = getQNameAttribute(outputElement, "name");
             Properties props = new Properties();
             NodeInfo propertyElement;
             SequenceIterator iterator1 = outputElement.iterateChildAxis(
-                                                               new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "property", config.getNamePool()));
+                    NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "property", config));
             while ((propertyElement = (NodeInfo)iterator1.next()) != null) {
                 String name = propertyElement.getAttributeValue(NamespaceUri.NULL,"name");
                 if (name.startsWith("Q{")) {
@@ -971,12 +974,12 @@ public class PackageLoaderHE implements IPackageLoader {
         StylesheetPackage pack = packStack.peek();
         NodeInfo charMapElement;
         SequenceIterator iterator = packageElement.iterateChildAxis(
-                                                           new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "charMap", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "charMap", config));
         while ((charMapElement = (NodeInfo)iterator.next()) != null) {
             StructuredQName mapName = getQNameAttribute(charMapElement, "name");
             NodeInfo mappingElement;
             SequenceIterator iterator1 = charMapElement.iterateChildAxis(
-                                                                new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "m", config.getNamePool()));
+                    NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "m", config));
             IntHashMap<String> map = new IntHashMap<>();
             while ((mappingElement = (NodeInfo)iterator1.next()) != null) {
                 int c = getIntegerAttribute(mappingElement, "c");
@@ -991,7 +994,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private void readSpaceStrippingRules(NodeInfo packageElement) throws XPathException {
         StylesheetPackage pack = packStack.peek();
         NodeInfo element;
-        SequenceIterator iterator = packageElement.iterateChildAxis( NodeKindTest.ELEMENT);
+        SequenceIterator iterator = packageElement.iterateChildAxis(NodeTypeTest.ELEMENT);
         while ((element = (NodeInfo)iterator.next()) != null) {
             String s = element.getLocalPart();
             switch (s) {
@@ -1003,7 +1006,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     pack.setStripperRules(new NoElementsSpaceStrippingRule());
                     break;
                 case "strip":
-                    SequenceIterator iterator2 = element.iterateChildAxis( NodeKindTest.ELEMENT);
+                    SequenceIterator iterator2 = element.iterateChildAxis(NodeTypeTest.ELEMENT);
                     NodeInfo element2;
                     SelectedElementsSpaceStrippingRule rules = new SelectedElementsSpaceStrippingRule(false);
                     while ((element2 = (NodeInfo)iterator2.next()) != null) {
@@ -1011,7 +1014,7 @@ public class PackageLoaderHE implements IPackageLoader {
                         String value = element2.getAttributeValue(NamespaceUri.NULL,"test");
                         NodeTest t;
                         if (value.equals("*")) {
-                            t = NodeKindTest.ELEMENT;
+                            t = NodeTypeTest.ELEMENT;
                         } else {
                             // See bug 4096: this is not a true item type, it also allows *:name and name:*
                             t = (NodeTest) parseAlphaCodeForItemType(element2, "test");
@@ -1032,7 +1035,7 @@ public class PackageLoaderHE implements IPackageLoader {
         NodeInfo formatElement;
         DecimalFormatManager decimalFormatManager = packStack.peek().getDecimalFormatManager();
         SequenceIterator iterator = packageElement.iterateChildAxis(
-                                                           new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "decimalFormat", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "decimalFormat", config));
 
         while ((formatElement = (NodeInfo)iterator.next()) != null) {
             StructuredQName name = getQNameAttribute(formatElement, "name");
@@ -1070,7 +1073,7 @@ public class PackageLoaderHE implements IPackageLoader {
      * @return the n'th child, or null if not available
      */
     public NodeInfo getChild(NodeInfo parent, int n) {
-        SequenceIterator iter = parent.iterateChildAxis( NodeKindTest.ELEMENT);
+        SequenceIterator iter = parent.iterateChildAxis(NodeTypeTest.ELEMENT);
         NodeInfo node = (NodeInfo)iter.next();
         for (int i = 0; i < n; i++) {
             node = (NodeInfo)iter.next();
@@ -1079,7 +1082,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     public NodeInfo getChildWithRole(NodeInfo parent, String role) {
-        SequenceIterator iter = parent.iterateChildAxis( NodeKindTest.ELEMENT);
+        SequenceIterator iter = parent.iterateChildAxis(NodeTypeTest.ELEMENT);
         NodeInfo node;
         while ((node = (NodeInfo)iter.next()) != null) {
             String roleAtt = node.getAttributeValue(NamespaceUri.NULL,"role");
@@ -1091,7 +1094,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     public Expression getFirstChildExpression(NodeInfo parent) throws XPathException {
-        NodeInfo node = (NodeInfo)parent.iterateChildAxis( NodeKindTest.ELEMENT).next();
+        NodeInfo node = (NodeInfo)parent.iterateChildAxis(NodeTypeTest.ELEMENT).next();
         return loadExpression(node);
     }
 
@@ -1210,7 +1213,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     private Pattern getFirstChildPattern(NodeInfo parent) throws XPathException {
-        NodeInfo node = (NodeInfo)parent.iterateChildAxis( NodeKindTest.ELEMENT).next();
+        NodeInfo node = (NodeInfo)parent.iterateChildAxis(NodeTypeTest.ELEMENT).next();
         return loadPattern(node);
     }
 
@@ -1459,7 +1462,7 @@ public class PackageLoaderHE implements IPackageLoader {
         List<SortKeyDefinition> skdl = new ArrayList<>(4);
         NodeInfo sortKeyElement;
         SequenceIterator iterator = element.iterateChildAxis(
-                                                    new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "sortKey", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "sortKey", config));
         while ((sortKeyElement = (NodeInfo)iterator.next()) != null) {
             SortKeyDefinition skd = new SortKeyDefinition();
             String compAtt = sortKeyElement.getAttributeValue(NamespaceUri.NULL,"comp");
@@ -1483,7 +1486,7 @@ public class PackageLoaderHE implements IPackageLoader {
         List<WithParam> wps = new ArrayList<>(4);
         NodeInfo wpElement;
         SequenceIterator iterator = element.iterateChildAxis(
-                                                    new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "withParam", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "withParam", config));
         while ((wpElement = (NodeInfo)iterator.next()) != null) {
             String flags = wpElement.getAttributeValue(NamespaceUri.NULL,"flags");
             boolean isTunnel = flags != null && flags.contains("t");
@@ -1848,7 +1851,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("choose", (loader, element) -> {
             List<Expression> conditions = new ArrayList<>();
             List<Expression> actions = new ArrayList<>();
-            SequenceIterator iter = element.iterateChildAxis( NodeKindTest.ELEMENT);
+            SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
             NodeInfo child;
             boolean odd = true;
             while ((child = (NodeInfo)iter.next()) != null) {
@@ -2058,10 +2061,10 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression target = loader.getFirstChildExpression(element);
             FunctionItem targetFn = (FunctionItem) ((Literal) target).getGroundedValue();
             NodeInfo args = loader.getChild(element, 1);
-            int count = Count.count(args.iterateChildAxis( NodeKindTest.ELEMENT));
+            int count = Count.count(args.iterateChildAxis(NodeTypeTest.ELEMENT));
             Sequence[] argValues = new Sequence[count];
             count = 0;
-            for (NodeInfo child : args.children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo child : args.children(NodeTypeTest.ELEMENT)) {
                 if (child.getLocalPart().equals("x")) {
                     argValues[count++] = null;
                 } else {
@@ -2689,7 +2692,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("literal", (loader, element) -> {
             List<Item> children = new ArrayList<>();
-            SequenceIterator iter = element.iterateChildAxis( NodeKindTest.ELEMENT);
+            SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
             NodeInfo child;
             while ((child = (NodeInfo)iter.next()) != null) {
                 Expression e = loader.loadExpression(child);
@@ -2753,7 +2756,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("merge", (loader, element) -> {
             final MergeInstr inst = new MergeInstr();
             SequenceIterator kids = element.iterateChildAxis(
-                                                    new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "mergeSrc", loader.config.getNamePool()));
+                    NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "mergeSrc", loader.config));
             NodeInfo msElem;
             List<MergeInstr.MergeSource> list = new ArrayList<>();
             while ((msElem = (NodeInfo)kids.next()) != null) {
@@ -2853,7 +2856,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("nextIteration", (loader, element) -> {
             NextIteration inst = new NextIteration();
             SequenceIterator kids = element.iterateChildAxis(
-                                                    new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "withParam", loader.config.getNamePool()));
+                    NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "withParam", loader.config));
             NodeInfo wp;
             List<WithParam> params = new ArrayList<>();
             while ((wp = (NodeInfo)kids.next()) != null) {
@@ -2897,7 +2900,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     StreamSource source = new StreamSource(new StringReader(content), baseURI);
                     node = loader.config.buildDocumentTree(source).getRootNode();
                     if (kind == Type.ELEMENT) {
-                        node = VirtualCopy.makeVirtualCopy((NodeInfo)node.iterateChildAxis( NodeKindTest.ELEMENT).next());
+                        node = VirtualCopy.makeVirtualCopy((NodeInfo)node.iterateChildAxis(NodeTypeTest.ELEMENT).next());
                     }
                     break;
                 }
@@ -3041,7 +3044,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("params", (loader, element) -> {
             List<LocalParam> children = new ArrayList<>();
-            SequenceIterator iter = element.iterateChildAxis( NodeKindTest.ELEMENT);
+            SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
             NodeInfo child;
             while ((child = (NodeInfo)iter.next()) != null) {
                 children.add((LocalParam) loader.loadExpression(child));
@@ -3050,11 +3053,11 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         eMap.put("partialApply", (loader, element) -> {
-            int count = Count.count(element.iterateChildAxis( NodeKindTest.ELEMENT));
+            int count = Count.count(element.iterateChildAxis(NodeTypeTest.ELEMENT));
             Expression base = null;
             Expression[] args = new Expression[count - 1];
             count = 0;
-            for (NodeInfo child : element.children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo child : element.children(NodeTypeTest.ELEMENT)) {
                 if (count == 0) {
                     base = loader.loadExpression(child);
                 } else if (child.getLocalPart().equals("null")) {
@@ -3116,7 +3119,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Properties locals = localProps == null ? new Properties() : loader.importProperties(localProps);
             Map<StructuredQName, Expression> dynamicProperties = new HashMap<>();
             NodeInfo child;
-            SequenceIterator iter = element.iterateChildAxis( NodeKindTest.ELEMENT);
+            SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
             while ((child = (NodeInfo)iter.next()) != null) {
                 Expression exp = loader.loadExpression(child);
                 String role = child.getAttributeValue(NamespaceUri.NULL,"role");
@@ -3301,7 +3304,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 tryCatch.setRollbackOutput(true);
             }
             SequenceIterator iter = element.iterateChildAxis(
-                    new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "catch", loader.config.getNamePool()));
+                    NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "catch", loader.config));
             NodeInfo catchElement;
             NamePool pool = loader.getConfiguration().getNamePool();
             while ((catchElement = (NodeInfo)iter.next()) != null) {
@@ -3480,7 +3483,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
     protected static List<Expression> getChildExpressionList(PackageLoaderHE loader, NodeInfo element) throws XPathException {
         List<Expression> children = new ArrayList<>();
-        SequenceIterator iter = element.iterateChildAxis( NodeKindTest.ELEMENT);
+        SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
         NodeInfo child;
         while ((child = (NodeInfo)iter.next()) != null) {
             children.add(loader.loadExpression(child));

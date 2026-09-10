@@ -15,9 +15,9 @@ import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnyXNodeTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -36,7 +36,7 @@ import java.util.function.Supplier;
  */
 public class DocumentSorter extends UnaryExpression {
 
-    private final Comparator<? super NodeInfo> comparer;
+    private final Comparator<? super GNode> comparer;
 
     public DocumentSorter(Expression base) {
         super(base);
@@ -76,7 +76,7 @@ public class DocumentSorter extends UnaryExpression {
         return "docOrder";
     }
 
-    public Comparator<? super NodeInfo> getComparer() {
+    public Comparator<? super GNode> getComparer() {
         return comparer;
     }
 
@@ -98,7 +98,7 @@ public class DocumentSorter extends UnaryExpression {
             return e2;
         }
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        if (th.relationship(getBaseExpression().getItemType(), AnyXNodeTest.getInstance()) == Affinity.DISJOINT) {
+        if (th.relationship(getBaseExpression().getItemType(), AnyXNodeType.getInstance()) == Affinity.DISJOINT) {
             return getBaseExpression();
         }
         Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.MISC, "document-order sorter", 0);
@@ -326,7 +326,7 @@ public class DocumentSorter extends UnaryExpression {
         public PullEvaluator elaborateForPull() {
             final DocumentSorter expr = (DocumentSorter) getExpression();
             final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
-            final Comparator<? super NodeInfo> comparer = expr.getComparer();
+            final Comparator<? super GNode> comparer = expr.getComparer();
 
             return context -> new DocumentOrderIterator(baseEval.iterate(context), comparer);
         }

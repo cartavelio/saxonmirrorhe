@@ -13,11 +13,11 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.sort.SortExpression;
 import net.sf.saxon.expr.sort.SortKeyDefinitionList;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.HashMap;
@@ -104,7 +104,7 @@ public class XSLApplyTemplates extends StyleElement {
         // get the Mode object
         if (useCurrentMode) {
             // give a warning if we're not inside an xsl:template
-            if (iterateAncestorAxis(new NameTest(Type.ELEMENT, StandardNames.XSL_TEMPLATE, getNamePool())).next() == null) {
+            if (iterateAncestorAxis(NamedXNodeType.make(Type.ELEMENT, StandardNames.XSL_TEMPLATE, getConfiguration())).next() == null) {
                 issueWarning("Specifying mode=\"#current\" when not inside an xsl:template serves no useful purpose",
                              SaxonErrorCode.SXWN9023);
             }
@@ -156,7 +156,7 @@ public class XSLApplyTemplates extends StyleElement {
             Expression here = new ContextItemExpression();
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "", 0, "XTTE0510");
-            here = new ItemChecker(here, AnyXNodeTest.getInstance(), role);
+            here = new ItemChecker(here, AnyXNodeType.getInstance(), role);
             select = new SimpleStepExpression(here, new AxisExpression(AxisInfo.CHILD, null));
             select.setLocation(allocateLocation());
             select.setRetainedStaticContext(makeRetainedStaticContext());

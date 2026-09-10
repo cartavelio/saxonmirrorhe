@@ -1,10 +1,6 @@
 package net.sf.saxon.pattern.qname;
 
-import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.LocalNameTest;
-import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.pattern.PortableNameTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.type.Affinity;
 
@@ -25,11 +21,6 @@ public class LocalQNameTest implements QNameTest {
         return qname.getLocalPart().equals(localName);
     }
 
-    @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return namePool.getLocalName(fp).equals(localName);
-    }
-
     public Affinity relationship(QNameTest other) {
         if (other instanceof AnyQNameTest) {
             return Affinity.SUBSUMED_BY;
@@ -48,11 +39,6 @@ public class LocalQNameTest implements QNameTest {
         } else {
             throw new IllegalArgumentException();
         }
-    }
-
-    @Override
-    public NodeTest makeNodeTest(int nodeKind) {
-        return new LocalNameTest(nodeKind, localName);
     }
 
     @Override

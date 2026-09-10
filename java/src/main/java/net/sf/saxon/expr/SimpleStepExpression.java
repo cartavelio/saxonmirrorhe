@@ -18,8 +18,8 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodePredicate;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.SelectorTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -88,7 +88,7 @@ public final class SimpleStepExpression extends SlashExpression {
             if (UType.JNODE.subsumes(contextItemUType)) {
                 ((AxisExpression) getStep()).setNodeTest(((SelectorTest) test).asJNodeTest());
             } else if (UType.XNODE.subsumes(contextItemUType)) {
-                ((AxisExpression) getStep()).setNodeTest(((SelectorTest) test).asXNodeTest(getConfiguration().getNamePool()));
+                ((AxisExpression) getStep()).setNodeTest(((SelectorTest) test).asXNodeTest(getConfiguration()));
             }
         }
         if (getStart() instanceof ContextItemExpression && AxisInfo.isForwards[((AxisExpression) getStep()).getAxis()]) {

@@ -17,7 +17,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ExternalObjectModel;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.ItemType;
 import org.jdom2.*;
@@ -124,7 +124,7 @@ public class JDOM2ObjectModel extends TreeModel implements ExternalObjectModel {
 
                 @Override
                 public ItemType getItemType() {
-                    return AnyXNodeTest.getInstance();
+                    return AnyXNodeType.getInstance();
                 }
             };
         } else {

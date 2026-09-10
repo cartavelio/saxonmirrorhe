@@ -22,6 +22,7 @@ import net.sf.saxon.om.QNameParser;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.SequenceType;
@@ -160,7 +161,7 @@ public class PatternParser extends XPathParser {
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
             visitor.setOptimizeForPatternMatching(true);
             ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(
-                    AnyXNodeTest.getInstance(), Optionality.OPTIONAL);
+                    AnyXNodeType.getInstance(), Optionality.OPTIONAL);
             Pattern pat;
             try {
                 pat = PatternMaker.fromExpression(exp.simplify().typeCheck(visitor, cit), env.getConfiguration(), true);

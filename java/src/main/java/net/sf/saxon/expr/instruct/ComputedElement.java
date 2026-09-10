@@ -22,8 +22,8 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.ContentTypeTest;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NamedXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -143,14 +143,14 @@ public class ComputedElement extends ElementCreator {
 
         final SchemaType schemaType = getSchemaType();
         if (schemaType != null) {
-            itemType = new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), schemaType, false, config);
+            itemType = new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), schemaType, false, config);
             schemaType.analyzeContentExpression(getContentExpression(), Type.ELEMENT, getRetainedStaticContext().getImportedSchema());
         } else if (getValidationAction() == Validation.STRIP || !schemaAware) {
-            itemType = new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
+            itemType = new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
         } else {
             // paradoxically, we know less about the type if validation="strict" is specified!
             // We know that it won't be untyped, but we have no way of representing that.
-            itemType = NodeKindTest.ELEMENT;
+            itemType = NodeKindType.ELEMENT;
         }
         return super.simplify();
     }

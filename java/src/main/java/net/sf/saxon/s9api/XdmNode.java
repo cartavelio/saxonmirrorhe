@@ -9,7 +9,7 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.push.Push;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.s9api.streams.Steps;
@@ -20,6 +20,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 
 import javax.xml.transform.Source;
 import java.net.URI;
@@ -352,8 +353,8 @@ public class XdmNode extends XdmItem {
                 break;
         }
         NodeInfo node = getUnderlyingNode();
-        NameTest test = new NameTest(kind, name.getNamespaceUri(), name.getLocalName(),
-                                     node.getConfiguration().getNamePool());
+        NodeTest test = NamedXNodeType.make(kind, name.getNamespaceUri(), name.getLocalName(),
+                                            node.getConfiguration());
         SequenceIterator base = Navigator.iterateAxis(node, axis.getAxisNumber(), test);
         return XdmSequenceIterator.ofNodes(base);
     }

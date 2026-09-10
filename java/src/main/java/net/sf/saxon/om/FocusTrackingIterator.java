@@ -8,8 +8,8 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -253,7 +253,7 @@ public class FocusTrackingIterator
      */
 
     public int getSiblingPosition(NodeInfo node, NodeTest nodeTest, int max) {
-        if (node instanceof SiblingCountingNode && nodeTest instanceof AnyXNodeTest) {
+        if (node instanceof SiblingCountingNode && nodeTest == NodeTypeTest.GNODE) {
             return ((SiblingCountingNode) node).getSiblingPosition();
         }
         if (siblingMemory == null) {

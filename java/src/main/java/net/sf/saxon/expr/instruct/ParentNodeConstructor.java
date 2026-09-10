@@ -13,9 +13,11 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.Schema;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.UType;
+import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.SequenceType;
 
 /**
@@ -211,10 +213,12 @@ public abstract class ParentNodeConstructor extends Instruction
             }
         }
         if (visitor.getStaticContext().getPackageData().isSchemaAware()) {
-            TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
             if (getValidationAction() == Validation.STRIP) {
-                if (getContentExpression().hasSpecialProperty(StaticProperty.ALL_NODES_UNTYPED) ||
-                    th.relationship(getContentExpression().getItemType(), MultipleNodeKindTest.DOC_ELEM_ATTR) == Affinity.DISJOINT) {
+                if (getContentExpression().hasSpecialProperty(StaticProperty.ALL_NODES_UNTYPED)) {
+                    setNoNeedToStrip();
+                }
+                UType contentType = getContentExpression().getItemType().getUType();
+                if (!contentType.overlaps(UType.DOCUMENT.union(UType.ELEMENT).union(UType.ATTRIBUTE))) {
                     // No need to strip type annotations if there are none needing to be stripped
                     setNoNeedToStrip();
                 }

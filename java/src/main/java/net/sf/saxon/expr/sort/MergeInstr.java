@@ -25,7 +25,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.ma.arrays.ArraySort;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -306,7 +306,7 @@ public class MergeInstr extends Instruction {
                 mergeSource.setForEachStream(tc.staticTypeCheck(
                         mergeSource.getForEachSource(), SequenceType.STRING_SEQUENCE, role, visitor));
 
-                rowContextItemType = config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT);
+                rowContextItemType = config.makeContextItemStaticInfo(NodeKindType.DOCUMENT);
             }
             mergeSource.rowSelectOp.typeCheck(visitor, rowContextItemType);
             ItemType rowItemType = mergeSource.getRowSelect().getItemType();
@@ -447,7 +447,7 @@ public class MergeInstr extends Instruction {
                 rowContextItemType = config.makeContextItemStaticInfo(mergeSource.getForEachItem().getItemType());
             } else if (mergeSource.getForEachSource() != null) {
                 mergeSource.forEachStreamOp.optimize(visitor, contextInfo);
-                rowContextItemType = config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT);
+                rowContextItemType = config.makeContextItemStaticInfo(NodeKindType.DOCUMENT);
             }
             mergeSource.rowSelectOp.optimize(visitor, rowContextItemType);
             ItemType rowItemType = mergeSource.getRowSelect().getItemType();

@@ -1,9 +1,6 @@
 package net.sf.saxon.pattern.qname;
 
-import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.pattern.PortableNameTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.type.Affinity;
 
@@ -30,11 +27,6 @@ public class PortableQNameTest implements QNameTest {
     }
 
     @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return namePool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart()) == fp;
-    }
-
-    @Override
     public String exportQNameTest() {
         return qName.getEQName();
     }
@@ -58,11 +50,6 @@ public class PortableQNameTest implements QNameTest {
         } else {
             throw new IllegalArgumentException();
         }
-    }
-
-    @Override
-    public NodeTest makeNodeTest(int nodeKind) {
-        return new PortableNameTest(nodeKind, qName.getNamespaceUri(), qName.getLocalPart());
     }
 
     @Override

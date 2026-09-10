@@ -9,7 +9,7 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.Type;
 import org.apache.axiom.om.OMDocument;

@@ -11,6 +11,8 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -24,6 +26,8 @@ import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.*;
+
+import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 
 /**
@@ -215,6 +219,24 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     public void graftLocationMap(/*@NotNull*/ DocumentImpl original) {
         systemIdMap = original.systemIdMap;
         lineNumberMap = original.lineNumberMap;
+    }
+
+    /**
+     * Get an iterator over the descendant axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
+        NodeTest test = nodeTestFromPredicate(predicate);
+        int fp = test.getRequiredFingerprint(Type.ELEMENT);
+        if (fp != -1) {
+            // optimised search of descendant axis
+            return getAllElements(fp);
+        }
+        return super.iterateDescendantAxis(predicate);
     }
 
     @Override

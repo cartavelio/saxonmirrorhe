@@ -10,13 +10,12 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.value.AtomicValue;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -97,6 +96,13 @@ public class UType {
             .union(UType.UNTYPED_ATOMIC);
 
     public static final UType ANY = XNODE.union(JNODE).union(ANY_ATOMIC).union(FUNCTION).union(EXTENSION);
+
+    // XNodes that cannot have children
+    public static final UType LEAF = UType.TEXT
+            .union(UType.COMMENT)
+            .union(UType.PI)
+            .union(UType.NAMESPACE)
+            .union(UType.ATTRIBUTE);
 
     
     private final int bits;
@@ -341,14 +347,14 @@ public class UType {
         } else if (p.size() == 1) {
             Iterator<PrimitiveUType> iter = p.iterator();
             return iter.hasNext() ? iter.next().toItemType() : null;
-        } else if (XNODE.subsumes(this)) {
-            return AnyXNodeTest.getInstance();
+        } else if (XNODE.equals(this)) {
+            return AnyXNodeType.getInstance();
+        } else if (GNODE.equals(this)) {
+            return AnyGNodeType.getInstance();
         } else if (equals(NUMERIC)) {
             return NumericType.getInstance();
-        } else if (ANY_ATOMIC.subsumes(this)) {
-            return BuiltInAtomicType.ANY_ATOMIC;
         } else {
-            return AnyItemType.getInstance();
+            return ChoiceItemType.of(this);
         }
     }
 

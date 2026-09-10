@@ -13,7 +13,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.pattern.AnyXNodeTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
@@ -75,7 +75,7 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
             final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
             Item value = arguments[0].head();
             ItemType type = SequenceTool.getItemType(value, th);
-            if (th.isSubType(type, AnyXNodeTest.getInstance())) {
+            if (th.isSubType(type, AnyXNodeType.getInstance())) {
                 return StringValue.bmp("node-set");
             } else if (th.isSubType(type, BuiltInAtomicType.STRING)) {
                 return StringValue.bmp("string");

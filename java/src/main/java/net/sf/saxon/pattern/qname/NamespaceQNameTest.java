@@ -1,10 +1,7 @@
 package net.sf.saxon.pattern.qname;
 
-import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NamespaceTest;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.type.Affinity;
 
@@ -19,11 +16,6 @@ public class NamespaceQNameTest implements QNameTest {
     @Override
     public boolean matches(StructuredQName qname) {
         return qname.hasURI(namespace);
-    }
-
-    @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return namePool.getURI(fp) == namespace;
     }
 
     @Override
@@ -53,11 +45,6 @@ public class NamespaceQNameTest implements QNameTest {
         } else {
             throw new IllegalArgumentException();
         }
-    }
-
-    @Override
-    public NodeTest makeNodeTest(int nodeKind) {
-        return new NamespaceTest(nodeKind,namespace);
     }
 
     @Override

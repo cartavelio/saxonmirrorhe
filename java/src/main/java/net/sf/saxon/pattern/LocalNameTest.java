@@ -7,25 +7,24 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.om.*;
+import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.LocalQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.tree.tiny.TinyTree;
-import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntPredicateProxy;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.z.IntSet;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
- * NodeTest is an interface that enables a test of whether a node has a particular
- * name and type. A LocalNameTest matches the node type and the local name,
+ * A {@code LocalNameTest} is a {@code NodeTest} that matches the node type and the local name,
  * it represents an XPath 2.0 test of the form *:name.
  */
 
@@ -35,31 +34,15 @@ public final class LocalNameTest extends NodeTest {
     private final String localName;
     private final UType uType;
 
+    /**
+     * Construct a LocalNameTest
+     * @param nodeKind the default node-kind of the axis. Note this is irrelevant when matching a JNode
+     * @param localName the required local name
+     */
     public LocalNameTest(int nodeKind, String localName) {
         this.nodeKind = nodeKind;
         this.localName = localName;
         uType = UType.fromTypeCode(nodeKind);
-    }
-
-    /**
-     * Get the node kind matched by this test
-     *
-     * @return the matching node kind
-     */
-
-    public int getNodeKind() {
-        return nodeKind;
-    }
-
-    /**
-     * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
-     * types.
-     *
-     * @return the smallest UType that subsumes this item type
-     */
-    @Override
-    public UType getUType() {
-        return uType;
     }
 
     /**
@@ -75,50 +58,45 @@ public final class LocalNameTest extends NodeTest {
         return Optional.empty();
     }
 
-    @Override
-    public String getFullAlphaCode() {
-        return getBasicAlphaCode() + " n*:" + localName;
-    }
+//    /**
+//     * Test whether this node test is satisfied by a given node. This method is only
+//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
+//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
+//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
+//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
+//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
+//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
+//     * node tests where the node kind is known to be an attribute.
+//     *
+//     * @param nodeKind   The kind of node to be matched
+//     * @param name       identifies the expanded name of the node to be matched.
+//     *                   The value should be null for a node with no name.
+//     * @param annotation The actual content type of the node
+//     */
+//    @Override
+//    public boolean matches(int nodeKind, /*@Nullable*/ NodeName name, SchemaType annotation) {
+//        return name != null && nodeKind == this.nodeKind && localName.equals(name.getLocalPart());
+//    }
 
-    /**
-     * Test whether this node test is satisfied by a given node. This method is only
-     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-     * node tests where the node kind is known to be an attribute.
-     *
-     * @param nodeKind   The kind of node to be matched
-     * @param name       identifies the expanded name of the node to be matched.
-     *                   The value should be null for a node with no name.
-     * @param annotation The actual content type of the node
-     */
-    @Override
-    public boolean matches(int nodeKind, /*@Nullable*/ NodeName name, SchemaType annotation) {
-        return name != null && nodeKind == this.nodeKind && localName.equals(name.getLocalPart());
-    }
-
-    @Override
-    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
-        final byte[] nodeKindArray = tree.getNodeKindArray();
-        final int[] nameCodeArray = tree.getNameCodeArray();
-        final NamePool namePool = tree.getNamePool();
-        if (nodeKind == Type.ELEMENT && tree instanceof TinyTree) {
-             Map<String, IntSet> localNameIndex = ((TinyTree)tree).getLocalNameIndex();
-             IntSet intSet = localNameIndex.get(localName);
-             if (intSet == null) {
-                 return IntPredicateLambda.of(n -> false);
-             } else {
-                 return IntPredicateLambda.of(nodeNr -> intSet.contains(nameCodeArray[nodeNr] & NamePool.FP_MASK)
-                         && (nodeKindArray[nodeNr] & 0x0f) == Type.ELEMENT);
-             }
-        } else {
-            return IntPredicateLambda.of(nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == nodeKind &&
-                    localName.equals(namePool.getLocalName(nameCodeArray[nodeNr] & NamePool.FP_MASK)));
-        }
-    }
+//    @Override
+//    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
+//        final byte[] nodeKindArray = tree.getNodeKindArray();
+//        final int[] nameCodeArray = tree.getNameCodeArray();
+//        final NamePool namePool = tree.getNamePool();
+//        if (nodeKind == Type.ELEMENT && tree instanceof TinyTree) {
+//             Map<String, IntSet> localNameIndex = ((TinyTree)tree).getLocalNameIndex();
+//             IntSet intSet = localNameIndex.get(localName);
+//             if (intSet == null) {
+//                 return IntPredicateLambda.of(n -> false);
+//             } else {
+//                 return IntPredicateLambda.of(nodeNr -> intSet.contains(nameCodeArray[nodeNr] & NamePool.FP_MASK)
+//                         && (nodeKindArray[nodeNr] & 0x0f) == Type.ELEMENT);
+//             }
+//        } else {
+//            return IntPredicateLambda.of(nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == nodeKind &&
+//                    localName.equals(namePool.getLocalName(nameCodeArray[nodeNr] & NamePool.FP_MASK)));
+//        }
+//    }
 
     /**
      * Test whether this node test is satisfied by a given node. This alternative
@@ -130,6 +108,10 @@ public final class LocalNameTest extends NodeTest {
 
     @Override
     public boolean test(GNode gnode) {
+        if (gnode instanceof JNode) {
+            AtomicValue key = ((JNode)gnode).getSelector();
+            return key instanceof QNameValue && ((QNameValue)key).getLocalName().equals(localName);
+        }
         NodeInfo node = (NodeInfo) gnode;
         return localName.equals(node.getLocalPart()) && nodeKind == node.getNodeKind();
     }
@@ -189,17 +171,17 @@ public final class LocalNameTest extends NodeTest {
         return localName;
     }
 
-    /**
-     * Determine the types of nodes to which this pattern applies. Used for optimisation.
-     * For patterns that match nodes of several types, return Type.NODE
-     *
-     * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
-     */
-
-    @Override
-    public int getPrimitiveType() {
-        return nodeKind;
-    }
+//    /**
+//     * Determine the types of nodes to which this pattern applies. Used for optimisation.
+//     * For patterns that match nodes of several types, return Type.NODE
+//     *
+//     * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
+//     */
+//
+//    @Override
+//    public int getPrimitiveType() {
+//        return nodeKind;
+//    }
 
     public String toString() {
         switch (nodeKind) {

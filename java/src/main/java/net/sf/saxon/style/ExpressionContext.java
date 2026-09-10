@@ -17,7 +17,6 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.DecimalFormatManager;
@@ -29,6 +28,7 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.value.SequenceType;
 
 /**
@@ -277,7 +277,7 @@ public class ExpressionContext implements StaticContext {
             // it might be an implicit error variable in try/catch
             if (getXPathVersion() >= 30 && qName.hasURI(NamespaceUri.ERR)) {
                 SequenceIterator catchers = element.iterateAncestorOrSelfAxis(
-                           new NameTest(Type.ELEMENT, StandardNames.XSL_CATCH, element.getNamePool()));
+                        NamedXNodeType.make(Type.ELEMENT, StandardNames.XSL_CATCH, element.getConfiguration()));
                 StyleElement catcher = (StyleElement) catchers.next();
                 if (catcher != null) {
                     for (StructuredQName errorVariable : StandardNames.errorVariables) {

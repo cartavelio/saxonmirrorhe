@@ -25,8 +25,8 @@ import java.util.Comparator;
 public final class DocumentOrderIterator implements SequenceIterator {
 
     private final SequenceIterator iterator;
-    private final ArrayList<NodeInfo> sequence; // explicit type ArrayList used so C# List.Sort() is available
-    private NodeInfo current = null;
+    private final ArrayList<GNode> sequence; // explicit type ArrayList used so C# List.Sort() is available
+    private GNode current = null;
 
     /**
      * Iterate over a sequence in document order.
@@ -34,13 +34,13 @@ public final class DocumentOrderIterator implements SequenceIterator {
      * @param comparer the comparer used for comparing node positions
      */
 
-    public DocumentOrderIterator(SequenceIterator base, Comparator<? super NodeInfo> comparer) {
+    public DocumentOrderIterator(SequenceIterator base, Comparator<? super GNode> comparer) {
 
         int len = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 50;
         sequence = new ArrayList<>(len);
         SequenceTool.supply(base, (ItemConsumer<? super Item>) item -> {
-            if (item instanceof NodeInfo) {
-                sequence.add((NodeInfo) item);
+            if (item instanceof GNode) {
+                sequence.add((GNode) item);
             } else {
                 throw new XPathException("Item in input for sorting is not a node: " + Err.depict(item), "XPTY0004");
             }
@@ -57,9 +57,9 @@ public final class DocumentOrderIterator implements SequenceIterator {
     // over the sequenceExtent, but looking ahead to remove duplicates.
 
     @Override
-    public NodeInfo next() {
+    public GNode next() {
         while (true) {
-            NodeInfo next = (NodeInfo)iterator.next();
+            GNode next = (GNode)iterator.next();
             if (next == null) {
                 current = null;
                 return null;

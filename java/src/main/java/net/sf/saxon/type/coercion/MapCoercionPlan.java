@@ -50,10 +50,18 @@ public final class MapCoercionPlan extends CoercionPlan {
             GeneralMapBuilder builder = new GeneralMapBuilder();
             CoercionPlan keyPlan = requiredKeyType.getCoercionPlan(40);
             CoercionPlan valuePlan = requiredValueType.getPrimaryType().getCoercionPlan(40);
+            if (keyPlan == null) {
+                keyPlan = new IdentityCoercionPlan();
+            }
+            if (valuePlan == null) {
+                valuePlan = new IdentityCoercionPlan();
+            }
             for (KeyValuePair pair : ((MapItem)item).keyValuePairs()) {
-                builder.put((AtomicValue)keyPlan.coerceItem(pair.key, requiredKeyType, request),
-                            SequenceTool.toGroundedValue(valuePlan.coerceSequence(
-                                    pair.value.iterate(), requiredValueType, request)));
+                builder.put(
+                        (AtomicValue)keyPlan.coerceItem(pair.key, requiredKeyType, request),
+                        SequenceTool.toGroundedValue(valuePlan.coerceSequence(
+                                        pair.value.iterate(), requiredValueType, request))
+                        );
             }
             try {
                 return builder.getCompletedMap();

@@ -15,8 +15,8 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.qname.*;
+import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -587,6 +587,7 @@ public class AlphaCode {
 
     /**
      * Serialize the XDM map representation of an alphacode
+     *
      * @param map the alphacode represented as an XDM map
      * @return the corresponding alphacode as a string
      */
@@ -767,21 +768,22 @@ public class AlphaCode {
 //                                                  AnyNodeTest.getInstance(), contentType, nillable, config);
             }
             if (tree.vennOperands != null) {
-                if (tree.vennOperands.length == 2) {
-                    NodeTest nt0 = (NodeTest) sequenceTypeFromTree(tree.vennOperands[0], schema).getPrimaryType();
-                    NodeTest nt1 = (NodeTest) sequenceTypeFromTree(tree.vennOperands[1], schema).getPrimaryType();
-                    itemType = new CombinedNodeTest(nt0, tree.vennOperator, nt1);
-                } else {
-                    // Dangerous short-cut here - we know this will be a union of node kind tests
-                    assert tree.vennOperator == OperatorSymbol.UNION;
-                    UType u = UType.VOID;
-                    for (int i = 0; i < tree.vennOperands.length; i++) {
-                        ItemType it = sequenceTypeFromTree(tree.vennOperands[i], schema).getPrimaryType();
-                        assert it instanceof NodeKindTest;
-                        u = u.union(it.getUType());
-                    }
-                    itemType = new MultipleNodeKindTest(u);
-                }
+                throw new UnsupportedOperationException(); // TEMPORARILY
+//                if (tree.vennOperands.length == 2) {
+//                    ItemType nt0 = sequenceTypeFromTree(tree.vennOperands[0], schema).getPrimaryType();
+//                    ItemType nt1 = sequenceTypeFromTree(tree.vennOperands[1], schema).getPrimaryType();
+//                    itemType = new CombinedNodeTest(nt0, tree.vennOperator, nt1);
+//                } else {
+//                    // Dangerous short-cut here - we know this will be a union of node kind tests
+//                    assert tree.vennOperator == OperatorSymbol.UNION;
+//                    UType u = UType.VOID;
+//                    for (int i = 0; i < tree.vennOperands.length; i++) {
+//                        ItemType it = sequenceTypeFromTree(tree.vennOperands[i], schema).getPrimaryType();
+//                        assert it instanceof NodeKindType;
+//                        u = u.union(it.getUType());
+//                    }
+//                    itemType = new MultipleNodeKindTest(u);
+//                }
             } else {
                 int kind = Type.XNODE;
                 if (principal.length() >= 2) {
@@ -821,67 +823,76 @@ public class AlphaCode {
                     }
                 }
                 if (partialNameTest != null) {
-                    itemType = partialNameTest.makeNodeTest(kind);
+                    itemType = new NamedXNodeType(kind, partialNameTest, config);
                 } else {
                     StructuredQName qName = name == null ? null : StructuredQName.fromEQName(name);
                     switch (principal) {
                         case "N":
-                            itemType = AnyXNodeTest.getInstance();
+                            itemType = AnyXNodeType.getInstance();
                             break;
                         case "NT":
-                            itemType = NodeKindTest.TEXT;
+                            itemType = NodeKindType.TEXT;
                             break;
                         case "NC":
-                            itemType = NodeKindTest.COMMENT;
+                            itemType = NodeKindType.COMMENT;
                             break;
                         case "NN":
                             if (name == null) {
-                                itemType = NodeKindTest.NAMESPACE;
+                                itemType = NodeKindType.NAMESPACE;
                             } else {
-                                itemType = new NameTest(Type.NAMESPACE, NamespaceUri.NULL, qName.getLocalPart(), namePool);
+                                itemType = new NamedXNodeType(Type.NAMESPACE,
+                                                              new StructuredQName("", NamespaceUri.NULL, qName.getLocalPart()),
+                                                              config);
                             }
                             break;
                         case "NP":
                             if (name == null) {
-                                itemType = NodeKindTest.PROCESSING_INSTRUCTION;
+                                itemType = NodeKindType.PROCESSING_INSTRUCTION;
                             } else {
-                                itemType = new NameTest(Type.PROCESSING_INSTRUCTION, NamespaceUri.NULL, qName.getLocalPart(), namePool);
+                                itemType = new NamedXNodeType(Type.PROCESSING_INSTRUCTION,
+                                                              new StructuredQName("", NamespaceUri.NULL, qName.getLocalPart()),
+                                                              config);
                             }
                             break;
                         case "ND":
                             AlphaCodeTree elementType = tree.elementType;
                             if (elementType == null) {
-                                itemType = NodeKindTest.DOCUMENT;
+                                itemType = NodeKindType.DOCUMENT;
                             } else {
                                 ItemType e = sequenceTypeFromTree(elementType, schema).getPrimaryType();
-                                itemType = new DocumentNodeTest((NodeTest) e);
+                                itemType = new DocumentNodeType((XNodeType) e);
                             }
                             break;
                         case "NE":
-                             if (contentType == null) {
+                            if (contentType == null) {
                                 itemType = qName == null
-                                        ? NodeKindTest.ELEMENT
-                                        : new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());;
+                                        ? NodeKindType.ELEMENT
+                                        : new NamedXNodeType(Type.ELEMENT,
+                                                             new StructuredQName("", qName.getNamespaceUri(), qName.getLocalPart()),
+                                                             config);
+                                ;
                             } else {
-                                 QNameTest nameTest = qName == null
-                                         ? AnyQNameTest.getInstance()
-                                         : new SpecificQNameTest(new StructuredQName("", qName.getNamespaceUri(), qName.getLocalPart()), config.getNamePool());
+                                QNameTest nameTest = qName == null
+                                        ? AnyQNameTest.getInstance()
+                                        : new SpecificQNameTest(
+                                                new StructuredQName("", qName.getNamespaceUri(), qName.getLocalPart()),
+                                                config.getNamePool());
 
-                                 itemType = new ContentTypeTest(Type.ELEMENT, nameTest, contentType, nillable, config);
+                                itemType = new NamedXNodeType(Type.ELEMENT, nameTest, contentType, nillable, config);
                             }
                             break;
                         case "NA":
                             if (contentType == null) {
                                 itemType = qName == null
-                                        ? NodeKindTest.ATTRIBUTE
-                                        : new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
+                                        ? NodeKindType.ATTRIBUTE
+                                        : new NamedXNodeType(Type.ATTRIBUTE, qName, config);
                                 ;
                             } else {
                                 QNameTest nameTest = qName == null
                                         ? AnyQNameTest.getInstance()
                                         : new SpecificQNameTest(new StructuredQName("", qName.getNamespaceUri(), qName.getLocalPart()), config.getNamePool());
 
-                                itemType = new ContentTypeTest(Type.ATTRIBUTE, nameTest, contentType, false, config);
+                                itemType = new NamedXNodeType(Type.ATTRIBUTE, nameTest, contentType, false, config);
                             }
                             break;
                         case "NES": {
@@ -897,7 +908,7 @@ public class AlphaCode {
                                 }
                             }
                             if (itemType == null) {
-                                itemType = new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), namePool);
+                                itemType = new NamedXNodeType(Type.ELEMENT, qName, config);
                             }
                             break;
                         }
@@ -914,12 +925,12 @@ public class AlphaCode {
                                 }
                             }
                             if (itemType == null) {
-                                itemType = new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), namePool);
+                                itemType = new NamedXNodeType(Type.ATTRIBUTE, qName, config);
                             }
                             break;
                         }
                         default:
-                            itemType = AnyXNodeTest.getInstance();
+                            itemType = AnyXNodeType.getInstance();
                             break;
                     }
                 }
@@ -1013,7 +1024,7 @@ public class AlphaCode {
         int cardinality = Cardinality.fromOccurrenceIndicator(indicator);
         return SequenceType.makeSequenceType(itemType, cardinality);
     }
-    
+
     private static AlphaCodeTree makeTree(SequenceType sequenceType) {
         AlphaCodeTree tree = makeTree(sequenceType.getPrimaryType());
         if (sequenceType.getCardinality() != StaticProperty.EXACTLY_ONE) {
@@ -1053,48 +1064,48 @@ public class AlphaCode {
                 memberMaps.add(makeTree(pt));
             }
             result.members = memberMaps;
-        } else if (primary instanceof NameTest) {
-            StructuredQName name = ((NameTest) primary).getMatchingNodeName();
-            result.name = name.getEQName();
+//        } else if (primary instanceof NameTest) {
+//            StructuredQName name = ((NameTest) primary).getMatchingNodeName();
+//            result.name = name.getEQName();
         } else if (primary instanceof SchemaNodeTest) {
             StructuredQName name = ((SchemaNodeTest) primary).getNodeName();
             result.name = name.getEQName();
-        } else if (primary instanceof LocalNameTest) {
-            result.name = "*:" + ((LocalNameTest) primary).getLocalName();
-        } else if (primary instanceof NamespaceTest) {
-            result.name = "Q{" + ((NamespaceTest) primary).getNamespaceURI() + "}*";
-        } else if (primary instanceof CombinedNodeTest) {
-            final CombinedNodeTest combi = (CombinedNodeTest) primary;
-            String c = combi.getContentTypeForAlphaCode();
-            if (c != null) {
-                if (!c.startsWith("Q{" + NamespaceConstant.ANONYMOUS)) {  // bug 4969
-                    result.content = c;
-                }
-                result.name = combi.getMatchingNodeName().getEQName();
-                result.nillable = combi.isNillable();
-            } else {
-                result.vennOperator = combi.getOperator();
-                result.vennOperands = new AlphaCodeTree[2];
-                result.vennOperands[0] = makeTree(combi.getOperand(0));
-                result.vennOperands[1] = makeTree(combi.getOperand(1));
-            }
-        } else if (primary instanceof MultipleNodeKindTest) {
-            result.vennOperator = OperatorSymbol.UNION;
-            Set<PrimitiveUType> types = primary.getUType().decompose();
-            result.vennOperands = new AlphaCodeTree[types.size()];
-            int i = 0;
-            for (PrimitiveUType type : types) {
-                result.vennOperands[i++] = makeTree(type.toItemType());
-            }
-        } else if (primary instanceof ContentTypeTest) {
-            QNameTest nt = ((ContentTypeTest) primary).getQNameTest();
+//        } else if (primary instanceof LocalNameTest) {
+//            result.name = "*:" + ((LocalNameTest) primary).getLocalName();
+//        } else if (primary instanceof NamespaceTest) {
+//            result.name = "Q{" + ((NamespaceTest) primary).getNamespaceURI() + "}*";
+//        } else if (primary instanceof CombinedNodeTest) {
+//            final CombinedNodeTest combi = (CombinedNodeTest) primary;
+//            String c = combi.getContentTypeForAlphaCode();
+//            if (c != null) {
+//                if (!c.startsWith("Q{" + NamespaceConstant.ANONYMOUS)) {  // bug 4969
+//                    result.content = c;
+//                }
+//                result.name = combi.getMatchingNodeName().getEQName();
+//                result.nillable = combi.isNillable();
+//            } else {
+//                result.vennOperator = combi.getOperator();
+//                result.vennOperands = new AlphaCodeTree[2];
+//                result.vennOperands[0] = makeTree(combi.getOperand(0));
+//                result.vennOperands[1] = makeTree(combi.getOperand(1));
+//            }
+//        } else if (primary instanceof MultipleNodeKindTest) {
+//            result.vennOperator = OperatorSymbol.UNION;
+//            Set<PrimitiveUType> types = primary.getUType().decompose();
+//            result.vennOperands = new AlphaCodeTree[types.size()];
+//            int i = 0;
+//            for (PrimitiveUType type : types) {
+//                result.vennOperands[i++] = makeTree(type.toItemType());
+//            }
+        } else if (primary instanceof NamedXNodeType) {
+            QNameTest nt = ((NamedXNodeType) primary).getAllowedNodeNames();
             if (nt != AnyQNameTest.getInstance()) {
-                result.name = ((ContentTypeTest) primary).getQNameTest().exportQNameTest();
+                result.name = ((NamedXNodeType) primary).getAllowedNodeNames().exportQNameTest();
             }
-            result.content = ((ContentTypeTest) primary).getContentType().getEQName();
-            result.nillable = ((ContentTypeTest) primary).isNillable();
-        } else if (primary instanceof DocumentNodeTest) {
-            ItemType content = ((DocumentNodeTest) primary).getElementTest();
+            result.content = ((NamedXNodeType) primary).getContentType().getEQName();
+            result.nillable = ((NamedXNodeType) primary).isNillable();
+        } else if (primary instanceof DocumentNodeType) {
+            ItemType content = ((DocumentNodeType) primary).getElementTest();
             result.elementType = makeTree(content);
         } else if (primary instanceof FunctionItemType) {
             if (primary instanceof ArrayItemType) {
@@ -1263,6 +1274,7 @@ public class AlphaCode {
     /**
      * Escape a supplied name by prefixing any characters not allowed in an NCName
      * with a backslash
+     *
      * @param ncName a name (which may or may not be a valid NCName)
      * @return the supplied name unchanged if it is a valid NCName; otherwise, the
      * name with all invalid ASCII characters backslash-escaped. Invalid non-ASCII
@@ -1288,6 +1300,7 @@ public class AlphaCode {
 
     /**
      * Convert an item type to an alphacode
+     *
      * @param type the item type to be converted
      * @return the corresponding alphacode. Note that this will have no occurrence indicator.
      */

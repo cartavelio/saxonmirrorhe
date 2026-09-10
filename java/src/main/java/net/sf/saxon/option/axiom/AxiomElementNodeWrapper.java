@@ -8,10 +8,8 @@
 package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -199,9 +197,10 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
         if (!((OMElement) node).getAllAttributes().hasNext()) {
             return EmptyIterator.getInstance();
-        } else if (nodeTest instanceof NameTest) {
-            String uri = ((NameTest) nodeTest).getNamespaceURI().toString();
-            String local = ((NameTest) nodeTest).getLocalPart();
+        } else if (nodeTest.getRequiredFingerprint(Type.ATTRIBUTE) != -1) {
+            StructuredQName requiredName = nodeTest.getMatchingNodeName();
+            String uri = requiredName.getURI();
+            String local = requiredName.getLocalPart();
             OMAttribute att = ((OMElement) node).getAttribute(new QName(uri, local));
             if (att == null) {
                 return EmptyIterator.getInstance();
@@ -216,14 +215,14 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     @Override
     protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (forwards) {
-            if (nodeTest instanceof AnyXNodeTest) {
+            if (nodeTest == NodeTypeTest.GNODE) {
                 return new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper);
             } else {
                 return Navigator.filter(
                         new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper), nodeTest);
             }
         } else {
-            if (nodeTest instanceof AnyXNodeTest) {
+            if (nodeTest == NodeTypeTest.GNODE) {
                 return new AxiomDocument.PrecedingSiblingIterator((OMElement) node, parent, docWrapper);
             } else {
                 return Navigator.filter(
@@ -342,7 +341,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
 
         public AttributeAxisIterator(AxiomElementNodeWrapper element, NodeTest test) {
             this.element = element;
-            if (test == AnyXNodeTest.getInstance() || test == NodeKindTest.ATTRIBUTE) {
+            if (test == NodeTypeTest.GNODE || test == NodeTypeTest.ATTRIBUTE) {
                 test = null;
             }
             base = ((OMElement) element.node).getAllAttributes();

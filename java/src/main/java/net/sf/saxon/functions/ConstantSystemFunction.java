@@ -14,7 +14,6 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.IntegerValue;
 
 /**
  * A ConstantSystemFunction is a zero-argument function that always delivers the same result, supplied
@@ -38,15 +37,6 @@ public abstract class ConstantSystemFunction extends SystemFunction  {
     @Override
     public Expression makeFunctionCall(Expression[] arguments) {
         return Literal.makeLiteral(value);
-    }
-
-    @Override
-    public IntegerValue[] getIntegerBounds() {
-        if (value instanceof IntegerValue) {
-            return new IntegerValue[]{(IntegerValue) value, (IntegerValue) value};
-        } else {
-            return null;
-        }
     }
 
     public static class True extends ConstantSystemFunction {

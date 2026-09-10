@@ -8,12 +8,15 @@
 package net.sf.saxon.dom;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import org.w3c.dom.*;
 
 /**
@@ -265,8 +268,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
 
     @Override
     public Attr getAttributeNodeNS(String namespaceURI, String localName) {
-        NamePool pool = node.getConfiguration().getNamePool();
-        NameTest test = new NameTest(Type.ATTRIBUTE, NamespaceUri.of(namespaceURI), localName, pool);
+        NodeTest test = NamedXNodeType.make(Type.ATTRIBUTE, NamespaceUri.of(namespaceURI), localName, node.getConfiguration());
         SequenceIterator atts = node.iterateAttributeAxis(test);
         return (Attr) wrap((NodeInfo)atts.next());
     }

@@ -8,7 +8,6 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -408,7 +407,8 @@ public class SaxonDeepEqual extends SystemFunction {
                 NodeInfo att1;
                 a1 = n1.iterateAttributeAxis(null);
                 while ((att1 = (NodeInfo)a1.next()) != null) {
-                    SequenceIterator a2iter = n2.iterateAttributeAxis(new SameNameTest(att1));
+                    StructuredQName required = att1.getQName();
+                    SequenceIterator a2iter = n2.iterateAttributeAxis(n -> ((NodeInfo)n).getQName().equals(required));
                     NodeInfo att2 = (NodeInfo)a2iter.next();
 
                     if (att2 == null) {

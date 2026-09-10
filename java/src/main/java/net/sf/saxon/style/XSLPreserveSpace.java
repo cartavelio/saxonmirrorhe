@@ -9,9 +9,8 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.event.Stripper;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Type;
 
 import java.util.StringTokenizer;
 
@@ -90,10 +89,8 @@ public class XSLPreserveSpace extends StyleElement {
         try {
             while (st.hasMoreTokens()) {
                 String s = st.nextToken();
-                NodeTest nt;
                 if (s.equals("*")) {
-                    nt = NodeKindTest.ELEMENT;
-                    rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
+                    rules.addRule(AnyQNameTest.getInstance(), preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
                 } else if (s.startsWith("Q{")) {
                     int brace = s.indexOf('}');
                     if (brace < 0) {
@@ -101,14 +98,15 @@ public class XSLPreserveSpace extends StyleElement {
                     } else if (brace == s.length() - 1) {
                         compileError("Missing local part in EQName");
                     } else {
+                        QNameTest qTest;
                         NamespaceUri uri = NamespaceUri.of(s.substring(2, brace));
                         String local = s.substring(brace+1);
                         if (local.equals("*")) {
-                            nt = new NamespaceTest(Type.ELEMENT, uri);
+                            qTest = new NamespaceQNameTest(uri);
                         } else {
-                            nt = new NameTest(Type.ELEMENT, uri, local, getNamePool());
+                            qTest = new SpecificQNameTest(new StructuredQName("", uri, local), getConfiguration().getNamePool());
                         }
-                        rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
+                        rules.addRule(qTest, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
                     }
                 } else if (s.endsWith(":*")) {
                     if (s.length() == 2) {
@@ -119,7 +117,7 @@ public class XSLPreserveSpace extends StyleElement {
                     if (uri == null) {
                         undeclaredNamespaceError(prefix, "XTSE0280", "elements");
                     }
-                    nt = new NamespaceTest(Type.ELEMENT, uri);
+                    QNameTest nt = new NamespaceQNameTest(uri);
                     rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
 
                 } else if (s.startsWith("*:")) {
@@ -127,7 +125,7 @@ public class XSLPreserveSpace extends StyleElement {
                         compileErrorInAttribute("No local name after '*:'", "XTSE0010", "elements");
                     }
                     String localname = s.substring(2);
-                    nt = new LocalNameTest(Type.ELEMENT, localname);
+                    QNameTest nt = new LocalQNameTest(localname);
                     rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
 
                 } else {
@@ -151,8 +149,7 @@ public class XSLPreserveSpace extends StyleElement {
                         return;
                     }
                     NamePool target = getNamePool();
-                    int nameCode = target.allocateFingerprint(uri, localName);
-                    nt = new NameTest(Type.ELEMENT, nameCode, getNamePool());
+                    QNameTest nt = new SpecificQNameTest(new StructuredQName("", uri, localName), getConfiguration().getNamePool());
                     rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
                 }
 

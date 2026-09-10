@@ -488,6 +488,9 @@ public final class AxisInfo {
             }
             resultType = resultType.union(r);
         }
+        if (origin.overlaps(UType.JNODE)) {
+            resultType = resultType.union(UType.JNODE);
+        }
         return resultType;
     }
 

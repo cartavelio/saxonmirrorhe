@@ -15,8 +15,8 @@ import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -137,13 +137,13 @@ public abstract class ParentNodeImpl extends NodeImpl {
             return EmptyIterator.getInstance();
         } else if (_children instanceof NodeImpl) {
             NodeImpl child = (NodeImpl) _children;
-            if (test == null || test == AnyXNodeTest.getInstance()) {
+            if (test == null || test == NodeTypeTest.GNODE) {
                 return SingletonIterator.makeIterator(child);
             } else {
                 return Navigator.filteredSingleton(child, test);
             }
         } else {
-            if (test == null || test == AnyXNodeTest.getInstance()) {
+            if (test == null || test == NodeTypeTest.GNODE) {
                 return new ArrayIterator.OfNodes<NodeImpl>((NodeImpl[]) _children);
             } else {
                 return new ChildEnumeration(this, test);

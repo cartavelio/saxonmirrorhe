@@ -7,7 +7,7 @@
 
 package net.sf.saxon.tree.linked;
 
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 
 final class ChildEnumeration extends TreeEnumeration {
 

@@ -7,12 +7,12 @@
 
 package net.sf.saxon.tree.tiny;
 
-import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.AtomizedValueIterator;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.Type;
 
 /**
  * AttributeIterator is an iterator over all the attribute nodes of an Element in the TinyTree.
@@ -24,7 +24,7 @@ final class AttributeIterator implements SequenceIterator, AtomizedValueIterator
     private final int element;
     private final NodeTest nodeTest;
     private int index;
-    private int currentNodeNr;
+    private TinyAttributeImpl current = null;
 
     /**
      * Constructor. Note: this constructor will only be called if the relevant node
@@ -42,7 +42,7 @@ final class AttributeIterator implements SequenceIterator, AtomizedValueIterator
         this.tree = tree;
         this.element = element;
         index = tree.alpha[element];
-        currentNodeNr = -1;
+
     }
 
     /**
@@ -55,16 +55,13 @@ final class AttributeIterator implements SequenceIterator, AtomizedValueIterator
         while (true) {
             if (index >= tree.numberOfAttributes || tree.attParent[index] != element) {
                 index = Integer.MAX_VALUE;
-                currentNodeNr = -1;
+                current = null;
                 return false;
             }
-            SchemaType typeCode = tree.getAttributeType(index);
-            if (nodeTest.matches(Type.ATTRIBUTE, new CodedName(tree.attCode[index] & NamePool.FP_MASK, "", tree.getNamePool()), typeCode)) {
-                currentNodeNr = index++;
-                if (nodeTest instanceof NameTest) {
-                    // there can only be one match, so abandon the search after this node
-                    index = Integer.MAX_VALUE;
-                }
+            TinyAttributeImpl att = tree.getAttributeNode(index);
+            if (nodeTest.test(att)) {
+                current = att;
+                index++;
                 return true;
             }
             index++;
@@ -81,7 +78,7 @@ final class AttributeIterator implements SequenceIterator, AtomizedValueIterator
     @Override
     public NodeInfo next() {
         if (moveToNext()) {
-            return tree.getAttributeNode(currentNodeNr);
+            return current;
         } else {
             return null;
         }
@@ -97,7 +94,7 @@ final class AttributeIterator implements SequenceIterator, AtomizedValueIterator
     @Override
     public AtomicSequence nextAtomizedValue() throws XPathException {
         if (moveToNext()) {
-            return tree.getTypedValueOfAttribute(null, currentNodeNr);
+            return current.atomize();
         } else {
             return null;
         }

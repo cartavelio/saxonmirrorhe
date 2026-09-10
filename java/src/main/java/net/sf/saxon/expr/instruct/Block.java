@@ -14,7 +14,7 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -322,8 +322,8 @@ public class Block extends Instruction {
             Expression exp = o.getChildExpression();
             if (!exp.hasSpecialProperty(StaticProperty.ALL_NODES_UNTYPED)) {
                 ItemType it = exp.getItemType();
-                if (th.relationship(it, NodeKindTest.ELEMENT) != Affinity.DISJOINT ||
-                        th.relationship(it, NodeKindTest.ATTRIBUTE) != Affinity.DISJOINT) {
+                if (th.relationship(it, NodeKindType.ELEMENT) != Affinity.DISJOINT ||
+                        th.relationship(it, NodeKindType.ATTRIBUTE) != Affinity.DISJOINT) {
                     return false;
                 }
             }

@@ -9,12 +9,15 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.ma.jnode.JNode;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.Type;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 
 import java.util.Optional;
@@ -54,30 +57,30 @@ public class JNodeSelectorTest extends NodeTest {
         return UType.JNODE;
     }
 
-    /**
-     * Test whether this node test is satisfied by a given node. This method is only
-     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-     * node tests where the node kind is known to be an attribute.
-     *
-     * @param nodeKind   The kind of node to be matched
-     * @param name       identifies the expanded name of the node to be matched.
-     *                   The value should be null for a node with no name.
-     * @param annotation The actual content type of the node
-     */
-    @Override
-    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-        return false;
-    }
-
-    @Override
-    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
-        return null;
-    }
+//    /**
+//     * Test whether this node test is satisfied by a given node. This method is only
+//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
+//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
+//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
+//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
+//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
+//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
+//     * node tests where the node kind is known to be an attribute.
+//     *
+//     * @param nodeKind   The kind of node to be matched
+//     * @param name       identifies the expanded name of the node to be matched.
+//     *                   The value should be null for a node with no name.
+//     * @param annotation The actual content type of the node
+//     */
+//    @Override
+//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
+//        return false;
+//    }
+//
+//    @Override
+//    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
+//        return null;
+//    }
 
     /**
      * Test whether this node test is satisfied by a given node. This alternative
@@ -148,7 +151,7 @@ public class JNodeSelectorTest extends NodeTest {
      * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
      */
 
-    @Override
+    //@Override
     public int getPrimitiveType() {
         return Type.JNODE;
     }
@@ -185,11 +188,11 @@ public class JNodeSelectorTest extends NodeTest {
         return other instanceof JNodeSelectorTest &&
                 ((JNodeSelectorTest) other).keys.equals(keys);
     }
-
-    @Override
-    public String getFullAlphaCode() {
-        return getBasicAlphaCode() + " n" + getMatchingNodeName().getEQName();
-    }
+//
+//    @Override
+//    public String getFullAlphaCode() {
+//        return getBasicAlphaCode() + " n" + getMatchingNodeName().getEQName();
+//    }
 
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this

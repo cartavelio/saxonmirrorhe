@@ -13,10 +13,10 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.StringValue;
 
@@ -72,7 +72,7 @@ public class Error extends SystemFunction implements Callable {
                 Item root = errorObject.head();
                 if ((root instanceof NodeInfo) && ((NodeInfo) root).getNodeKind() == Type.DOCUMENT) {
                     SequenceIterator iter = ((NodeInfo) root).iterateChildAxis(
-                            new NameTest(Type.ELEMENT, NamespaceUri.NULL, "error", context.getConfiguration().getNamePool()));
+                            NamedXNodeType.make(Type.ELEMENT, NamespaceUri.NULL, "error", context.getConfiguration()));
                     NodeInfo errorElement = (NodeInfo)iter.next();
                     if (errorElement != null) {
                         String module = errorElement.getAttributeValue(NamespaceUri.NULL, "module");

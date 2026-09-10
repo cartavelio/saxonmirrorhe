@@ -19,7 +19,7 @@ import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
@@ -814,7 +814,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
 
     private static void setLocalParamDetails(XSLTemplate source, NamedTemplate nt) {
-        SequenceIterator kids = source.iterateChildAxis(NodeKindTest.ELEMENT);
+        SequenceIterator kids = source.iterateChildAxis(NodeTypeTest.ELEMENT);
         List<NamedTemplate.LocalParamInfo> details = new ArrayList<>();
         SequenceTool.supply(kids, (ItemConsumer<? super Item>) child -> {
             if (child instanceof XSLLocalParam) {

@@ -9,9 +9,8 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -24,6 +23,7 @@ import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import org.w3c.dom.*;
 
 import java.util.ArrayList;
@@ -590,7 +590,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     @Override
     protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
         SequenceIterator iter = new AttributeEnumeration(this);
-        if (nodeTest != AnyXNodeTest.getInstance()) {
+        if (nodeTest != null && nodeTest != NodeTypeTest.GNODE) {
             iter = Navigator.filter(iter, nodeTest);
         }
         return iter;
@@ -602,10 +602,10 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
     @Override
     protected SequenceIterator iterateChildren(NodeTest nodeTest) {
-        boolean elementOnly = isElementOnly(nodeTest);
+        boolean elementOnly = nodeTest != null && isElementOnly(nodeTest);
         SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, true, true, elementOnly));
-        if (nodeTest != AnyXNodeTest.getInstance()) {
+        if (nodeTest != null && nodeTest != NodeTypeTest.GNODE) {
             iter = Navigator.filter(iter, nodeTest);
         }
         return iter;
@@ -616,7 +616,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         boolean elementOnly = isElementOnly(nodeTest);
         SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, false, forwards, elementOnly));
-        if (nodeTest != AnyXNodeTest.getInstance()) {
+        if (nodeTest != NodeTypeTest.GNODE) {
             iter = Navigator.filter(iter, nodeTest);
         }
         return iter;
@@ -639,7 +639,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
     @Override
     public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
-        NameTest test = new NameTest(Type.ATTRIBUTE, uri, local, getNamePool());
+        NodeTest test = NamedXNodeType.make(Type.ATTRIBUTE, uri, local, getConfiguration());
         SequenceIterator iterator = iterateAttributeAxis(test);
         NodeInfo attribute = (NodeInfo)iterator.next();
         if (attribute == null) {

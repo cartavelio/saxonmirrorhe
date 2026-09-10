@@ -1,10 +1,7 @@
 package net.sf.saxon.pattern.qname;
 
-import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.Affinity;
-import net.sf.saxon.type.ErrorType;
 
 public class NoQNameTest implements QNameTest {
 
@@ -21,22 +18,12 @@ public class NoQNameTest implements QNameTest {
         return false;
     }
 
-    @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return false;
-    }
-
     public Affinity relationship(QNameTest other) {
         if (other instanceof NoQNameTest) {
             return Affinity.SAME_TYPE;
         } else {
             return Affinity.SUBSUMED_BY;
         }
-    }
-
-    @Override
-    public NodeTest makeNodeTest(int nodeKind) {
-        return ErrorType.getInstance();
     }
 
 

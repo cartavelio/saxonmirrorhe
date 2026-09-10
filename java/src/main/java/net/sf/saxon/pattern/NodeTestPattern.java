@@ -13,9 +13,12 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.GNodeType;
 
 /**
  * A NodeTestPattern is a pattern that consists simply of a NodeTest
@@ -56,8 +59,8 @@ public class NodeTestPattern extends Pattern {
      */
 
     @Override
-    public NodeTest getItemType() {
-        return nodeTest;
+    public ItemType getItemType() {
+        return nodeTest.getItemType();
     }
 
     /**
@@ -126,7 +129,7 @@ public class NodeTestPattern extends Pattern {
      */
     @Override
     public Pattern convertToTypedPattern(String val) throws XPathException {
-        if (nodeTest instanceof NameTest && nodeTest.getUType() == UType.ELEMENT) {
+        if (nodeTest.getRequiredFingerprint(Type.ELEMENT) != -1) {
             StructuredQName qName = nodeTest.getMatchingNodeName();
             Schema schema = getRetainedStaticContext().getImportedSchema();
             IElementDecl decl = schema.getElementDecl(qName);
@@ -139,8 +142,8 @@ public class NodeTestPattern extends Pattern {
                             "but there is no schema element declaration named " + nodeTest, "XTSE3105");
                 }
             } else {
-                NodeTest schemaNodeTest = schema.makeSchemaElementTest(decl.getFingerprint());
-                return new NodeTestPattern(schemaNodeTest);
+                GNodeType schemaNodeTest = schema.makeSchemaElementTest(decl.getFingerprint());
+                return new NodeTestPattern(new NodeTypeTest(schemaNodeTest));
             }
         } else {
             return this;
@@ -150,7 +153,7 @@ public class NodeTestPattern extends Pattern {
     @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
         presenter.startElement("p.nodeTest");
-        presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest));
+        presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest.getItemType()));
         presenter.endElement();
     }
 

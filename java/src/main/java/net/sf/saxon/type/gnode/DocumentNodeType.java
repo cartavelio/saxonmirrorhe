@@ -5,13 +5,14 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.pattern;
+package net.sf.saxon.type.gnode;
 
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.qname.NoQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
@@ -19,19 +20,15 @@ import net.sf.saxon.type.UType;
 import java.util.Optional;
 
 /**
- * A DocumentNodeTest implements the test document-node(element(~,~))
+ * A DocumentNodeType implements the test document-node(element(~,~))
  */
 
-// This is messy because the standard interface for a NodeTest does not allow
-// any navigation from the node in question - it only tests for the node kind,
-// node name, and type annotation of the node.
-
-public class DocumentNodeTest extends NodeTest {
+public class DocumentNodeType extends XNodeType {
 
 
-    private final NodeTest elementTest;
+    private final XNodeType elementTest;
 
-    public DocumentNodeTest(NodeTest elementTest) {
+    public DocumentNodeType(XNodeType elementTest) {
         this.elementTest = elementTest;
     }
 
@@ -46,47 +43,44 @@ public class DocumentNodeTest extends NodeTest {
         return UType.DOCUMENT;
     }
 
+
+    /**
+     * Get the set of allowed node names that this type if capable
+     * of matching
+     *
+     * @return the allowed node names
+     */
     @Override
-    public QNameTest getQNameTest() {
+    public QNameTest getAllowedNodeNames() {
         return NoQNameTest.getInstance();
     }
 
     /**
-     * Test whether this node test is satisfied by a given node. This method is only
-     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-     * node tests where the node kind is known to be an attribute.
+     * Get an alphabetic code representing the type, or at any rate, the nearest built-in type
+     * from which this type is derived. The codes are designed so that for any two built-in types
+     * A and B, alphaCode(A) is a prefix of alphaCode(B) if and only if A is a supertype of B.
      *
-     * @param nodeKind   The kind of node to be matched
-     * @param name       identifies the expanded name of the node to be matched.
-     *                   The value should be null for a node with no name.
-     * @param annotation The actual content type of the node
+     * @return the alphacode for the nearest containing built-in type. For example: for xs:string
+     * return "AS", for xs:boolean "AB", for node() "N", for element() "NE", for map(*) "FM", for
+     * array(*) "FA".
      */
     @Override
-    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-        if (nodeKind != Type.DOCUMENT) {
-            return false;
-        }
-        throw new UnsupportedOperationException("DocumentNodeTest doesn't support this method");
+    public String getBasicAlphaCode() {
+        return null;
     }
 
     /**
-     * Determine whether this Pattern matches the given Node.
+     * Test whether a given item conforms to this type
      *
-     * @param node The NodeInfo representing the Element or other node to be tested against the Pattern
-     *             uses variables, or contains calls on functions such as document() or key().
-     * @return true if the node matches the Pattern, false otherwise
+     * @param item The item to be tested
+     * @return true if the item is an instance of this type; false otherwise
      */
-
     @Override
-    public boolean test(GNode node) {
-        if (!(node instanceof NodeInfo) || ((NodeInfo)node).getNodeKind() != Type.DOCUMENT) {
+    public boolean matches(Item item) {
+        if (!(item instanceof NodeInfo) || ((NodeInfo)item).getNodeKind() != Type.DOCUMENT) {
             return false;
         }
+        NodeInfo node = (NodeInfo)item;
         SequenceIterator iter = node.iterateChildAxis(null);
         // The match is true if there is exactly one element node child, no text node
         // children, and the element node matches the element test.
@@ -100,7 +94,7 @@ public class DocumentNodeTest extends NodeTest {
                 if (found) {
                     return false;
                 }
-                if (elementTest.test(n)) {
+                if (elementTest.matches(n)) {
                     found = true;
                 } else {
                     return false;
@@ -109,6 +103,65 @@ public class DocumentNodeTest extends NodeTest {
         }
         return found;
     }
+
+    //    /**
+//     * Test whether this node test is satisfied by a given node. This method is only
+//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
+//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
+//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
+//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
+//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
+//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
+//     * node tests where the node kind is known to be an attribute.
+//     *
+//     * @param nodeKind   The kind of node to be matched
+//     * @param name       identifies the expanded name of the node to be matched.
+//     *                   The value should be null for a node with no name.
+//     * @param annotation The actual content type of the node
+//     */
+//    @Override
+//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
+//        if (nodeKind != Type.DOCUMENT) {
+//            return false;
+//        }
+//        throw new UnsupportedOperationException("DocumentNodeTest doesn't support this method");
+//    }
+
+//    /**
+//     * Determine whether this Pattern matches the given Node.
+//     *
+//     * @param node The NodeInfo representing the Element or other node to be tested against the Pattern
+//     *             uses variables, or contains calls on functions such as document() or key().
+//     * @return true if the node matches the Pattern, false otherwise
+//     */
+//
+//    @Override
+//    public boolean test(GNode node) {
+//        if (!(node instanceof NodeInfo) || ((NodeInfo)node).getNodeKind() != Type.DOCUMENT) {
+//            return false;
+//        }
+//        SequenceIterator iter = node.iterateChildAxis(null);
+//        // The match is true if there is exactly one element node child, no text node
+//        // children, and the element node matches the element test.
+//        boolean found = false;
+//        NodeInfo n;
+//        while ((n = (NodeInfo)iter.next()) != null) {
+//            int kind = n.getNodeKind();
+//            if (kind == Type.TEXT) {
+//                return false;
+//            } else if (kind == Type.ELEMENT) {
+//                if (found) {
+//                    return false;
+//                }
+//                if (elementTest.test(n)) {
+//                    found = true;
+//                } else {
+//                    return false;
+//                }
+//            }
+//        }
+//        return found;
+//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
@@ -136,7 +189,7 @@ public class DocumentNodeTest extends NodeTest {
      * @return the contained element test
      */
 
-    public NodeTest getElementTest() {
+    public XNodeType getElementTest() {
         return elementTest;
     }
 
@@ -153,8 +206,8 @@ public class DocumentNodeTest extends NodeTest {
     }
 
     public boolean equals(/*@NotNull*/ Object other) {
-        return other instanceof DocumentNodeTest &&
-                ((DocumentNodeTest) other).elementTest.equals(elementTest);
+        return other instanceof DocumentNodeType &&
+                ((DocumentNodeType) other).elementTest.equals(elementTest);
     }
 
     @Override
@@ -191,7 +244,7 @@ public class DocumentNodeTest extends NodeTest {
                 if (found) {
                     return Optional.of("The supplied document node has more than one element child");
                 }
-                if (elementTest.test(n)) {
+                if (elementTest.matches(n)) {
                     found = true;
                 } else {
                     String s = "The supplied document node has an element child (" + Err.depict(n) +

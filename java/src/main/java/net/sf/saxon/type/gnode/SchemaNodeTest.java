@@ -5,12 +5,12 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.pattern;
+package net.sf.saxon.type.gnode;
 
 import net.sf.saxon.om.StructuredQName;
 
 /**
- * Marker interface for schema-element() and schema-attribute() node tests
+ * Marker interface for schema-element() and schema-attribute() node types
  */
 public interface SchemaNodeTest {
 

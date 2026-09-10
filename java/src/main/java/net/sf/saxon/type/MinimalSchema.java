@@ -5,10 +5,10 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.gnode.GNodeType;
 
 /**
  * A schema that contains only the built-in types
@@ -158,7 +158,7 @@ public class MinimalSchema implements Schema {
      * @throws SchemaException if there is no element declaration with this name in the schema
      */
     @Override
-    public NodeTest makeSchemaElementTest(int fp) throws SchemaException {
+    public GNodeType makeSchemaElementTest(int fp) throws SchemaException {
         throw new SchemaException("No such element declaration");
     }
 
@@ -170,7 +170,7 @@ public class MinimalSchema implements Schema {
      * @throws SchemaException if there is no attribute declaration with this name in the schema
      */
     @Override
-    public NodeTest makeSchemaAttributeTest(int fp) throws SchemaException {
+    public GNodeType makeSchemaAttributeTest(int fp) throws SchemaException {
         throw new SchemaException("No such attribute declaration");
     }
     

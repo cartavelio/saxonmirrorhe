@@ -12,10 +12,10 @@ import net.sf.saxon.Version;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.z.IntBlockSet;
 import net.sf.saxon.z.IntSet;
 
@@ -99,7 +99,7 @@ public class UnicodeBlocks {
         }
 
         SequenceIterator iter = doc.getRootNode().iterateDescendantAxis(
-                                                          new NameTest(Type.ELEMENT, NamespaceUri.NULL, "block", config.getNamePool()));
+                NamedXNodeType.make(Type.ELEMENT, NamespaceUri.NULL, "block", config));
         while (true) {
             NodeInfo item = (NodeInfo)iter.next();
             if (item == null) {
@@ -108,7 +108,7 @@ public class UnicodeBlocks {
             String blockName = normalizeBlockName(item.getAttributeValue(NamespaceUri.NULL, "name"));
             System.err.println("Loading " + blockName);
             IntSet range = null;
-            for (NodeInfo rangeElement : item.children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo rangeElement : item.children(NodeTypeTest.ELEMENT)) {
                 int from = Integer.parseInt(rangeElement.getAttributeValue(NamespaceUri.NULL, "from").substring(2), 16);
                 int to = Integer.parseInt(rangeElement.getAttributeValue(NamespaceUri.NULL, "to").substring(2), 16);
                 IntSet cr = new IntBlockSet(from, to);

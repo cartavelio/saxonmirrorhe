@@ -14,7 +14,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -196,9 +196,13 @@ public class TypeChecker {
         if (uRequired.overlaps(UType.ANY_ATOMIC)) {
             switch (supplied.getGenre()) {
                 case XNODE: return true;
+                case JNODE:
+                    return true;
                 case ARRAY: return true;
                 case ATOMIC: return possiblePromotions(uSupplied).overlaps(uRequired);
                 case EXTERNAL: return true;
+                case ANY:
+                    return true;
                 default: return false;
             }
         }

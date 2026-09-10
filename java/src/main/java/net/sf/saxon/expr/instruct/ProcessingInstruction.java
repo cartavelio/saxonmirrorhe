@@ -16,7 +16,7 @@ import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NoNamespaceName;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.Twine8;
@@ -78,7 +78,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return NodeKindTest.PROCESSING_INSTRUCTION;
+        return NodeKindType.PROCESSING_INSTRUCTION;
     }
 
     @Override

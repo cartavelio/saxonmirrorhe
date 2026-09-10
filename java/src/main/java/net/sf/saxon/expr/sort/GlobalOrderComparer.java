@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.sort;
 
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.NodeInfo;
 
 import java.util.Comparator;
@@ -18,7 +19,7 @@ import java.util.Comparator;
  */
 
 //@CSharpInjectMembers(code="public override int Compare(net.sf.saxon.om.NodeInfo a, net.sf.saxon.om.NodeInfo b) { return compare(a, b); }")
-public final class GlobalOrderComparer implements Comparator<NodeInfo> {
+public final class GlobalOrderComparer implements Comparator<GNode> {
 
     private static final GlobalOrderComparer instance = new GlobalOrderComparer();
 
@@ -33,16 +34,21 @@ public final class GlobalOrderComparer implements Comparator<NodeInfo> {
     }
 
     @Override
-    public int compare(NodeInfo a, NodeInfo b) {
+    public int compare(GNode a, GNode b) {
         if (a == b) {
             return 0;
         }
-        long d1 = a.getTreeInfo().getDocumentNumber();
-        long d2 = b.getTreeInfo().getDocumentNumber();
-        if (d1 == d2) {
-            return a.compareOrder(b);
+        if (a instanceof NodeInfo && b instanceof NodeInfo) {
+            long d1 = ((NodeInfo) a).getTreeInfo().getDocumentNumber();
+            long d2 = ((NodeInfo) b).getTreeInfo().getDocumentNumber();
+            if (d1 == d2) {
+                return ((NodeInfo) a).compareOrder(((NodeInfo) b));
+            }
+            return (int) Long.signum(d1 - d2);
+        } else {
+            // TODO: this is temporary
+            return System.identityHashCode(a) - System.identityHashCode(b);
         }
-        return (int)Long.signum(d1 - d2);
     }
 }
 

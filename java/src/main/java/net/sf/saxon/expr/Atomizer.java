@@ -19,10 +19,10 @@ import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -30,6 +30,7 @@ import net.sf.saxon.tree.iter.AtomizingIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.UntypedAtomizingIterator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.XNodeType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
@@ -192,19 +193,26 @@ public final class Atomizer extends UnaryExpression {
         return this;
     }
 
+    /**
+     * Determine whether the cardinality of the atomized value is guaranteed to be a single
+     * atomic value (or empty)
+     * @param th the type hierarchy cache
+     */
     private void computeSingleValued(TypeHierarchy th) {
         ItemType operandType = getOperandItemType();
         if (th.relationship(operandType, ArrayItemType.ANY_ARRAY_TYPE) != Affinity.DISJOINT) {
+            singleValued = false;
+        } else if (th.relationship(operandType, AnyJNodeType.getInstance()) != Affinity.DISJOINT) {
             singleValued = false;
         } else {
             singleValued = untyped;
             if (!singleValued) {
                 ItemType nodeType = getBaseExpression().getItemType();
-                if (nodeType instanceof NodeTest) {
+                if (nodeType instanceof XNodeType) {
                     if (!nodeType.getUType().overlaps(UType.ELEMENT.union(UType.ATTRIBUTE))) {
                         singleValued = true;
                     } else {
-                        SchemaType st = ((NodeTest) nodeType).getContentType();
+                        SchemaType st = ((XNodeType)nodeType).getContentType();
                         if (isSingleValuedSchemaType(st)) {  // Bug 5803
                             singleValued = true;
                         }
@@ -312,8 +320,7 @@ public final class Atomizer extends UnaryExpression {
                 return newBlock.typeCheck(visitor, contextInfo).optimize(visitor, contextInfo);
             }
             if (untyped && operand instanceof AxisExpression &&
-                    ((AxisExpression)operand).getAxis() == AxisInfo.ATTRIBUTE &&
-                    ((AxisExpression) operand).getNodeTest() instanceof NameTest &&
+                    ((AxisExpression) operand).getNodeTest().getRequiredFingerprint(Type.ATTRIBUTE) != -1 &&
                     !((AxisExpression) operand).isContextPossiblyUndefined()) {
                 StructuredQName name = ((AxisExpression) operand).getNodeTest().getMatchingNodeName();
                 FingerprintedQName qName = new FingerprintedQName(name, visitor.getConfiguration().getNamePool());
@@ -323,7 +330,7 @@ public final class Atomizer extends UnaryExpression {
             }
             if (untyped && operand instanceof SimpleStepExpression &&
                     ((SimpleStepExpression) operand).getAxisExpression().getAxis() == AxisInfo.ATTRIBUTE &&
-                    ((SimpleStepExpression) operand).getAxisExpression().getNodeTest() instanceof NameTest) {
+                    ((SimpleStepExpression) operand).getAxisExpression().getNodeTest().getRequiredFingerprint(Type.ATTRIBUTE) != -1) {
                 StructuredQName name = ((SimpleStepExpression) operand).getAxisExpression().getNodeTest().getMatchingNodeName();
                 FingerprintedQName qName = new FingerprintedQName(name, visitor.getConfiguration().getNamePool());
                 AttributeGetter ag = new AttributeGetter(qName);
@@ -440,7 +447,7 @@ public final class Atomizer extends UnaryExpression {
     public ItemType getItemType() {
         operandItemType = getBaseExpression().getItemType();
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
-        return getAtomizedItemType(getBaseExpression(), untyped, th);
+        return getAtomizedItemType(getBaseExpression(), untyped);
     }
 
     @Override
@@ -453,12 +460,11 @@ public final class Atomizer extends UnaryExpression {
      *
      * @param operand       the given expression
      * @param alwaysUntyped true if it is known that nodes will always be untyped
-     * @param th            the type hierarchy cache
      * @return the item type of the result of evaluating the operand expression, after atomization, or
-     *         xs:error if it is known that atomization will return an error
+     * xs:error if it is known that atomization will return an error
      */
 
-    public static ItemType getAtomizedItemType(Expression operand, boolean alwaysUntyped, TypeHierarchy th) {
+    public static ItemType getAtomizedItemType(Expression operand, boolean alwaysUntyped) {
         ItemType in = operand.getItemType();
         if (in.isPlainType()) {
             return in;
@@ -530,8 +536,8 @@ public final class Atomizer extends UnaryExpression {
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         } else if (in.isPlainType()) {
             return operand.getCardinality();
-        } else if (in instanceof NodeTest) {
-            SchemaType schemaType = ((NodeTest) in).getContentType();
+        } else if (in instanceof XNodeType) {
+            SchemaType schemaType = ((XNodeType) in).getContentType();
             if (schemaType.isAtomicType()) {
                 // can return at most one atomic value per node
                 return operand.getCardinality();

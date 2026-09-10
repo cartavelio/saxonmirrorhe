@@ -9,7 +9,7 @@ package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 
 import java.util.function.Function;
 

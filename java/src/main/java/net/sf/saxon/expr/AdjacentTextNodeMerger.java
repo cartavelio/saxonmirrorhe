@@ -21,7 +21,7 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AdjacentTextNodeMergingIterator;
 import net.sf.saxon.type.*;
@@ -80,7 +80,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
         // This wrapper expression is unnecessary if the base expression cannot return text nodes,
         // or if it can return at most one item
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        if (th.relationship(getBaseExpression().getItemType(), NodeKindTest.TEXT) == Affinity.DISJOINT) {
+        if (th.relationship(getBaseExpression().getItemType(), NodeKindType.TEXT) == Affinity.DISJOINT) {
             Expression base = getBaseExpression();
             base.setParentExpression(getParentExpression());
             return base;

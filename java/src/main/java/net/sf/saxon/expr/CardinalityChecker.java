@@ -18,7 +18,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.pattern.DocumentNodeTest;
+import net.sf.saxon.type.gnode.DocumentNodeType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
@@ -496,7 +496,7 @@ public final class CardinalityChecker extends UnaryExpression {
                 type = ((ItemChecker) next).getRequiredType();
                 next = ((ItemChecker) next).getBaseExpression();
             }
-            if ((next.getImplementationMethod() & PROCESS_METHOD) != 0 && !(type instanceof DocumentNodeTest)) {
+            if ((next.getImplementationMethod() & PROCESS_METHOD) != 0 && !(type instanceof DocumentNodeType)) {
                 ItemType finalType = type;
                 PushEvaluator pushEval = next.makeElaborator().elaborateForPush();
                 return (output, context) -> {

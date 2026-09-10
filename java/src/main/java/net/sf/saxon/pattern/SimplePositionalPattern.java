@@ -12,6 +12,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.AlphaCode;
@@ -98,7 +99,7 @@ public final class SimplePositionalPattern extends Pattern {
 
     @Override
     public ItemType getItemType() {
-        return nodeTest.getPrimitiveItemType();
+        return nodeTest.getItemType();
     }
 
     /**
@@ -191,7 +192,7 @@ public final class SimplePositionalPattern extends Pattern {
     @Override
     public void export(ExpressionPresenter presenter) {
         presenter.startElement("p.simPos");
-        presenter.emitAttribute("test", AlphaCode.fromItemType(nodeTest));
+        presenter.emitAttribute("test", AlphaCode.fromItemType(getItemType()));
         presenter.emitAttribute("pos", position + "");
         presenter.endElement();
     }

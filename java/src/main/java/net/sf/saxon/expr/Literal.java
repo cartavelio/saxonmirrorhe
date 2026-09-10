@@ -12,14 +12,17 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.elab.*;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.str.EmptyUnicodeString;
@@ -265,7 +268,7 @@ public class Literal extends Expression {
     @Override
     public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
         if (isEmptySequence(this)) {
-            return new NodeTestPattern(ErrorType.getInstance());
+            return new ItemTypePattern(ErrorType.getInstance());
         } else {
             return super.toPattern(config, topLevel);
         }

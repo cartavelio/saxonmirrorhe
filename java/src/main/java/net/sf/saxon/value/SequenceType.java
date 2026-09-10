@@ -13,9 +13,9 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnyGNodeTest;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.type.*;
 
 import java.util.Optional;
@@ -347,42 +347,42 @@ public final class SequenceType {
      */
 
     public static final SequenceType OPTIONAL_NODE =
-            AnyXNodeTest.getInstance().zeroOrOne();
+            AnyXNodeType.getInstance().zeroOrOne();
 
     /**
      * A type that allows a single node
      */
 
     public static final SequenceType SINGLE_NODE =
-            AnyXNodeTest.getInstance().one();
+            AnyXNodeType.getInstance().one();
 
     /**
      * A type that allows a single document node
      */
 
     public static final SequenceType OPTIONAL_DOCUMENT_NODE =
-            NodeKindTest.DOCUMENT.zeroOrOne();
+            NodeKindType.DOCUMENT.zeroOrOne();
 
     /**
      * A type that allows a sequence of zero or more XNodes
      */
 
     public static final SequenceType NODE_SEQUENCE =
-            AnyXNodeTest.getInstance().zeroOrMore();
+            AnyXNodeType.getInstance().zeroOrMore();
 
     /**
      * A type that allows a sequence of zero or more GNodes
      */
 
     public static final SequenceType GNODE_SEQUENCE =
-            AnyGNodeTest.getInstance().zeroOrMore();
+            AnyGNodeType.getInstance().zeroOrMore();
 
     /**
      * A type that allows a sequence of zero or one GNodes
      */
 
     public static final SequenceType OPTIONAL_GNODE =
-            AnyGNodeTest.getInstance().zeroOrOne();
+            AnyGNodeType.getInstance().zeroOrOne();
 
     /**
      * A type that allows a sequence of zero or more string values

@@ -98,7 +98,7 @@ public class TinyBuilderMonitor extends BuilderMonitor {
 //            NamePool pool = builder.getConfiguration().getNamePool();
 //            String prefix = nscode.getPrefix();
 //            NodeInfo parent = builder.getTree().getNode(builder.getTree().namespaceParent[markedNamespace]);
-//            NameTest test = new NameTest(Type.NAMESPACE, "", prefix, pool);
+//            NameTest test = NameTest.make(Type.NAMESPACE, "", prefix, pool);
 //            AxisIterator iter = parent.iterateAxis(AxisInfo.NAMESPACE, test);
 //            return iter.next();
         } else {

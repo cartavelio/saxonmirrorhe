@@ -17,7 +17,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -144,7 +144,7 @@ public final class ComputedAttribute extends AttributeCreator {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return NodeKindTest.ATTRIBUTE;
+        return NodeKindType.ATTRIBUTE;
     }
 
     /**

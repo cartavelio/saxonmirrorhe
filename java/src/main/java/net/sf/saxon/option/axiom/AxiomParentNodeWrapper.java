@@ -10,7 +10,7 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.util.Navigator;

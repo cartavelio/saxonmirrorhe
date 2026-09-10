@@ -12,11 +12,10 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.pattern.qname.NoQNameTest;
-import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.gnode.GNodeType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -33,7 +32,7 @@ import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
  * This class has a singleton instance which represents the XML Schema 1.1 built-in type xs:error.
  */
 
-public final class ErrorType extends NodeTest implements AtomicType, UnionType, PlainType {
+public final class ErrorType extends GNodeType implements AtomicType, UnionType, PlainType {
 
     /*@NotNull*/ private static final ErrorType theInstance = new ErrorType();
 
@@ -58,11 +57,25 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     public UType getUType() {
         return UType.VOID;
     }
+//
+//    @Override
+//    public QNameTest getQNameTest() {
+//        return NoQNameTest.getInstance();
+//    }
 
+
+    /**
+     * Test whether a given item conforms to this type
+     *
+     * @param item The item to be tested
+     * @return true if the item is an instance of this type; false otherwise
+     */
     @Override
-    public QNameTest getQNameTest() {
-        return NoQNameTest.getInstance();
+    public boolean matches(Item item) {
+        return false;
     }
+
+
 
     /**
      * Get the local name of this type
@@ -229,14 +242,14 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
         return StandardNames.XS_ERROR;
     }
 
-    /**
-     * Get the name of the nodes matched by this nodetest, if it matches a specific name.
-     * Return null if the node test matches nodes of more than one name
-     */
-    @Override
-    public StructuredQName getMatchingNodeName() {
-        return StandardNames.getStructuredQName(StandardNames.XS_ERROR);
-    }
+//    /**
+//     * Get the name of the nodes matched by this nodetest, if it matches a specific name.
+//     * Return null if the node test matches nodes of more than one name
+//     */
+//    @Override
+//    public StructuredQName getMatchingNodeName() {
+//        return StandardNames.getStructuredQName(StandardNames.XS_ERROR);
+//    }
 
     /**
      * Get the name of the type as a StructuredQName
@@ -316,15 +329,30 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     }
 
     /**
-     * Test whether this Simple Type is an atomic type
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
      *
-     * @return false, this is not (necessarily) an atomic type
+     * @param version the XPath language version (40 or 31)
      */
-
     @Override
-    public boolean isAtomicType() {
-        return false;
+    public CoercionPlan getCoercionPlan(int version) {
+        return null;
     }
+
+    /**
+     * Get an alphabetic code representing the type, or at any rate, the nearest built-in type
+     * from which this type is derived. The codes are designed so that for any two built-in types
+     * A and B, alphaCode(A) is a prefix of alphaCode(B) if and only if A is a supertype of B.
+     *
+     * @return the alphacode for the nearest containing built-in type. For example: for xs:string
+     * return "AS", for xs:boolean "AB", for node() "N", for element() "NE", for map(*) "FM", for
+     * array(*) "FA".
+     */
+    @Override
+    public String getBasicAlphaCode() {
+        return "X";
+    }
+
 
     /**
      * Ask whether this type is an ID type. This is defined to be any simple type
@@ -551,20 +579,20 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
         return input;
     }
 
-    @Override
-    public boolean isPlainType() {
-        return true;
-    }
+//    @Override
+//    public boolean isPlainType() {
+//        return true;
+//    }
 
-    @Override
-    public boolean matches(Item item, TypeHierarchy th) {
-        return false;
-    }
+//    @Override
+//    public boolean matches(Item item, TypeHierarchy th) {
+//        return false;
+//    }
 
-    @Override
-    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-        return false;
-    }
+//    @Override
+//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
+//        return false;
+//    }
 
     @Override
     public AtomicType getPrimitiveItemType() {

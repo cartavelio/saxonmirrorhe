@@ -9,6 +9,7 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.type.coercion.CoercionPlan;
 
 import java.util.Optional;
@@ -23,12 +24,12 @@ import java.util.Optional;
  * instances of SimpleType in the schema type hierarchy. Node Types, represented by
  * the class NodeTest, are also Patterns as used in XSLT.
  * <p>Saxon assumes that apart from {@link AnyItemType} (which corresponds to <code>item()</code>
- * and matches anything), every ItemType will be either an {@link AtomicType}, a {@link net.sf.saxon.pattern.NodeTest},
+ * and matches anything), every ItemType will be either an {@link AtomicType}, a {@link NodeTest},
  * or a {@link FunctionItemType}. User-defined implementations of ItemType must therefore extend one of those
  * three classes/interfaces.</p>
  *
  * @see AtomicType
- * @see net.sf.saxon.pattern.NodeTest
+ * @see NodeTest
  * @see FunctionItemType
  */
 public interface ItemType {

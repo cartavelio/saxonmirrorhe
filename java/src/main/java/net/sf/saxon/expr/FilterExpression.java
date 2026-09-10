@@ -22,12 +22,15 @@ import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.*;
 
 import java.math.BigInteger;
@@ -384,7 +387,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         // rewrite axis::*[local-name() = 'literal'] as axis::*:local (people write this a lot in XSLT 1.0)
 
         if (getBase() instanceof AxisExpression
-                && ((AxisExpression)getBase()).getNodeTest() == NodeKindTest.ELEMENT
+                && ((AxisExpression)getBase()).getNodeTest() == NodeTypeTest.ELEMENT
                 && getFilter() instanceof CompareToStringConstant
                 && ((CompareToStringConstant) getFilter()).getSingletonOperator() == OperatorSymbol.FEQ
                 && ((CompareToStringConstant) getFilter()).getLhsExpression().isCallOn(LocalName_1.class)
@@ -434,7 +437,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             // (This happens in Saxon-EE only)
             if (isIndexable != 0) {
                 boolean contextIsDoc = contextItemType != null && contextItemType.getItemType() != ErrorType.getInstance() &&
-                        th.isSubType(contextItemType.getItemType(), NodeKindTest.DOCUMENT);
+                        th.isSubType(contextItemType.getItemType(), NodeKindType.DOCUMENT);
                 Expression f = opt.tryIndexedFilter(this, visitor, isIndexable > 0, contextIsDoc);
                 if (f != this) {
                     return f.typeCheck(visitor, contextItemType).optimize(visitor, contextItemType);

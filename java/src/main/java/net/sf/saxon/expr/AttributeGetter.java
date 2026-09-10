@@ -12,9 +12,10 @@ import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.StringEvaluator;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.*;
-import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.StringView;
+import net.sf.saxon.om.FingerprintedQName;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -78,57 +79,59 @@ public final class AttributeGetter extends Expression {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        Item item = context.getContextItem();
-        if (item instanceof TinyElementImpl) {
-            // fast path
-            String val = ((TinyElementImpl) item).getAttributeValue(attributeName.getFingerprint());
-            return val == null ? null : StringValue.makeUntypedAtomic(StringView.tidy(val));
-        }
-        if (item == null) {
-            // This doesn't actually happen, we don't create an AttributeGetter unless we know statically
-            dynamicError("The context item for @" + attributeName.getDisplayName() +
-                                 " is absent", "XPDY0002", context);
-        }
-        if (!(item instanceof NodeInfo)) {
-            typeError("The context item for @" + attributeName.getDisplayName() +
-                                 " is not a node", "XPDY0002", context);
-        }
-        assert item instanceof NodeInfo;
-        NodeInfo node = (NodeInfo) item;
-        if (node.getNodeKind() == Type.ELEMENT) {
-            String val = node.getAttributeValue(attributeName.getNamespaceUri(), attributeName.getLocalPart());
-            return val == null ? null : StringValue.makeUntypedAtomic(StringView.tidy(val));
-        } else {
-            return null;
-        }
+        return makeElaborator().elaborateForItem().eval(context);
+//        Item item = context.getContextItem();
+//        if (item instanceof TinyElementImpl) {
+//            // fast path
+//            String val = ((TinyElementImpl) item).getAttributeValue(attributeName.getFingerprint());
+//            return val == null ? null : StringValue.makeUntypedAtomic(StringView.tidy(val));
+//        }
+//        if (item == null) {
+//            // This doesn't actually happen, we don't create an AttributeGetter unless we know statically
+//            dynamicError("The context item for @" + attributeName.getDisplayName() +
+//                                 " is absent", "XPDY0002", context);
+//        }
+//        if (!(item instanceof NodeInfo)) {
+//            typeError("The context item for @" + attributeName.getDisplayName() +
+//                                 " is not a node", "XPDY0002", context);
+//        }
+//        assert item instanceof NodeInfo;
+//        NodeInfo node = (NodeInfo) item;
+//        if (node.getNodeKind() == Type.ELEMENT) {
+//            String val = node.getAttributeValue(attributeName.getNamespaceUri(), attributeName.getLocalPart());
+//            return val == null ? null : StringValue.makeUntypedAtomic(StringView.tidy(val));
+//        } else {
+//            return null;
+//        }
     }
 
     @Override
     public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
-        Item item = context.getContextItem();
-        if (item instanceof TinyElementImpl) {
-            // fast path
-            String val = ((TinyElementImpl) item).getAttributeValue(attributeName.getFingerprint());
-            return val == null ? EmptyUnicodeString.getInstance() : StringView.tidy(val);
-        }
-        if (item == null) {
-            // This doesn't actually happen, we don't create an AttributeGetter unless we know statically
-            dynamicError("The context item for @" + attributeName.getDisplayName() +
-                                 " is absent", "XPDY0002", context);
-        }
-        if (!(item instanceof NodeInfo)) {
-            typeError("The context item for @" + attributeName.getDisplayName() +
-                              " is not a node", "XPDY0002", context);
-        }
-        assert item instanceof NodeInfo;
-        NodeInfo node = (NodeInfo) item;
-        if (node.getNodeKind() == Type.ELEMENT) {
-            String val = node.getAttributeValue(attributeName.getNamespaceUri(), attributeName.getLocalPart());
-            if (val != null) {
-                return StringView.tidy(val);
-            }
-        }
-        return EmptyUnicodeString.getInstance();
+        return makeElaborator().elaborateForUnicodeString(true).eval(context);
+//        Item item = context.getContextItem();
+//        if (item instanceof TinyElementImpl) {
+//            // fast path
+//            String val = ((TinyElementImpl) item).getAttributeValue(attributeName.getFingerprint());
+//            return val == null ? EmptyUnicodeString.getInstance() : StringView.tidy(val);
+//        }
+//        if (item == null) {
+//            // This doesn't actually happen, we don't create an AttributeGetter unless we know statically
+//            dynamicError("The context item for @" + attributeName.getDisplayName() +
+//                                 " is absent", "XPDY0002", context);
+//        }
+//        if (!(item instanceof NodeInfo)) {
+//            typeError("The context item for @" + attributeName.getDisplayName() +
+//                              " is not a node", "XPDY0002", context);
+//        }
+//        assert item instanceof NodeInfo;
+//        NodeInfo node = (NodeInfo) item;
+//        if (node.getNodeKind() == Type.ELEMENT) {
+//            String val = node.getAttributeValue(attributeName.getNamespaceUri(), attributeName.getLocalPart());
+//            if (val != null) {
+//                return StringView.tidy(val);
+//            }
+//        }
+//        return EmptyUnicodeString.getInstance();
     }
 
     @Override

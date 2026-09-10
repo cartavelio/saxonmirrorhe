@@ -10,7 +10,7 @@ package net.sf.saxon.functions.registry;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.NumericType;
@@ -162,7 +162,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("doc", 1, e -> e.populate(Doc::new, NodeKindTest.DOCUMENT, OPT, BASE | LATE)
+        register("doc", 1, e -> e.populate(Doc::new, NodeKindType.DOCUMENT, OPT, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
         register("doc-available", 1, e -> e.populate(DocAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, BASE | LATE)
@@ -171,10 +171,10 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("document-uri", 1, e -> e.populate(DocumentUri_1::new, BuiltInAtomicType.ANY_URI, OPT, LATE)
                 .arg(0, Type.XNODE_TYPE, OPT | INS, EMPTY));
 
-        register("element-with-id", 1, e -> e.populate(() -> new SuperId.ElementWithId(), NodeKindTest.ELEMENT, STAR, CDOC | LATE | UO)
+        register("element-with-id", 1, e -> e.populate(() -> new SuperId.ElementWithId(), NodeKindType.ELEMENT, STAR, CDOC | LATE | UO)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY));
 
-        register("element-with-id", 2, e -> e.populate(() -> new SuperId.ElementWithId(), NodeKindTest.ELEMENT, STAR, UO)
+        register("element-with-id", 2, e -> e.populate(() -> new SuperId.ElementWithId(), NodeKindType.ELEMENT, STAR, UO)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY)
                 .arg(1, Type.XNODE_TYPE, ONE, null));
 
@@ -236,10 +236,10 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                  BuiltInAtomicType.INTEGER, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.TIME, OPT, EMPTY));
 
-        register("id", 1, e -> e.populate(() -> new SuperId.Id(), NodeKindTest.ELEMENT, STAR, CDOC | LATE | UO)
+        register("id", 1, e -> e.populate(() -> new SuperId.Id(), NodeKindType.ELEMENT, STAR, CDOC | LATE | UO)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY));
 
-        register("id", 2, e -> e.populate(() -> new SuperId.Id(), NodeKindTest.ELEMENT, STAR, LATE | UO)
+        register("id", 2, e -> e.populate(() -> new SuperId.Id(), NodeKindType.ELEMENT, STAR, LATE | UO)
                 .arg(0, BuiltInAtomicType.STRING, STAR, EMPTY)
                 .arg(1, Type.XNODE_TYPE, ONE | NAV, null));
 
@@ -253,7 +253,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("implicit-timezone", 0, e -> e.populate(() -> new DynamicContextAccessor.ImplicitTimezone(), BuiltInAtomicType.DAY_TIME_DURATION, ONE, LATE));
 
         register("in-scope-prefixes", 1, e -> e.populate(InScopePrefixes::new, BuiltInAtomicType.STRING, STAR, 0)
-                .arg(0, NodeKindTest.ELEMENT, ONE | INS, null));
+                .arg(0, NodeKindType.ELEMENT, ONE | INS, null));
 
         register("index-of", 2, e -> e.populate(IndexOf::new, BuiltInAtomicType.INTEGER, STAR, DCOLL)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
@@ -355,7 +355,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("namespace-uri-for-prefix", 2, e -> e.populate(NamespaceForPrefix::new, BuiltInAtomicType.ANY_URI, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, NodeKindTest.ELEMENT, ONE | INS, null));
+                .arg(1, NodeKindType.ELEMENT, ONE | INS, null));
 
         register("namespace-uri-from-QName", 1, e -> e.populate(() -> new AccessorFn.NamespaceUriFromQName(), BuiltInAtomicType.ANY_URI, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, EMPTY));
@@ -420,7 +420,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("resolve-QName", 2, e -> e.populate(ResolveQName::new, BuiltInAtomicType.QNAME, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
-                .arg(1, NodeKindTest.ELEMENT, ONE | INS, null));
+                .arg(1, NodeKindType.ELEMENT, ONE | INS, null));
 
         register("resolve-uri", 1, e -> e.populate(ResolveURI::new, BuiltInAtomicType.ANY_URI, OPT, CARD0 | BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));

@@ -16,11 +16,12 @@ import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -194,30 +195,30 @@ public class TypeHierarchy {
      */
 
     private static ItemType normalizeItemType(ItemType in) {
-        if (in instanceof SameNameTest) {
-            // we don't want to put a SameNameTest in the cache because it locks down the referenced document
-            return ((SameNameTest)in).getEquivalentNameTest();
-        }
+//        if (in instanceof SameNameTest) {
+//            // we don't want to put a SameNameTest in the cache because it locks down the referenced document
+//            return ((SameNameTest)in).getEquivalentNameTest();
+//        }
         // Convert element(a|b) to element(a)|element(b)
-        if (in instanceof NameTestUnion) {
-            Set<QNameTest> tests = ((UnionQNameTest)((NameTestUnion)in).getQNameTest()).getTests();
-            int nodeKind = ((NameTestUnion) in).getNodeKind();
-            List<ItemType> memberTypes = new ArrayList<>();
-            for (QNameTest test : tests) {
-                memberTypes.add(test.makeNodeTest(nodeKind));
-            }
-            return new ChoiceItemType(memberTypes);
-        }
+//        if (in instanceof NameTestUnion) {
+//            Set<QNameTest> tests = ((UnionQNameTest)((NameTestUnion)in).getQNameTest()).getTests();
+//            int nodeKind = ((NameTestUnion) in).getNodeKind();
+//            List<ItemType> memberTypes = new ArrayList<>();
+//            for (QNameTest test : tests) {
+//                memberTypes.add(test.makeNodeTest(nodeKind));
+//            }
+//            return new ChoiceItemType(memberTypes);
+//        }
         // Convert element(a|b, T) to element(a, T) | element(b, T)
-        if (in instanceof ContentTypeTest && ((ContentTypeTest)in).getQNameTest() instanceof UnionQNameTest) {
-            Configuration config = ((ContentTypeTest) in).getConfiguration();
-            Set<QNameTest> tests = ((UnionQNameTest) ((ContentTypeTest) in).getQNameTest()).getTests();
-            SchemaType contentType = ((ContentTypeTest)in).getContentType();
-            int nodeKind = ((ContentTypeTest) in).getNodeKind();
+        if (in instanceof NamedXNodeType && ((NamedXNodeType)in).getAllowedNodeNames() instanceof UnionQNameTest) {
+            Configuration config = ((NamedXNodeType) in).getConfiguration();
+            Set<QNameTest> tests = ((UnionQNameTest) ((NamedXNodeType) in).getAllowedNodeNames()).getTests();
+            SchemaType contentType = ((NamedXNodeType)in).getContentType();
+            int nodeKind = ((NamedXNodeType) in).getNodeKind();
             List<ItemType> memberTypes = new ArrayList<>();
-            boolean nillable = ((ContentTypeTest) in).isNillable();
+            boolean nillable = ((NamedXNodeType) in).isNillable();
             for (QNameTest test : tests) {
-                ContentTypeTest contentTypeTest = new ContentTypeTest(
+                NamedXNodeType contentTypeTest = new NamedXNodeType(
                         nodeKind, test, contentType, nillable, config);
                 memberTypes.add(contentTypeTest);
             }
@@ -266,10 +267,9 @@ public class TypeHierarchy {
                 ChoiceItemType c1 = t1 instanceof ChoiceItemType ? (ChoiceItemType) t1 : ChoiceItemType.of(t1);
                 ChoiceItemType c2 = t2 instanceof ChoiceItemType ? (ChoiceItemType) t2 : ChoiceItemType.of(t2);
                 return choiceItemRelationship(c1, c2);
-
             }
             if (t1.isPlainType()) {
-                if (t2 instanceof NodeTest || t2 instanceof FunctionItemType || t2 instanceof JavaExternalObjectType) {
+                if (t2 instanceof GNodeType || t2 instanceof FunctionItemType || t2 instanceof JavaExternalObjectType) {
                     return DISJOINT;
                 } else if (t1 == BuiltInAtomicType.ANY_ATOMIC && t2.isPlainType()) {
                     return SUBSUMES;
@@ -334,73 +334,74 @@ public class TypeHierarchy {
                     // all options exhausted
                     throw new IllegalStateException();
                 }
-            } else if (t1 instanceof AnyGNodeTest) {
-                if (t2 instanceof JNodeType || t2 instanceof NodeTest) {
+            } else if (t1 instanceof AnyGNodeType) {
+                if (t2 instanceof JNodeType || t2 instanceof XNodeType) {
                     return SUBSUMES;
                 }
                 return DISJOINT;
             } else if (t1 instanceof JNodeType) {
-                if (t2 instanceof AnyGNodeTest) {
+                if (t2 instanceof AnyGNodeType) {
                     return SUBSUMED_BY;
                 } else if (t2 instanceof JNodeType) {
                     return sequenceTypeRelationship(((JNodeType)t1).getValueType(), ((JNodeType) t2).getValueType());
                 } else {
                     return DISJOINT;
                 }
-            } else if (t1 instanceof NodeTest) {
-                if (t2.isPlainType() || t2 instanceof FunctionItemType) {
-                    return DISJOINT;
-                }
-                // first find the relationship between the node kinds allowed
-                Affinity nodeKindRelationship;
-                UType m1 = t1.getUType();
-                UType m2 = t2.getUType();
-                if (!m1.overlaps(m2)) {
-                    return DISJOINT;
-                } else if (m1.equals(m2)) {
-                    nodeKindRelationship = SAME_TYPE;
-                } else if (m2.subsumes(m1)) {
-                    nodeKindRelationship = SUBSUMED_BY;
-                } else if (m1.subsumes(m2)) {
-                    nodeKindRelationship = SUBSUMES;
-                } else {
-                    return OVERLAPS;
-                }
-
-                // Now find the relationship between the node names allowed.  See bug 3713
-                Affinity nodeNameRelationship = nameTestRelationship(
-                        ((NodeTest)t1).getQNameTest(),
-                        ((NodeTest)t2).getQNameTest());
-
-                if (nodeNameRelationship == DISJOINT || nodeNameRelationship == OVERLAPS) {
-                    return nodeNameRelationship;
-                }
-
-                // now find the relationship between the content types allowed
-
-                Affinity contentRelationship = computeContentRelationship(t1, t2);
-
-                // now analyse the three different relationships
-
-                if (nodeKindRelationship == SAME_TYPE &&
-                        nodeNameRelationship == SAME_TYPE &&
-                        contentRelationship == SAME_TYPE) {
-                    return SAME_TYPE;
-                } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMES) &&
-                        (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMES) &&
-                        (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMES)) {
-                    return SUBSUMES;
-                } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMED_BY) &&
-                        (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMED_BY) &&
-                        (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMED_BY)) {
+            } else if (t1 instanceof XNodeType) {
+                if (t2 instanceof AnyGNodeType) {
                     return SUBSUMED_BY;
-                } else if (contentRelationship == DISJOINT) {
-                    return DISJOINT;
-                } else {
-                    return OVERLAPS;
                 }
-//                    }
-//                }
+                if (t2 instanceof XNodeType) {
+                    // first find the relationship between the node kinds allowed
+                    Affinity nodeKindRelationship;
+                    UType m1 = t1.getUType();
+                    UType m2 = t2.getUType();
+                    if (!m1.overlaps(m2)) {
+                        return DISJOINT;
+                    } else if (m1.equals(m2)) {
+                        nodeKindRelationship = SAME_TYPE;
+                    } else if (m2.subsumes(m1)) {
+                        nodeKindRelationship = SUBSUMED_BY;
+                    } else if (m1.subsumes(m2)) {
+                        nodeKindRelationship = SUBSUMES;
+                    } else {
+                        return OVERLAPS;
+                    }
+
+                    // Now find the relationship between the node names allowed.  See bug 3713
+                    Affinity nodeNameRelationship = nameTestRelationship(
+                            ((XNodeType) t1).getAllowedNodeNames(),
+                            ((XNodeType) t2).getAllowedNodeNames());
+
+                    if (nodeNameRelationship == DISJOINT || nodeNameRelationship == OVERLAPS) {
+                        return nodeNameRelationship;
+                    }
+
+                    // now find the relationship between the content types allowed
+
+                    Affinity contentRelationship = computeContentRelationship((XNodeType)t1, (XNodeType)t2);
+
+                    // now analyse the three different relationships
+
+                    if (nodeKindRelationship == SAME_TYPE &&
+                            nodeNameRelationship == SAME_TYPE &&
+                            contentRelationship == SAME_TYPE) {
+                        return SAME_TYPE;
+                    } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMES) &&
+                            (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMES) &&
+                            (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMES)) {
+                        return SUBSUMES;
+                    } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMED_BY) &&
+                            (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMED_BY) &&
+                            (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMED_BY)) {
+                        return SUBSUMED_BY;
+                    } else if (contentRelationship == DISJOINT) {
+                        return DISJOINT;
+                    } else {
+                        return OVERLAPS;
+                    }
+                }
+                return DISJOINT;
             } else if (t1 instanceof AnyExternalObjectType) {
                 if (!(t2 instanceof AnyExternalObjectType)) {
                     return DISJOINT;
@@ -613,25 +614,25 @@ public class TypeHierarchy {
      *         {@link Affinity#SAME_TYPE}, {@link Affinity#SUBSUMES},
      *         {@link Affinity#SUBSUMED_BY}, {@link Affinity#DISJOINT}, {@link Affinity#OVERLAPS}
      */
-    protected Affinity computeContentRelationship(ItemType t1, ItemType t2) {
+    protected Affinity computeContentRelationship(XNodeType t1, XNodeType t2) {
         Affinity contentRelationship;
-        if (t1 instanceof DocumentNodeTest) {
-            if (t2 instanceof DocumentNodeTest) {
-                contentRelationship = relationship(((DocumentNodeTest) t1).getElementTest(),
-                        ((DocumentNodeTest) t2).getElementTest());
+        if (t1 instanceof DocumentNodeType) {
+            if (t2 instanceof DocumentNodeType) {
+                contentRelationship = relationship(((DocumentNodeType) t1).getElementTest(),
+                        ((DocumentNodeType) t2).getElementTest());
             } else {
                 contentRelationship = SUBSUMED_BY;
             }
-        } else if (t2 instanceof DocumentNodeTest) {
+        } else if (t2 instanceof DocumentNodeType) {
             contentRelationship = SUBSUMES;
         } else {
-            SchemaType s1 = ((NodeTest) t1).getContentType();
-            SchemaType s2 = ((NodeTest) t2).getContentType();
+            SchemaType s1 = t1.getContentType();
+            SchemaType s2 = t2.getContentType();
             contentRelationship = schemaTypeRelationship(s1, s2);
         }
 
-        boolean nillable1 = ((NodeTest) t1).isNillable();
-        boolean nillable2 = ((NodeTest) t2).isNillable();
+        boolean nillable1 = t1.isNillable();
+        boolean nillable2 = t2.isNillable();
 
         // Adjust the results to take nillability into account
         // Note: although nodes cannot be nilled in a non-schema-aware environment,

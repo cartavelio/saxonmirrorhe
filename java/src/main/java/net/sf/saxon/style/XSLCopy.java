@@ -14,7 +14,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
@@ -164,7 +164,7 @@ public class XSLCopy extends StyleElement {
             // wrap the UseAttributeSet instructions in a conditional to perform a run-time test
             Expression condition = new InstanceOfExpression(
                     new ContextItemExpression(),
-                    SequenceType.one(NodeKindTest.ELEMENT));
+                    SequenceType.one(NodeKindType.ELEMENT));
             Expression choice = Choose.makeConditional(condition, use);
             if (content == null) {
                 content = choice;

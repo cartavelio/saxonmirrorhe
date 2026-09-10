@@ -7,7 +7,6 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.Affinity;
@@ -44,23 +43,6 @@ public class UnionQNameTest implements QNameTest {
     public boolean matches(StructuredQName qname) {
         for (QNameTest test : tests) {
             if (test.matches(qname)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Test whether the QNameTest matches a given fingerprint
-     *
-     * @param namePool the name pool
-     * @param fp       the fingerprint of the QName to be matched
-     * @return true if the name matches, false if not
-     */
-    @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        for (QNameTest test : tests) {
-            if (test.matchesFingerprint(namePool, fp)) {
                 return true;
             }
         }
@@ -134,11 +116,6 @@ public class UnionQNameTest implements QNameTest {
             return Affinity.DISJOINT;
         }
         return Affinity.OVERLAPS;
-    }
-
-    @Override
-    public NodeTest makeNodeTest(int nodeKind) {
-        return new NameTestUnion(this, nodeKind);
     }
 
     private static boolean samePredicates(UnionQNameTest lhs, UnionQNameTest rhs) {

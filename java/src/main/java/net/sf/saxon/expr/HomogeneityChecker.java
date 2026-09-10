@@ -7,17 +7,17 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
-import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnyXNodeTest;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
@@ -59,7 +59,7 @@ public class HomogeneityChecker extends UnaryExpression {
         if (type.equals(ErrorType.getInstance())) {
             return Literal.makeEmptySequence();
         }
-        Affinity rel = th.relationship(type, AnyXNodeTest.getInstance());
+        Affinity rel = th.relationship(type, AnyGNodeType.getInstance());
         if (rel == Affinity.DISJOINT) {
             // expression cannot return nodes, so this checker is redundant
               // code deleted by bug 4298

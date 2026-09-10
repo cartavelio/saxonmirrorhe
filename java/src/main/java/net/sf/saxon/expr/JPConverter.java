@@ -16,8 +16,8 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -52,7 +52,7 @@ public abstract class JPConverter {
         converterMap.put(XdmValue.class, new FromXdmValue(AnyItemType.getInstance(), StaticProperty.ALLOWS_ZERO_OR_MORE));
         converterMap.put(XdmItem.class, new FromXdmValue(AnyItemType.getInstance(), StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmAtomicValue.class, new FromXdmValue(BuiltInAtomicType.ANY_ATOMIC, StaticProperty.ALLOWS_ONE));
-        converterMap.put(XdmNode.class, new FromXdmValue(AnyXNodeTest.getInstance(), StaticProperty.ALLOWS_ONE));
+        converterMap.put(XdmNode.class, new FromXdmValue(AnyXNodeType.getInstance(), StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmFunctionItem.class, new FromXdmValue(AnyFunctionType.getInstance(), StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmMap.class, new FromXdmValue(MapType.ANY_MAP_TYPE, StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmArray.class, new FromXdmValue(ArrayItemType.getInstance(), StaticProperty.ALLOWS_ONE));
@@ -128,8 +128,8 @@ public abstract class JPConverter {
         itemTypeMap.put(NotationValue.class, BuiltInAtomicType.NOTATION);
         itemTypeMap.put(HexBinaryValue.class, BuiltInAtomicType.HEX_BINARY);
         itemTypeMap.put(Base64BinaryValue.class, BuiltInAtomicType.BASE64_BINARY);
-        itemTypeMap.put(NodeInfo.class, AnyXNodeTest.getInstance());
-        itemTypeMap.put(TreeInfo.class, NodeKindTest.DOCUMENT);
+        itemTypeMap.put(NodeInfo.class, AnyXNodeType.getInstance());
+        itemTypeMap.put(TreeInfo.class, NodeKindType.DOCUMENT);
         itemTypeMap.put(MapItem.class, MapType.getInstance());
         itemTypeMap.put(ArrayItem.class, ArrayItemType.getInstance());
         itemTypeMap.put(FunctionItem.class, AnyFunctionType.getInstance());
@@ -193,7 +193,7 @@ public abstract class JPConverter {
         }
         if (NodeInfo.class.isAssignableFrom(javaClass)) {
             // probably now redundant
-            return new FromSequence(AnyXNodeTest.getInstance(), StaticProperty.ALLOWS_ZERO_OR_ONE);
+            return new FromSequence(AnyXNodeType.getInstance(), StaticProperty.ALLOWS_ZERO_OR_ONE);
         }
         if (Source.class.isAssignableFrom(javaClass) && !DOMSource.class.isAssignableFrom(javaClass)) {
             return FromSource.INSTANCE;
@@ -770,7 +770,7 @@ public abstract class JPConverter {
 
         @Override
         public ItemType getItemType() {
-            return AnyXNodeTest.getInstance();
+            return AnyXNodeType.getInstance();
         }
 
     }

@@ -9,7 +9,8 @@ package net.sf.saxon.tree.util;
 
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.type.Type;
 
 
@@ -220,43 +221,42 @@ public abstract class SteppingNavigator {
                 current = start;
             }
 
-            if (test == null || test == AnyXNodeTest.getInstance()) {
+            if (test == null || test == NodeTypeTest.GNODE) {
                 stepper = new FollowingNodeStepper(start);
-            } else if (test instanceof NameTest) {
-                if (((NameTest)test).getPrimitiveType() == Type.ELEMENT) {
-                    NameTest nt = (NameTest) test;
-                    if (start.hasFingerprint()) {
-                        stepper = new FollowingFingerprintedElementStepper(start, nt.getFingerprint());
-                    } else {
-                        stepper = new FollowingElementStepper(start, nt.getNamespaceURI(), nt.getLocalPart());
-                    }
-                } else {
-                    stepper = new FollowingFilteredNodeStepper(start, test);
-                }
-            } else if (test instanceof NodeKindTest) {
-                if (((NodeKindTest)test).getPrimitiveType() == Type.ELEMENT) {
-                    stepper = new FollowingElementStepper(start, null, null);
-                } else {
-                    stepper = new FollowingFilteredNodeStepper(start, test);
-                }
-            } else if (test instanceof LocalNameTest) {
-                if (((LocalNameTest)test).getPrimitiveType() == Type.ELEMENT) {
-                    LocalNameTest nt = (LocalNameTest) test;
-                    stepper = new FollowingElementStepper(start, null, nt.getLocalName());
-                } else {
-                    stepper = new FollowingFilteredNodeStepper(start, test);
-                }
-            } else if (test instanceof NamespaceTest) {
-                if (((NamespaceTest)test).getPrimitiveType() == Type.ELEMENT) {
-                    NamespaceTest nt = (NamespaceTest) test;
-                    stepper = new FollowingElementStepper(start, nt.getNamespaceURI(), null);
-                } else {
-                    stepper = new FollowingFilteredNodeStepper(start, test);
-                }
             } else {
-                stepper = new FollowingFilteredNodeStepper(start, test);
+                int fingerprint = test.getRequiredFingerprint(Type.ELEMENT);
+                if (fingerprint != -1) {
+                    stepper = new FollowingFingerprintedElementStepper(start, fingerprint);
+                } else {
+                    stepper = new FollowingFilteredNodeStepper(start, test);
+                }
             }
+//            } else if (test instanceof NodeKindType) {
+//                if (((NodeKindType)test).getPrimitiveType() == Type.ELEMENT) {
+//                    stepper = new FollowingElementStepper(start, null, null);
+//                } else {
+//                    stepper = new FollowingFilteredNodeStepper(start, test);
+//                }
+//            } else if (test instanceof LocalNameTest) {
+//                if (((LocalNameTest)test).getPrimitiveType() == Type.ELEMENT) {
+//                    LocalNameTest nt = (LocalNameTest) test;
+//                    stepper = new FollowingElementStepper(start, null, nt.getLocalName());
+//                } else {
+//                    stepper = new FollowingFilteredNodeStepper(start, test);
+//                }
+//            } else if (test instanceof NamespaceTest) {
+//                if (((NamespaceTest)test).getPrimitiveType() == Type.ELEMENT) {
+//                    NamespaceTest nt = (NamespaceTest) test;
+//                    stepper = new FollowingElementStepper(start, nt.getNamespaceURI(), null);
+//                } else {
+//                    stepper = new FollowingFilteredNodeStepper(start, test);
+//                }
+//                    } else {
+//                        stepper = new FollowingFilteredNodeStepper(start, test);
+//                    }
+//                }
         }
+        //}
 
 
         @Override

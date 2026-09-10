@@ -7,13 +7,19 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.om.*;
+import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.NamespaceQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.type.*;
-import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntPredicateProxy;
+import net.sf.saxon.type.Type;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UType;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.z.IntSet;
 
 import java.util.Optional;
@@ -49,17 +55,6 @@ public final class NamespaceTest extends NodeTest {
     }
 
     /**
-     * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
-     * types.
-     *
-     * @return the smallest UType that subsumes this item type
-     */
-    @Override
-    public UType getUType() {
-        return uType;
-    }
-
-    /**
      * Get the set of node names allowed by this NodeTest. Return no result, because the
      * set of names cannot be represented.
      *
@@ -72,54 +67,56 @@ public final class NamespaceTest extends NodeTest {
         return Optional.empty();
     }
 
-    @Override
-    public String getFullAlphaCode() {
-        return getBasicAlphaCode() + " nQ{" + uri + "}*";
-    }
+//    @Override
+//    public String getFullAlphaCode() {
+//        return getBasicAlphaCode() + " nQ{" + uri + "}*";
+//    }
+
+//    /**
+//     * Test whether this node test is satisfied by a given node. This method is only
+//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
+//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
+//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
+//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
+//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
+//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
+//     * node tests where the node kind is known to be an attribute.
+//     *
+//     * @param nodeKind   The kind of node to be matched
+//     * @param name       identifies the expanded name of the node to be matched.
+//     *                   The value should be null for a node with no name.
+//     * @param annotation The actual content type of the node
+//     */
+//    @Override
+//    public boolean matches(int nodeKind, /*@Nullable*/ NodeName name, SchemaType annotation) {
+//        return name != null && name.hasURI(uri);
+//    }
+
+//    @Override
+//    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
+//        final byte[] nodeKindArray = tree.getNodeKindArray();
+//        final int[] nameCodeArray = tree.getNameCodeArray();
+//        final NamePool namePool = tree.getNamePool();
+//        return IntPredicateLambda.of(nodeNr -> {
+//            int fp = nameCodeArray[nodeNr] & 0xfffff;
+//            return fp != -1 &&
+//                    (nodeKindArray[nodeNr]&0x0f) == nodeKind &&
+//                    uri.equals(namePool.getURI(fp));
+//        });
+//    }
 
     /**
-     * Test whether this node test is satisfied by a given node. This method is only
-     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-     * node tests where the node kind is known to be an attribute.
-     *
-     * @param nodeKind   The kind of node to be matched
-     * @param name       identifies the expanded name of the node to be matched.
-     *                   The value should be null for a node with no name.
-     * @param annotation The actual content type of the node
-     */
-    @Override
-    public boolean matches(int nodeKind, /*@Nullable*/ NodeName name, SchemaType annotation) {
-        return name != null && name.hasURI(uri);
-    }
-
-    @Override
-    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
-        final byte[] nodeKindArray = tree.getNodeKindArray();
-        final int[] nameCodeArray = tree.getNameCodeArray();
-        final NamePool namePool = tree.getNamePool();
-        return IntPredicateLambda.of(nodeNr -> {
-            int fp = nameCodeArray[nodeNr] & 0xfffff;
-            return fp != -1 &&
-                    (nodeKindArray[nodeNr]&0x0f) == nodeKind &&
-                    uri.equals(namePool.getURI(fp));
-        });
-    }
-
-    /**
-     * Test whether this node test is satisfied by a given node. This alternative
-     * method is used in the case of nodes where calculating the fingerprint is expensive,
-     * for example DOM or JDOM nodes.
+     * Test whether this node test is satisfied by a given node.
      *
      * @param gnode the node to be matched
      */
 
     @Override
     public boolean test(GNode gnode) {
+        if (gnode instanceof JNode) {
+            AtomicValue key = ((JNode) gnode).getSelector();
+            return key instanceof QNameValue && ((QNameValue) key).getNamespaceURI().equals(uri);
+        }
         NodeInfo node = (NodeInfo)gnode;
         return node.getNodeKind() == nodeKind && node.getNamespaceUri().equals(uri);
     }
@@ -145,17 +142,17 @@ public final class NamespaceTest extends NodeTest {
     }
 
 
-    /**
-     * Determine the types of nodes to which this pattern applies. Used for optimisation.
-     * For patterns that match nodes of several types, return Type.NODE
-     *
-     * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
-     */
-
-    @Override
-    public int getPrimitiveType() {
-        return nodeKind;
-    }
+//    /**
+//     * Determine the types of nodes to which this pattern applies. Used for optimisation.
+//     * For patterns that match nodes of several types, return Type.NODE
+//     *
+//     * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
+//     */
+//
+//    @Override
+//    public int getPrimitiveType() {
+//        return nodeKind;
+//    }
 
     /**
      * Get the namespace URI matched by this NamespaceTest

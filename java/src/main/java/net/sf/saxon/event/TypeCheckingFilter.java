@@ -10,7 +10,7 @@ package net.sf.saxon.event;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
@@ -56,7 +56,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
         this.cardinality = cardinality;
         this.roleDiagnostic = roleDiagnostic;
         this.locator = locator;
-        Affinity aff = typeHierarchy.relationship(requiredType, NodeKindTest.ELEMENT);
+        Affinity aff = typeHierarchy.relationship(requiredType, NodeKindType.ELEMENT);
         allowAnyElement = aff == Affinity.SAME_TYPE || aff == Affinity.SUBSUMES;
     }
 
@@ -158,7 +158,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(Loc.NONE);
             }
-            checkItemType(NodeKindTest.DOCUMENT,
+            checkItemType(NodeKindType.DOCUMENT,
                           nodeSupplier(Type.DOCUMENT, null, null, EmptyUnicodeString.getInstance()), Loc.NONE);
         }
         level++;

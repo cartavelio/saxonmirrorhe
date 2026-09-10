@@ -112,6 +112,9 @@ public class CurriedFunction extends AbstractFunction {
     /*@Nullable*/
     @Override
     public StructuredQName getFunctionName() {
+        if (getArity() == targetFunction.getArity()) {
+            return targetFunction.getFunctionName();
+        }
         return null;
     }
 

@@ -18,9 +18,9 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -166,7 +166,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the type node(), that is, any node
      */
 
-    public static final ItemType ANY_NODE = new ItemType(AnyXNodeTest.getInstance()) {
+    public static final ItemType ANY_NODE = new ItemType(AnyXNodeType.getInstance()) {
 
         @Override
         public boolean matches(XdmItem item) {
@@ -185,7 +185,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the ATTRIBUTE node() type
      */
 
-    public static final ItemType ATTRIBUTE_NODE = new ItemType(NodeKindTest.ATTRIBUTE) {
+    public static final ItemType ATTRIBUTE_NODE = new ItemType(NodeKindType.ATTRIBUTE) {
 
         @Override
         public boolean matches(XdmItem item) {
@@ -205,7 +205,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the COMMENT node() type
      */
 
-    public static final ItemType COMMENT_NODE = new ItemType(NodeKindTest.COMMENT) {
+    public static final ItemType COMMENT_NODE = new ItemType(NodeKindType.COMMENT) {
 
         @Override
         public boolean matches(XdmItem item) {
@@ -225,7 +225,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the TEXT node() type
      */
 
-    public static final ItemType TEXT_NODE = new ItemType(NodeKindTest.TEXT) {
+    public static final ItemType TEXT_NODE = new ItemType(NodeKindType.TEXT) {
 
         @Override
         public boolean matches(XdmItem item) {
@@ -245,7 +245,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the ELEMENT node() type
      */
 
-    public static final ItemType ELEMENT_NODE = new ItemType(NodeKindTest.ELEMENT) {
+    public static final ItemType ELEMENT_NODE = new ItemType(NodeKindType.ELEMENT) {
 
         @Override
         public boolean matches(XdmItem item) {
@@ -264,7 +264,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the DOCUMENT node() type
      */
 
-    public static final ItemType DOCUMENT_NODE = new ItemType(NodeKindTest.DOCUMENT) {
+    public static final ItemType DOCUMENT_NODE = new ItemType(NodeKindType.DOCUMENT) {
 
         @Override
         public boolean matches(XdmItem item) {
@@ -284,7 +284,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the NAMESPACE node() type
      */
 
-    public static final ItemType NAMESPACE_NODE = new ItemType(NodeKindTest.NAMESPACE) {
+    public static final ItemType NAMESPACE_NODE = new ItemType(NodeKindType.NAMESPACE) {
 
         @Override
         public boolean matches(XdmItem item) {
@@ -304,7 +304,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      * ItemType representing the PROCESSING_INSTRUCTION node() type
      */
 
-    public static final ItemType PROCESSING_INSTRUCTION_NODE = new ItemType(NodeKindTest.PROCESSING_INSTRUCTION) {
+    public static final ItemType PROCESSING_INSTRUCTION_NODE = new ItemType(NodeKindType.PROCESSING_INSTRUCTION) {
 
         @Override
         public boolean matches(XdmItem item) {

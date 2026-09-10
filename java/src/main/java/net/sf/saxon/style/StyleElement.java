@@ -34,6 +34,7 @@ import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.tree.linked.TextImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.value.BigDecimalValue;
 import net.sf.saxon.value.DecimalValue;
 import net.sf.saxon.value.SequenceType;
@@ -736,7 +737,7 @@ public abstract class StyleElement extends ElementImpl {
             err.maybeSetErrorCode("XTSE0340");
             XPathException err2 = err.replacingErrorCode("XPST0003", "XTSE0340");
             compileError(err2);
-            NodeTestPattern nsp = new NodeTestPattern(AnyXNodeTest.getInstance());
+            ItemTypePattern nsp = new ItemTypePattern(AnyXNodeType.getInstance());
             nsp.setLocation(allocateLocation());
             return nsp;
         }
@@ -1710,7 +1711,7 @@ public abstract class StyleElement extends ElementImpl {
                 throw e2;
             } else {
                 Pattern p = new BasePatternWithPredicate(
-                        new NodeTestPattern(ErrorType.getInstance()),
+                        new ItemTypePattern(ErrorType.getInstance()),
                         new ErrorExpression(new XmlProcessingException(err)));
                 p.setLocation(allocateLocation());
                 return p;

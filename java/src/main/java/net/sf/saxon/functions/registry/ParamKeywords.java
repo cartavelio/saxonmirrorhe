@@ -59,7 +59,8 @@ public class ParamKeywords {
         arrayParamNames.put("size", "array");
         arrayParamNames.put("slice", "array|start|end|step");
         arrayParamNames.put("split", "array");
-        arrayParamNames.put("sort", "array|collations|keys|orders");
+        arrayParamNames.put("sort", "array|collations|key");
+        arrayParamNames.put("sort-by", "array|keys");
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
         arrayParamNames.put("trunk", "array");
@@ -160,6 +161,7 @@ public class ParamKeywords {
         fnParamNames.put("hours-from-dateTime", "value");
         fnParamNames.put("hours-from-duration", "value");
         fnParamNames.put("hours-from-time", "value");
+        fnParamNames.put("html-doc", "source|options");
         fnParamNames.put("id", "values|node");
         fnParamNames.put("identity", "input");
         fnParamNames.put("idref", "values|node");
@@ -218,7 +220,7 @@ public class ParamKeywords {
         fnParamNames.put("parse-ietf-date", "value");
         fnParamNames.put("parse-integer", "value|radix");
         fnParamNames.put("parse-json", "value|options");
-        fnParamNames.put("parse-html", "html|options");
+        fnParamNames.put("parse-html", "value|options");
         fnParamNames.put("parse-QName", "value");
         fnParamNames.put("parse-uri", "value|options");
         fnParamNames.put("parse-xml", "value|options");
@@ -253,6 +255,7 @@ public class ParamKeywords {
         fnParamNames.put("slice", "input|start|end|step");
         fnParamNames.put("some", "input|predicate");
         fnParamNames.put("sort", "input|collation|key");
+        fnParamNames.put("sort-by", "input|keys");
         fnParamNames.put("sort-with", "input|comparators");
         fnParamNames.put("stack-trace", "");
         fnParamNames.put("starts-with", "value|substring|collation");

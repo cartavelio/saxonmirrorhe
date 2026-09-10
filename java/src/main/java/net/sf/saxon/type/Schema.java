@@ -5,10 +5,10 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.gnode.GNodeType;
 
 /**
  * A schema is a collection of schema components. It may be derived from a single schema
@@ -133,12 +133,13 @@ public interface Schema {
 
     /**
      * Make a {@code schema-element} node test for a given element name
+     *
      * @param fp the integer fingerprint of the element name
      * @return a node test corresponding to the XPath item type syntax schema-element(E)
      * @throws SchemaException if there is no element declaration with this name in the schema
      */
 
-    NodeTest makeSchemaElementTest(int fp) throws SchemaException;
+    GNodeType makeSchemaElementTest(int fp) throws SchemaException;
 
     /**
      * Make a {@code schema-attribute} node test for a given attribute name
@@ -148,7 +149,7 @@ public interface Schema {
      * @throws SchemaException if there is no attribute declaration with this name in the schema
      */
 
-    NodeTest makeSchemaAttributeTest(int fp) throws SchemaException;
+    GNodeType makeSchemaAttributeTest(int fp) throws SchemaException;
 
 
 }

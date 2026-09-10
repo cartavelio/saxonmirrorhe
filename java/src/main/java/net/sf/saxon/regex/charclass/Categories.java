@@ -12,16 +12,15 @@ import net.sf.saxon.Version;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.z.*;
 
 import javax.xml.transform.stream.StreamSource;
@@ -147,11 +146,11 @@ public class Categories {
         int fp_f = config.getNamePool().allocateFingerprint(NamespaceUri.NULL, "f");
         int fp_t = config.getNamePool().allocateFingerprint(NamespaceUri.NULL, "t");
 
-        SequenceIterator iter = doc.iterateDescendantAxis(new NameTest(Type.ELEMENT, NamespaceUri.NULL, "cat", config.getNamePool()));
+        SequenceIterator iter = doc.iterateDescendantAxis(NamedXNodeType.make(Type.ELEMENT, NamespaceUri.NULL, "cat", config));
         for (NodeInfo item; (item = (NodeInfo)iter.next()) != null; ) {
             String cat = ((TinyElementImpl)item).getAttributeValue(fp_name);
             IntRangeSet irs = new IntRangeSet();
-            for (NodeInfo r : item.children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo r : item.children(NodeTypeTest.ELEMENT)) {
                 String from = ((TinyElementImpl)r).getAttributeValue(fp_f);
                 String to = ((TinyElementImpl) r).getAttributeValue(fp_t);
                 irs.addRange(Integer.parseInt(from, 16), Integer.parseInt(to, 16));

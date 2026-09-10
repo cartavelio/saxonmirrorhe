@@ -15,7 +15,9 @@ import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.TemplateRule;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.StylesheetModule;
 import net.sf.saxon.style.StylesheetPackage;
@@ -24,7 +26,6 @@ import net.sf.saxon.trans.rules.*;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.ErrorType;
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
@@ -373,16 +374,10 @@ public class SimpleMode extends Mode {
         Rule newRule = makeRule(pattern, action, precedence, minImportPrecedence, priority, position, part);
 
         if (pattern instanceof NodeTestPattern) {
-            ItemType test = pattern.getItemType();
-            if (test instanceof AnyXNodeTest) {
+            NodeTest test = ((NodeTestPattern)pattern).getNodeTest();
+            int fingerprint = test.getFingerprint();
+            if (fingerprint != -1) {
                 newRule.setAlwaysMatches(true);
-            } else if (test instanceof NodeKindTest) {
-                newRule.setAlwaysMatches(true);
-            } else if (test instanceof NameTest) {
-                int kind = test.getPrimitiveType();
-                if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
-                    newRule.setAlwaysMatches(true);
-                }
             }
         }
         mostRecentRule = newRule;

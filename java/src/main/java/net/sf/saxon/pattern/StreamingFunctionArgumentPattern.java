@@ -18,6 +18,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 
 /**
  * This is a special pattern that matches the node supplied as the first argument of a call to
@@ -90,7 +91,7 @@ public class StreamingFunctionArgumentPattern extends Pattern {
 
     @Override
     public ItemType getItemType() {
-        return AnyXNodeTest.getInstance();
+        return AnyXNodeType.getInstance();
     }
 
     @Override

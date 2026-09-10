@@ -14,13 +14,15 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -253,7 +255,27 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         if (tree.alpha[nodeNr] < 0) {
             return EmptyIterator.getInstance();
         }
-        return new AttributeIterator(tree, nodeNr, nodeTestFromPredicate(predicate));
+        NodeTest selector = nodeTestFromPredicate(predicate);
+
+        // Fast path for selecting a specific attribute by name
+        int requiredFingerprint = selector.getRequiredFingerprint(Type.ATTRIBUTE);
+        if (requiredFingerprint != -1) {
+            int index = tree.alpha[nodeNr];
+            int[] attNames = tree.getAttributeNameCodeArray();
+            while (index < tree.numberOfAttributes && tree.attParent[index] == nodeNr) {
+                if (requiredFingerprint == (attNames[index] & NamePool.FP_MASK)) {
+                    TinyAttributeImpl att = tree.getAttributeNode(index);
+                    if (predicate.test(att)) { //because there might be other conditions
+                        return new SingletonIterator(att);
+                    } else {
+                        return EmptyIterator.getInstance();
+                    }
+                }
+                index++;
+            }
+            return EmptyIterator.getInstance();
+        }
+        return new AttributeIterator(tree, nodeNr, selector);
     }
 
     /**

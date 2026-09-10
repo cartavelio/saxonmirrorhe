@@ -10,8 +10,9 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.trans.*;
 
 /**
@@ -44,18 +45,19 @@ public class XSLAccept extends XSLAcceptExpose {
         if (pack != null) {
             for (ComponentTest test : getExplicitComponentTests()) {
                 QNameTest nameTest = test.getQNameTest();
-                if (nameTest instanceof NameTest) {
+                if (nameTest instanceof SpecificQNameTest) {
                     int kind = test.getComponentKind();
+                    StructuredQName name = ((SpecificQNameTest)nameTest).getStructuredQName();
                     SymbolicName sName = kind == StandardNames.XSL_FUNCTION ?
-                        new SymbolicName.F(((NameTest) nameTest).getMatchingNodeName(), test.getArity()) :
-                        new SymbolicName(kind, ((NameTest) nameTest).getMatchingNodeName());
+                        new SymbolicName.F(name, test.getArity()) :
+                        new SymbolicName(kind, name);
                     Component comp = pack.getComponent(sName);
                     boolean found = false;
                     if (comp == null) {
                         if (kind == StandardNames.XSL_FUNCTION && test.getArity() == -1) {
                             // This will match any function of the required name, regardless of arity
                             for (int i = 0; i <= pack.getMaxFunctionArity(); i++) {
-                                sName = new SymbolicName.F(((NameTest) nameTest).getMatchingNodeName(), i);
+                                sName = new SymbolicName.F(name, i);
                                 comp = pack.getComponent(sName);
                                 if (comp != null) {
                                     checkCompatibility(sName, comp.getVisibility(), getVisibility());

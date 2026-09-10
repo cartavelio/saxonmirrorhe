@@ -11,8 +11,8 @@ import com.saxonica.ee.validate.SkipValidator;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Stripper;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -225,7 +225,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         switch (getNodeKind()) {
             case Type.DOCUMENT:
             case Type.ELEMENT:
-                SequenceIterator iter = iterateDescendantAxis(NodeKindTest.makeNodeKindTest(Type.TEXT));
+                SequenceIterator iter = iterateDescendantAxis(NodeTypeTest.TEXT);
                 UnicodeBuilder sb = new UnicodeBuilder();
                 NodeInfo it;
                 while ((it = (NodeInfo)iter.next()) != null) {

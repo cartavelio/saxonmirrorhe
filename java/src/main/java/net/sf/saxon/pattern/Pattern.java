@@ -17,12 +17,19 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.Current;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.*;
+import net.sf.saxon.tree.iter.ConcatenatingIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 
@@ -329,24 +336,24 @@ public abstract class Pattern extends PseudoExpression {
                 return EmptyIterator.getInstance();
             }
         } else if (UType.ATTRIBUTE.subsumes(uType)) {
-            SequenceIterator allElements = doc.iterateDescendantAxis(NodeKindTest.ELEMENT);
+            SequenceIterator allElements = doc.iterateDescendantAxis(NodeTypeTest.ELEMENT);
             SequenceIterator allAttributes =
                     MappingIterator.map(allElements,
                                         item -> ((NodeInfo) item).iterateAttributeAxis(null));
             return ItemMappingIterator.filter(allAttributes, item -> matchesItem(item, context));
         } else if (UType.NAMESPACE.subsumes(uType)) {
-            SequenceIterator allElements = doc.iterateDescendantAxis(NodeKindTest.ELEMENT);
+            SequenceIterator allElements = doc.iterateDescendantAxis(NodeTypeTest.ELEMENT);
             SequenceIterator allNamespaces =
                     MappingIterator.map(allElements,
                                         item -> ((NodeInfo) item).iterateNamespaceAxis(null));
             return ItemMappingIterator.filter(allNamespaces, item -> matchesItem(item, context));
 
         } else if (UType.CHILD_NODE_KINDS.subsumes(uType)) {
-            NodeTest nodeTest;
+            NodePredicate nodeTest;
             if (uType.equals(UType.ELEMENT)) {
-                nodeTest = NodeKindTest.ELEMENT; // common case, enables use of getAllElements()
+                nodeTest = NodeTypeTest.ELEMENT; // common case, enables use of getAllElements()
             } else {
-                nodeTest = new MultipleNodeKindTest(uType);
+                nodeTest = uType::matches;
             }
             SequenceIterator allChildren = doc.iterateDescendantAxis(nodeTest);
             return ItemMappingIterator.filter(allChildren, item -> matchesItem(item, context));
@@ -379,7 +386,6 @@ public abstract class Pattern extends PseudoExpression {
      */
 
     public abstract UType getUType();
-
 
     /**
      * Determine the name fingerprint of nodes to which this pattern applies. Used for

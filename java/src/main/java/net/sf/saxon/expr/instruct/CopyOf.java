@@ -17,10 +17,10 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.ContentTypeTest;
-import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NamedXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.str.UnicodeString;
@@ -286,13 +286,13 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         Configuration config = getConfiguration();
         if (schemaType != null) {
             TypeHierarchy th = config.getTypeHierarchy();
-            Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
+            Affinity e = th.relationship(in, NodeKindType.ELEMENT);
             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                return new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), schemaType, false, config);
+                return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), schemaType, false, config);
             }
-            Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
+            Affinity a = th.relationship(in, NodeKindType.ATTRIBUTE);
             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                return new ContentTypeTest(Type.ATTRIBUTE, AnyQNameTest.getInstance(), schemaType, false, config);
+                return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), schemaType, false, config);
             }
         } else {
             switch (validation) {
@@ -300,18 +300,18 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     return in;
                 case Validation.STRIP: {
                     TypeHierarchy th = config.getTypeHierarchy();
-                    Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
+                    Affinity e = th.relationship(in, NodeKindType.ELEMENT);
                     if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                        return new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
+                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
                     }
-                    Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
+                    Affinity a = th.relationship(in, NodeKindType.ATTRIBUTE);
                     if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                        return new ContentTypeTest(Type.ATTRIBUTE, AnyQNameTest.getInstance(), BuiltInAtomicType.UNTYPED_ATOMIC, false, config);
+                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), BuiltInAtomicType.UNTYPED_ATOMIC, false, config);
                     }
                     if (e != Affinity.DISJOINT || a != Affinity.DISJOINT) {
                         // it might be an element or attribute
                         if (in instanceof NodeTest) {
-                            return AnyXNodeTest.getInstance();
+                            return AnyXNodeType.getInstance();
                         } else {
                             return AnyItemType.getInstance();
                         }
@@ -324,49 +324,49 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 case Validation.LAX:
                     if (in instanceof NodeTest) {
                         TypeHierarchy th = config.getTypeHierarchy();
-                        int fp = ((NodeTest) in).getFingerprint();
+                        int fp = ((NodeTest) in).getRequiredFingerprint(Type.ELEMENT);
                         if (fp != -1) {
-                            Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
+                            Affinity e = th.relationship(in, NodeKindType.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
                                 Schema schema = getRetainedStaticContext().getImportedSchema();
                                 IElementDecl elem = schema.getElementDecl(fp);
                                 if (elem != null) {
                                     try {
-                                        return new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), elem.getType(), false, config);
+                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), elem.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
+                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
                                     }
                                 } else {
                                     // Although there is no element declaration now, there might be one at run-time
-                                    return new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
+                                    return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
                                 }
                             }
-                            Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
+                            Affinity a = th.relationship(in, NodeKindType.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
                                 Schema schema = getRetainedStaticContext().getImportedSchema();
                                 IAttributeDecl attr = schema.getAttributeDecl(fp);
                                 if (attr != null) {
                                     try {
-                                        return new ContentTypeTest(Type.ATTRIBUTE, AnyQNameTest.getInstance(), attr.getType(), false, config);
+                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), attr.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new ContentTypeTest(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
+                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
                                     }
                                 } else {
                                     // Although there is no attribute declaration now, there might be one at run-time
-                                    return new ContentTypeTest(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
+                                    return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
                                 }
                             }
                         } else {
-                            Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
+                            Affinity e = th.relationship(in, NodeKindType.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                                return NodeKindTest.ELEMENT;
+                                return NodeKindType.ELEMENT;
                             }
-                            Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
+                            Affinity a = th.relationship(in, NodeKindType.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                                return NodeKindTest.ATTRIBUTE;
+                                return NodeKindType.ATTRIBUTE;
                             }
                         }
-                        return AnyXNodeTest.getInstance();
+                        return AnyXNodeType.getInstance();
                     } else if (in instanceof AtomicType) {
                         return in;
                     } else {
@@ -406,19 +406,19 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
             TypeHierarchy th = config.getTypeHierarchy();
             ItemType t = getSelect().getItemType();
-            if (th.isSubType(t, NodeKindTest.ATTRIBUTE)) {
+            if (th.isSubType(t, NodeKindType.ATTRIBUTE)) {
                 throw new XPathException("validate{} expression cannot be applied to an attribute", "XQTY0030");
             }
-            if (th.isSubType(t, NodeKindTest.TEXT)) {
+            if (th.isSubType(t, NodeKindType.TEXT)) {
                 throw new XPathException("validate{} expression cannot be applied to a text node", "XQTY0030");
             }
-            if (th.isSubType(t, NodeKindTest.COMMENT)) {
+            if (th.isSubType(t, NodeKindType.COMMENT)) {
                 throw new XPathException("validate{} expression cannot be applied to a comment node", "XQTY0030");
             }
-            if (th.isSubType(t, NodeKindTest.PROCESSING_INSTRUCTION)) {
+            if (th.isSubType(t, NodeKindType.PROCESSING_INSTRUCTION)) {
                 throw new XPathException("validate{} expression cannot be applied to a processing instruction node", "XQTY0030");
             }
-            if (th.isSubType(t, NodeKindTest.NAMESPACE)) {
+            if (th.isSubType(t, NodeKindType.NAMESPACE)) {
                 throw new XPathException("validate{} expression cannot be applied to a namespace node", "XQTY0030");
             }
         }

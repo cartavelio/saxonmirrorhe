@@ -13,9 +13,16 @@ import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.DocumentSorter;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.MultipleNodeKindTest;
+import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.pattern.nodetest.*;
+import net.sf.saxon.pattern.qname.NamespaceQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -23,12 +30,10 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.SequenceCoercer;
-import net.sf.saxon.z.IntIterator;
-import net.sf.saxon.z.IntSet;
+import net.sf.saxon.type.gnode.*;
 
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -113,7 +118,7 @@ public final class AxisExpression extends Expression {
         if (e2 != this) {
             return e2;
         }
-        if ((test == null || test == AnyXNodeTest.getInstance() || test == AnyGNodeTest.getInstance()) &&
+        if ((test == null || test == NodeTypeTest.GNODE) &&
                 (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
             // get more precise type information for parent/ancestor nodes
             test = MultipleNodeKindTest.PARENT_NODE;
@@ -143,17 +148,11 @@ public final class AxisExpression extends Expression {
                     .withLocation(getLocation());
         }
         if (visitor.getStaticContext().getXPathVersion() >= 40) {
-            if (!th.isSubType(contextItemType, AnyGNodeTest.getInstance())) {
+            if (!th.isSubType(contextItemType, AnyGNodeType.getInstance())) {
                 Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(
                         RoleDiagnostic.AXIS_STEP, "", axis);
-                Expression coercer = SequenceCoercer.makeSequenceCoercer(new ContextItemExpression(), JNodeType.ANY_JNODE.zeroOrMore(), role, true);
+                Expression coercer = SequenceCoercer.makeSequenceCoercer(new ContextItemExpression(), AnyGNodeType.getInstance().zeroOrMore(), role, true);
                 return new SimpleStepExpression(coercer, this).typeCheck(visitor, contextInfo);
-            }
-        }
-        if (test instanceof RawNodeTest) {
-            NodeTest newTest = ((RawNodeTest) test).cook(contextItemType);
-            if (newTest != test) {
-                return new AxisExpression(axis, newTest).typeCheck(visitor, contextInfo);
             }
         }
         if (contextInfo.getCardinality() != StaticProperty.ALLOWS_ONE) {
@@ -167,7 +166,7 @@ public final class AxisExpression extends Expression {
         }
 
         if (!UType.GNODE.subsumes(contextItemType.getUType())) {
-            Affinity relation = th.relationship(contextItemType, AnyXNodeTest.getInstance());
+            Affinity relation = th.relationship(contextItemType, AnyXNodeType.getInstance());
             if (relation == Affinity.DISJOINT) {
                 throw new XPathException("Axis step "
                                                  + this + " cannot be used here: the context item is not a node")
@@ -184,11 +183,26 @@ public final class AxisExpression extends Expression {
                 ExpressionTool.copyLocationInfo(this, exp);
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.AXIS_STEP, "", axis, "XPTY0020");
-                ItemChecker checker = new ItemChecker(exp, AnyXNodeTest.getInstance(), role);
+                ItemChecker checker = new ItemChecker(exp, AnyXNodeType.getInstance(), role);
                 ExpressionTool.copyLocationInfo(this, checker);
                 SimpleStepExpression step = new SimpleStepExpression(checker, thisExp);
                 ExpressionTool.copyLocationInfo(this, step);
                 return step;
+            }
+        }
+
+        if (contextItemType instanceof XNodeType) {
+            // An axis step starting at an XNode will always return XNodes
+            if (test == null) {
+                return new AxisExpression(axis, new NodeTypeTest(AnyXNodeType.getInstance()));
+            } else if (test instanceof NodeTestStar) {
+                NodeKindType kind = NodeKindType.of(((NodeTestStar)test).getDefaultNodeKind());
+                return new AxisExpression(axis, new NodeTypeTest(kind));
+            }
+        } else if (contextItemType instanceof JNodeType) {
+            // An axis step starting at a JNode will always return JNodes
+            if (test == null || test instanceof NodeTestStar) {
+                return new AxisExpression(axis, new NodeTypeTest(AnyJNodeType.getInstance()));
             }
         }
 
@@ -200,13 +214,13 @@ public final class AxisExpression extends Expression {
     }
 
     private Expression checkPlausibility(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, boolean warnings)
-            throws XPathException  {
+            throws XPathException {
         StaticContext env = visitor.getStaticContext();
         Configuration config = env.getConfiguration();
         ItemType contextType = contextInfo.getItemType();
 
         if (!(contextType instanceof NodeTest)) {
-            contextType = AnyXNodeTest.getInstance();
+            contextType = AnyGNodeType.getInstance();
         }
 
         if (contextType instanceof JNodeType) {
@@ -223,141 +237,148 @@ public final class AxisExpression extends Expression {
             return Literal.makeEmptySequence();
         }
 
-        if (test instanceof NameTest && axis == AxisInfo.NAMESPACE && !((NameTest) test).getNamespaceURI().isEmpty()) {
-            if (warnings) {
-                visitor.issueWarning("The names of namespace nodes are never prefixed, so this axis step will never select anything",
-                                     SaxonErrorCode.SXWN9037, getLocation());
-            }
-            return Literal.makeEmptySequence();
-        }
-
-        // Test whether the axis ever selects anything, when starting at this context node
-        UType originUType = contextType.getUType();
-
-        if (originUType == UType.JNODE) {
-            itemType = JNodeType.ANY_JNODE;
-            return this;
-        }
-        UType targetUType = AxisInfo.getTargetUType(originUType, axis);
-        UType testUType = test == null ? UType.XNODE : test.getUType();
-        if (targetUType.equals(UType.VOID)) {
-            if (warnings) {
-                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
-                                             originUType.toStringWithIndefiniteArticle() + " will never select anything",
-                                     SaxonErrorCode.SXWN9037, getLocation());
-            }
-            return Literal.makeEmptySequence();
-        }
-
-        if (contextInfo.isParentless() && (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
-            if (warnings) {
-                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select anything because the context item is parentless",
-                                     SaxonErrorCode.SXWN9037, getLocation());
-            }
-            return Literal.makeEmptySequence();
-        }
-
-        // Test whether the axis ever selects a node of the right kind, when starting at this context node
-        if (!targetUType.overlaps(testUType)) {
-            if (warnings) {
-                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
-                                             originUType.toStringWithIndefiniteArticle() + " will never select " +
-                                             test.getUType().toStringWithIndefiniteArticle(),
-                                     SaxonErrorCode.SXWN9037, getLocation());
-            }
-            return Literal.makeEmptySequence();
-        }
-
-        // For an X-or-self axis, if X never selects anything, then substitute the self axis.
-        int nonSelf = AxisInfo.excludeSelfAxis[axis];
-        UType kind = test == null ? UType.XNODE : test.getUType();
-        if (axis != nonSelf) {
-            UType nonSelfTarget = AxisInfo.getTargetUType(originUType, nonSelf);
-            if (!nonSelfTarget.overlaps(testUType)) {
-                axis = AxisInfo.SELF;
-                targetUType = AxisInfo.getTargetUType(originUType, axis);
-            }
-        }
-
-        ItemType target = targetUType.toItemType();
-        if (test == null || test instanceof AnyXNodeTest) {
-            itemType = target;
-        } else if (target instanceof AnyXNodeTest || targetUType.subsumes(test.getUType())) {
-            itemType = test;
-        } else {
-            itemType = new CombinedNodeTest((NodeTest) target, OperatorSymbol.INTERSECT, test);
-        }
-
-        if (test != null) {
-
-            // If the content type of the context item is known, see whether the node test can select anything
-
-            if (contextType instanceof DocumentNodeTest && kind.equals(UType.ELEMENT)) {
-                NodeTest elementTest = ((DocumentNodeTest) contextType).getElementTest();
-                Optional<IntSet> outermostElementNames = elementTest.getRequiredNodeNames();
-                if (outermostElementNames.isPresent()) {
-                    Optional<IntSet> selectedElementNames = test.getRequiredNodeNames();
-                    if (selectedElementNames.isPresent()) {
-                        if (axis == AxisInfo.CHILD) {
-                            // check that the name appearing in the step is one of the names allowed by the nodetest
-
-                            if (selectedElementNames.get().intersect(outermostElementNames.get()).isEmpty()) {
-                                if (warnings) {
-                                    visitor.issueWarning(
-                                            "Starting at a document node, the step is selecting an element whose name " +
-                                                    "is not among the names of child elements permitted for this document node type", SaxonErrorCode.SXWN9037, getLocation());
-                                }
-
-                                return Literal.makeEmptySequence();
-                            }
-
-                            if (env.getPackageData().isSchemaAware() &&
-                                    elementTest instanceof SchemaNodeTest &&
-                                    outermostElementNames.get().size() == 1) {
-                                IntIterator oeni = outermostElementNames.get().iterator();
-                                int outermostElementName = oeni.hasNext() ? oeni.next() : -1;
-                                IElementDecl decl = env.getImportedSchema().getElementDecl(outermostElementName);
-                                if (decl == null) {
-                                    if (warnings) {
-                                        visitor.issueWarning("Element " + config.getNamePool().getEQName(outermostElementName) +
-                                                                     " is not declared in the schema", SaxonErrorCode.SXWN9037, getLocation());
-                                    }
-                                    itemType = elementTest;
-                                } else {
-                                    itemType = new ContentTypeTest(Type.ELEMENT, elementTest.getQNameTest(), decl.getType(), true, config);
-                                }
-                            } else {
-                                itemType = elementTest;
-                            }
-                            return this;
-
-                        } else if (axis == AxisInfo.DESCENDANT) {
-                            // check that the name appearing in the step is one of the names allowed by the nodetest
-                            boolean canMatchOutermost = !selectedElementNames.get().intersect(outermostElementNames.get()).isEmpty();
-                            if (!canMatchOutermost) {
-                                // The expression /descendant::x starting at the document node doesn't match the outermost
-                                // element, so replace it by child::*/descendant::x, and check that
-                                Expression path = ExpressionTool.makePathExpression(new AxisExpression(AxisInfo.CHILD, elementTest), new AxisExpression(AxisInfo.DESCENDANT, test));
-                                ExpressionTool.copyLocationInfo(this, path);
-                                return path.typeCheck(visitor, contextInfo);
-                            }
-                        }
-                    }
+        if (test != null && axis == AxisInfo.NAMESPACE) {
+            QNameTest qNameTest = test.getQNameTest();
+            if (qNameTest instanceof NamespaceQNameTest ||
+                    (qNameTest instanceof SpecificQNameTest && !((SpecificQNameTest) qNameTest).getStructuredQName().getNamespaceUri().isEmpty())) {
+                if (warnings) {
+                    visitor.issueWarning("The names of namespace nodes are never prefixed, so this axis step will never select anything",
+                                         SaxonErrorCode.SXWN9037, getLocation());
                 }
+                return Literal.makeEmptySequence();
             }
-
-            SchemaType contentType = ((NodeTest) contextType).getContentType();
-            if (contentType == AnyType.getInstance()) {
-                // fast exit in non-schema-aware case
-                return this;
-            }
-
-            Optimizer opt = visitor.obtainOptimizer();
-            return opt.checkAxisExprAgainstSchema(this, visitor, contextInfo, warnings);
         }
-
         return this;
     }
+
+        // TODO: reinstate the plausibility logic
+
+//        // Test whether the axis ever selects anything, when starting at this context node
+//        UType originUType = contextType.getUType();
+//
+//        if (originUType == UType.JNODE) {
+//            itemType = AnyJNodeType.getInstance();
+//            return this;
+//        }
+//        UType targetUType = AxisInfo.getTargetUType(originUType, axis);
+//        UType testUType = test == null ? UType.XNODE : test.getUType();
+//        if (targetUType.equals(UType.VOID)) {
+//            if (warnings) {
+//                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
+//                                             originUType.toStringWithIndefiniteArticle() + " will never select anything",
+//                                     SaxonErrorCode.SXWN9037, getLocation());
+//            }
+//            return Literal.makeEmptySequence();
+//        }
+//
+//        if (contextInfo.isParentless() && (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
+//            if (warnings) {
+//                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select anything because the context item is parentless",
+//                                     SaxonErrorCode.SXWN9037, getLocation());
+//            }
+//            return Literal.makeEmptySequence();
+//        }
+//
+//        // Test whether the axis ever selects a node of the right kind, when starting at this context node
+//        if (!targetUType.overlaps(testUType)) {
+//            if (warnings) {
+//                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
+//                                             originUType.toStringWithIndefiniteArticle() + " will never select " +
+//                                             test.getUType().toStringWithIndefiniteArticle(),
+//                                     SaxonErrorCode.SXWN9037, getLocation());
+//            }
+//            return Literal.makeEmptySequence();
+//        }
+//
+//        // For an X-or-self axis, if X never selects anything, then substitute the self axis.
+//        int nonSelf = AxisInfo.excludeSelfAxis[axis];
+//        UType kind = test == null ? UType.XNODE : test.getUType();
+//        if (axis != nonSelf) {
+//            UType nonSelfTarget = AxisInfo.getTargetUType(originUType, nonSelf);
+//            if (!nonSelfTarget.overlaps(testUType)) {
+//                axis = AxisInfo.SELF;
+//                targetUType = AxisInfo.getTargetUType(originUType, axis);
+//            }
+//        }
+//
+//        ItemType target = targetUType.toItemType();
+//        if (test == null || test instanceof AnyXNodeType) {
+//            itemType = target;
+//        } else if (target instanceof AnyXNodeType || targetUType.subsumes(test.getUType())) {
+//            itemType = test;
+//        } else {
+//            itemType = new CombinedNodeTest((NodeTest) target, OperatorSymbol.INTERSECT, test);
+//        }
+//
+//        if (test != null) {
+//
+//            // If the content type of the context item is known, see whether the node test can select anything
+//
+//            if (contextType instanceof DocumentNodeType && kind.equals(UType.ELEMENT)) {
+//                NodeTest elementTest = ((DocumentNodeType) contextType).getElementTest();
+//                Optional<IntSet> outermostElementNames = elementTest.getRequiredNodeNames();
+//                if (outermostElementNames.isPresent()) {
+//                    Optional<IntSet> selectedElementNames = test.getRequiredNodeNames();
+//                    if (selectedElementNames.isPresent()) {
+//                        if (axis == AxisInfo.CHILD) {
+//                            // check that the name appearing in the step is one of the names allowed by the nodetest
+//
+//                            if (selectedElementNames.get().intersect(outermostElementNames.get()).isEmpty()) {
+//                                if (warnings) {
+//                                    visitor.issueWarning(
+//                                            "Starting at a document node, the step is selecting an element whose name " +
+//                                                    "is not among the names of child elements permitted for this document node type", SaxonErrorCode.SXWN9037, getLocation());
+//                                }
+//
+//                                return Literal.makeEmptySequence();
+//                            }
+//
+//                            if (env.getPackageData().isSchemaAware() &&
+//                                    elementTest instanceof SchemaNodeTest &&
+//                                    outermostElementNames.get().size() == 1) {
+//                                IntIterator oeni = outermostElementNames.get().iterator();
+//                                int outermostElementName = oeni.hasNext() ? oeni.next() : -1;
+//                                IElementDecl decl = env.getImportedSchema().getElementDecl(outermostElementName);
+//                                if (decl == null) {
+//                                    if (warnings) {
+//                                        visitor.issueWarning("Element " + config.getNamePool().getEQName(outermostElementName) +
+//                                                                     " is not declared in the schema", SaxonErrorCode.SXWN9037, getLocation());
+//                                    }
+//                                    itemType = elementTest;
+//                                } else {
+//                                    itemType = new NamedNodeKindType(Type.ELEMENT, elementTest.getQNameTest(), decl.getType(), true, config);
+//                                }
+//                            } else {
+//                                itemType = elementTest;
+//                            }
+//                            return this;
+//
+//                        } else if (axis == AxisInfo.DESCENDANT) {
+//                            // check that the name appearing in the step is one of the names allowed by the nodetest
+//                            boolean canMatchOutermost = !selectedElementNames.get().intersect(outermostElementNames.get()).isEmpty();
+//                            if (!canMatchOutermost) {
+//                                // The expression /descendant::x starting at the document node doesn't match the outermost
+//                                // element, so replace it by child::*/descendant::x, and check that
+//                                Expression path = ExpressionTool.makePathExpression(new AxisExpression(AxisInfo.CHILD, elementTest), new AxisExpression(AxisInfo.DESCENDANT, test));
+//                                ExpressionTool.copyLocationInfo(this, path);
+//                                return path.typeCheck(visitor, contextInfo);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            SchemaType contentType = ((NodeTest) contextType).getContentType();
+//            if (contentType == AnyType.getInstance()) {
+//                // fast exit in non-schema-aware case
+//                return this;
+//            }
+//
+//            Optimizer opt = visitor.obtainOptimizer();
+//            return opt.checkAxisExprAgainstSchema(this, visitor, contextInfo, warnings);
+//        }
+
+
 
     public void setItemType(ItemType type) {
         itemType = type;
@@ -446,8 +467,7 @@ public final class AxisExpression extends Expression {
         // generate an arbitrary hash code that depends on the axis and the node test
         int h = 9375162 + axis << 20;
         if (test != null) {
-            h ^= test.getPrimitiveType() << 16;
-            h ^= test.getFingerprint();
+            h ^= test.hashCode();
         }
         return h;
     }
@@ -531,12 +551,12 @@ public final class AxisExpression extends Expression {
         switch (p) {
             case Type.ATTRIBUTE:
             case Type.NAMESPACE:
-                return NodeKindTest.makeNodeKindTest(p);
+                return NodeKindType.makeNodeKindTest(p);
             default:
                 if (test == null) {
-                    return AnyGNodeTest.getInstance();
+                    return AnyGNodeType.getInstance();
                 } else {
-                    return test;
+                    return test.getItemType();
                 }
         }
     }
@@ -581,23 +601,24 @@ public final class AxisExpression extends Expression {
 
     @Override
     protected int computeCardinality() {
-        NodeTest originNodeType;
-        NodeTest nodeTest = test;
-        ItemType contextItemType = staticInfo.getItemType();
-        if (contextItemType instanceof NodeTest) {
-            originNodeType = (NodeTest) contextItemType;
-        } else if (contextItemType instanceof AnyItemType) {
-            originNodeType = AnyXNodeTest.getInstance();
-        } else {
+        ItemType originNodeType = staticInfo.getItemType();
+        if (!(originNodeType instanceof GNodeType)) {
             // context item not a node - we'll report a type error somewhere along the line
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
-        if (axis == AxisInfo.ATTRIBUTE && nodeTest instanceof NameTest) {
+        if (test == null) {
+            return StaticProperty.ALLOWS_ZERO_OR_MORE;
+        }
+        GNodeType gNodeType = (GNodeType)originNodeType;
+        int attFingerprint = test.getRequiredFingerprint(Type.ATTRIBUTE);
+        int elemFingerprint = test.getRequiredFingerprint(Type.ELEMENT);
+        if (axis == AxisInfo.ATTRIBUTE && attFingerprint != -1) {
+            StructuredQName attName = getConfiguration().getNamePool().getStructuredQName(attFingerprint);
             Schema schema = getRetainedStaticContext().getImportedSchema();
-            SchemaType contentType = originNodeType.getContentType();
+            SchemaType contentType = gNodeType.getContentType();
             if (contentType instanceof ComplexType) {
                 try {
-                    return ((ComplexType) contentType).getAttributeUseCardinality(nodeTest.getMatchingNodeName(), schema);
+                    return ((ComplexType) contentType).getAttributeUseCardinality(attName, schema);
                 } catch (SchemaException err) {
                     // shouldn't happen; play safe
                     return StaticProperty.ALLOWS_ZERO_OR_ONE;
@@ -606,20 +627,20 @@ public final class AxisExpression extends Expression {
                 return StaticProperty.EMPTY;
             }
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
-        } else if (axis == AxisInfo.CHILD && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
+        } else if (axis == AxisInfo.CHILD && elemFingerprint != -1) {
             Schema schema = getRetainedStaticContext().getImportedSchema();
-            SchemaType contentType = originNodeType.getContentType();
+            SchemaType contentType = gNodeType.getContentType();
             if (contentType instanceof ComplexType) {
-                return ((ComplexType) contentType).getElementParticleCardinality(nodeTest.getFingerprint(), schema, true);
+                return ((ComplexType) contentType).getElementParticleCardinality(elemFingerprint, schema, true);
             } else {
                 return StaticProperty.EMPTY;
             }
-        } else if (axis == AxisInfo.DESCENDANT && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
+        } else if (axis == AxisInfo.DESCENDANT && elemFingerprint != -1) {
             Schema schema = getRetainedStaticContext().getImportedSchema();
-            SchemaType contentType = originNodeType.getContentType();
+            SchemaType contentType = gNodeType.getContentType();
             if (contentType instanceof ComplexType) {
                 try {
-                    return ((ComplexType) contentType).getDescendantElementCardinality(schema, nodeTest.getFingerprint());
+                    return ((ComplexType) contentType).getDescendantElementCardinality(schema, elemFingerprint);
                 } catch (SchemaException err) {
                     // shouldn't happen; play safe
                     return StaticProperty.ALLOWS_ZERO_OR_MORE;
@@ -700,37 +721,37 @@ public final class AxisExpression extends Expression {
         Pattern pat;
 
         if (test == null) {
-            test = AnyXNodeTest.getInstance();
+            test = NodeTypeTest.GNODE;
         }
-        if (test instanceof AnyXNodeTest && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
+        if (test == NodeTypeTest.GNODE && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
             test = MultipleNodeKindTest.CHILD_NODE;
         }
-        int kind = test.getPrimitiveType();
+        int kind = test.getItemType().getPrimitiveType();
         if (axis == AxisInfo.SELF) {
             pat = new NodeTestPattern(test);
         } else if (axis == AxisInfo.ATTRIBUTE) {
             if (kind == Type.XNODE) {
                 // attribute::node() matches any attribute, and only an attribute
-                pat = new NodeTestPattern(NodeKindTest.ATTRIBUTE);
+                pat = new NodeTestPattern(NodeTypeTest.ATTRIBUTE);
             } else if (!AxisInfo.containsNodeKind(axis, kind)) {
                 // for example, attribute::comment()
-                pat = new NodeTestPattern(ErrorType.getInstance());
+                pat = new NodeTestPattern(NodeRejector.getInstance());
             } else {
                 pat = new NodeTestPattern(test);
             }
         } else if (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF) {
             if (kind != Type.XNODE && !AxisInfo.containsNodeKind(axis, kind)) {
-                pat = new NodeTestPattern(ErrorType.getInstance());
+                pat = new NodeTestPattern(NodeRejector.getInstance());
             } else {
                 pat = new NodeTestPattern(test);
             }
         } else if (axis == AxisInfo.NAMESPACE) {
             if (kind == Type.XNODE) {
                 // namespace::node() matches any attribute, and only an attribute
-                pat = new NodeTestPattern(NodeKindTest.NAMESPACE);
+                pat = new NodeTestPattern(NodeTypeTest.NAMESPACE);
             } else if (!AxisInfo.containsNodeKind(axis, kind)) {
                 // for example, namespace::comment()
-                pat = new NodeTestPattern(ErrorType.getInstance());
+                pat = new NodeTestPattern(NodeRejector.getInstance());
             } else {
                 pat = new NodeTestPattern(test);
             }
@@ -805,7 +826,9 @@ public final class AxisExpression extends Expression {
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("axis", this);
         destination.emitAttribute("name", AxisInfo.axisName[axis]);
-        destination.emitAttribute("nodeTest", AlphaCode.fromItemType(test == null ? AnyXNodeTest.getInstance() : test));
+        destination.emitAttribute("nodeTest", AlphaCode.fromItemType(test == null
+                                                                             ? AnyXNodeType.getInstance()
+                                                                             : test.getItemType()));
         destination.endElement();
     }
 
@@ -838,14 +861,8 @@ public final class AxisExpression extends Expression {
         }
         if (test == null) {
             fsb.append("gnode()");
-        } else if (test instanceof NameTest) {
-            if (((NameTest) test).getNodeKind() != AxisInfo.principalNodeType[axis]) {
-                fsb.append(test.toString());
-            } else {
-                fsb.append(test.getMatchingNodeName().getDisplayName());
-            }
         } else {
-            fsb.append(test.toString());
+            fsb.append(test);
         }
         return fsb.toString();
     }
@@ -953,9 +970,6 @@ public final class AxisExpression extends Expression {
                         Item origin = context.getContextItem();
                         checkOrigin.accept(origin, context);
                         NodePredicate t = test;
-                        if (t instanceof RawNodeTest) {
-                            t = ((RawNodeTest)t).cook((GNode)origin);
-                        }
                         return ((GNode) origin).iterateChildAxis(t);
                     };
 

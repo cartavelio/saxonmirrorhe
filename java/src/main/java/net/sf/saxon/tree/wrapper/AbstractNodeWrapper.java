@@ -9,9 +9,9 @@ package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyXNodeTest;
-import net.sf.saxon.pattern.NodePredicate;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -348,7 +348,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @CSharpModifiers(code={"protected", "virtual"})
     protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         SequenceIterator iter = new Navigator.DescendantIterator(this, includeSelf, true);
-        if (!(nodeTest instanceof AnyXNodeTest)) {
+        if (nodeTest != NodeTypeTest.GNODE) {
             iter = Navigator.filter(iter, nodeTest);
         }
         return iter;

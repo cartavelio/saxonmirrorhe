@@ -47,6 +47,9 @@ public final class ArrayCoercionPlan extends CoercionPlan {
         if (item instanceof ArrayItem) {
             List<GroundedValue> result = new ArrayList<>(((ArrayItem)item).arrayLength());
             CoercionPlan memberPlan = requiredMemberType.getPrimaryType().getCoercionPlan(40);
+            if (memberPlan == null) {
+                memberPlan = new IdentityCoercionPlan();
+            }
             for (GroundedValue member : ((ArrayItem)item).members()) {
                  SequenceIterator newMember = memberPlan.coerceSequence(member.iterate(), requiredMemberType, request);
                  result.add(SequenceExtent.from(newMember));

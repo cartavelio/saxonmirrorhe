@@ -16,7 +16,7 @@ import net.sf.saxon.lib.ExternalObjectModel;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.pattern.AnyXNodeTest;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -111,7 +111,7 @@ public class DOMEnvelope implements ExternalObjectModel {
 
                 @Override
                 public ItemType getItemType() {
-                    return AnyXNodeTest.getInstance();
+                    return AnyXNodeType.getInstance();
                 }
             };
         } else {
