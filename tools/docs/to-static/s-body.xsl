@@ -124,10 +124,6 @@
                <xsl:apply-templates/>
           </a>
      </xsl:template>
-     
-     <xsl:template match="a[@class ='feature']" mode="secondary" expand-text="yes">
-          <a class="bodylink code" href="/configuration/config-features/{@href}">{@href}</a>
-     </xsl:template>
 
      <xsl:template match="a" mode="secondary">
           <xsl:param name="hash-path" tunnel="yes" required="no" as="xs:string" select="''"/>
@@ -192,6 +188,10 @@ $a/ancestor::def:function|$a/ancestor::def:functions)[last()]"/>
                          </xsl:otherwise>
                     </xsl:choose>
                </xsl:variable>
+               <xsl:variable name="fragment" select="if (contains($resolved-ref, '@')) then
+                    concat('#', substring-after($resolved-ref, '@')) else ''"/>
+               <xsl:variable name="resolved-ref" select="if (contains($resolved-ref, '@')) then
+                    substring-before($resolved-ref, '@') else $resolved-ref"/>
 
                <!-- Fix for links to javadoc and dotnetdoc APIs -->
                <xsl:choose>
@@ -229,7 +229,7 @@ resolved-ref <xsl:value-of select="$resolved-ref"/>
                               <xsl:variable name="ext"
                                    select="if (article|section|def:function) then '' else '.html'"/>
                               <xsl:variable name="pre-filepath"
-                                   select="concat($prefix, $fpath, $ext)"/>
+                                   select="concat($prefix, $fpath, $ext, $fragment)"/>
                               <xsl:variable name="filepath" select="f:index-fix($pre-filepath)"/>
                               <xsl:sequence select="$filepath"/>
 
