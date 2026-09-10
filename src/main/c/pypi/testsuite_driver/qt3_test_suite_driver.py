@@ -789,7 +789,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
     pos = 0
     try:
-        for test_query in test_queries.item_at(pos):
+        for test_query in test_queries:
             pos += 1
             xpath_proc.set_context(xdm_item=test_query)
             exp = None
