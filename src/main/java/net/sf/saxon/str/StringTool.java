@@ -251,7 +251,6 @@ public class StringTool {
 
     /*@NotNull*/
     public static UnicodeString compress(char[] in, int offset, int len, boolean compressWS) {
-        //final int inlen = in.length;
         if (len == 0) {
             return EmptyUnicodeString.getInstance();
         }
@@ -271,7 +270,7 @@ public class StringTool {
                 k++;
             }
             if (allWhite) {
-                return CompressedWhitespace.compressWS(in, offset, end);
+                return CompressedWhitespace.compressWS(in, offset, len);
             }
         }
         while (k < end) {
@@ -282,19 +281,6 @@ public class StringTool {
             }
         }
 
-//        for (int i=offset; i < end; i++) {
-//            int c = in[i];
-//            max |= c;
-//            if (allWhite && !Whitespace.isWhite(c)) {
-//                allWhite = false;
-//            }
-//            if (UTF16CharacterSet.isSurrogate(c)) {
-//                surrogates++;
-//            }
-//        }
-//        if (allWhite) {
-//            return CompressedWhitespace.compressWS(in, offset, end);
-//        }
         if (max < 256) {
             byte[] array = new byte[len];
             for (int i = offset, j=0; i < end;) {
