@@ -611,6 +611,7 @@ val csprojTemplateTask = tasks.register<JavaExec>("csproj-template") {
   outputs.file(layout.projectDirectory.file("SaxonCS.csproj"))
   outputs.file(layout.projectDirectory.file("SaxonCS.sln"))
   outputs.file(layout.projectDirectory.file("NUnitTests.csproj"))
+  outputs.file(layout.projectDirectory.file("Directory.Build.props"))
   classpath = saxonClasspath
   mainClass = "net.sf.saxon.Transform"
   args("-it",

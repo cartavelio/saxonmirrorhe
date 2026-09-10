@@ -82,9 +82,9 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
     val stdOutput = ByteArrayOutputStream()
     val errOutput = ByteArrayOutputStream()
 
-    val relprefix = "${msbuildArch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
-    val relarch = "${netver.get()}/${msbuildPlatform.get()}-${msbuildArch.get()}/TestDrivers.dll"
-    val testDrivers = project.layout.buildDirectory.file("${relprefix}/${relarch}")
+    val relprefix = "${msbuildArch.get()}/TestDrivers/artifacts/bin/TestDrivers/${dotnetBuildType.get().lowercase()}_"
+    val relarch = "${msbuildPlatform.get()}-${msbuildArch.get()}/TestDrivers.dll"
+    val testDrivers = project.layout.buildDirectory.file("${relprefix}${relarch}")
 
     // This makes the report name match what the regression report builder
     // expects. Since I don't think any one else cares...

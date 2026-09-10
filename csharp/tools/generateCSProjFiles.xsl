@@ -99,6 +99,8 @@ EndGlobal
   <xsl:result-document href="{$core.csproj}" method="xml" indent="yes">
     <Project>
       <PropertyGroup>
+        <UseArtifactsOutput>true</UseArtifactsOutput>
+        <DefineConstants>{upper-case($edition)}</DefineConstants>
         <xsl:choose>
           <xsl:when test="$nunitBuild = 'true'">
             <LangVersion>10.0</LangVersion>
@@ -136,8 +138,8 @@ EndGlobal
           <PackageReadmeFile>README.md</PackageReadmeFile>
           <DefineConstants>{upper-case($edition)}</DefineConstants>
         </xsl:if>
-      </PropertyGroup>    
-      
+      </PropertyGroup>
+
       <xsl:if test="not($nunitBuild = 'true')">
         <ItemGroup>
           <None Include="../LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
@@ -194,9 +196,11 @@ EndGlobal
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="core.csproj"/>
           <PropertyGroup>
+            <UseArtifactsOutput>true</UseArtifactsOutput>
             <Description>SaxonCS NUnit tests.</Description>
             <IsTestProject>true</IsTestProject>
             <DefineConstants>{upper-case($edition)}</DefineConstants>
+            <UseArtifactsOutput>true</UseArtifactsOutput>
           </PropertyGroup>
           <ItemGroup>
             <Compile Include="SaxonCS-NUnit\**\*.cs"/>
@@ -229,6 +233,7 @@ EndGlobal
       <xsl:when test="$releaseBuild = 'NUnitTests'">
         <Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
+            <UseArtifactsOutput>true</UseArtifactsOutput>
             <TargetFramework>{$framework}</TargetFramework>
             <ImplicitUsings>enable</ImplicitUsings>
             <Nullable>enable</Nullable>
@@ -261,6 +266,7 @@ EndGlobal
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="{$core.csproj}"/>
           <PropertyGroup>
+            <UseArtifactsOutput>true</UseArtifactsOutput>
             <StartupObject>Saxon.Cmd.Command</StartupObject>
             <OutputType>Exe</OutputType>
             <AssemblyName>SaxonCS</AssemblyName>
@@ -317,6 +323,14 @@ EndGlobal
     </xsl:choose>
   </xsl:result-document>
 
+  <xsl:result-document href="Directory.Build.props" method="xml" indent="true">
+    <Project>
+      <PropertyGroup>
+        <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+      </PropertyGroup>
+    </Project>
+  </xsl:result-document>
+
   <xsl:if test="$includeTestDriver">
     <xsl:result-document href="{$templateName}TestDriver.csproj" method="xml" indent="yes">
       <xsl:call-template name="TestDriver.csproj">
@@ -340,7 +354,8 @@ EndGlobal
   <Project Sdk="Microsoft.NET.Sdk">
     <Import Project="{$core.csproj}"/>
     <PropertyGroup>
-      <StartupObject>TestDriver.Driver</StartupObject> 
+      <UseArtifactsOutput>true</UseArtifactsOutput>
+      <StartupObject>TestDriver.Driver</StartupObject>
       <OutputType>Exe</OutputType>
       <AssemblyName>TestDrivers</AssemblyName>
       <Description>QT3/4 test suite test driver.</Description>
@@ -362,7 +377,7 @@ EndGlobal
     </ItemGroup>
     <ItemGroup>
       <Reference Include="SaxonCS">
-        <HintPath>{translate($relative-hint-path, '/', '\')}bin\{$release}\{$framework}\{$platform}-{$arch}\SaxonCS.dll</HintPath>
+        <HintPath>{translate($relative-hint-path, '/', '\')}artifacts\bin\SaxonCS\release_{$platform}-{$arch}\SaxonCS.dll</HintPath>
       </Reference>
     </ItemGroup>
   </Project>
@@ -375,6 +390,7 @@ EndGlobal
 <Project Sdk="Microsoft.NET.Sdk">
    <Import Project="core.csproj"/>
    <PropertyGroup>
+     <UseArtifactsOutput>true</UseArtifactsOutput>
       <LangVersion>10.0</LangVersion>
       <TargetFramework>net8.0</TargetFramework>
       <ImplicitUsings>enable</ImplicitUsings>

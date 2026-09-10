@@ -1,6 +1,8 @@
 /SaxonCS.sln.DotSettings.user
 *.csproj
 *.sln
+Directory.Build.props
+artifacts/
 bin/
 obj/
 *.DotSettings.user

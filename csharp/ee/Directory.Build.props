@@ -1,5 +1,0 @@
-<Project>
-   <PropertyGroup>
-      <BaseIntermediateOutputPath>bin/tmp/$(MSBuildProjectName)</BaseIntermediateOutputPath>
-   </PropertyGroup>
-</Project>

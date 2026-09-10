@@ -297,10 +297,10 @@ abstract class TestSuitesExtension
 
     val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
 
-    val relprefix = "${arch.get().msbuild}/TestDrivers/bin/${dotnetBuildType.get()}"
-    val relarch = "${netver.get()}/${platform.get().msbuild}-${arch.get().msbuild}"
+    val relprefix = "${arch.get()}/TestDrivers/artifacts/bin/TestDrivers/${dotnetBuildType.get().lowercase()}_"
+    val relarch = "${platform.get().msbuild}-${arch.get()}/TestDrivers.dll"
 
-    val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}/TestDrivers.dll")
+    val testDrivers = layout.buildDirectory.file("${relprefix}${relarch}")
 
     val driverargs = mutableListOf<String>("${dotnet.get()}",
                                            "${testDrivers.get().asFile}",
