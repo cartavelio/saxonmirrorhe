@@ -112,8 +112,8 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="8.0.0" />
       <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
-      <PackageReference Include="XmlResolver" Version="6.0.2" />
-      <PackageReference Include="XmlResolverData" Version="6.0.2" />
+      <PackageReference Include="XmlResolver" Version="6.0.3" />
+      <PackageReference Include="XmlResolverData" Version="6.0.3" />
     </ItemGroup>
 
 </Project>
