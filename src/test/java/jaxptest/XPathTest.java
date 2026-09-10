@@ -217,6 +217,35 @@ public class XPathTest {
 
     }
 
+    @Test
+    public void testBug6003() {
+        try {
+            String xml = "<root><test name=\"test\"/></root>";
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = factory.newDocumentBuilder();
+            Document doc = db.parse(new InputSource(new StringReader(xml)));
+
+            XPathFactory factory2 = new XPathFactoryImpl();
+            XPath xPath = factory2.newXPath();
+            xPath.setXPathVariableResolver(variableName -> {
+                if (variableName.getLocalPart().equals("y")) {
+                    return 18;
+                } else {
+                    fail();
+                    return null;
+                }
+            });
+            String expression = "function($x){$x + $y}(42)";
+            XPathExpression exp = xPath.compile(expression);
+            double result = (double)exp.evaluate(doc, XPathConstants.NUMBER);
+            assertEquals(60.0e0, result);
+        } catch (Exception e) {
+            fail(e);
+        }
+
+
+    }
+
 
 }
 
