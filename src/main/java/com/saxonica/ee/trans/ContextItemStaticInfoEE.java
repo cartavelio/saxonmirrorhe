@@ -45,7 +45,7 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
 
     public ContextItemStaticInfoEE(ItemType itemType, boolean maybeUndefined, Posture contextItemPosture) {
         super(itemType, maybeUndefined);
-        this.explicitPosture = contextItemPosture == null ? Posture.UNKNOWN : contextItemPosture;
+        this.explicitPosture = contextItemPosture;
     }
 
     @Override

@@ -77,15 +77,15 @@ public class AttributeSorter extends ProxyReceiver  {
             attributes.sort((a, b) -> {
                 NodeName n0 = a.getNodeName();
                 NodeName n1 = b.getNodeName();
-                Integer r0 = knownAttributes.get(n0);
-                Integer r1 = knownAttributes.get(n1);
-                if (r0 != null) {
-                    if (r1 == null) {
-                        return r0.compareTo(MIDDLE_GROUND);
+                int r0 = knownAttributes.getOrDefault(n0, Integer.MIN_VALUE);
+                int r1 = knownAttributes.getOrDefault(n1, Integer.MIN_VALUE);
+                if (r0 != Integer.MIN_VALUE) {
+                    if (r1 == Integer.MIN_VALUE) {
+                        return Integer.compare(r0, MIDDLE_GROUND);
                     } else {
-                        return r0.compareTo(r1);
+                        return Integer.compare(r0, r1);
                     }
-                } else if (r1 != null) {
+                } else if (r1 != Integer.MIN_VALUE) {
                     return Integer.compare(MIDDLE_GROUND, r1);
                 } else {
                     // both null: sort on URI/local-name
@@ -96,7 +96,6 @@ public class AttributeSorter extends ProxyReceiver  {
                     return x;
                 }
             });
-            //GenericSorter.quickSort(0, attributes.size(), this);
 
             AttributeMap sorted = SequenceTool.attributeMapFromList(attributes);
             nextReceiver.startElement(elemName, type, sorted, namespaces, location, properties);

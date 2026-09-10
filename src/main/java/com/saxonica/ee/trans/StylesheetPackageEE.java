@@ -151,7 +151,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
         presenter.emitAttribute("relocatable", isRelocatable() ? "true" : "false");
         presenter.emitAttribute("implicit", isImplicitPackage() ? "true" : "false");
         for (StylesheetPackage used : getUsedPackages()) {
-            if (packageIdMap.get(used) == null) {
+            if (!packageIdMap.containsKey(used)) {
                 packageIdMap.put(used, packageIdMap.size());
                 ((StylesheetPackageEE) used).export(presenter, false);
             }

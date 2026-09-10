@@ -37,14 +37,12 @@ public class MapSearch extends SystemFunction {
         GroundedValue in = ((Sequence) seq).materialize();
         SequenceIterator iter = in.iterate();
         Item item;
-        int i = 0;
         while ((item = iter.next()) != null) {
             if (item instanceof ArrayItem) {
                 ArrayItem array = (ArrayItem)item;
                 if (!(array instanceof PedigreeValue)) {
                     array = new PedigreeArrayItem(array);
                 }
-                int j = 0;
                 for (GroundedValue member : array.members()) {
                     processSequence(member, key, tester, context, result);
                 }

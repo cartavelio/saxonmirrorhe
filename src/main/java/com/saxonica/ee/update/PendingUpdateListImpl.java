@@ -1,7 +1,6 @@
 package com.saxonica.ee.update;
 
 import com.saxonica.ee.validate.InSituValidator;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.PackageData;
@@ -25,10 +24,8 @@ import java.util.*;
  */
 public class PendingUpdateListImpl implements PendingUpdateList {
 
-    private final Configuration config;
-
     private final IntHashMap<List<PendingUpdateAction>> lists =
-            new IntHashMap<List<PendingUpdateAction>>(PutAction.PHASE + 1);
+            new IntHashMap<>(PutAction.PHASE + 1);
             // one list per phase of the apply process
 
     private final Set<MutableNodeInfo> affectedTrees = new HashSet<>();
@@ -49,12 +46,10 @@ public class PendingUpdateListImpl implements PendingUpdateList {
 
     /**
      * Create a Pending Update List
-     *
-     * @param config the Saxon configuration
      */
 
-    public PendingUpdateListImpl(Configuration config) {
-        this.config = config;
+    public PendingUpdateListImpl() {
+
     }
 
     /**
@@ -67,6 +62,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
     public void add(PendingUpdateAction action) throws XPathException {
         int phase = action.getApplyPhase();
         if (lists.get(phase) == null) {
+            //noinspection Convert2Diamond
             lists.put(phase, new ArrayList<PendingUpdateAction>(4));
         }
 
@@ -356,42 +352,36 @@ public class PendingUpdateListImpl implements PendingUpdateList {
         for (PendingUpdateAction action : actions) {
             if (action instanceof DeleteAction) {
                 NodeName nameOfNode = NameOfNode.makeName(action.getTargetNode());
-                Integer countVal = names.get(nameOfNode);
-                int count = countVal == null ? 0 : countVal;
+                int count = names.getOrDefault(nameOfNode, 0);
                 if (count > 0) {
                     names.put(nameOfNode, count - 1);
                 }
             } else if (action instanceof RenameAction) {
                 NodeName nameOfNode = NameOfNode.makeName(action.getTargetNode());
-                Integer countVal = names.get(nameOfNode);
-                int count = countVal == null ? 0 : countVal;
+                int count = names.getOrDefault(nameOfNode, 0);
                 if (count > 0) {
                     names.put(nameOfNode, count - 1);
                 }
 
                 nameOfNode = ((RenameAction) action).getNewName();
-                countVal = names.get(nameOfNode);
-                count = countVal == null ? 0 : countVal;
+                count = names.getOrDefault(nameOfNode, 0);
                 names.put(nameOfNode, count + 1);
             } else if (action instanceof ReplaceAttributeAction) {
                 NodeInfo target = ((ReplaceAttributeAction) action).getOldAttribute();
                 NodeName nameOfNode = NameOfNode.makeName(target);
-                Integer countVal = names.get(nameOfNode);
-                int count = countVal == null ? 0 : countVal;
+                int count = names.getOrDefault(nameOfNode, 0);
                 if (count > 0) {
                     names.put(nameOfNode, count - 1);
                 }
                 AttributeMap newNodes = ((ReplaceAttributeAction) action).getNewAttributes();
                 for (AttributeInfo a : newNodes) {
                     nameOfNode = a.getNodeName();
-                    countVal = names.get(nameOfNode);
-                    count = countVal == null ? 0 : countVal;
+                    count = names.getOrDefault(nameOfNode, 0);
                     names.put(nameOfNode, count + 1);
                 }
             } else if (action instanceof InsertAttributeAction) {
                 NodeName nameOfNode = ((InsertAttributeAction) action).getAttributeName();
-                Integer countVal = names.get(nameOfNode);
-                int count = countVal == null ? 0 : countVal;
+                int count = names.getOrDefault(nameOfNode, 0);
                 names.put(nameOfNode, count + 1);
             }
         }

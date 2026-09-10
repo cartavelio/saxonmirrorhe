@@ -52,8 +52,7 @@ public class MessageCount extends SystemFunction {
             }
             return new Int64Value(total);
         } else {
-            Integer c = counters.get(arg.getStructuredQName());
-            int result = c==null ? 0 : c;
+            int result = counters.getOrDefault(arg.getStructuredQName(), 0);
             return new Int64Value(result);
         }
     }

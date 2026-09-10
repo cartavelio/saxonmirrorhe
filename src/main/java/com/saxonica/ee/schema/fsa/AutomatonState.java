@@ -518,8 +518,8 @@ public abstract class AutomatonState implements State {
                 symbol = card.toString();
             }
             AutomatonState target = edge.getTargetState();
-            Integer endKey = map.get(target);
-            if (endKey == null) {
+            int endKey = map.getOrDefault(target, Integer.MIN_VALUE);
+            if (endKey == Integer.MIN_VALUE) {
                 endKey = map.size();
                 System.err.println(key + " " + symbol +
                         " -> " + endKey + finalMarker(target));

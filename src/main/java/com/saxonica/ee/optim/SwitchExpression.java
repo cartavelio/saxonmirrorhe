@@ -396,8 +396,8 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
             return doTailCall(getOtherwiseExpression(), output, context);
         }
         AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-        Integer selection = map.get(key);
-        if (selection == null) {
+        int selection = map.getOrDefault(key, -1);
+        if (selection == -1) {
             return doTailCall(getOtherwiseExpression(), output, context);
         } else {
             return doTailCall(actions.get(selection).getChildExpression(), output, context);

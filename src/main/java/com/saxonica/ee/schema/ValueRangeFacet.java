@@ -104,9 +104,15 @@ public abstract class ValueRangeFacet extends Facet {
         } catch (SchemaException e1) {
             // normally the value of the restriction must be valid for the base type. But there's
             // an exception for the maxExclusive value - it can be equal to the value on the base type.
+            boolean ok;
             try {
                 convertToTargetType((AtomicType) type.getBuiltInBaseType(), config);
+                ok = true;
             } catch (SchemaException e2) {
+                ok = false;
+            }
+            if (!ok) {
+                // the logic here is written to enable a "rethrow" in C#
                 throw e1;
             }
         }
