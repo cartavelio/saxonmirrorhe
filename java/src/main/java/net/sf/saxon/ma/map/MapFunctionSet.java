@@ -9,6 +9,10 @@ package net.sf.saxon.ma.map;
 
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.OptionsParameter;
@@ -22,6 +26,7 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -754,6 +759,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     MapItem options = (MapItem) arguments[1].head();
                     if (options != null && !options.isEmpty()) {
                         int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                        Instrumentation.count("MapMerge options");
                         Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context, version);
                         action = getDuplicatesCombiner(options, "use-first", duplicatesErrorCode);
                     }
@@ -815,6 +821,50 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 Literal.exportValue(options.getCompletedMap(), out);
             }
         }
+
+        @Override
+        public Elaborator getElaborator() {
+            return new MapMerge.MapMergeElaborator();
+        }
+
+        private static class MapMergeElaborator extends ItemElaborator {
+
+            @Override
+            public ItemEvaluator elaborateForItem() {
+                SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+                int arity = fnc.getArity();
+                PullEvaluator input = fnc.getArg(0).makeElaborator().elaborateForPull();
+                if (arity == 2 && fnc.getArg(1) instanceof Literal optionsArg) {
+                    try {
+                        MapItem options = (MapItem)optionsArg.getGroundedValue();
+                        int version = options.getSpecVersion();
+                        XPathContext context = new EarlyEvaluationContext(getConfiguration());
+                        fnc.getTargetFunction().getDetails().optionDetails.processSuppliedOptions(options, context, version);
+                        String duplicatesErrorCode = "FOJS0003";
+                        OnDuplicatesAction action = getDuplicatesCombiner(options, "use-first", duplicatesErrorCode);
+                        return cxt -> {
+                            SequenceIterator maps = input.iterate(cxt);
+                            return mergeMaps(maps, cxt, action, version);
+                        };
+                    } catch (XPathException e) {
+                        throw new UncheckedXPathException(e);
+                    }
+                } else {
+                    //try {
+                        //String duplicatesErrorCode = "FOJS0003";
+                        OnDuplicatesAction action = (x, y, cxt) -> x;
+                        return cxt -> {
+                            SequenceIterator maps = input.iterate(cxt);
+                            return mergeMaps(maps, cxt, action, 40);
+                        };
+//                    } catch (XPathException e) {
+//                        throw new UncheckedXPathException(e);
+//                    }
+                }
+            }
+        }
+
+
     }
 
 

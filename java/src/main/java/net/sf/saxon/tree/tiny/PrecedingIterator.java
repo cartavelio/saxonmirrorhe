@@ -24,7 +24,7 @@ import net.sf.saxon.z.IntPredicateProxy;
  * when performing xsl:number level="any".
  */
 
-final class PrecedingIterator implements SequenceIterator {
+final public class PrecedingIterator implements SequenceIterator {
 
     private final TinyTree tree;
     private NodeInfo current;

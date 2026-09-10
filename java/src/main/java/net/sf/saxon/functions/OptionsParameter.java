@@ -17,6 +17,7 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
@@ -115,6 +116,7 @@ public class OptionsParameter {
      */
 
     public Map<String, GroundedValue> processSuppliedOptions(MapItem supplied, XPathContext context, int version) throws XPathException {
+        Instrumentation.count("process options");
         Map<String, GroundedValue> result = new HashMap<>();
         Configuration config = context.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();

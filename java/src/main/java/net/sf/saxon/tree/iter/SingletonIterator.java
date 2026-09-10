@@ -33,7 +33,6 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
 
     public SingletonIterator(Item value) {
         assert value != null;
-        //Instrumentation.count("SINGLETON ITERATOR");
         this.item = value;
     }
 

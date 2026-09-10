@@ -29,7 +29,6 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.AtomicType;
@@ -434,7 +433,6 @@ public final class EvaluateInstr extends Expression {
 
                 // Create a cache key so the compiled expression can be reused
 
-                Instrumentation.count("Evaluate make cache key");
                 StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
                 fsb.append(baseUri);
                 fsb.append("##");

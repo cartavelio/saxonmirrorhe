@@ -1668,6 +1668,10 @@ public final class Navigator {
      */
 
     public static SequenceIterator iteratePrecedingOrAncestorAxis(GNode origin, NodePredicate predicate) {
+        if (origin instanceof TinyNodeImpl n) {
+            // Fast path for tinytree
+            return new net.sf.saxon.tree.tiny.PrecedingIterator(n.getTree(), n, predicate, true);
+        }
         PrecedingIterator iter = new PrecedingIterator(origin, true);
         if (predicate != null && predicate != AnyGNode.TEST) {
             return new AxisFilter(iter, predicate);
@@ -1700,19 +1704,12 @@ public final class Navigator {
         public PrecedingIterator(/*@NotNull*/ GNode start, boolean includeAncestors) {
             this.includeAncestors = includeAncestors;
             ancestorEnum = new AncestorIterator(start, false);
-            switch (start.getNodeKind()) {
-                case Type.ELEMENT:
-                case Type.TEXT:
-                case Type.COMMENT:
-                case Type.PROCESSING_INSTRUCTION:
-                case Type.JNODE:
+            siblingEnum = switch (start.getNodeKind()) {
+                case Type.ELEMENT, Type.TEXT, Type.COMMENT, Type.PROCESSING_INSTRUCTION, Type.JNODE ->
                     // get preceding-sibling enumeration
-                    siblingEnum = start.iteratePrecedingSiblingAxis(AnyGNode.TEST);
-                    break;
-                default:
-                    siblingEnum = EmptyIterator.getInstance();
-                    break;
-            }
+                    start.iteratePrecedingSiblingAxis(AnyGNode.TEST);
+                default -> EmptyIterator.getInstance();
+            };
         }
 
         @Override

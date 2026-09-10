@@ -333,7 +333,6 @@ public final class SequenceCoercer extends UnaryExpression {
             // TODO: isolate the case where the only thing needed is a CardinalityChecker
         }
 
-
     }
 }
 
