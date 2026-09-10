@@ -17,7 +17,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.type.Schema;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -117,29 +116,11 @@ public class XsltPackage {
             PreparedStylesheet pss = new PreparedStylesheet(compilation);
             stylesheetPackage.updatePreparedStylesheet(pss);
             pss.addPackage(stylesheetPackage);
-            return new XsltExecutable(getProcessor(), pss);
+            return new XsltExecutable(getProcessor(), pss, info.getXsltVersion());
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
     }
-
-    /**
-     * Get the schema used as the static context of this package in the stylesheet. This will typically
-     * include schema components preloaded using {@link XsltCompiler#useSchema(XsdSchema)}, plus schema components
-     * loaded using <code>xsl:import-schema</code> declarations within the stylesheet itself.
-     *
-     * <p>This schema can usefully be used for validating source documents that are to be supplied as input to
-     * the stylesheet.</p>
-     *
-     * @return the schema used by this package
-     * @since 13.0
-     */
-
-    public XsdSchema getImportedSchema() {
-        Schema schema = stylesheetPackage.getImportedSchema();
-        return compiler.getProcessor().newXsdCompiler().wrapInternalSchema(schema);
-    }
-
 
     /**
      * Save this compiled package to filestore.

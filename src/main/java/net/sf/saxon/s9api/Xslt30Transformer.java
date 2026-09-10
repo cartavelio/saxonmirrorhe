@@ -26,6 +26,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.CoercionRules;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -588,6 +589,8 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
 
     private Sequence[] typeCheckFunctionArguments(UserFunction uf, XdmValue[] arguments) throws XPathException {
         Configuration config = processor.getUnderlyingConfiguration();
+        int version = controller.getExecutable().getTopLevelPackage().getHostLanguageVersion();
+        CoercionRules coercionRules = CoercionRules.forVersion(version);
         UserFunctionParameter[] params = uf.getParameterDefinitions();
         GroundedValue[] vr =
                 new GroundedValue[arguments.length];
@@ -598,7 +601,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
                 final int pos = i;
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, uf.getFunctionName().getDisplayName(), pos);
-                Sequence converted = config.getTypeHierarchy().applyFunctionConversionRules(vr[i], type, role, Loc.NONE);
+                Sequence converted = coercionRules.coerce(vr[i], type, config, role, Loc.NONE);
                 vr[i] = converted.materialize();
             }
         }

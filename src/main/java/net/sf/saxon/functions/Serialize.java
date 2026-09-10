@@ -13,18 +13,14 @@ import net.sf.saxon.event.SequenceCopier;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
-import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.*;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -40,7 +36,6 @@ import javax.xml.transform.OutputKeys;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Supplier;
 
 /**
  * Implementation of fn:serialize() as defined in XPath 3.1
@@ -48,9 +43,9 @@ import java.util.function.Supplier;
 
 public class Serialize extends SystemFunction implements Callable {
     
-    public static OptionsParameter makeOptionsParameter() {
+    public static OptionsParameter makeOptionsParameter(int version) {
         SequenceType listOfQNames = BuiltInAtomicType.QNAME.zeroOrMore();
-        OptionsParameter op = new OptionsParameter();
+        OptionsParameter op = new OptionsParameter(version);
         op.addAllowedOption("allow-duplicate-names", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("byte-order-mark", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("cdata-section-elements", listOfQNames, EmptySequence.getInstance());
@@ -187,51 +182,51 @@ public class Serialize extends SystemFunction implements Callable {
         //eqnames
     }
 
-    /**
-     * Check the options supplied:
-     * 1. ignore any other options not in the specs;
-     * 2. validate the types of the option values supplied.
-     */
-
-    private MapItem checkOptions(MapItem map, XPathContext context) throws XPathException {
-        MapItem result = new HashTrieMap();
-        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-
-        AtomicIterator keysIterator = map.keys();
-        AtomicValue key;
-        while ((key = keysIterator.next()) != null) {
-            if (key instanceof StringValue) {
-                String keyName = key.getStringValue();
-                if (isParamName(keyName)) {
-                    Supplier<RoleDiagnostic> role =
-                            () -> new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0, "XPTY0004");
-                    //If any serialization error occurs, including the detection of an invalid value for a serialization
-                    // parameter, this results in the fn:serialize call failing with a dynamic error.
-                    Sequence converted = th.applyFunctionConversionRules(
-                            map.get(key), requiredTypes.get(keyName), role, Loc.NONE);
-                    result = result.addEntry(key, converted.materialize());
-                }
-            } else if (key instanceof QNameValue) {
-                if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().isEmpty()) {
-                    throw new XPathException("A serialization parameter supplied with a QName key must have non-absent namespace", "SEPM0017");
-                } else if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().equals(StringView.of("http://saxon.sf.net/"))) {
-                    // Capture Saxon serialization parameters
-                    String keyName = ((QNameValue) key).getLocalName();
-                    if (isParamNameSaxon(keyName)) {
-                        Supplier<RoleDiagnostic> role =
-                                () -> new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0);
-                        Sequence converted = th.applyFunctionConversionRules(
-                                map.get(key), requiredTypesSaxon.get(keyName), role, Loc.NONE);
-                        result = result.addEntry(key, converted.materialize());
-                    }
-                }
-                // Implementation-defined serialization parameters in an unrecognised namespace are ignored.
-            } else {
-                break;
-            }
-        }
-        return result;
-    }
+//    /**
+//     * Check the options supplied:
+//     * 1. ignore any other options not in the specs;
+//     * 2. validate the types of the option values supplied.
+//     */
+//
+//    private MapItem checkOptions(MapItem map, XPathContext context) throws XPathException {
+//        MapItem result = new HashTrieMap();
+//        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+//
+//        AtomicIterator keysIterator = map.keys();
+//        AtomicValue key;
+//        while ((key = keysIterator.next()) != null) {
+//            if (key instanceof StringValue) {
+//                String keyName = key.getStringValue();
+//                if (isParamName(keyName)) {
+//                    Supplier<RoleDiagnostic> role =
+//                            () -> new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0, "XPTY0004");
+//                    //If any serialization error occurs, including the detection of an invalid value for a serialization
+//                    // parameter, this results in the fn:serialize call failing with a dynamic error.
+//                    Sequence converted = th.applyFunctionConversionRules(
+//                            map.get(key), requiredTypes.get(keyName), role, Loc.NONE);
+//                    result = result.addEntry(key, converted.materialize());
+//                }
+//            } else if (key instanceof QNameValue) {
+//                if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().isEmpty()) {
+//                    throw new XPathException("A serialization parameter supplied with a QName key must have non-absent namespace", "SEPM0017");
+//                } else if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().equals(StringView.of("http://saxon.sf.net/"))) {
+//                    // Capture Saxon serialization parameters
+//                    String keyName = ((QNameValue) key).getLocalName();
+//                    if (isParamNameSaxon(keyName)) {
+//                        Supplier<RoleDiagnostic> role =
+//                                () -> new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0);
+//                        Sequence converted = th.applyFunctionConversionRules(
+//                                map.get(key), requiredTypesSaxon.get(keyName), role, Loc.NONE);
+//                        result = result.addEntry(key, converted.materialize());
+//                    }
+//                }
+//                // Implementation-defined serialization parameters in an unrecognised namespace are ignored.
+//            } else {
+//                break;
+//            }
+//        }
+//        return result;
+//    }
 
     // Convert a boolean value to a yes-no-type string.
 

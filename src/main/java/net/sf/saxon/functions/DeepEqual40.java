@@ -54,7 +54,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
     public static OptionsParameter OPTION_DETAILS;
 
     static {
-        OptionsParameter o = new OptionsParameter();
+        OptionsParameter o = new OptionsParameter(40);
         o.addAllowedOption("base-uri", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("comments", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("debug", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);

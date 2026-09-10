@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions.hof;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.FunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -21,6 +22,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.CoercionRules;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -176,7 +178,9 @@ public class CoercedFunction extends AbstractFunction {
         SpecificFunctionType req = requiredType;
         SequenceType[] argTypes = targetFunction.getFunctionItemType().getArgumentTypes();
         int suppliedArity = Math.min(args.length, argTypes.length);
-        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+        CoercionRules coercionRules = CoercionRules.forVersion(allow40 ? 40 : 31);
+        Configuration config = context.getConfiguration();
+        TypeHierarchy th = config.getTypeHierarchy();
         Sequence[] targetArgs = new Sequence[suppliedArity];
         for (int i = 0; i < suppliedArity; i++) {
             GroundedValue gVal = args[i].materialize();
@@ -186,7 +190,7 @@ public class CoercedFunction extends AbstractFunction {
                 final int pos = i;
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, targetFunction.getDescription(), pos);
-                targetArgs[i] = th.applyFunctionConversionRules(gVal, argTypes[i], role, Loc.NONE);
+                targetArgs[i] = coercionRules.coerce(gVal, argTypes[i], config, role, Loc.NONE);
             }
         }
         // TODO: don't materialize the result if static type checking tells us the result will be OK
@@ -196,7 +200,7 @@ public class CoercedFunction extends AbstractFunction {
         } else {
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, getDescription(), 0);
-            return th.applyFunctionConversionRules(rawResult, req.getResultType(), role, Loc.NONE);
+            return coercionRules.coerce(rawResult, req.getResultType(), config, role, Loc.NONE);
         }
     }
 

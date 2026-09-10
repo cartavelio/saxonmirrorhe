@@ -107,7 +107,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                  OPT, LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(ParseJsonFn.OPTION_DETAILS));
+                .setOptionDetails(ParseJsonFn.makeOptionsParameter(31)));
 
         register("json-to-xml", 1, e -> e.populate( JsonToXMLFn::new, AnyItemType.getInstance(),
                  OPT, LATE | NEW)
@@ -117,7 +117,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                  OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(JsonToXMLFn.OPTION_DETAILS));
+                .setOptionDetails(JsonToXMLFn.makeOptionsParameter(31)));
 
         register("load-xquery-module", 1, e -> e.populate( LoadXqueryModule::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
@@ -125,7 +125,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("load-xquery-module", 2, e -> e.populate( LoadXqueryModule::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null) // null or EMPTY?
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .setOptionDetails(LoadXqueryModule.makeOptionsParameter()));
+                .setOptionDetails(LoadXqueryModule.makeOptionsParameter(31)));
 
 
         register("parse-ietf-date", 1, e -> e.populate( ParseIetfDate::new, BuiltInAtomicType.DATE_TIME, OPT, 0)
@@ -137,7 +137,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("parse-json", 2, e -> e.populate( ParseJsonFn::new, AnyItemType.getInstance(), OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(ParseJsonFn.OPTION_DETAILS));
+                .setOptionDetails(ParseJsonFn.makeOptionsParameter(31)));
 
         register("parse-xml", 1, e -> e.populate(ParseXml::new, new DocumentNodeTest(NodeKindTest.ELEMENT), OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
@@ -153,7 +153,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("serialize", 2, e -> e.populate( Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, Type.ITEM_TYPE, OPT, null)
-                .setOptionDetails(Serialize.makeOptionsParameter()));
+                .setOptionDetails(Serialize.makeOptionsParameter(31)));
 
         // The snapshot function is defined in XSLT 3.0, but we choose to make it available also in XPath/XQuery
 
@@ -196,7 +196,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         register("transform", 1, e -> e.populate( TransformFn::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .setOptionDetails(TransformFn.makeOptionsParameter()));
+                .setOptionDetails(TransformFn.makeOptionsParameter(31)));
 
         register("xml-to-json", 1, e -> e.populate( XMLToJsonFn::new, BuiltInAtomicType.STRING,
                  OPT, LATE)
@@ -206,7 +206,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                  OPT, LATE)
                 .arg(0, AnyNodeTest.getInstance(), OPT | ABS, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE | ABS, null)
-                .setOptionDetails(XMLToJsonFn.makeOptionsParameter()));
+                .setOptionDetails(XMLToJsonFn.makeOptionsParameter(31)));
 
     }
 

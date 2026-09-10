@@ -20,6 +20,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.CoercionRules;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
@@ -175,6 +176,8 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
             return;
         }
         Configuration config = getConfiguration();
+        int version =  xsltExecutable.getXsltVersion();
+        CoercionRules coercionRules = CoercionRules.forVersion(version);
         net.sf.saxon.value.SequenceType required = details.getUnderlyingDeclaredType();
         GroundedValue converted;
         try {
@@ -196,8 +199,8 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
             if (required != null && !required.matches(converted, config.getTypeHierarchy())) {
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, qName.toString(), -1);
-                converted = config.getTypeHierarchy().applyFunctionConversionRules(
-                        converted, required, role, Loc.NONE);
+                converted = coercionRules.coerce(
+                        converted, required, config, role, Loc.NONE);
             }
         } catch (XPathException e) {
             throw new IllegalArgumentException(e);

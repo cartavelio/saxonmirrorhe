@@ -45,8 +45,8 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
             new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING
     );
 
-    public static OptionsParameter makeOptionsParameter() {
-        OptionsParameter xmlToJsonOptions = new OptionsParameter();
+    public static OptionsParameter makeOptionsParameter(int version) {
+        OptionsParameter xmlToJsonOptions = new OptionsParameter(version);
         xmlToJsonOptions.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         xmlToJsonOptions.addAllowedOption("number-formatter",
                                           SequenceType.makeSequenceType(formatterFunctionType, StaticProperty.ALLOWS_ZERO_OR_ONE),

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
@@ -307,6 +308,7 @@ public class DynamicFunctionCall extends Expression {
         @Override
         public PullEvaluator elaborateForPull() {
             DynamicFunctionCall expr = (DynamicFunctionCall)getExpression();
+            Configuration config = getConfiguration();
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
             SequenceEvaluator[] argEvaluators = new SequenceEvaluator[expr.getArity()];
             for (int i=0; i<argEvaluators.length; i++) {
@@ -315,7 +317,9 @@ public class DynamicFunctionCall extends Expression {
             }
             Expression body = expr.targetFunction.getChildExpression();
             ItemEvaluator functionEvaluator = body.makeElaborator().elaborateForItem();
-            final boolean is40 = expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
+            final int version = expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            final boolean is40 = version >= 40;
+            final CoercionRules coercionRules = CoercionRules.forVersion(version);
             return context -> {
                 FunctionItem fn = (FunctionItem) functionEvaluator.eval(context);
                 FunctionItemType fit = fn.getFunctionItemType();
@@ -342,8 +346,8 @@ public class DynamicFunctionCall extends Expression {
                         if (!expected.equals(SequenceType.ANY_SEQUENCE)) {
                             Supplier<RoleDiagnostic> role;
                             role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, fn.getDescription(), 0);
-                            actual = th.applyFunctionConversionRules(
-                                    actual, expected, role, Loc.NONE);
+                            actual = coercionRules.coerce(
+                                    actual, expected, config, role, Loc.NONE);
                         }
                         argValues[i] = actual;
                     }
@@ -364,8 +368,8 @@ public class DynamicFunctionCall extends Expression {
                     // Check the result of the function
                     Supplier<RoleDiagnostic> resultRole =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
-                    return th.applyFunctionConversionRules(
-                            rawResult, fit.getResultType(), resultRole, Loc.NONE).iterate();
+                    return coercionRules.coerce(
+                            rawResult, fit.getResultType(), config, resultRole, Loc.NONE).iterate();
                 }
             };
         }

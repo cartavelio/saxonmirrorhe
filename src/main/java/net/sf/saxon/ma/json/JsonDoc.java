@@ -89,7 +89,9 @@ public class JsonDoc extends SystemFunction  {
                     ? new HashMap<>()
                     : getDetails().optionDetails.processSuppliedOptions(options, context);
         } else {
-            checkedOptions = ParseJsonFn.OPTION_DETAILS.getDefaultOptions();
+            checkedOptions = ParseJsonFn.makeOptionsParameter(
+                    getRetainedStaticContext().getPackageData().getHostLanguageVersion())
+                    .getDefaultOptions();
         }
         Item result = ParseJsonFn.parse(content.toString(), checkedOptions, context);
         return SequenceTool.itemOrEmpty(result);

@@ -7,15 +7,22 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.ma.arrays.*;
+import net.sf.saxon.ma.arrays.ArrayFunctionSet;
+import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -112,7 +119,9 @@ public class ApplyFn extends SystemFunction  {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         final FunctionItem function = (FunctionItem) arguments[0].head();
-        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+        CoercionRules coercionRules = CoercionRules.forVersion(
+                getRetainedStaticContext().getPackageData().getHostLanguageVersion());
+        Configuration config = context.getConfiguration();
         FunctionItemType fit = function.getFunctionItemType();
 
         ArrayItem args = (ArrayItem) arguments[1].head();
@@ -135,8 +144,8 @@ public class ApplyFn extends SystemFunction  {
                 SequenceType expected = fit.getArgumentTypes()[i];
                 final int pos = i;
                 Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "fn:apply", pos + 1);
-                Sequence converted = th.applyFunctionConversionRules(
-                        args.get(i), expected, role, Loc.NONE);
+                Sequence converted = coercionRules.coerce(
+                        args.get(i), expected, config, role, Loc.NONE);
                 argArray[i] = converted.materialize();
             }
         }
@@ -151,8 +160,6 @@ public class ApplyFn extends SystemFunction  {
             final GroundedValue argSequence = SequenceExtent.makeSequenceExtent(members);
             List<GroundedValue> singletonArg = new ArrayList<>(1);
             singletonArg.add(argSequence);
-        } else {
-
         }
 
 
@@ -164,8 +171,8 @@ public class ApplyFn extends SystemFunction  {
             // Check the result of the function
             Supplier<RoleDiagnostic> resultRole =
                     () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
-            return th.applyFunctionConversionRules(
-                    rawResult, fit.getResultType(), resultRole, Loc.NONE);
+            return coercionRules.coerce(
+                    rawResult, fit.getResultType(), config, resultRole, Loc.NONE);
         }
     }
 

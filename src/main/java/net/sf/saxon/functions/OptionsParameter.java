@@ -8,6 +8,7 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
@@ -17,10 +18,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
@@ -43,8 +41,11 @@ public class OptionsParameter {
     private String errorCodeForDisallowedValue;
     private String errorCodeForAbsentValue = "SXJE9999";
     private boolean allowCastFromString = false;
+    private final int languageVersion;
 
-    public OptionsParameter() {}
+    public OptionsParameter(int version) {
+        this.languageVersion = version;
+    }
 
     /**
      * Register a permitted option keyword, and the associated type of value, without defining
@@ -108,7 +109,9 @@ public class OptionsParameter {
 
     public Map<String, GroundedValue> processSuppliedOptions(MapItem supplied, XPathContext context) throws XPathException {
         Map<String, GroundedValue> result = new HashMap<>();
-        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+        Configuration config = context.getConfiguration();
+        TypeHierarchy th = config.getTypeHierarchy();
+        CoercionRules coercionRules = CoercionRules.forVersion(languageVersion);
 
         for (String req : requiredOptions) {
             if (supplied.get(new StringValue(req)) == null) {
@@ -141,8 +144,8 @@ public class OptionsParameter {
                     if (!ok) {
                         Supplier<RoleDiagnostic> role =
                                 () -> new RoleDiagnostic(RoleDiagnostic.OPTION, nominalKey, 0, "XPTY0004");
-                        actual = th.applyFunctionConversionRules(
-                                actual, required, role, Loc.NONE);
+                        actual = coercionRules.coerce(
+                                actual, required, config, role, Loc.NONE);
                     }
                 }
                 actual = actual.materialize();

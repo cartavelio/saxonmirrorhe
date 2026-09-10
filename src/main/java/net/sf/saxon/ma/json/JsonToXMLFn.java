@@ -30,19 +30,17 @@ import java.util.Map;
 
 public class JsonToXMLFn extends SystemFunction {
 
-    public static OptionsParameter OPTION_DETAILS;
-
-    static{
+    public static OptionsParameter makeOptionsParameter(int version) {
         SpecificFunctionType fallbackType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING);
-        OptionsParameter jsonToXmlOptions = new OptionsParameter();
+        OptionsParameter jsonToXmlOptions = new OptionsParameter(version);
         jsonToXmlOptions.addAllowedOption("liberal", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, null);
         jsonToXmlOptions.setAllowedValues("duplicates", "FOJS0005", "reject", "use-first", "retain");
         jsonToXmlOptions.addAllowedOption("validate", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("fallback", SequenceType.makeSequenceType(fallbackType, StaticProperty.EXACTLY_ONE), null);
-        OPTION_DETAILS = jsonToXmlOptions;
+        return jsonToXmlOptions;
     }
 
     /**

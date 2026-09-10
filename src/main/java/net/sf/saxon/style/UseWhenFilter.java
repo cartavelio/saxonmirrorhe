@@ -480,6 +480,7 @@ public class UseWhenFilter extends ProxyReceiver {
         SequenceType requiredType = SequenceType.ANY_SEQUENCE;
 
         int languageLevel = compilation.getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
+        CoercionRules coercionRules = CoercionRules.forVersion(languageLevel);
         if (languageLevel == 30) {
             languageLevel = 305; // XPath 3.0 + XSLT extensions
         }
@@ -520,7 +521,7 @@ public class UseWhenFilter extends ProxyReceiver {
 
             if (isSupplied) {
                 Sequence suppliedValue = compilation.getParameters()
-                        .convertParameterValue(varName, requiredType, true, staticContext.makeEarlyEvaluationContext());
+                        .convertParameterValue(varName, requiredType, languageLevel, staticContext.makeEarlyEvaluationContext());
 
                 compilation.declareStaticVariable(varName, suppliedValue.materialize(), precedence, isParam);
             }
@@ -559,9 +560,7 @@ public class UseWhenFilter extends ProxyReceiver {
             }
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0, "XTDE0050");
-            TypeHierarchy th = getConfiguration().getTypeHierarchy();
-            Sequence seq = th.applyFunctionConversionRules(value, requiredType, role, attLoc);
-            value = seq.materialize();
+            value = coercionRules.coerce(value, requiredType, getConfiguration(), role, attLoc);
             try {
                 compilation.declareStaticVariable(varName, value, precedence, isParam);
             } catch (XPathException e) {

@@ -40,8 +40,8 @@ import java.util.Map;
  */
 public class LoadXqueryModule extends SystemFunction implements Callable {
 
-    public static OptionsParameter makeOptionsParameter() {
-        OptionsParameter op = new OptionsParameter();
+    public static OptionsParameter makeOptionsParameter(int version) {
+        OptionsParameter op = new OptionsParameter(version);
         op.addAllowedOption("xquery-version", SequenceType.SINGLE_DECIMAL);
         op.addAllowedOption("location-hints", SequenceType.STRING_SEQUENCE);
         op.addAllowedOption("context-item", SequenceType.OPTIONAL_ITEM);

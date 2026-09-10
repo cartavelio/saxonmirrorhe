@@ -27,6 +27,8 @@ import java.util.Set;
  *
  * <p>The XPath syntax proposed is <code>enum("A", "B", "C")</code></p>
  */
+
+// TODO: this implementation is bizarre...
 public class EnumerationType implements AtomicType {
 
     private Set<String> values;
@@ -37,6 +39,10 @@ public class EnumerationType implements AtomicType {
      */
     public EnumerationType(Set<String> values) {
         this.values = values;
+    }
+
+    public boolean allowsValue(String value) {
+        return values.contains(value);
     }
 
     /**
@@ -569,12 +575,11 @@ public class EnumerationType implements AtomicType {
      * @param expression the expression that delivers the content
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
      *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
-     * @param schema
      * @throws XPathException if the expression will never deliver a value of the correct type
      */
     @Override
-    public void analyzeContentExpression(Expression expression, int kind, Schema schema) throws XPathException {
-        BuiltInAtomicType.STRING.analyzeContentExpression(expression, kind, schema);
+    public void analyzeContentExpression(Expression expression, int kind) throws XPathException {
+        BuiltInAtomicType.STRING.analyzeContentExpression(expression, kind);
     }
 
     /**

@@ -49,7 +49,10 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -266,8 +269,9 @@ public class Controller implements ContextOriginator {
 
     public GroundedValue getConvertedParameter(StructuredQName name, SequenceType requiredType, XPathContext context)
             throws XPathException {
+        int version = getExecutable().getTopLevelPackage().getHostLanguageVersion();
         GroundedValue val =
-                globalParameters.convertParameterValue(name, requiredType, convertParameters, context);
+                globalParameters.convertParameterValue(name, requiredType, convertParameters ? version : 0, context);
         if (val != null) {
 
             // Check that any nodes belong to the right configuration

@@ -25,6 +25,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
+import net.sf.saxon.type.CoercionRules;
 import net.sf.saxon.type.TypeHierarchy;
 
 import javax.xml.transform.ErrorListener;
@@ -724,6 +725,8 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
             throw new SaxonApiException("No function with name " + function.getEQName() +
                     " and arity " + arguments.length + " has been declared in the query");
         }
+        int version = expression.getMainModule().getXPathVersion();
+        CoercionRules coercionRules = CoercionRules.forVersion(version);
         try {
             if (controller == null) {
                 controller = expression.newController(context);
@@ -740,7 +743,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                     final int pos = i;
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, function.getStructuredQName().getDisplayName(), pos);
-                    gVal = th.applyFunctionConversionRules(gVal, type, role, Loc.NONE);
+                    gVal = coercionRules.coerce(gVal, type, config, role, Loc.NONE);
                 }
                 vr[i] = gVal;
             }

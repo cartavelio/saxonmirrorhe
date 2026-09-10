@@ -16,7 +16,6 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.type.Schema;
 import net.sf.saxon.value.SequenceType;
 
 import java.io.IOException;
@@ -38,10 +37,12 @@ public class XsltExecutable {
 
     private final Processor processor;
     private final PreparedStylesheet preparedStylesheet;
+    private final int xsltVersion;
 
-    protected XsltExecutable(Processor processor, PreparedStylesheet preparedStylesheet) {
+    protected XsltExecutable(Processor processor, PreparedStylesheet preparedStylesheet, int xsltVersion) {
         this.processor = processor;
         this.preparedStylesheet = preparedStylesheet;
+        this.xsltVersion = xsltVersion;
     }
 
     /**
@@ -53,6 +54,16 @@ public class XsltExecutable {
 
     public Processor getProcessor() {
         return processor;
+    }
+
+    /**
+     * Get the XSLT language version. This is the version as configured for the XSLT Compiler,
+     * which is not necessarily the same as the version contained in the XSLT source code.
+     * @return 30 for XSLT 3.0, 40 for XSLT 4.0
+     */
+
+    public int getXsltVersion() {
+        return xsltVersion;
     }
 
     /**
@@ -94,23 +105,6 @@ public class XsltExecutable {
 
     public Xslt30Transformer load30() {
         return new Xslt30Transformer(processor, preparedStylesheet.newController(), preparedStylesheet.getCompileTimeParams());
-    }
-
-    /**
-     * Get the schema used as the static context of the top-level package in the stylesheet. This will typically
-     * include schema components preloaded using {@link XsltCompiler#useSchema(XsdSchema)}, plus schema components
-     * loaded using <code>xsl:import-schema</code> declarations within the stylesheet itself.
-     *
-     * <p>This schema can usefully be used for validating source documents that are to be supplied as input to
-     * the stylesheet.</p>
-     *
-     * @return the schema used by the top-level package of the stylesheet
-     * @since 13.0
-     */
-
-    public XsdSchema getImportedSchema() {
-        Schema schema = preparedStylesheet.getTopLevelPackage().getImportedSchema();
-        return processor.newXsdCompiler().wrapInternalSchema(schema);
     }
 
     /**

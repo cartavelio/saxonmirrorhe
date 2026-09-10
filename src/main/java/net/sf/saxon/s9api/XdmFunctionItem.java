@@ -16,6 +16,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.CoercionRules;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.TypeHierarchy;
 
@@ -152,7 +153,8 @@ public class XdmFunctionItem extends XdmItem {
      *
      * @param arguments the values to be supplied as arguments to the function. The "function
      *                  conversion rules" will be applied to convert the arguments to the required
-     *                  type when necessary.
+     *                  type when necessary. The conversion rules that apply are those defined
+     *                  in the XPath 3.1 specification.
      * @param processor the s9api Processor
      * @return the result of calling the function
      * @throws SaxonApiException if an error is detected
@@ -166,7 +168,9 @@ public class XdmFunctionItem extends XdmItem {
             FunctionItem fi = (FunctionItem) getUnderlyingValue();
             FunctionItemType type = fi.getFunctionItemType();
             Sequence[] argVals = new Sequence[arguments.length];
-            TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
+            final Configuration config = processor.getUnderlyingConfiguration();
+            TypeHierarchy th = config.getTypeHierarchy();
+            CoercionRules coercionRules = CoercionRules.forVersion(31);
             for (int i = 0; i < arguments.length; i++) {
                 net.sf.saxon.value.SequenceType required = type.getArgumentTypes()[i];
                 GroundedValue val = arguments[i].getUnderlyingValue();
@@ -174,11 +178,10 @@ public class XdmFunctionItem extends XdmItem {
                     final int pos = i;
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", pos);
-                    val = th.applyFunctionConversionRules(val, required, role, Loc.NONE);
+                    val = coercionRules.coerce(val, required, config, role, Loc.NONE);
                 }
                 argVals[i] = val;
             }
-            Configuration config = processor.getUnderlyingConfiguration();
             Controller controller = new Controller(config);
             XPathContext context = controller.newXPathContext();
             context = fi.makeNewContext(context, controller);
@@ -190,7 +193,7 @@ public class XdmFunctionItem extends XdmItem {
                 if (!required.matches(groundedResult, th)) {
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
-                    groundedResult = th.applyFunctionConversionRules(groundedResult, required, role, Loc.NONE);
+                    groundedResult = coercionRules.coerce(groundedResult, required, config, role, Loc.NONE);
                 }
             }
             return XdmValue.wrap(groundedResult);

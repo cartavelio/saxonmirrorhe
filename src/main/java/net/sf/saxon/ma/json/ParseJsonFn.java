@@ -14,7 +14,6 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
@@ -29,21 +28,19 @@ import java.util.Map;
  */
 public class ParseJsonFn extends JsonToXMLFn {
 
-    @CSharpModifiers(code={"public", "static", "new"})
-    public static OptionsParameter OPTION_DETAILS;
-    static {
+    public static OptionsParameter makeOptionsParameter(int version) {
         SpecificFunctionType fallbackType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING);
         SpecificFunctionType parserType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
-        OptionsParameter parseJsonOptions = new OptionsParameter();
+        OptionsParameter parseJsonOptions = new OptionsParameter(version);
         parseJsonOptions.addAllowedOption("liberal", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));
         parseJsonOptions.setAllowedValues("duplicates", "FOJS0005", "reject", "use-first", "use-last");
         parseJsonOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("fallback", SequenceType.makeSequenceType(fallbackType, StaticProperty.EXACTLY_ONE), null);
         parseJsonOptions.addAllowedOption("number-parser", SequenceType.makeSequenceType(parserType, StaticProperty.EXACTLY_ONE), null);
-        OPTION_DETAILS = parseJsonOptions;
+        return parseJsonOptions;
     }
 
 

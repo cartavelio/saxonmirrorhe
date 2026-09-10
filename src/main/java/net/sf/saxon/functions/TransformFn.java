@@ -75,8 +75,8 @@ public class TransformFn extends SystemFunction implements Callable {
     }
 
 
-    public static OptionsParameter makeOptionsParameter() {
-        OptionsParameter op = new OptionsParameter();
+    public static OptionsParameter makeOptionsParameter(int version) {
+        OptionsParameter op = new OptionsParameter(version);
         op.addAllowedOption("xslt-version", SequenceType.SINGLE_DECIMAL);
         op.addAllowedOption("stylesheet-location", SequenceType.SINGLE_STRING);
         op.addAllowedOption("stylesheet-node", SequenceType.SINGLE_NODE);

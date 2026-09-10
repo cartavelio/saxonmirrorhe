@@ -82,7 +82,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 field("key", SequenceType.SINGLE_ATOMIC, false),
                 field("value", SequenceType.ANY_SEQUENCE, false));
 
-        OptionsParameter mergeOptionDetails = new OptionsParameter();
+        OptionsParameter mergeOptionDetails = new OptionsParameter(version);
         mergeOptionDetails.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));
         // duplicates=unspecified is retained because that's what the XSLT 3.0 Rec incorrectly uses
         mergeOptionDetails.setAllowedValues("duplicates", "FOJS0005", "use-first", "use-last", "combine", "reject", "unspecified", "use-any", "use-callback");
