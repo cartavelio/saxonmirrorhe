@@ -55,6 +55,8 @@ public class OpLookahead extends Operation {
     public IntIterator iterateMatches(final REMatcher matcher, final int position) {
         final IntIterator basis = childOp.iterateMatches(matcher, position);
         if (basis.hasNext() == positive) {
+            // Need to call basis.next() in case this captures any captured groups
+            basis.next();
             return new IntSingletonIterator(position);
         } else {
             return EmptyIntIterator.getInstance();
