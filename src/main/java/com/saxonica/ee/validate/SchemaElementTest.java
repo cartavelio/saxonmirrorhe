@@ -58,7 +58,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
         List<QNameTest> names = new ArrayList<>();
         NamePool pool = head.getConfiguration().getNamePool();
         for (NodeName nn : groupByName.keySet()) {
-            names.add(new SpecificQNameTest(nn.getStructuredQName(), pool, nn.getFingerprint()));
+            names.add(new SpecificQNameTest(nn.getStructuredQName(), pool, nn.obtainFingerprint(pool)));
         }
         return new UnionQNameTest(names);
     }
