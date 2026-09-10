@@ -598,6 +598,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
 
     @Override
     public Elaborator getElaborator() {
+        allocateArgumentEvaluators();
         if (isTailCall()) {
             return new TailCallElaborator();
         } else {
@@ -609,7 +610,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
 
         public PullEvaluator elaborateForPull() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-            expr.allocateArgumentEvaluators();
+            //expr.allocateArgumentEvaluators();
             if (expr.bindingSlot >= 0) {
                 return context -> {
                     TailCallLoop.TailCallComponent info = new TailCallLoop.TailCallComponent();
@@ -661,7 +662,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         @Override
         public PullEvaluator elaborateForPull() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-            expr.allocateArgumentEvaluators();
+            //expr.allocateArgumentEvaluators();
             if (expr.bindingSlot >= 0) {
                 // XSLT packages in general need dynamic binding
                 return context -> {
@@ -702,7 +703,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         @Override
         public ItemEvaluator elaborateForItem() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-            expr.allocateArgumentEvaluators();
+            //expr.allocateArgumentEvaluators();
             if (expr.bindingSlot >= 0) {
                 // XSLT packages in general need dynamic binding
                 return context -> {
@@ -744,7 +745,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         public PushEvaluator elaborateForPush() {
 
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-            expr.allocateArgumentEvaluators();
+            //expr.allocateArgumentEvaluators();
             if (expr.isTailCall()) {
                 throw new AssertionError("Not using tail call path");
             }
@@ -816,7 +817,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         @Override
         public UpdateEvaluator elaborateForUpdate() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-            expr.allocateArgumentEvaluators();
+            //expr.allocateArgumentEvaluators();
             UserFunction targetFunction = expr.getFunction(); // This is XQuery: target function is known
             return (context, pul) -> {
                 Sequence[] actualArgs = expr.evaluateArguments(context, false);
