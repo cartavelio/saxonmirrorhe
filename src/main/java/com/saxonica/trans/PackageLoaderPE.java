@@ -163,10 +163,17 @@ public class PackageLoaderPE extends PackageLoaderHE {
                 ((JavaExtensionFunctionCall) exp).prepareForDynamicCall(loader.getConfiguration());
                 String declaredType = element.getAttributeValue("", "declType");
                 if (declaredType != null) {
-                    SequenceType returnType = loader.parseAlphaCode(element, "declType");
-                    if (returnType.getPrimaryType() instanceof JavaExternalObjectType) {
-                        ((JavaExtensionFunctionCall) exp).adjustRequiredType(
-                                (JavaExternalObjectType) returnType.getPrimaryType());
+                    try {
+                        StructuredQName classQName = StructuredQName.fromEQName(declaredType);
+                        if (classQName.hasURI(NamespaceConstant.JAVA_TYPE)) {
+                            String className = JavaExternalObjectType.localNameToClassName(classQName.getLocalPart());
+                            Configuration config = loader.getConfiguration();
+                            Class<?> resultClass = config.getClass(className, false);
+                            JavaExternalObjectType jeot = new JavaExternalObjectType(resultClass);
+                            ((JavaExtensionFunctionCall) exp).adjustRequiredType(jeot);
+                        }
+                    } catch (Exception err) {
+                        throw new XPathException("Unable to load type " + declaredType + " needed by an extension function");
                     }
                 }
             }
