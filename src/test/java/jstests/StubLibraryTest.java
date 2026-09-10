@@ -1,6 +1,5 @@
 package jstests;
 
-//import com.saxonica.ee.extfn.IxslFunctionLibrary;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ExtensionFunctionCall;
@@ -22,9 +21,7 @@ import java.io.StringReader;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * Created by mike on 27/01/2016.
- */
+
 public class StubLibraryTest {
 
     @Test
@@ -86,6 +83,125 @@ public class StubLibraryTest {
             err.printStackTrace();
             fail();
         }
+    }
+
+    @Test
+    public void testSingleNamespace() {
+
+        String lib = "{\n"
+                + "    \"namespace\": \"http://sjs/\",\n"
+                + "    \"signatures\": {\n"
+                + "      \"one\": {\n"
+                + "        \"as\": \"xs:boolean\",\n"
+                + "        \"param\": [\n"
+                + "          \"xs:string\"\n"
+                + "        ],\n"
+                + "        \"arity\": [1]\n"
+                + "      },\n"
+                + "      \"two\": {\n"
+                + "        \"as\": \"element(*)\",\n"
+                + "        \"param\": [\n"
+                + "          \"xs:string\",\n"
+                + "          \"xs:string\"\n"
+                + "        ],\n"
+                + "        \"arity\": [1, 2]\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }";
+
+        String xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+                "<xsl:template name='xsl:initial-template'>" +
+                "<xsl:value-of select='Q{http://sjs/}one(\"thing\")'/>" +
+                "<xsl:value-of select='Q{http://sjs/}two(\"thing\")'/>" +
+                "<xsl:value-of select='Q{http://sjs/}two(\"thing\", \"thong\")'/>" +
+                "</xsl:template>" +
+                "</xsl:transform>";
+        try {
+            Processor proc = new Processor(true);
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setJustInTimeCompilation(false);
+            CompilerInfo info = comp.getUnderlyingCompilerInfo();
+            info.importStubFunctionLibrary(new StreamSource(new StringReader(lib)));
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+            ByteArrayOutputStream sef = new ByteArrayOutputStream();
+            exec.export(sef, "JS3");
+
+        } catch (XPathException | SaxonApiException e) {
+            fail(e);
+        }
+
+
+    }
+
+    @Test
+    public void testMultipleNamespace() {
+
+        String lib = "[{\n"
+                + "    \"namespace\": \"http://sjs/\",\n"
+                + "    \"signatures\": {\n"
+                + "      \"one\": {\n"
+                + "        \"as\": \"xs:boolean\",\n"
+                + "        \"param\": [\n"
+                + "          \"xs:string\"\n"
+                + "        ],\n"
+                + "        \"arity\": [1]\n"
+                + "      },\n"
+                + "      \"two\": {\n"
+                + "        \"as\": \"element(*)\",\n"
+                + "        \"param\": [\n"
+                + "          \"xs:string\",\n"
+                + "          \"xs:string\"\n"
+                + "        ],\n"
+                + "        \"arity\": [1, 2]\n"
+                + "      }\n"
+                + "    }\n"
+                + "  },"
+                + "  {\n "
+                + "    \"namespace\": \"http://sjs2/\",\n"
+                + "    \"signatures\": {\n"
+                + "      \"one\": {\n"
+                + "        \"as\": \"xs:boolean\",\n"
+                + "        \"param\": [\n"
+                + "          \"xs:string\"\n"
+                + "        ],\n"
+                + "        \"arity\": [1]\n"
+                + "      },\n"
+                + "      \"two\": {\n"
+                + "        \"as\": \"element(*)\",\n"
+                + "        \"param\": [\n"
+                + "          \"xs:string\",\n"
+                + "          \"xs:string\"\n"
+                + "        ],\n"
+                + "        \"arity\": [1, 2]\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }]";
+
+        String xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>" +
+                "<xsl:template name='xsl:initial-template'>" +
+                "<xsl:value-of select='Q{http://sjs/}one(\"thing\")'/>" +
+                "<xsl:value-of select='Q{http://sjs/}two(\"thing\")'/>" +
+                "<xsl:value-of select='Q{http://sjs/}two(\"thing\", \"thong\")'/>" +
+                "<xsl:value-of select='Q{http://sjs2/}one(\"thing\")'/>" +
+                "<xsl:value-of select='Q{http://sjs2/}two(\"thing\")'/>" +
+                "<xsl:value-of select='Q{http://sjs2/}two(\"thing\", \"thong\")'/>" +
+                "</xsl:template>" +
+                "</xsl:transform>";
+        try {
+            Processor proc = new Processor(true);
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setJustInTimeCompilation(false);
+            CompilerInfo info = comp.getUnderlyingCompilerInfo();
+            info.importStubFunctionLibrary(new StreamSource(new StringReader(lib)));
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
+            ByteArrayOutputStream sef = new ByteArrayOutputStream();
+            exec.export(sef, "JS3");
+
+        } catch (XPathException | SaxonApiException e) {
+            fail(e);
+        }
+
+
     }
 
 }
