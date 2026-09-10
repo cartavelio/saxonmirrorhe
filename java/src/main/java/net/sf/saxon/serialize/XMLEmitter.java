@@ -21,6 +21,8 @@ import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.OutputKeys;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Stack;
@@ -240,6 +242,7 @@ public class XMLEmitter extends Emitter {
 
             if (canonical) {
                 omitXMLDeclaration = "yes";
+                requireWellFormed = true;
             }
 
             String version = outputProperties.getProperty(OutputKeys.VERSION);
@@ -431,7 +434,7 @@ public class XMLEmitter extends Emitter {
         if (!started) {
             openDocument();
         } else if (requireWellFormed && elementStack.isEmpty() && startedElement && !unfailing) {
-            throw new XPathException("When 'standalone' or 'doctype-system' is specified, " +
+            throw new XPathException("When 'standalone' or 'doctype-system' or 'canonical' is specified, " +
                                                             "the document must be well-formed; but this document contains more than one top-level element")
                     .withErrorCode("SEPM0004");
         }
@@ -482,6 +485,17 @@ public class XMLEmitter extends Emitter {
             boolean isFirst = true;
 
             for (NamespaceBinding ns : namespaces) {
+                // Perversely, the namespace need not be a valid URI, but if it is a valid
+                // URI, it must not be relative
+                try {
+                    URI uri = new URI(ns.getNamespaceUri().toString());
+                    if (!uri.isAbsolute()) {
+                        throw new XPathException("Canonical XML does not allow namespace URIs to be relative: "
+                                                         + ns.getNamespaceUri(), "SERE0024");
+                    }
+                } catch (URISyntaxException err) {
+                    // no action
+                }
                 namespace(ns.getPrefix(), ns.getNamespaceUri(), isFirst);
                 isFirst = false;
             }
@@ -751,26 +765,7 @@ public class XMLEmitter extends Emitter {
             if (openStartTag) {
                 closeStartTag();
             }
-            if (ReceiverOption.contains(properties, ReceiverOption.USE_CDATA)) {
-                writer.write(CDATAFilter.CDATA_OPEN);
-
-                // Check that the character data doesn't include the substring "]]>"
-                // Also get rid of any zero bytes inserted by character map expansion
-
-                long i = 0;
-                long doneto = 0;
-                long len = chars.length();
-                while (i < len - 2) {
-                    if (chars.codePointAt(i) == ']' && chars.codePointAt(i + 1) == ']' && chars.codePointAt(i + 2) == '>') {
-                        writer.write(chars.substring(doneto, i + 2));
-                        writer.write(CDATAFilter.CDATA_CLOSE_AND_REOPEN);
-                        doneto = i + 2;
-                    }
-                    i++;
-                }
-                writer.write(chars.substring(doneto, len));
-                writer.write(CDATAFilter.CDATA_CLOSE);
-            } else if (chars instanceof WhitespaceString) {
+            if (chars instanceof WhitespaceString) {
                 ((WhitespaceString) chars).write(writer);
             } else if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
                 writer.write(chars);
