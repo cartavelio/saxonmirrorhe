@@ -7,7 +7,7 @@
 
 package internaltests;
 
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class ConcurrentStringTests {
         }
 
         private List<Callable<Boolean>> createTasks(final String input) {
-            StringItem stringValue = StringItem.makeStringValue(input);
+            StringValue stringValue = StringValue.makeStringValue(input);
 
             List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
             for (int i = 0; i < TASKS_COUNT; i++) {
@@ -72,9 +72,9 @@ public class ConcurrentStringTests {
         }
 
         private static class GetStringLengthCallable implements Callable<Boolean> {
-            private final StringItem stringValue;
+            private final StringValue stringValue;
 
-            public GetStringLengthCallable(StringItem stringValue) {
+            public GetStringLengthCallable(StringValue stringValue) {
                 this.stringValue = stringValue;
             }
 

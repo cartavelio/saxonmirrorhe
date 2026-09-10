@@ -9,7 +9,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Transformer;
@@ -106,9 +106,9 @@ public class MultithreadedExtensionTest {
                         throw new RuntimeException("FAILED_ON_PURPOSE");
                     else
                         try {
-                            return new StringItem(sequences[0].head().getStringValue());
+                            return new StringValue(sequences[0].head().getStringValue());
                         } catch (XPathException e) {
-                            return new StringItem("ERR: " + e.getMessage());
+                            return new StringValue("ERR: " + e.getMessage());
                         }
                 }
             };
