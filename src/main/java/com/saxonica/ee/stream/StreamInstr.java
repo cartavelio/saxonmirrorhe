@@ -25,6 +25,7 @@ import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.QuitParsingException;
@@ -49,6 +50,9 @@ public class StreamInstr extends SourceDocument implements Pusher {
         super(hrefExp, body, options);
     }
 
+    public void setSpaceStrippingRule(SpaceStrippingRule rule) {
+        parseOptions = parseOptions.withSpaceStrippingRule(rule);
+    }
 
     /**
      * Perform optimisation of an expression and its subexpressions. This is the third and final

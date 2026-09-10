@@ -130,14 +130,16 @@ public class PackageLoaderEE extends PackageLoaderPE {
             final ParseOptions options = loader.getConfiguration().getParseOptions()
                 .withSchemaValidationMode(validation)
                 .withTopLevelType(schemaType);
-            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
-//            if (flags != null && flags.contains("s")) {
-//                loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
-//            }
+
             Expression body = loader.getExpressionWithRole(element, "body");
             Expression href = loader.getExpressionWithRole(element, "href");
 
             final StreamInstr inst = new StreamInstr(href, body, options);
+
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
+            if (flags != null && flags.contains("s")) {
+                loader.addCompletionAction(() -> inst.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
+            }
 
             String accumulatorNames = element.getAttributeValue(NamespaceUri.NULL, "accum");
             processAccumulatorList(loader, inst, accumulatorNames);
