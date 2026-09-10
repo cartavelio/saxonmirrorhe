@@ -39,7 +39,9 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
    <section id="xslt" title="XSLT processor">
       <h1>XSLT processor</h1>
 
-      <p>Details about parameters and properties which can be set on the <code>Xslt30Processor</code>.</p>
+      <p>Details about parameters which can be set on <code>Xslt30Processor</code> or
+         <code>XsltExecutable</code>; and properties which can be set on
+         <code>XsltExecutable</code>.</p>
 
       <h3 class="codeTitle">setParameter(string $name, XdmValue $value)</h3>
 
