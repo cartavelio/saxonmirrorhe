@@ -441,7 +441,7 @@ public class Query {
                         if (outputFile.isDirectory()) {
                             quit("Output is a directory", 2);
                         }
-                       serializer = processor.newSerializer(outputFile);
+                        serializer = processor.newSerializer(outputFile);
                     } else {
                         serializer = processor.newSerializer(System.out);
                     }
@@ -480,8 +480,8 @@ public class Query {
                         // quit after 1000 seconds
                         break;
                     }
-                    startTime = endTime;
                 }
+                startTime = endTime;
             }
 
             if (repeat > 3) {
