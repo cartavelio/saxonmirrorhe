@@ -175,6 +175,7 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
          */
         public void startDocument() throws XPathException {
             out.open();
+            out.startDocument(0);
             out.startElement(csvElementName, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
             out.startContent();
         }
@@ -186,6 +187,7 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
          */
         public void endDocument() throws XPathException {
             out.endElement();
+            out.endDocument();
             out.close();
         }
 
