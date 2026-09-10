@@ -295,7 +295,7 @@ dependencies {
   )
 
   xmldoclet (
-    [group: 'com.saxonica', name: 'xmldoclet', version: '0.11.0']
+    [group: 'com.saxonica', name: 'xmldoclet', version: '0.15.0']
   )
 
   jeldoclet (

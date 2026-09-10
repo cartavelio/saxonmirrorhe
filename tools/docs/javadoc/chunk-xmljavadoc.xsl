@@ -80,7 +80,7 @@ History
             <xsl:result-document href="{$base-output}/{concat('packages/', $package, '.xml')}">
                 <package id="{$package}">
                     <xsl:for-each select="current-group()">
-                        <xsl:sort select="upper-case(@type)"/>
+                        <xsl:sort select="upper-case(@name)"/>
                         <xsl:apply-templates select="."/>
                     </xsl:for-each>
                 </package>
@@ -103,7 +103,7 @@ History
                     <j id="{@package}" in="p">
 
                         <xsl:apply-templates select="current-group()" mode="deeptree">
-                            <xsl:sort select="upper-case(@type)"/>
+                            <xsl:sort select="upper-case(@name)"/>
                         </xsl:apply-templates>
 
                     </j>
@@ -122,7 +122,7 @@ History
                     <j id="{@package}" in="p">
 
                         <xsl:apply-templates select="current-group()" mode="tree">
-                            <xsl:sort select="upper-case(@type)"/>
+                            <xsl:sort select="upper-case(@name)"/>
                         </xsl:apply-templates>
 
                     </j>
@@ -134,7 +134,7 @@ History
     </xsl:template>
 
     <xsl:template match="d:class|d:interface|d:enum" mode="tree">
-        <xsl:variable name="type" select="tokenize(@type,'\.')[last()]"/>
+        <xsl:variable name="name" select="tokenize(@name,'\.')[last()]"/>
         <xsl:variable name="has-nonPP-implementing-classes" as="xs:boolean" 
             select="self::d:interface and exists(key('implementing-classes',
             @fullname)[exists(@access) and @access ne 'private'])" />
@@ -145,9 +145,9 @@ History
         
         <xsl:if test="@access ne 'private' or (empty(@access) and not($has-PP-members-only) and
             ($has-nonPP-implementing-classes or $has-nonPP-subclasses))">
-            <j id="{$type}" in="{f:get-att-name(.)}">
+            <j id="{$name}" in="{f:get-att-name(.)}">
                 <xsl:apply-templates select="d:class|d:interface|d:enum" mode="tree">
-                    <xsl:sort select="upper-case(@type)"/>
+                    <xsl:sort select="upper-case(@name)"/>
                 </xsl:apply-templates>
             </j>
         </xsl:if>
@@ -177,7 +177,7 @@ History
     </xsl:template>
     
     <xsl:template match="d:class|d:interface|d:enum" mode="deeptree">
-        <xsl:variable name="type" select="tokenize(@type,'\.')[last()]"/>
+        <xsl:variable name="name" select="tokenize(@name,'\.')[last()]"/>
         
         <xsl:variable name="has-nonPP-implementing-classes" as="xs:boolean" 
             select="self::d:interface and exists(key('implementing-classes',
@@ -189,11 +189,10 @@ History
         
         <xsl:if test="@access ne 'private' or (empty(@access) and not($has-PP-members-only) and
             ($has-nonPP-implementing-classes or $has-nonPP-subclasses))">
-            <j id="{$type}" in="c" qy="{lower-case($type)}">
+            <j id="{$name}" in="c" qy="{lower-case($name)}">
                 <xsl:apply-templates select="d:class|d:interface|d:enum|d:field[@access ne
                     'private']|d:constant[@access ne 'private']" mode="deeptree">
-                    <xsl:sort select="if (self::d:class or self::d:interface or self::d:enum) then
-                        upper-case(@type) else upper-case(@name)"/>
+                    <xsl:sort select="upper-case(@name)"/>
                 </xsl:apply-templates>
                 <xsl:apply-templates select="d:method[@access ne 'private']" mode="deeptree">
                     <xsl:sort select="upper-case(@name)"/>
@@ -357,11 +356,11 @@ History
                 <xsl:if test="d:constructor[@access ne 'private']|d:method[@access ne 'private']">
                     <methods>
                         <xsl:apply-templates select="d:constructor[@access ne 'private']">
-                            <xsl:sort select="count(d:parameter)"/>
+                            <xsl:sort select="count(d:parameter[not(@class eq 'type')])"/>
                         </xsl:apply-templates>
                         <xsl:apply-templates select="d:method[@access ne 'private']">
                             <xsl:sort select="upper-case(@name)"/>
-                            <xsl:sort select="count(d:parameter)"/>
+                            <xsl:sort select="count(d:parameter[not(@class eq 'type')])"/>
                         </xsl:apply-templates>
                     </methods>
                 </xsl:if>
@@ -373,16 +372,12 @@ History
                     </enumConstants>
                 </xsl:if>
                 <xsl:apply-templates select="d:class|d:interface|d:enum">
-                    <xsl:sort select="upper-case(@type)"/>
+                    <xsl:sort select="upper-case(@name)"/>
                 </xsl:apply-templates>
                 <xsl:sequence select="$implementing-classes"/>
                 <xsl:sequence select="$subclasses"/>
             </class>
         </xsl:if>
-    </xsl:template>
-    
-    <xsl:template match="@type">
-        <xsl:attribute name="id" select="."/>
     </xsl:template>
     
     <xsl:template match="@name">
@@ -533,7 +528,7 @@ History
     <xsl:template match="d:constructor">
         <constructor>
             <xsl:apply-templates select="@* except @fullsig"/>
-            <xsl:attribute name="id" select="tokenize(parent::d:class/@type,'\.')[last()]"/>
+            <xsl:attribute name="id" select="tokenize(parent::d:class/@name,'\.')[last()]"/>
             <xsl:if test="d:purpose|d:description|d:since|d:see|d:deprecated">
                 <comment>
                     <xsl:apply-templates select="d:purpose"/>
@@ -545,9 +540,9 @@ History
                     <xsl:apply-templates select="d:since|d:see|d:deprecated"/>
                 </comment>
             </xsl:if>
-            <xsl:if test="d:parameter">
+            <xsl:if test="d:parameter[not(@class eq 'type')]">
                 <params>
-                    <xsl:apply-templates select="d:parameter"/>
+                    <xsl:apply-templates select="d:parameter[not(@class eq 'type')]"/>
                 </params>
             </xsl:if>
             <xsl:if test="d:throws">
@@ -586,10 +581,15 @@ History
                 </comment>
             </xsl:if>
             <xsl:apply-templates select="d:overrides"/>
-            <xsl:if test="d:parameter">
+            <xsl:if test="d:parameter[not(@class eq 'type')]">
                 <params>
-                    <xsl:apply-templates select="d:parameter"/>
+                    <xsl:apply-templates select="d:parameter[not(@class eq 'type')]"/>
                 </params>
+            </xsl:if>
+            <xsl:if test="d:parameter[@class eq 'type']">
+                <paramtypes>
+                    <xsl:apply-templates select="d:parameter[@class eq 'type']"/>
+                </paramtypes>
             </xsl:if>
             <xsl:if test="d:throws">
                 <exceptions>
@@ -601,11 +601,21 @@ History
     
     <xsl:template match="d:overrides">
         <xsl:variable name="override-parts" select="tokenize(@method, '#')"/>
-        <override-of fulltype="{$override-parts[1]}" method="{$override-parts[2]}"
-            type="{tokenize($override-parts[1], '\.')[last()]}" />
+        <xsl:variable name="override-class" select="$override-parts[1]"/>
+        <!-- Refer to the superclass hierarchy to find this $override-class -->
+        <xsl:variable name="override-class-name"
+            select="parent::d:method/parent::d:class//d:superclass/d:type[@fullname eq
+            $override-class]/@name"/>
+        
+        <xsl:if test="empty($override-class-name)">
+            <xsl:message>*** superclass not found: <xsl:value-of select="$override-class"/></xsl:message>
+        </xsl:if>
+        
+        <override-of fulltype="{$override-class}" method="{$override-parts[2]}"
+            type="{$override-class-name}" />
     </xsl:template>
     
-    <xsl:template match="d:parameter">
+    <xsl:template match="d:parameter[not(@class eq 'type')]">
         <param>
             <xsl:apply-templates select="@*"/>
             <xsl:call-template name="type-attributes"/>
@@ -618,6 +628,21 @@ History
                 </body>
             </xsl:if>
         </param>
+    </xsl:template>
+    
+    <xsl:template match="d:parameter[@class eq 'type']">
+        <type name="{@name}">
+            <xsl:if test="d:purpose|d:description">
+                <comment>
+                    <xsl:apply-templates select="d:purpose"/>
+                    <xsl:if test="d:description">
+                        <body>
+                            <xsl:call-template name="full-comment"/>
+                        </body>
+                    </xsl:if>
+                </comment>
+            </xsl:if>
+        </type>
     </xsl:template>
     
     <xsl:template match="d:parameter/@name"><!-- Usually @name becomes @id, but not for param -->
@@ -656,11 +681,32 @@ History
     
     <xsl:template match="d:throws">
         <exception>
-            <xsl:variable name="exception-type" select="if (contains(@exception, '.')) then
-                (tokenize(@exception, '\.')[last()]) else @exception"/>
-            <xsl:variable name="exception-fulltype" select="if (contains(@exception, '.')) then
-                @exception else key('classref', @exception)/@fullname"/>
-            <xsl:attribute name="id" select="$exception-type"/>
+            <!-- @exception may or may not be a fullname, so we must handle both -->
+            <xsl:variable name="exception-name" as="xs:string"
+                select="if (contains(@exception, '.')) then (tokenize(@exception, '\.')[last()])
+                else @exception"/>
+            <xsl:variable name="exception-fulltype" as="xs:string">
+                <xsl:choose>
+                    <xsl:when test="contains(@exception, '.')">
+                        <xsl:value-of select="@exception"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:variable name="key" select="key('classref', string(@exception))"/>
+                        <xsl:choose>
+                            <xsl:when test="exists($key)">
+                                <xsl:value-of select="$key/@fullname"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <!--<xsl:message>*** classref not found for: <xsl:value-of select="@exception"/></xsl:message>-->
+                                <!-- In this case, we don't know the fullname, so just use name
+                                    (e.g. for members of external packages) -->
+                                <xsl:value-of select="@exception"/>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+            <xsl:attribute name="id" select="$exception-name"/>
             <xsl:attribute name="fulltype" select="$exception-fulltype"/>
             <xsl:if test="h:body">
                 <sentence><xsl:apply-templates select="h:body/node()"/></sentence>
@@ -695,17 +741,15 @@ History
     </xsl:template>
     
     
-    <xsl:key name="classref" match="d:package/d:classref" use="@name"/>
-    
-    
+    <xsl:key name="classref" match="d:package//(d:classref|d:interfaceref)" use="@name"/>
     
     <xsl:template name="classes-which-implement-interface">
         <xsl:if test="self::d:interface and exists(key('implementing-classes',
             @fullname)[exists(@access) and @access ne 'private'])">
             <implemented-by>
                 <xsl:for-each select="key('implementing-classes', @fullname)[exists(@access) and @access ne 'private']">
-                    <xsl:sort select="upper-case(@type)"/>
-                    <class fulltype="{@fullname}" type="{@type}"/>
+                    <xsl:sort select="upper-case(@name)"/>
+                    <class fulltype="{@fullname}" type="{@name}"/>
                 </xsl:for-each>
             </implemented-by>
         </xsl:if>
@@ -718,8 +762,8 @@ History
         <xsl:if test="exists(key('subclasses-key', @fullname)[exists(@access) and @access ne 'private'])">
             <subclasses>
                 <xsl:for-each select="key('subclasses-key', @fullname)[exists(@access) and @access ne 'private']">
-                    <xsl:sort select="upper-case(@type)"/>
-                    <class fulltype="{@fullname}" type="{@type}"/>
+                    <xsl:sort select="upper-case(@name)"/>
+                    <class fulltype="{@fullname}" type="{@name}"/>
                 </xsl:for-each>
             </subclasses>
         </xsl:if>
