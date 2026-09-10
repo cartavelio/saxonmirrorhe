@@ -1033,6 +1033,72 @@
       </ol>
    </section>
 
+	<section id="xpath40" title="XPath 4.0 conformance">
+      <h1>XPath 4.0 conformance</h1>
+      <p>Saxon partially implements the still evolving draft XPath 4.0 Recommendation.</p>
+      <aside>
+         <p>Use one of the following mechanisms to enable syntax extensions:</p>
+
+         <ul>
+            <li>Set the configuration property <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>
+               (equivalently, use <code>--allowSyntaxExtensions:on</code> on the command line, or
+                  <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</li>
+            <li>Set the language level to 4.0 in a call to an API method such as
+                  <code>XsltCompiler.setXsltLanguageVersion()</code>.</li>
+            <li>
+               <p>For XQuery, set the language level to 4.0 in the XQuery declaration in the query
+                  prolog of the main module, or use the option <code>-qversion:4.0</code> on the
+                  command line.</p>
+               <p>When processing a library module, the effective language level is either the
+                  declared version in the prolog of the library module, or the effective language
+                  level for the importing module, whichever is greater. It is generally not a good
+                  idea to mix language levels, because this causes problems with the semantics of
+                  constructs that span modules, for example the type coercions applied when code in
+                  one module makes a call on a function declared in another.</p>
+            </li>
+         </ul>
+
+         <p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This
+            gives you an XSLT 3.0 processor running in forwards compatibility mode, rather than an
+            XSLT 4.0 processor.</p>
+
+         <p>Like other Saxon extensions, these extensions all require Saxon-PE or higher. They are
+            also available in SaxonCS.</p>
+      </aside>
+
+      <p>For a list of changes introduced by XPath 4.0, see <a class="bodylink"
+            href="/conformance/xpath40/new-in-xpath40">New in XPath 4.0</a>. Saxon-specific
+         implementation details are summarised below.</p>
+
+      <section id="new-in-xpath40" title="New in XPath 4.0">
+         
+         <p>For full details of the changes in XPath 4.0, see the W3C specifications.</p>
+         
+        <ul>
+        	<!-- TODO: Are changes being made to Saxon that correspond with this change?
+        	     For example, renaming:
+        	     - net.net.sf.saxon.value.AtomicValue
+        	     - Saxon.Api.XdmAtomicValue
+        	<li>
+        		<p>Terminology changes:</p>
+        		<ul>
+        			<li><p><em>Atomic item</em> replaces <em>atomic value</em></p></li>
+        		</ul>
+        	</li>
+        	-->
+        	<li>
+        		<p>Support for new item types.  See:</p>
+        		<ul>
+            		<li><p><a class="bodylink" href="/expressions/type-system/choice-types">Choice item types</a></p></li>
+		            <li><p><a class="bodylink" href="/expressions/type-system/record-types">Record types</a></p></li>
+        		    <li><p><a class="bodylink" href="/expressions/type-system/enum-types">Enum types</a></p></li>
+		            <li><p><a class="bodylink" href="/expressions/type-system/kindtests">KindTests and NodeTests</a></p></li>
+		            <li><p><a class="bodylink" href="/expressions/type-system/type-aliases">Type aliases</a></p></li>
+        		</ul>   
+         	</li>
+         </ul>
+      </section>
+   </section>
   
    <section id="xquery31" title="XQuery 3.1 conformance">
       <h1>XQuery 3.1 conformance</h1>
