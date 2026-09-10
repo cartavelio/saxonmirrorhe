@@ -35,6 +35,8 @@ import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.dom.DOMLocator;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.List;
 
 /**
@@ -46,6 +48,21 @@ import java.util.List;
 public class StandardDiagnostics {
 
     public StandardDiagnostics() {}
+
+    /**
+     * Return a stacktrace showing the call path to a given XPathContext
+     * @param context the relevant entry on the context stack
+     * @return a string, showing the entries on the context stack. The format is not defined,
+     * and is subject to change.
+     */
+
+    public static String stackTrace(XPathContext context) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
+        StandardLogger logger = new StandardLogger();
+        logger.setPrintStream(new PrintStream(baos));
+        new StandardDiagnostics().logStackTrace(context, logger, 2);
+        return baos.toString().replace("\r", "");
+    }
 
     /**
      * Construct a message identifying the location of an error

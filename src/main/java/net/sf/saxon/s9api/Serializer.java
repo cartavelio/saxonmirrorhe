@@ -374,11 +374,15 @@ public class Serializer extends AbstractDestination {
 
 
     /**
-     * Say if the output stream should be closed on completion
-     * By default the close method closes the output stream only when the serializer created the output stream itself
-     * that is when the destination has been supplied as a file rather than a stream.
-     * @param value - if true the output file will be closed when the close method is called
-     *              if false the close method has no effect.
+     * Say whether the output stream or writer should be closed on completion
+     * By default the close method closes the output stream only when the serializer created the output stream itself,
+     * that is, when the destination has been supplied as a file rather than a stream.
+     * <p>Note that this method causes a call on <code>close()</code>, but it does not cause a call on
+     * <code>flush()</code>. With most implementations of <code>OutputStream</code>, and with all
+     * conformant implementations of <code>Writer</code>, a call on <code>close()</code>
+     * does an implicit <code>flush()</code>, but this cannot be guaranteed.</p>
+     * @param value - if true the output stream or writer will be closed when the serialization is complete;
+     *              if false it is left open.
      */
 
     public void setCloseOnCompletion(boolean value) {

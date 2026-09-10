@@ -302,6 +302,7 @@ public abstract class StandardNames {
             new StructuredQName("err", NamespaceUri.ERR, "line-number"),
             new StructuredQName("err", NamespaceUri.ERR, "column-number"),
             new StructuredQName("err", NamespaceUri.ERR, "additional"),
+            new StructuredQName("err", NamespaceUri.ERR, "stack-trace"),
             new StructuredQName("err", NamespaceUri.ERR, "map")
     };
     // key is an expanded QName in Clark notation

@@ -7,14 +7,18 @@
 
 package net.sf.saxon.functions.registry;
 
+import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.XPathParser;
+import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.ConstantAnonymousFunction;
 import net.sf.saxon.functions.Doc_2;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.ma.zeno.ZenoSequence;
@@ -23,10 +27,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.NumericType;
-import net.sf.saxon.type.Type;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.SourceLocator;
@@ -281,6 +282,17 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                         return new Int64Value(column);
                     }
                 }
+                case "stack-trace": {
+                    final XPathContext errorContext = error.getXPathContext();
+                    if (errorContext == null) {
+                        return new ConstantAnonymousFunction(EmptySequence.getInstance(), SequenceType.OPTIONAL_STRING);
+                    } else {
+                        Callable callable = (cxt, args) -> new StringValue(StandardDiagnostics.stackTrace(errorContext));
+                        return new CallableFunction(0, callable,
+                                                    new SpecificFunctionType(new SequenceType[]{}, SequenceType.OPTIONAL_STRING));
+                    }
+                    
+                }
                 case "map": {
                     StructuredQName errorCodeQName = error.getErrorCodeQName();
                     if (errorCodeQName == null) {
@@ -314,6 +326,16 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                         column = locator.getColumnNumber();
                     }
 
+                    final XPathContext errorContext = error.getXPathContext();
+                    FunctionItem stackTraceFn;
+                    if (errorContext == null) {
+                        stackTraceFn = new ConstantAnonymousFunction(EmptySequence.getInstance(), SequenceType.OPTIONAL_STRING);
+                    } else {
+                        Callable callable = (cxt, args) -> new StringValue(StandardDiagnostics.stackTrace(errorContext));
+                        stackTraceFn = new CallableFunction(0, callable,
+                                                    new SpecificFunctionType(new SequenceType[]{}, SequenceType.OPTIONAL_STRING));
+                    }
+
                     return new ShapedMap(errorMapShape,
                                            errorCode,
                                            description,
@@ -321,7 +343,8 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                                            new StringValue(module),
                                            new Int64Value(line),
                                            new Int64Value(column),
-                                           EmptySequence.getInstance()
+                                           EmptySequence.getInstance(),
+                                           stackTraceFn
                                         );
                 }
                 default:
@@ -338,7 +361,8 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
             new Twine8("module"),
             new Twine8("line-number"),
             new Twine8("column-number"),
-            new Twine8("additional")
+            new Twine8("additional"),
+            new Twine8("stack-trace")
     );
 
 
