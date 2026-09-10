@@ -1,28 +1,105 @@
 package net.sf.saxon.ma.map;
 
-import io.vavr.Tuple2;
 import io.vavr.collection.LinkedHashMap;
 import io.vavr.control.Option;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * An XDM Map implementation that maintains map entries in insertion order (new entries at the end)
+ * An XDM Map implementation using string keys, that maintains map entries in insertion order (new entries at the end)
  */
-public class OrderedMap extends MapTypeMaintainer implements BuildableMap {
+public class OrderedStringMap extends StringMap {
 
-    private final LinkedHashMap<AtomicValue, GroundedValue> baseMap;
+    private static class OrderedDictionaryBuilder implements MapBuilder {
 
-    public OrderedMap() {
+        private LinkedHashMap<String, GroundedValue> map;
+
+        public OrderedDictionaryBuilder() {
+            map = LinkedHashMap.empty();
+        }
+
+        /**
+         * During initial construction of the map, add a key-value pair
+         *
+         * @param key   the key
+         * @param value the corresponding value
+         */
+        @Override
+        public void put(AtomicValue key, GroundedValue value) {
+            map = map.put(key.getStringValue(), value);
+        }
+
+        /**
+         * During initial construction of the map, add a key-value pair where the key is a string
+         *
+         * @param key   the key
+         * @param value the corresponding value
+         */
+        @Override
+        public void put(String key, GroundedValue value) {
+            map = map.put(key, value);
+        }
+
+        /**
+         * Ask whether the map under construction contains a given key
+         */
+
+        public boolean contains(String key) {
+            return map.get(key) != null;
+        }
+
+        /**
+         * Get a value from the map under construction
+         */
+
+        public GroundedValue get(String key) {
+            return map.get(key).getOrNull();
+        }
+
+        /**
+         * Get a value from the map under construction
+         */
+
+        public GroundedValue get(AtomicValue key) {
+            return map.get(key.getStringValue()).getOrNull();
+        }
+
+        /**
+         * Get the constructed map. This method must only be called once; subsequent calls will return null
+         *
+         * @return the constructed map
+         */
+        @Override
+        public OrderedStringMap getCompletedMap() {
+            OrderedStringMap result = new OrderedStringMap(map);
+            map = null;
+            return result;
+        }
+    }
+
+    public static MapBuilder getBuilder() {
+        return new OrderedStringMap.OrderedDictionaryBuilder();
+    }
+
+
+    private final LinkedHashMap<String, GroundedValue> baseMap;
+
+    public OrderedStringMap() {
         baseMap = LinkedHashMap.empty();
 
     }
 
-    private OrderedMap(LinkedHashMap<AtomicValue, GroundedValue> baseMap) {
+    private OrderedStringMap(LinkedHashMap<String, GroundedValue> baseMap) {
         this.baseMap = baseMap;
     }
 
@@ -34,8 +111,109 @@ public class OrderedMap extends MapTypeMaintainer implements BuildableMap {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
+        Option<GroundedValue> val = baseMap.get(key.getStringValue());
+        return (val.isEmpty() ? null : val.get());
+    }
+
+    /**
+     * Ask whether the map conforms to a given map type
+     *
+     * @param keyType   the required keyType
+     * @param valueType the required valueType
+     * @param th        the type hierarchy cache for the configuration
+     * @return true if the map conforms to the required type
+     */
+    @Override
+    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
+        return false;
+    }
+
+    /**
+     * Get the type of the map. This method is used largely for diagnostics, to report
+     * the type of a map when it differs from the required type.
+     *
+     * @param th the type hierarchy cache
+     * @return the type of this map
+     */
+    @Override
+    public ItemType getItemType(TypeHierarchy th) {
+        ItemType valueType = null;
+        int valueCard = 0;
+        // we need to test the entries individually
+        for (GroundedValue val : baseMap.values()) {
+            if (valueType == null) {
+                valueType = SequenceTool.getItemType(val, th);
+                valueCard = SequenceTool.getCardinality(val);
+            } else {
+                valueType = Type.getCommonSuperType(valueType, SequenceTool.getItemType(val, th), th);
+                valueCard = Cardinality.union(valueCard, SequenceTool.getCardinality(val));
+            }
+        }
+        if (valueType == null) {
+            // empty map
+            return MapType.EMPTY_MAP_TYPE;
+        } else {
+            return new MapType(BuiltInAtomicType.STRING, SequenceType.makeSequenceType(valueType, valueCard));
+        }
+    }
+
+    /**
+     * Get the lowest common item type of the keys in the map
+     *
+     * @return the most specific type to which all the keys belong. If the map is
+     * empty, return UType.VOID
+     */
+    @Override
+    public UType getKeyUType() {
+        return UType.STRING;
+    }
+
+    /**
+     * Get an entry from the map, supplying a Java String as the key
+     *
+     * @param key the key
+     * @return the relevant entry if present, or null if absent.
+     */
+    @Override
+    public GroundedValue get(String key) {
         Option<GroundedValue> val = baseMap.get(key);
         return (val.isEmpty() ? null : val.get());
+    }
+
+    /**
+     * Get an entry from the map, supplying a {@link UnicodeString} as the key
+     *
+     * @param key the key
+     * @return the relevant entry if present, or null if absent.
+     */
+    @Override
+    public GroundedValue get(UnicodeString key) {
+        Option<GroundedValue> val = baseMap.get(key.toString());
+        return (val.isEmpty() ? null : val.get());
+    }
+
+    /**
+     * Ask whether a given string is present as a key in the map
+     *
+     * @param key the key being tested
+     * @return true if the key is present
+     */
+    @Override
+    public boolean contains(String key) {
+        Option<GroundedValue> val = baseMap.get(key);
+        return (!val.isEmpty());
+    }
+
+    /**
+     * Ask whether a given string is present as a key in the map
+     *
+     * @param key the key being tested
+     * @return true if the key is present
+     */
+    @Override
+    public boolean contains(UnicodeString key) {
+        Option<GroundedValue> val = baseMap.get(key.toString());
+        return (!val.isEmpty());
     }
 
     /**
@@ -55,21 +233,8 @@ public class OrderedMap extends MapTypeMaintainer implements BuildableMap {
      */
     @Override
     public AtomicIterator keys() {
-        return new AtomicIterator() {
-
-            final io.vavr.collection.Iterator<Tuple2<AtomicValue, GroundedValue>> baseIter = baseMap.iterator();
-
-            @Override
-            @CSharpSuppressWarnings("UnsafeIteratorConversion")
-            public AtomicValue next() {
-                if (baseIter.hasNext()) {
-                    return baseIter.next()._1;
-                } else {
-                    return null;
-                }
-            }
-        };
-
+        // TODO: this is inefficient
+        return new DictionaryMap.KeyIterator(baseMap.toJavaMap());
     }
 
     /**
@@ -79,31 +244,9 @@ public class OrderedMap extends MapTypeMaintainer implements BuildableMap {
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        return new Iterable<KeyValuePair>() {
-            @Override
-            @CSharpSuppressWarnings("UnsafeIteratorConversion")
-            public Iterator<KeyValuePair> iterator() {
-                return new Iterator<>() {
-                    final Iterator<Tuple2<AtomicValue, GroundedValue>> baseIter = baseMap.iterator();
-
-                    @Override
-                    public boolean hasNext() {
-                        return baseIter.hasNext();
-                    }
-
-                    @Override
-                    public KeyValuePair next() {
-                        Tuple2<AtomicValue, GroundedValue> next = baseIter.next();
-                        return new KeyValuePair(next._1, next._2);
-                    }
-
-                    @Override
-                    public void remove() {
-                        baseIter.remove();
-                    }
-                };
-            }
-        };
+        List<KeyValuePair> pairs = new ArrayList<>();
+        baseMap.forEach((k,v) -> pairs.add(new KeyValuePair(new StringValue(k), v)));
+        return pairs;
     }
 
     /**
@@ -117,7 +260,7 @@ public class OrderedMap extends MapTypeMaintainer implements BuildableMap {
      */
     @Override
     public MapItem addEntry(AtomicValue key, GroundedValue value) {
-        return new OrderedMap(baseMap.put(key, value));
+        return new OrderedStringMap(baseMap.put(key.getStringValue(), value));
     }
 
     /**
@@ -129,7 +272,7 @@ public class OrderedMap extends MapTypeMaintainer implements BuildableMap {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return new OrderedMap(baseMap.remove(key));
+        return new OrderedStringMap(baseMap.remove(key.getStringValue()));
     }
 
 }

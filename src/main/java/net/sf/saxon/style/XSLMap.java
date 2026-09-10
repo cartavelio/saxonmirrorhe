@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.AttributeInfo;
@@ -116,11 +117,11 @@ public class XSLMap extends StyleElement {
                     Literal.makeLiteral(new QNameValue("", NamespaceUri.SAXON, "on-duplicates")),
                     onDuplicates);
         } else {
-            HashTrieMap options = new HashTrieMap();
-            options.initialPut(StringValue.bmp("duplicates"), StringValue.bmp("reject"));
-            options.initialPut(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"),
+            MapBuilder options = HashTrieMap.getBuilder();
+            options.put("duplicates", StringValue.bmp("reject"));
+            options.put(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"),
                                StringValue.bmp("XTDE3365"));
-            optionsExp = Literal.makeLiteral(options, select);
+            optionsExp = Literal.makeLiteral(options.getCompletedMap(), select);
         }
 
         Expression exp = MapFunctionSet.getInstance(31).makeFunction("merge", 2)

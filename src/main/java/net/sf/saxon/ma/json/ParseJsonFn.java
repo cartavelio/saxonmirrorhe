@@ -41,6 +41,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         parseJsonOptions.addAllowedOption("fallback", SequenceType.one(fallbackType), null);
         parseJsonOptions.addAllowedOption("null", SequenceType.ANY_SEQUENCE, EmptySequence.getInstance());
         parseJsonOptions.addAllowedOption("number-parser", SequenceType.one(parserType), null);
+        parseJsonOptions.addAllowedOption("retain-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         return parseJsonOptions;
     }
 

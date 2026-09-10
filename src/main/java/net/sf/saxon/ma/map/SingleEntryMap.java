@@ -182,9 +182,7 @@ public class SingleEntryMap extends MapItem {
      */
 
     private HashTrieMap toHashTrieMap() {
-        HashTrieMap target = new HashTrieMap();
-        target.initialPut(key, value);
-        return target;
+        return HashTrieMap.singleton(key, value);
     }
 
     public String toString() {

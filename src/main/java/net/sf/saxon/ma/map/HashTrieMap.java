@@ -16,6 +16,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Iterator;
 
@@ -35,6 +36,79 @@ public class HashTrieMap extends MapTypeMaintainer {
     // The number of entries in the map; -1 if unknown
     private int entries = -1;
 
+    private static class HashTrieMapBuilder implements MapBuilder {
+
+        HashTrieMap map = new HashTrieMap();
+        public HashTrieMapBuilder() {
+
+        }
+
+        /**
+         * During initial construction of the map, add a key-value pair
+         *
+         * @param key   the key
+         * @param value the corresponding value
+         */
+        @Override
+        public void put(AtomicValue key, GroundedValue value) {
+            map.initialPut(key, value);
+        }
+
+        /**
+         * During initial construction of the map, add a key-value pair where the key is a string
+         *
+         * @param key   the key
+         * @param value the corresponding value
+         */
+        @Override
+        public void put(String key, GroundedValue value) {
+            map.initialPut(new StringValue(key), value);
+        }
+
+        /**
+         * Ask whether the map under construction contains a given key
+         */
+
+        public boolean contains(String key) {
+            return map.get(new StringValue(key)) != null;
+        }
+
+        /**
+         * Get the value corresponding to a given xs:string key in the map under construction
+         *
+         * @param key
+         * @return the value if it exists, or null otherwise.
+         */
+        @Override
+        public GroundedValue get(String key) {
+            return map.get(new StringValue(key));
+        }
+
+        /**
+         * Get the value corresponding to a given xs:string key in the map under construction
+         *
+         * @param key
+         * @return the value if it exists, or null otherwise.
+         */
+        @Override
+        public GroundedValue get(AtomicValue key) {
+            return map.get(key);
+        }
+
+        /**
+         * Get the constructed map. This method must only be called once; subsequent calls will return null
+         *
+         * @return the constructed map
+         */
+        @Override
+        public HashTrieMap getCompletedMap() {
+            HashTrieMap result = map;
+            map = null;
+            return result;
+        }
+    }
+
+
     /**
      * Create an empty map
      */
@@ -44,6 +118,9 @@ public class HashTrieMap extends MapTypeMaintainer {
         this.entries = 0;
     }
 
+    public static MapBuilder getBuilder() {
+        return new HashTrieMapBuilder();
+    }
 
     /**
      * Create a singleton map with a single key and value
@@ -148,7 +225,7 @@ public class HashTrieMap extends MapTypeMaintainer {
      * @return true if an existing entry with the same key was replaced
      */
 
-    public boolean initialPut(AtomicValue key, GroundedValue value) {
+    private boolean initialPut(AtomicValue key, GroundedValue value) {
 //        if (Instrumentation.ACTIVE) {
 //            Instrumentation.count("initialPut");
 //        }

@@ -99,6 +99,8 @@ public enum AnySimpleType implements SimpleType {
         return false;
     }
 
+
+
     /**
      * Get the redefinition level. This is zero for a component that has not been redefined;
      * for a redefinition of a level-0 component, it is 1; for a redefinition of a level-N
@@ -463,6 +465,17 @@ public enum AnySimpleType implements SimpleType {
     @Override
     public UnicodeString postprocess(UnicodeString input) throws ValidationException {
         return input;
+    }
+
+    /**
+     * Ask whether this type only allows zero-length content
+     *
+     * @return true if this is a list type with a length or maxLength of zero, or an atomic type
+     * that restricts the content to be empty
+     */
+    @Override
+    public boolean isZeroLength() {
+        return false;
     }
 
     //#if SCHEMA==true

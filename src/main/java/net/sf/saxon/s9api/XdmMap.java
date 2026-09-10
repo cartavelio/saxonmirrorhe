@@ -7,10 +7,7 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.ma.map.EmptyMap;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.jiter.MappingJavaIterator;
 import net.sf.saxon.value.DoubleValue;
@@ -66,11 +63,11 @@ public class XdmMap extends XdmFunctionItem {
     }
 
     private static HashTrieMap fromJavaMap(Map<? extends XdmAtomicValue, ? extends XdmValue> map) {
-        HashTrieMap val = new HashTrieMap();
+        MapBuilder val = HashTrieMap.getBuilder();
         for (Map.Entry<? extends XdmAtomicValue, ? extends XdmValue> entry : map.entrySet()) {
-            val.initialPut(entry.getKey().getUnderlyingValue(), entry.getValue().getUnderlyingValue());
+            val.put(entry.getKey().getUnderlyingValue(), entry.getValue().getUnderlyingValue());
         }
-        return val;
+        return (HashTrieMap)val.getCompletedMap();
     }
 
     /**
@@ -383,15 +380,15 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public static <K, V> XdmMap makeMap(Map<K, V> input) throws IllegalArgumentException {
-        HashTrieMap result = new HashTrieMap();
+        MapBuilder result = HashTrieMap.getBuilder();
         for (Map.Entry<K, V> entry : input.entrySet()) {
             K key = entry.getKey();
             V value = entry.getValue();
             XdmAtomicValue xKey = XdmAtomicValue.makeAtomicValue(key);
             XdmValue xValue = XdmValue.makeValue(value);
-            result.initialPut(xKey.getUnderlyingValue(), xValue.getUnderlyingValue());
+            result.put(xKey.getUnderlyingValue(), xValue.getUnderlyingValue());
         }
-        return new XdmMap(result);
+        return new XdmMap(result.getCompletedMap());
     }
 
     private static class XdmMapEntry implements Map.Entry<XdmAtomicValue, XdmValue> {

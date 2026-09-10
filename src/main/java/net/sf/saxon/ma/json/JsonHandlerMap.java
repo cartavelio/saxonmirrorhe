@@ -11,7 +11,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapBuilder;
+import net.sf.saxon.ma.map.OrderedStringMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -29,16 +30,18 @@ import java.util.Stack;
  * representing the content of the JSON text.
  */
 public class JsonHandlerMap extends JsonHandler {
-    Stack<Sequence> stack;
+    Stack<Object> stack;
 
     protected Stack<String> keys;
     private GroundedValue nullRepresentation = EmptySequence.getInstance();
+    private boolean retainOrder = false;
 
     public JsonHandlerMap(XPathContext context, int flags) {
         setContext(context);
         stack = new Stack<>();
         keys = new Stack<>();
         escape = (flags & JsonParser.ESCAPE) != 0;
+        retainOrder = (flags & JsonParser.ORDER_RETAINED) != 0;
         charChecker = context.getConfiguration().getValidCharacterChecker();
     }
 
@@ -48,7 +51,7 @@ public class JsonHandlerMap extends JsonHandler {
 
     @Override
     public Sequence getResult() {
-        return stack.peek();
+        return (Sequence)stack.peek();
     }
 
     /**
@@ -56,7 +59,7 @@ public class JsonHandlerMap extends JsonHandler {
      *
      * @param unEscaped the key for the entry (null implies no key) in unescaped form (backslashes,
      *                  if present, do not signal an escape sequence)
-     * @param reEscaped the key for the entry (null implies no key) in reescaped form. In this form
+     * @param reEscaped the key for the entry (null implies no key) in re-escaped form. In this form
      *                  special characters are represented as backslash-escaped sequences if the escape
      *                  option is yes; if escape=no, the reEscaped form is the same as the unEscaped form.
      * @return true if the key is already present in the map, false if it is not
@@ -64,8 +67,8 @@ public class JsonHandlerMap extends JsonHandler {
     @Override
     public boolean setKey(String unEscaped, String reEscaped) {
         this.keys.push(reEscaped);
-        MapItem map = (MapItem) stack.peek();
-        return map.get(new StringValue(reEscaped)) != null;
+        MapBuilder map = (MapBuilder) stack.peek();
+        return map.get(reEscaped) != null;
     }
 
     /**
@@ -75,8 +78,8 @@ public class JsonHandlerMap extends JsonHandler {
     @Override
     public void startArray() {
         List<GroundedValue> memberList = new ArrayList<>();
-        ArrayItem map = new SimpleArrayItem(memberList);
-        stack.push(map);
+        ArrayItem arrayItem = new SimpleArrayItem(memberList);
+        stack.push(arrayItem);
     }
 
     /**
@@ -84,11 +87,11 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void endArray() {
-        ArrayItem map = (ArrayItem) stack.pop();
+        ArrayItem arrayItem = (ArrayItem) stack.pop();
         if (stack.empty()) {
-            stack.push(map); // the end
+            stack.push(arrayItem); // the end
         } else {
-            writeItem(map);
+            writeItem(arrayItem);
         }
     }
 
@@ -97,8 +100,8 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void startMap() {
-        DictionaryMap map = new DictionaryMap();
-        stack.push(map);
+        MapBuilder mapBuilder = retainOrder ? OrderedStringMap.getBuilder() : DictionaryMap.getBuilder();
+        stack.push(mapBuilder);
     }
 
     /**
@@ -106,11 +109,11 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void endMap() {
-        DictionaryMap map = (DictionaryMap) stack.pop();
+        MapBuilder map = (MapBuilder) stack.pop();
         if (stack.empty()) {
-            stack.push(map); // the end
+            stack.push(map.getCompletedMap()); // the end
         } else {
-            writeItem(map);
+            writeItem(map.getCompletedMap());
         }
     }
 
@@ -125,10 +128,8 @@ public class JsonHandlerMap extends JsonHandler {
             SimpleArrayItem array = (SimpleArrayItem) stack.peek();
             array.getMembers().add(val.materialize());
         } else {
-            DictionaryMap map = (DictionaryMap) stack.peek();
-            //StringValue key = new StringValue(reEscape(keys.pop(), true, false, false));
-            //StringValue key = new StringValue(keys.pop());
-            map.initialPut(keys.pop(), val);
+            MapBuilder map = (MapBuilder) stack.peek();
+            map.put(keys.pop(), val);
         }
     }
 

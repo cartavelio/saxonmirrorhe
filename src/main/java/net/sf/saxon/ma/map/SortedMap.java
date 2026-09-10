@@ -13,6 +13,9 @@ import net.sf.saxon.value.AtomicValue;
 import java.util.Comparator;
 import java.util.Iterator;
 
+/**
+ * An XDM Map implementation that maintains map entries in sorted order of keys
+ */
 public class SortedMap extends MapTypeMaintainer {
 
     private static class KeyComparator implements Comparator<AtomicValue> {

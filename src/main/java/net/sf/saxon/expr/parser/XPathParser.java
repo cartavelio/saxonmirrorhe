@@ -4115,21 +4115,21 @@ public class XPathParser {
 
                 if (allLiteralKeys && allLiteralValues) {
                     if (allStringKeys) {
-                        DictionaryMap map = new DictionaryMap(keys.size());
+                        MapBuilder mapBuilder = DictionaryMap.getBuilder(keys.size());
                         for (int i = 0; i < keys.size(); i++) {
                             String key = ((StringLiteral) keys.get(i)).stringify();
                             GroundedValue val = ((Literal) values.get(i)).getGroundedValue();
-                            map.initialPut(key, val);
+                            mapBuilder.put(key, val);
                         }
-                        result = Literal.makeLiteral(map);
+                        result = Literal.makeLiteral(mapBuilder.getCompletedMap());
                     } else {
-                        HashTrieMap map = new HashTrieMap();
+                        MapBuilder map = HashTrieMap.getBuilder();
                         for (int i = 0; i < keys.size(); i++) {
                             AtomicValue key = (AtomicValue) ((Literal) keys.get(i)).getGroundedValue();
                             GroundedValue val = ((Literal) values.get(i)).getGroundedValue();
-                            map.initialPut(key, val);
+                            map.put(key, val);
                         }
-                        result = Literal.makeLiteral(map);
+                        result = Literal.makeLiteral(map.getCompletedMap());
                     }
                 } else {
                     Expression[] entriesArray = new Expression[keys.size()];
@@ -4138,10 +4138,11 @@ public class XPathParser {
                                  .makeFunction("entry", 2).makeFunctionCall(keys.get(i), values.get(i));
                     }
                     Block block = new Block(entriesArray);
-                    HashTrieMap options = new HashTrieMap();
-                    options.initialPut(new StringValue("duplicates"), new StringValue("reject"));
-                    options.initialPut(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
-                    result = MapFunctionSet.getInstance(31).makeFunction("merge", 2).makeFunctionCall(block, Literal.makeLiteral(options));
+                    MapBuilder options = HashTrieMap.getBuilder();
+                    options.put(new StringValue("duplicates"), new StringValue("reject"));
+                    options.put(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
+                    result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
+                            .makeFunctionCall(block, Literal.makeLiteral(options.getCompletedMap()));
                 }
                 break;
         }

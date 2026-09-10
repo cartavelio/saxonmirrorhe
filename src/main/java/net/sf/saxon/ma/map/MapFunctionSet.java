@@ -516,10 +516,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             AtomicValue key = (AtomicValue) arguments[0].head();
             GroundedValue value = arguments[1].materialize();
-            DictionaryMap map = new DictionaryMap(2);
-            map.initialPut("key", key);
-            map.initialPut("value", value);
-            return map;
+            return new ShapedMap(Shape.KEY_VALUE_PAIR, key, value);
         }
     }
 
@@ -605,7 +602,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            HashTrieMap map = new HashTrieMap();
+            MapBuilder mapBuilder = HashTrieMap.getBuilder();
             FunctionItem keyFunction = (FunctionItem)arguments[1].head();
             FunctionItem valueFunction = (FunctionItem) arguments[2].head();
             FunctionItem combineFunction = (FunctionItem) arguments[3].head();
@@ -617,14 +614,14 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 AtomicValue key;
                 while ((key = (AtomicValue)keys.next()) != null) {
                     GroundedValue value = dynamicCall(valueFunction, context, item, posValue).materialize();
-                    GroundedValue existing = map.get(key);
+                    GroundedValue existing = mapBuilder.get(key);
                     if (existing != null) {
                         value = dynamicCall(combineFunction, context, existing, value).materialize();
                     }
-                    map.initialPut(key, value);
+                    mapBuilder.put(key, value);
                 }
             }
-            return map;
+            return mapBuilder.getCompletedMap();
         }
     }
 
@@ -787,7 +784,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 if (treatAsFinal && allStringKeys) {
                     // Optimize for a map with string-valued keys that's unlikely to be modified
                     SequenceIterator iter = arguments[0].iterate();
-                    DictionaryMap baseMap = new DictionaryMap();
+                    MapBuilder mapBuilder = DictionaryMap.getBuilder();
                     MapItem next;
                     switch (duplicates) {
                         // Code is structured (a) to avoid testing "duplicates" within the loop unnecessarily,
@@ -800,17 +797,17 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                     if (!(pair.key instanceof StringValue)) {
                                         throw new XPathException("The keys in this map must all be strings (found " + pair.key.getItemType() + ")");
                                     }
-                                    baseMap.initialPut(pair.key.getStringValue(), pair.value);
+                                    mapBuilder.put(pair.key.getStringValue(), pair.value);
                                 }
                             }
-                            return baseMap;
+                            return mapBuilder.getCompletedMap();
                         default:
                             while ((next = (MapItem) iter.next()) != null) {
                                 for (KeyValuePair pair : next.keyValuePairs()) {
                                     if (!(pair.key instanceof StringValue)) {
                                         throw new XPathException("The keys in this map must all be strings (found " + pair.key.getItemType() + ")");
                                     }
-                                    Sequence existing = baseMap.get(pair.key);
+                                    Sequence existing = mapBuilder.get(pair.key.getStringValue());
                                     if (existing != null) {
                                         switch (duplicates) {
                                             case "use-first":
@@ -820,23 +817,23 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                                 InsertBefore.InsertIterator combinedIter =
                                                         new InsertBefore.InsertIterator(pair.value.iterate(), existing.iterate(), 1);
                                                 GroundedValue combinedValue = SequenceTool.toGroundedValue(combinedIter);
-                                                baseMap.initialPut(pair.key.getStringValue(), combinedValue);
+                                                mapBuilder.put(pair.key.getStringValue(), combinedValue);
                                                 break;
                                             case "use-callback":
                                                 Sequence[] args = new Sequence[]{existing, pair.value};
                                                 Sequence combined = onDuplicates.call(context, args);
-                                                baseMap.initialPut(pair.key.getStringValue(), combined.materialize());
+                                                mapBuilder.put(pair.key.getStringValue(), combined.materialize());
                                                 break;
                                             default:
                                                 throw new XPathException("Duplicate key in constructed map: " +
                                                                                  Err.wrap(pair.key.getStringValue()), duplicatesErrorCode);
                                         }
                                     } else {
-                                        baseMap.initialPut(pair.key.getStringValue(), pair.value);
+                                        mapBuilder.put(pair.key.getStringValue(), pair.value);
                                     }
                                 }
                             }
-                            return baseMap;
+                            return mapBuilder.getCompletedMap();
                     }
                 } else {
                     SequenceIterator iter = arguments[0].iterate();
@@ -967,10 +964,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public void exportAdditionalArguments(SystemFunctionCall call, ExpressionPresenter out) throws XPathException {
             if (call.getArity() == 1) {
-                HashTrieMap options = new HashTrieMap();
-                options.initialPut(StringValue.bmp("duplicates"), new StringValue(duplicates));
-                options.initialPut(StringValue.bmp("Q{" + NamespaceUri.SAXON + "}duplicates-error-code"), new StringValue(duplicatesErrorCode));
-                Literal.exportValue(options, out);
+                MapBuilder options = DictionaryMap.getBuilder(2);
+                options.put("duplicates", new StringValue(duplicates));
+                options.put("Q{" + NamespaceUri.SAXON + "}duplicates-error-code", new StringValue(duplicatesErrorCode));
+                Literal.exportValue(options.getCompletedMap(), out);
             }
         }
     }

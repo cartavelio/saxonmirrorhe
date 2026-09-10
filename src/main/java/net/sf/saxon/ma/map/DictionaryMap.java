@@ -28,11 +28,88 @@ import java.util.*;
 
 public class DictionaryMap extends StringMap {
 
+    private static class DictionaryMapBuilder implements MapBuilder {
+
+        private HashMap<String, GroundedValue> map;
+        public DictionaryMapBuilder() {
+            map = new HashMap<>();
+        }
+
+        public DictionaryMapBuilder(int initialSize) {
+            map = new HashMap<>(initialSize);
+        }
+
+        /**
+         * During initial construction of the map, add a key-value pair
+         *
+         * @param key   the key
+         * @param value the corresponding value
+         */
+        @Override
+        public void put(AtomicValue key, GroundedValue value) {
+            map.put(key.getStringValue(), value);
+        }
+
+        /**
+         * During initial construction of the map, add a key-value pair where the key is a string
+         *
+         * @param key   the key
+         * @param value the corresponding value
+         */
+        @Override
+        public void put(String key, GroundedValue value) {
+            map.put(key, value);
+        }
+
+        /**
+         * Ask whether the map under construction contains a given key
+         */
+
+        public boolean contains(String key) {
+            return map.get(key) != null;
+        }
+
+        /**
+         * Get a value from the map under construction
+         */
+
+        public GroundedValue get(String key) {
+            return map.get(key);
+        }
+
+        /**
+         * Get a value from the map under construction
+         */
+
+        public GroundedValue get(AtomicValue key) {
+            return map.get(key.getStringValue());
+        }
+
+        /**
+         * Get the constructed map. This method must only be called once; subsequent calls will return null
+         *
+         * @return the constructed map
+         */
+        @Override
+        public DictionaryMap getCompletedMap() {
+            DictionaryMap result = new DictionaryMap(map);
+            map = null;
+            return result;
+        }
+    }
+
+    public static MapBuilder getBuilder() {
+        return new DictionaryMapBuilder();
+    }
+
+    public static MapBuilder getBuilder(int initialSize) {
+        return new DictionaryMapBuilder(initialSize);
+    }
+
     private final Map<String, GroundedValue> hashMap;
 
     /**
-     * Create an empty dictionary, to which entries can be added using {@link #initialPut(String, GroundedValue)},
-     * provided this is done before the map is exposed to the outside world.
+     * Create an empty dictionary.
      */
 
     public DictionaryMap() {
@@ -40,8 +117,7 @@ public class DictionaryMap extends StringMap {
     }
 
     /**
-     * Create an empty dictionary, to which entries can be added using {@link #initialPut(String, GroundedValue)},
-     * provided this is done before the map is exposed to the outside world.
+     * Create an empty dictionary.
      * @param size estimated final size of the dictionary
      */
 
@@ -50,28 +126,13 @@ public class DictionaryMap extends StringMap {
     }
 
     /**
-     * During initial construction of the map, add a key-value pair
-     * @param key the key
-     * @param value the corresponding value
+     * Create a dictionary backed by an existing map. It is the caller's responsibility to ensure that
+     * this map is not subsequently modified.
+     *
+     * @param underlyingMap the initial contents of the dictionary
      */
-
-    public void initialPut(String key, GroundedValue value) {
-        hashMap.put(key, value);
-    }
-
-    /**
-     * During initial construction of the map, append a value to a possibly existing key-value pair
-     * @param key the key
-     * @param value the corresponding value
-     */
-
-    public void initialAppend(String key, GroundedValue value) {
-        GroundedValue existingValue = hashMap.get(key);
-        if (existingValue == null) {
-            initialPut(key, value);
-        } else {
-            hashMap.put(key, existingValue.concatenate(value));
-        }
+    public DictionaryMap(HashMap<String, GroundedValue> underlyingMap) {
+        hashMap = underlyingMap;
     }
 
     /**
@@ -272,14 +333,14 @@ public class DictionaryMap extends StringMap {
 
     private HashTrieMap toHashTrieMap() {
         //System.err.println("Dictionary rewrite!!!!");
-        HashTrieMap target = new HashTrieMap();
+        MapBuilder target = HashTrieMap.getBuilder();
         for (Map.Entry<String, GroundedValue> entry : hashMap.entrySet()) {
-            target.initialPut(new StringValue(entry.getKey()), entry.getValue());
+            target.put(new StringValue(entry.getKey()), entry.getValue());
         }
-        return target;
+        return (HashTrieMap)target.getCompletedMap();
     }
 
-    private class KeyIterator implements AtomicIterator {
+    protected static class KeyIterator implements AtomicIterator {
         Iterator<String> keyIter;
 
         public KeyIterator(Map<String, GroundedValue> hashMap) {

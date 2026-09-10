@@ -39,6 +39,7 @@ public class JsonParser {
     public static final int DUPLICATES_FIRST = 128;
     public static final int DUPLICATES_REJECTED = 256;
     public static final int NUMERIC_FORMAT_RETAINED = 512;
+    public static final int ORDER_RETAINED = 1024;
 
     public static final int DUPLICATES_SPECIFIED = DUPLICATES_FIRST | DUPLICATES_LAST | DUPLICATES_RETAINED | DUPLICATES_REJECTED;
 
@@ -113,6 +114,11 @@ public class JsonParser {
             if (options.get("fallback") != null) {
                 throw new XPathException("Cannot specify a fallback function when escape=true", "FOJS0005");
             }
+        }
+
+        BooleanValue retainOrder = ((BooleanValue) options.get("retain-order"));
+        if (retainOrder != null && retainOrder.getBooleanValue()) {
+            flags |= ORDER_RETAINED;
         }
 
         BooleanValue liberal = ((BooleanValue) options.get("liberal"));

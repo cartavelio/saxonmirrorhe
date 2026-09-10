@@ -13,13 +13,11 @@ import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
@@ -252,48 +250,48 @@ public class AlphaCode {
         void setMultiTypeProperty(T container, String key, List<T> value);
     }
 
-    /**
-     * Implementation of the callback where the container is an XDM MapItem, using
-     * the {@link DictionaryMap} implementation
-     */
-    private static class MapItemCallBack implements ParserCallBack<DictionaryMap> {
-
-        @Override
-        public DictionaryMap makeContainer() {
-            return new DictionaryMap();
-        }
-
-        @Override
-        public void setStringProperty(DictionaryMap container, String key, String value) {
-            container.initialPut(key, new StringValue(value));
-        }
-
-        @Override
-        public void setMultiStringProperty(DictionaryMap container, String key, List<String> value) {
-            List<Item> xdmValue = new ArrayList<>();
-            for (String v : value) {
-                xdmValue.add(new StringValue(v));
-            }
-            container.initialPut(key, new SequenceExtent.Of<>(xdmValue));
-        }
-
-        @Override
-        public void setTypeProperty(DictionaryMap container, String key, DictionaryMap value) {
-            container.initialPut(key, value);
-        }
-
-        @SuppressWarnings("UseBulkOperation")
-        @Override
-        public void setMultiTypeProperty(DictionaryMap container, String key, List<DictionaryMap> value) {
-            List<GroundedValue> contents = new ArrayList<>();
-            // Written this way for C# conversion
-            for (DictionaryMap map : value) {
-                contents.add(map);
-            }
-            container.initialPut(key, new SimpleArrayItem(contents));
-        }
-
-    }
+//    /**
+//     * Implementation of the callback where the container is an XDM MapItem, using
+//     * the {@link DictionaryMap} implementation
+//     */
+//    private static class MapItemCallBack implements ParserCallBack<DictionaryMap> {
+//
+//        @Override
+//        public DictionaryMap makeContainer() {
+//            return new DictionaryMap();
+//        }
+//
+//        @Override
+//        public void setStringProperty(DictionaryMap container, String key, String value) {
+//            container.initialPut(key, new StringValue(value));
+//        }
+//
+//        @Override
+//        public void setMultiStringProperty(DictionaryMap container, String key, List<String> value) {
+//            List<Item> xdmValue = new ArrayList<>();
+//            for (String v : value) {
+//                xdmValue.add(new StringValue(v));
+//            }
+//            container.initialPut(key, new SequenceExtent.Of<>(xdmValue));
+//        }
+//
+//        @Override
+//        public void setTypeProperty(DictionaryMap container, String key, DictionaryMap value) {
+//            container.initialPut(key, value);
+//        }
+//
+//        @SuppressWarnings("UseBulkOperation")
+//        @Override
+//        public void setMultiTypeProperty(DictionaryMap container, String key, List<DictionaryMap> value) {
+//            List<GroundedValue> contents = new ArrayList<>();
+//            // Written this way for C# conversion
+//            for (DictionaryMap map : value) {
+//                contents.add(map);
+//            }
+//            container.initialPut(key, new SimpleArrayItem(contents));
+//        }
+//
+//    }
 
     /**
      * Implementation of the callback where the container is an AlphaCodeTree
@@ -573,19 +571,19 @@ public class AlphaCode {
         }
     }
 
-    /**
-     * Parse an AlphaCode into an XDM map
-     *
-     * @param input the input alphacode
-     * @return the resulting map
-     * @throws IllegalArgumentException if the input is not a valid AlphaCode
-     */
-
-    public static MapItem toXdmMap(String input) {
-        MapItemCallBack callBack = new MapItemCallBack();
-        AlphaCodeParser<DictionaryMap> parser = new AlphaCodeParser<>(input, callBack);
-        return parser.parseType(null);
-    }
+//    /**
+//     * Parse an AlphaCode into an XDM map
+//     *
+//     * @param input the input alphacode
+//     * @return the resulting map
+//     * @throws IllegalArgumentException if the input is not a valid AlphaCode
+//     */
+//
+//    public static MapItem toXdmMap(String input) {
+//        MapItemCallBack callBack = new MapItemCallBack();
+//        AlphaCodeParser<DictionaryMap> parser = new AlphaCodeParser<>(input, callBack);
+//        return parser.parseType(null);
+//    }
 
     /**
      * Serialize the XDM map representation of an alphacode

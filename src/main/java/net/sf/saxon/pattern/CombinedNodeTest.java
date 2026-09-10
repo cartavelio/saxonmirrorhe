@@ -8,7 +8,7 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.expr.parser.OperatorSymbol;
-import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
@@ -227,13 +227,13 @@ public class CombinedNodeTest extends NodeTest {
      * in structured form
      */
 
-    public void addTypeDetails(DictionaryMap map) {
+    public void addTypeDetails(MapBuilder map) {
         if (nodetest1 instanceof NameTest && operator == OperatorSymbol.INTERSECT) {
-            map.initialPut("n", new StringValue(nodetest1.getMatchingNodeName().getEQName()));
+            map.put("n", new StringValue(nodetest1.getMatchingNodeName().getEQName()));
             if (nodetest2 instanceof ContentTypeTest) {
                 SchemaType schemaType = ((ContentTypeTest) nodetest2).getSchemaType();
                 if (schemaType != Untyped.getInstance() && schemaType != BuiltInAtomicType.UNTYPED_ATOMIC) {
-                    map.initialPut("c", new StringValue(schemaType.getEQName() +
+                    map.put("c", new StringValue(schemaType.getEQName() +
                             (nodetest2.isNillable() ? "?" : "")));
 
                 }

@@ -33,6 +33,7 @@ import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.json.JsonParser;
 import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
@@ -2714,17 +2715,17 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("map", (loader, element) -> {
             List<Expression> children = getChildExpressionList(loader, element);
             AtomicValue key = null;
-            HashTrieMap map = new HashTrieMap();
+            MapBuilder map = HashTrieMap.getBuilder();
             for (Expression child : children) {
                 if (key == null) {
                     key = (AtomicValue)((Literal)child).getGroundedValue();
                 } else {
                     GroundedValue value = ((Literal) child).getGroundedValue();
-                    map.initialPut(key, value);
+                    map.put(key, value);
                     key = null;
                 }
             }
-            return Literal.makeLiteral(map);
+            return Literal.makeLiteral(map.getCompletedMap());
         });
 
         eMap.put("merge", (loader, element) -> {
