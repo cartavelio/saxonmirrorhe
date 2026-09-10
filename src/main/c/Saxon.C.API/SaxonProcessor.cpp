@@ -1098,7 +1098,7 @@ XdmArray *SaxonProcessor::makeArray(short *input, int length) {
     jshortArray sArray = nullptr;
 
     sArray = SaxonProcessor::sxn_environ->env->NewShortArray((jint) length);
-    jshort fill[length];
+    jshort * fill = new jshort[length];
     for (int i = 0; i < length; i++) {
         fill[i] = input[i];
     }
@@ -1184,7 +1184,7 @@ XdmArray *SaxonProcessor::makeArray(int *input, int length) {
     jintArray iArray = nullptr;
 
     iArray = SaxonProcessor::sxn_environ->env->NewIntArray((jint) length);
-    jint fill[length];
+    jint * fill = new jint[length];
     for (int i = 0; i < length; i++) {
         fill[i] = input[i];
     }
@@ -1226,7 +1226,7 @@ XdmArray *SaxonProcessor::makeArray(long *input, int length) {
     jlongArray lArray = nullptr;
 
     lArray = SaxonProcessor::sxn_environ->env->NewLongArray((jint) length);
-    jlong fill[length];
+    jlong * fill = new[length];
     for (int i = 0; i < length; i++) {
         fill[i] = input[i];
     }
@@ -1268,7 +1268,7 @@ XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
     jbooleanArray bArray = nullptr;
 
     bArray = SaxonProcessor::sxn_environ->env->NewBooleanArray((jint) length);
-    jboolean fill[length];
+    jboolean * fill = new[length];
     for (int i = 0; i < length; i++) {
         fill[i] = input[i];
     }
