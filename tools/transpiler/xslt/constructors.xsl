@@ -58,12 +58,12 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
-   <!-- Special-case 'new BigInteger(string)' ==> Saxon.Api.Helpers.BigIntegerUtils.ValueOf(string) -->
+   <!-- Special-case 'new BigInteger(string)' ==> Saxon.Impl.Helpers.BigIntegerUtils.ValueOf(string) -->
    <!-- Detecting the type of the argument is tricky, but we do our best -->
    <!-- The helper method converts the exception so it can be caught -->
    <xsl:template match="*[type/@RESOLVED_TYPE='java.math.BigInteger']
       [f:expressionType(arguments/argument[1])='java.lang.String']" priority="30">
-      <xsl:text>Saxon.Api.Helpers.BigIntegerUtils.ValueOf(</xsl:text>
+      <xsl:text>Saxon.Impl.Helpers.BigIntegerUtils.ValueOf(</xsl:text>
       <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
       <xsl:text>)</xsl:text>
    </xsl:template>

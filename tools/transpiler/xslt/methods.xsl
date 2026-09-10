@@ -516,7 +516,7 @@
    <xsl:template match="*[@RESOLVED_TYPE='java.net.URI']" 
       priority="30" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'create#1':                  'new System.Uri(%args%)',
+         'create#1':                  'new System.Uri(%args%, System.UriKind.RelativeOrAbsolute)',
          'getAuthority#0':            '%scope%.Authority',
          'getFragment#0':             'Saxon.Impl.Helpers.StringUtils.nullIfEmpty(%scope%.Fragment)',
          'getHost#0':                 '%scope%.Host',

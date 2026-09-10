@@ -957,10 +957,16 @@
    <xsl:template match="*[@nodeType='ThrowStmt']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:call-template name="indent"/>
-      <xsl:text>throw </xsl:text>
-      <xsl:apply-templates select="*"> 
-         <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
-      </xsl:apply-templates>
+      <xsl:text>throw</xsl:text>
+      <xsl:if test="not(ancestor::catchClause) 
+         or ancestor::*[@nodeType='LambdaExpr'] 
+         or not(ancestor::catchClause[1]/parameter/name/@identifier = expression/name/@identifier)">
+         <!-- Use C# re-throw where possible to preserve stack trace -->
+         <xsl:text> </xsl:text>
+         <xsl:apply-templates select="*"> 
+            <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
+         </xsl:apply-templates>
+      </xsl:if>
       <xsl:text>;{$NL}</xsl:text>
    </xsl:template>
    
