@@ -1,9 +1,10 @@
 <exceptions>
 
   <exception run="false" report="known restriction"
-             test-case="id-003 id-005 id-006 id-007 id-008 id-009 id-012
+             test-case="id-001 id-003 id-005 id-006 id-007 id-008 id-009 id-012
+                        id-015 id-016 id-018 id-019
                         id-020 id-021 id-022 id-023 id-024 id-025 id-026 id-027 id-028 id-029
-                        id-030 id-031 id-036 id-039 id-040 id-042 id-043
+                        id-030 id-031 id-034 id-036 id-037 id-039 id-040 id-042 id-043
                         axes-197 axes-201 match-013 match-014 match-053
                         number-4501">
     <created by="Norm Tovey-Walsh" on="2026-05-08"/>
@@ -21,12 +22,45 @@
     <created by="Norm Tovey-Walsh" on="2026-05-08"/>
     <reason>Microsoft parser doesn’t report unparsed entities</reason>
   </exception>
+  
+  <exception run="false" report="known restriction"
+             test-case="base-uri-006">
+    <created by="Michael Kay" on="2026-05-19"/>
+    <reason>.NET doesn't like URIs with a single-character scheme name</reason>
+  </exception>
+  
+  <exception run="false" report="known restriction"
+             test-case="base-uri-051 base-uri-052">
+    <created by="Michael Kay" on="2026-05-19"/>
+    <reason>Not detecting entity boundaries in events from Microsoft parser</reason>
+  </exception>
 
   <exception run="false" report="known restriction" when="XT30"
              test-case="format-date-en-020 format-date-en-021 format-date-en-022
                         format-date-en-026 format-date-en-028">
     <created by="Norm Tovey-Walsh" on="2026-05-08"/>
     <reason>The formats are less constrained in XT40</reason>
+  </exception>
+  
+  <exception run="false" report="known restriction" when="XT30"
+             test-case="document-1503">
+    <created by="Michael Kay" on="2026-05-19"/>
+    <reason>Fragment id on URI passed to document() or to xsl:include/import</reason>
+  </exception>
+  
+  <exception test-case="include-0102 include-0103" run="false" report="Not Implemented">
+    <created by="Michael Kay" on="2026-02-16"/>
+    <reason>Fragment identifiers in stylesheet URIs not supported</reason>
+  </exception>
+  
+  <exception test-case="strip-type-annotations-026" run="false" report="Not Implemented">
+    <created by="Michael Kay" on="2026-02-16"/>
+    <reason>idref() function not implemented (MS Parser limitations)</reason>
+  </exception>
+  
+  <exception test-case="type-functions-0304" run="false" report="bug">
+    <created by="Michael Kay" on="2026-02-16"/>
+    <reason>In the Microsoft world, a single-character scheme name in a URI has special meaning.</reason>
   </exception>
   
   <!--<exception test-case="su-absorbing-204" run="false" report="error">
@@ -103,10 +137,15 @@
     <reason>Stylesheet says "Can't make chunks with Saxonica's processor. Uses saxon:output which required PE.</reason>
   </exception>
   
-  <!--<exception test-case="function-available-1017" run="false" report="bug">
-    <created by="Michael Kay" on="2022-08-15"/>
-    <reason>We report map:key-value-pairs as available though it shouldn't be available with a 3.0 processor.</reason>
-  </exception>-->
+  <exception test-case="format-date-en-032" run="false">
+    <created by="Michael Kay" on="2026-05-19"/>
+    <reason>Unknown language "Iberian": underlying code falls back to English, without Saxon intervention.</reason>
+  </exception>
+  
+  
+  
+  
+  
 
 
 </exceptions>
