@@ -351,7 +351,12 @@ public final class DoubleValue extends NumericValue {
 
         BigDecimalValue decimalValue = new BigDecimalValue(BigDecimal.valueOf(value));
         NumericValue rounded = decimalValue.round(scale, roundingRule);
-        return new DoubleValue(rounded.getDoubleValue());
+        double result = rounded.getDoubleValue();
+        if (result == 0.0e0) {
+            // return negative zero if the original value was negative
+            return value < 0 ? DoubleValue.NEGATIVE_ZERO : DoubleValue.ZERO;
+        }
+        return new DoubleValue(result);
     }
 
     /**
