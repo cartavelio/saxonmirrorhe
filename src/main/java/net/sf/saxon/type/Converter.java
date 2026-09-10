@@ -801,6 +801,79 @@ public abstract class Converter {
         }
     }
 
+    /**
+     * Converter that implements the promotion rules from xs:string to xs:anyURI
+     */
+
+    public static class PromoterToAnyURI extends Converter {
+
+        public static PromoterToAnyURI INSTANCE = new PromoterToAnyURI();
+
+        @Override
+        public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
+            switch (input.getPrimitiveType().getFingerprint()) {
+                case StandardNames.XS_ANY_URI:
+                    return input;
+                case StandardNames.XS_STRING:
+                case StandardNames.XS_UNTYPED_ATOMIC:
+                    return new AnyURIValue(input.getUnicodeStringValue());
+                default:
+                    ValidationFailure err = new ValidationFailure(
+                            "Required type is xs:anyURI; supplied value is " + Err.depict(input));
+                    err.setErrorCode("XPTY0004");
+                    return err;
+            }
+        }
+    }
+
+    /**
+     * Converter that implements the promotion rules from xs:string to xs:anyURI
+     */
+
+    public static class PromoterToHexBinary extends Converter {
+
+        public static PromoterToHexBinary INSTANCE = new PromoterToHexBinary();
+
+        @Override
+        public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
+            switch (input.getPrimitiveType().getFingerprint()) {
+                case StandardNames.XS_HEX_BINARY:
+                    return input;
+                case StandardNames.XS_BASE64_BINARY:
+                    return new HexBinaryValue(((Base64BinaryValue)input).getBinaryValue());
+                case StandardNames.XS_UNTYPED_ATOMIC:
+                    return StringConverter.StringToHexBinary.INSTANCE.convertString(input.getUnicodeStringValue());
+                default:
+                    ValidationFailure err = new ValidationFailure(
+                            "Required type is xs:hexBinary; supplied value is " + Err.depict(input));
+                    err.setErrorCode("XPTY0004");
+                    return err;
+            }
+        }
+    }
+
+    public static class PromoterToBase64Binary extends Converter {
+
+        public static PromoterToBase64Binary INSTANCE = new PromoterToBase64Binary();
+
+        @Override
+        public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
+            switch (input.getPrimitiveType().getFingerprint()) {
+                case StandardNames.XS_BASE64_BINARY:
+                    return input;
+                case StandardNames.XS_HEX_BINARY:
+                    return new Base64BinaryValue(((HexBinaryValue) input).getBinaryValue());
+                case StandardNames.XS_UNTYPED_ATOMIC:
+                    return StringConverter.StringToBase64Binary.INSTANCE.convertString(input.getUnicodeStringValue());
+                default:
+                    ValidationFailure err = new ValidationFailure(
+                            "Required type is xs:base64Binary; supplied value is " + Err.depict(input));
+                    err.setErrorCode("XPTY0004");
+                    return err;
+            }
+        }
+    }
+
 
 }
 

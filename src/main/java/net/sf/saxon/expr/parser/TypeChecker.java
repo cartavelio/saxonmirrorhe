@@ -126,10 +126,9 @@ public class TypeChecker {
         }
 
 
-        if (!itemTypeOK) {
-            // Now apply the conversions needed in 2.0 mode
+        if (reqItemType.isPlainType()) {
 
-            if (reqItemType.isPlainType()) {
+            if (!itemTypeOK) {
 
                 // rule 1: Atomize
                 if (!suppliedItemType.isPlainType() &&
@@ -170,10 +169,72 @@ public class TypeChecker {
                     suppliedCard = exp.getCardinality();
                     cardOK = Cardinality.subsumes(reqCard, suppliedCard);
                 }
+            }
 
-                // rule 2: convert untypedAtomic to the required type
+            // rule 2: convert untypedAtomic to the required type
 
-                //   2a: all supplied values are untyped atomic. Convert if necessary, and we're finished.
+            // The specification says we do untypedAtomic conversion first, then promotion. However, if the
+            // target type is one to which promotion applies, then we combine the two operations into one:
+            // the conversion functions that handle type promotion (for example from float to double) also
+            // handle conversion from untypedAtomic, so we only need to make one pass over the data.
+
+            // rule 3: type promotion (combined with untypedAtomic conversion)
+
+            if (reqItemType instanceof AtomicType && !itemTypeOK) {
+                int rt = ((AtomicType) reqItemType).getFingerprint();
+                Expression promoted = null;
+                switch (rt) {
+                    case StandardNames.XS_DOUBLE:
+                        promoted = makePromoter(exp, new Converter.PromoterToDouble(), BuiltInAtomicType.DOUBLE);
+                        break;
+                    case StandardNames.XS_FLOAT:
+                        promoted = makePromoter(exp, new Converter.PromoterToFloat(), BuiltInAtomicType.FLOAT);
+                        break;
+                    case StandardNames.XS_STRING:
+                        promoted = makePromoter(exp, new Converter.PromoterToString(), BuiltInAtomicType.STRING);
+                        break;
+                    case StandardNames.XS_ANY_URI:
+                        if (allow40) {
+                            promoted = makePromoter(exp, new Converter.PromoterToAnyURI(), BuiltInAtomicType.ANY_URI);
+                        }
+                        break;
+                    case StandardNames.XS_HEX_BINARY:
+                        if (allow40) {
+                            promoted = makePromoter(exp, new Converter.PromoterToHexBinary(), BuiltInAtomicType.HEX_BINARY);
+                        }
+                        break;
+                    case StandardNames.XS_BASE64_BINARY:
+                        if (allow40) {
+                            promoted = makePromoter(exp, new Converter.PromoterToBase64Binary(), BuiltInAtomicType.BASE64_BINARY);
+                        }
+                        break;
+
+                }
+
+                if (promoted != null) {
+                    if (promoted instanceof AtomicSequenceConverter) {
+                        ((AtomicSequenceConverter) promoted).setRoleDiagnostic(roleSupplier);
+                    }
+                    exp = promoted;
+                    try {
+                        exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(exp.getLocation())
+                                .asStaticError()
+                                .withFailingExpression(supplied);
+                    }
+                    suppliedItemType = reqItemType;
+                    suppliedCard = -1;
+                    itemTypeOK = true;
+
+                }
+            }
+
+            if (!itemTypeOK) {
+
+                // Revisit rule 2 (conversion from untyped atomic) for target types that have not been handled by a Promoter
+
+                //   2b: all supplied values are untyped atomic. Convert if necessary, and we're finished.
 
                 if (suppliedItemType.equals(BuiltInAtomicType.UNTYPED_ATOMIC)
                         && !(reqItemType.equals(BuiltInAtomicType.UNTYPED_ATOMIC) || reqItemType.equals(BuiltInAtomicType.ANY_ATOMIC))) {
@@ -213,7 +274,7 @@ public class TypeChecker {
                     suppliedItemType = reqItemType;
                 }
 
-                //   2b: some supplied values are untyped atomic. Convert these to the required type; but
+                //   2c: some supplied values are untyped atomic. Convert these to the required type; but
                 //   there may be other values in the sequence that won't convert and still need to be checked
 
                 if (suppliedItemType.equals(BuiltInAtomicType.ANY_ATOMIC)
@@ -246,144 +307,61 @@ public class TypeChecker {
                         throw err.maybeWithLocation(exp.getLocation()).asStaticError();
                     }
                 }
+            }
 
-                // Rule 3a: numeric promotion decimal -> float -> double
+            // New 4.0 rule - relabelling (or "downcasting")
 
-                if (reqItemType instanceof AtomicType) {
-                    int rt = ((AtomicType) reqItemType).getFingerprint();
-                    if (rt == StandardNames.XS_DOUBLE &&
-                            th.relationship(suppliedItemType, NumericType.getInstance()) != DISJOINT) {
-                        Expression cexp = makePromoterToDouble(exp);
-                        if (cexp instanceof AtomicSequenceConverter) {
-                            ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
-                        }
-                        ExpressionTool.copyLocationInfo(exp, cexp);
-                        exp = cexp;
-                        try {
-                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                        } catch (XPathException err) {
-                            throw err.maybeWithLocation(exp.getLocation()).asStaticError();
-                        }
-                        suppliedItemType = BuiltInAtomicType.DOUBLE;
-                        suppliedCard = -1;
-
-                    } else if (rt == StandardNames.XS_FLOAT &&
-                            th.relationship(suppliedItemType, NumericType.getInstance()) != DISJOINT &&
-                            !th.isSubType(suppliedItemType, BuiltInAtomicType.DOUBLE)) {
-                        Expression cexp = makePromoterToFloat(exp);
-                        if (cexp instanceof AtomicSequenceConverter) {
-                            ((AtomicSequenceConverter)cexp).setRoleDiagnostic(roleSupplier);
-                        }
-                        ExpressionTool.copyLocationInfo(exp, cexp);
-                        exp = cexp;
-                        try {
-                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                        } catch (XPathException err) {
-                            throw err.maybeWithLocation(exp.getLocation())
-                                    .asStaticError()
-                                    .withFailingExpression(supplied);
-                        }
-                        suppliedItemType = BuiltInAtomicType.FLOAT;
-                        suppliedCard = -1;
-
+            if (!itemTypeOK && reqItemType.getBasicAlphaCode().length() > 2 && visitor.getStaticContext().getXPathVersion() >= 40) {
+                // allow down-conversion ("relabelling")
+                if (reqItemType.getUType().overlaps(suppliedItemType.getUType())) {
+                    itemTypeOK = true;
+                    Expression cexp = makeDownCaster(exp, (AtomicType) reqItemType, config);
+                    if (cexp instanceof AtomicSequenceConverter) {
+                        ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
                     }
-
-                    // Rule 3b: promotion from anyURI -> string
-
-                    if (rt == StandardNames.XS_STRING && th.relationship(suppliedItemType, BuiltInAtomicType.ANY_URI) != DISJOINT) {
-                        itemTypeOK = true;
-                        Expression cexp = makePromoterToString(exp);
-                        if (cexp instanceof AtomicSequenceConverter) {
-                            ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
-                        }
-                        ExpressionTool.copyLocationInfo(exp, cexp);
-                        exp = cexp;
-                        try {
-                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                        } catch (XPathException err) {
-                            throw err.maybeWithLocation(exp.getLocation())
-                                    .withFailingExpression(supplied)
-                                    .asStaticError();
-                        }
-                        suppliedItemType = BuiltInAtomicType.STRING;
-                        suppliedCard = -1;
+                    ExpressionTool.copyLocationInfo(exp, cexp);
+                    exp = cexp;
+                    try {
+                        exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                    } catch (XPathException err) {
+                        throw err.maybeWithLocation(exp.getLocation())
+                                .asStaticError()
+                                .withFailingExpression(supplied);
                     }
-
-
-                    // Rule 3c: promotion between xs:hexBinary and xs:base64Binary
-
-//                    if (rt == StandardNames.XS_HEX_BINARY) {
-//                        itemTypeOK = true;
-//                        Expression cexp = makePromoter(exp, Converter.Base64BinaryToHexBinary.INSTANCE, BuiltInAtomicType.HEX_BINARY);
-//                        if (cexp instanceof AtomicSequenceConverter) {
-//                            ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
-//                        }
-//                        ExpressionTool.copyLocationInfo(exp, cexp);
-//                        exp = cexp;
-//                        try {
-//                            exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-//                        } catch (XPathException err) {
-//                            throw err.maybeWithLocation(exp.getLocation())
-//                                    .withFailingExpression(supplied)
-//                                    .asStaticError();
-//                        }
-//                        suppliedItemType = BuiltInAtomicType.HEX_BINARY;
-//                        suppliedCard = -1;
-//                    }
-
-                    // New 4.0 rule - relabelling (or "downcasting")
-
-                    if (!itemTypeOK && reqItemType.getBasicAlphaCode().length() > 2 && visitor.getStaticContext().getXPathVersion() >= 40) {
-                        // allow down-conversion ("relabelling")
-                        if (reqItemType.getUType().overlaps(suppliedItemType.getUType())) {
-                            itemTypeOK = true;
-                            Expression cexp = makeDownCaster(exp, (AtomicType) reqItemType, config);
-                            if (cexp instanceof AtomicSequenceConverter) {
-                                ((AtomicSequenceConverter) cexp).setRoleDiagnostic(roleSupplier);
-                            }
-                            ExpressionTool.copyLocationInfo(exp, cexp);
-                            exp = cexp;
-                            try {
-                                exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
-                            } catch (XPathException err) {
-                                throw err.maybeWithLocation(exp.getLocation())
-                                        .asStaticError()
-                                        .withFailingExpression(supplied);
-                            }
-                            suppliedItemType = reqItemType;
-                        }
-                    }
-
+                    suppliedItemType = reqItemType;
                 }
 
-            } else if (reqItemType instanceof FunctionItemType && !((FunctionItemType) reqItemType).isMapType()
-                    && !((FunctionItemType) reqItemType).isArrayType()) {
-                Affinity r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
-                if (r != DISJOINT) {
-                    if (!(suppliedItemType instanceof FunctionItemType)) {
-                        exp = new ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
-                        suppliedItemType = th.getGenericFunctionItemType();
-                    }
-                    exp = makeFunctionSequenceCoercer(exp, (FunctionItemType) reqItemType, roleSupplier, allow40);
-                    itemTypeOK = true;
+            }
+        // Function coercion
+
+        } else if (!itemTypeOK && reqItemType instanceof FunctionItemType && !((FunctionItemType) reqItemType).isMapType()
+                && !((FunctionItemType) reqItemType).isArrayType()) {
+            Affinity r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
+            if (r != DISJOINT) {
+                if (!(suppliedItemType instanceof FunctionItemType)) {
+                    exp = new ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
+                    suppliedItemType = th.getGenericFunctionItemType();
                 }
+                exp = makeFunctionSequenceCoercer(exp, (FunctionItemType) reqItemType, roleSupplier, allow40);
+                itemTypeOK = true;
+            }
 
-            } else if (reqItemType instanceof JavaExternalObjectType &&
-                    /*Sequence.class.isAssignableFrom(((JavaExternalObjectType) reqItemType).getJavaClass()) &&  */
-                    reqCard == StaticProperty.EXACTLY_ONE) {
+        // External object conversion
 
-                if (Sequence.class.isAssignableFrom(((JavaExternalObjectType) reqItemType).getJavaClass())) {
-                    // special case: allow an extension function to call an instance method on the implementation type of an XDM value
-                    // we leave the conversion to be sorted out at run-time
+        } else if (!itemTypeOK && reqItemType instanceof JavaExternalObjectType &&
+                /*Sequence.class.isAssignableFrom(((JavaExternalObjectType) reqItemType).getJavaClass()) &&  */
+                reqCard == StaticProperty.EXACTLY_ONE) {
+
+            if (Sequence.class.isAssignableFrom(((JavaExternalObjectType) reqItemType).getJavaClass())) {
+                // special case: allow an extension function to call an instance method on the implementation type of an XDM value
+                // we leave the conversion to be sorted out at run-time
+                itemTypeOK = true;
+            } else if (supplied instanceof FunctionCall) {
+                // adjust the required type of the Java extension function call
+                // this does nothing unless supplied is an instanceof JavaExtensionFunctionCall
+                if (((FunctionCall) supplied).adjustRequiredType((JavaExternalObjectType) reqItemType)) {
                     itemTypeOK = true;
-                } else if (supplied instanceof FunctionCall) {
-                    // adjust the required type of the Java extension function call
-                    // this does nothing unless supplied is an instanceof JavaExtensionFunctionCall
-                    if (((FunctionCall) supplied).adjustRequiredType((JavaExternalObjectType) reqItemType)) {
-                        itemTypeOK = true;
-                        cardOK = true;
-                    }
-
+                    cardOK = true;
                 }
 
             }
@@ -738,18 +716,6 @@ public class TypeChecker {
                     .withErrorCode("FORG0006").asTypeError();
         }
         return null;
-    }
-
-    private static Expression makePromoterToDouble(Expression exp) {
-        return makePromoter(exp, new Converter.PromoterToDouble(), BuiltInAtomicType.DOUBLE);
-    }
-
-    private static Expression makePromoterToFloat(Expression exp) {
-        return makePromoter(exp, new Converter.PromoterToFloat(), BuiltInAtomicType.FLOAT);
-    }
-
-    private static Expression makePromoterToString(Expression exp) {
-        return makePromoter(exp, Converter.PromoterToString.INSTANCE, BuiltInAtomicType.STRING);
     }
 
     private static Expression makePromoter(Expression exp, Converter converter, BuiltInAtomicType type) {
