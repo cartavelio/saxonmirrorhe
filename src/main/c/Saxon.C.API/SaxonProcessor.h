@@ -390,6 +390,27 @@ public:
    */
     XdmMap *makeMap3(XdmAtomicValue ** keys, XdmValue ** values, int len);
 
+    //! Convert clark name string to EQName notation.
+    /**
+        * The expanded name, as a string using the notation defined by the EQName production in XPath 3.0.
+        * If the name is in a namespace, the resulting string takes the form <code>Q{uri}local</code>.
+        * Otherwise, the value is the local part of the name.
+        * @param name - The URI in Clark notation: <code>{uri}local</code> if the
+        *                name is in a namespace, or simply <code>local</code> if not.
+        * @return the expanded name, as a string using the notation defined by the EQName production in XPath 3.0.
+   */
+    const char * clarkNameToEQName(const char * name);
+
+    //! Convert EQName string to clark name notation.
+    /**
+     *
+     * @param name - The URI in EQName notation: <code>Q{uri}local</code> if the
+     *               name is in a namespace. For a name in no namespace, either of the
+     *               forms <code>Q{}local</code> or simply <code>local</code> are accepted.
+     * @return the URI in the clark notation
+   */
+    const char * EQNameToClarkName(const char * name);
+
 
     //! Get the string representation of the XdmValue.
     /**

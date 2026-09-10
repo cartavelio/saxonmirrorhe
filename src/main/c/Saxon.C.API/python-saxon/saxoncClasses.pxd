@@ -39,6 +39,10 @@ cdef extern from "../SaxonProcessor.h":
 
         bool isSchemaAware()
 
+        const char * EQNameToClarkName(const char * name)
+
+        const char * clarkNameToEQName(const char * name)
+
         const char * getResourcesDirectory()
 
         void setResourcesDirectory(const char* dir)

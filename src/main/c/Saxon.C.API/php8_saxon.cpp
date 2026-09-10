@@ -387,6 +387,59 @@ PHP_METHOD(SaxonProcessor, createXdmArrayValue)
 
 }
 
+PHP_METHOD(SaxonProcessor,  EQNameToClarkName){
+    SaxonProcessor * saxonProcessor;
+    char * eqname;
+    size_t len1;
+
+    if (ZEND_NUM_ARGS()==1 && zend_parse_parameters(ZEND_NUM_ARGS() , "s", &eqname, &len1) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+    assert (obj != nullptr);
+    saxonProcessor = obj->saxonProcessor;
+    if (saxonProcessor != nullptr) {
+
+        const char * qname = saxonProcessor->EQNameToClarkName(eqname);
+        if(qname != NULL) {
+            //char *str = estrdup(errStr);
+            _RETURN_STRING(qname);
+        }
+    }
+
+    RETURN_NULL();
+}
+
+
+
+PHP_METHOD(SaxonProcessor,  clarkNameToEQName){
+    SaxonProcessor * saxonProcessor;
+    char * clname;
+    size_t len1;
+
+    if (ZEND_NUM_ARGS()==1 && zend_parse_parameters(ZEND_NUM_ARGS() , "s", &clname, &len1) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+    assert (obj != nullptr);
+    saxonProcessor = obj->saxonProcessor;
+    if (saxonProcessor != nullptr) {
+
+        const char * qname = saxonProcessor->clarkNameToEQName(clname);
+        if(qname != NULL) {
+            //char *str = estrdup(errStr);
+            _RETURN_STRING(qname);
+        }
+    }
+
+    RETURN_NULL();
+
+}
+
 
 PHP_METHOD(SaxonProcessor, createQNameValue)
 {
@@ -3273,6 +3326,8 @@ zend_function_entry SaxonProcessor_methods[] = {
     //PHP_ME(SaxonProcessor,  registerPHPFunctions,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  version,      arginfo_saxonc_version, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  isSchemaAware,      arginfo_saxonc_isSchemaAware, ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor,  EQNameToClarkName,      arginfo_saxonc_EQNameToClarkName, ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor,  clarkNameToEQName,      arginfo_saxonc_clarkNameToEQName, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  exceptionOccurred,      arginfo_saxonc_isSchemaAware, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  getErrorMessage,      arginfo_saxonc_exceptionOccurred, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  exceptionClear,      arginfo_saxonc_exceptionClear, ZEND_ACC_PUBLIC)

@@ -292,6 +292,24 @@
             </tr>
             <tr>
                <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">clarkNameToEQName(string $name)</span>
+                  <div class="fcomment">Convert clark name string to EQName notation.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">EQNameToClarkName(string $name)</span>
+                  <div class="fcomment">Convert EQName string to clark name notation.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
                   <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
                </td>
                <td>
