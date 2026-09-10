@@ -4667,9 +4667,12 @@ public class XPathParser {
                 QNameTest qNameTest2 = parseNameTestUnion(nodeKind);
 
                 if (languageVersion < 40) {
-                    if (qNameTest2 instanceof NamespaceQNameTest || qNameTest2 instanceof LocalQNameTest) {
+                    if ((qNameTest2 instanceof NamespaceQNameTest || qNameTest2 instanceof LocalQNameTest)
+                            && !((env.getPackageData().getTargetEdition().startsWith("JS"))
+                            && env.getUnprefixedElementMatchingPolicy() == UnprefixedElementMatchingPolicy.ANY_NAMESPACE)) {
                         grumble("Wildcard syntax in item types requires 4.0 to be enabled");
-                    } else if (qNameTest2 instanceof UnionQNameTest) {
+                    } else if (qNameTest2 instanceof UnionQNameTest && !((env.getPackageData().getTargetEdition().startsWith("JS"))
+                            && env.getUnprefixedElementMatchingPolicy() == UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE)) {
                         grumble("Union syntax in item types requires 4.0 to be enabled");
                     }
                 }
