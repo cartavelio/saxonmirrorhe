@@ -4,3 +4,4 @@ requires = [
          "cython ~= 0.29.0"
 ]
 build-backend = "setuptools.build_meta"
+[LAST-LINE-BUILD-PATCH]
