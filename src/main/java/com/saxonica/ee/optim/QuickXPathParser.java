@@ -115,11 +115,12 @@ public class QuickXPathParser implements XPathParser.Accelerator {
     /**
      * Get a {@code long} number that uniquely identifies a sequence of up to 8 tokens.
      * Note: tokens are identified by numbers in the range 0..255.
+     * Note: changed the vararg from Integer to int due to a JavaParser change. See bug issue #4339
      *
      * @param tokens the array of token numbers. Up to 8 integers in the range 0.255.
      * @return a key identifying the sequence of tokens.
      */
-    private static long key(Integer... tokens) {
+    private static long key(int... tokens) {
         long key = 0L;
         for (int token : tokens) {
             key = (key << 8) + token;
