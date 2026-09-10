@@ -2,8 +2,6 @@ using System;
 using System.IO.Packaging;
 using System.Reflection;
 using System.Text;
-using org.nineml.coffeefilter;
-using org.nineml.coffeefilter.documents;
 using Saxon.Hej;
 using Saxon.Hej.expr;
 using Saxon.Hej.expr.instruct;

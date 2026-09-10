@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Saxon.Eej.ee.schema;
 using SysCollGen = System.Collections.Generic;
 namespace Saxon.Ejava.util
 {
