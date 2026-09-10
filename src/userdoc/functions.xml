@@ -1763,7 +1763,7 @@
       </signatures>
       <status>
         <p>Available since Saxon 9.3, provided XPath 3.0 is enabled.</p>
-        <p>Localization capabilities extended (a little) in Saxon 12.0</p>
+        <p>Localization capabilities extended (a little) in Saxon 12.0.</p>
       </status>
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
@@ -6402,7 +6402,7 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since before Saxon 7.2. Dropped in 12.1, but then reinstated
+        <p>Available since before Saxon 7.2. Dropped in 12.0, but then reinstated
         in 12.4 for the benefit of XQuery users, where the <code>xsl:evaluate</code> instruction is
         not available.</p>
       </status>
@@ -6439,7 +6439,7 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since before Saxon 7.2. Dropped in 12.1, but then reinstated
+        <p>Available since before Saxon 7.2. Dropped in 12.0, but then reinstated
           in 12.4 for the benefit of XQuery users, where the <code>xsl:evaluate</code> instruction is
           not available.
           Note that an <a class="bodylink code"
@@ -6498,7 +6498,7 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since before Saxon 7.2. Dropped in 12.1, but then reinstated
+        <p>Available since before Saxon 7.2. Dropped in 12.0, but then reinstated
           in 12.4 for the benefit of XQuery users, where the <code>xsl:evaluate</code> instruction is
           not available.</p>
       </status>
@@ -8622,7 +8622,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
       </signatures>
       <status>
         <p>Available since Saxon 10. In 12.4 the function becomes obsolescent, since the functionality
-        has been absorbed into the standard 4.0 <code>fn:replace</code> function.</p>
+          has been absorbed into the standard 4.0 <a class="bodylink code" href="/functions/fn/replace">fn:replace()</a> function.</p>
       </status>
       <saxon-edition>PE/EE 10</saxon-edition>
       <details>
@@ -8657,7 +8657,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
           
           <p>Note: the callback function does not have access to captured groups within the
           matched substring, only to the matched substring as a whole. For access to captured
-          groups, use the 4.0 version of <code>fn:replace</code>.</p>
+          groups, use the 4.0 version of <code>fn:replace()</code>.</p>
         </div>
       </details>
       

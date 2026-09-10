@@ -412,13 +412,13 @@
             <li><p>The new <code>fn:all()</code> function is renamed <code>fn:every()</code>.</p></li>
             <li><p>The new <code>map:of()</code> function is renamed <code>map:of-pairs()</code>.</p></li>
             <li><p>The new <code>array:of()</code> function is renamed <code>array:of-members()</code>.</p></li>
-            <li><p>Implemented <code>array:split()</code>, <code>map:pair</code>.</p></li>
-            <li><p>The <code>action</code> parameter of <code>fn:replace</code> is implemented, allowing the
-            replacement string to be computed. This makes the Saxon extension function <code>saxon:replace-with</code>
+            <li><p>Implemented <code>array:split()</code>, and <code>map:pair()</code>.</p></li>
+            <li><p>The <code>action</code> parameter of <code>fn:replace()</code> is implemented, allowing the
+            replacement string to be computed. This makes the Saxon extension function <code>saxon:replace-with()</code>
             obsolescent. The new function is more powerful in that it supplies captured groups to the action
             function.</p></li>
             <li><p>Constructor functions have a zero-arity version that takes the context item as
-                the default argument. Also, they single argument version can be called using <code>value</code>
+                the default argument. Also, the single argument version can be called using <code>value</code>
                 as the argument keyword.</p></li>
         </ul>
         
@@ -427,9 +427,11 @@
         <h2>Dropped or Changed Extension Functions</h2>
         
         <p>The Saxon extension functions <code>saxon:evaluate()</code>, <code>saxon:eval()</code>, and <code>saxon:expression()</code>
-            have been dropped. (The function <code>saxon:evaluate-node()</code> was dropped in Saxon 10). 
+            were dropped in Saxon 12.0. (The function <code>saxon:evaluate-node()</code> was dropped in Saxon 10). 
             The same effect (and more) can be achieved using the standard XSLT 3.0 instruction
-            <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a>.</p>
+            <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a>. From Saxon 12.4,
+            the functions are reinstated for the benefit of XQuery users, where the
+            <code>xsl:evaluate</code> instruction is not available.</p>
         
         <p>The Saxon extension function <a class="bodylink code" href="/functions/saxon/in-scope-namespaces">saxon:in-scope-namespaces()</a> has been
             aligned with the proposed 4.0 function <code>fn:in-scope-namespaces()</code> in that the returned map now always includes an entry for the
@@ -525,14 +527,10 @@
         member $b in $B return ...</code>. Previously the second <code>member</code> was not needed, it was assumed to
         apply to subsequent clauses.</p>
         
-
-        <p>From 12.4, the XQuery syntax for declaring a type alias is <code>declare item-type XX as record(a,b)</code>
-            rather than <code>declare type XX = record(a,b)</code>.</p>
         <p>From 12.4, the atomic types <code>xs:hexBinary</code> and <code>xs:base64Binary</code> are mutually
         comparable; and promotion on function calls and variable binding now ensures that either type can be supplied
         where the other is required.</p>
         
-
         
         
         
@@ -559,13 +557,15 @@
         <code>let $x as xs:double := 1</code> because the integer 1 is now coerced to an <code>xs:double</code>.</p>
         
         <p>From 12.4, <code>true()</code> and <code>false()</code> are allowed as annotation values. (In previous
-        XQuery versions, only string literals and numeric literals were allowed).</p>
+        XQuery versions, only string literals and numeric literals were allowed.)</p>
         
         <p>From 12.4, the comparand expression in a switch expression can be omitted, and defaults to <code>true()</code>.</p>
         
         <p>From 12.4, the XQuery syntax for declaring named item types is changed to match the syntax in the
-        draft specification (`declare item-type my:type as union(x, y);` in place of 
-        `declare type my:type = union(x, y)`.</p>
+        draft specification (<code>declare item-type my:type as union(x, y);</code> in place of 
+        <code>declare type my:type = union(x, y)</code>).</p>
+
+        
         
         <h2>XSLT 4.0 extensions</h2>
         

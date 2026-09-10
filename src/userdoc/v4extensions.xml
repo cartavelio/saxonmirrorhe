@@ -476,7 +476,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>The second argument may be omitted and defaults to <code>fn:identity#1</code>, so 
          <code>fn:all((1=1, 2=2, 3=4))</code> returns false.</p>
       
-      <aside><p>The function has been renamed <code>fn:every</code>; for the time being both names are available.</p></aside>
+      <aside>The function has been renamed <code>fn:every</code>; for the time being both names are available.</aside>
 
       <kbd>fn:all-different(
          $values	as xs:anyAtomicType*,	
@@ -681,16 +681,16 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>Returns an arity-2 function corresponding to a supplied binary operator, for example <code>fn:op("is")</code>
       returns <code>function($x, $y){$x is $y}</code>.</p>
 
-      <kbd>fn:parcel($input as item()*) as record(value)</kbd>
+      <kbd>fn:parcel( $input as item()* ) as record(value)</kbd>
 
       <p>Wraps an arbitrary sequence of items as a <i>parcel</i>: a parcel is a map with a single entry,
       whose key is the string <code>"value"</code> and whose value is the wrapped sequence. Parcels are
       useful because they enable an array to be treated as a sequence of items, by wrapping each member of the
       array as a parcel.</p>
       
-      <aside><p>This function has been dropped from the spec.</p></aside>
+      <aside>This function has been dropped from the spec.</aside>
 
-      <kbd>fn:parse-html($input as xs:string) as document-node</kbd>
+      <kbd>fn:parse-html( $input as xs:string ) as document-node</kbd>
 
       <p>Parses an HTML5 document (supplied as a string) using the HTML5 parsing algorithm, returning
       the result as an XDM document. In SaxonJ this is implemented using <code>validator.nu</code>; in SaxonCS the
@@ -711,7 +711,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>Parses a URI value, returning a map that identifies the component parts of the URI. Inverse of
          <code>fn:build-uri()</code>. Available from Saxon 12.1.</p>
 
-      <kbd>fn:parts($in as item()) as map(xs:string, xs:anyAtomicType)</kbd>
+      <kbd>fn:parts( $in as item() ) as map(xs:string, xs:anyAtomicType)</kbd>
 
       <p>Decomposes a composite "atomic" value into its parts, in the form of a map. For example, an <code>xs:dateTime</code>
       value is decomposed into year, month, day, hour, minute, second, and timezone. Other values that are decomposable include
@@ -719,13 +719,11 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       For values that are not decomposable, the resulting map contains a single entry whose key is "value" and whose corresponding
       value is the input value.</p>
 
-      <p>
-         <em>Likely to be dropped.</em>
-      </p>
+      <aside>Likely to be dropped.</aside>
 
       <kbd>fn:range()</kbd>
 
-      <p>Dropped from Saxon 12.</p>
+      <aside>Dropped from Saxon 12.</aside>
 
       <kbd>fn:remove(
          $input	  as item()*,	
@@ -777,11 +775,11 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <p>Returns all items in a sequence except the last.</p>
 
-      <kbd>fn:unparcel($parcel as record(value, *)) as item()*</kbd>
+      <kbd>fn:unparcel( $parcel as record(value, *) ) as item()*</kbd>
 
       <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?value</code>.)</p>
       
-      <aside><p>This function has been dropped from the spec.</p></aside>
+      <aside>This function has been dropped from the spec.</aside>
       
       <kbd>fn:void(
          $input	as item()*	
@@ -830,7 +828,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>Accepts an array as input, and turns it into a sequence of parcels: the inverse of the <code>array:of()</code>
          function.</p>
 
-      <kbd>array:of($input as record(value, *)*) as array(*)</kbd>
+      <kbd>array:of( $input as record(value, *)* ) as array(*)</kbd>
 
       <p>Accepts a sequence of parcels (as produced by the <code>fn:parcel()</code> function), and returns an array
       whose members are the sequences obtained by applying <code>fn:unparcel()</code> to each parcel in turn.</p>
@@ -863,31 +861,29 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       the values are combined using the <code>$combine</code> function.</p>
 
 
-      <kbd>map:entries($map as map(*)) as map(*)*</kbd>
+      <kbd>map:entries( $map as map(*) ) as map(*)*</kbd>
 
       <p>Accepts a map as input, and turns it into a sequence of singleton maps representing the key-value pairs contained in the map.
       Equivalent to <code>map:for-each($map, ->($k, $v){map{$k : $v}})</code>.</p>
 
-      <kbd>map:filter($map as map(*), $predicate as function(xs:anyAtomicType, item()*) as xs:boolean) as map(*)</kbd>
+      <kbd>map:filter( $map as map(*), $predicate as function(xs:anyAtomicType, item()* ) as xs:boolean) as map(*)</kbd>
 
       <p>Accepts a map as input, and returns a new map containing those entries from the original map that satisfy the predicate function.</p>
 
-      <kbd>map:keys($map as map(*), $predicate as function(item()*) as xs:boolean := true#0) as xs:atomicValue*</kbd>
+      <kbd>map:keys( $map as map(*), $predicate as function(item()*) as xs:boolean := true#0 ) as xs:atomicValue*</kbd>
       
       <p>The second argument is new in 4.0; if supplied, <code>map:keys()</code> returns the keys from entries in the map where
          applying the predicate to the corresponding value returns true.</p>
       
 
-      <kbd>map:pairs($map as map(*)) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
+      <kbd>map:pairs( $map as map(*) ) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
 
       <p>Accepts a map as input, and turns it into a sequence of maps representing the key-value pairs contained in the map.
          Equivalent to <code>map:for-each($map, ->($k, $v){map{"key":$k, "value":$v}})</code>. This differs from
       <code>map:entries</code> in that each entry in the input map is turned into a map with two entries, named "key"
       and "value", rather than a singleton map with one entry.</p>
       
-      <p>
-         <em>Previously named <code>map:key-value-pairs</code>.</em>
-      </p>
+      <aside>Previously named <code>map:key-value-pairs</code>.</aside>
 
 
 
