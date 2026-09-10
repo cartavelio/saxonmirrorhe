@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This package is concerned with evaluation of FLWOR expressions in XQuery
+ * <p>This package is concerned with evaluation of FLWOR expressions in XQuery</p>
  */
 
 package net.sf.saxon.expr.flwor;

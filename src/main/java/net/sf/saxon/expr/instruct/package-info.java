@@ -8,8 +8,8 @@
 package net.sf.saxon.expr.instruct;
 
 /**
- * This package is concerned with the representation of XSLT instructions on the expression tree,
+ * <p>This package is concerned with the representation of XSLT instructions on the expression tree,
  * and with the evaluation of those instructions. In cases where XQuery constructs correspond
  * directly to XSLT instructions (for example, element constructors), the same representation
- * is used for both.
+ * is used for both.</p>
  */

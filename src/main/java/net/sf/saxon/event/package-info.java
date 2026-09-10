@@ -6,9 +6,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This package provides support for push pipeline processing based on the {@link net.sf.saxon.event.Receiver} interface
+ * <p>This package provides support for push pipeline processing based on the {@link net.sf.saxon.event.Receiver} interface
  * and its implementation classes. The classes are mainly for internal use, but are available for use in advanced
- * applications.
+ * applications.</p>
  */
 
 package net.sf.saxon.event;

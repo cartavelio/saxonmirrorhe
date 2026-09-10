@@ -6,8 +6,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This package provides a number of re-usable utility classes and methods used by more than one
- * tree model implementation.
+ * <p>This package provides a number of re-usable utility classes and methods used by more than one
+ * tree model implementation.</p>
  */
 
 package net.sf.saxon.tree.util;

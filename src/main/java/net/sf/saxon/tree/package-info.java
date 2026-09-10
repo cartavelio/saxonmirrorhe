@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This package contains classes and sub-packages used to implement Saxon's various tree models including
- * the linked tree and tiny tree.
+ * <p>This package contains classes and sub-packages used to implement Saxon's various tree models including
+ * the linked tree and tiny tree.</p>
  */
 package net.sf.saxon.tree;

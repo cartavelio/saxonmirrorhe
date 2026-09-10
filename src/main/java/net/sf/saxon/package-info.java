@@ -6,6 +6,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This is the top-level package containing the code used to build Saxon-HE.
+ * <p>This is the top-level package containing the code used to build Saxon-HE.</p>
  */
 package net.sf.saxon;
