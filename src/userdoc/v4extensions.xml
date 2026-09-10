@@ -1115,7 +1115,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
          <p>The <code>break-when</code> attribute can be specified on <code>xsl:for-each-group</code> in 
             place of <code>group-by</code>, <code>group-adjacent</code>, <code>group-starting-with</code>, or 
             <code>group-ending-with</code>. This allows a new group to be started conditionally based on the contents
-         of the current group so far. For example, <code>break-when="@date lt current-group()[last()]/@date</code>
+         of the current group so far. For example, <code>break-when="@date lt $group[last()]/@date</code>
          causes a new group to be started whenever the date on the current item is earlier than the date on the
          last item in the previous group.</p>
          
