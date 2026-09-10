@@ -44,7 +44,7 @@ public class SchemaDocument {
      */
 
     public boolean isSourceSchemaDocument() {
-        return getXSDSchema() != null;
+        return getXSDSchemaElement() != null;
     }
 
     /**
@@ -66,7 +66,7 @@ public class SchemaDocument {
      * does not contain an xs:schema element (for example if it contains a compiled schema)
      */
 
-    public XSDSchemaElement getXSDSchema() {
+    public XSDSchemaElement getXSDSchemaElement() {
         AxisIterator iter = document.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.makeNodeKindTest(Type.ELEMENT));
         NodeInfo node = iter.next();
         return node instanceof XSDSchemaElement ? (XSDSchemaElement)node : null;
@@ -79,7 +79,7 @@ public class SchemaDocument {
      */
 
     public NamespaceUri getTargetNamespace() {
-        XSDSchemaElement root = getXSDSchema();
+        XSDSchemaElement root = getXSDSchemaElement();
         return root == null ? null : root.getTargetNamespace();
     }
 

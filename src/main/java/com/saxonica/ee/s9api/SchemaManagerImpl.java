@@ -254,7 +254,7 @@ public class SchemaManagerImpl extends SchemaManager {
             ps = new PreparedSchema((EnterpriseConfiguration) processor.getUnderlyingConfiguration());
             ps.setXsdVersion(xsdVersion);
         }
-        return new SchemaValidatorImpl(processor, ps);
+        return new SchemaValidatorImpl(processor, new XsdSchemaImpl(ps));
     }
 
 

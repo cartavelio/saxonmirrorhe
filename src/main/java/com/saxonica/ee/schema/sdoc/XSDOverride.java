@@ -93,16 +93,16 @@ public class XSDOverride extends SchemaElement {
             PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
             SchemaDocument schemaDoc = SchemaReader.buildSchemaDocument(source, compiler, this);
             originalSchemaDocument = schemaDoc;
-            originalSchema = schemaDoc.getXSDSchema().getSchema();
-            NamespaceUri originalTargetNS = schemaDoc.getXSDSchema().getTargetNamespace();
+            originalSchema = schemaDoc.getXSDSchemaElement().getSchema();
+            NamespaceUri originalTargetNS = schemaDoc.getXSDSchemaElement().getTargetNamespace();
             if (!getSchema().getTargetNamespace().equals(originalTargetNS)) {
                 if (originalTargetNS.isEmpty()) {
                     // chameleon override
                     originalSchemaDocument = schemaDoc = compiler.doChameleonTransformation(
                             schemaDoc.getDocument().getRootNode(), this);
-                    originalSchema = schemaDoc.getXSDSchema().getSchema();
+                    originalSchema = schemaDoc.getXSDSchemaElement().getSchema();
                     try {
-                        XSDSchemaElement overridden = schemaDoc.getXSDSchema();
+                        XSDSchemaElement overridden = schemaDoc.getXSDSchemaElement();
                         overridden.processAllAttributes();
                         overridden.validateSubtree(compiler);
                     } catch (SchemaException err) {
@@ -121,7 +121,7 @@ public class XSDOverride extends SchemaElement {
             }
             SchemaDocument convertedSchemaDocument = compiler.doOverrideTransformation(
                     schemaDoc.getDocument().getRootNode(), this);
-            XSDSchemaElement top = convertedSchemaDocument.getXSDSchema();
+            XSDSchemaElement top = convertedSchemaDocument.getXSDSchemaElement();
 
             top.processAllAttributes();
             top.validateSubtree(compiler);

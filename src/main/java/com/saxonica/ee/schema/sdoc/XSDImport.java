@@ -5,7 +5,6 @@ import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.Version;
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -208,8 +207,8 @@ public class XSDImport extends AnnotationParent {
         int errors;
         try {
             importee = SchemaReader.read(source, compiler, null);
-            XSDSchemaElement s = importee.getXSDSchema();
-            errors = importee.getXSDSchema().getErrorCount();
+            XSDSchemaElement s = importee.getXSDSchemaElement();
+            errors = importee.getXSDSchemaElement().getErrorCount();
             importedSchema = s.getSchema();
         } catch (SchemaException e) {
             processSchemaException(schemaLocation, namespace, e);

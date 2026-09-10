@@ -22,7 +22,6 @@ import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.type.ValidationParams;
@@ -59,7 +58,7 @@ import java.util.concurrent.*;
 public class SchemaValidatorImpl extends SchemaValidator {
 
     private final Processor processor;
-    private final PreparedSchema schema;
+    private final XsdSchema schema;
     private boolean lax;
     private InvalidityHandler invalidityHandler;
     private Destination destination;
@@ -75,7 +74,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
     private int threadCount = Runtime.getRuntime().availableProcessors();
 
     @CSharpModifiers(code = {"internal"})
-    public SchemaValidatorImpl(Processor processor, PreparedSchema schema) {
+    public SchemaValidatorImpl(Processor processor, XsdSchema schema) {
         this.processor = Objects.requireNonNull(processor);
         this.schema = Objects.requireNonNull(schema);
         this.useXsiSchemaLocation = processor.getConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION);
@@ -89,7 +88,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @return the relevant schema
      */
     @Override
-    public Schema getSchema() {
+    public XsdSchema getSchema() {
         return schema;
     }
 
@@ -324,7 +323,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
     @Override
     public void setDocumentElementTypeName(QName name) throws SaxonApiException {
         StructuredQName name1 = name.getStructuredQName();
-        documentElementType = schema.getSchemaType(name1);
+        documentElementType = schema.getUnderlyingSchema().getSchemaType(name1);
         if (documentElementType == null) {
             throw new SaxonApiException("Unknown type " + name.getClarkName());
         }
@@ -552,7 +551,8 @@ public class SchemaValidatorImpl extends SchemaValidator {
                     Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, null);
                     output.setPipelineConfiguration(pipe);
 
-                    Receiver receiver = schema.getDocumentValidator(output, source.getSystemId(), options, null);
+                    Receiver receiver = schema.getUnderlyingSchema().getDocumentValidator(
+                            output, source.getSystemId(), options, null);
                     Sender.send(source, receiver, options);
                 } catch (XPathException | SaxonApiException e1) {
                     //e1.printStackTrace();
@@ -699,7 +699,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         Controller controller = new Controller(config);
         Executable exec = controller.getExecutable();
         PackageData pack = new PackageData(config);
-        pack.setLocalLicenseId(schema.getLocalLicenseId());
+        pack.setLocalLicenseId(((PreparedSchema)schema.getUnderlyingSchema()).getLocalLicenseId());
         pack.setSchemaAware(true);
         exec.setTopLevelPackage(pack);
         exec.setSchemaAware(true);
@@ -734,7 +734,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, config.obtainDefaultSerializationProperties());
         output.setPipelineConfiguration(pipe);
 
-        return schema.getDocumentValidator(output, systemId, options, null);
+        return schema.getUnderlyingSchema().getDocumentValidator(output, systemId, options, null);
     }
 
     /**

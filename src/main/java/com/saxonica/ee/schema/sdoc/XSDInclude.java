@@ -86,7 +86,7 @@ public class XSDInclude extends AnnotationParent {
             try {
                 PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
                 SchemaDocument inc = SchemaReader.read(source, compiler, this);
-                XSDSchemaElement includedXSDSchema = inc.getXSDSchema();
+                XSDSchemaElement includedXSDSchema = inc.getXSDSchemaElement();
                 includedXSDSchema.setReferrer(this);
                 includedSchema = includedXSDSchema.getSchema();
                 compiler.markAsRead(source.getSystemId(), includedXSDSchema);

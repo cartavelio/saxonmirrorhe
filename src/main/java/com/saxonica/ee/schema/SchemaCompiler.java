@@ -370,12 +370,12 @@ public class SchemaCompiler {
             throw exception;
         }
 
-        PreparedSchema ps = schemadoc.getXSDSchema().getSchema();
+        PreparedSchema ps = schemadoc.getXSDSchemaElement().getSchema();
         preparedSchema = ps;
         validate(schemadoc);
         preparedSchema = null;
 
-        Collection<GlobalParam> globalParams = schemadoc.getXSDSchema().getGlobalParams();
+        Collection<GlobalParam> globalParams = schemadoc.getXSDSchemaElement().getGlobalParams();
         for (GlobalParam param : globalParams) {
             ps.addGlobalParam(param);
         }
@@ -434,7 +434,7 @@ public class SchemaCompiler {
                     throw new SchemaException("Only source schema documents (not SCM compiled schemas) are accepted here");
                 }
                 success = true;
-                PreparedSchema ps = schemadoc.getXSDSchema().getSchema();
+                PreparedSchema ps = schemadoc.getXSDSchemaElement().getSchema();
                 if (mergedSchema == null) {
                     mergedSchema = ps;
                 } else {
@@ -528,7 +528,7 @@ public class SchemaCompiler {
         if (doc.isCompiledSchemaDocument()) {
             throw new SchemaException("Only source schema documents (not SCM compiled schemas) are accepted here");
         }
-        XSDSchemaElement schemaRoot = doc.getXSDSchema();
+        XSDSchemaElement schemaRoot = doc.getXSDSchemaElement();
         preparedSchema = schemaRoot.getSchema();
         int errors = schemaRoot.getErrorCount();
         if (errors > 0) {

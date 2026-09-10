@@ -632,7 +632,7 @@ public class SchemaTestSuiteDriver {
         XPathCompiler tempXPath = tempProcessor.newXPathCompiler();
         for (XdmItem schemaDocRefItem : xpath.evaluate("schemaDocument", schemaTest)) {
             XdmNode schemaDocumentRef = (XdmNode) schemaDocRefItem;
-            println("Loading schema at " + schemaDocumentRef.getAttributeValue(QN_xlink_href));
+            println("Loading schema via SCM at " + schemaDocumentRef.getAttributeValue(QN_xlink_href));
             XdmNode schemaDoc = getLinkedDocument(schemaDocumentRef, tempProcessor, false);
             XdmNode schemaElement =
                     (XdmNode) tempXPath.evaluateSingle("*", schemaDoc);

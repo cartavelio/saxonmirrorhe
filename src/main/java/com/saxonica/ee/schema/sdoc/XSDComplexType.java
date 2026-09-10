@@ -355,7 +355,7 @@ public class XSDComplexType extends SchemaElement {
         XSDSchemaElement schemaDefiningDefaults;
         if (getParent() instanceof XSDOverride) {
             SchemaDocument original = ((XSDOverride) getParent()).getOriginalSchemaDocument();
-            schemaDefiningDefaults = original.getXSDSchema();
+            schemaDefiningDefaults = original.getXSDSchemaElement();
         } else {
             schemaDefiningDefaults = getXSDSchema();
         }
