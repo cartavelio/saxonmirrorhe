@@ -767,7 +767,26 @@ public class XMLEmitter extends Emitter {
             if (openStartTag) {
                 closeStartTag();
             }
-            if (chars instanceof WhitespaceString) {
+            if (ReceiverOption.contains(properties, ReceiverOption.USE_CDATA)) {
+                writer.write(CDATAFilter.CDATA_OPEN);
+
+                // Check that the character data doesn't include the substring "]]>"
+                // Also get rid of any zero bytes inserted by character map expansion
+
+                long i = 0;
+                long doneto = 0;
+                long len = chars.length();
+                while (i < len - 2) {
+                    if (chars.codePointAt(i) == ']' && chars.codePointAt(i + 1) == ']' && chars.codePointAt(i + 2) == '>') {
+                        writer.write(chars.substring(doneto, i + 2));
+                        writer.write(CDATAFilter.CDATA_CLOSE_AND_REOPEN);
+                        doneto = i + 2;
+                    }
+                    i++;
+                }
+                writer.write(chars.substring(doneto, len));
+                writer.write(CDATAFilter.CDATA_CLOSE);
+            } else if (chars instanceof WhitespaceString) {
                 ((WhitespaceString) chars).write(writer);
             } else if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
                 writer.write(chars);
