@@ -15,13 +15,12 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.Doc_2;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.map.MapCreate;
-import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.MapUntypedContains;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.type.AnyItemType;
@@ -228,40 +227,45 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
             }
             SourceLocator locator = error.getLocator();
             switch (var) {
-                case "code":
+                case "code": {
                     StructuredQName errorCodeQName = error.getErrorCodeQName();
                     if (errorCodeQName == null) {
                         errorCodeQName = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
                     }
                     return new QNameValue(errorCodeQName, BuiltInAtomicType.QNAME);
-                case "description":
+                }
+                case "description": {
                     String s = error.getMessage();
                     if (error.getCause() != null) {
                         s += "(" + error.getCause().getMessage() + ")";
                     }
                     return new StringValue(s);
-                case "value":
+                }
+                case "value": {
                     Sequence value = error.getErrorObject();
                     if (value == null) {
                         return EmptySequence.getInstance();
                     } else {
                         return value;
                     }
-                case "module":
+                }
+                case "module": {
                     String module = locator == null ? null : locator.getSystemId();
                     if (module == null) {
                         return EmptySequence.getInstance();
                     } else {
                         return new StringValue(module);
                     }
-                case "line-number":
+                }
+                case "line-number": {
                     int line = locator == null ? -1 : locator.getLineNumber();
                     if (line == -1) {
                         return EmptySequence.getInstance();
                     } else {
                         return new Int64Value(line);
                     }
-                case "column-number":
+                }
+                case "column-number": {
                     // Bug 4144
                     int column = -1;
                     if (locator == null) {
@@ -276,12 +280,66 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     } else {
                         return new Int64Value(column);
                     }
+                }
+                case "map": {
+                    StructuredQName errorCodeQName = error.getErrorCodeQName();
+                    if (errorCodeQName == null) {
+                        errorCodeQName = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
+                    }
+                    QNameValue errorCode = new QNameValue(errorCodeQName, BuiltInAtomicType.QNAME);
+
+                    String s = error.getMessage();
+                    if (error.getCause() != null) {
+                        s += "(" + error.getCause().getMessage() + ")";
+                    }
+                    StringValue description = new StringValue(s);
+
+                    Sequence errorObject = error.getErrorObject();
+                    if (errorObject == null) {
+                        errorObject = EmptySequence.getInstance();
+                    } 
+
+                    String module = locator == null ? null : locator.getSystemId();
+                    if (module == null) {
+                        module = "";
+                    }
+                    int line = locator == null ? -1 : locator.getLineNumber();
+
+                    int column = -1;
+                    if (locator == null) {
+                        return EmptySequence.getInstance();
+                    } else if (locator instanceof XPathParser.NestedLocation) {
+                        column = ((XPathParser.NestedLocation) locator).getContainingLocation().getColumnNumber();
+                    } else {
+                        column = locator.getColumnNumber();
+                    }
+
+                    return new ShapedMap(errorMapShape,
+                                           errorCode,
+                                           description,
+                                           errorObject.materialize(),
+                                           new StringValue(module),
+                                           new Int64Value(line),
+                                           new Int64Value(column),
+                                           EmptySequence.getInstance()
+                                        );
+                }
                 default:
                     return EmptySequence.getInstance();
             }
 
         }
     }
+
+    private static final Shape errorMapShape = new Shape(
+            new Twine8("code"),
+            new Twine8("description"),
+            new Twine8("value"),
+            new Twine8("module"),
+            new Twine8("line-number"),
+            new Twine8("column-number"),
+            new Twine8("additional")
+    );
 
 
 //    private static StringValue valueKey = new StringValue(new Twine8(StringConstants.bytes("value")));

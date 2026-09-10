@@ -301,7 +301,8 @@ public abstract class StandardNames {
             new StructuredQName("err", NamespaceUri.ERR, "module"),
             new StructuredQName("err", NamespaceUri.ERR, "line-number"),
             new StructuredQName("err", NamespaceUri.ERR, "column-number"),
-            new StructuredQName("err", NamespaceUri.ERR, "additional")
+            new StructuredQName("err", NamespaceUri.ERR, "additional"),
+            new StructuredQName("err", NamespaceUri.ERR, "map")
     };
     // key is an expanded QName in Clark notation
     // value is a fingerprint, as a java.lang.Integer
