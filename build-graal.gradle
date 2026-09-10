@@ -12,6 +12,26 @@ if (graalHome == null)
   graalHome = System.getenv("GRAALVM_HOME")
 }
 
+def saxonApiDir = "${buildDir}/../src/main/c/Saxon.C.API"
+def commandDir = "${buildDir}/../src/main/c/command"
+def sharedLibDir = "${buildDir}/c"
+
+ task buildSaxonGlue(type: Exec) {
+     workingDir "${commandDir}"
+     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "-c", "${saxonApiDir}/SaxonCGlue.c", "-o", "${commandDir}/SaxonCGlue.o"
+ }
+
+ task buildTransform(type: Exec) {
+     workingDir "${commandDir}"
+     commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "${commandDir}/Transform.c", "-o", "${commandDir}/transform", "-ldl", "-lc", "-DEEC", "${commandDir}/SaxonCGlue.o", "-L${sharedLibDir}", "-lsaxon-eec-12.1" 
+ }
+
+ task buildCWrappers {
+    dependsOn 'buildSaxonGlue'
+    dependsOn 'buildTransform'
+    tasks.findByName('buildTransform').mustRunAfter 'buildSaxonGlue'
+ }
+
 task test_graalHome(
   description: "Test that graalHome is configured"
 ) {
