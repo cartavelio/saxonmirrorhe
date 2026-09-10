@@ -7,6 +7,7 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.BMPString;
@@ -633,6 +634,12 @@ public final class BigDecimalValue extends DecimalValue {
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
         return this;
     }
+
+    @Override
+    public AtomicMatchKey getXPathTransitiveMatchKey(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
 
     /**
      * Compare the value to another numeric value

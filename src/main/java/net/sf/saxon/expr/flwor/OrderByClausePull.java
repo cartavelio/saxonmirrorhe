@@ -59,7 +59,7 @@ public class OrderByClausePull extends TuplePull {
             int position = 0;
 
             while (base.nextTuple(context)) {
-                Tuple tuple = tupleExpr.evaluateItem(context);
+                FlworTuple tuple = tupleExpr.evaluateItem(context);
                 SortKeyDefinitionList sortKeyDefinitions = orderByClause.getSortKeyDefinitions();
                 ItemToBeSorted itbs = new ItemToBeSorted(sortKeyDefinitions.size());
                 itbs.value = tuple;
@@ -96,7 +96,7 @@ public class OrderByClausePull extends TuplePull {
         }
 
         if (currentPosition < tupleArray.size()) {
-            tupleExpr.setCurrentTuple(context, (Tuple) tupleArray.get(currentPosition++).value);
+            tupleExpr.setCurrentTuple(context, (FlworTuple) tupleArray.get(currentPosition++).value);
             return true;
         } else {
             return false;

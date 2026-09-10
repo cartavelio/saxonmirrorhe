@@ -13,7 +13,7 @@ package net.sf.saxon.trans;
  * timezone. This exception should be caught internally, and should result in evaluation
  * of the expression being deferred until run-time
  */
-public class NoDynamicContextException extends XPathException {
+public class NoDynamicContextException extends RuntimeException {
 
     /**
      * Create a NoDynamicContextException

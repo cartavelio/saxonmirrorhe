@@ -7,7 +7,9 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.functions.FormatNumber;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -375,6 +377,12 @@ public abstract class IntegerValue extends DecimalValue {
 
     @Override
     public abstract BigDecimal getDecimalValue();
+
+
+    @Override
+    public AtomicMatchKey getXPathTransitiveMatchKey(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
 
     /**
      * Determine whether the value is a whole number, that is, whether it compares

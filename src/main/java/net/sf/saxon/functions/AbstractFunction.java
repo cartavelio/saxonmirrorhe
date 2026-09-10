@@ -13,7 +13,7 @@ import net.sf.saxon.expr.OperandUsage;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.query.AnnotationList;
@@ -141,17 +141,13 @@ public abstract class AbstractFunction implements FunctionItem {
      * @param other the other function item
      */
     @Override
-    public boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
+    public boolean deepEquals(FunctionItem other, XPathContext context, AtomicMatcher comparer, int flags) throws XPathException {
         throw new XPathException("Argument to deep-equal() contains a function item", "FOTY0015");
     }
 
     @Override
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
         return this.equals(other);
-        //        if (options.falseOnError) {
-//            return false;
-//        }
-//        throw new XPathException("Argument to deep-equal() contains a function item", "FOTY0015");
     }
 
     /**

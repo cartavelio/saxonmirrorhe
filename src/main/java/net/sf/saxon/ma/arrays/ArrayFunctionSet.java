@@ -86,14 +86,21 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("flatten", 1, e -> e.populate( ArrayFlatten::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | ABS, null));
 
-        ItemType foldFunctionType = new SpecificFunctionType(
+        SpecificFunctionType foldFunctionType31 = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
+
+        SpecificFunctionType foldFunctionType40 = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
+
+        SpecificFunctionType foldFunctionType = version >= 40 ? foldFunctionType40 : foldFunctionType31;
 
         register("fold-left", 3, e -> e.populate( ArrayFoldLeft::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
                 .arg(2, foldFunctionType, ONE | INS, null));
+
 
         register("fold-right", 3, e -> e.populate( ArrayFoldRight::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
@@ -416,13 +423,25 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             int arraySize = array.arrayLength();
             Sequence zero = arguments[1];
             FunctionItem fn = (FunctionItem) arguments[2].head();
-            int i;
-            for (i=0; i < arraySize; i++) {
-                zero = dynamicCall(fn, context, new Sequence[]{zero, array.get(i)});
+
+            int arity = fn.getArity();
+            Sequence[] args = new Sequence[arity];
+            for (int i = 0; i < arraySize; i++) {
+                if (arity > 0) {
+                    args[0] = zero;
+                    if (arity > 1) {
+                        args[1] = array.get(i);
+                        if (arity > 2) {
+                            args[2] = new Int64Value(i + 1);
+                        }
+                    }
+                }
+                zero = dynamicCall(fn, context, args);
             }
             return zero;
         }
     }
+
 
     /**
      * Implementation of the function array:fold-left(array, item()*, function) =&gt; array
@@ -434,10 +453,23 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
             Sequence zero = arguments[1];
+            int arraySize = array.arrayLength();
             FunctionItem fn = (FunctionItem) arguments[2].head();
-            int i;
-            for (i = array.arrayLength() - 1; i >= 0; i--) {
-                zero = dynamicCall(fn, context, new Sequence[]{array.get(i), zero});
+
+
+            int arity = fn.getArity();
+            Sequence[] args = new Sequence[arity];
+            for (int i = array.arrayLength() - 1; i >= 0; i--) {
+                if (arity > 0) {
+                    args[0] = array.get(i);
+                    if (arity > 1) {
+                        args[1] = zero;
+                        if (arity > 2) {
+                            args[2] = new Int64Value(i + 1);
+                        }
+                    }
+                }
+                zero = dynamicCall(fn, context, args);
             }
             return zero;
         }
@@ -531,10 +563,21 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             ArrayItem array2 = (ArrayItem) arguments[1].head();
             assert array2 != null;
             FunctionItem fn = (FunctionItem) arguments[2].head();
+            int arity = fn.getArity();
+            Sequence[] args = new Sequence[arity];
             List<GroundedValue> list = new ArrayList<>(expectedSize());
             int i;
             for (i=0; i < array1.arrayLength() && i < array2.arrayLength(); i++) {
-                list.add(dynamicCall(fn, context, new Sequence[]{array1.get(i), array2.get(i)}).materialize());
+                if (arity > 0) {
+                    args[0] = array1.get(i);
+                    if (arity > 1) {
+                        args[1] = array2.get(i);
+                        if (arity > 2) {
+                            args[2] = new Int64Value(i+1);
+                        }
+                    }
+                }
+                list.add(dynamicCall(fn, context, args).materialize());
             }
             return makeArray(list);
         }

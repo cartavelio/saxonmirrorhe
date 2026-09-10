@@ -10,7 +10,6 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.map.DictionaryMap;
@@ -39,6 +38,7 @@ import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntSet;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -123,7 +123,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         public boolean preserveSpace = true;
         public String collationName;
         public StringCollator stringCollator;
-        public AtomicComparer comparer;
+        public BiFunction<AtomicValue, AtomicValue, Boolean> comparer;
 
 
         private static final String[] booleanOptions = new String[]{
@@ -156,12 +156,40 @@ public class DeepEqual40 extends CollatingFunctionFixed {
             if (stringCollator == null) {
                 throw new XPathException("Unknown collation " + collationName, "FOCH0002");
             }
-            comparer = GenericAtomicComparer.makeAtomicComparer(
-                    BuiltInAtomicType.ANY_ATOMIC, BuiltInAtomicType.ANY_ATOMIC,
-                    stringCollator, context);
+            //try {
+                comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
+                                .equals(b.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone()));
+//            } catch (NoDynamicContextException e) {
+//                throw new XPathException(e);
+//            }
 
             if (normalizeSpace || normalizationForm != null) {
-                comparer = new NormalizingComparer(comparer, this);
+                final BiFunction<AtomicValue, AtomicValue, Boolean> baseComparer = comparer;
+                comparer = (v0, v1) -> {
+                    if (v0 instanceof StringValue && v1 instanceof StringValue) {
+                        UnicodeString u0 = v0.getUnicodeStringValue();
+                        UnicodeString u1 = v1.getUnicodeStringValue();
+                        if (normalizeSpace) {
+                            u0 = Whitespace.collapseWhitespace(u0);
+                            u1 = Whitespace.collapseWhitespace(u1);
+                        }
+                        if (normalizationForm != null) {
+                            try {
+                                u0 = StringView.of(NormalizeUnicode.normalize(u0.toString(), normalizationForm));
+                            } catch (XPathException e) {
+                                throw new IllegalArgumentException(e);
+                            }
+                            try {
+                                u1 = StringView.of(NormalizeUnicode.normalize(u1.toString(), normalizationForm));
+                            } catch (XPathException e) {
+                                throw new IllegalArgumentException();
+                            }
+                        }
+                        return stringCollator.comparesEqual(u0, u1);
+                    } else {
+                        return baseComparer.apply(v0, v1);
+                    }
+                };
             }
         }
 
@@ -324,7 +352,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                         AtomicValue av2 = (AtomicValue) item2;
                         if (av1.isNaN() && av2.isNaN()) {
                             // treat as equal, no action
-                        } else if (!options.comparer.comparesEqual(av1, av2)) {
+                        } else if (!options.comparer.apply(av1, av2)) {
                             result = false;
                             reason = "atomic values at position " + pos1 + " differ";
                             break;
@@ -586,7 +614,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                 if (options.typedValuesSignificant) {
                     ar = deepEqual(n1.atomize().iterate(), n2.atomize().iterate(), context, options);
                 } else {
-                    ar = options.comparer.comparesEqual(new StringValue(n1.getUnicodeStringValue()), new StringValue(n2.getUnicodeStringValue()));
+                    ar = options.comparer.apply(new StringValue(n1.getUnicodeStringValue()), new StringValue(n2.getUnicodeStringValue()));
                 }
                 if (!ar) {
                     final String reason = "attribute values differ";

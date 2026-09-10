@@ -8,7 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.om.*;
@@ -167,7 +167,7 @@ public abstract class AbstractArrayItem extends ArrayItem {
 
 
     @Override
-    public boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
+    public boolean deepEquals(FunctionItem other, XPathContext context, AtomicMatcher comparer, int flags) throws XPathException {
         if (other instanceof ArrayItem) {
             ArrayItem that = (ArrayItem) other;
             if (this.arrayLength() != that.arrayLength()) {

@@ -11,10 +11,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.AtomicMatchKey;
-import net.sf.saxon.expr.sort.AtomicSortComparer;
-import net.sf.saxon.expr.sort.CodepointCollator;
-import net.sf.saxon.expr.sort.GenericAtomicComparer;
+import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.Feature;
@@ -24,7 +21,10 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.AdaptiveEmitter;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -844,9 +844,9 @@ public class TestOutcome {
                 SequenceIterator iter1 = expected.axisIterator(Axis.CHILD).next()
                         .getUnderlyingValue().iterateAxis(AxisInfo.CHILD);
                 GroundedValue val1 = SequenceTool.toGroundedValue(iter1);
+                AtomicMatcher matcher = GenericAtomicComparer.getTransitiveAtomicMatcher(CodepointCollator.getInstance(), 0);
                 boolean success = DeepEqual.deepEqual(
-                    val0.iterate(), val1.iterate(),
-                    new GenericAtomicComparer(CodepointCollator.getInstance(), null),
+                    val0.iterate(), val1.iterate(), matcher,
                     assertXpc.getProcessor().getUnderlyingConfiguration().getConversionContext(), flag);
                 // if necessary try again ignoring whitespace nodes
                 if (!success) {
@@ -857,8 +857,7 @@ public class TestOutcome {
                     iter0 = new ItemMappingIterator(iter0, new RemoveWhitespace());
                     iter1 = new ItemMappingIterator(iter1, new RemoveWhitespace());
                     success = DeepEqual.deepEqual(
-                        iter0, iter1,
-                        new GenericAtomicComparer(CodepointCollator.getInstance(), null),
+                        iter0, iter1, matcher,
                         assertXpc.getProcessor().getUnderlyingConfiguration().getConversionContext(),
                         flag | DeepEqual.EXCLUDE_WHITESPACE_TEXT_NODES);
                     if (success) {

@@ -13,7 +13,6 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.functions.Count;
-import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -102,7 +101,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
         for (AtomicValue aKey : key) {
             AtomicMatchKey comparisonKey;
             if (aKey.isNaN()) {
-                comparisonKey = DistinctValues.NaN_MATCH_KEY;
+                comparisonKey = AtomicSortComparer.COLLATION_KEY_NaN;
             } else {
                 comparisonKey = aKey.getXPathMatchKey(collator, keyContext.getImplicitTimezone());
             }

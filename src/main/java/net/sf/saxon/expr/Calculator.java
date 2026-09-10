@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicType;
@@ -1020,7 +1021,11 @@ public abstract class Calculator {
     private static class DateTimeMinusDateTime extends Calculator {
         @Override
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
-            return ((CalendarValue) a).subtract((CalendarValue) b, c);
+            try {
+                return ((CalendarValue) a).subtract((CalendarValue) b, c);
+            } catch (NoDynamicContextException e) {
+                throw new XPathException(e);
+            }
         }
 
         @Override

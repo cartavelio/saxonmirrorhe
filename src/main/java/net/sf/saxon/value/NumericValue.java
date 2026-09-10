@@ -232,6 +232,11 @@ public abstract class NumericValue extends AtomicValue
     }
 
     @Override
+    public AtomicMatchKey getXPathTransitiveMatchKey(StringCollator collator, int implicitTimezone) {
+        return asMapKey();
+    }
+
+    @Override
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
         return this;
     }

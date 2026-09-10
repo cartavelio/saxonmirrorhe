@@ -8,7 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.ma.map.DictionaryMap;
@@ -143,7 +143,7 @@ public class DeepEqual extends CollatingFunctionFixed {
      */
 
     public static boolean deepEqual(SequenceIterator op1, SequenceIterator op2,
-                                    AtomicComparer comparer, XPathContext context, int flags)
+                                    AtomicMatcher comparer, XPathContext context, int flags)
             throws XPathException {
         boolean result = true;
         String reason = null;
@@ -205,7 +205,7 @@ public class DeepEqual extends CollatingFunctionFixed {
 
                 if (item1 instanceof NodeInfo) {
                     if (item2 instanceof NodeInfo) {
-                        String message = deepEquals((NodeInfo) item1, (NodeInfo) item2, comparer, context, flags);
+                        String message = deepEqualNodes((NodeInfo) item1, (NodeInfo) item2, comparer, context, flags);
                         if (message != null) {
                             result = false;
                             reason = "nodes at position " + pos1 + " differ: " + message;
@@ -226,7 +226,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                         AtomicValue av2 = (AtomicValue) item2;
                         if (av1.isNaN() && av2.isNaN()) {
                             // treat as equal, no action
-                        } else if (!comparer.comparesEqual(av1, av2)) {
+                        } else if (!comparer.equal(av1, av2)) {
                             result = false;
                             reason = "atomic values at position " + pos1 + " differ";
                             break;
@@ -255,13 +255,52 @@ public class DeepEqual extends CollatingFunctionFixed {
         return result;
     }
 
+    /**
+     * Determine whether two items are deep-equal, with default options
+     *
+     * @param item1      the first item
+     * @param item2      the second item
+     * @param comparer the comparer to be used for comparing atomic values
+     * @param context  the XPathContext item
+     * @return true if the items are deep-equal
+     * @throws XPathException if either sequence contains a function item
+     */
+
+    public static boolean deepEqual(Item item1, Item item2,
+                                    AtomicMatcher comparer, XPathContext context)
+            throws XPathException {
+
+        if (item1.getGenre() != item2.getGenre()) {
+            return false;
+        }
+        if (item1 instanceof FunctionItem) {
+            return ((FunctionItem) item1).deepEquals((FunctionItem) item2, context, comparer, 0);
+        }
+
+        if (item1 instanceof ObjectValue<?>) {
+            return item1.equals(item2);
+        }
+
+        if (item1 instanceof NodeInfo) {
+            String message = deepEqualNodes((NodeInfo) item1, (NodeInfo) item2, comparer, context, 0);
+            return message == null;
+
+        } else {
+            AtomicValue av1 = (AtomicValue) item1;
+            AtomicValue av2 = (AtomicValue) item2;
+            return (av1.isNaN() && av2.isNaN()) || comparer.equal(av1, av2);
+
+        }
+    }
+
+
     /*
       * Determine whether two nodes are deep-equal
       * @return null if they are deep equal, or an explanation of the reason if not
       */
 
-    public static String deepEquals(NodeInfo n1, NodeInfo n2,
-                                      AtomicComparer comparer, XPathContext context, int flags)
+    public static String deepEqualNodes(NodeInfo n1, NodeInfo n2,
+                                        AtomicMatcher comparer, XPathContext context, int flags)
             throws XPathException {
         // shortcut: a node is always deep-equal to itself
         if (n1.equals(n2)) {
@@ -311,7 +350,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                         explain(reporter, reason, flags, n1, n2);
                         return reason;
                     }
-                    String attReason = deepEquals(att1, att2, comparer, context, flags);
+                    String attReason = deepEqualNodes(att1, att2, comparer, context, flags);
                     if (attReason != null) {
                         final String reason = "elements have different values for the attribute " +
                                 NameOfNode.makeName(att1).getStructuredQName().getEQName() + " - " + attReason;
@@ -415,7 +454,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                         }
                         return null;
                     }
-                    String recursiveResult = deepEquals(d1, d2, comparer, context, flags);
+                    String recursiveResult = deepEqualNodes(d1, d2, comparer, context, flags);
                     if (recursiveResult != null) {
                         return recursiveResult;
                     }
@@ -446,7 +485,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                 if ((flags & COMPARE_STRING_VALUES) == 0) {
                     ar = deepEqual(n1.atomize().iterate(), n2.atomize().iterate(), comparer, context, 0);
                 } else {
-                    ar = comparer.comparesEqual(new StringValue(n1.getUnicodeStringValue()), new StringValue(n2.getUnicodeStringValue()));
+                    ar = comparer.equal(new StringValue(n1.getUnicodeStringValue()), new StringValue(n2.getUnicodeStringValue()));
                 }
                 if (!ar) {
                     final String reason = "attribute values differ";
@@ -479,7 +518,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                 // drop through
             case Type.TEXT:
             case Type.COMMENT:
-                boolean vr = comparer.comparesEqual((AtomicValue) n1.atomize(), (AtomicValue) n2.atomize());
+                boolean vr = comparer.equal((AtomicValue) n1.atomize(), (AtomicValue) n2.atomize());
                 if (!vr) {
                     if ((flags & WARNING_IF_FALSE) != 0) {
                         String v1 = n1.getStringValue();
@@ -616,7 +655,8 @@ public class DeepEqual extends CollatingFunctionFixed {
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         GenericAtomicComparer comparer = new GenericAtomicComparer(getStringCollator(), context);
-        boolean b = deepEqual(arguments[0].iterate(), arguments[1].iterate(), comparer, context, 0);
+        AtomicMatcher matcher = comparer::comparesEqual;
+        boolean b = deepEqual(arguments[0].iterate(), arguments[1].iterate(), matcher, context, 0);
         return BooleanValue.get(b);
     }
 

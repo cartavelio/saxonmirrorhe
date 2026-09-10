@@ -13,7 +13,6 @@ import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
@@ -112,15 +111,11 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
                 return +1;
             }
             else {
-                try {
-                    int first = comparer.compareAtomicValues(firsta, firstb);
-                    if (first == 0){
-                        continue;
-                    } else {
-                        return first;
-                    }
-                } catch (NoDynamicContextException e) {
-                    throw new AssertionError(e);
+                int first = comparer.compareAtomicValues(firsta, firstb);
+                if (first == 0){
+                    continue;
+                } else {
+                    return first;
                 }
             }
         }

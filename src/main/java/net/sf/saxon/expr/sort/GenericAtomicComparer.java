@@ -111,7 +111,7 @@ public class GenericAtomicComparer implements AtomicComparer {
         }
         return new GenericAtomicComparer(collator, context);
     }
-
+    
     /**
      * An {@code AtomicComparisonFunction} compares two atomic values to return a result
      * of true or false. This means it is committed to a particular comparison operator (such
@@ -306,6 +306,19 @@ public class GenericAtomicComparer implements AtomicComparer {
 
             };
         }
+    }
+
+    /**
+     * Get an {@link AtomicMatcher} that compares two atomic values for equality using the rules
+     * for distinct-values() as defined in XPath 4.0. These differ from the normal "eq" rules in that
+     * numeric values are compared by conversion to xs:decimal, not to xs:double
+     * @param collator the collation to be used when comparing strings
+     * @param implicitTimezone the timezone to be used when comparing calendar values that lack a timezone
+     * @return a matcher function for comparing values under these constraints
+     */
+    public static AtomicMatcher getTransitiveAtomicMatcher(StringCollator collator, int implicitTimezone) {
+        return (a, b) -> a.getXPathTransitiveMatchKey(collator, implicitTimezone)
+                .equals(b.getXPathTransitiveMatchKey(collator, implicitTimezone));
     }
 
     @Override

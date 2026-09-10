@@ -1005,11 +1005,7 @@ public final class DateTimeValue extends CalendarValue
         if (hasTimezone()) {
             return ZonedDateTime.from(this);
         } else {
-            try {
-                return ZonedDateTime.from(adjustToUTC(0));
-            } catch (NoDynamicContextException e) {
-                throw new AssertionError(e);
-            }
+            return ZonedDateTime.from(adjustToUTC(0));
         }
     }
 
@@ -1026,11 +1022,7 @@ public final class DateTimeValue extends CalendarValue
         if (hasTimezone()) {
             return OffsetDateTime.from(this);
         } else {
-            try {
-                return OffsetDateTime.from(adjustToUTC(0));
-            } catch (NoDynamicContextException e) {
-                throw new AssertionError(e);
-            }
+            return OffsetDateTime.from(adjustToUTC(0));
         }
     }
 
@@ -1274,14 +1266,10 @@ public final class DateTimeValue extends CalendarValue
     }
 
     public BigDecimal secondsSinceEpoch() {
-        try {
-            DateTimeValue dtv = adjustToUTC(0);
-            BigDecimal d1 = dtv.toJulianInstant();
-            BigDecimal d2 = EPOCH.toJulianInstant();
-            return d1.subtract(d2);
-        } catch (NoDynamicContextException e) {
-            throw new AssertionError(e);
-        }
+        DateTimeValue dtv = adjustToUTC(0);
+        BigDecimal d1 = dtv.toJulianInstant();
+        BigDecimal d2 = EPOCH.toJulianInstant();
+        return d1.subtract(d2);
     }
 
     /**

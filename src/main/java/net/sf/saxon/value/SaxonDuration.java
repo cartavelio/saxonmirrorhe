@@ -10,7 +10,6 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.datatype.DatatypeConstants;
@@ -306,13 +305,9 @@ public class SaxonDuration extends Duration {
         if (!(rhs instanceof SaxonDuration)) {
             throw new IllegalArgumentException("Supplied duration is not a SaxonDuration");
         }
-        try {
-            XPathComparable c0 = duration.getXPathComparable(null, 0);
-            XPathComparable c1 = ((SaxonDuration) rhs).duration.getXPathComparable(null, 0);
-            return c0.compareTo(c1);
-        } catch (NoDynamicContextException e) {
-            throw new AssertionError(e);
-        }
+        XPathComparable c0 = duration.getXPathComparable(null, 0);
+        XPathComparable c1 = ((SaxonDuration) rhs).duration.getXPathComparable(null, 0);
+        return c0.compareTo(c1);
     }
 
     /**

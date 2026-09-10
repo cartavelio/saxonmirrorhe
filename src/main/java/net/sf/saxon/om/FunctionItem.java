@@ -11,7 +11,7 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -118,7 +118,7 @@ public interface FunctionItem extends Item, Callable, GroundedValue {
      * @throws XPathException if the comparison cannot be performed
      */
 
-    boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException;
+    boolean deepEquals(FunctionItem other, XPathContext context, AtomicMatcher comparer, int flags) throws XPathException;
 
     boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException;
 

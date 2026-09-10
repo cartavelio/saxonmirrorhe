@@ -9,13 +9,15 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.*;
-import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.om.Action;
+import net.sf.saxon.om.LazySequence;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.QNameValue;
 
 import java.util.HashSet;
 
@@ -26,12 +28,6 @@ import java.util.HashSet;
 public class DistinctValues extends CollatingFunctionFixed {
 
 
-    /**
-     * A match key for use in situations where NaN = NaN
-     */
-
-    public static final AtomicMatchKey NaN_MATCH_KEY = new QNameValue("", NamespaceUri.SAXON, "+NaN+");
-
     @Override
     public String getStreamerName() {
         return "DistinctValues";
@@ -40,7 +36,8 @@ public class DistinctValues extends CollatingFunctionFixed {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringCollator collator = getStringCollator();
-        return new LazySequence(new DistinctIterator(arguments[0].iterate(), collator, context));
+        boolean transitive = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
+        return new LazySequence(new DistinctIterator(arguments[0].iterate(), collator, context, transitive));
     }
 
 
@@ -55,6 +52,7 @@ public class DistinctValues extends CollatingFunctionFixed {
         private final XPathContext context;
         private final HashSet<AtomicMatchKey> lookup = new HashSet<>(40);
         private Action onDuplicates = null;
+        private final boolean transitive;
 
         /**
          * Create an iterator over the distinct values in a sequence
@@ -63,12 +61,15 @@ public class DistinctValues extends CollatingFunctionFixed {
          * @param collator The comparer used to obtain comparison keys from each value;
          *                 these comparison keys are themselves compared using equals().
          * @param context the XPath dynamic context
+         * @param transitive true if transitive equality semantics are used (specifically, for comparing
+         *                   numeric values of different types)
          */
 
-        public DistinctIterator(SequenceIterator base, StringCollator collator, XPathContext context) {
+        public DistinctIterator(SequenceIterator base, StringCollator collator, XPathContext context, boolean transitive) {
             this.base = base;
             this.collator = collator;
             this.context = context;
+            this.transitive = transitive;
         }
 
         /**
@@ -87,12 +88,12 @@ public class DistinctValues extends CollatingFunctionFixed {
                 }
                 AtomicMatchKey key;
                 if (nextBase.isNaN()) {
-                    key = NaN_MATCH_KEY;
+                    key = AtomicSortComparer.COLLATION_KEY_NaN;
                 } else {
-                    try {
+                    if (transitive) {
+                        key = nextBase.getXPathTransitiveMatchKey(collator, implicitTimezone);
+                    } else {
                         key = nextBase.getXPathMatchKey(collator, implicitTimezone);
-                    } catch (NoDynamicContextException e) {
-                        throw new UncheckedXPathException(e);
                     }
                 }
                 if (lookup.add(key)) {

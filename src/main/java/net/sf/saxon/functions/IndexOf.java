@@ -15,7 +15,6 @@ import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
@@ -107,19 +106,15 @@ public class IndexOf extends CollatingFunctionFixed  {
          */
         @Override
         public Int64Value next() {
-            try {
-                AtomicValue baseItem;
-                while ((baseItem = (AtomicValue) base.next()) != null) {
-                    index++;
-                    if (Type.isGuaranteedComparable(searchType, baseItem.getPrimitiveType(), false) &&
-                            comparer.comparesEqual(baseItem, key)) {
-                        return new Int64Value(index);
-                    }
+            AtomicValue baseItem;
+            while ((baseItem = (AtomicValue) base.next()) != null) {
+                index++;
+                if (Type.isGuaranteedComparable(searchType, baseItem.getPrimitiveType(), false) &&
+                        comparer.comparesEqual(baseItem, key)) {
+                    return new Int64Value(index);
                 }
-                return null;
-            } catch (NoDynamicContextException e) {
-                throw new UncheckedXPathException(e);
             }
+            return null;
         }
 
     }

@@ -8,10 +8,9 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
+import net.sf.saxon.value.AtomicValue;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,16 +26,10 @@ public class GroupByClausePull extends TuplePull {
     private final TuplePull base;
     private final GroupByClause groupByClause;
     /*@Nullable*/ Iterator<List<GroupByClause.ObjectToBeGrouped>> groupIterator;
-    private final GenericAtomicComparer[] comparers;
-
 
     public GroupByClausePull(TuplePull base, GroupByClause groupBy, XPathContext context) {
         this.base = base;
         this.groupByClause = groupBy;
-        comparers = new GenericAtomicComparer[groupBy.comparers.length];
-        for (int i = 0; i < comparers.length; i++) {
-            comparers[i] = groupBy.comparers[i].provideContext(context);
-        }
     }
 
     /**
@@ -60,11 +53,11 @@ public class GroupByClausePull extends TuplePull {
             HashMap<Object, List<GroupByClause.ObjectToBeGrouped>> map = new HashMap<>();
             while (base.nextTuple(context)) {
                 GroupByClause.ObjectToBeGrouped otbg = new GroupByClause.ObjectToBeGrouped();
-                Sequence[] groupingValues = groupingTupleExpr.evaluateItem(context).getMembers();
-                GroupByClausePush.checkGroupingValues(groupingValues);
-                otbg.groupingValues = new Tuple(groupingValues);
+                AtomicValue[] groupingValues = groupingTupleExpr.evaluateItemAllAtomic(context).getValues();
+                //GroupByClausePush.checkGroupingValues(groupingValues);
+                otbg.groupingValues = new FlworTuple<>(groupingValues);
                 otbg.retainedValues = retainedTupleExpr.evaluateItem(context);
-                Object key = groupByClause.getComparisonKey(otbg.groupingValues, comparers);
+                GroupByClause.TupleComparisonKey key = groupByClause.getComparisonKey(otbg.groupingValues, context);
                 List<GroupByClause.ObjectToBeGrouped> group = map.get(key);
                 GroupByClausePush.addToGroup(key, otbg, group, map);
             }

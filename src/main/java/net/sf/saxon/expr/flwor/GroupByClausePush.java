@@ -8,15 +8,9 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.EmptySequence;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,17 +27,12 @@ public class GroupByClausePush extends TuplePush {
     private final GroupByClause groupByClause;
     private final HashMap<Object, List<GroupByClause.ObjectToBeGrouped>> map = new HashMap<>();
     private final XPathContext context;
-    private final GenericAtomicComparer[] comparers;
-
+    
     public GroupByClausePush(Outputter outputter, TuplePush destination, GroupByClause groupBy, XPathContext context) {
         super(outputter);
         this.destination = destination;
         this.groupByClause = groupBy;
         this.context = context;
-        comparers = new GenericAtomicComparer[groupBy.comparers.length];
-        for (int i=0; i<comparers.length; i++) {
-            comparers[i] = groupBy.comparers[i].provideContext(context);
-        }
     }
 
     /**
@@ -62,11 +51,11 @@ public class GroupByClausePush extends TuplePush {
 
 
         GroupByClause.ObjectToBeGrouped otbg = new GroupByClause.ObjectToBeGrouped();
-        Sequence[] groupingValues = groupingTupleExpr.evaluateItem(context).getMembers();
-        checkGroupingValues(groupingValues);
-        otbg.groupingValues = new Tuple(groupingValues);
+        AtomicValue[] groupingValues = groupingTupleExpr.evaluateItemAllAtomic(context).getValues();
+        //checkGroupingValues(groupingValues);
+        otbg.groupingValues = new FlworTuple<>(groupingValues);
         otbg.retainedValues = retainedTupleExpr.evaluateItem(context);
-        Object key = groupByClause.getComparisonKey(otbg.groupingValues, comparers);
+        GroupByClause.TupleComparisonKey key = groupByClause.getComparisonKey(otbg.groupingValues, context);
         List<GroupByClause.ObjectToBeGrouped> group = map.get(key);
         addToGroup(key, otbg, group, map);
     }
@@ -86,22 +75,22 @@ public class GroupByClausePush extends TuplePush {
         }
     }
 
-    protected static void checkGroupingValues(Sequence[] groupingValues) throws XPathException {
-        try {
-            for (int i = 0; i < groupingValues.length; i++) {
-                Sequence v = groupingValues[i];
-                if (!(v instanceof EmptySequence || v instanceof AtomicValue)) {
-                    v = SequenceTool.toGroundedValue(Atomizer.getAtomizingIterator(v.iterate(), false));
-                    if (SequenceTool.getLength(v) > 1) {
-                        throw new XPathException("Grouping key value cannot be a sequence of more than one item", "XPTY0004");
-                    }
-                    groupingValues[i] = v;
-                }
-            }
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
-        }
-    }
+//    protected static void checkGroupingValues(Sequence[] groupingValues) throws XPathException {
+//        try {
+//            for (int i = 0; i < groupingValues.length; i++) {
+//                Sequence v = groupingValues[i];
+//                if (!(v instanceof EmptySequence || v instanceof AtomicValue)) {
+//                    v = SequenceTool.toGroundedValue(Atomizer.getAtomizingIterator(v.iterate(), false));
+//                    if (SequenceTool.getLength(v) > 1) {
+//                        throw new XPathException("Grouping key value cannot be a sequence of more than one item", "XPTY0004");
+//                    }
+//                    groupingValues[i] = v;
+//                }
+//            }
+//        } catch (UncheckedXPathException e) {
+//            throw e.getXPathException();
+//        }
+//    }
 
 
     /**

@@ -126,6 +126,36 @@ public abstract class AtomicValue
             throws NoDynamicContextException;
 
     /**
+     * Get an object value that implements the XPath equality comparison semantics for this value,
+     * using the transitive comparison rules used (inter alia) for distinct-values() in 4.0. This
+     * differs from the results of {@link #getXPathMatchKey(StringCollator, int)} in the case of
+     * numeric values, where doubles are converted to decimals rather than the other way around,
+     * to avoid losing precision.
+     * A collation is supplied for comparing strings, and an implicit timezone
+     * for comparing date/time values that have no saved timezone. The returned object supports
+     * equality matching only, not ordering. An atomic value may return itself as its own
+     * {@code AtomicMatchKey} provided that its equality semantics are context-free.
+     *
+     * @param collator         the collation to be used when comparing strings
+     * @param implicitTimezone the implicit timezone in the dynamic context, used when comparing
+     *                         dates/times with and without timezone
+     * @return an Object whose equals() and hashCode() methods implement the XPath comparison semantics
+     * with respect to this atomic value. If ordered is specified, the result will either be null if
+     * no ordering is defined, or will be a Comparable
+     * @throws NoDynamicContextException if the supplied implicit timezone is "NO_TIMEZONE" (meaning
+     *                                   unknown), and the implicit timezone is actually required because the value in question is a date/time
+     *                                   value with no timezone. This can cause a failure to evaluate expressions statically (because the implicit
+     *                                   timezone is not known statically), and it will then be caught, meaning that the expression has to be
+     *                                   evaluated dynamically.
+     */
+
+
+    public AtomicMatchKey getXPathTransitiveMatchKey(StringCollator collator, int implicitTimezone)
+            throws NoDynamicContextException {
+        return getXPathMatchKey(collator, implicitTimezone);
+    }
+
+    /**
      * Get an object value that implements the XPath equality and ordering comparison semantics for this value.
      * A collation is supplied for comparing strings, and an implicit timezone for comparing date/time values
      * that have no saved timezone. An atomic value may return itself as the result, provided that its ordering
@@ -157,12 +187,7 @@ public abstract class AtomicValue
      */
 
     public AtomicMatchKey asMapKey() {
-        try {
-            return getXPathMatchKey(CodepointCollator.getInstance(), CalendarValue.NO_TIMEZONE);
-        } catch (NoDynamicContextException e) {
-            // Should not happen
-            throw new IllegalStateException("No implicit timezone available");
-        }
+        return getXPathMatchKey(CodepointCollator.getInstance(), CalendarValue.NO_TIMEZONE);
     }
 
     /**

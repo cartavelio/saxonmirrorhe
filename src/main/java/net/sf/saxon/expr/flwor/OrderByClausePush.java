@@ -48,7 +48,7 @@ public class OrderByClausePush extends TuplePush {
      */
     @Override
     public void processTuple(XPathContext context) throws XPathException {
-        Tuple tuple = tupleExpr.evaluateItem(context);
+        FlworTuple tuple = tupleExpr.evaluateItem(context);
         SortKeyDefinitionList sortKeyDefinitions = orderByClause.getSortKeyDefinitions();
         ItemToBeSorted itbs = new ItemToBeSorted(sortKeyDefinitions.size());
         itbs.value = tuple;
@@ -89,7 +89,7 @@ public class OrderByClausePush extends TuplePush {
         }
 
         for (ItemToBeSorted itbs : tupleArray) {
-            tupleExpr.setCurrentTuple(context, (Tuple) itbs.value);
+            tupleExpr.setCurrentTuple(context, (FlworTuple) itbs.value);
             destination.processTuple(context);
         }
         destination.close();

@@ -27,7 +27,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
@@ -755,12 +754,7 @@ public class MergeInstr extends Instruction {
                 ItemWithMergeKeys bItem = b.getObject();
 
                 for (int i = 0; i < sKeys.size(); i++) {
-                    int val;
-                    try {
-                        val = comps[i].compareAtomicValues(aItem.sortKeyValues.get(i), bItem.sortKeyValues.get(i));
-                    } catch (NoDynamicContextException e) {
-                        throw new IllegalStateException(e);
-                    }
+                    int val = comps[i].compareAtomicValues(aItem.sortKeyValues.get(i), bItem.sortKeyValues.get(i));
 
                     if (val != 0) {
                         return val;

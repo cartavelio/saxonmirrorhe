@@ -11,7 +11,6 @@ import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -89,9 +88,6 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
         }
     }
 
-    public GroupByIterator() {
-    }
-
     /**
      * Build the grouping table forming groups of items with equal keys.
      * This form of grouping allows a member of the population to be present in zero
@@ -116,9 +112,9 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 }
                 AtomicMatchKey comparisonKey;
                 if (key.isNaN()) {
-                    comparisonKey = DistinctValues.NaN_MATCH_KEY;
+                    comparisonKey = AtomicSortComparer.COLLATION_KEY_NaN;
                 } else {
-                    comparisonKey = key.getXPathMatchKey(collator, implicitTimezone);
+                    comparisonKey = key.getXPathTransitiveMatchKey(collator, implicitTimezone);
                 }
                 List<Item> g = index.get(comparisonKey);
                 if (g == null) {
@@ -171,7 +167,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 compositeKey.add(key);
                 AtomicMatchKey comparisonKey;
                 if (key.isNaN()) {
-                    comparisonKey = DistinctValues.NaN_MATCH_KEY;
+                    comparisonKey = AtomicSortComparer.COLLATION_KEY_NaN;
                 } else {
                     comparisonKey = key.getXPathMatchKey(collator, implicitTimezone);
                 }

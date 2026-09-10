@@ -13,7 +13,6 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.*;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.expr.sort.SortKeyDefinition;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
@@ -2828,14 +2827,11 @@ public class XQueryParser extends XPathParser {
         }
 
         clause.setVariableBindings(bindings);
-        GenericAtomicComparer[] comparers = new GenericAtomicComparer[collations.size()];
-        XPathContext context = env.makeEarlyEvaluationContext();
-        for (int i = 0; i < comparers.length; i++) {
-            StringCollator coll = env.getConfiguration().getCollation(collations.get(i));
-            comparers[i] = (GenericAtomicComparer) GenericAtomicComparer.makeAtomicComparer(
-                    BuiltInAtomicType.ANY_ATOMIC, BuiltInAtomicType.ANY_ATOMIC, coll, context);
+        StringCollator[] stringCollators = new StringCollator[collations.size()];
+        for (int i = 0; i < collations.size(); i++) {
+            stringCollators[i] = env.getConfiguration().getCollation(collations.get(i));
         }
-        clause.setComparers(comparers);
+        clause.setStringCollators(stringCollators);
         clauseList.add(clause);
     }
 

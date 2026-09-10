@@ -8,6 +8,7 @@
 package net.sf.saxon.dom;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
@@ -710,11 +711,12 @@ public abstract class NodeOverNodeInfo implements Node {
         }
         try {
             XPathContext context = node.getConfiguration().getConversionContext();
+            AtomicMatcher matcher = GenericAtomicComparer.getTransitiveAtomicMatcher(
+                    CodepointCollator.getInstance(), context.getImplicitTimezone());
             return DeepEqual.deepEqual(
                 SingletonIterator.makeIterator(node),
                 SingletonIterator.makeIterator(((NodeOverNodeInfo) arg).node),
-                new GenericAtomicComparer(CodepointCollator.getInstance(),
-                    context),
+                matcher,
                 context,
                 DeepEqual.INCLUDE_PREFIXES |
                     DeepEqual.INCLUDE_COMMENTS |
