@@ -274,10 +274,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                         .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
             });
 
-            register("join", 1, 2, e -> e.populate(ArrayJoin::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR | INS, null)
-                    .arg(1, ArrayItemType.ANY_ARRAY_TYPE, OPT | INS, null));
-
             register("slice", 1, 4, e -> e.populate(ArraySlice::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null)
                     .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
@@ -709,22 +705,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-            ArrayItem separator = null;
-            if (arguments.length == 2) {
-                separator = ((ArrayItem)arguments[1].head());
-            }
             SequenceIterator iterator = arguments[0].iterate();
             ArrayItem array = SimpleArrayItem.EMPTY_ARRAY;
             ArrayItem nextArray;
-            boolean atStart = true;
             while ((nextArray = (ArrayItem) iterator.next()) != null) {
-                if (separator != null) {
-                    if (atStart) {
-                        atStart = false;
-                    } else {
-                        array = array.concat(separator);
-                    }
-                }
                 array = array.concat(nextArray);
             }
             return array;
