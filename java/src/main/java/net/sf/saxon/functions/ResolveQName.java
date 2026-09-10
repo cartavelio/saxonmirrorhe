@@ -54,7 +54,7 @@ public class ResolveQName extends SystemFunction {
     /*@Nullable*/
     public static QNameValue resolveQName(String lexicalQName, NodeInfo element) throws XPathException {
         NamespaceResolver resolver = element.getAllNamespaces();
-        StructuredQName qName = StructuredQName.fromLexicalQName(lexicalQName, true, false, resolver);
+        StructuredQName qName = StructuredQName.fromLexicalQName(lexicalQName, true, 0, resolver);
         return new QNameValue(qName, BuiltInAtomicType.QNAME);
     }
 

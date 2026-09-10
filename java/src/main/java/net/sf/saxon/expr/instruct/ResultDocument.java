@@ -580,13 +580,13 @@ public class ResultDocument extends Instruction
         Properties computedGlobalProps = globalProperties;
         NamespaceResolver nsResolver = getRetainedStaticContext();
         assert nsResolver != null;
-
+        boolean allow40 = getPackageData().getHostLanguageVersion() >= 40;
         if (getFormatExpression() != null) {
             // format was an AVT and now needs to be computed
             StructuredQName qName;
             String format = getFormatExpression().evaluateAsString(context).toString();
             if (format.startsWith("Q{")) {
-                qName = StructuredQName.fromEQName(format);
+                qName = allow40 ? StructuredQName.fromEQName40(format) : StructuredQName.fromEQName(format);
             } else {
                 String[] parts;
                 try {

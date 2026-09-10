@@ -126,7 +126,7 @@ public class PackageLoaderHE implements IPackageLoader {
             StringTokenizer tokenizer = new StringTokenizer(accumulatorNames);
             while (tokenizer.hasMoreTokens()) {
                 String token = tokenizer.nextToken();
-                StructuredQName name = StructuredQName.fromEQName((token));
+                StructuredQName name = StructuredQName.fromEQName40((token));
                 accNameList.add(name);
             }
             final StylesheetPackage pack = loader.getPackStack().peek();
@@ -1273,7 +1273,7 @@ public class PackageLoaderHE implements IPackageLoader {
         if (val == null) {
             return null;
         }
-        return StructuredQName.fromEQName((val));
+        return StructuredQName.fromEQName40((val));
     }
 
     public List<StructuredQName> getListOfQNameAttribute(NodeInfo element, String localName) throws XPathException {
@@ -1291,9 +1291,9 @@ public class PackageLoaderHE implements IPackageLoader {
 
     private StructuredQName resolveQName(String val, NodeInfo element) throws XPathException {
         if (val.startsWith("Q{")) {
-            return StructuredQName.fromEQName((val));
+            return StructuredQName.fromEQName40((val));
         } else if (val.contains(":")) {
-            return StructuredQName.fromLexicalQName((val), true, true, element.getAllNamespaces());
+            return StructuredQName.fromLexicalQName((val), true, 0, element.getAllNamespaces());
         } else {
             return new StructuredQName("", NamespaceUri.NULL, val);
         }
@@ -1780,14 +1780,14 @@ public class PackageLoaderHE implements IPackageLoader {
                 SequenceType seqType = loader.parseAlphaCode(element, "as");
                 return new CastExpression(body, (AtomicType) seqType.getPrimaryType(), allowEmpty);
             } else if (flags.contains("l")) {
-                StructuredQName typeName = StructuredQName.fromEQName((element.getAttributeValue(NamespaceUri.NULL,"as")));
+                StructuredQName typeName = StructuredQName.fromEQName40((element.getAttributeValue(NamespaceUri.NULL,"as")));
                 SchemaType type = loader.getSchema().getSchemaType(typeName);
                 NamespaceResolver resolver = element.getAllNamespaces();
                 ListConstructorFunction ucf = new ListConstructorFunction((ListType) type, resolver, allowEmpty);
                 return new StaticFunctionCall(ucf, new Expression[]{body});
             } else if (flags.contains("u")) {
                 if (element.getAttributeValue(NamespaceUri.NULL,"as") != null) {
-                    StructuredQName typeName = StructuredQName.fromEQName((element.getAttributeValue(NamespaceUri.NULL,"as")));
+                    StructuredQName typeName = StructuredQName.fromEQName40((element.getAttributeValue(NamespaceUri.NULL,"as")));
                     SchemaType type = loader.getSchema().getSchemaType(typeName);
                     NamespaceResolver resolver = element.getAllNamespaces();
                     UnionConstructorFunction ucf = new UnionConstructorFunction((UnionType) type, resolver, allowEmpty);
@@ -1811,14 +1811,14 @@ public class PackageLoaderHE implements IPackageLoader {
                 SequenceType seqType = loader.parseAlphaCode(element, "as");
                 return new CastableExpression(body, (AtomicType) seqType.getPrimaryType(), allowEmpty);
             } else if (flags.contains("l")) {
-                StructuredQName typeName = StructuredQName.fromEQName((element.getAttributeValue(NamespaceUri.NULL,"as")));
+                StructuredQName typeName = StructuredQName.fromEQName40((element.getAttributeValue(NamespaceUri.NULL,"as")));
                 SchemaType type = loader.getSchema().getSchemaType(typeName);
                 NamespaceResolver resolver = element.getAllNamespaces();
                 ListCastableFunction ucf = new ListCastableFunction((ListType) type, resolver, allowEmpty);
                 return new StaticFunctionCall(ucf, new Expression[]{body});
             } else if (flags.contains("u")) {
                 if (element.getAttributeValue(NamespaceUri.NULL,"as") != null) {
-                    StructuredQName typeName = StructuredQName.fromEQName((element.getAttributeValue(NamespaceUri.NULL,"as")));
+                    StructuredQName typeName = StructuredQName.fromEQName40((element.getAttributeValue(NamespaceUri.NULL,"as")));
                     SchemaType type = loader.getSchema().getSchemaType(typeName);
                     NamespaceResolver resolver = element.getAllNamespaces();
                     UnionCastableFunction ucf = new UnionCastableFunction((UnionType) type, resolver, allowEmpty);
@@ -2386,7 +2386,7 @@ public class PackageLoaderHE implements IPackageLoader {
             RetainedStaticContext rsc = loader.makeRetainedStaticContext(element);
             SystemFunction f = null;
             if (name.startsWith("Q{")) {
-                StructuredQName qName = StructuredQName.fromEQName((name));
+                StructuredQName qName = StructuredQName.fromEQName40((name));
                 if (rsc.getConfiguration().isDisabledFunction(qName)) {
                     throw new XPathException("Function " + name + " has been disabled", "XPST0017");
                 }
@@ -2799,7 +2799,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 StringTokenizer tokenizer = new StringTokenizer(accumulatorNames);
                 while (tokenizer.hasMoreTokens()) {
                     String token = tokenizer.nextToken();
-                    StructuredQName name = StructuredQName.fromEQName((token));
+                    StructuredQName name = StructuredQName.fromEQName40((token));
                     accNameList.add(name);
                 }
                 final StylesheetPackage pack = loader.getPackStack().peek();
@@ -3144,7 +3144,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 } else if ("content".equals(role)) {
                     content = exp;
                 } else {
-                    StructuredQName name = StructuredQName.fromEQName((role));
+                    StructuredQName name = StructuredQName.fromEQName40((role));
                     dynamicProperties.put(name, exp);
                 }
             }
@@ -3333,7 +3333,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     } else if (t.endsWith("}*")) {
                         list.add(new NamespaceQNameTest(NamespaceUri.of(t.substring(2, t.length()-2))));
                     } else {
-                        StructuredQName qName = StructuredQName.fromEQName((t));
+                        StructuredQName qName = StructuredQName.fromEQName40((t));
                         list.add(new SpecificQNameTest(qName, pool));
                     }
                 }

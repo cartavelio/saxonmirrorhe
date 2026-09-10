@@ -543,7 +543,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                 typeName = StructuredQName.fromLexicalQName(
                                         xsitype,
                                         true,
-                                        false,
+                                        0,
                                         item.getAllNamespaces());
                             } catch (XPathException e) {
                                 throw new XPathException("Invalid QName in xsi:type attribute of element being validated: "

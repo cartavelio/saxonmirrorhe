@@ -189,7 +189,7 @@ public class ElementAvailable extends SystemFunction {
                 return new StructuredQName("", uri, lexicalName);
             } else {
                 return StructuredQName.fromLexicalQName(lexicalName, false,
-                                                        true, getRetainedStaticContext());
+                                                        StructuredQName.QUPL, getRetainedStaticContext());
             }
         } catch (XPathException e) {
             XPathException err = new XPathException("Invalid element name passed to element-available(): " + e.getMessage());

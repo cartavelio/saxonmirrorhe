@@ -209,6 +209,7 @@ public class SimpleMode extends Mode {
                         String[] tokens = stringValue.split("[ \t\r\n]+");
                         for (String eqname : tokens) {
                             Accumulator acc = registry.getAccumulator(StructuredQName.fromEQName(eqname));
+                            // TODO: allow EQName40 under 4.0
                             accumulators.add(acc);
                         }
                     }

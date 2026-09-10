@@ -4124,7 +4124,7 @@ public class Configuration implements SourceResolver {
      */
 
     public Receiver makeEmitter(String eqName, Properties props) throws XPathException {
-        StructuredQName sqName = StructuredQName.fromEQName(eqName);
+        StructuredQName sqName = StructuredQName.fromEQName40(eqName);
         String className = sqName.getLocalPart();
         Object handler;
         try {

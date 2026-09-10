@@ -117,7 +117,7 @@ public class ParseXml extends SystemFunction implements Callable {
                 }
                 StructuredQName typeName;
                 try {
-                    typeName = StructuredQName.fromLexicalQName(eqName, false, true, null);
+                    typeName = StructuredQName.fromLexicalQName(eqName, false, StructuredQName.QUPL, null);
                 } catch (XPathException e) {
                     throw e.withErrorCode("FODC0008");
                 }

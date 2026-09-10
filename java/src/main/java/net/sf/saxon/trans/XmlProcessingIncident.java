@@ -187,7 +187,7 @@ public class XmlProcessingIncident implements XmlProcessingError {
         if (errorCode == null) {
             return null;
         }
-        return new QName(StructuredQName.fromEQName((errorCode)));
+        return new QName(StructuredQName.fromEQName40((errorCode)));
     }
 
     public void setErrorCodeAsEQName(String code) {

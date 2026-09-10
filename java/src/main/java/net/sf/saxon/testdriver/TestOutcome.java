@@ -1019,7 +1019,7 @@ public class TestOutcome {
         } else if (expectedError.contains(":")) {
             try {
                 NamespaceResolver resolver = assertion.getUnderlyingNode().getAllNamespaces();
-                StructuredQName sq = StructuredQName.fromLexicalQName((expectedError), false, false, resolver);
+                StructuredQName sq = StructuredQName.fromLexicalQName((expectedError), false, 0, resolver);
                 expectedErrorQ = new QName(sq);
             } catch (XPathException e) {
                 expectedErrorQ = new QName("", "", "unknown-prefix-in-lexical-QName");

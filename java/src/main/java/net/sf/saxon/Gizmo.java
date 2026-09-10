@@ -484,7 +484,7 @@ public class Gizmo {
     }
 
     private StructuredQName getQName(String in) throws XPathException {
-        return StructuredQName.fromLexicalQName(in, false, true, env.getNamespaceResolver());
+        return StructuredQName.fromLexicalQName(in, false, StructuredQName.QUPL, env.getNamespaceResolver());
     }
 
     private void needCurrentDoc() throws XPathException {

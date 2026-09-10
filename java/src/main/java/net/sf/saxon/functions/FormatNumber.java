@@ -67,7 +67,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                     try {
                         String lexicalName = ((StringLiteral) arguments[2]).stringify();
                         decimalFormatName = StructuredQName.fromLexicalQName(lexicalName, false,
-                                                                             true, getRetainedStaticContext());
+                                                                             StructuredQName.QUPL, getRetainedStaticContext());
                     } catch (XPathException e) {
                         throw new XPathException("Invalid decimal format name. " + e.getMessage(), "FODF1280");
                     }
@@ -974,7 +974,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         StructuredQName qName;
         try {
             qName = StructuredQName.fromLexicalQName(lexicalName, false,
-                                                     true, getRetainedStaticContext());
+                                                     StructuredQName.QUPL, getRetainedStaticContext());
         } catch (XPathException e) {
             throw new XPathException("Invalid decimal format name. " + e.getMessage(), "FODF1280");
         }

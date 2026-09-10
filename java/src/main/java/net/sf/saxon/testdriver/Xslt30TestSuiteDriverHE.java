@@ -1524,7 +1524,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             } else if (val.startsWith("{")) {
                 return new QName(StructuredQName.fromClarkName(val));
             } else if (val.startsWith("Q{")) {
-                return new QName(StructuredQName.fromEQName((val)));
+                return new QName(StructuredQName.fromEQName40((val)));
             } else if (val.contains(":")){
                 try {
                     QNameValue qn = ResolveQName.resolveQName(

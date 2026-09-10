@@ -111,7 +111,7 @@ public class Err {
             }
             if (s.startsWith("Q{")) {
                 try {
-                    StructuredQName qn = StructuredQName.fromEQName(sb.toString());
+                    StructuredQName qn = StructuredQName.fromEQName40(sb.toString());
                     String uri = abbreviateURI(qn.getNamespaceUri());
                     s = "Q{" + uri + "}" + qn.getLocalPart();
                 } catch (Exception e) {
@@ -125,22 +125,15 @@ public class Err {
         } else {
             s = len > 30 ? sb.substring(0, 30) + "..." : sb.toString();
         }
-        switch (valueType) {
-            case ELEMENT:
-                return "<" + s + ">";
-            case ATTRIBUTE:
-                return "@" + s;
-            case FUNCTION:
-                return s + "()";
-            case VARIABLE:
-                return "$" + s;
-            case VALUE:
-                return "\"" + s + "\"";
-            case EQNAME:
-                return s;
-            default:
-                return "{" + s + "}";
-        }
+        return switch (valueType) {
+            case ELEMENT -> "<" + s + ">";
+            case ATTRIBUTE -> "@" + s;
+            case FUNCTION -> s + "()";
+            case VARIABLE -> "$" + s;
+            case VALUE -> "\"" + s + "\"";
+            case EQNAME -> s;
+            default -> "{" + s + "}";
+        };
     }
 
     /**
@@ -283,7 +276,7 @@ public class Err {
             if (eqName.startsWith("{")) {
                 eqName = "Q" + eqName;
             }
-            StructuredQName sq = StructuredQName.fromEQName(eqName);
+            StructuredQName sq = StructuredQName.fromEQName40(eqName);
             return "Q{" + abbreviateURI(sq.getNamespaceUri()) + "}" + sq.getLocalPart();
         } catch (Exception e) {
             return eqName;

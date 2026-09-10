@@ -76,10 +76,13 @@ public class QNameFn extends SystemFunction {
         return new QNameFnElaborator();
     }
 
-    public static class QNameFnElaborator extends ItemElaborator {
+    private static class QNameFnElaborator extends ItemElaborator {
 
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall sfc = (SystemFunctionCall) getExpression();
+            final int qNameFormat = sfc.getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40
+                    ? StructuredQName.QUPL
+                    : StructuredQName.QUL;
             if (sfc.getArity() == 2) {
                 ItemEvaluator arg0eval = sfc.getArg(0).makeElaborator().elaborateForItem();
                 ItemEvaluator arg1eval = sfc.getArg(1).makeElaborator().elaborateForItem();
@@ -92,7 +95,7 @@ public class QNameFn extends SystemFunction {
                     if (in == null) {
                         return null;
                     }
-                    StructuredQName qn = StructuredQName.fromLexicalQName(in.getStringValue(), false, true, resolver);
+                    StructuredQName qn = StructuredQName.fromLexicalQName(in.getStringValue(), false, qNameFormat, resolver);
                     return new QNameValue(qn, BuiltInAtomicType.QNAME);
                 };
             }

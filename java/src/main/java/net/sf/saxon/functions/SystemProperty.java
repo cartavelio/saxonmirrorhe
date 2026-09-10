@@ -52,7 +52,7 @@ public class SystemProperty extends SystemFunction implements Callable {
             try {
                 String name = ((StringLiteral) arguments[0]).stringify();
                 StructuredQName qName = StructuredQName.fromLexicalQName(name,
-                                                                         false, true,
+                                                                         false, StructuredQName.QUPL,
                                                                          getRetainedStaticContext());
                 if (qName.hasURI(NamespaceUri.XSLT)) {
                     String local = qName.getLocalPart();
@@ -86,7 +86,7 @@ public class SystemProperty extends SystemFunction implements Callable {
         String name = arguments[0].head().getStringValue();
         try {
             StructuredQName qName = StructuredQName.fromLexicalQName(name,
-                    false, true,
+                    false, StructuredQName.QUPL,
                     getRetainedStaticContext());
 
             return new StringValue(getProperty(

@@ -140,7 +140,7 @@ public class OptionsParameter {
             String nominalKey = allowed.getKey();
             AtomicValue actualKey;
             if (nominalKey.startsWith("Q{")) {
-                actualKey = new QNameValue(StructuredQName.fromEQName((nominalKey)), BuiltInAtomicType.QNAME);
+                actualKey = new QNameValue(StructuredQName.fromEQName40((nominalKey)), BuiltInAtomicType.QNAME);
             } else {
                 actualKey = new StringValue(nominalKey);
             }

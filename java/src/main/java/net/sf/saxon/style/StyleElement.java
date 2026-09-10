@@ -355,7 +355,8 @@ public abstract class StyleElement extends ElementImpl {
      *
      * @param lexicalQName  The lexical QName as written, in the form "[prefix:]localname". Leading and trailing whitespace
      *                      will be trimmed. The EQName syntax "Q{uri}local" is also
-     *                      accepted.
+     *                      accepted, and the extended form "Q{uri}prefix:local" is accepted
+     *                      if the effective version is 4.0 or later.
      * @param errorCode     The error code to be used if the QName is not valid. If this is set to null,
      *                      then the code used is XTSE0280 for an undeclared prefix, and XTSE0020
      *                      for all other errors. The code XTSE0080 is used if the URI is a reserved
@@ -373,8 +374,9 @@ public abstract class StyleElement extends ElementImpl {
             if (getModuleRoot().getFixedNamespaces() != null) {
                 resolver = getModuleRoot().getFixedNamespaces();
             }
+            int qNameFormat = getEffectiveVersion() >= 40 ? StructuredQName.QUPL : StructuredQName.QUL;
             qName = StructuredQName.fromLexicalQName((lexicalQName), false,
-                                                     true, resolver);
+                                                     qNameFormat, resolver);
         } catch (XPathException e) {
             String requestedError = errorCode == null ? "XTSE0020" : errorCode;
             XPathException e2 = e.asStaticError()

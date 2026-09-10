@@ -457,7 +457,9 @@ public class UseWhenFilter extends ProxyReceiver {
     private void registerModeName(String modeAtt, NamespaceResolver nsResolver) {
         if (modeAtt != null && !modeAtt.startsWith("#")) {
             try {
-                StructuredQName qName = StructuredQName.fromLexicalQName((modeAtt), false, true, nsResolver);
+                int version = versionStack.isEmpty() ? 30 : versionStack.peek();
+                int qNameFormat =  version >= 40 ? StructuredQName.QUPL : StructuredQName.QUL;
+                StructuredQName qName = StructuredQName.fromLexicalQName((modeAtt), false, qNameFormat, nsResolver);
                 compilation.getAllKnownModeNames().add(qName);
             } catch (XPathException e) {
                 // No action, the error (if any) will be reported later
@@ -509,7 +511,8 @@ public class UseWhenFilter extends ProxyReceiver {
 
         StructuredQName varName;
         try {
-            varName = StructuredQName.fromLexicalQName((nameStr), false, true, nsResolver);
+            int qNameFormat = languageLevel >= 40 ? StructuredQName.QUPL : StructuredQName.QUL;
+            varName = StructuredQName.fromLexicalQName((nameStr), false, qNameFormat, nsResolver);
         } catch (XPathException err) {
             throw createXPathException(
                     "Invalid variable name:" + nameStr + ". " + err.getMessage(),

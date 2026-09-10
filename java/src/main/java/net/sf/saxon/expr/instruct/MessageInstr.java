@@ -322,7 +322,8 @@ public class MessageInstr extends Instruction {
                 StructuredQName errorCode;
                 try {
                     errorCode = StructuredQName.fromLexicalQName(
-                            code, false, true, expr.getRetainedStaticContext());
+                            code, false, StructuredQName.QUPL, expr.getRetainedStaticContext());
+                    // Note, we're being a bit over-liberal here: XSLT 3.0 does not allow Q{uri}prefix:local
                     if (errorCode.hasURI(NamespaceUri.ERR) && errorCode.getPrefix().isEmpty()) {
                         // cosmetic - add the err: prefix
                         errorCode = new StructuredQName("err", NamespaceUri.ERR, errorCode.getLocalPart());

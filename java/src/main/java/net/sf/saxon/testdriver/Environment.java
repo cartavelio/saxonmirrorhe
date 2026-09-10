@@ -545,7 +545,7 @@ public class Environment implements ResourceResolver {
                     formatQName = new StructuredQName("", NamespaceUri.NULL, formatName);
                 } else {
                     try {
-                        formatQName = StructuredQName.fromLexicalQName((formatName), false, true,
+                        formatQName = StructuredQName.fromLexicalQName((formatName), false, StructuredQName.QUPL,
                                                                        decimalFormat.getUnderlyingNode().getAllNamespaces());
                     } catch (XPathException e) {
                         driver.println("**** Invalid QName as decimal-format name");

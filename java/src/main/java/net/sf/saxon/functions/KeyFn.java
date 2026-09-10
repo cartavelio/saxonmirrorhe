@@ -175,7 +175,7 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         StructuredQName qName = null;
         try {
             qName = StructuredQName.fromLexicalQName(
-                    keyName, false, true,
+                    keyName, false, StructuredQName.QUPL,
                     getNamespaceResolver());
         } catch (XPathException err) {
             throw new XPathException("Invalid key name: " + err.getMessage(), "XTDE1260");

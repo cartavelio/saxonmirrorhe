@@ -17,7 +17,6 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -133,18 +132,6 @@ public final class ComputedAttribute extends AttributeCreator {
 
     public NamespaceResolver getNamespaceResolver() {
         return getRetainedStaticContext();
-    }
-
-    /**
-     * Get the static type of this expression
-     *
-     * @return the static type of the item returned by this expression
-     */
-
-    /*@NotNull*/
-    @Override
-    public ItemType getItemType() {
-        return NodeKindType.ATTRIBUTE;
     }
 
     /**

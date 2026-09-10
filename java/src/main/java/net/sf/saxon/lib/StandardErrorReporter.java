@@ -202,7 +202,7 @@ public class StandardErrorReporter
             suppressedWarnings = new HashSet<>();
         }
         if (code.startsWith("Q{")) {
-            suppressedWarnings.add(StructuredQName.fromEQName(code));
+            suppressedWarnings.add(StructuredQName.fromEQName40(code));
         } else {
             suppressedWarnings.add(new StructuredQName("err", NamespaceConstant.ERR, code));
         }

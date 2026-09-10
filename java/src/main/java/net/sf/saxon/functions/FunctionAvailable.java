@@ -108,7 +108,7 @@ public class FunctionAvailable extends SystemFunction {
                 qName = new StructuredQName("", NamespaceUri.FN, lexicalName);
             } else {
                 qName = StructuredQName.fromLexicalQName(lexicalName,
-                        false, true,
+                        false, StructuredQName.QUPL,
                         getRetainedStaticContext());
             }
         } catch (XPathException e) {

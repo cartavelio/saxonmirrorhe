@@ -36,7 +36,7 @@ public class TypeAvailable extends SystemFunction {
                 qName = new StructuredQName("", defaultNS, lexicalName);
             } else {
                 qName = StructuredQName.fromLexicalQName(lexicalName,
-                        false, true,
+                        false, StructuredQName.QUPL,
                         getRetainedStaticContext());
             }
         } catch (XPathException e) {

@@ -75,7 +75,7 @@ public class SaplingElement extends SaplingNode {
     public SaplingElement(String name) {
         Objects.requireNonNull(name);
         reversedChildren = emptyNodeList();
-        nodeName = StructuredQName.fromEQName((name));
+        nodeName = StructuredQName.fromEQName40((name));
     }
 
     /**

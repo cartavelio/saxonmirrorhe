@@ -738,7 +738,7 @@ public class AlphaCode {
             }
             itemType = builtIn;
             if (tree.name != null) {
-                StructuredQName name = StructuredQName.fromEQName(tree.name);
+                StructuredQName name = StructuredQName.fromEQName40(tree.name);
                 SchemaType type = schema.getSchemaType(name);
                 if (!(type instanceof PlainType)) {
                     throw new IllegalArgumentException("Schema type " + tree.name + " is not known");
@@ -763,7 +763,7 @@ public class AlphaCode {
             SchemaType contentType = null;
             boolean nillable = tree.nillable;
             if (contentName != null) {
-                contentQName = StructuredQName.fromEQName(contentName);
+                contentQName = StructuredQName.fromEQName40(contentName);
                 contentType = schema.getSchemaType(contentQName);
                 if (contentType == null) {
                     throw new IllegalArgumentException("Unknown type " + contentName);
@@ -829,7 +829,7 @@ public class AlphaCode {
                 if (partialNameTest != null) {
                     itemType = new NamedXNodeType(kind, partialNameTest, config);
                 } else {
-                    StructuredQName qName = name == null ? null : StructuredQName.fromEQName(name);
+                    StructuredQName qName = name == null ? null : StructuredQName.fromEQName40(name);
                     switch (principal) {
                         case "N":
                             itemType = AnyXNodeType.getInstance();
@@ -1014,7 +1014,7 @@ public class AlphaCode {
             Class<?> theClass = Object.class;
             //#if CSHARP==false
             if (tree.name != null) {
-                String className = StructuredQName.fromEQName(tree.name).getLocalPart();
+                String className = StructuredQName.fromEQName40(tree.name).getLocalPart();
                 try {
                     theClass = Class.forName(className);
                 } catch (ClassNotFoundException e) {

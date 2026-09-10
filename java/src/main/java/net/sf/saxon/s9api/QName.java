@@ -113,7 +113,8 @@ public class QName {
      *
      * @param lexicalQName The lexical QName, in the form <code>prefix:local</code>
      *                     or simply <code>local</code>. The EQName syntax "Q{uri}local"
-     *                     and the ClarkName syntax "{uri}local" are also accepted.
+     *                     and the ClarkName syntax "{uri}local" are also accepted,
+     *                     including the 4.0 extension "Q{uri}prefix:local"
      * @param element      The element node whose in-scope namespaces are to be used
      *                     to resolve the prefix part of the lexical QName.
      * @throws IllegalArgumentException If the prefix of the lexical QName is not in scope
@@ -127,7 +128,7 @@ public class QName {
         try {
             NodeInfo node = element.getUnderlyingValue();
             sqName = StructuredQName.fromLexicalQName((lexicalQName), true,
-                                                      true, node.getAllNamespaces());
+                                                      StructuredQName.QUPL, node.getAllNamespaces());
 
         } catch (XPathException err) {
             throw new IllegalArgumentException(err);

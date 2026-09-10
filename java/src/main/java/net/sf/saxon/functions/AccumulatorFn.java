@@ -76,9 +76,12 @@ public abstract class AccumulatorFn extends SystemFunction implements IContextAc
      */
 
     private Accumulator getAccumulator(String name, AccumulatorRegistry registry) throws XPathException {
+        int qNameFormat = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40
+                ? StructuredQName.QUPL
+                : StructuredQName.QUL;
         StructuredQName qName;
         try {
-            qName = StructuredQName.fromLexicalQName(name, false, true, getRetainedStaticContext());
+            qName = StructuredQName.fromLexicalQName(name, false, qNameFormat, getRetainedStaticContext());
         } catch (XPathException err) {
             throw new XPathException("Invalid accumulator name: " + err.getMessage(), "XTDE3340");
         }
