@@ -66,7 +66,7 @@ public class SaxonParam extends AnnotationParent {
         GroundedValue defaultValue = EmptySequence.getInstance();
         try {
             Expression expr = ExpressionTool.make(select, env,
-                0, Token.EOF, null);
+                0, tok -> tok == Token.EOF, null);
             //expr.setContainer(env);
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
             ItemType contextItemType = Type.ITEM_TYPE;
@@ -97,7 +97,7 @@ public class SaxonParam extends AnnotationParent {
         param.setVariableQName(qName);
         param.setRequiredType(requiredType);
         param.setBody(Literal.makeLiteral(defaultValue));
-        getXSDSchemaElement().addGlobalParam(param);
+        getXSDSchema().addGlobalParam(param);
 
 
     }

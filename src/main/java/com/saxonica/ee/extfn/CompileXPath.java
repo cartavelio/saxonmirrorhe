@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 
 /**
@@ -259,7 +260,7 @@ public class CompileXPath extends SystemFunction {
             if (type != null && "pattern".equals(type.getStringValue())) {
                 expr = Pattern.make(exprText, env, null);
             } else {
-                expr = make(exprText, env, 0, Token.EOF, null, inCatch);
+                expr = make(exprText, env, 0, tok -> tok == Token.EOF, null, inCatch);
             }
         } catch (XPathException e) {
             throw new XPathException("Static error in XPath expression supplied to saxon:compile-XPath: " +
@@ -368,7 +369,7 @@ public class CompileXPath extends SystemFunction {
 
     /*@NotNull*/
     public static Expression make(String expression, StaticContext env,
-                                  int start, int terminator,
+                                  int start, Predicate<Token> terminator,
                                   CodeInjector codeInjector, boolean inCatch) throws XPathException {
         int languageLevel = env.getXPathVersion();
         XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
@@ -377,9 +378,6 @@ public class CompileXPath extends SystemFunction {
         }
         if (codeInjector != null) {
             parser.setCodeInjector(codeInjector);
-        }
-        if (terminator == -1) {
-            terminator = Token.EOF;
         }
         Expression exp = parser.parse(expression, start, terminator, env);
         ExpressionTool.setDeepRetainedStaticContext(exp, env.makeRetainedStaticContext());

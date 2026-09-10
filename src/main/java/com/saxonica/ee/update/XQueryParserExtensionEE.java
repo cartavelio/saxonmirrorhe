@@ -3,7 +3,6 @@ package com.saxonica.ee.update;
 import com.saxonica.expr.DeepUpdate2;
 import com.saxonica.expr.XQueryParserExtensionPE;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.Validation;
@@ -61,14 +60,13 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
         }
         foundRevalidationDeclaration = true;
         p.nextToken();
-        p.expectName();
+        String mode = p.expectName();
         int val;
-        Tokenizer t = p.getTokenizer();
-        if ("strict".equals(t.currentTokenValue)) {
+        if ("strict".equals(mode)) {
             val = Validation.STRICT;
-        } else if ("lax".equals(t.currentTokenValue)) {
+        } else if ("lax".equals(mode)) {
             val = Validation.LAX;
-        } else if ("skip".equals(t.currentTokenValue)) {
+        } else if ("skip".equals(mode)) {
             val = Validation.SKIP;
         } else {
             p.grumble("revalidation mode must be 'strict', 'lax', or 'skip'");
@@ -99,23 +97,18 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     @Override
     protected Expression parseExtendedExprSingle(XPathParser p) throws XPathException {
         if (acceptUpdateSyntax) {
-            Tokenizer t = p.getTokenizer();
-            switch (t.currentToken) {
-                case Token.COPY:
-                    return UpdateParser.parseTransformExpression(p);
-                case Token.INSERT_NODE:
-                    return UpdateParser.parseInsertExpression(p);
-                case Token.DELETE_NODE:
-                    return UpdateParser.parseDeleteExpression(p);
-                case Token.REPLACE_NODE:
-                    return UpdateParser.parseReplaceNodeExpression(p);
-                case Token.REPLACE_VALUE:
-                    return UpdateParser.parseReplaceValueExpression(p);
-                case Token.RENAME_NODE:
-                    return UpdateParser.parseRenameExpression(p);
-                default:
-                    break;
-                    // fall through;
+            if (p.isKeyword("copy")) {
+                return UpdateParser.parseTransformExpression(p);
+            } else if (p.isKeywordPair("insert", "node")) {
+                return UpdateParser.parseInsertExpression(p);
+            } else if (p.isKeywordPair("delete", "node")) {
+                return UpdateParser.parseDeleteExpression(p);
+            } else if (p.isKeywordPair("replace", "node")) {
+                return UpdateParser.parseReplaceNodeExpression(p);
+            } else if (p.isKeywordPair("replace", "value")) {
+                return UpdateParser.parseReplaceValueExpression(p);
+            } else if (p.isKeywordPair("rename", "node")) {
+                return UpdateParser.parseRenameExpression(p);
             }
         }
         return super.parseExtendedExprSingle(p);
@@ -143,21 +136,20 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
             parser.grumble("update map/array syntax requires 4.0 to be enabled");
         }
 
-        int operation = t.currentToken;
         parser.nextToken();
         Expression rootExpr = parser.parseExprSingle();
-        if (t.currentToken != Token.REPLACE && !parser.isKeyword("replace")) {
+        if (!parser.isKeyword("replace")) {
             parser.grumble("expected keyword 'replace'");
         }
         parser.nextToken();
         Expression selectExpr = parser.parseExprSingle();
-        if (t.currentToken != Token.WITH && !parser.isKeyword("with")) {
+        if (!parser.isKeyword("with")) {
             parser.grumble("expected keyword 'with");
         }
         parser.nextToken();
         Expression actionExpr = parser.parseExprSingle();
 
-        return new DeepUpdate2(operation, rootExpr, selectExpr, actionExpr);
+        return new DeepUpdate2(-12345678, rootExpr, selectExpr, actionExpr);   // TODO: fixme
     }
 
 

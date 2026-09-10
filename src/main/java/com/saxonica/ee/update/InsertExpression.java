@@ -29,14 +29,14 @@ import java.util.function.Supplier;
  */
 public class InsertExpression extends BasicUpdatingExpression {
 
-    private final int position;
+    private final InsertPosition position;
     private final int constructionMode;
     private final boolean inheritNamespaces;
     private final boolean preserveNamespaces;
     private final Operand sourceOp;
     private final Operand targetOp;
 
-
+    public static enum InsertPosition {BEFORE, AFTER, FIRST, LAST, INTO};
     /**
      * Create an InsertExpression
      *
@@ -48,7 +48,7 @@ public class InsertExpression extends BasicUpdatingExpression {
      * @param preserve         true if namespaces are to be preserved
      */
 
-    public InsertExpression(Expression source, Expression target, int position,
+    public InsertExpression(Expression source, Expression target, InsertPosition position,
                             int constructionMode, boolean inherit, boolean preserve) {
         sourceOp = new Operand(this, source, OperandRole.SINGLE_ATOMIC);
         targetOp = new Operand(this, target, OperandRole.INSPECT);
@@ -134,7 +134,7 @@ public class InsertExpression extends BasicUpdatingExpression {
 
         Supplier<RoleDiagnostic> roleSupplier1 = () -> {
             RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "insert", 1);
-            role0.setErrorCode(position == Token.AFTER || position == Token.BEFORE ? "XUTY0006" : "XUTY0005");
+            role0.setErrorCode(position == InsertPosition.AFTER || position == InsertPosition.BEFORE ? "XUTY0006" : "XUTY0005");
             return role0;
         };
         setTargetExpression(tc.staticTypeCheck(
@@ -221,7 +221,7 @@ public class InsertExpression extends BasicUpdatingExpression {
                         .withXPathContext(context);
                 }
                 int kind = target.getNodeKind();
-                if (expr.position == Token.AFTER || expr.position == Token.BEFORE) {
+                if (expr.position == InsertPosition.AFTER || expr.position == InsertPosition.BEFORE) {
                     if (!(kind == Type.ELEMENT || kind == Type.TEXT ||
                                   kind == Type.COMMENT || kind == Type.PROCESSING_INSTRUCTION)) {
                         throw new XPathException(
@@ -239,7 +239,7 @@ public class InsertExpression extends BasicUpdatingExpression {
                                 .withXPathContext(context);
                     }
                 }
-                NodeInfo parent = expr.position == Token.AFTER || expr.position == Token.BEFORE ? target.getParent() : target;
+                NodeInfo parent = expr.position == InsertPosition.AFTER || expr.position == InsertPosition.BEFORE ? target.getParent() : target;
                 if (parent == null) {
                     throw new XPathException(
                             "When inserting before or after a node, that node must have a parent", "XUDY0029")
@@ -264,7 +264,7 @@ public class InsertExpression extends BasicUpdatingExpression {
                                     .withXPathContext(context);
                         }
                         if (parent.getNodeKind() != Type.ELEMENT) {
-                            if (expr.position == Token.AFTER || expr.position == Token.BEFORE) {
+                            if (expr.position == InsertPosition.AFTER || expr.position == InsertPosition.BEFORE) {
                                 throw new XPathException(
                                         "When inserting an attribute before or after a node, that node must " +
                                                 "have a parent and the parent must be an element", "XUDY0030")

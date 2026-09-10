@@ -1,7 +1,6 @@
 package com.saxonica.ee.update;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.MutableNodeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -17,7 +16,7 @@ public class InsertAction extends PendingUpdateAction {
 
     private final NodeInfo[] content;
     private final MutableNodeInfo targetNode;
-    private final int position;
+    private final InsertExpression.InsertPosition position;
     private final boolean inheritNamespaces;
 
     /**
@@ -32,7 +31,7 @@ public class InsertAction extends PendingUpdateAction {
      *                   or last child of the target node.
      */
 
-    public InsertAction(NodeInfo[] content, MutableNodeInfo targetNode, int position, boolean inherit) {
+    public InsertAction(NodeInfo[] content, MutableNodeInfo targetNode, InsertExpression.InsertPosition position, boolean inherit) {
         this.content = content;
         this.targetNode = targetNode;
         this.position = position;
@@ -59,26 +58,26 @@ public class InsertAction extends PendingUpdateAction {
             }
         }
         switch (position) {
-            case Token.FIRST_INTO:
+            case FIRST:
                 targetNode.insertChildren(content, true, inheritNamespaces);
                 if (affectsType) {
                     targetNode.removeTypeAnnotation();
                 }
                 break;
-            case Token.LAST_INTO:
-            case Token.INTO:
+            case LAST:
+            case INTO:
                 targetNode.insertChildren(content, false, inheritNamespaces);
                 if (affectsType) {
                     targetNode.removeTypeAnnotation();
                 }
                 break;
-            case Token.BEFORE:
+            case BEFORE:
                 targetNode.insertSiblings(content, true, inheritNamespaces);
                 if (affectsType) {
                     ((MutableNodeInfo) targetNode.getParent()).removeTypeAnnotation();
                 }
                 break;
-            case Token.AFTER:
+            case AFTER:
                 targetNode.insertSiblings(content, false, inheritNamespaces);
                 if (affectsType) {
                     ((MutableNodeInfo) targetNode.getParent()).removeTypeAnnotation();
@@ -112,7 +111,7 @@ public class InsertAction extends PendingUpdateAction {
 
     @Override
     public int getApplyPhase() {
-        return (position == Token.INTO ? 1 : 2);
+        return (position == InsertExpression.InsertPosition.INTO ? 1 : 2);
     }
 }
 

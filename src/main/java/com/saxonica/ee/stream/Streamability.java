@@ -7,7 +7,10 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.SourceDocument;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.sort.SortKeyDefinition;
 import net.sf.saxon.functions.AccumulatorFn;
 import net.sf.saxon.functions.SystemFunction;
@@ -62,7 +65,7 @@ public class Streamability {
         RetainedStaticContext rsc = quant.getRetainedStaticContext();
         test = replaceVariableReferenceByDot(test, quant);
         if (test != null) {
-            if (quant.getOperator() == Token.SOME) {
+            if (quant.getOperator() == QuantifiedExpression.Qualifier.SOME) {
                 Expression fn = SystemFunction.makeCall("boolean", rsc, test);
                 FilterExpression fe = new FilterExpression(select, fn);
                 return SystemFunction.makeCall("exists", rsc, fe);

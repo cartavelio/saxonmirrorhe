@@ -1,6 +1,5 @@
 package com.saxonica.expr;
 
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryParser;
@@ -28,10 +27,10 @@ public class XQueryParserExtensionPE extends SaxonSyntaxExtension {
     @Override
     public void parseItemTypeDeclaration(XQueryParser p) throws XPathException {
         p.nextToken();
-        p.expectName();
-        StructuredQName typeName = p.makeStructuredQName(p.getTokenizer().currentTokenValue, NamespaceUri.NULL);
+        String name = p.expectName();
+        StructuredQName typeName = p.makeStructuredQName(name, NamespaceUri.NULL);
         p.nextToken();
-        p.expect(Token.AS);
+        p.expectKeyword("as");
         p.nextToken();
         ItemType typeDef = p.parseItemType();
         p.getStaticContext().getPackageData().obtainTypeAliasManager().registerTypeAlias(typeName, typeDef);

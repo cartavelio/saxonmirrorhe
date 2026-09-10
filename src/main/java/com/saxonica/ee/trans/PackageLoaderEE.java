@@ -90,7 +90,8 @@ public class PackageLoaderEE extends PackageLoaderPE {
 
         eMap.put("insert", (loader, element) -> {
             int constructionMode = loader.getIntegerAttribute(element, "constructionMode");
-            int position = SaxonInsert.interpretPosition(element.getAttributeValue(NamespaceUri.NULL, "position"));
+            InsertExpression.InsertPosition position =
+                    SaxonInsert.interpretPosition(element.getAttributeValue(NamespaceUri.NULL, "position"));
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             Expression source = loader.getFirstChildExpression(element);
             Expression target = loader.getSecondChildExpression(element);

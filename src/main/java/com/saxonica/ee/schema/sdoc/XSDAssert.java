@@ -13,7 +13,6 @@ import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.functions.Empty;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Feature;
@@ -61,7 +60,7 @@ public class XSDAssert extends AnnotationParent {
 
     @Override
     protected void prepareAttributes() throws SchemaException {
-        if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+        if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             error("The xs:assert element requires XSD 1.1 to be enabled");
         }
         AttributeMap atts = attributes();
@@ -72,7 +71,7 @@ public class XSDAssert extends AnnotationParent {
 
         String defaultNamespace = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
         if (defaultNamespace == null) {
-            defaultNamespace = getXSDSchemaElement().getXPathDefaultNamespace();
+            defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
         }
         NamespaceUri defaultNamespaceUri;
         switch (defaultNamespace) {
@@ -80,7 +79,7 @@ public class XSDAssert extends AnnotationParent {
                 defaultNamespaceUri = getURIForPrefix("", true);
                 break;
             case "##targetNamespace":
-                defaultNamespaceUri = getXSDSchemaElement().getTargetNamespace();
+                defaultNamespaceUri = getXSDSchema().getTargetNamespace();
                 break;
             case "##local":
                 defaultNamespaceUri = NamespaceUri.NULL;
@@ -116,7 +115,7 @@ public class XSDAssert extends AnnotationParent {
         env.setContextItemParentless(true);
         env.setContainingLocation(new AttributeLocation(this, NamespaceUri.NULL.qName("test")));
         int xpathVersion = config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSD);
-        if (getXSDSchemaElement().getAllowedExtensions().contains("any-xpath-version")) {
+        if (getXSDSchema().getAllowedExtensions().contains("any-xpath-version")) {
             xpathVersion = 31;
         }
         env.setXPathLanguageLevel(xpathVersion);
@@ -126,7 +125,7 @@ public class XSDAssert extends AnnotationParent {
 
         // Declare any variables defined in saxon:param elements
         Map<StructuredQName, XPathVariable> parameters = new HashMap<>();
-        for (GlobalParam param : getXSDSchemaElement().getGlobalParams()) {
+        for (GlobalParam param : getXSDSchema().getGlobalParams()) {
             XPathVariable var = env.declareVariable(param.getVariableQName());
             GroundedValue defaultVal = ((Literal) param.getBody()).getGroundedValue();
             var.setDefaultValue(defaultVal);
@@ -227,7 +226,7 @@ public class XSDAssert extends AnnotationParent {
                 core = lastOp.getChildExpression();
             }
             if (core instanceof QuantifiedExpression &&
-                    ((QuantifiedExpression) core).getOperator() == Token.EVERY) {
+                    ((QuantifiedExpression) core).getOperator() == QuantifiedExpression.Qualifier.EVERY) {
                 QuantifiedExpression every = (QuantifiedExpression) core;
                 if (every.getSequence().getItemType() instanceof NodeTest) {
                     Operand sequenceOp = every.getSequenceOp();

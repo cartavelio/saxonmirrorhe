@@ -291,7 +291,7 @@ public class ExperimentalXPathCompiler {
                 parser.setCatchDepth(1);
             }
             parser.setAllowAbsentExpression(allowEmpty);
-            Expression exp = parser.parse(expression, 0, Token.EOF, env);
+            Expression exp = parser.parse(expression, 0, tok -> tok == Token.EOF, env);
             ExpressionTool.setDeepRetainedStaticContext(exp, env.makeRetainedStaticContext());
             exp = exp.simplify();
             return exp;

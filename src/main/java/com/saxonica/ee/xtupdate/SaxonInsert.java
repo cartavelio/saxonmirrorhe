@@ -84,30 +84,32 @@ public class SaxonInsert extends ExtensionInstruction {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression content = compileSequenceConstructor(exec, decl, false);
-        int pos = interpretPosition(positionAtt);
+        InsertExpression.InsertPosition pos = interpretPosition(positionAtt);
         return new InsertExpression(content, select, pos, Validation.PRESERVE, true, true);
     }
 
-    public static int interpretPosition(String p) {
+    public static InsertExpression.InsertPosition interpretPosition(String p) {
         switch (p) {
-            case "first": return Token.FIRST_INTO;
-            case "last": return Token.LAST_INTO;
-            case "before": return Token.BEFORE;
-            case "after": return Token.AFTER;
-            default: return -1;
+            case "first": return InsertExpression.InsertPosition.FIRST;
+            case "last": return InsertExpression.InsertPosition.LAST;
+            case "before": return InsertExpression.InsertPosition.BEFORE;
+            case "after": return InsertExpression.InsertPosition.AFTER;
+            default: return null;
         }
     }
 
-    public static String encodePosition(int p) {
+    public static String encodePosition(InsertExpression.InsertPosition p) {
         switch (p) {
-            case Token.FIRST_INTO:
+            case FIRST:
                 return "first";
-            case Token.LAST_INTO:
+            case LAST:
                 return "last";
-            case Token.BEFORE:
+            case BEFORE:
                 return "before";
-            case Token.AFTER:
+            case AFTER:
                 return "after";
+            case INTO:
+                return "into";
             default:
                 return "??";
         }

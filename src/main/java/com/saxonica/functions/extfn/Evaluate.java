@@ -72,7 +72,7 @@ public class Evaluate extends SystemFunction {
 
         Expression expr;
         try {
-            expr = ExpressionTool.make(exprText, env, 0, Token.EOF, null);
+            expr = ExpressionTool.make(exprText, env, 0, tok -> tok == Token.EOF, null);
         } catch (XPathException e) {
             throw e.withMessage("Static error in XPath expression supplied to " +
                                                             functionName + ": " + e.getMessage().trim())

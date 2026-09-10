@@ -6,6 +6,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.QNameParser;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -78,7 +79,7 @@ public class SelectionParser extends XPathParser {
     /*@Nullable*/
     protected Expression parseUnionExpression() throws XPathException {
         Expression exp = parseRelativePath();
-        while (t.currentToken == Token.UNION) {
+        while (t.currentToken == Token.VBAR) {
             if (t.currentTokenValue.equals("union")) {
                 grumble("Union operator in the selector/field XPath subset must be written as '|'");
             }
@@ -102,7 +103,7 @@ public class SelectionParser extends XPathParser {
                 }
             }
             first = false;
-            int op = t.currentToken;
+            Token op = t.currentToken;
             nextToken();
             Expression next = parseStepExpression();
             if (op == Token.SLASH) {
@@ -135,65 +136,48 @@ public class SelectionParser extends XPathParser {
      */
 
     protected Expression parseStepExpression() throws XPathException {
-        switch (t.currentToken) {
-            case Token.DOT:
+        if (t.currentToken == Token.DOT) {
+            nextToken();
+            Expression cie = new ContextItemExpression();
+            setLocation(cie);
+            return cie;
+        } else if (t.currentToken == Token.AT) {
+            if (!isFieldSubset) {
+                grumble("The attribute axis cannot be used in a selector XPath");
+            }
+            nextToken();
+            if (t.currentToken == Token.STAR) {
                 nextToken();
-                Expression cie = new ContextItemExpression();
-                setLocation(cie);
-                return cie;
-            case Token.NAME:
-            case Token.PREFIX:
-            case Token.STAR:
-                Expression ae = new AxisExpression(AxisInfo.CHILD, parseNodeTest(Type.ELEMENT));
-                setLocation(ae);
-                return ae;
-            case Token.AT:
-                if (!isFieldSubset) {
-                    grumble("The attribute axis cannot be used in a selector XPath");
-                }
+                Expression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, AnyNodeTest.getInstance());
+                setLocation(ae2);
+                return ae2;
+            } else {
+                NodeTest test = parseNodeTest(Type.ATTRIBUTE);
+                Expression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, test);
+                setLocation(ae2);
+                return ae2;
+            }
+        } else if (t.peekAhead() == Token.COLON_COLON) {
+            int axis = AxisInfo.getAxisNumber(t.currentTokenValue);
+            if (axis != AxisInfo.CHILD && axis != AxisInfo.ATTRIBUTE) {
+                grumble("Only the child and attribute axes are permitted");
+            }
+            if (axis == AxisInfo.ATTRIBUTE && !isFieldSubset) {
+                grumble("The attribute axis cannot be used in a selector XPath");
+            }
+            short principalNodeType = AxisInfo.principalNodeType[axis];
+            nextToken();
+            if (t.currentToken == Token.STAR) {
                 nextToken();
-                switch (t.currentToken) {
-
-                    case Token.NAME:
-                    case Token.PREFIX:
-                    case Token.STAR:
-                        Expression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE,
-                                parseNodeTest(Type.ATTRIBUTE));
-                        setLocation(ae2);
-                        return ae2;
-
-                    default:
-                        grumble("Unexpected token " + currentTokenDisplay() + " after axis name");
-                        break;
-                }
-                break;
-            case Token.AXIS:
-                int axis = AxisInfo.getAxisNumber(t.currentTokenValue);
-                if (axis != AxisInfo.CHILD && axis != AxisInfo.ATTRIBUTE) {
-                    grumble("Only the child and attribute axes are permitted");
-                }
-                if (axis == AxisInfo.ATTRIBUTE && !isFieldSubset) {
-                    grumble("The attribute axis cannot be used in a selector XPath");
-                }
-                short principalNodeType = AxisInfo.principalNodeType[axis];
-                nextToken();
-                switch (t.currentToken) {
-
-                    case Token.NAME:
-                    case Token.PREFIX:
-                    case Token.STAR:
-                        Expression ae3 = new AxisExpression(axis, parseNodeTest(principalNodeType));
-                        setLocation(ae3);
-                        return ae3;
-
-                    default:
-                        grumble("Unexpected token " + currentTokenDisplay() + " after axis name");
-                        break;
-                }
-                break;
-            default:
-                grumble("Unexpected token " + currentTokenDisplay() + " in path expression");
-                break;
+                Expression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, AnyNodeTest.getInstance());
+                setLocation(ae2);
+                return ae2;
+            } else {
+                NodeTest test = parseNodeTest(Type.ATTRIBUTE);
+                Expression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, test);
+                setLocation(ae2);
+                return ae2;
+            }
         }
         return null;
     }
