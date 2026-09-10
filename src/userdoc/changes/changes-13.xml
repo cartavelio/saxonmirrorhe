@@ -181,6 +181,8 @@
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
         is dropped.</p>
         
+        <p>Variadic functions (syntax <code>declare %variadic function</code>) are implemented in XQuery.</p>
+        
         <p>The second <code>$position</code> argument is available on function callbacks made by the functions
             <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-of</code>, <code>some</code>.</p>
         
