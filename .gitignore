@@ -1,13 +1,48 @@
-out/
+# IDE artefacts and local settings
 .idea/
-/*.iml
+*.iml
 .DS_Store
+._.DS_Store
+python/.pyenv/
+.project
+.settings/
+.classpath
+.vs/
+java_*.hprof
+
+# Ephemeral artefacts
+out/
+build/
+bin/
+target/
 .gradle/
 .kotlin/
-build/
+*.log
 __pycache__
-src/test/testdata/sandpit/
-src/test/testdata/temp/
+temp/
+sandpit/
+/extra/lib/
 csharp/ee/bin/Debug/
 csharp/ee/obj/
-python/.pyenv/
+
+
+# Created by running the unit tests :-(
+/secondary-out.xml
+/src/test/testdata/welch-ser/out/
+
+# Auto-generated sources
+/src/main/java/net/sf/saxon/lib/Feature.java
+/src/main/java/net/sf/saxon/lib/FeatureCode.java
+/src/main/java/net/sf/saxon/lib/FeatureKeys.java
+/src/main/java/net/sf/saxon/lib/FeatureData.java
+/src/main/csharp/api/Saxon.Api/Feature.cs
+/src/main/csharp/api/Saxon.Api/FeatureKeys.cs
+/src/main/saxon-cs/engine/Saxon/Api/Feature.cs
+/src/main/saxon-cs/engine/Saxon/Api/FeatureKeys.cs
+
+# Binaries built by Rider and friends
+/src/samples/cs/bin/
+
+# SaxonC Python genrated library file
+/src/main/c/Saxon.C.API/python-saxon/saxonc.cpp
+/src/main/c/Saxon.C.API/*.lo
