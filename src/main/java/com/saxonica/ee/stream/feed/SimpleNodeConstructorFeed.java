@@ -13,6 +13,7 @@ import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
@@ -69,6 +70,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
     }
 
     @Override
+    @CSharpInnerClass(outer = true, extra = {"Saxon.Hej.s9api.Location loc"})
     public UniStringConsumer getStringReceiver(boolean asTextNode, Location loc) {
         if (isSimpleText) {
             return new AbstractUniStringConsumer() {
