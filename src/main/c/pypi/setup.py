@@ -11,13 +11,15 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 # include platform specific dynamic lib in the wheel.
-from platform import system
+ffrom platform import system
 from distutils.dir_util import copy_tree
 
 extra_link_args = []
 
 if system() == 'Darwin':
     extra_link_args.append('-Llibs/darwin')
+elif system() == 'Windows':
+    extra_link_args.append('-Llibs/win')
 else:
     extra_link_args.append('-Llibs/nix')
 
