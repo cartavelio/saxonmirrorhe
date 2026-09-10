@@ -811,6 +811,8 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
     result_documents = {}
     outcome = PyTestOutcome()
 
+    lang_version = spec.version
+
     pos = 0
     try:
         for test_query in test_queries.item_at(pos):
@@ -902,6 +904,14 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
     assert_xpc.declare_namespace("file", "http://expath.org/ns/file")
     assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
     assert_xpc.declare_variable("result")
+
+    if lang_version is "4.0":
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+            print("set assert_xpc.Spec version=", lang_version)
+        assert_xpc.set_language_version(lang_version)
+
+    if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+        print("Spec version=", lang_version)
     global assert_set
     '''TODO add method  - assert_xpc.set_base_uri(assertion.getBaseURI())'''
     if result is not None or outcome.serialized_result is not None:
