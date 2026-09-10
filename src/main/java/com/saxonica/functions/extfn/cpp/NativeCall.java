@@ -31,6 +31,7 @@ public class NativeCall implements ExtensionFunction {
     private SequenceType returnType = ExtensionFunction.super.getResultType();
     private QName name;
     private CFunctionPointer func;
+    private CFunctionPointer pythonProc;
     SaxonCAPI.AllocatorFn alloc;
 
 
@@ -39,12 +40,13 @@ public class NativeCall implements ExtensionFunction {
         this.name = qn;
     }
 
-    public NativeCall(QName funcQname, SequenceType[] sequenceTypes, SequenceType returnSequenceType, CFunctionPointer func, SaxonCAPI.AllocatorFn alloc) {
+    public NativeCall(QName funcQname, SequenceType[] sequenceTypes, SequenceType returnSequenceType, CFunctionPointer pythonProc, CFunctionPointer func, SaxonCAPI.AllocatorFn alloc) {
         this.name = funcQname;
         this.sequenceType = sequenceTypes;
         this.returnType = returnSequenceType;
         this.func = func;
         this.alloc = alloc;
+        this.pythonProc = pythonProc;
 
     }
 
@@ -164,7 +166,7 @@ public class NativeCall implements ExtensionFunction {
 
     // Declare a native method _native()
     @CFunction
-    public static native ObjectHandle c_nativeCall(CCharPointer c_funcName, CFunctionPointer func, int length, CLongPointer addr);
+    public static native ObjectHandle c_nativeCall(CCharPointer c_funcName, CFunctionPointer proc,  CFunctionPointer func, int length, CLongPointer addr);
 
 
     @Override
@@ -207,7 +209,7 @@ public class NativeCall implements ExtensionFunction {
             System.err.println("Java SaxonC Debug NativeCall.call= " + arguments.length);
 
 
-            ObjectHandle valueRef = c_nativeCall(holder.get(), func, arguments.length, addr); // pass arguments as an array
+            ObjectHandle valueRef = c_nativeCall(holder.get(), pythonProc, func, arguments.length, addr); // pass arguments as an array
 
              // get info on the return type
             if (valueRef != WordFactory.nullPointer()) {
@@ -220,6 +222,8 @@ public class NativeCall implements ExtensionFunction {
                     System.err.println("xdmValue in userFunction is null!!");
                 }
 
+            } else {
+                System.err.println("ObjectHandle value in userFunction is null!!");
             }
         } 
         System.err.println("after c_NativeCall method");
