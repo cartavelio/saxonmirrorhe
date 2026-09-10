@@ -284,12 +284,10 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
             } else {
                 jobjectArray results = (jobjectArray) (
                         SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonResultDocObj, getresultID));
-
                 jobjectArray resultUris = (jobjectArray) (
                         SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonResultDocObj, getresult_uriID));
-
                 if(!results || !resultUris ) {
-                return resultDocumentMap;
+                    return resultDocumentMap;
                 }
 
                 int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
@@ -302,7 +300,6 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
                                                      "net/sf/saxon/s9api/XdmArray");
 
                 if (sizex > 0) {
-
                     for (int p = 0; p < sizex; ++p) {
                         jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
                         jobject resultURIsi = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(resultUris, p);
@@ -314,7 +311,6 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
                         XdmValue * value= nullptr;
                         XdmItem * xdmItem = nullptr;
                         if(rawResultsFlag) {
-
                             value = new XdmValue();
 
                             if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, atomicValueClass)           == JNI_TRUE) {
@@ -344,15 +340,12 @@ std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
 
                             }
 
-
-
                         } else {
                             value = new XdmValue();
                             value->addXdmItem(new XdmNode(resulti));
                             SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
 
                         }
-
                         resultDocumentMap[str] = value;
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(resultURIsi);

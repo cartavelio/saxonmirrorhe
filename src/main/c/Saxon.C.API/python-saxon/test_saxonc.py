@@ -699,8 +699,27 @@ def testResultDocumentAsMap(saxonproc):
     keysList = [*rdocs_map.keys()]
     assert  keysList[0].endswith('out.xml')
     assert  keysList[1].endswith('out2.xml')
-    assert isinstance(rdocs_map[keysList[0]], PyXdmNode)
-    assert  'hello' in rdocs_map[keysList[1]].string_value
+    assert isinstance(rdocs_map[keysList[0]].head, PyXdmNode)
+    assert  'hello' in rdocs_map[keysList[1]].head.string_value
+
+
+def testResultDocumentWitJson(saxonproc):
+    inputDoc = saxonproc.parse_xml(xml_text="<a>b</a>")
+    assert inputDoc is not None
+    xsl = "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='a'><xsl:result-document href='result-1.json' method='json'><xsl:sequence select='map { \"value\" : \"foo\" }'/></xsl:result-document></xsl:template></xsl:stylesheet>"
+    trans = saxonproc.new_xslt30_processor()
+    executable = trans.compile_stylesheet(stylesheet_text=xsl)
+    assert executable is not None
+    executable.set_capture_result_documents(True, True)
+    executable.set_initial_match_selection(xdm_value=inputDoc)
+    executable.apply_templates_returning_value()
+
+    rdocs_map = executable.get_result_documents()
+    assert rdocs_map is not None
+    assert len(rdocs_map) == 1
+    keysList = [*rdocs_map.keys()]
+    assert  keysList[0].endswith('result-1.json')
+    assert isinstance(rdocs_map[keysList[0]].head, PyXdmMap)
 
     
 def testApplyTemplatesToFile(saxonproc):
