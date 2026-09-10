@@ -68,24 +68,13 @@ TODO: rethink redefines and override
     </category>
     
     <category name="sourcedocs" class="javaonly">
-        <p>Line numbering of XML documents read using a SAX parser 
-            (including schema documents and stylesheets) has changed.</p>
+        <p>Line and column numbering (if enabled for a particular document)
+            is now maintained for text nodes as well as element nodes.
+            Previously the line and column reported for a text node were that
+            of the parent element.</p>
         
-        <p>TODO: did we keep this change?</p>
         
-        <p>Wherever possible, the line and column number associated with a node
-        are now the position where the node starts: in the case of elements,
-        the start of the start tag. Previously, Saxon reported the location
-        returned by the SAX parser, which is the position after the associated
-        SAX event (for elements, the end of the start tag). There are a few
-        cases where this information is not available, notably when an
-        element is immediately preceded by a <code>DOCTYPE</code>
-        declaration or an external entity reference. In these cases Saxon
-        will continue to report the location as reported by the SAX parser.</p>
-        
-        <p>In addition, the linked tree model now retains line and column
-        position for text nodes (if line numbering is enabled, which is
-        always the case for stylesheets and schema documents). This enables
+        <p>This enables
         more accurate location information to be provided for expressions
         in XSLT text value templates.</p>
         

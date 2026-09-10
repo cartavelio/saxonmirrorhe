@@ -62,7 +62,7 @@ public class LineNumberMap {
      */
 
     public int getLineNumber(int sequence) {
-        int index = Arrays.binarySearch(sequenceNumbers, sequence);
+        int index = Arrays.binarySearch(sequenceNumbers, 0, allocated, sequence);
         if (index < 0) {
             index = -index - 1;
             if (index > lineNumbers.length - 1) {

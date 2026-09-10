@@ -7150,9 +7150,11 @@
           <p>Note that the value returned is dependent on information supplied by the XML parser.
             For an element node, SAX parsers generally report the line and column position of the
             "&gt;" character at the end of the start tag. StAX parsers by contrast report the
-            position of the "&lt;" character at the start of the start tag. SAX parsers report line
-            and column numbers only for element nodes, so for any other kind of node, the returned
-            value will be -1.</p>
+            position of the "&lt;" character at the start of the start tag.</p>
+          
+          <p>From Saxon 13, Saxon maintains location information for text, comment, and processing
+          instruction nodes as well as for element nodes. A SAX parser reports the location of the
+          end of the node, not the location at the start.</p>
         </div>
       </details>
       <see-also name="system-id" namespace="http://saxon.sf.net/"/>
@@ -8825,11 +8827,13 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           <p>Note that the value returned is dependent on information supplied by the XML parser.
             For an element node, SAX parsers generally report the line and column position of the
             "&gt;" character at the end of the start tag. StAX parsers by contrast report the
-            position of the "&lt;" character at the start of the start tag. SAX parsers report line
-            and column numbers only for element nodes, so for any other kind of node, the returned
-            value will be -1.</p>
+            position of the "&lt;" character at the start of the start tag.</p>
+          
+          <p>From Saxon 13, Saxon maintains location information for text, comment, and processing
+          instruction nodes as well as for element nodes. A SAX parser reports the location of the
+          end of the node, not the location at the start.</p>
 
-          <p>From release 9.0, the <code>-l</code> option also causes line numbers to be copied from
+          <p>The <code>-l</code> option also causes line numbers to be copied from
             a source document to a result document when the <a class="bodylink code"
               href="/xsl-elements/copy-of">xsl:copy-of</a> instruction is applied to a document or
             element node. For elements created using other instructions, the line number will
