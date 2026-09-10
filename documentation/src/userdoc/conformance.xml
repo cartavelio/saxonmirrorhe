@@ -815,6 +815,18 @@
       
 
    </section>
+   <section id="xslt40" title="XSLT 4.0 conformance" class="qt4">
+      <h1>XSLT 4.0 conformance</h1>
+      
+      <p>Saxon-PE and Saxon-EE partially implement the still evolving draft XSLT 4.0 specification.</p>
+      
+      <p>The use of XSLT 4.0 features must be enabled in Saxon, for more information see <a
+         class="bodylink" href="/v4extensions">QT4 extensions</a>.</p>
+      
+      <p>TODO - add details</p>
+      
+   </section>
+   
    <section id="xpath20" title="XPath 2.0 conformance">
       <h1>XPath 2.0 conformance</h1>
 
@@ -1042,44 +1054,17 @@
       </ol>
    </section>
 
-	<section id="xpath40" title="XPath 4.0 conformance">
+   <section id="xpath40" title="XPath 4.0 conformance" class="qt4">
 		<h1>XPath 4.0 conformance</h1>
 		
-	   <p>Saxon-PE and Saxon-EE partially implement the still evolving draft XPath 4.0 Recommendation.</p>
-		
-		<aside>
-		   <p>TODO The following is right for Saxon 12, but update this for Saxon 13.</p>
-			<p>Use one of the following mechanisms to enable syntax extensions:</p>
-
-			<ul>
-				<li>Set the configuration property <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>
-				   (equivalently, use <code>--allowSyntaxExtensions:on</code> on the command line, or
-				   <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</li>
-				<li>Set the language level to 4.0 in a call to an API method such as
-				   <code>XsltCompiler.setXsltLanguageVersion()</code>.</li>
-				<li>
-					<p>For XQuery, set the language level to 4.0 in the XQuery declaration in the query prolog of
-					   the main module, or use the option <code>-qversion:4.0</code> on the command line.</p>
-					<p>When processing a library module, the effective language level is either the declared
-					   version in the prolog of the library module, or the effective language level for the
-					   importing module, whichever is greater. It is generally not a good idea to mix language
-					   levels, because this causes problems with the semantics of constructs that span modules, for
-					   example the type coercions applied when code in one module makes a call on a function
-					   declared in another.</p>
-				</li>
-			</ul>
-
-			<!-- It's expected that this will be changed for Saxon 13, so that setting 4.0 in the stylesheet WILL be enough. -->
-			<p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This gives
-			   you an XSLT 3.0 processor running in forwards compatibility mode, rather than an XSLT 4.0 processor.</p>
-
-			<p>Like other Saxon extensions, these extensions all require Saxon-PE or higher. They are also
-			   available in SaxonCS.</p>
-		</aside>
+      <p>Saxon-PE and Saxon-EE partially implement the still evolving draft XPath 4.0 specification.</p>
+	   
+      <p>The use of XPath 4.0 features must be enabled in Saxon, for more information see <a
+	      class="bodylink" href="/v4extensions">QT4 extensions</a>.</p>
 	   
 	   <p>For a list of changes introduced by XPath 4.0, see <a class="bodylink"
 	      href="/expressions/xpath40new">New in XPath 4.0</a>. Saxon-specific implementation details
-	      are summarised below.</p>
+	      are summarised below. TODO</p>
 		
 	</section>
   
@@ -1524,6 +1509,18 @@
          </li>
       </ol>
 
+   </section>
+   
+   <section id="xquery40" title="XQuery 4.0 conformance" class="qt4">
+      <h1>XQuery 4.0 conformance</h1>
+      
+      <p>Saxon-PE and Saxon-EE partially implement the still evolving draft XQuery 4.0 specification.</p>
+      
+      <p>The use of XQuery 4.0 features must be enabled in Saxon, for more information see <a
+         class="bodylink" href="/v4extensions">QT4 extensions</a>.</p>
+      
+      <p>TODO - add details</p>
+      
    </section>
 
  

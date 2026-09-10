@@ -10,10 +10,11 @@
 		specifications.</p>
 
 	<p class="qt4">This section also now contains details of new extensions in the <a
-			class="bodylink" href="https://qt4cg.org/pr/2501/xquery-40/xpath-40.html">XPath 4.0</a>
-		specification, available in Saxon-PE and Saxon-EE. For an overview of the new additions see <a
-			class="bodylink" href="xpath40new">New features in XPath 4.0</a>. TODO explain how 4.0 features
-		are enabled in Saxon 13.</p>
+			class="bodylink" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html">XPath 4.0</a>
+		specification, with information about the Saxon implementation. The use of these 4.0
+		features requires Saxon-PE or Saxon-EE, and must be enabled - for more information see <a
+			class="bodylink" href="/v4extensions">QT4 extensions</a>. For an overview of the new
+		additions see <a class="bodylink" href="xpath40new">New features in XPath 4.0</a>.</p>
 
 	<aside>See the <a class="bodylink" href="/xpath-api">XPath API for Java</a> section for details
 		on using the XPath Java interfaces, or the <a class="bodylink" href="/saxon-cs/dotnetapi"
@@ -2630,9 +2631,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 	
 	<section id="xpath40new" title="New features in XPath 4.0" class="qt4">
 		<h1>New features in XPath 4.0</h1>
-		<aside>These features are available in Saxon only if explicitly enabled, either directly, or
-			by requesting support for XSLT 4.0 or XQuery 4.0. In both cases, this requires Saxon-PE or
-			higher. Note that streaming and schema-awareness requires Saxon-EE.</aside>
+		<aside>These features require Saxon-PE or Saxon-EE, and are available only if explicitly
+			enabled - for more information see <a class="bodylink" href="/v4extensions">QT4
+				extensions</a>. Note that streaming and schema-awareness requires Saxon-EE.</aside>
 		
 		<p>Some of the new features in XPath 4.0 are as follows. For full details, see the W3C
 			specifications (in particular <a class="bodylink"

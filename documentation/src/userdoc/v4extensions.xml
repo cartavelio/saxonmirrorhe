@@ -2,7 +2,7 @@
 <article id="v4extensions" title="QT4 extensions" class="qt4">
 	<h1>QT4 extensions</h1>
 	
-	<aside>The use of new 4.0 features requires Saxon-PE or higher.</aside>
+	<aside>The use of new 4.0 features requires Saxon-PE or Saxon-EE.</aside>
 
 	<p>A W3C Community Group is working on proposals for extensions to XPath, XSLT, and XQuery, and has
 		produced a version 4.0 set of specifications. Details are at <a
@@ -13,14 +13,6 @@
 	   state of development at the time they were published. They are used as a baseline because they
 	   have a persistent URL, and the documents at that location will not change. However, the specifications
 	   themselves should not be considered to be stable: they will change as the design progresses.)</p>
-
-	<p>TODO Provide some stability and implementation level comments </p>
-	
-
-	<p>FIXME: In some cases, the community group has agreed new features but Saxon has not yet implemented
-		them. In other cases, Saxon has implemented proposed features that the community group has not
-		yet agreed. In addition, the draft specifications are constantly changing. So the
-		specifications are only an approximate guide to what is implemented in Saxon.</p>
 	
 	<p>Because the features in the 4.0 specs cannot be considered stable, they are not enabled by default,
 	and in most cases they are not available in Saxon-HE. To enable 4.0 functionality:</p>
@@ -45,13 +37,13 @@
 	to enable both extensions defined in the 4.0 specifications, and Saxon-specific language extensions.</p>
 	
 	<p>Generally, Saxonica aims to avoid making incompatible changes except in major releases. But
-		the features described in this section are experimental, so this policy does not apply: the
+		since the 4.0 features are not yet entirely stable, this policy does not apply: the
 		aim instead will be to respond rapidly to changes in the developing specification.
 	   Maintenance releases in the 13.x series may therefore reflect changes in the draft specifications.</p>
 
 	<p>Further information and details of the current Saxon implementation has been integrated into the
 		relevant sections of this documentation. Content is highlighted (like this page) to indicate
-		details about QT4 features, using a yellow colored side-bar and the QT4 lightbulb image. The main
+		details about 4.0 features, using a yellow colored side-bar and the QT4 lightbulb image. The main
 		sections with new information are as follows:</p>
 	
 	<ul>

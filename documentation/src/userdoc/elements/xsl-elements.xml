@@ -27,17 +27,21 @@
         give a comprehensive summary of the features, but for the full specification, consult the
         official standard.</p>
 
-    <p class="qt4">This section now includes all additions in the proposed <a
-            href="https://qt4cg.org/specifications/xslt-40/Overview.html" class="bodylink">XSLT 4.0
-            Specification</a> (dated XXXX), with information about the Saxon implementation. From
-        Saxon 13, new 4.0 features are available in XSLT 4.0 stylesheets, and require Saxon-PE or
-        Saxon-EE.</p>
+    <p class="qt4">This section now includes all additions in the draft <a
+            href="https://qt4cg.org/2026-01-28/xslt-40/Overview.html" class="bodylink">XSLT 4.0
+        specification</a> dated 28 January 2026, with information about the Saxon
+        implementation. The use of these 4.0 features requires Saxon-PE or Saxon-EE, and must be
+        enabled: from Saxon 13, on the XSLT command line, use the option
+        <code>-xsltversion:4.0</code>; or on the <code>XsltCompiler</code> class, call
+        <code>setXsltLanguageVersion("4.0")</code>; or set the configuration property <a
+            class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>. (For more information see <a
+                class="bodylink" href="/v4extensions">QT4 extensions</a>.)</p>
 
 
     <h3 class="subtitle">XSLT patterns</h3>
 
     <p>This section of the documentation also contains an informal description of the syntax of <a
-            class="bodylink" href="patterns">Patterns</a> in XSLT 3.0.</p>
+            class="bodylink" href="patterns">XSLT Patterns</a>.</p>
 
     <h3 class="subtitle">Standard attributes</h3>
 
@@ -586,8 +590,8 @@
                     dropped since Saxon 9.6, because it was found to cause problems when local
                     variables were used.</p>
 
-                <p class="qt4">The <code>separator</code> attribute is available from Saxon 13 for
-                    XSLT 4.0 stylesheets; it is available in Saxon 11 and 12 provided that syntax
+                <p class="qt4">The <code>separator</code> attribute is available from Saxon 13 in
+                    XSLT 4.0; it is available in Saxon 11 and 12 provided that syntax
                     extensions are enabled.</p>
             </status>
             <see-also name="call-template" type="xsl-elements"/>
@@ -670,8 +674,7 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>PE/EE 13 11_EXPERIMENTAL</saxon-edition>
             <status>
-                <p>The <code>xsl:array</code> instruction is available from Saxon 13 for XSLT 4.0
-                    stylesheets.</p>
+                <p>The <code>xsl:array</code> instruction is available from Saxon 13 in XSLT 4.0.</p>
                 <p>The instruction is available in Saxon 11 and 12 provided that syntax extensions
                     are enabled, but note that specification and implementation changes were made
                     between the Saxon 12 and 13 releases, so for accurate information it is best to
@@ -1044,8 +1047,8 @@
             <status>
                 <p class="qt4">The use of extension instructions to invoke named templates (as an
                     alternative to using <code>xsl:call-template</code>) is available from Saxon 13
-                    for XSLT 4.0 stylesheets; it is available in Saxon 11 and 12 provided that
-                    syntax extensions are enabled.</p>
+                    in XSLT 4.0; it is available in Saxon 11 and 12 provided that syntax
+                    extensions are enabled.</p>
             </status>
             <see-also name="apply-templates" type="xsl-elements"/>
             <see-also name="template" type="xsl-elements"/>
@@ -1255,7 +1258,7 @@
                     needed. This also means that if there is any branch whose static type is
                     incompatible with the required type, a compile-time error will be reported even
                     if the branch is never executed.</p>
-                <p class="qt4">From Saxon 13, in a XSLT 4.0 stylesheet the <code>xsl:when</code> and
+                <p class="qt4">From Saxon 13, in XSLT 4.0 the <code>xsl:when</code> and
                         <code>xsl:otherwise</code> elements are allowed to return a value using a
                         <code>select</code> attribute in place of a contained sequence constructor.
                     This is allowed in Saxon 10 to 12 provided that syntax extensions are
@@ -1918,8 +1921,8 @@
                     circumvented by using the <code>outermost</code> function, for example the
                     expression <code>outermost(//title)</code> is striding even though it uses the
                     descendant axis.</p>
-                <p class="qt4">The <code>separator</code> attribute is available from Saxon 13 for
-                    XSLT 4.0 stylesheets; it is available in Saxon 11 and 12 provided that syntax
+                <p class="qt4">The <code>separator</code> attribute is available from Saxon 13 in
+                    XSLT 4.0; it is available in Saxon 11 and 12 provided that syntax
                     extensions are enabled.</p>
             </status>
             <see-also name="apply-templates" type="xsl-elements"/>
@@ -2270,7 +2273,7 @@
             <saxon-edition>ALL</saxon-edition>
             <status>
                 <p class="qt4">The new attributes <code>then</code> and <code>else</code> are
-                    available from Saxon 13 for XSLT 4.0 stylesheets; they are available in Saxon 10
+                    available from Saxon 13 in XSLT 4.0; they are available in Saxon 10
                     to 12 provided that syntax extensions are enabled.</p>
             </status>
             <see-also name="choose" type="xsl-elements"/>
@@ -2460,8 +2463,8 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>PE/EE 11</saxon-edition>
             <status>
-                <p>The <code>xsl:item-type</code> declaration is available from Saxon 13 for XSLT
-                    4.0 stylesheets; it is available in Saxon 11 and 12 provided that syntax
+                <p>The <code>xsl:item-type</code> declaration is available from Saxon 13 in XSLT
+                    4.0; it is available in Saxon 11 and 12 provided that syntax
                     extensions are enabled. (It was also available in earlier releases under the
                     synonym <a class="bodylink code" href="/extensions/instructions/item-type"
                         >saxon:item-type</a>.)</p>
@@ -2711,7 +2714,7 @@
             <saxon-edition>ALL_SINCE_9.8 PE/EE_9.6</saxon-edition>
             <status>
                 <p class="qt4">The new attributes <code>duplicates</code> and <code>select</code>
-                    are available from Saxon 13 for XSLT 4.0 stylesheets. The 4.0
+                    are available from Saxon 13 in XSLT 4.0. The 4.0
                         <code>duplicates</code> attribute replaces <code>on-duplicates</code> which
                     was defined in earlier drafts, and which was based on the Saxon extension
                     attribute <code>saxon:on-duplicates</code>, which were previously available in
@@ -3865,8 +3868,8 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
             <status>
-                <p class="qt4">The <code>select</code> attribute is available from Saxon 13 for XSLT
-                    4.0 stylesheets; it is available in Saxon 10 to 12 provided that syntax
+                <p class="qt4">The <code>select</code> attribute is available from Saxon 13 in XSLT
+                    4.0; it is available in Saxon 10 to 12 provided that syntax
                     extensions are enabled.</p>
             </status>
             <see-also name="choose" type="xsl-elements"/>
@@ -5221,8 +5224,8 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>PE/EE 11</saxon-edition>
             <status>
-                <p>The <code>xsl:switch</code> instruction is available from Saxon 13 for XSLT 4.0
-                    stylesheets; it is available in Saxon 11 and 12 provided that syntax extensions
+                <p>The <code>xsl:switch</code> instruction is available from Saxon 13 in XSLT
+                    4.0; it is available in Saxon 11 and 12 provided that syntax extensions
                     are enabled.</p>
             </status>
             <see-also name="when" type="xsl-elements"/>
@@ -5958,8 +5961,8 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <status>
-                <p class="qt4">The <code>select</code> attribute is available from Saxon 13 for XSLT
-                    4.0 stylesheets; it is available in Saxon 10 to 12 provided that syntax
+                <p class="qt4">The <code>select</code> attribute is available from Saxon 13 in XSLT
+                    4.0; it is available in Saxon 10 to 12 provided that syntax
                     extensions are enabled.</p>
             </status>
             <see-also name="choose" type="xsl-elements"/>
@@ -6485,7 +6488,7 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
             <h1>Patterns in XSLT 4.0</h1>
 
             <p>In XSLT 4.0, the syntax of match patterns is extended to make it easier to match maps
-                and arrays. These extensions are available from Saxon 13 for XSLT 4.0 stylesheets;
+                and arrays. These extensions are available from Saxon 13 in XSLT 4.0;
                 and available in Saxon 11 and 12 provided that syntax extensions are enabled.</p>
 
             <p>In particular the syntax <code>ma-type predicate*</code> is allowed in a pattern,
@@ -6509,7 +6512,7 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
                 </li>
             </ul>
 
-            <p>For example if an <a class="bodylink" href="/xsl-elements/item-type">named item
+            <p>For example if a <a class="bodylink" href="/xsl-elements/item-type">named item
                     type</a> has been declared:</p>
 
             <pre><code class="language-xml">&lt;xsl:item-type name="cx:complex" type="record(r as xs:double, i as xs:double)"/></code></pre>
@@ -6547,6 +6550,10 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
 
             <p>The rules for calculating the default priority of these patterns are not yet stable;
                 explicit priorities should be used if there is any risk of ambiguity.</p>
+            
+            <p>TODO [the following was moved from expressions/types/node-types]: In match patterns, union node tests work like union patterns, so <code>match="@(code,
+                ns:*)"</code> is equivalent to having two separate template rules, matching the two
+                node tests, with different default priority.</p>
 
         </section>
     </section>
