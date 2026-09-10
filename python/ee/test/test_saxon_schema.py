@@ -111,7 +111,7 @@ def testValidatorReport(saxonproc2):
     saxonproc2.set_cwd('.')
     saxonproc2.set_configuration_property("xsdversion", "1.1")
     val = saxonproc2.new_schema_validator()
-    val.set_property('report-node', "true");
+    val.set_property('report-node', "true")
     assert val is not None
     
     invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>"
