@@ -22,15 +22,7 @@ public class KeyValuePair  {
         this.key = key;
         this.value = value;
     }
-
-    /**
-     * Get a key value record corresponding to this {@code KeyValuePair}
-     * @return a corresponding key value record, that is, an XDM map in the form <code>map{"key":key, "value":value}</code>
-     */
-    public MapItem asKeyValueRecord() {
-        return new ShapedMap(Shape.KEY_VALUE_PAIR, key, value);
-    }
-
+    
 }
 
 // Copyright (c) 2010-2023 Saxonica Limited

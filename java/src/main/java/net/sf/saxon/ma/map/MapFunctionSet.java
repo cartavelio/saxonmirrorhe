@@ -25,7 +25,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -221,12 +220,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE, null));
 
-            register("pair", 2, e -> e.populate(MapPair::new, KVP_TYPE_EXTENSIBLE, ONE, 0)
-                    .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | INS, null)
-                    .arg(1, AnyItemType.getInstance(), STAR | INS, null));
-
-            register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE_EXTENSIBLE, STAR, 0)
-                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+//            register("pair", 2, e -> e.populate(MapPair::new, KVP_TYPE_EXTENSIBLE, ONE, 0)
+//                    .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | INS, null)
+//                    .arg(1, AnyItemType.getInstance(), STAR | INS, null));
+//
+//            register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE_EXTENSIBLE, STAR, 0)
+//                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             register("empty", 1, e -> e.populate(MapEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
@@ -234,13 +233,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             register("entries", 1, e -> e.populate(MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
-            register("of-pairs", 1, e -> e.populate(MapOfPairs::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                    .arg(0, KVP_TYPE_EXTENSIBLE, STAR | INS, null));
-
-            register("of-pairs", 2, e -> e.populate(MapOfPairs::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                    .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null)
-                    .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
-                    .setOptionDetails(mergeOptionDetails));
+//            register("of-pairs", 1, e -> e.populate(MapOfPairs::new, MapType.ANY_MAP_TYPE, ONE, 0)
+//                    .arg(0, KVP_TYPE_EXTENSIBLE, STAR | INS, null));
+//
+//            register("of-pairs", 2, e -> e.populate(MapOfPairs::new, MapType.ANY_MAP_TYPE, ONE, 0)
+//                    .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null)
+//                    .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+//                    .setOptionDetails(mergeOptionDetails));
 
             register("untyped-contains", 2, e -> e.populate(MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
@@ -560,19 +559,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the proposed 4.0 function map:pair(key, value) =&gt; record(key, value)
-     */
-    public static class MapPair extends SystemFunction {
-
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            AtomicValue key = (AtomicValue) arguments[0].head();
-            GroundedValue value = arguments[1].materialize();
-            return new ShapedMap(Shape.KEY_VALUE_PAIR, key, value);
-        }
-    }
-
-    /**
      * Implementation of the proposed 4.0 function map:empty(Map) =&gt; boolean
      */
     public static class MapEmpty extends SystemFunction {
@@ -581,22 +567,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             return BooleanValue.get(map.isEmpty());
-        }
-    }
-
-    /**
-     * Implementation of the proposed 4.0 function map:pairs(Map) =&gt; record(key, value)*
-     */
-    public static class MapPairs extends SystemFunction {
-
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            MapItem map = (MapItem) arguments[0].head();
-            Iterable<KeyValuePair> pairIterable = map.keyValuePairs();
-            SequenceIterator iter = new SequenceIteratorOverJavaIterator<KeyValuePair>(
-                    pairIterable.iterator(),
-                    (KVP, position) -> KVP.asKeyValueRecord());
-            return new LazySequence(iter);
         }
     }
 
@@ -846,39 +816,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         }
     }
 
-    /**
-     * Implementation of the function map:of-pairs() =&gt; Map
-     */
-    public static class MapOfPairs extends SystemFunction {
-
-
-        @Override
-        public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-            GeneralMapBuilder builder = new GeneralMapBuilder();
-            MapItem options = EmptyMap.getInstance();
-            if (arguments.length > 1) {
-                options = (MapItem) arguments[1].head();
-                if (options != null) {
-                    getDetails().optionDetails.processSuppliedOptions(options, context);
-                }
-            }
-            OnDuplicatesAction action = getDuplicatesCombiner(options, "combine", "FOJS0003");
-            builder.setDuplicatesAction(action);
-
-            SequenceIterator iter = arguments[0].iterate();
-            StringValue keyKey = new StringValue("key");
-            StringValue valueKey = new StringValue("value");
-            for (Item item; (item = iter.next()) != null; ) {
-                AtomicValue key = (AtomicValue) ((MapItem) item).get(keyKey);
-                GroundedValue suppliedValue = ((MapItem) item).get(valueKey);
-                builder.put(key, suppliedValue);
-            }
-            return builder.getCompletedMap(context);
-        }
-    }
 
     /**
-     * Implementation of the extension function map:put() =&gt; Map
+     * Implementation of the function map:put() =&gt; Map
      */
 
     public static class MapPut extends SystemFunction {
