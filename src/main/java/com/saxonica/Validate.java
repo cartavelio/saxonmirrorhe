@@ -568,7 +568,16 @@ public class Validate {
      */
 
     protected int quit(String message, int code) {
-        config.getLogger().info(message);
+        if (config != null && config.getLogger() != null) {
+            config.getLogger().warning(message);
+        } else {
+            System.err.println(message);
+        }
+        if (allowExit) {
+            System.exit(code);
+        } else {
+            throw new RuntimeException(message);
+        }
         return code;
     }
 
