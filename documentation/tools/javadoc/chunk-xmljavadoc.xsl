@@ -73,7 +73,7 @@ History
 
         <!-- chunk xml at package level (default) -->
 
-        <xsl:for-each-group select="d:doclet/(d:class|d:interface|d:enum)[@nesting eq 'top_level']" group-by="@package">
+        <xsl:for-each-group select="d:doclet/(d:class|d:interface|d:enum|d:record)[@nesting eq 'top_level']" group-by="@package">
             <xsl:sort select="@package"/>
             <xsl:variable name="package" select="current-grouping-key()"/>
             <!--<xsl:message>package document: <xsl:value-of select="$package"/></xsl:message>-->
@@ -98,7 +98,7 @@ History
         <xsl:result-document href="{$base-output}/javadoc-types.xml">
             <packages title="Search Data">
 
-                <xsl:for-each-group select="d:doclet/(d:class|d:interface|d:enum)[@nesting eq 'top_level']" group-by="@package">
+                <xsl:for-each-group select="d:doclet/(d:class|d:interface|d:enum|d:record)[@nesting eq 'top_level']" group-by="@package">
                     <xsl:sort select="@package"/>
                     <j id="{@package}" in="p">
 
@@ -117,7 +117,7 @@ History
         <xsl:result-document href="{$base-output}/javadoc-tree.xml">
             <packages id="javadoc" title="Java API">
 
-                <xsl:for-each-group select="d:doclet/(d:class|d:interface|d:enum)[@nesting eq 'top_level']" group-by="@package">
+                <xsl:for-each-group select="d:doclet/(d:class|d:interface|d:enum|d:record)[@nesting eq 'top_level']" group-by="@package">
                     <xsl:sort select="@package"/>
                     <j id="{@package}" in="p">
 
