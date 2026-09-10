@@ -183,7 +183,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
             ItemType filterFunctionType = new SpecificFunctionType(
                     new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
-                    SequenceType.SINGLE_BOOLEAN);
+                    SequenceType.OPTIONAL_BOOLEAN);
 
             register("keys-where", 2, e -> e.populate(MapKeysWhere::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
@@ -218,7 +218,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
             SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
                     new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
-                    SequenceType.SINGLE_BOOLEAN
+                    SequenceType.OPTIONAL_BOOLEAN
             );
 
             register("filter", 2, e -> e.populate(MapFilter::new, MapType.ANY_MAP_TYPE, ONE, 0)
@@ -267,7 +267,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             MapItem result = new HashTrieMap();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 BooleanValue match = (BooleanValue)dynamicCall(fn, context, new Sequence[]{pair.key, pair.value}).head();
-                if (match.getBooleanValue()) {
+                if (match != null && match.getBooleanValue()) {
                     result = result.addEntry(pair.key, pair.value);
                 }
             }
@@ -683,7 +683,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 BooleanValue selected = (BooleanValue) fn.call(context, new Sequence[]{pair.key, pair.value}).head();
-                if (selected.getBooleanValue()) {
+                if (selected != null && selected.getBooleanValue()) {
                     results = results.append(pair.key);
                 }
             }

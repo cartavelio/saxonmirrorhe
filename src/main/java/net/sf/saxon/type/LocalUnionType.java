@@ -12,6 +12,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.UnionCoercionPlan;
 import net.sf.saxon.value.AtomicValue;
@@ -214,6 +215,9 @@ public class LocalUnionType extends ChoiceItemType implements PlainType, UnionTy
     public AtomicValue getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
         for (ItemType type : memberTypes) {
+            if (type instanceof EnumerationUnionType) {
+                throw new UncheckedXPathException("NOT YET IMPLEMENTED");
+            }
             StringConverter converter = rules.makeStringConverter((AtomicType)type);
             converter.setNamespaceResolver(resolver);
             ConversionResult outcome = converter.convertString(value);

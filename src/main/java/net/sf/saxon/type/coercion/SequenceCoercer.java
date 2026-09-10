@@ -98,13 +98,21 @@ public final class SequenceCoercer extends UnaryExpression {
         // if the actual function accepts a supertype.
 
         ItemType reqItemType = requiredType.getPrimaryType();
+        if (reqItemType instanceof SpecificFunctionType) {
+            return this; // Function coercion is mandatory
+        }
         int reqCardinality = requiredType.getCardinality();
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         Expression supplied = getOperand().getChildExpression();
-        if (Cardinality.subsumes(reqCardinality, supplied.getCardinality()) &&
-                th.isSubType(supplied.getItemType(), reqItemType) &&
-                !(reqItemType instanceof SpecificFunctionType)) {
-            return supplied;
+        if (Cardinality.subsumes(reqCardinality, supplied.getCardinality())) {
+            // no cardinality check needed
+            if (th.isSubType(supplied.getItemType(), reqItemType)) {
+                // no item type check needed
+                return supplied;
+            } else if (th.isSubType(reqItemType, supplied.getItemType())) {
+                // need item type check only (note: this rewrite needed for streaming use cases)
+                return new ItemChecker(getBaseExpression(), reqItemType, roleSupplier);
+            }
         }
 
         return this;

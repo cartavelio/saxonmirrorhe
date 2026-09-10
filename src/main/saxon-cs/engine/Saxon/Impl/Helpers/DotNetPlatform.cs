@@ -124,7 +124,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public Saxon.Hej.lib.StringCollator makeUcaCollator(string uri, Saxon.Hej.Configuration config) {
-            return null;
+            return DotNetCollationFactory.makeCollation(config, uri, null);
         }
 
         public Saxon.Hej.regex.RegularExpression compileRegularExpression(Saxon.Hej.Configuration config,

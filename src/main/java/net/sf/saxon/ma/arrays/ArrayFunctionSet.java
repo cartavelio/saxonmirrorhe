@@ -75,7 +75,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         SpecificFunctionType filterFunctionType40 = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
-                SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
+                SequenceType.OPTIONAL_BOOLEAN).withAcceptReducedArity();
 
         final SpecificFunctionType filterFunctionType = version >= 40 ? filterFunctionType40 : filterFunctionType31;
 
@@ -369,20 +369,24 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             FunctionItem fn = (FunctionItem) arguments[1].head();
             List<GroundedValue> list = new ArrayList<>(expectedSize());
             switch (fn.getArity()) {
-                case 0:
-                    boolean truth = ((BooleanValue) dynamicCall(fn, context).head()).getBooleanValue();
-                    return truth ? array : SimpleArrayItem.EMPTY_ARRAY;
-                case 1:
+                case 0: {
+                    BooleanValue truth = ((BooleanValue) dynamicCall(fn, context).head());
+                    return (truth != null && truth.getBooleanValue()) ? array : SimpleArrayItem.EMPTY_ARRAY;
+                }
+                case 1: {
                     for (GroundedValue gv : array.members()) {
-                        if (((BooleanValue) dynamicCall(fn, context, gv).head()).getBooleanValue()) {
+                        BooleanValue truth = ((BooleanValue) dynamicCall(fn, context, gv).head());
+                        if (truth != null && truth.getBooleanValue()) {
                             list.add(gv);
                         }
                     }
                     return makeArray(list);
+                }
                 case 2:
                     int position = 0;
                     for (GroundedValue gv : array.members()) {
-                        if (((BooleanValue) dynamicCall(fn, context, gv, new Int64Value(++position)).head()).getBooleanValue()) {
+                        BooleanValue truth = ((BooleanValue) dynamicCall(fn, context, gv, new Int64Value(++position)).head());
+                        if (truth != null && truth.getBooleanValue()) {
                             list.add(gv);
                         }
                     }

@@ -7,18 +7,24 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.ItemType;
 
 /**
  * Implement the XSLT current() function
  */
 
 public class Current extends SystemFunction {
+
+    private ItemType contextItemType;
 
     /**
      * The name of the Current function
@@ -45,6 +51,34 @@ public class Current extends SystemFunction {
 //        fn.setRetainedStaticContext(getRetainedStaticContext());
 //        return fn;
         return null;
+    }
+
+    /**
+     * Method called during static type checking. This method may be implemented in subclasses so that functions
+     * can take advantage of knowledge of the types of the arguments that will be supplied.
+     *
+     * @param visitor         an expression visitor, providing access to the static context and configuration
+     * @param contextInfo information about whether the context item is set, and what its type is
+     * @param arguments       the expressions appearing as arguments in the function call
+     * @throws XPathException if an error is detected
+     */
+    @Override
+    public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression[] arguments) throws XPathException {
+        this.contextItemType = contextInfo.getItemType();
+    }
+
+    /**
+     * Determine the item type of the value returned by the function
+     *
+     * @return the item type of the result
+     */
+    @Override
+    public ItemType getResultItemType(Expression[] args) {
+        if (contextItemType != null) {
+            return contextItemType;
+        } else {
+            return super.getResultItemType();
+        }
     }
 
     /**

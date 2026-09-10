@@ -65,6 +65,11 @@ public class DeepEqual20 extends CollatingFunctionFixed {
         return deepEqual40.call(context, arguments);
     }
 
+    @Override
+    public String getStreamerName() {
+        return "DeepEqual";
+    }
+
 
 }
 
