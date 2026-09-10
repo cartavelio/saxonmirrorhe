@@ -166,7 +166,17 @@ namespace Saxon.Api {
         /// <summary>
         /// Gets the <c>SchemaManager</c> for this <c>Processor</c>. 
         /// </summary>
+        /// <remarks>
+        /// <para>The <c>SchemaManager</c> is obsolete and deprecated from Saxon 13, because
+        /// it assumes the old model of a global schema shared by all queries and transformations
+        /// running under this processor. It is better to use a <c>SchemaCompiler</c> which
+        /// allows multiple independent schemas to be constructed, each of which can be used
+        /// as the basis for schema validation.</para>
+        /// <para>Applications that continue to use the <c>SchemaManager</c> with Saxon 13 may
+        /// need to make adjustments. See the documentation of <c>SchemaManager</c> for details.</para>
+        /// </remarks>
 
+        [Obsolete("Use NewXsdCompiler instead")]
         public SchemaManager SchemaManager
         {
             get

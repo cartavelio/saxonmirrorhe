@@ -9,34 +9,35 @@ using Saxon.Hej.type;
 using Saxon.Api.Support;
 
 
-
 namespace Saxon.Api {
     /// <summary>
-    /// A <c>SchemaManager</c> is responsible for compiling schemas and
-    /// maintaining a cache of compiled schemas that can be used for validating
-    /// instance documents.
+    /// A <c>SchemaManager</c> is responsible for maintaining a global schema
+    /// for all queries and transformations running under a single processor. The class
+    /// is deprecated from Saxon 13, because it only allows a single schema. The class
+    /// is maintained for the time being in the interests of compatibility, but
+    /// some changes may be needed.
     /// </summary>
     /// <remarks>
     /// <para>To obtain a <c>SchemaManager</c>, use the 
     /// <c>SchemaManager</c> property of the <c>Processor</c> object.</para>
     /// <para>In a schema-aware <c>Processor</c> there is exactly one
     /// <c>SchemaManager</c> (in a non-schema-aware <c>Processor</c> there is none).</para>
-    /// <para>The cache of compiled schema definitions can include only one schema
-    /// component (for example a type, or an element declaration) with any given name.
-    /// An attempt to compile two different schemas in the same namespace will usually
-    /// therefore fail.</para>
-    /// <para>As soon as a type definition or element declaration is used for the first
-    /// time in a validation episode, it is marked as being "sealed": this prevents subsequent
-    /// modifications to the component. Examples of modifications that are thereby disallowed
-    /// include adding to the substitution group of an existing element declaration, adding subtypes
-    /// to an existing type, or redefining components using <c>&lt;xs:redefine&gt;</c>.</para>
+    /// <para>The following restrictions apply from Saxon 13:</para>
+    /// <para>
+    /// (a) the schema must be compiled before a <c>SchemaValidator</c> can be created;
+    /// (b) if a schema is to be assembled from several schema documents, they must all be
+    /// processed together in a single call of the <c>Compile</c> method;
+    /// (c) if the schema is to be imported into any <c>XQueryCompiler</c>, <c>XsltCompiler</c>,
+    /// or <c>XPathCompiler</c>, the schema must be compiled before the XQuery, XSLT, or XPath
+    /// compiler is created.
+    /// </para>
     /// </remarks>
 
     [Serializable]
+    [Obsolete("Use Saxon.Api.XsdCompiler in preference")]
     public class SchemaManager
     {
         private Saxon.Hej.s9api.SchemaManager s9schemaManager;
-        private Configuration config;
         private Processor processor;
         
         // internal constructor
@@ -45,7 +46,6 @@ namespace Saxon.Api {
         {
             this.processor = processor;
             this.s9schemaManager = processor.JProcessor.getSchemaManager();
-            this.config = processor.Implementation;
         }
 
         /// <summary>
@@ -197,6 +197,29 @@ namespace Saxon.Api {
         {
             s9schemaManager.load(node.Implementation.asActiveSource());
         }
+        
+        
+        ///<summary>
+        /// Load a schema document from a given SchemaSource, or from a set of SchemaSources.
+        /// The schema components are  returned
+        /// by the method as an <c>XsdSchema</c> object.
+        ///</summary>
+        /// <param name="sources">A set of SchemaSources.</param>
+        /// <returns>The schema constructed from the supplied SchemaSources.</returns>
+        public XsdSchema Compile(params XsdCompiler.SchemaSource[] sources) {
+            XsdSchema result;
+            if (sources.Length == 0) {
+                result = processor.NewXsdCompiler().EmptySchema();
+            }
+            else {
+                result = processor.NewXsdCompiler().Compile(sources);
+            }
+
+            XdmDestination scm = new();
+            result.ExportComponents(scm);
+            s9schemaManager.importComponents(scm.XdmNode.Implementation.asActiveSource());
+            return result;
+        }
 
         /// <summary>
         /// Import schema components from an SCM file, produced using a previous call on
@@ -241,8 +264,12 @@ namespace Saxon.Api {
         /// </remarks>
 
         public SchemaValidator NewSchemaValidator() {
-            return null; // TODO: for now
-            //return new (s9schemaManager.newSchemaValidator(), processor);
+            SchemaValidator result = null;
+#if EE 
+            Saxon.Hej.s9api.SchemaValidator validatorJ = s9schemaManager.newSchemaValidator();
+            result = new Saxon.Api.Support.XsdValidatorEE(validatorJ, processor);
+#endif
+            return result;
         }
 
         /// <summary>
