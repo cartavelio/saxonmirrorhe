@@ -1,6 +1,7 @@
 import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.gradle.api.Project
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.JavaExec
 
 class TestSuite {
@@ -11,6 +12,7 @@ class TestSuite {
                    "XT30": "XSLT3.0",
                    "XT40": "XSLT4.0",
                    "XP31": "XPath3.1",
+                   "XQ10": "XQuery1.0",                                    
                    "XQ20": "XQuery2.0",
                    "XQ30": "XQuery3.0",
                    "XQ31": "XQuery3.1"]
@@ -19,6 +21,8 @@ class TestSuite {
   Project project
   boolean configOk = true
   String suite = null
+  String testPlatform = null
+  String testDotnet = null
   String testRelease = null
   String testTaskName = null
   String testClass = null
@@ -30,6 +34,7 @@ class TestSuite {
   String testCatalog = null
   Boolean testByteCode = null
   Boolean testUnfolded = null
+  Boolean testTree = null
   Boolean testExport = null
   Boolean testJit = null
   ArrayList testOptions = []
@@ -42,6 +47,8 @@ class TestSuite {
   private void reset(String suiteName) {
     configOk = true
     suite = suiteName
+    testPlatform = null
+    testDotnet = null
     testRelease = null
     testTaskName = null
     testClass = null
@@ -53,6 +60,7 @@ class TestSuite {
     testCatalog = null
     testByteCode = null
     testUnfolded = null
+    testTree = null
     testExport = null
     testJit = null
     testDebug = null
@@ -75,6 +83,8 @@ class TestSuite {
   private void dumpConfiguration() {
     println("==== TestSuite configuration: ====")
     println("Test suite: ${suite}")
+    dumpState("Platform", testPlatform)
+    dumpState("Dotnet", testDotnet)
     dumpState("Release", testRelease)
     dumpState("Task", testTaskName)
     dumpState("Class", testClass)
@@ -86,6 +96,7 @@ class TestSuite {
     dumpState("Catalog", testCatalog)
     dumpState("Bytecode", testByteCode)
     dumpState("Unfolded", testUnfolded)
+    dumpState("Tree", testTree)
     dumpState("Export", testExport)
     dumpState("Jit", testJit)
     if (testOptions.size() != 0) {
@@ -153,6 +164,19 @@ class TestSuite {
     testTaskName = name
   }
 
+  void platform(String platform) {
+    if (platform != "java" && platform != "dotnet") {
+      throw new GradleException("Unsupported platform: ${platform}")
+    }
+    onlyOnce("platform", testPlatform)
+    testPlatform = platform
+  }
+
+  void dotnet(String dotnet) {
+    onlyOnce("dotnet", testDotnet)
+    testDotnet = dotnet
+  }
+
   void release(String release) {
     onlyOnce("release", testRelease)
     testRelease = release
@@ -188,6 +212,11 @@ class TestSuite {
     testUnfolded = un
   }
 
+  void tree(boolean t) {
+    onlyOnce("tree", testTree)
+    testTree = t
+  }
+
   void export(boolean ex) {
     onlyOnce("export", testExport)
     testExport = ex
@@ -220,11 +249,19 @@ class TestSuite {
     }
 
     String computedTaskName = "${testRelease}${taskroot[suite]}_${testLang}"
+
+    if (testPlatform == "dotnet") {
+      computedTaskName = "dotnet${computedTaskName}"
+    }
+
     if (testByteCode != null) {
       computedTaskName += "_bc${testByteCode ? 'on' : 'off'}"
     }
     if (testUnfolded != null && testUnfolded) {
       computedTaskName += "_un"
+    }
+    if (testTree != null && testTree) {
+      computedTaskName += "_tree"
     }
     if (testExport != null && testExport) {
       computedTaskName += "_export"
@@ -246,6 +283,11 @@ class TestSuite {
     }
 
     String computedName = "${project.buildDir}/test-results/${testRelease}j"
+
+    if (testPlatform == "dotnet") {
+      computedName = "${project.buildDir}/test-results/${testRelease}dotnet"
+    }
+
     computedName = "${computedName}/${suite}/${project.ext.DSTAMP}"
     computedName = "${computedName}/report_${langCodeMap[testLang]}_${project.ext.saxonVersion}"
     if (testByteCode != null && testByteCode) {
@@ -253,6 +295,9 @@ class TestSuite {
     }
     if (testUnfolded != null && testUnfolded) {
       computedName += "_un"
+    }
+    if (testTree != null && testTree) {
+      computedName += "_tree"
     }
     if (testExport != null && testExport) {
       computedName += "_export"
@@ -308,7 +353,14 @@ class TestSuite {
     reset("qt3")
     cl.delegate = this
     cl()
+    if (testPlatform == "dotnet") {
+      qt3Dotnet(cl)
+    } else {
+      qt3Java(cl)
+    }
+  }
 
+  def qt3Java(Closure cl) {
     require("language", testLang)
     require("directory", testDir)
     require("release", testRelease)
@@ -412,11 +464,89 @@ class TestSuite {
     }
   }
 
+  def qt3Dotnet(Closure cl) {
+    require("language", testLang)
+    require("directory", testDir)
+    require("release", testRelease)
+    forbid("jit", testJit)
+    forbid("export", testExport)
+
+    testCatalog = testCatalog ?: "catalog.xml"
+    testTaskName = testTaskName ?: computeTaskName()
+    testEx = testEx ?: computeExceptions()
+
+    def testReport = computeReport()
+    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
+    testReportFilename = getReportFilename(testReport.getAbsolutePath())
+
+    if (testDebug) {
+      dumpConfiguration()
+    }
+
+    if (!configOk) {
+      setupInvalidConfig(testTaskName)
+      return
+    }
+
+    // There's no bytecode generation and it's only EE
+    testTaskName = testTaskName.replace("_bcoff", "").replace("dotnetee", "dotnet")
+
+    project.task(testTaskName, type: Exec) {
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
+      outputs.upToDateWhen { false }
+
+      def msg = "Run the QT3 test suite driver for ${testLang} with dotnet"
+      if (testByteCode != null || testUnfolded != null) {
+        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
+      }
+      description msg
+      dependsOn "dotnetTestDrivers", "cloneQT3TestSuite"
+
+      doFirst {
+        project.mkdir testReportDirectory
+      }
+
+      def driver = "${project.buildDir}/testdrivers/bin/Release/net5.0/TestDrivers.dll"
+
+      def testargs = [testDotnet, driver,
+                      testDir,
+                      "-exceptions:${testEx}",
+                      "-reportfilename:${testReportFilename}.xml",
+                      "-o:${testReportDirectory}",
+                      "-lang:${testLang}"]
+
+      if (testUnfolded) {
+        testargs += ["-unfolded"]
+      }
+
+      testargs += testOptions
+
+      commandLine testargs
+    }
+
+    Task t = project.tasks.findByName("qt3TestsDotnet")
+    if (t) {
+      t.dependsOn testTaskName
+    }
+    t = project.tasks.findByName("${testRelease}jTestSuitesDotnet")
+    if (t) {
+      t.dependsOn testTaskName
+    }
+  }
+
   def qt3extra(Closure cl) {
     reset("qt3extra")
     cl.delegate = this
     cl()
+    if (testPlatform == "dotnet") {
+      qt3extraDotnet(cl)
+    } else {
+      qt3extraJava(cl)
+    }
+  }
 
+  def qt3extraJava(Closure cl) {
     require("language", testLang)
     require("directory", testDir)
     require("release", testRelease)
@@ -513,6 +643,77 @@ class TestSuite {
       t.dependsOn testTaskName
     }
     t = project.tasks.findByName("${testRelease}jTestSuitesJava")
+    if (t) {
+      t.dependsOn testTaskName
+    }
+  }
+
+  def qt3extraDotnet(Closure cl) {
+    require("language", testLang)
+    require("directory", testDir)
+    require("release", testRelease)
+    forbid("unfolded", testUnfolded)
+    forbid("jit", testJit)
+    forbid("export", testExport)
+
+    testCatalog = testCatalog ?: "catalog.xml"
+    testTaskName = testTaskName ?: computeTaskName()
+    testClass = testClass ?: computeClass()
+    testEx = testEx ?: computeExceptions()
+
+    def testReport = computeReport()
+    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
+    testReportFilename = getReportFilename(testReport.getAbsolutePath())
+
+    if (testDebug) {
+      dumpConfiguration()
+    }
+
+    if (!configOk) {
+      setupInvalidConfig(testTaskName)
+      return
+    }
+
+    // There's no bytecode generation and it's only EE
+    testTaskName = testTaskName.replace("_bcoff", "").replace("dotnetee", "dotnet")
+
+    project.task(testTaskName, type: Exec) {
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
+      outputs.upToDateWhen { false }
+
+      def msg = "Run the QT3 extra test suite driver for ${testLang} with dotnet}"
+      if (testByteCode != null || testUnfolded != null) {
+        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, unfolded: ${testUnfolded ? 'yes' : 'no'})"
+      }
+      description msg
+      dependsOn "dotnetTestDrivers", "cloneQT3TestSuite"
+
+      doFirst {
+        project.mkdir testReportDirectory
+      }
+
+      def driver = "${project.buildDir}/testdrivers/bin/Release/net5.0/TestDrivers.dll"
+
+      def testargs = [testDotnet, driver,
+                      testDir,
+                      "-exceptions:${testEx}",
+                      "-reportfilename:${testReportFilename}.xml",
+                      "-o:${testReportDirectory}",
+                      "-lang:${testLang}"]
+
+      testargs += testOptions
+
+      //println(testargs)
+
+      commandLine testargs
+    }
+
+    Task t = project.tasks.findByName("qt3ExtraTestsDotnet")
+    if (t) {
+      t.dependsOn testTaskName
+    }
+    t = project.tasks.findByName("${testRelease}jTestSuitesDotnet")
     if (t) {
       t.dependsOn testTaskName
     }
@@ -631,6 +832,14 @@ class TestSuite {
     cl.delegate = this
     cl()
 
+    if (testPlatform == "dotnet") {
+      xslt30Dotnet(cl)
+    } else {
+      xslt30Java(cl)
+    }
+  }
+
+  def xslt30Java(Closure cl) {
     require("language", testLang)
     require("directory", testDir)
     require("release", testRelease)
@@ -737,6 +946,76 @@ class TestSuite {
       t.dependsOn testTaskName
     }
     t = project.tasks.findByName("${testRelease}jTestSuitesJava")
+    if (t) {
+      t.dependsOn testTaskName
+    }
+  }
+
+  def xslt30Dotnet(Closure cl) {
+    require("language", testLang)
+    require("directory", testDir)
+    require("release", testRelease)
+    forbid("unfolded", testUnfolded)
+
+    testCatalog = testCatalog ?: "catalog.xml"
+    testTaskName = testTaskName ?: computeTaskName()
+    testClass = testClass ?: computeClass()
+    testEx = testEx ?: computeExceptions()
+
+    def testReport = computeReport()
+    testReportDirectory = getReportDirectory(testReport.getAbsolutePath())
+    testReportFilename = getReportFilename(testReport.getAbsolutePath())
+
+    if (testDebug) {
+      dumpConfiguration()
+    }
+
+    // There's no bytecode generation and it's only EE
+    testTaskName = testTaskName.replace("_bcoff", "").replace("dotnetee", "dotnet")
+
+    if (!configOk) {
+      setupInvalidConfig(testTaskName)
+      return
+    }
+
+    project.task(testTaskName, type: Exec) {
+      inputs.files project.fileTree(dir: "${project.projectDir}/src")
+      outputs.file "${testReportDirectory}/${testReportFilename}.xml"
+      outputs.upToDateWhen { false }
+
+      def msg = "Run the XSLT 3.0 test suite driver for ${testLang} with dotnet"
+      if (testByteCode != null || testExport != null || testJit != null) {
+        msg += " (bytecode: ${testByteCode ? 'on' : 'off'}, export: ${testExport ? 'yes' : 'no'}, "
+        msg += "jit: ${testJit ? 'on' : 'off'})"
+      }
+      description msg
+      dependsOn "dotnetTestDrivers", "cloneQT3TestSuite"
+
+      doFirst {
+        project.mkdir testReportDirectory
+      }
+
+      def driver = "${project.buildDir}/testdrivers/bin/Release/net5.0/TestDrivers.dll"
+
+      def testargs = [testDotnet, driver,
+                      testDir,
+                      "-exceptions:${testEx}",
+                      "-reportfilename:${testReportFilename}.xml",
+                      "-o:${testReportDirectory}",
+                      "-lang:${testLang}"]
+
+      testargs += testOptions
+
+      //println(testargs)
+
+      commandLine testargs
+    }
+
+    Task t = project.tasks.findByName("xslt30TestsDotnet")
+    if (t) {
+      t.dependsOn testTaskName
+    }
+    t = project.tasks.findByName("${testRelease}jTestSuitesDotnet")
     if (t) {
       t.dependsOn testTaskName
     }
