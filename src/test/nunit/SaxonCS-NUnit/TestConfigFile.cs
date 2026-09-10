@@ -53,7 +53,9 @@ namespace SaxonCS_NUnit {
                 // Phase 1: should pick up license file from build directory
                 string existingLicenseFileLocation =
                     Environment.GetEnvironmentVariable("SAXON_LICENSE_DIR") + "/saxon-license.lic";
-                string newLicenseLocation = ConfigTest.DATA_DIR.Replace("src/test/testdata", "build/license") + "copied-license.text";
+                DirectoryInfo newLicenseDir = new DirectoryInfo(TestHelper.RepoPath("build/license"));
+                newLicenseDir.Create();
+                string newLicenseLocation = Path.Combine(newLicenseDir.FullName, "copied-license.text");
                 File.Copy(existingLicenseFileLocation, newLicenseLocation, true);
                 Uri address = new Uri(ConfigTest.DataDirUri, "config-with-link-to-license-file.config");
                 Stream configFile = new WebClient().OpenRead(address);

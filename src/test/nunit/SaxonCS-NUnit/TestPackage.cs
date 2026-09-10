@@ -15,17 +15,17 @@ namespace SaxonCS_NUnit {
             try {
                 Processor proc = new Processor(true);
                 XsltCompiler xc = proc.NewXsltCompiler();
-                FileStream file1 = new FileStream(ConfigTest.XSLT3TS_DIR + "decl/override/override-base-f-001.xsl",
+                FileStream file1 = new FileStream(TestHelper.XsltTestSuitePath("decl/override/override-base-f-001.xsl"),
                     FileMode.Open);
                 XsltPackage pack1 = xc.CompilePackage(file1);
-                FileStream file2 = new FileStream(ConfigTest.DATA_DIR + "test-package-001.pack", FileMode.Create);
+                FileStream file2 = new FileStream(TestHelper.DataDirPath("test-package-001.pack"), FileMode.Create);
                 pack1.Save(file2);
 
                 Processor proc2 = new Processor(true);
                 XsltCompiler xc2 = proc2.NewXsltCompiler();
-                XsltPackage xp = xc2.LoadLibraryPackage(new Uri(ConfigTest.DATA_DIR + "test-package-001.pack"));
+                XsltPackage xp = xc2.LoadLibraryPackage(TestHelper.DataDirUri("test-package-001.pack"));
                 xc2.ImportPackage(xp);
-                FileStream file3 = new FileStream(ConfigTest.XSLT3TS_DIR + "decl/override/override-f-001.xsl",
+                FileStream file3 = new FileStream(TestHelper.XsltTestSuitePath("decl/override/override-f-001.xsl"),
                     FileMode.Open);
                 XsltExecutable xe = xc2.Compile(file3);
                 Xslt30Transformer xt = xe.Load30();
@@ -49,14 +49,14 @@ namespace SaxonCS_NUnit {
                 XsltCompiler xsltCompiler = processor.NewXsltCompiler();
                 xsltCompiler.XsltLanguageVersion = "3.0";
                 XsltPackage packageA;
-                using (Stream stream = File.OpenRead(ConfigTest.DATA_DIR + "packageA.xsl"))
+                using (Stream stream = File.OpenRead(TestHelper.DataDirPath("packageA.xsl")))
                     packageA = xsltCompiler.CompilePackage(stream);
 
                 xsltCompiler = processor.NewXsltCompiler();
                 xsltCompiler.XsltLanguageVersion = "3.0";
                 xsltCompiler.ImportPackage(packageA);
                 XsltPackage packageB;
-                using (Stream stream = File.OpenRead(ConfigTest.DATA_DIR + "packageB.xsl"))
+                using (Stream stream = File.OpenRead(TestHelper.DataDirPath("packageB.xsl")))
                     packageB = xsltCompiler.CompilePackage(stream);
 
                 xsltCompiler = processor.NewXsltCompiler();
@@ -64,7 +64,7 @@ namespace SaxonCS_NUnit {
                 xsltCompiler.ImportPackage(packageA);
                 xsltCompiler.ImportPackage(packageB);
                 XsltExecutable exec =
-                    xsltCompiler.Compile(new Uri(ConfigTest.DataDirUri, "testPackage.xsl"));
+                    xsltCompiler.Compile(TestHelper.DataDirUri("testPackage.xsl"));
                 Xslt30Transformer transf = exec.Load30();
                 Serializer serializer = processor.NewSerializer();
                 StringWriter sw = new StringWriter();
