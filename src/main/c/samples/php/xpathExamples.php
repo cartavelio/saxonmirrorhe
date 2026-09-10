@@ -260,11 +260,11 @@ function testTestSuiteCatalog($proc, $xpathEngine){
 }
 
 
-$books_xml = "php/query/books.xml";
-$books_to_html_xq = "php/query/books-to-html.xq";
-$baz_xml = "php/xml/baz.xml";
-$cities_xml = "php/xml/cities.xml";
-$embedded_xml = "php/xml/embedded.xml";
+$books_xml = "query/books.xml";
+$books_to_html_xq = "query/books-to-html.xq";
+$baz_xml = "xml/baz.xml";
+$cities_xml = "xml/cities.xml";
+$embedded_xml = "xml/embedded.xml";
 
 $proc = new Saxon\SaxonProcessor(true);
 $xpath = $proc->newXPathProcessor();
