@@ -296,6 +296,7 @@ tasks.compileTestDrivers {
   include("com/saxonica/testdriver/QT3TestDriverPE.java")
   include("com/saxonica/testdriver/Xslt30TestSuiteDriverPE.java")
   include("com/saxonica/testdriver/Licensor.java")
+  include("com/saxonica/ee/domino/**")
 }
 
 val jarTaskBuilder = saxonj.jarTaskBuilder(project)
