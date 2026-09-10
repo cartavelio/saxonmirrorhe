@@ -19,7 +19,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -30,8 +29,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
 
     private final int hour;
     private final int minute;
-    private final int second;
-    private final int nanosecond;
+    private final BigDecimal second;
 
 
     /**
@@ -40,21 +38,16 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      *
      * @param hour        the hour value, 0-23
      * @param minute      the minutes value, 0-59
-     * @param second      the seconds value, 0-59
-     * @param microsecond the number of microseconds, 0-999999
+     * @param second      the seconds value, 0-59.9999...
      * @param tzMinutes   the timezone displacement in minutes from UTC. Supply the value
      *                    {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
-     * @deprecated since 10.0: use the constructor {@link #TimeValue(int, int, int, int, int, AtomicType)}
-     * that accepts nanosecond precision
      */
 
-    @Deprecated
-    public TimeValue(byte hour, byte minute, byte second, int microsecond, int tzMinutes) {
+    public TimeValue(int hour, int minute, BigDecimal second, int tzMinutes) {
         super(BuiltInAtomicType.TIME, tzMinutes);
         this.hour = hour;
         this.minute = minute;
         this.second = second;
-        this.nanosecond = microsecond * 1000;
     }
 
     /**
@@ -63,44 +56,17 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      *
      * @param hour        the hour value, 0-23
      * @param minute      the minutes value, 0-59
-     * @param second      the seconds value, 0-59
-     * @param nanosecond  the number of microseconds, 0-999999
+     * @param second      the seconds value, 0-59.99999...
      * @param tzMinutes   the timezone displacement in minutes from UTC. Supply the value
      *                    {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
      * @param typeLabel   the type annotation (must be a subtype of xs:time)
      */
 
-    public TimeValue(int hour, int minute, int second, int nanosecond, int tzMinutes, AtomicType typeLabel) {
+    public TimeValue(int hour, int minute, BigDecimal second, int tzMinutes, AtomicType typeLabel) {
         super(typeLabel, tzMinutes);
         this.hour = hour;
         this.minute = minute;
         this.second = second;
-        this.nanosecond = nanosecond;
-    }
-
-    /**
-     * Factory method to construct a time value given the hour, minute, second, and nanosecond components.
-     * This constructor performs no validation.
-     *
-     * @param hour        the hour value, 0-23
-     * @param minute      the minutes value, 0-59
-     * @param second      the seconds value, 0-59
-     * @param nanosecond  the number of nanoseconds, 0-999_999_999
-     * @param tz          the timezone displacement in minutes from UTC. Supply the value
-     *                    {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
-     * @return the constructed time value
-     */
-
-    public TimeValue makeTimeValue(byte hour, byte minute, byte second, int nanosecond, int tz) {
-        return new TimeValue(hour, minute, second, nanosecond, tz, BuiltInAtomicType.TIME);
-    }
-
-    private TimeValue(DateTimeValue.MutableDateTimeValue m) {
-        super(m.typeLabel, m.tzMinutes);
-        this.hour = m.hour;
-        this.minute = m.minute;
-        this.second = m.second;
-        this.nanosecond = m.nanosecond;
     }
 
     //#if CSHARP==false
@@ -111,12 +77,11 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @param tz       the timezone offset in minutes, or NO_TIMEZONE indicating that there is no timezone
      */
 
-    public TimeValue(/*@NotNull*/ GregorianCalendar calendar, int tz) {
+    public TimeValue(GregorianCalendar calendar, int tz) {
         super(BuiltInAtomicType.TIME, tz);
-        hour = (byte) calendar.get(Calendar.HOUR_OF_DAY);
-        minute = (byte) calendar.get(Calendar.MINUTE);
-        second = (byte) calendar.get(Calendar.SECOND);
-        nanosecond = calendar.get(Calendar.MILLISECOND) * 1_000_000;
+        hour = calendar.get(Calendar.HOUR_OF_DAY);
+        minute = calendar.get(Calendar.MINUTE);
+        second = DateTimeValue.makeSeconds(calendar.get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND) * 1_000_000);
     }
     //#endif
 
@@ -295,7 +260,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
             hour = 0;
         }
 
-        return new TimeValue(hour, minute, second, nanosecond, tz, BuiltInAtomicType.TIME);
+        return new TimeValue(hour, minute, DateTimeValue.makeSeconds(second, nanosecond), tz, BuiltInAtomicType.TIME);
     }
 
     /**
@@ -305,74 +270,23 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      *
      * @param hour - hour number within an arbitrary day
      * @param minute - minute within the hour specified
-     * @param second - second within the minute specified
-     * @param nanosecond - nanosecond within the second specified
+     * @param seconds - second within the minute specified
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
      * @return - an instance of TimeValue or ValidationFailure
      */
-    public static ConversionResult makeTimeValue(int hour, int minute, int second, int nanosecond, int timezoneInMinutes) {
-        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
-        g.typeLabel = BuiltInAtomicType.TIME;
-        if (g.tzMinutes != timezoneInMinutes) {
-            TimeValue.setValues(g, hour, minute, second, nanosecond, timezoneInMinutes);
+    public static ConversionResult makeTimeValue(int hour, int minute, BigDecimal seconds, int timezoneInMinutes) {
+        if (isValidTime(hour, minute, seconds)) {
+            return new TimeValue(hour, minute, seconds, timezoneInMinutes, BuiltInAtomicType.TIME);
         } else {
-            TimeValue.setValues(g, hour, minute, second, nanosecond);
+            return new ValidationFailure("Invalid time " + hour + ":" + minute + ":" + seconds);
         }
-        if (g.error != null) return g.error;
-        return new TimeValue(g);
     }
 
-    public static ConversionResult makeTimeValue(int hour, int minute, int second, int nanosecond) {
-        return TimeValue.makeTimeValue(hour, minute, second, nanosecond, CalendarValue.NO_TIMEZONE);
-    }
-
-    /**
-     * Checks whether a gDay value in an arbitrary month and year
-     * is valid per the rules specified in XPath and XQuery Functions
-     * and Operators 4.0.
-     * If the input values are valid, they will be assigned to their
-     * corresponding attributes in the input instance of MutableGDateValue.
-     * If an error is found, the details will be assigned to the
-     * error attribute of the input instance of MutableGDateValue.
-     *
-     * @param m - a mutable placeholder for storing the instance values during validation checks
-     * @param hour - hour number within an arbitrary day
-     * @param minute - minute within the hour specified
-     * @param second - second within the minute specified
-     * @param nanosecond - nanosecond within the second specified
-     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @return the input instance of MutableTimeValue, with the attributes set to their corresponding input values
-     */
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int hour, int minute, int second, int nanosecond, int timezoneInMinutes) {
-        TimeValue.setValues(m, hour, minute, second, nanosecond);
-        if (m.error != null) return;
-        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
-    }
-
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int hour, int minute, int second, int nanosecond) {
-        // XSD 1.0 stated that "24" was an invalid hour
-        // but XSD 1.1 equates "24" to "00",
-        // so the hour must be less than 25
-        if (hour < 0 || hour > 24) {
-            m.error = badTimeComponent("Hour must be between 0 and 24 (inclusive).", hour, "FODT0006");
-            return;
-        }
-        m.hour = (byte) hour;
-        if (minute < 0 || minute > 59) {
-            m.error = badTimeComponent("Minute must be between 0 and 59 (inclusive).", minute, "FODT0006");
-            return;
-        }
-        m.minute = (byte) minute;
-        if (second < 0 || second > 59) {
-            m.error = badTimeComponent("Second must be between 0 and 59 (inclusive).", second, "FODT0006");
-            return;
-        }
-        m.second = (byte) second;
-        if (nanosecond < 0 || nanosecond > 999999999) {
-            m.error = badTimeComponent("Nanosecond must be between 0 and 999999999 (inclusive).", nanosecond, "FODT0006");
-            return;
-        }
-        m.nanosecond = nanosecond;
+    private final static BigDecimal SIXTY = BigDecimal.valueOf(60);
+    public static boolean isValidTime(int hours, int minutes, BigDecimal seconds) {
+        return hours >= 0 && hours < 24
+                && minutes >= 0 && minutes <= 59
+                && seconds.signum() >= 0 && seconds.compareTo(SIXTY) < 0;
     }
 
     /*@NotNull*/
@@ -429,18 +343,8 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * @return the second
      */
 
-    public int getSecond() {
+    public BigDecimal getSecond() {
         return second;
-    }
-
-    /**
-     * Get the nanosecond component, 0-999_999
-     *
-     * @return the nanoseconds
-     */
-
-    public int getNanosecond() {
-        return nanosecond;
     }
 
 
@@ -455,22 +359,11 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        TwineBuilder tb = TwineBuilder.make(16);;
+        TwineBuilder tb = TwineBuilder.make(16);
 
         tb = appendTwoDigits(tb, hour).append(':');
         tb = appendTwoDigits(tb, minute).append(':');
-        tb = appendTwoDigits(tb, second);
-        if (nanosecond != 0) {
-            tb = tb.append('.');
-            int ms = nanosecond;
-            int div = 100_000_000;
-            while (ms > 0) {
-                int d = ms / div;
-                tb = tb.append((char) (d + '0'));
-                ms = ms % div;
-                div /= 10;
-            }
-        }
+        tb = DateTimeValue.formatSeconds(second, tb);
 
         if (hasTimezone()) {
             tb = appendTimezone(tb);
@@ -507,7 +400,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     /*@NotNull*/
     @Override
     public DateTimeValue toDateTime() {
-        return new DateTimeValue(1972, (byte) 12, (byte) 31, hour, minute, second, nanosecond, getTimezoneInMinutes());
+        return new DateTimeValue(1972, 12, 31, hour, minute, second, getTimezoneInMinutes());
     }
 
     //#if CSHARP==false
@@ -528,8 +421,9 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         }
 
         // use a reference date of 1972-12-31
-        calendar.set(1972, Calendar.DECEMBER, 31, hour, minute, second);
-        calendar.set(Calendar.MILLISECOND, nanosecond / 1_000_000);
+        int[] split = splitSecond(second);
+        calendar.set(1972, Calendar.DECEMBER, 31, hour, minute, split[0]);
+        calendar.set(Calendar.MILLISECOND, split[1] / 1_000_000);
         calendar.set(Calendar.ZONE_OFFSET, tz);
         calendar.set(Calendar.DST_OFFSET, 0);
 
@@ -548,7 +442,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     /*@NotNull*/
     @Override
     public AtomicValue withMetadata(AtomicMetadata metadata) {
-        return new TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), metadata.getType());
+        return new TimeValue(hour, minute, second, getTimezoneInMinutes(), metadata.getType());
     }
 
     /**
@@ -565,7 +459,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     public TimeValue adjustTimezone(int timezone) {
         DateTimeValue dt = toDateTime().adjustTimezone(timezone);
         return new TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(),
-                dt.getNanosecond(), dt.getTimezoneInMinutes(), BuiltInAtomicType.TIME);
+                dt.getTimezoneInMinutes(), BuiltInAtomicType.TIME);
     }
 
     /**
@@ -582,16 +476,9 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
             case MINUTES:
                 return Int64Value.makeIntegerValue(minute);
             case SECONDS:
-                BigDecimal d = BigDecimal.valueOf(nanosecond);
-                d = d.divide(BigDecimalValue.ONE_BILLION, 9, RoundingMode.DOWN);
-                d = d.add(BigDecimal.valueOf(second));
-                return new BigDecimalValue(d);
+                return new BigDecimalValue(second);
             case WHOLE_SECONDS: //(internal use only)
-                return Int64Value.makeIntegerValue(second);
-            case MICROSECONDS:
-                return new Int64Value(nanosecond / 1000);
-            case NANOSECONDS:
-                return new Int64Value(nanosecond);
+                return Int64Value.makeIntegerValue(splitSecond(second)[0]);
             case TIMEZONE:
                 if (hasTimezone()) {
                     return DayTimeDurationValue.fromMilliseconds(60000L * getTimezoneInMinutes());
@@ -631,17 +518,14 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      */
 
     public int compareTo(XPathComparable other) {
-        if (other instanceof TimeValue) {
-            TimeValue otherTime = (TimeValue) other;
+        if (other instanceof TimeValue otherTime) {
             if (getTimezoneInMinutes() == otherTime.getTimezoneInMinutes()) {
                 if (hour != otherTime.hour) {
                     return IntegerValue.signum(hour - otherTime.hour);
                 } else if (minute != otherTime.minute) {
                     return IntegerValue.signum(minute - otherTime.minute);
-                } else if (second != otherTime.second) {
-                    return IntegerValue.signum(second - otherTime.second);
-                } else if (nanosecond != otherTime.nanosecond) {
-                    return IntegerValue.signum(nanosecond - otherTime.nanosecond);
+                } else if (!second.equals(otherTime.second)) {
+                    return second.subtract(otherTime.second).signum();
                 } else {
                     return 0;
                 }
@@ -670,10 +554,9 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
 
     @Override
     public int compareTo(/*@NotNull*/ CalendarValue other, /*@NotNull*/ int implicitTimezone) throws NoDynamicContextException {
-        if (!(other instanceof TimeValue)) {
+        if (!(other instanceof TimeValue otherTime)) {
             throw new ClassCastException("Time values are not comparable to " + other.getClass());
         }
-        TimeValue otherTime = (TimeValue) other;
         if (getTimezoneInMinutes() == otherTime.getTimezoneInMinutes()) {
             // The values have the same time zone, or neither has a timezone
             return compareTo(otherTime);
@@ -723,7 +606,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
 
     public int hashCode() {
         return DateTimeValue.computeHashCode(
-                1951, 10, 11, hour, minute, second, nanosecond, getTimezoneInMinutes());
+                1951, 10, 11, hour, minute, second, getTimezoneInMinutes());
     }
 
     /**
@@ -742,7 +625,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (duration instanceof DayTimeDurationValue) {
             DateTimeValue dt = toDateTime().add(duration);
             return new TimeValue(dt.getHour(), dt.getMinute(), dt.getSecond(),
-                    dt.getNanosecond(), getTimezoneInMinutes(), BuiltInAtomicType.TIME);
+                    getTimezoneInMinutes(), BuiltInAtomicType.TIME);
         } else {
             throw new XPathException("Time+Duration arithmetic is supported only for xs:dayTimeDuration", "XPTY0004")
                     .asTypeError();
@@ -771,12 +654,11 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     /**
      * Split a decimal second value into its component parts.
      *
-     * @param second
-     * @return the whole number; and the fractional value in nanoseconds
+     * @param second the decimal seconds value
+     * @return the whole number of seconds; and the fractional value in nanoseconds
      */
-    public static int[] splitSecond(DecimalValue second) {
-        BigDecimal dSecond = (BigDecimal) second.getDecimalValue();
-        return new int[]{dSecond.intValue(), nanosecondFromSecond(dSecond)};
+    public static int[] splitSecond(BigDecimal second) {
+        return new int[]{second.intValue(), nanosecondFromSecond(second)};
     }
 
     /**

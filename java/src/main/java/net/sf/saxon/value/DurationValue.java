@@ -487,16 +487,6 @@ public class DurationValue extends AtomicValue implements XPathComparable, Atomi
                 BigDecimal decimalSeconds = negative ? getSeconds().negate() : getSeconds();
                 return Int64Value.makeIntegerValue(decimalSeconds.longValue());
             }
-            case MICROSECONDS: {
-                BigDecimal decimalSeconds = negative ? getSeconds().negate() : getSeconds();
-                long micros = decimalSeconds.divideAndRemainder(BigDecimalValue.ONE_MILLION)[1].longValue();
-                return new Int64Value(micros);
-            }
-            case NANOSECONDS: {
-                BigDecimal decimalSeconds = negative ? getSeconds().negate() : getSeconds();
-                long nanos = decimalSeconds.divideAndRemainder(BigDecimalValue.ONE_BILLION)[1].longValue();
-                return new Int64Value(nanos);
-            }
             default:
                 throw new IllegalArgumentException("Unknown component for duration: " + component);
         }

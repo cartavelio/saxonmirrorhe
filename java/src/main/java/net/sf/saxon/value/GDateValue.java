@@ -11,14 +11,14 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationFailure;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -26,11 +26,26 @@ import java.util.*;
  * xs:gYearMonth, xs:gMonth, xs:gMonthDay, xs:gDay
  */
 public abstract class GDateValue extends CalendarValue {
-    protected final int year;         // unlike the lexical representation, includes a year zero
+    protected final int year;         // includes a year zero
     protected final int month;
     protected final int day;
 
-    public GDateValue(int year, int month, int day, boolean hasNoYearZero, int tzMinutes, AtomicType typeLabel) {
+    // The spec suggests 1972-12-31 as the default date when components are missing, but that causes
+    // problems with gYearMonth. There's no particular reason for the choice other than the fact that it
+    // has a leap second; but leap seconds aren't supported anyway.
+    protected final static int DEFAULT_YEAR = 1972;
+    protected final static int DEFAULT_MONTH = 1;
+    protected final static int DEFAULT_DAY = 1;
+
+    /**
+     * Constructor that performs no validation
+     * @param year the year value, allows year zero
+     * @param month range 1-12
+     * @param day range 1-31
+     * @param tzMinutes offset in minutes, or NO_TIMEZONE
+     * @param typeLabel the type annotation
+     */
+    public GDateValue(int year, int month, int day, int tzMinutes, AtomicMetadata typeLabel) {
         super(typeLabel, tzMinutes);
         this.year = year;
         this.month = month;
@@ -38,7 +53,7 @@ public abstract class GDateValue extends CalendarValue {
     }
 
     protected static class MutableGDateValue {
-        public int year;       // the year as written, +1 for BC years
+        public int year;       // the year as written
         public byte month;     // the month as written, range 1-12
         public byte day;       // the day as written, range 1-31
         public int tzMinutes = NO_TIMEZONE;
@@ -55,30 +70,6 @@ public abstract class GDateValue extends CalendarValue {
         }
     }
 
-    protected MutableGDateValue makeMutableCopy() {
-        MutableGDateValue m = new MutableGDateValue();
-        m.year = year;
-        m.month = (byte)month;
-        m.day = (byte)day;
-        m.tzMinutes = getTimezoneInMinutes();
-        m.typeLabel = getItemType();
-        return m;
-    }
-
-    protected GDateValue(MutableGDateValue m) {
-        super(m.typeLabel, m.tzMinutes);
-        this.year = m.year;
-        this.month = m.month;
-        this.day = m.day;
-    }
-
-    protected GDateValue(DateTimeValue.MutableDateTimeValue m) {
-        super(m.typeLabel, m.tzMinutes);
-        this.year = m.year;
-        this.month = m.month;
-        this.day = m.day;
-    }
-
     protected EnumSet<AccessorFn.Component> getDefinedComponents() {
         return EnumSet.of(AccessorFn.Component.YEAR, AccessorFn.Component.MONTH, AccessorFn.Component.DAY);
     }
@@ -87,8 +78,8 @@ public abstract class GDateValue extends CalendarValue {
      * Test whether a candidate date is actually a valid date in the proleptic Gregorian calendar
      */
 
-    /*@NotNull*/ protected static byte[] daysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    /*@NotNull*/ protected static final short[] monthData = {306, 337, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275};
+    protected static byte[] daysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    protected static final short[] monthData = {306, 337, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275};
 
     /**
      * Get the year component of the date (in local form)
@@ -149,266 +140,6 @@ public abstract class GDateValue extends CalendarValue {
     //#endif
 
     /**
-     * Initialize the DateValue using a character string in the format yyyy-mm-dd and an optional time zone.
-     * Input must have format [-]yyyy-mm-dd[([+|-]hh:mm | Z)]
-     *
-     * @param m     the "raw" MutableGDateValue to be populated: this is modified in-situ. If the string is
-     *              invalid, the error field of the MutableGDateValue will be set.
-     * @param s     the supplied string value
-     * @param allowYearZero true if (as in XSD 1.1) there is a year zero, false if (as in XSD 1.0) there is not
-     */
-
-    /*@NotNull*/
-    protected static void setLexicalValue(MutableGDateValue m, UnicodeString s, boolean allowYearZero) {
-        StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:+TZ", true);
-        try {
-            if (!tok.hasMoreTokens()) {
-                m.error = badDate("Too short", s);
-                return;
-            }
-            String part = tok.nextToken();
-            int era = +1;
-            if ("+".equals(part)) {
-                m.error = badDate("Date must not start with '+' sign", s);
-                return;
-            } else if ("-".equals(part)) {
-                era = -1;
-                if (!tok.hasMoreTokens()) {
-                    m.error = badDate("No year after '-'", s);
-                    return;
-                }
-                part = (String) tok.nextToken();
-            }
-
-            if (part.length() < 4) {
-                m.error = badDate("Year is less than four digits", s);
-                return;
-            }
-            if (part.length() > 4 && part.charAt(0) == '0') {
-                m.error = badDate("When year exceeds 4 digits, leading zeroes are not allowed", s);
-                return;
-            }
-            long value = DurationValue.simpleInteger(part);
-            if (value < 0 || value > Integer.MAX_VALUE) {
-                if (value == -1) {
-                    m.error = badDate("Non-numeric year component", s);
-                } else {
-                    m.error = badDate("Year is outside the range that Saxon can handle", s, "FODT0001");
-                }
-                return;
-            }
-            m.year = (int)value * era;
-            if (m.year == 0 && !allowYearZero) {
-                m.error = badDate("Year zero is not allowed", s);
-                return;
-            }
-            if (!tok.hasMoreTokens()) {
-                m.error = badDate("Too short", s);
-                return;
-            }
-            if (!"-".equals(tok.nextToken())) {
-                m.error = badDate("Wrong delimiter after year", s);
-                return;
-            }
-
-            if (!tok.hasMoreTokens()) {
-                m.error = badDate("Too short", s);
-                return;
-            }
-            part = tok.nextToken();
-            if (part.length() != 2) {
-                m.error = badDate("Month must be two digits", s);
-                return;
-            }
-            value = DurationValue.simpleInteger(part);
-            if (value < 0) {
-                m.error = badDate("Non-numeric month component", s);
-                return;
-            }
-            m.month = (byte) value;
-            if (m.month < 1 || m.month > 12) {
-                m.error = badDate("Month is out of range", s);
-                return;
-            }
-            if (!tok.hasMoreTokens()) {
-                m.error = badDate("Too short", s);
-                return;
-            }
-            if (!"-".equals(tok.nextToken())) {
-                m.error = badDate("Wrong delimiter after month", s);
-                return;
-            }
-
-            if (!tok.hasMoreTokens()) {
-                m.error = badDate("Too short", s);
-                return;
-            }
-            part = (String) tok.nextToken();
-            if (part.length() != 2) {
-                m.error = badDate("Day must be two digits", s);
-                return;
-            }
-            value = DurationValue.simpleInteger(part);
-            if (value < 0) {
-                m.error = badDate("Non-numeric day component", s);
-                return;
-            }
-            m.day = (byte) value;
-            if (m.day < 1 || m.day > 31) {
-                m.error = badDate("Day is out of range", s);
-                return;
-            }
-
-            int tzOffset;
-            if (tok.hasMoreTokens()) {
-
-                String delim = tok.nextToken();
-
-                if ("T".equals(delim)) {
-                    m.error = badDate("Value includes time", s);
-                    return;
-                } else if ("Z".equals(delim)) {
-                    tzOffset = 0;
-                    if (tok.hasMoreTokens()) {
-                        m.error = badDate("Continues after 'Z'", s);
-                        return;
-                    }
-                    m.tzMinutes = tzOffset;
-
-                } else if (!(!"+".equals(delim) && !"-".equals(delim))) {
-                    if (!tok.hasMoreTokens()) {
-                        m.error = badDate("Missing timezone", s);
-                        return;
-                    }
-                    part = (String) tok.nextToken();
-                    value = DurationValue.simpleInteger(part);
-                    if (value < 0) {
-                        m.error = badDate("Non-numeric timezone hour component", s);
-                        return;
-                    }
-                    if (value > 14) {
-                        m.error = badDate("Timezone hour is out of range", s);
-                        return;
-                    }
-                    int tzhour = (int)value;
-                    if (part.length() != 2) {
-                        m.error = badDate("Timezone hour must be two digits", s);
-                        return;
-                    }
-
-                    if (!tok.hasMoreTokens()) {
-                        m.error = badDate("No minutes in timezone", s);
-                        return;
-                    }
-                    if (!":".equals(tok.nextToken())) {
-                        m.error = badDate("Wrong delimiter after timezone hour", s);
-                        return;
-                    }
-
-                    if (!tok.hasMoreTokens()) {
-                        m.error = badDate("No minutes in timezone", s);
-                        return;
-                    }
-                    part = (String) tok.nextToken();
-                    value = DurationValue.simpleInteger(part);
-                    if (value < 0) {
-                        m.error = badDate("Non-numeric timezone minute component", s);
-                        return;
-                    }
-                    if (value > 59) {
-                        m.error = badDate("Timezone minute is out of range", s);
-                        return;
-                    }
-                    int tzminute = (int)value;
-                    if (part.length() != 2) {
-                        m.error = badDate("Timezone minute must be two digits", s);
-                        return;
-                    }
-
-                    if (tok.hasMoreTokens()) {
-                        m.error = badDate("Continues after timezone", s);
-                        return;
-                    }
-
-                    tzOffset = tzhour * 60 + tzminute;
-                    if ("-".equals(delim)) {
-                        tzOffset = -tzOffset;
-                    }
-                    m.tzMinutes = tzOffset;
-
-                } else {
-                    m.error = badDate("Timezone format is incorrect", s);
-                    return;
-                }
-            }
-
-            if (!isValidDate(m.year, m.month, m.day)) {
-                m.error = badDate("Non-existent date", s);
-            }
-
-        } catch (NumberFormatException err) {
-            m.error = badDate("Non-numeric component", s);
-        }
-    }
-
-
-    /**
-     * Checks whether the component parts of a gDate value
-     * are valid per the rules specified in XPath and XQuery Functions
-     * and Operators 4.0.
-     * If the input values are valid, they will be assigned to their
-     * corresponding attributes in the input instance of MutableGDateValue.
-     * If an error is found, the details will be assigned to the
-     * error attribute of the input instance of MutableGDateValue.
-     *
-     * @param m - a mutable placeholder for storing the instance values during validation checks
-     * @param year - number of a year in the Gregorian calendar
-     * @param month - number of a month within the specified year
-     * @param day - number of a day within the specified month
-     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     */
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, int timezoneInMinutes) {
-        GDateValue.setValues(m, year, month, day);
-        if (m.error != null) return;
-        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
-    }
-
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day) {
-        GYearValue.setValues(m, year);
-        if (m.error != null) return;
-
-        GMonthDayValue.setValues(m, month, day); // Includes checks that month is between 1-12 (inc) and  day is between 1-31 (inc)
-        if (m.error != null) return;
-
-        if (month == 2 && day > 28 && !(GDateValue.isLeapYear(year))) {
-            m.error = badDateComponent("There are only 28 days in February " + year + ", as it is not a leap year.", day, "FODT0006");
-        }
-    }
-
-
-    private static ValidationFailure badDate(String msg, UnicodeString value) {
-        ValidationFailure err = new ValidationFailure(
-                "Invalid date " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
-        err.setErrorCode("FORG0001");
-        return err;
-    }
-
-    private static ValidationFailure badDate(String msg, UnicodeString value, String errorCode) {
-        ValidationFailure err = new ValidationFailure(
-                "Invalid date " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
-        err.setErrorCode(errorCode);
-        return err;
-    }
-
-    protected static ValidationFailure badDateComponent(String msg, int value, String errorCode) {
-        ValidationFailure err = new ValidationFailure(
-                "Invalid date component: " + Err.wrap(value + "", Err.VALUE) + " (" + msg + ")");
-        err.setErrorCode(errorCode);
-        return err;
-    }
-
-
-    /**
      * Determine whether a given date is valid
      *
      * @param year  the year (permitting year zero)
@@ -420,6 +151,14 @@ public abstract class GDateValue extends CalendarValue {
     public static boolean isValidDate(int year, int month, int day) {
         return month > 0 && month <= 12 && day > 0 && day <= daysPerMonth[month - 1]
                 || month == 2 && day == 29 && isLeapYear(year);
+    }
+
+    /**
+     * Test whether a timezone value (expressed as the number of minutes) is valid
+     */
+
+    public static boolean isValidTimezone(int timezoneInMinutes) {
+        return Math.abs(timezoneInMinutes) <= (14 * 60) || timezoneInMinutes == NO_TIMEZONE;
     }
 
     /**
@@ -470,7 +209,7 @@ public abstract class GDateValue extends CalendarValue {
     }
 
     public int hashCode() {
-        return DateTimeValue.computeHashCode(year, month, day, (byte) 12, (byte) 0, (byte) 0, 0, getTimezoneInMinutes());
+        return DateTimeValue.computeHashCode(year, month, day, 12, 0, BigDecimal.ZERO, getTimezoneInMinutes());
     }
 
     /**
@@ -514,7 +253,7 @@ public abstract class GDateValue extends CalendarValue {
     /*@NotNull*/
     @Override
     public DateTimeValue toDateTime() {
-        return new DateTimeValue(year, month, day, (byte) 0, (byte) 0, (byte) 0, 0, getTimezoneInMinutes());
+        return new DateTimeValue(year, month, day, 0, 0, BigDecimal.ZERO, getTimezoneInMinutes());
     }
 
 
@@ -538,8 +277,6 @@ public abstract class GDateValue extends CalendarValue {
     @Override
     public AtomicValue getComponent(AccessorFn.Component component) throws XPathException {
         switch (component) {
-            case YEAR_ALLOWING_ZERO:
-                return Int64Value.makeIntegerValue(year);
             case YEAR:
                 if (!getDefinedComponents().contains(component)) {
                     return null;
@@ -565,7 +302,6 @@ public abstract class GDateValue extends CalendarValue {
             case MINUTES:
             case SECONDS:
             case WHOLE_SECONDS: // Internal use only
-            case NANOSECONDS: // Internal use only
                 return null;
             default:
                 throw new IllegalArgumentException("Unknown component for date: " + component);

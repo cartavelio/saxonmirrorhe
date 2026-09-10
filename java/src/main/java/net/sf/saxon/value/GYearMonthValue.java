@@ -29,17 +29,42 @@ public class GYearMonthValue extends GDateValue {
     private static final Pattern regex =
             Pattern.compile("(-?[0-9]+-[0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
 
-    private GYearMonthValue(MutableGDateValue m) {
-        super(m);
+    /**
+     * Constructs an instance of GYearMonthValue without any validation
+     * of the input values.
+     *
+     * @param year  - number of a year in the Gregorian calendar
+     * @param month - number of a month within the specified year
+     * @param tzMinutes - number of minutes to adjust by for the timezone
+     */
+
+    public GYearMonthValue(int year, int month, int tzMinutes) {
+        super(year, month, DEFAULT_DAY, tzMinutes, BuiltInAtomicType.G_YEAR_MONTH);
     }
 
-    private GYearMonthValue(DateTimeValue.MutableDateTimeValue m) {
-        super(m);
+    /**
+     * Constructs an instance of GYearMonthValue without any validation
+     * of the input values, with a type annotation
+     *
+     * @param year      - number of a year in the Gregorian calendar
+     * @param month     - number of a month within the specified year
+     * @param tzMinutes - number of minutes to adjust by for the timezone
+     */
+
+    public GYearMonthValue(int year, int month, int tzMinutes, AtomicMetadata type) {
+        super(year, month, DEFAULT_DAY, tzMinutes, type);
     }
 
     protected EnumSet<AccessorFn.Component> getDefinedComponents() {
         return EnumSet.of(AccessorFn.Component.YEAR, AccessorFn.Component.MONTH);
     }
+
+    /**
+     * Parse a GYearMonth value supplied as a string
+     * @param value the supplied string
+     * @param rules conversion rules - indicate whether year zero is valid
+     * @return either a GYearMonth value, or a {@link ValidationFailure}
+     */
 
     public static ConversionResult makeGYearMonthValue(UnicodeString value, ConversionRules rules) {
         final UnicodeString trimmed = Whitespace.trim(value);
@@ -47,33 +72,17 @@ public class GYearMonthValue extends GDateValue {
         if (!m.matches()) {
             return new ValidationFailure("Cannot convert '" + value + "' to a gYearMonth");
         }
-        MutableGDateValue g = new MutableGDateValue();
         String base = m.group(1);
         String tz = m.group(2);
         String date = base + "-01" + (tz == null ? "" : tz);
-        g.typeLabel = BuiltInAtomicType.G_YEAR_MONTH;
-        setLexicalValue(g, BMPString.of(date), rules.isAllowYearZero());
-        if (g.error != null) {
-            return g.error;
+        ConversionResult result = DateValue.tryParseDate(date, rules.isAllowYearZero());
+        if (result instanceof ValidationFailure) {
+            return result;
         }
-        return new GYearMonthValue(g);
+        DateValue dv = (DateValue) result;
+        return new GYearMonthValue(dv.getYear(), dv.getMonth(), dv.getTimezoneInMinutes());
     }
-
-//    /**
-//     * Creates an instance of GYearMonthValue.  Includes validation
-//     * checks.  If a validation error is detected, an instance of
-//     * ValidationFailure will be returned instead.
-//     *
-//     * @param year - number of a year in the Gregorian calendar
-//     * @param month - number of a month within the specified year
-//     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-//     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
-//     */
-//
-//    public GYearMonthValue(int year, int month, int timezoneInMinutes, boolean allowYearZero) {
-//        super(year, month, 1, timezoneInMinutes, allowYearZero, BuiltInAtomicType.G_YEAR_MONTH);
-//    }
-
+    
     /**
      * Creates an instance of GYearMonthValue.  Includes validation
      * checks.  If a validation error is detected, an instance of
@@ -85,65 +94,17 @@ public class GYearMonthValue extends GDateValue {
      * @return an instance of GYearMonthValue or ValidationFailure
      */
     public static ConversionResult makeGYearMonthValue(int year, int month, int timezoneInMinutes) {
-        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
-        g.typeLabel = BuiltInAtomicType.G_YEAR_MONTH;
-        if (g.tzMinutes != timezoneInMinutes) {
-            GYearMonthValue.setValues(g, year, month, timezoneInMinutes);
-        } else {
-            GYearMonthValue.setValues(g, year, month);
+        if (!isValidDate(year, month, 1)) {
+            return new ValidationFailure("Invalid gYearMonth value " + year + "-" + month);
         }
-        if (g.error != null) return g.error;
-        return new GYearMonthValue(g);
-    }
-
-    public static ConversionResult makeGYearMonthValue(int year, int month) {
-        return GYearMonthValue.makeGYearMonthValue(year, month, CalendarValue.NO_TIMEZONE);
-    }
-
-    /**
-     * Checks whether the component parts of a gYearMonth value
-     * are valid per the rules specified in XPath and XQuery Functions
-     * and Operators 4.0.
-     * If the input values are valid, they will be assigned to their
-     * corresponding attributes in the input instance of MutableGDateValue.
-     * If an error is found, the details will be assigned to the
-     * error attribute of the input instance of MutableGDateValue.
-     *
-     * @param m - a mutable placeholder for storing the instance values during validation checks
-     * @param year - number of a year in the Gregorian calendar
-     * @param month - number of a month within the specified year
-     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     */
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int timezoneInMinutes) {
-        GYearMonthValue.setValues(m, year, month);
-        if (m.error != null) return;
-        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
-    }
-
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month) {
-        GYearValue.setValues(m, year);
-        if (m.error != null) return;
-        GMonthValue.setValues(m, month); // Includes check that month is between 1-12 (inc)
+        if (!isValidTimezone(timezoneInMinutes)) {
+            return new ValidationFailure("Invalid timezone offset " + timezoneInMinutes + " minutes");
+        }
+        return new GYearMonthValue(year, month, timezoneInMinutes);
     }
 
     /**
-     * Constructs an instance of GDayValue without any validation
-     * of the input values.
-     *
-     * @param year - number of a year in the Gregorian calendar
-     * @param month - number of a month within the specified year
-     * @param tz - number of minutes to adjust by for the timezone
-     */
-    public GYearMonthValue(int year, int month, int tz) {
-        this(new MutableGDateValue(year, month, 1, tz, BuiltInAtomicType.G_YEAR_MONTH));
-    }
-
-    public GYearMonthValue(int year, int month, int tz, AtomicType type) {
-        this(new MutableGDateValue(year, month, 1, tz, type));
-    }
-
-    /**
-     * Make a copy of this date, time, or dateTime value
+     * Make a copy of this date, time, or dateTime value, with specified type annotation
      *
      * @param metadata the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
@@ -152,9 +113,7 @@ public class GYearMonthValue extends GDateValue {
 
     @Override
     public AtomicValue withMetadata(AtomicMetadata metadata) {
-        MutableGDateValue m = makeMutableCopy();
-        m.typeLabel = metadata.getType();
-        return new GYearMonthValue(m);
+        return new GYearMonthValue(year, month, getTimezoneInMinutes(), metadata);
     }
 
     @Override

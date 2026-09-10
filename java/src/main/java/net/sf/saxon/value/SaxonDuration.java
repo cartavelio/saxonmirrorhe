@@ -214,8 +214,10 @@ public class SaxonDuration extends Duration {
         calendar.add(Calendar.DAY_OF_MONTH, getDays() * sign);
         calendar.add(Calendar.HOUR_OF_DAY, getHours() * sign);
         calendar.add(Calendar.MINUTE, getMinutes() * sign);
-        calendar.add(Calendar.SECOND, (int) ((Int64Value) duration.getComponent(AccessorFn.Component.WHOLE_SECONDS)).longValue() * sign);
-        calendar.add(Calendar.MILLISECOND, (int) ((Int64Value) duration.getComponent(AccessorFn.Component.MICROSECONDS)).longValue() * sign / 1000);
+        BigDecimal seconds = duration.getSeconds();
+        int[] split = DateTimeValue.splitSeconds(seconds);
+        calendar.add(Calendar.SECOND, split[0] * sign);
+        calendar.add(Calendar.MILLISECOND, split[1] * sign / 1_000_000);
     }
 
     /**

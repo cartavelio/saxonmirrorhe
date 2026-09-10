@@ -90,7 +90,7 @@ public final class Date {
                 return ((DateTimeValue) cr).toDateValue().getStringValue();
             }
         } else {
-            ConversionResult cr = DateValue.makeDateValue(datetimeIn.getUnicodeStringValue(), rules);
+            ConversionResult cr = DateValue.tryParseDate(datetimeIn.getStringValue(), rules.isAllowYearZero());
             if (cr instanceof ValidationFailure) {
                 return "";
             } else {

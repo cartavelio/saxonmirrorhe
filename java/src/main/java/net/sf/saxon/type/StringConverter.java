@@ -689,7 +689,7 @@ public abstract class StringConverter extends Converter {
         
         @Override
         public ConversionResult convertString(UnicodeString input) {
-            return DateValue.makeDateValue(input, getConversionRules());
+            return DateValue.tryParseDate(input.toString(), getConversionRules().isAllowYearZero());
         }
     }
 

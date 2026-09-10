@@ -10,10 +10,14 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.TwineBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicMetadata;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationFailure;
 
 import java.util.EnumSet;
 import java.util.regex.Matcher;
@@ -28,38 +32,60 @@ public class GDayValue extends GDateValue {
     private static final Pattern regex =
             Pattern.compile("---([0-9][0-9])(Z|[+-][0-9][0-9]:[0-9][0-9])?");
 
-    private GDayValue(MutableGDateValue m) {
-        super(m);
+    /**
+     * Constructs an instance of GDayValue without any validation
+     * of the input values.
+     *
+     * @param day - number of a day within an arbitrary month
+     * @param tz  - number of minutes to adjust by for the timezone
+     */
+
+    public GDayValue(int day, int tz) {
+        super(DEFAULT_YEAR, DEFAULT_MONTH, day, tz, BuiltInAtomicType.G_DAY);
     }
 
-    private GDayValue(DateTimeValue.MutableDateTimeValue m) {
-        super(m);
+    /**
+     * Constructs an instance of GDayValue without any validation
+     * of the input values.
+     *
+     * @param day - number of a day within an arbitrary month
+     * @param tz  - number of minutes to adjust by for the timezone
+     * @param type - the type annotation to be used
+     */
+
+    public GDayValue(int day, int tz, AtomicMetadata type) {
+        super(DEFAULT_YEAR, DEFAULT_MONTH, day, tz, type);
     }
 
     protected EnumSet<AccessorFn.Component> getDefinedComponents() {
         return EnumSet.of(AccessorFn.Component.DAY);
     }
 
+    /**
+     * Parse a GDay value from its lexical representation
+     * @param value the lexical representation of the xs:gDay value
+     * @return either a {@link GDayValue}, or a validation error
+     */
     public static ConversionResult makeGDayValue(UnicodeString value) {
         final UnicodeString trimmed = Whitespace.trim(value);
-        Matcher m = regex.matcher(trimmed.toString());
+        Matcher m;
+        m = regex.matcher(trimmed.toString());
         if (!m.matches()) {
             return new ValidationFailure("Cannot convert '" + value + "' to a gDay");
         }
-        MutableGDateValue g = new MutableGDateValue();
         String base = m.group(1);
         String tz = m.group(2);
-        String date = "2000-01-" + base + (tz == null ? "" : tz);
-        g.typeLabel = BuiltInAtomicType.G_DAY;
-        setLexicalValue(g, BMPString.of(date), true);
-        if (g.error != null) {
-            return g.error;
+        String date = "1972-01-" + base + (tz == null ? "" : tz);
+        ConversionResult result = DateValue.tryParseDate(date, true);
+        if (result instanceof ValidationFailure) {
+            return result;
         }
-        return new GDayValue(g);
+        DateValue dv = (DateValue) result;
+        return new GDayValue(dv.getDay(), dv.getTimezoneInMinutes());
     }
 
     /**
-     * Creates an instance of GDayValue.  Includes validation
+     * Create an instance of GDayValue, with validation
      * checks.  If a validation error is detected, an instance of
      * ValidationFailure will be returned instead.
      *
@@ -68,67 +94,17 @@ public class GDayValue extends GDateValue {
      * @return - an instance of GDayValue
      */
     public static ConversionResult makeGDayValue(int day, int timezoneInMinutes) {
-        DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
-        g.typeLabel = BuiltInAtomicType.G_DAY;
-        if (g.tzMinutes != timezoneInMinutes) {
-            GDayValue.setValues(g, day, timezoneInMinutes);
-        } else {
-            GDayValue.setValues(g, day);
+        if (!isValidDate(1972, 1, day)) {
+            return new ValidationFailure("Invalid gDay value " + day);
         }
-        if (g.error != null) return g.error;
-        return new GDayValue(g);
-    }
-
-    public static ConversionResult makeGDayValue(int day) {
-        return GDayValue.makeGDayValue(day, CalendarValue.NO_TIMEZONE);
-    }
-
-    /**
-     * Checks whether a gDay value in an arbitrary month and year
-     * is valid per the rules specified in XPath and XQuery Functions
-     * and Operators 4.0.
-     * If the input values are valid, they will be assigned to their
-     * corresponding attributes in the input instance of MutableGDateValue.
-     * If an error is found, the details will be assigned to the
-     * error attribute of the input instance of MutableGDateValue.
-     *
-     * @param day - number of a day within an arbitrary month
-     * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @return the input instance of MutableDGateValue, with the day attribute set to the input day number
-     */
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int day, int timezoneInMinutes) {
-        GDayValue.setValues(m, day);
-        if (m.error != null) return;
-        DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
-    }
-
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int day) {
-        if (day < 1 || day > 31) {
-            m.error = badDateComponent("Day must be between 1 and 31 (inclusive).", day, "FODT0006");
-            return;
+        if (!isValidTimezone(timezoneInMinutes)) {
+            return new ValidationFailure("Invalid timezone offset " + timezoneInMinutes + " minutes");
         }
-        m.day = (byte) day;
+        return new GDayValue(day, timezoneInMinutes);
     }
 
     /**
-     * Constructs an instance of GDayValue without any validation
-     * of the input values.
-     *
-     * @param day - number of a day within an arbitrary month
-     * @param tz - number of minutes to adjust by for the timezone
-     * @return - an instance of GDayValue
-     */
-    public GDayValue(int day, int tz) {
-        this(day, tz, BuiltInAtomicType.G_DAY);
-    }
-
-    public GDayValue(int day, int tz, AtomicType type) {
-        this(new MutableGDateValue(2000, 1, day, tz, type));
-    }
-
-    /**
-     * Make a copy of this date, time, or dateTime value
-     *
+     * Make a copy of this value with a different type annotation
      * @param metadata the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      * @return the copied value
@@ -136,15 +112,13 @@ public class GDayValue extends GDateValue {
 
     @Override
     public AtomicValue withMetadata(AtomicMetadata metadata) {
-        MutableGDateValue m = makeMutableCopy();
-        m.typeLabel = metadata.getType();
-        return new GDayValue(m);
+        return new GDayValue(getDay(), getTimezoneInMinutes(), metadata);
     }
 
 
     @Override
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
-        return specVersion >= 40 ? new DateValue(1972, (byte)12, day)
+        return specVersion >= 40 ? new DateValue(DEFAULT_YEAR, DEFAULT_MONTH, day)
                 .adjustTimezone(hasTimezone() ? getTimezoneInMinutes() : implicitTimezone) : null;
     }
 

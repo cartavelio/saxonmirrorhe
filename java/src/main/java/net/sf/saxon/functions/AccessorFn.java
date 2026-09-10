@@ -27,7 +27,7 @@ public abstract class AccessorFn extends ScalarSystemFunction {
     @CSharpSimpleEnum(flags=true)
     public enum Component {
         YEAR, MONTH, DAY, HOURS, MINUTES, SECONDS, TIMEZONE,
-        LOCALNAME, NAMESPACE, PREFIX, MICROSECONDS, NANOSECONDS, WHOLE_SECONDS, YEAR_ALLOWING_ZERO
+        LOCALNAME, NAMESPACE, PREFIX, WHOLE_SECONDS
     }
     
     public abstract Component getComponentId();

@@ -30,7 +30,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
 
     // This is a reimplementation that makes no use of the Java Calendar/Date types except for computations.
 
-    private final int tzMinutes;  // timezone offset in minutes: or the special value NO_TIMEZONE
+    protected final int tzMinutes;  // timezone offset in minutes: or the special value NO_TIMEZONE
 
     /**
      * The value NO_TIMEZONE is used in a value that has no timezone, and it can be passed as an argument
@@ -51,6 +51,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
 
     /**
      * Parse a string to create a CalendarValue whose actual type will depend on the format of the string
+     * This method is used by the EXSLT date/time library.
      *
      * @param s     a string in the lexical space of one of the date/time types (date, time, dateTime,
      *              gYearMonth, gYear, gMonth, gMonthDay, or gDay
@@ -62,7 +63,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
         ConversionResult cr = DateTimeValue.makeDateTimeValue(s, rules);
         ConversionResult firstError = cr;
         if (cr instanceof ValidationFailure) {
-            cr = DateValue.makeDateValue(s, rules);
+            cr = DateValue.tryParseDate(s.toString(), rules.isAllowYearZero());
         }
         if (cr instanceof ValidationFailure) {
             cr = TimeValue.makeTimeValue(s);

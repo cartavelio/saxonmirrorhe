@@ -285,9 +285,8 @@ public class FormatDate extends SystemFunction implements Callable {
                             .withErrorCode("FOFD1350")
                             .withXPathContext(context);
                 } else {
-                    Int64Value hour = (Int64Value) value.getComponent(AccessorFn.Component.HOURS);
-                    assert hour != null;
-                    return formatNumber(component, (int) hour.longValue(), format, defaultFormat, numberer, context);
+                    TimeValue time = (value instanceof TimeValue ? ((TimeValue) value) : ((DateTimeValue)value).toTimeValue());
+                    return formatNumber(component, time.getHour(), format, defaultFormat, numberer, context);
                 }
             case 'h':       // hour in half-day (12 hour clock)
                 if (ignoreTime) {
@@ -295,9 +294,8 @@ public class FormatDate extends SystemFunction implements Callable {
                             .withErrorCode("FOFD1350")
                             .withXPathContext(context);
                 } else {
-                    Int64Value hour = (Int64Value) value.getComponent(AccessorFn.Component.HOURS);
-                    assert hour != null;
-                    int hr = (int) hour.longValue();
+                    TimeValue time = (value instanceof TimeValue ? ((TimeValue) value) : ((DateTimeValue) value).toTimeValue());
+                    int hr = time.getHour();
                     if (hr > 12) {
                         hr = hr - 12;
                     }
@@ -312,9 +310,8 @@ public class FormatDate extends SystemFunction implements Callable {
                             .withErrorCode("FOFD1350")
                             .withXPathContext(context);
                 } else {
-                    Int64Value minutes = (Int64Value) value.getComponent(AccessorFn.Component.MINUTES);
-                    assert minutes != null;
-                    return formatNumber(component, (int) minutes.longValue(), format, defaultFormat, numberer, context);
+                    TimeValue time = (value instanceof TimeValue ? ((TimeValue) value) : ((DateTimeValue) value).toTimeValue());
+                    return formatNumber(component, time.getMinute(), format, defaultFormat, numberer, context);
                 }
             case 's':       // seconds
                 if (ignoreTime) {
@@ -322,9 +319,8 @@ public class FormatDate extends SystemFunction implements Callable {
                             .withErrorCode("FOFD1350")
                             .withXPathContext(context);
                 } else {
-                    IntegerValue seconds = (IntegerValue) value.getComponent(AccessorFn.Component.WHOLE_SECONDS);
-                    assert seconds != null;
-                    return formatNumber(component, (int) seconds.longValue(), format, defaultFormat, numberer, context);
+                    TimeValue time = (value instanceof TimeValue ? ((TimeValue) value) : ((DateTimeValue) value).toTimeValue());
+                    return formatNumber(component, time.getSecond().intValue(), format, defaultFormat, numberer, context);
                 }
             case 'f':       // fractional seconds
                 // ignore the format
@@ -333,9 +329,10 @@ public class FormatDate extends SystemFunction implements Callable {
                             .withErrorCode("FOFD1350")
                             .withXPathContext(context);
                 } else {
-                    Int64Value micros = (Int64Value) value.getComponent(AccessorFn.Component.MICROSECONDS);
-                    assert micros != null;
-                    return formatNumber(component, (int)micros.longValue(), format, defaultFormat, numberer, context);
+                    TimeValue time = (value instanceof TimeValue ? ((TimeValue) value) : ((DateTimeValue) value).toTimeValue());
+                    BigDecimal subSeconds = time.getSecond().divideAndRemainder(BigDecimal.ONE)[1];
+                    int micros = subSeconds.multiply(BigDecimal.valueOf(1_000_000)).intValue();
+                    return formatNumber(component, micros, format, defaultFormat, numberer, context);
                 }
             case 'z':
             case 'Z':
@@ -350,10 +347,10 @@ public class FormatDate extends SystemFunction implements Callable {
                     int year = now.getYear();
                     int tzoffset = value.getTimezoneInMinutes();
                     DateTimeValue baseDate =
-                            new DateTimeValue(year, (byte)1, (byte)1, (byte)0, (byte)0, (byte)0, 0, tzoffset);
+                            new DateTimeValue(year, 1, 1, 0, 0, BigDecimal.ZERO, tzoffset);
                     Optional<Boolean> b = NamedTimeZone.inSummerTime(baseDate, country);
                     if (b.isPresent() && b.get()) {
-                        baseDate = new DateTimeValue(year, (byte) 7, (byte) 1, (byte) 0, (byte) 0, (byte) 0, 0, tzoffset);
+                        baseDate = new DateTimeValue(year, 7, 1, 0, 0, BigDecimal.ZERO, tzoffset);
                     }
                     dtv = DateTimeValue.makeDateTimeValue(baseDate.toDateValue(), (TimeValue)value);
                 } else {
