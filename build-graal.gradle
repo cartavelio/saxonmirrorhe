@@ -464,8 +464,8 @@ task unjar_htmlParser(
 
 task graal_hec_jar(
   type: Jar,
-  dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces", "compile_function_library",
-              "unjar_ICU4jJar"],
+  dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces",
+              "compile_function_library", "unjar_ICU4jJar"],
   description: "Build the HE jar file for SaxonC"
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-he/META-INF")
@@ -902,7 +902,7 @@ task all_saxonc_releases() {
     lastLinePatch = ('[tool.cibuildwheel]\n'
                      + 'build = "*"\n'
                      + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n'
-                     + 'archs = ["x86_64"]\n'
+                     + "archs = [\"${systemOsArch}\"]\n"
                      + 'environment.LD_LIBRARY_PATH = "/project/libs/nix"\n')
   } else if (systemOsName == 'windows') {
     lastLinePatch = ('[tool.cibuildwheel]\n'
@@ -1111,15 +1111,19 @@ task all_saxonc_releases() {
   }
 }
 
+// I'd be inclined to give saxonc_stage_wheels, saxonc_prepare_wheels, and
+// saxonc_build_wheels different names, but two of the names have been in use
+// for a while, so I'm not changing them
+
 task saxonc_stage_wheels(
   type: Tar,
   dependsOn: ['saxon_eec_stage_wheel', 'saxon_pec_stage_wheel', 'saxon_hec_stage_wheel']
 
 ) {
   inputs.files fileTree(dir: "${buildDir}/wheels/${systemOsName}")
-  outputs.file "${buildDir}/distributions/${systemOsName}.wheels.tar.gz"
+  outputs.file "${buildDir}/distributions/${systemOsName}-${systemOsArch}.wheels.tar.gz"
 
-  archiveFileName = "${systemOsName}.wheels.tar.gz"
+  archiveFileName = "${systemOsName}-${systemOsArch}.wheels.tar.gz"
   from "${buildDir}/wheels"
   include "${systemOsName}/**"
   exclude "${systemOsName}/*/build/**"
@@ -1131,33 +1135,71 @@ task saxonc_stage_wheels(
   }
 }
 
-task saxonc_build_wheels(
+task saxonc_prepare_wheels(
   dependsOn: ['saxonc_stage_wheels']
 ) {
   def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
-
   if (user == 'ndw') {
     user = 'norm' // HACK
   }
 
-  def osarch = System.getProperty("os.arch")
+  doFirst {
+    if (awscli == null) {
+      throw new GradleException("Did not find 'aws' on path")
+    }
+  }
+
+  def wheels = "${systemOsName}-${systemOsArch}.wheels.tar.gz"
+  if (project.findProperty("skipWheelUpload") == null
+      && project.findProperty('wheelDryRun') == null) {
+    doLast {
+      println("Copying ${systemOsName} staging files to s3://saxonica-wheel-staging/${user}/${wheels}")
+      exec {
+        workingDir "${buildDir}/distributions"
+        commandLine awscli, "--profile", "saxonica",
+          "s3", "cp", "${wheels}",
+          "s3://saxonica-wheel-staging/${user}/${wheels}"
+      }
+    }
+  } else {
+    doLast {
+      println("Skipping upload of ${wheels}")
+    }
+  }
+}
+
+task saxonc_build_wheels(
+  dependsOn: ['saxonc_prepare_wheels']
+) {
+  def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
+  if (user == 'ndw') {
+    user = 'norm' // HACK
+  }
+
   def now = new Date()
   def isodate = "${now.format('yyyy-MM-dd')}T${now.format('HH-mm-ss')}"
 
-  def buildMacA64  = project.findProperty('macWheels_aarch64') != null
-  def buildMacX86  = project.findProperty('macWheels_x86_64') != null
-  def buildLinux   = project.findProperty('linuxWheels') != null
-  def buildWindows = project.findProperty('windowsWheels') != null
+  def buildMacA64    = project.findProperty('macWheels_aarch64') != null
+  def buildMacX86    = project.findProperty('macWheels_x86_64') != null
+  def buildLinuxA64  = project.findProperty('linuxWheels_aarch64') != null
+  def buildLinuxX86  = project.findProperty('linuxWheels_x86_64') != null
+  def buildWindows   = project.findProperty('windowsWheels') != null
 
-  if (!buildMacA64 && !buildMacX86 && !buildLinux && !buildWindows) {
+  if (!buildMacA64 && !buildMacX86 && !buildLinuxA64 && !buildLinuxX86 && !buildWindows) {
     if (systemOs.isMacOsX()) {
-      if (osarch == 'x86_64') {
+      if (systemOsArch == 'x86_64') {
         buildMacX86 = true
       } else {
         buildMacA64 = true
       }
     }
-    buildLinux = systemOs.isLinux()
+    if (systemOs.isLinux()) {
+      if (systemOsArch == 'x86_64') {
+        buildLinuxX86 = true
+      } else {
+        buildLinuxA64 = true
+      }
+    }
     buildWindows = systemOs.isWindows()
   }
 
@@ -1168,17 +1210,17 @@ task saxonc_build_wheels(
   if (buildMacA64) {
     arch.add("macaarch64")
   }
-  if (buildLinux) {
-    arch.add("linux")
+  if (buildLinuxX86) {
+    arch.add("linuxx86_64")
+  }
+  if (buildLinuxA64) {
+    arch.add("linuxaarch64")
   }
   if (buildWindows) {
     arch.add("windows")
   }
 
   doFirst {
-    if (scp == null) {
-      throw new GradleException("Did not find 'scp' on path")
-    }
     delete "${buildDir}/BuildWheels"
   }
 
@@ -1190,28 +1232,6 @@ task saxonc_build_wheels(
     }
   }
 
-  if (project.findProperty("skipWheelUpload") == null
-      && project.findProperty('wheelDryRun') == null) {
-    doLast {
-      def wheels = "${systemOsName}.wheels.tar.gz"
-      if (systemOsName == "mac") {
-        wheels = "${systemOsName}-${osarch}.wheels.tar.gz"
-      }
-      def path = "/var/www/html/dev.saxonica.com/github-wheel-sources"
-
-      println("Copying ${systemOsName} staging files to dev.saxonica.com/${wheels}")
-      exec {
-        workingDir "${buildDir}/distributions"
-        commandLine scp, "${systemOsName}.wheels.tar.gz",
-          "dev.saxonica.com:${path}/${user}/${wheels}"
-      }
-    }
-  } else {
-    doLast {
-      println("Skipping upload of ${systemOsName}.wheels.tar.gz")
-    }
-  }
-
   doLast {
     println("Creating build configuration")
     def m = new PrintStream(new File("${buildDir}/BuildWheels/config.json"))
@@ -1219,7 +1239,8 @@ task saxonc_build_wheels(
     m.println("  \"user\": \"${user}\",")
     m.println("  \"macx86_64\": ${buildMacX86},")
     m.println("  \"macaarch64\": ${buildMacA64},")
-    m.println("  \"linux\": ${buildLinux},")
+    m.println("  \"linuxx86_64\": ${buildLinuxX86},")
+    m.println("  \"linuxaarch64\": ${buildLinuxA64},")
     m.println("  \"windows\": ${buildWindows},")
 
     if (buildMacX86) {
@@ -1246,9 +1267,7 @@ task saxonc_build_wheels(
         commandLine 'git', 'commit', '-m', msg, 'config.json'
       }
     }
-  }
 
-  if (project.findProperty('wheelDryRun') == null) {
     doLast {
       println("Pushing build trigger")
       exec {
