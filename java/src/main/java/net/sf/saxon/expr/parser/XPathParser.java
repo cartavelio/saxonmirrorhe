@@ -66,6 +66,7 @@ import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 
 /**
@@ -4614,42 +4615,101 @@ public class XPathParser {
                                           arguments,
                                           keywordArgs);
         } else {
-            StructuredQName functionName;
+            StructuredQName functionQName;
             if (NameChecker.isValidNCName(fname) && isAllowXPath40Syntax()) {
                 // First try for a no-namespace name, otherwise a name in the default function namespace
                 StructuredQName noNamespaceName = new StructuredQName("", NamespaceUri.NULL, fname);
                 FunctionItem fit = env.getFunctionLibrary().getFunctionItem(new SymbolicName.F(noNamespaceName, arguments.length), env);
                 if (fit != null) {
-                    functionName = noNamespaceName;
+                    functionQName = noNamespaceName;
                 } else {
-                    functionName = resolveFunctionName(fname);
+                    functionQName = resolveFunctionName(fname);
                 }
             } else {
-                functionName = resolveFunctionName(fname);
+                functionQName = resolveFunctionName(fname);
             }
-            if (env.getConfiguration().isDisabledFunction(functionName)) {
-                grumble("Function " + functionName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
-            }
-            if (placeHolderSequence > 0) {
-
-                return makeStaticPartialApply(this, offset, functionName, arguments, keywordArgs);
+            if (env.getConfiguration().isDisabledFunction(functionQName)) {
+                grumble("Function " + functionQName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
             }
 
-            SymbolicName.F sn;
+            // Make a function call expression
 
-
-            sn = new SymbolicName.F(functionName, args.size());
             List<String> reasons = new ArrayList<>();
-            try {
-                fcall = env.getFunctionLibrary().bind(sn, arguments, keywordArgs, env, reasons);
-            } catch (UncheckedXPathException e) {
-                reasons.add(e.getMessage());
+            SymbolicName.F functionName = new SymbolicName.F(functionQName, arguments.length);
+            Expression exp = env.getFunctionLibrary().bind(functionName, arguments, keywordArgs, env, reasons);
+            if (exp == null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Cannot find a ").append(arguments.length).append(
+                        "-argument function named ").append(functionName.getComponentName().getEQName()).append("()");
+                for (String reason : reasons) {
+                    sb.append(". ").append(reason);
+                }
+                throw new XPathException(sb.toString(), "XPST0017").asStaticError();
             }
 
-            if (fcall == null) {
-                return reportMissingFunction(offset, functionName, arguments, reasons);
+            if (exp instanceof FunctionCall fc) {
+
+                // Inject any default value expressions
+                for (int i = 0; i < fc.getArguments().length; i++) {
+                    if (fc.getArg(i) instanceof DefaultedArgumentExpression) {
+                        if (fc instanceof UserFunctionCall ufc) {
+                            UserFunction uf = ufc.getFunction();
+                            Supplier<Expression> def = uf.getParameterDefinitions()[i].getDefaultValueExpression();
+                            if (def == null) {
+                                throw new XPathException("Argument " + (i + 1) + " has no default value in function " + functionQName.getEQName(), "XPST0017");
+                            }
+                            fc.setArg(i, def.get().copy(new RebindingMap()));
+                        } else if (fc instanceof SystemFunctionCall sfc) {
+                            Supplier<Expression> def = sfc.getTargetFunction().getDetails().getDefaultValueExpression(i);
+                            fc.setArg(i, def == null ? Literal.makeEmptySequence() : def.get());
+                        } else {
+                            throw new UnsupportedOperationException();
+                        }
+                    }
+                    exp.adoptChildExpression(fc.getArg(i));
+                }
+
+                // If there are placeholders as well as keywords then we take advantage of the fact that
+                // the call on bind() will have dealt with mapping keyword arguments to positional arguments,
+                // and evaluating defaulted arguments
+
+                if (placeHolderSequence > 0) {
+                    SymbolicName.F sn2 = new SymbolicName.F(functionName.getComponentName(), fc.getArguments().length);
+                    FunctionItem functionItem = env.getFunctionLibrary().getFunctionItem(sn2, env);
+                    return new DynamicPartialApply(new FunctionLiteral(functionItem), fc.getArguments());
+                }
+            } else if (placeHolderSequence > 0) {
+                // For example, this happens with test xqhof10, xs:NCName(?), where bind() returns a CastExpression
+                FunctionItem functionItem = env.getFunctionLibrary().getFunctionItem(functionName, env);
+                return new DynamicPartialApply(new FunctionLiteral(functionItem), arguments);
             }
+
+
+            exp.setRetainedStaticContext(env.makeRetainedStaticContext());
+            setLocation(exp, offset);
+            return exp;
+
         }
+//            if (placeHolderSequence > 0) {
+//
+//                return makeStaticPartialApply(this, offset, functionName, arguments, keywordArgs);
+//            }
+//
+//            SymbolicName.F sn;
+//
+//
+//            sn = new SymbolicName.F(functionName, args.size());
+//            List<String> reasons = new ArrayList<>();
+//            try {
+//                fcall = env.getFunctionLibrary().bind(sn, arguments, keywordArgs, env, reasons);
+//            } catch (UncheckedXPathException e) {
+//                reasons.add(e.getMessage());
+//            }
+//
+//            if (fcall == null) {
+//                return reportMissingFunction(offset, functionName, arguments, reasons);
+//            }
+//        }
         //}
         //  A QName or NOTATION constructor function must be given the namespace context now
 //        if (fcall instanceof CastExpression &&

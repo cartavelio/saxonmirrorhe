@@ -239,6 +239,10 @@ public class DraftFunctionCall extends DraftExpression {
 
         SymbolicName.F functionName = new SymbolicName.F(qName, arity);
 
+        return makeFunctionCall(lib, functionName, qName);
+    }
+
+    private Expression makeFunctionCall(FunctionLibrary lib, SymbolicName.F functionName, StructuredQName qName) throws XPathException {
         // Make a function call expression
 
         List<String> reasons = new ArrayList<>();

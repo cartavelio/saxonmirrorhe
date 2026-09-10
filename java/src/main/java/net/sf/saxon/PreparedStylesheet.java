@@ -15,14 +15,13 @@ import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.OutputURIResolver;
-import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -234,22 +233,14 @@ public class PreparedStylesheet extends Executable {
         // When searching for a function, accept a function with higher arity provided
         // the arity range is OK
         if (name instanceof SymbolicName.F fnName) {
-            try {
-                FunctionItem item = getFunctionLibrary().getFunctionItem(fnName, new IndependentContext(getConfiguration()));
-                if (item != null) {
-                    int arity = item.getArity();
-
-                }
-            } catch (XPathException e) {
-                return null;
-            }
-            int arity = fnName.getArity();
-            while (true) {
-                arity++;
-                SymbolicName.F next = new SymbolicName.F(fnName.getComponentName(), arity);
-                c = componentIndex.get(next);
-                if (c == null) {
-                    return null;
+            for (Map.Entry<SymbolicName, Component> entry : componentIndex.entrySet()) {
+                SymbolicName fn = entry.getKey();
+                if (fn.getComponentKind() == StandardNames.XSL_FUNCTION
+                        && fn.getComponentName().equals(fnName.getComponentName())) {
+                    UserFunction uf = (UserFunction)entry.getValue().getActor();
+                    if (uf.getArity() >= fnName.getArity() && uf.getMinimumArity() <= fnName.getArity()) {
+                        return entry.getValue();
+                    }
                 }
             }
         }
