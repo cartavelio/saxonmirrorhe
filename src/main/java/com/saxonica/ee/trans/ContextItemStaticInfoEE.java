@@ -3,6 +3,7 @@ package com.saxonica.ee.trans;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.Streamability;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.AttributeSet;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -21,6 +22,7 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
     private boolean strictStreamabilityRules;
     private Actor container;
     private AccumulatorFn.Phase accumulatorPhase = AccumulatorFn.Phase.UNSPECIFIED;
+
 
 
     /**
