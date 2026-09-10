@@ -28,15 +28,19 @@ public class FoldStreamer extends StreamingAdjunct implements FeedMaker {
     @Override
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         SystemFunctionCall call = (SystemFunctionCall)getExpression();
-        return new FoldFeed(call, out, context);
+        return new FoldFeed(watchManager, call, out, context);
     }
 
     private static class FoldFeed extends AtomicItemFeed {
 
         private final Fold fold;
+        private WatchManager watchManager;
+        private boolean closed = false;
 
-        public FoldFeed(SystemFunctionCall expression, ItemFeed result, XPathContext context) throws XPathException {
+        public FoldFeed(WatchManager watchManager, SystemFunctionCall expression,
+                        ItemFeed result, XPathContext context) throws XPathException {
             super(expression, result, context);
+            this.watchManager = watchManager;
             Sequence[] additionalArgs = SequenceTool.makeSequenceArray(expression.getArity() - 1);
             for (int i=1; i<expression.getArity(); i++) {
                 additionalArgs[i-1] = SequenceTool.toLazySequence(expression.getArg(i).iterate(context));
@@ -61,7 +65,8 @@ public class FoldStreamer extends StreamingAdjunct implements FeedMaker {
                 } catch (XPathException err) {
                     dynamicError(err);
                 }
-                if (fold.isFinished()) {
+                if (fold.isFinished() && watchManager.allowsEarlyExit()) {
+                    closed = true;
                     close();
                     getTerminator().terminate();
                 }
@@ -81,7 +86,9 @@ public class FoldStreamer extends StreamingAdjunct implements FeedMaker {
                 Sequence value = fold.result();
                 Outputter out = getNextOutputter();
                 processItems(value.iterate(), out);
-                out.close();
+                if (!closed) {
+                    out.close();
+                }
             }
         }
 

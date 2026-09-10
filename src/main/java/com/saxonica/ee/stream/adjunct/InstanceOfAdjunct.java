@@ -29,20 +29,23 @@ public class InstanceOfAdjunct extends InspectionAdjunct implements FeedMaker {
 
     @Override
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-        return new InstanceOfFeed(getExpression(), out, context);
+        return new InstanceOfFeed(watchManager, getExpression(), out, context);
     }
 
     private static class InstanceOfFeed extends GroundedItemFeed {
 
+        WatchManager watchManager;
         ItemType itemType;
         int level;
         int count;
         int cardinality;
         boolean matchesSoFar;
+        boolean closed;
 
 
-        InstanceOfFeed(Expression exp, ItemFeed result, XPathContext context) {
+        InstanceOfFeed(WatchManager watchManager, Expression exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
+            this.watchManager = watchManager;
             itemType = ((InstanceOfExpression)exp).getRequiredItemType();
             cardinality = ((InstanceOfExpression)exp).getRequiredCardinality();
             matchesSoFar = true;
@@ -68,8 +71,11 @@ public class InstanceOfAdjunct extends InspectionAdjunct implements FeedMaker {
                 }
                 if (!matchesSoFar) {
                     getNextOutputter().append(BooleanValue.FALSE);
-                    getNextOutputter().close();
-                    getTerminator().terminate();
+                    if (watchManager.allowsEarlyExit()) {
+                        closed = true;
+                        getNextOutputter().close();
+                        getTerminator().terminate();
+                    }
                 }
             }
         }
@@ -81,6 +87,8 @@ public class InstanceOfAdjunct extends InspectionAdjunct implements FeedMaker {
                     matchesSoFar = false;
                 }
                 getNextOutputter().append(BooleanValue.get(matchesSoFar));
+            }
+            if (!closed) {
                 getNextOutputter().close();
             }
         }

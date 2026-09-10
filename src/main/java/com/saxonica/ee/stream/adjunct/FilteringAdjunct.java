@@ -31,7 +31,7 @@ public abstract class FilteringAdjunct extends TransmissionAdjunct implements Fe
     @Override
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
         final FilteringFeed.Filter filter = makeFilter(context, out);
-        return new FilteringFeed(out, context, filter);
+        return new FilteringFeed(watchManager, out, context, filter);
     }
 
 

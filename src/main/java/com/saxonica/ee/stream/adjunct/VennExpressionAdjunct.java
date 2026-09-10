@@ -143,17 +143,17 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
                 return new UnionFeed(exp, exp.getLhsExpression(), out, context);
             }
         } else if (operator == Token.INTERSECT) {
-            return new FilteringFeed(out, context, FilteringFeed.OpaqueFilter);
+            return new FilteringFeed(watchManager, out, context, FilteringFeed.OpaqueFilter);
 
         } else if (operator == Token.EXCEPT) {
             if (a0consuming) {
                 // If the LHS expression is streamed, we deliver its contents and ignore the RHS
                 // expression, which cannot deliver any streamed nodes
-                return new FilteringFeed(out, context, FilteringFeed.TransparentFilter);
+                return new FilteringFeed(watchManager, out, context, FilteringFeed.TransparentFilter);
             } else {
                 // If the RHS expression is streamed, we deliver the contents of the LHS operand, and ignore the RHS
                 // expression, which cannot deliver any unstreamed nodes
-                return new FirstOperandOnlyFeed(out, context, exp.getLhsExpression());
+                return new FirstOperandOnlyFeed(watchManager, out, context, exp.getLhsExpression());
 //                return new FilteringFeed(out, context, FilteringFeed.OpaqueFilter) {
 //                    @Override
 //                    public void open(Terminator terminator) throws XPathException {
@@ -177,8 +177,8 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
 
         Expression lhs;
 
-        public FirstOperandOnlyFeed(ItemFeed out, XPathContext context, Expression lhs) {
-            super(out, context, FilteringFeed.OpaqueFilter);
+        public FirstOperandOnlyFeed(WatchManager watchManager, ItemFeed out, XPathContext context, Expression lhs) {
+            super(watchManager, out, context, FilteringFeed.OpaqueFilter);
             this.lhs = lhs;
         }
 

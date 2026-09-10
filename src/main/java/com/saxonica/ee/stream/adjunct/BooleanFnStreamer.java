@@ -14,7 +14,7 @@ public class BooleanFnStreamer extends InspectionAdjunct implements FeedMaker {
 
     @Override
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-        return new BooleanFnFeed.Positive(getExpression(), out, context);
+        return new BooleanFnFeed.Positive(watchManager, getExpression(), out, context);
     }
 
 }

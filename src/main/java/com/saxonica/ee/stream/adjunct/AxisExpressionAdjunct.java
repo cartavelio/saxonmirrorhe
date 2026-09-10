@@ -68,6 +68,7 @@ public class AxisExpressionAdjunct extends StreamingAdjunct {
             return (watchManager, out, context) -> {
                 if (forGrouping) {
                     out = new FilteringFeed(
+                            watchManager,
                             out,
                             context,
                             new FilteringFeed.FilterLambda((item, position)

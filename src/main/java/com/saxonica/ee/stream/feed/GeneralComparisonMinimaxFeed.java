@@ -1,6 +1,7 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.watch.Terminator;
+import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.GeneralComparison;
@@ -9,11 +10,9 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.NumericComparer;
 import net.sf.saxon.expr.sort.NumericComparer11;
-import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
@@ -39,30 +38,28 @@ import java.util.function.Predicate;
 
 public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
 
+    private WatchManager watchManager;
     private AtomicComparer comparer;
-    private final StringCollator collator;
-    BuiltInAtomicType matchType;
     private List<AtomicValue> unstreamedValues;
     private NumericValue minUnstreamedNumeric;
     private NumericValue maxUnstreamedNumeric;
     private int operator;
     private boolean done = false;
+    private boolean closed = false;
     private final Expression pullOperand;
-    private final int implicitTimezone;
     private Predicate<Integer> predicate;
 
-    public GeneralComparisonMinimaxFeed(Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
+    public GeneralComparisonMinimaxFeed(WatchManager watchManager, Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
         super(expr, result, context);
+        this.watchManager = watchManager;
         final GeneralComparison gc = (GeneralComparison) getExpression();
         comparer = gc.getAtomicComparer();
-        collator = gc.getAtomicComparer().getCollator();
         operator = gc.getSingletonOperator();
         // Adjust the expression so the streamed argument is effectively first
         if (pushedArg == 1) {
             operator = Token.inverse(operator);
         }
         pullOperand = pushedArg==0 ? gc.getRhsExpression() : gc.getLhsExpression();
-        implicitTimezone = context.getImplicitTimezone();
         predicate = makeTest(operator);
     }
 
@@ -194,8 +191,11 @@ public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
         Outputter out = getNextOutputter();
         done = true;
         out.append(BooleanValue.get(result));
-        out.close();
-        getTerminator().terminate();
+        if (watchManager.allowsEarlyExit()) {
+            closed = true;
+            out.close();
+            getTerminator().terminate();
+        }
     }
 
     @Override
@@ -203,6 +203,8 @@ public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
         if (!done) {
             // If we've come to the end without finding an item that meets the conditions, report the result false
             getNextOutputter().append(BooleanValue.FALSE);
+        }
+        if (!closed) {
             super.close();
             minUnstreamedNumeric = null;
             maxUnstreamedNumeric = null;

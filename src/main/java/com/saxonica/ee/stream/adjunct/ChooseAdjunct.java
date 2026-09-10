@@ -83,7 +83,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
                 // if no condition matches, or if a matching condition has been processed without reference to the
                 // source document, then return a Watch that never fires
                 return new Trigger(new NodeTestPattern(ErrorType.getInstance()),
-                                   new FilteringFeed(out, context, FilteringFeed.OpaqueFilter),
+                                   new FilteringFeed(watchManager, out, context, FilteringFeed.OpaqueFilter),
                                    context);
             };
         } else {
@@ -136,7 +136,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
             ItemFeed action = new ItemFeedForConsumingCondition(expression, consumingCondition, out, context);
             // Now construct an input feed that computes the EBV. May be unnecessary since
             // the optimizer will have already inserted a call of boolean() in the expression tree.
-            return new BooleanFnFeed.Positive(expression, action, context);
+            return new BooleanFnFeed.Positive(watchManager, expression, action, context);
         }
     }
 

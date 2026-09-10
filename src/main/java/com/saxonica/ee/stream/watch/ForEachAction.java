@@ -35,7 +35,7 @@ public class ForEachAction extends ItemFeed {
     // bodyContext contains the iterator over the nodes selected by the for-each instruction,
     // and is the context in which the inner inverted expression is evaluated
     protected XPathContext bodyContext;
-    private final WatchManager watchManager;
+    protected final WatchManager watchManager;
 
     private final Expression action;
     private Inversion inversion;

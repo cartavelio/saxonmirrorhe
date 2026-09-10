@@ -301,12 +301,14 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
             lastLocationId = location.saveLocation();
         } catch (QuitParsingException quit) {
-            while (!namespaceStack.isEmpty()) {
-                endElement();
+            if (multiAccumulatorWatch == null) {
+                while (!namespaceStack.isEmpty()) {
+                    endElement();
+                }
+                endDocument();
+                warning(quit);
+                throw quit;
             }
-            endDocument();
-            warning(quit);
-            throw quit;
         }
 
         processAttributes(attributes);
@@ -778,23 +780,13 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         return true;
     }
 
+    public boolean allowsEarlyExit() {
+        return multiAccumulatorWatch == null;
+    }
+
     public FleetingDocumentNode getDocumentNode() {
         return documentNode;
     }
-
-//    /**
-//     * Get a map from accumulators to AccumulatorWatch instances
-//     * @return the map for all accumulators that apply to this stream. Return null if there are no
-//     * accumulators
-//     */
-//
-//    public Map<Accumulator, AccumulatorWatch> getAccumulatorWatchMap() {
-//        return accumulatorWatchMap;
-//    }
-//
-//    public void setAccumulatorWatchMap(Map<Accumulator, AccumulatorWatch> accumulatorWatchMap) {
-//        this.accumulatorWatchMap = accumulatorWatchMap;
-//    }
 
     public MultiAccumulatorWatch getMultiAccumulatorWatch() {
         return multiAccumulatorWatch;

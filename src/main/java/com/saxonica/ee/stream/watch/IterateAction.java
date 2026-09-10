@@ -118,7 +118,9 @@ public class IterateAction extends ForEachAction {
             // Indicates a saxon:break instruction was encountered: break the loop
             // If we are iterating over the whole document, abandon parsing as soon as xsl:break is executed
             broken = true;
-            terminator.terminate();
+            if (getWatchManager().allowsEarlyExit()) {
+                terminator.terminate();
+            }
         }
     }
 

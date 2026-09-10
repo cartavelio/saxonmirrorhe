@@ -2,6 +2,7 @@ package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.watch.Terminator;
+import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -21,14 +22,17 @@ import net.sf.saxon.value.BooleanValue;
  */
 
 public abstract class BooleanFnFeed extends ItemFeed {
+    private WatchManager watchManager;
     private int count;
     private int level;
     private boolean foundAtomic;
     private boolean result;
     private boolean done;
+    private boolean closed;
 
-    BooleanFnFeed(Expression exp, ItemFeed result, XPathContext context) {
+    BooleanFnFeed(WatchManager watchManager, Expression exp, ItemFeed result, XPathContext context) {
         super(exp, result, context);
+        this.watchManager = watchManager;
     }
 
     @Override
@@ -45,10 +49,13 @@ public abstract class BooleanFnFeed extends ItemFeed {
     private void testNode() throws XPathException {
         if (level == 0 && !hasFailed()) {
             if (++count == 1) {
-                getNextOutputter().append(BooleanValue.get(isPositive()));
-                getNextOutputter().close();
                 done = true;
-                getTerminator().terminate();
+                getNextOutputter().append(BooleanValue.get(isPositive()));
+                if (watchManager.allowsEarlyExit()) {
+                    closed = true;
+                    getNextOutputter().close();
+                    getTerminator().terminate();
+                }
             } else if (foundAtomic) {
                 try {
                     ExpressionTool.ebvError("a sequence of two or more items starting with an atomic value", getExpression());
@@ -130,7 +137,9 @@ public abstract class BooleanFnFeed extends ItemFeed {
     public void close() throws XPathException {
         if (!hasFailed() && !done) {
             getNextOutputter().append(BooleanValue.get(result));
-            super.close();
+            if (!closed) {
+                super.close();
+            }
             done = true;
         }
     }
@@ -141,8 +150,8 @@ public abstract class BooleanFnFeed extends ItemFeed {
 
     public static class Positive extends BooleanFnFeed {
 
-        public Positive(Expression exp, ItemFeed result, XPathContext context) {
-            super(exp, result, context);
+        public Positive(WatchManager watchManager, Expression exp, ItemFeed result, XPathContext context) {
+            super(watchManager, exp, result, context);
         }
 
         @Override
@@ -158,8 +167,8 @@ public abstract class BooleanFnFeed extends ItemFeed {
 
     public static class Negative extends BooleanFnFeed {
 
-        Negative(Expression exp, ItemFeed result, XPathContext context) {
-            super(exp, result, context);
+        public Negative(WatchManager watchManager, Expression exp, ItemFeed result, XPathContext context) {
+            super(watchManager, exp, result, context);
         }
 
         @Override

@@ -182,7 +182,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
                     } else {
                         FilteringFeed.Filter filter = new FilteringFeed.FilterLambda((item, position) ->
                                 pattern.matchesBeneathAnchor((NodeInfo) item, anchorNode, bodyContext) ? MATCHES : SKIP);
-                        gp.feed = new FilteringFeed(actionFeed, getContext(), filter);
+                        gp.feed = new FilteringFeed(watchManager, actionFeed, getContext(), filter);
                         if (pattern instanceof AncestorQualifiedPattern) {
                             // This typically means we need to watch for ./xxx or current-group()/xxx
                             getWatchManager().addWatch(watch, true);

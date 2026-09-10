@@ -213,7 +213,7 @@ public class ForEachGroupPartitionAction extends ItemFeed {
                         (item, position) -> pattern.matchesBeneathAnchor((NodeInfo)item, anchorNode, bodyContext)
                                 ? FilteringFeed.FilterResult.MATCHES
                                 : FilteringFeed.FilterResult.SKIP);
-                currentGroupFeed = new FilteringFeed(actionFeed, getContext(), filter);
+                currentGroupFeed = new FilteringFeed(watchManager, actionFeed, getContext(), filter);
                 if (pattern instanceof AncestorQualifiedPattern) {
                     // This typically means we need to watch for ./xxx or current-group()/xxx
                     watchManager.addWatch(watch, true);

@@ -19,14 +19,18 @@ public class ExistsStreamer extends InspectionAdjunct implements FeedMaker {
         return new ExistenceFeed(getExpression(), out, context) {
 
             boolean found = false;
+            boolean closed = false;
 
             @Override
             public void action() throws XPathException {
                 if (!found) {
                     getNextOutputter().append(BooleanValue.TRUE);
-                    getNextOutputter().close();
                     found = true;
-                    getTerminator().terminate();
+                    if (watchManager.allowsEarlyExit()) {
+                        closed = true;
+                        getNextOutputter().close();
+                        getTerminator().terminate();
+                    }
                 }
             }
 
@@ -34,6 +38,8 @@ public class ExistsStreamer extends InspectionAdjunct implements FeedMaker {
             public void close() throws XPathException {
                 if (!found) {
                     getNextOutputter().append(BooleanValue.FALSE);
+                }
+                if (!closed) {
                     getNextOutputter().close();
                 }
             }

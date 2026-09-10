@@ -1,6 +1,7 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.watch.Terminator;
+import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.GeneralComparison;
@@ -33,6 +34,7 @@ import java.util.Set;
 
 public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
 
+    private WatchManager watchManager;
     private final StringCollator collator;
     // A set of lookup tables, one for each primitive atomic type that has been encountered
     private IntHashMap<Set<AtomicMatchKey>> lookupTable;
@@ -41,9 +43,11 @@ public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
     private boolean done = false;
     private final Expression pullOperand;
     private final int implicitTimezone;
+    private boolean closed;
 
-    public GeneralComparisonEqualityFeed(Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
+    public GeneralComparisonEqualityFeed(WatchManager watchManager, Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
         super(expr, result, context);
+        this.watchManager = watchManager;
         final GeneralComparison gc = (GeneralComparison) getExpression();
         collator = gc.getAtomicComparer().getCollator();
         pullOperand = pushedArg==0 ? gc.getRhsExpression() : gc.getLhsExpression();
@@ -132,9 +136,12 @@ public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
                     Outputter out = getNextOutputter();
                     done = true;
                     out.append(BooleanValue.FALSE);
-                    out.close();
                     lookupTable = null;
-                    getTerminator().terminate();
+                    if (watchManager.allowsEarlyExit()) {
+                        closed = true;
+                        out.close();
+                        getTerminator().terminate();
+                    }
                 }
             } else {
                 Set<AtomicMatchKey> typed = lookupTable.get(matchType.getFingerprint());
@@ -183,9 +190,12 @@ public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
             //System.err.println("Matched on " + k);
             done = true;
             out.append(BooleanValue.TRUE);
-            out.close();
             lookupTable = null;
-            getTerminator().terminate();
+            if (watchManager.allowsEarlyExit()) {
+                closed = true;
+                out.close();
+                getTerminator().terminate();
+            }
         }
     }
 
@@ -194,6 +204,8 @@ public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
         if (!done) {
             // If we've come to the end without finding an item that meets the conditions, report the result false
             getNextOutputter().append(BooleanValue.FALSE);
+        }
+        if (!closed) {
             super.close();
             lookupTable = null;
         }

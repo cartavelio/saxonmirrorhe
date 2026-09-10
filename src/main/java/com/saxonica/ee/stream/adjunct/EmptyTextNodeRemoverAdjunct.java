@@ -46,7 +46,7 @@ public class EmptyTextNodeRemoverAdjunct extends StreamingAdjunct implements Fee
 
     @Override
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
-          return new FilteringFeed(out, context,
+          return new FilteringFeed(watchManager, out, context,
                                    new FilteringFeed.FilterLambda((item, position) ->
                                            (!AdjacentTextNodeMerger.isTextNode(item) || !item.getUnicodeStringValue().isEmpty()) ? FilteringFeed.FilterResult.MATCHES : FilteringFeed.FilterResult.SKIP));
     }

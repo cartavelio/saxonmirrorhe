@@ -3,6 +3,7 @@ package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
+import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
@@ -21,11 +22,12 @@ import java.util.Stack;
 
 public class FilteringFeed extends GroundedItemFeed {
 
+    private WatchManager watchManager;
     private final Filter filter;
     private int position;
     private final Stack<Boolean> matchStack = new Stack<>();
-    //private Stack<Integer> nodeKindStack = new Stack<>();
     private boolean terminated;
+    private boolean closed;
 
     /**
      * Create a filtering feed
@@ -34,8 +36,9 @@ public class FilteringFeed extends GroundedItemFeed {
      * position is to be selected
      */
 
-    public FilteringFeed(ItemFeed nextFeed, XPathContext context, Filter filter) {
+    public FilteringFeed(WatchManager watchManager, ItemFeed nextFeed, XPathContext context, Filter filter) {
         super(nextFeed, context);
+        this.watchManager = watchManager;
         this.filter = filter;
     }
 
@@ -56,9 +59,12 @@ public class FilteringFeed extends GroundedItemFeed {
                 return getResultFeed().startSelectedParentNode(node, locationId);
                 //node.notify(getNextOutputter());
             } else if (match == FilterResult.DONE && getTerminator() != null) {
-                getNextOutputter().close();
                 terminated = true;
-                getTerminator().terminate();
+                if (watchManager.allowsEarlyExit()) {
+                    closed = true;
+                    getNextOutputter().close();
+                    getTerminator().terminate();
+                }
             }
         }
         return null;
@@ -83,9 +89,12 @@ public class FilteringFeed extends GroundedItemFeed {
                 if (match == FilterResult.MATCHES) {
                     getNextOutputter().append(item);
                 } else if (match == FilterResult.DONE && getTerminator() != null) {
-                    getNextOutputter().close();
                     terminated = true;
-                    getTerminator().terminate();
+                    if (watchManager.allowsEarlyExit()) {
+                        closed = true;
+                        getNextOutputter().close();
+                        getTerminator().terminate();
+                    }
                 }
             } catch (XPathException e) {
                 dynamicError(e);
@@ -95,7 +104,7 @@ public class FilteringFeed extends GroundedItemFeed {
 
     @Override
     public void close() throws XPathException {
-        if (!terminated && !hasFailed()) {
+        if ((!terminated && !hasFailed()) || !closed) {
             getNextOutputter().close();
         }
     }

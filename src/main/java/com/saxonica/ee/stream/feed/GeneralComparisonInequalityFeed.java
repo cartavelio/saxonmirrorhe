@@ -1,6 +1,7 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.stream.watch.Terminator;
+import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.GeneralComparison;
@@ -29,12 +30,12 @@ import net.sf.saxon.value.StringValue;
 
 public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
 
+    private WatchManager watchManager;
     private final StringCollator collator;
     private AtomicMatchKey firstStreamed = null;
     private StringValue firstUntypedStreamed = null;
-    private AtomicMatchKey firstUnstreamed = null;
-    private StringValue firstUntypedUnstreamed = null;
     private boolean done = false;
+    private boolean closed = false;
     private final Expression pullOperand;
     private final int implicitTimezone;
 
@@ -50,8 +51,9 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
     // then the result is false if the other operand contains more than one distinct value, which
     // limits what we need to retain.
 
-    public GeneralComparisonInequalityFeed(Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
+    public GeneralComparisonInequalityFeed(WatchManager watchManager, Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
         super(expr, result, context);
+        this.watchManager = watchManager;
         final GeneralComparison gc = (GeneralComparison) getExpression();
         collator = gc.getAtomicComparer().getCollator();
         pullOperand = pushedArg==0 ? gc.getRhsExpression() : gc.getLhsExpression();
@@ -64,8 +66,6 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
         done = false;
         firstStreamed = null;
         firstUntypedStreamed = null;
-        firstUnstreamed = null;
-        firstUntypedUnstreamed = null;
     }
 
     /**
@@ -106,14 +106,11 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
                                                  "XPTY0004", getExpression().getLocation());
                     }
                     if (val.isUntypedAtomic()) {
-                        firstUntypedUnstreamed = (StringValue) val;
                         AtomicValue cval = Converter.convert(firstUntypedStreamed, matchType, rules);
                         AtomicMatchKey ku1 = cval.getXPathMatchKey(collator, implicitTimezone);
                         if (!ku1.equals(ks1)) {
                             reportDone(true);
                             break;
-                        } else {
-                            firstUnstreamed = ku1;
                         }
                     } else {
 
@@ -121,8 +118,6 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
                         if (!ks1.equals(ku2)) {
                             reportDone(true);
                             break;
-                        } else {
-                            firstUnstreamed = ku2;
                         }
                         if (firstUntypedStreamed != null) {
                             AtomicValue cval = Converter.convert(firstUntypedStreamed, matchType, rules);
@@ -149,8 +144,11 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
         Outputter out = getNextOutputter();
         done = true;
         out.append(BooleanValue.get(result));
-        out.close();
-        getTerminator().terminate();
+        if (watchManager.allowsEarlyExit()) {
+            closed = true;
+            out.close();
+            getTerminator().terminate();
+        }
     }
 
 
@@ -159,11 +157,11 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
         if (!done) {
             // If we've come to the end without finding an item that meets the conditions, report the result false
             getNextOutputter().append(BooleanValue.FALSE);
+        }
+        if (!closed) {
             super.close();
             firstStreamed = null;
             firstUntypedStreamed = null;
-            firstUnstreamed = null;
-            firstUntypedUnstreamed = null;
         }
 
     }

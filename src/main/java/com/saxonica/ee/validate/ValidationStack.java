@@ -416,7 +416,7 @@ public class ValidationStack extends ValidatingFilter {
                 ItemFeed assertionResultHandler = new AssertionResultHandler(this, a, elemName, context);
 
                 assertionResultHandler.setPipelineConfiguration(pipe);
-                ItemFeed booleanCapture = new BooleanFnFeed.Positive(null, assertionResultHandler, context);
+                ItemFeed booleanCapture = new BooleanFnFeed.Positive(watchManager, null, assertionResultHandler, context);
                 Trigger assertionWatch = inversion.getWatch(watchManager, booleanCapture, context);
                 watchManager.addWatch(assertionWatch, true);
                 watchManager.restartElement(assertionWatch);

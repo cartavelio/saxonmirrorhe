@@ -32,16 +32,18 @@ public class AccumulatorRegistryEE extends AccumulatorRegistry {
 
     public static void registerSelectedAccumulators(
             WatchManager watchManager, Set<? extends Accumulator> accumulators) throws XPathException {
-        Map<Accumulator, AccumulatorWatch> watchMap = new HashMap<>();
+        if (!accumulators.isEmpty()) {
+            Map<Accumulator, AccumulatorWatch> watchMap = new HashMap<>();
 
-        for (Accumulator acc : accumulators) {
-            AccumulatorWatch watch = new AccumulatorWatch(acc);
-            watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
-            watch.setWatchManager(watchManager);
-            watchMap.put(acc, watch);
+            for (Accumulator acc : accumulators) {
+                AccumulatorWatch watch = new AccumulatorWatch(acc);
+                watch.setPipelineConfiguration(watchManager.getPipelineConfiguration());
+                watch.setWatchManager(watchManager);
+                watchMap.put(acc, watch);
+            }
+            MultiAccumulatorWatch maw = new MultiAccumulatorWatch(watchMap);
+            watchManager.watchAccumulators(maw);
         }
-        MultiAccumulatorWatch maw = new MultiAccumulatorWatch(watchMap);
-        watchManager.watchAccumulators(maw);
     }
 
     /**

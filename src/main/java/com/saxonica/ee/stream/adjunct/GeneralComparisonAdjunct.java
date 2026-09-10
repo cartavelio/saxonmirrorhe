@@ -19,11 +19,11 @@ public class GeneralComparisonAdjunct extends StreamingAdjunct {
         return new FeedMakerDelegate((watchManager, out, context) -> {
             int op = ((GeneralComparison)getExpression()).getSingletonOperator();
             if (op == Token.FEQ) {
-                return new GeneralComparisonEqualityFeed(getExpression(), streamedArg, out, context);
+                return new GeneralComparisonEqualityFeed(watchManager, getExpression(), streamedArg, out, context);
             } else if (op == Token.FNE) {
-                return new GeneralComparisonInequalityFeed(getExpression(), streamedArg, out, context);
+                return new GeneralComparisonInequalityFeed(watchManager, getExpression(), streamedArg, out, context);
             } else {
-                return new GeneralComparisonMinimaxFeed(getExpression(), streamedArg, out, context);
+                return new GeneralComparisonMinimaxFeed(watchManager, getExpression(), streamedArg, out, context);
             }
         });
     }

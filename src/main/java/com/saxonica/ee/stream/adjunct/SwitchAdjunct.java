@@ -85,7 +85,7 @@ public class SwitchAdjunct extends TransmissionAdjunct {
             // if no condition matches, or if a matching condition has been processed without reference to the
             // source document, then return a Watch that never fires
             return new Trigger(new NodeTestPattern(ErrorType.getInstance()),
-                               new FilteringFeed(out, context, FilteringFeed.OpaqueFilter),
+                               new FilteringFeed(watchManager, out, context, FilteringFeed.OpaqueFilter),
                                context);
         };
     }

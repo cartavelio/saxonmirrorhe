@@ -53,11 +53,11 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
         SystemFunctionCall call = (SystemFunctionCall)getExpression();
         Posture posture = Streamability.getPosture(call.getArg(consumingArg));
         if (posture == Posture.GROUNDED || posture == Posture.CLIMBING) {
-            return new GroundedDeepEqualFeed(call, out, context, consumingArg);
+            return new GroundedDeepEqualFeed(watchManager, call, out, context, consumingArg);
         } else {
             // TODO: tough case. At present, we don't do a fully streamed implementation: we effectively do
             // deep-equal(copy-of(X/Y/Z), $val) instead of deep-equal(X/Y/Z, val).
-            ItemFeed comparisonFeed = new GroundedDeepEqualFeed(call, out, context, consumingArg);
+            ItemFeed comparisonFeed = new GroundedDeepEqualFeed(watchManager, call, out, context, consumingArg);
             return new CopyOfFeed(watchManager, comparisonFeed, context);
         }
     }
@@ -68,13 +68,17 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
 
     private static class GroundedDeepEqualFeed extends ItemFeed {
 
+        WatchManager watchManager;
         int consumingArg;
         SequenceIterator other;
         AtomicComparer comparer;
         boolean done;
+        boolean closed;
 
-        public GroundedDeepEqualFeed(SystemFunctionCall exp, ItemFeed result, XPathContext context, int consumingArg) throws XPathException {
+        public GroundedDeepEqualFeed(WatchManager watchManager, SystemFunctionCall exp,
+                                     ItemFeed result, XPathContext context, int consumingArg) throws XPathException {
             super(exp, result, context);
+            this.watchManager = watchManager;
             other = exp.getArg(1 - consumingArg).iterate(context);
             this.consumingArg = consumingArg;
             SystemFunctionCall call = (SystemFunctionCall) getExpression();
@@ -114,9 +118,12 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
                             SingletonIterator.makeIterator(otherItem),
                             comparer, getContext(), 0)) {
                     getNextOutputter().append(BooleanValue.FALSE);
-                    getNextOutputter().close();
                     done = true;
-                    getTerminator().terminate();
+                    if (watchManager.allowsEarlyExit()) {
+                        closed = true;
+                        getNextOutputter().close();
+                        getTerminator().terminate();
+                    }
                 }
             }
         }
@@ -132,6 +139,8 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
             if (!done) {
                 boolean more = other.next() != null;
                 getNextOutputter().append(BooleanValue.get(!more));
+            }
+            if (!closed) {
                 getNextOutputter().close();
             }
         }
