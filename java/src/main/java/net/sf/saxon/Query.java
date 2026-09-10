@@ -547,6 +547,8 @@ public class Query {
         } catch (TransformerFactoryConfigurationError err) {
             err.printStackTrace();
             quit("Query processing failed", 2);
+        } catch (CommandExitException err) {
+            throw err;
         } catch (Exception err2) {
             err2.printStackTrace();
             quit("Fatal error during query: " + err2.getClass().getName() + ": " +
