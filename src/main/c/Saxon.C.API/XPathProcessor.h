@@ -60,6 +60,14 @@ public:
    */
   void setBaseURI(const char *uriStr);
 
+
+    //! Get the static base URI for XPath expressions compiled using this
+    //! XPathCompiler.
+    /**
+     * @return base URI as string of the xPathProcessor
+     */
+    const char * getBaseURI();
+
   //! Compile and evaluate an XPath expression
   /**
    *  @param xpathStr - supplied as a character string
@@ -287,6 +295,7 @@ private:
   SaxonProcessor *proc; /*!< SaxonProcessor pointer to object. This is the
                            object that created the XPathProcessor */
   std::string cwdXP;    /*!< current working directory */
+  const char * xp_baseURI;
   // jclass  cppClass; /*!< Reference to the XPathProcessor Java class under JNI
   // */
   int64_t cppXP; /*!< The XPathProcessor underlying Java object  */

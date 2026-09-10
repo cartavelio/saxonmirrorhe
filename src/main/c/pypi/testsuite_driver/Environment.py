@@ -93,9 +93,14 @@ class Environment:
         self.context_item = None
 
         self.source_docs = {}
-        self.param_decimal_declarations = []
+        self.param_decimal_declarations = None
+
+        self.param_declarations = None
+
+        self.params = {}
 
         self.reset_actions = []
+        self.usable = True
 
     def create_processors(self):
         self.xpath_proc = self.proc.new_xpath_processor()

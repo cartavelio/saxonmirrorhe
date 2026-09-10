@@ -64,7 +64,12 @@ public class SaxonCException  {
                 System.err.println("Exception thrown but getMessage() is null");
                 System.err.println(exception.getCause().toString());
             }
-            return WordFactory.nullPointer();
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            throwable.printStackTrace(pw);
+            exception = new SaxonApiException("NullPointer exception found: "+ sw.toString());
+
+            //return WordFactory.nullPointer();
         }
 
         CCharPointer a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());

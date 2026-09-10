@@ -739,6 +739,45 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
   }
 }
 
+XdmValue * SaxonProcessor::parseJsonFromString(const char *source){
+
+  if(source == nullptr) {
+    throw SaxonApiException("JSON source string is null");
+  }
+
+  applyConfigurationProperties();
+  int64_t xdmValueRef = parseJsonString(
+      sxn_environ->thread, (void *)procRef, (char *)source);
+  if (xdmValueRef >= 0) {
+    XdmValue *value = new XdmValue(xdmValueRef);
+
+    return value;
+  } else if (xdmValueRef == -2) {
+    throw SaxonApiException();
+  }
+  return nullptr;
+
+}
+
+XdmValue * SaxonProcessor::parseJsonFromFile(const char *source){
+
+  if(source == nullptr) {
+    throw SaxonApiException("JSON source file name is null");
+  }
+
+  applyConfigurationProperties();
+  int64_t xdmValueRef = parseJsonFile(
+      sxn_environ->thread, (void *)procRef, (char *)source);
+  if (xdmValueRef >= 0) {
+    XdmValue *value = new XdmValue(xdmValueRef);
+
+    return value;
+  } else if (xdmValueRef == -2) {
+    throw SaxonApiException();
+  }
+  return nullptr;
+}
+
 XdmNode *SaxonProcessor::parseXmlFromString(const char *source,
                                             SchemaValidator *validator) {
   // SaxonProcessor::attachCurrentThread();

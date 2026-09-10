@@ -240,6 +240,18 @@ public class XPathProcessor extends SaxonCAPI {
 
     }
 
+    @CEntryPoint(name = "j_xp_getBaseURI", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static CCharPointer getBaseURI(IsolateThread thread, ObjectHandle xpathProcessorRef, SaxonCAPI.AllocatorCCharFn alloc) {
+
+        XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
+        XPathCompiler compiler = xPathProcessor.getCompiler();
+        URI uri = null;
+        String baseUri = compiler.getBaseURI().toString();
+
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, baseUri);
+        return a;
+    }
+
 
     /*public void setProperties(ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         if (selector != null) {

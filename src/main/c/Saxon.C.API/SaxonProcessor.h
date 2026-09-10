@@ -502,6 +502,27 @@ public:
   XdmNode *parseXmlFromUri(const char *source,
                            SchemaValidator *validator = nullptr);
 
+
+  //! Parse a lexical representation of the JSON and return it as an
+  //! XdmValue
+  /**
+   *
+   * @param source the JSON as a lexical string
+   * @return an XdmValue
+   * @throws SaxonApiException if there is a failure in the parsing of the JSON
+   */
+  XdmValue *parseJsonFromString(const char *source);
+
+  //! Parse a source JSON file and return it as an XdmValue.
+  /**
+   *
+   * @param source the filename of the JSON. This is a full path filename or a URI
+   * @return an XdmValue
+   * @throws SaxonApiException  if there ia a failure in the parsing of the XML
+   * file
+   */
+  XdmValue *parseJsonFromFile(const char *source);
+
   //! Get the kind of node.
   /**
    *

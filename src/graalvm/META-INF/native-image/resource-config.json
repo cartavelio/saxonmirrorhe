@@ -8,7 +8,22 @@
       "pattern": "com/ibm/icu/.*/*.*res$"
     },
     {
+      "pattern": "com/ibm/icu/.*/*.*icu$"
+    },
+    {
+      "pattern": "com/ibm/icu/.*/*.*dat$"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/*.xml\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/*.xsd\\E"
+    },
+    {
       "pattern":"\\Qnet/sf/saxon/data/categories.xml\\E"
+    },
+    {
+      "pattern":"\\Qnet/sf/saxon/data/entities.txt\\E"
     },
     {
       "pattern":"\\Qnet/sf/saxon/data/unicodeBlocks.xml\\E"

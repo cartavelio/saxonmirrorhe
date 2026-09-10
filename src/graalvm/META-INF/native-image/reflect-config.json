@@ -31,6 +31,10 @@
      "name":"com.ibm.icu.text.RuleBasedNumberFormat",
      "methods":[{"name":"<init>","parameterTypes":[] }]
    },
+  {
+    "name":"com.ibm.icu.impl.number.CurrencySpacingEnabledModifier",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
 {
   "name":"net.sf.saxon.Configuration",
   "methods":[{"name":"<init>","parameterTypes":[] }]

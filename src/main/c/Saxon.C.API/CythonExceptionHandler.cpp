@@ -12,7 +12,12 @@ void raise_py_error() {
   } catch (SaxonApiException &e) {
     const char *errorMessage = e.getMessageWithErrorCode();
     if (errorMessage == nullptr) {
-      PyErr_SetString(pysaxonapierror, "Unknown exception found");
+      errorMessage = e.getMessage();
+      if(errorMessage == nullptr) {
+        PyErr_SetString(pysaxonapierror, "Unknown exception found");
+      } else {
+        PyErr_SetString(pysaxonapierror, errorMessage);
+      }
     } else {
       PyErr_SetString(pysaxonapierror, errorMessage);
     }
