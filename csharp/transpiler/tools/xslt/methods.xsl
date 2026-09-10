@@ -1363,6 +1363,12 @@
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>.ToArray()</xsl:text>           
          </xsl:when>
+         <!-- stream.readAllBytes() becomes IOUtils.readAllBytes(stream). -->
+         <xsl:when test="name/@identifier = 'readAllBytes' and count(arguments/argument) eq 0">
+            <xsl:text>Saxon.Impl.Helpers.IOUtils.readAllBytes(</xsl:text>
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+            <xsl:text>)</xsl:text>
+         </xsl:when>
          <!-- stream.skip(n) becomes stream.Seek(n, SeekOrigin.Current). -->
          <xsl:when test="name/@identifier = 'skip' and count(arguments/argument) eq 1">
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
