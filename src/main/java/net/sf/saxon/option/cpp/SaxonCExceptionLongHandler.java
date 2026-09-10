@@ -26,7 +26,7 @@ public class SaxonCExceptionLongHandler implements CEntryPoint.ExceptionHandler 
      */
     @Uninterruptible(reason = "exception handler")
     public static long handle(Throwable e) {
-        SaxonCException.throwable = e;
+        SaxonCCurrentException.getInstance().setThrowable(e);
         return SaxonCAPI.STATUS_EXCEPTION;
    	}
 }

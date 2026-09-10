@@ -42,6 +42,7 @@ XsltExecutable::~XsltExecutable() {
   SaxonProcessor::attachCurrentThread();
   clearProperties();
   clearParameters();
+  resources_dir.clear();
 
   if (saxonMessageListenerRef != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
@@ -657,7 +658,7 @@ const char *XsltExecutable::callFunctionReturningString(
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
-  if (saxonResultDocRef > 0) {
+  if (saxonResultDocRef != SXN_UNSET) {
     optionStr = "rd";
     addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),

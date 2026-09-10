@@ -313,7 +313,7 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
     setProperty("!input-encoding", encoding);
   }
   int addition = 0;
-  if (importPackageValue > SXN_UNSET) {
+  if (importPackageValue != SXN_UNSET) {
     addition += 1;
   }
 
@@ -337,7 +337,7 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
   }
   XsltExecutable *executable =
       new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
-  if (processorDataRef > 0) {
+  if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;

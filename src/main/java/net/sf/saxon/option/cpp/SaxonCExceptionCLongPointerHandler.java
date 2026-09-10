@@ -28,7 +28,7 @@ public class SaxonCExceptionCLongPointerHandler implements CEntryPoint.Exception
      */
     @Uninterruptible(reason = "exception handler")
     public static CLongPointer handle(Throwable e) {
-        SaxonCException.throwable = e;
+        SaxonCCurrentException.getInstance().setThrowable(e);
         return WordFactory.nullPointer();
    	}
 }

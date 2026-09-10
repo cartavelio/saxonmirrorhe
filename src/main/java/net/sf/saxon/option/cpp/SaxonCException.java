@@ -25,7 +25,7 @@ import java.io.*;
  */
 public class SaxonCException  {
 
-    public static Throwable throwable = null;
+    //public static Throwable throwable = null;
     public static String errorOutputFile = null;
     public static SaxonCErrorReporter errorReporter = new SaxonCErrorReporter();
 
@@ -33,9 +33,16 @@ public class SaxonCException  {
 
     @Uninterruptible(reason = "exception handler")
     public SaxonCException(Throwable e) {
-        throwable = e;
+        //throwable = e;
 
     }
+
+    @Uninterruptible(reason = "exception handler")
+    public static SaxonCException getInstance(Throwable e){
+        return new SaxonCException(e);
+    }
+
+
 
     public void setErrorOutput(PrintStream out){
         errorReporter.setStandardErrorOutput(out);
@@ -44,6 +51,7 @@ public class SaxonCException  {
     
     @CEntryPoint(name = "j_getErrorMessage")
     public static CCharPointer j_getErrorMessage(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
+        Throwable throwable = SaxonCCurrentException.get();
         SaxonApiException exception = null;
         if(throwable == null) {
             if(SaxonCAPI.debug) {
@@ -84,6 +92,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_getErrorMessageWithErrorCode")
     public static CCharPointer j_getErrorMessageWithErrorCode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
+        Throwable throwable = SaxonCCurrentException.get();
         SaxonApiException exception = null;
         if(SaxonCAPI.debug) {
             System.err.println("Java DEBUG: j_getErrorMessageWithErrorCode called");
@@ -160,6 +169,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_getErrorMessageInJavaMem")
     public static CCharPointer j_getErrorMessageInJavaMem(IsolateThread thread){
+        Throwable throwable = SaxonCCurrentException.get();
         SaxonApiException exception = null;
         if(throwable == null) {
             return WordFactory.nullPointer();
@@ -186,7 +196,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_getCombinedStaticErrorMessages")
     public static CCharPointer j_getCombinedStaticErrorMessages(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc) {
-
+        Throwable throwable = SaxonCCurrentException.get();
         if (errorOutputFile != null) {
             CCharPointer a = SaxonCAPI.stringToNative2(alloc,throwable.getMessage());
             return a;
@@ -224,6 +234,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_getLineNumber")
     public static int getLinenumber(IsolateThread thread){
+        Throwable throwable = SaxonCCurrentException.get();
         SaxonApiException exception = null;
         if(throwable == null) {
             return -1;
@@ -239,6 +250,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_getErrorCode")
     public static CCharPointer getErrorCode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
+        Throwable throwable = SaxonCCurrentException.get();
         SaxonApiException exception = null;
         if(throwable == null) {
             return WordFactory.nullPointer();
@@ -260,6 +272,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_getSystemId")
     public static CCharPointer getSystemId(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
+        Throwable throwable = SaxonCCurrentException.get();
         SaxonApiException exception = null;
         if(throwable == null) {
             return WordFactory.nullPointer();
@@ -279,9 +292,8 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_clearException")
     public static void clearException(IsolateThread thread) {
-        //staticErrorList.clear();
+        SaxonCCurrentException.clear();
         errorReporter.reset();
-        throwable = null;
         errorOutputFile = null;
     }
 
@@ -289,6 +301,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_checkForException")
     public static byte checkForException(IsolateThread thread) {
+        Throwable throwable = SaxonCCurrentException.get();
         return CTypeConversion.toCBoolean(throwable != null);
     }
 
