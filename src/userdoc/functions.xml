@@ -1479,7 +1479,7 @@
           <arg name="seq" type="item()*" desc="The input sequence"/>
           <arg name="zero" type="item()*"
             desc="The initial value (the value to be returned if the sequence is empty)"/>
-          <arg name="f" type="function(item(), item()*) as item()*"
+          <arg name="f" type="function(item()*, item()) as item()*"
             desc="The function to be applied to each item in the sequence"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -5889,6 +5889,7 @@
         </div>
       </details>
       <see-also name="query" namespace="http://saxon.sf.net/"/>
+      <see-also name="xquery" namespace="http://saxon.sf.net/"/>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">compile-stylesheet</name>
@@ -7271,9 +7272,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.0. The specification of this function was changed in Saxon 9.2.
-          To find the last-modified date of the file from which a given node was loaded, use
-            <code>saxon:last-modified(document-uri($node))</code>. </p>
+        <p>Available since Saxon 9.0; revised in Saxon 9.2. Not available in Saxon-CS.</p>
       </status>
       <saxon-edition>PE/EE</saxon-edition>
       <details>
@@ -7303,6 +7302,9 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           <p>This function differs from the EXPath function <code>file:last-modified</code> in that it takes
           a URI rather than a filename as input, and may work for resources other than files: for example,
           HTTP resources, provided the <code>last-modified</code> header is present in the HTTP response.</p>
+          
+          <p>To find the last-modified date of the file from which a given node was loaded, use
+            <code>saxon:last-modified(document-uri($node))</code>. </p>
         </div>
       </details>
     </function>
@@ -8272,18 +8274,32 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
             document. It returns the document node (root node) that results from parsing this text
             using the TagSoup parser. </p>
 
-          <p>On the Java platform, the TagSoup jar file must be on the classpath. It may be
+          <p class="javaonly">On the Java platform, the TagSoup jar file must be on the classpath. It may be
             downloaded from <a href="https://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup/1.2"
               >https://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup/1.2</a>.</p>
 
-          <p>On the .NET platform, the code of TagSoup 1.2 is available automatically: it has been
-            compiled into the <code>saxon-pe-10.#.dll</code> and <code>saxon-ee-10.#.dll</code>
-            assemblies.</p>
+          <p class="csonly">On Saxon-CS platform, the HTML is parsed using HTMLAgilityPack, which
+          is registered as a dependency and will normally be installed automatically by <b>nuget</b>.</p>
 
           <p>This function is useful where an HTML document is embedded inside another using CDATA.
             It can also be used in conjunction with the <a class="bodylink code"
               href="/functions/fn/unparsed-text">unparsed-text()</a> function to read HTML from
             filestore. Note that the base URI of the document is not retained in this case.</p>
+          
+          <p>Because different parsers are used, and there is no standard mapping from HTML
+          to the XDM model, there are some differences depending on the platform:</p>
+          
+          <ul>
+            <li>On both platforms, HTML elements will have lower-case local names, and will be in
+              the XHTML namespace (<code> "http://www.w3.org/1999/xhtml"</code>)</li>
+            <li class="javaonly"><p>On Java, there will be an additional namespace declaration
+            binding the prefix <code>html</code> to the XHTML namespace.</p></li>
+            <li class="javaonly"><p>On Java, default attributes are expanded, for example
+              an element written as <code>&lt;br/></code> will appear in the XDM model
+              with the additional attribute <code>clear="none"</code>.</p></li>
+            <li class="csonly"><p>On Saxon-CS, defaulted attribute values are not included
+            in the XDM model.</p></li>
+          </ul>
         </div>
       </details>
     </function>
@@ -8414,7 +8430,7 @@ return ....
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">query</name>
       <description>
-        <p>Evaluates an XQuery query.</p>
+        <p>Evaluates an XQuery query compiled using <code>saxon:compile-query()</code>.</p>
       </description>
       <signatures>
         <proto return-type="item()*">
@@ -8434,7 +8450,9 @@ return ....
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.1. The function is available both in XQuery and in XSLT.</p>
+        <p>Available since Saxon 9.1. The function is available both in XQuery and in XSLT.
+        Not available with Saxon-CS. The function is obsolescent, replaced by the new function
+        <code>saxon:xquery()</code>.</p>
       </status>
       <saxon-edition>PE/EE</saxon-edition>
       <details>
@@ -8477,6 +8495,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
         </div>
       </details>
       <see-also name="compile-query" namespace="http://saxon.sf.net/"/>
+      <see-also name="xquery" namespace="http://saxon.sf.net/"/>
     </function>
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -9455,7 +9474,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
         </proto>
       </signatures>
       <status>
-        <p>This extension function is not available on the .NET platform.</p>
+        <p>This extension function is not available on Saxon-CS.</p>
         <p>Use of this function requires the JavaMail API. The mail.jar must be available on the
           classpath. From Saxon 9.9, the required jar is compiled against version 1.6 (previously,
           this was version 1.4). The jar is not redistributed as part
@@ -9465,7 +9484,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
         <p>From 9.8.0.5, the function was upgraded: for details of the changes, see bug 3400. This
           documentation describes the latest version.</p>
       </status>
-      <saxon-edition>PE/EE 9.5</saxon-edition>
+      <saxon-edition platform="J">PE/EE 9.5</saxon-edition>
       <details>
         <div>
           <p>This function takes four arguments:</p>
@@ -10219,9 +10238,9 @@ return saxon:transform($splitter, $results)]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.1.</p>
+        <p>Available since Saxon 9.1. Not available in Saxon-CS.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <details>
         <div>
           <p>This function returns a list of the names of the unparsed entities declared with the
@@ -10429,6 +10448,52 @@ return saxon:transform($splitter, $results)]]></samp>
       </details>
       <see-also namespace="http://saxon.sf.net/" name="pedigree"/>
     </function>
+    
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://saxon.sf.net/">xquery</name>
+      <description>
+        <p>Compiles an XQuery query, delivering a function item that can be called to execute the query.</p>
+      </description>
+      <signatures>
+        <proto return-type="function(item()?, map(xs:QName, item()*) as item()*">
+          <arg name="query" type="xs:string" desc="The query to be evaluated"/>
+        </proto>
+      </signatures>
+      <status>
+        <p>Available since Saxon 11. The function is available both in XQuery and in XSLT.</p>
+      </status>
+      <saxon-edition>PE/EE</saxon-edition>
+      <details>
+        <div>
+          <p>This function takes as input an XQuery query, and returns a function item,
+            which can be evaluated to run the query.</p>
+          
+          <p>The returned function takes two arguments:</p>
+          
+          <ol>
+            <li>The context item for execution of the query. The argument may be set to
+            an empty sequence if no context item is required.</li>
+            <li>A map containing values of parameters (external variables) for the query.
+            The keys are xs:QNames representing the parameter names; the corresponding
+            values are arbitrary values for the parameters.</li>
+          </ol>
+          
+          
+          <p>Here is an example of how to use the function from XQuery:</p>
+          <samp><![CDATA[declare namespace saxon = "http://saxon.sf.net/"; 
+            
+<out>{ 
+   let $src := "declare variable $x external; declare variable $y external; <z>{$x + $y + .}</z&>" 
+   let $qry := saxon:xquery($q1)
+   return $qry(4, map{xs:QName('x'): 3, xs:QName('y'): 2})
+}</out>]]></samp>
+          
+          <p>The result of the query is a sequence containing the single integer 9.</p>
+        </div>
+      </details>
+      <see-also name="compile-query" namespace="http://saxon.sf.net/"/>
+      <see-also name="query" namespace="http://saxon.sf.net/"/>
+    </function>
   </section>
   <section id="exslt-common" title="Namespace exslt-common">
     <h1>Namespace exslt-common</h1>
@@ -10492,7 +10557,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the date/time resulting from adding a duration to a date/time.</p>
       </description>
@@ -10516,7 +10581,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the duration resulting from adding two durations together.</p>
       </description>
@@ -10531,7 +10596,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the date specified in the date/time string given as the argument. If no argument
           is given, then the current local date/time, as returned by <a class="bodylink code"
@@ -10547,7 +10612,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the current date and time as a date/time string.</p>
       </description>
@@ -10561,7 +10626,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the abbreviation of the day of the week of a date. If no argument is given, then
           the current local date/time, as returned by <a class="bodylink code"
@@ -10587,7 +10652,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the day of a date as a number. If no argument is given, then the current local
           date/time, as returned by <a class="bodylink code"
@@ -10603,7 +10668,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the day of the week given in a date as a number. If no argument is given, then
           the current local date/time, as returned by <a class="bodylink code"
@@ -10620,7 +10685,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the day of a date in a year as a number. If no argument is given, then the
           current local date/time, as returned by <a class="bodylink code"
@@ -10636,7 +10701,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the full name of the day of the week of a date. If no argument is given, then the
           current local date/time, as returned by <a class="bodylink code"
@@ -10654,7 +10719,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the day-of-the-week in a month of a date as a number (e.g. 3 for the 3rd Tuesday
           in May). If no argument is given, then the current local date/time, as returned by <a
@@ -10671,7 +10736,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the duration between the first date and the second date. If the first date occurs
           before the second date, then the result is a positive duration; if it occurs after the
@@ -10695,7 +10760,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns a duration string representing the number of seconds specified by the argument
           string. If no argument is given, then the result of calling <a class="bodylink code"
@@ -10725,7 +10790,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the hour of the day as a number. If no argument is given, then the current local
           date/time, as returned by <a class="bodylink code"
@@ -10741,7 +10806,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns true if the year given in a date is a leap year. If no argument is given, then
           the current local date/time, as returned by <a class="bodylink code"
@@ -10757,7 +10822,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the minute of the hour as a number. If no argument is given, then the current
           local date/time, as returned by <a class="bodylink code"
@@ -10773,7 +10838,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the abbreviation of the month of a date. If no argument is given, then the
           current local date/time, as returned by <a class="bodylink code"
@@ -10791,7 +10856,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the month of a date as a number. If no argument is given, then the current local
           date/time, as returned by <a class="bodylink code"
@@ -10807,7 +10872,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the full name of the month of a date. If no argument is given, then the current
           local date/time, as returned by <a class="bodylink code"
@@ -10840,7 +10905,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the second of the minute as a number. If no argument is given, then the current
           local date/time, as returned by <a class="bodylink code"
@@ -10856,7 +10921,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the number of seconds specified by the argument string (a date/time or duration).
           If the argument is a date/time then the function returns the time difference in seconds
@@ -10882,7 +10947,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Adds a set of durations together. The string values of the nodes in the node set passed
           as an argument are interpreted as durations and added together as if using the <a
@@ -10901,7 +10966,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the time specified in the date/time string given as the argument. If no argument
           is given, then the current local date/time, as returned by <a class="bodylink code"
@@ -10918,7 +10983,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the week in a month of a date as a number. If no argument is given, then the
           current local date/time, as returned by <a class="bodylink code"
@@ -10939,7 +11004,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the week of the year as a number. If no argument is given, then the current local
           date/time, as returned by <a class="bodylink code"
@@ -10959,7 +11024,7 @@ return saxon:transform($splitter, $results)]]></samp>
           <in-spec>exslt-dates-and-times</in-spec>
         </proto>
       </signatures>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the year of a date as a number. If no argument is given, then the current local
           date/time, as returned by <a class="bodylink code"
@@ -10983,7 +11048,7 @@ return saxon:transform($splitter, $results)]]></samp>
         <p>Saxon also implements the function <a class="bodylink code" href="/functions/fn/abs"
             >fn:abs()</a>. </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the absolute value of a given number. Returns the same type as the supplied
           argument.</p>
@@ -11002,7 +11067,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:acos()</a> in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.
         </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the arc cosine of the argument, the result being in the range zero to
             +<code>π</code> radians.</p>
@@ -11021,7 +11086,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:asin()</a> in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.
         </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the arc sine of the argument, the result being in the range -<code>π</code>/2 to
             +<code>π</code>/2 radians.</p>
@@ -11040,7 +11105,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:atan()</a> in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.
         </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the arc tangent of the argument, the result being in the range -<code>π</code>/2
           to +<code>π</code>/2 radians.</p>
@@ -11060,7 +11125,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:atan2()</a> in namespace
           <code>http://www.w3.org/2005/xpath-functions/math</code>.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p> Returns the angle in radians subtended at the origin by the point on a plane with
           coordinates (x, y) and the positive x-axis, the result being in the range -<code>π</code>
@@ -11082,7 +11147,7 @@ return saxon:transform($splitter, $results)]]></samp>
         <p>The implementation starts with a decimal string representation of the constant, truncates
           this to the required precision, then parses the result as a double.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Delivers the value of one of the named constants <code>PI</code>, <code>E</code>,
             <code>SQRRT2</code>, <code>LN2</code>, <code>LN10</code>, <code>LOG2E</code>,
@@ -11102,7 +11167,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:cos()</a> in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.
         </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the cosine of the argument, expressed in radians.</p>
       </description>
@@ -11120,7 +11185,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:exp()</a> in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.
         </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns <code>e</code> to the power of <code>$arg</code>.</p>
       </description>
@@ -11134,7 +11199,7 @@ return saxon:transform($splitter, $results)]]></samp>
         </proto>
       </signatures>
       <status-ok/>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the nodes in the node set whose value is the maximum value for the node set.</p>
       </description>
@@ -11152,7 +11217,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:log()</a> in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.
         </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the natural logarithm of <code>$arg</code>. </p>
       </description>
@@ -11166,7 +11231,7 @@ return saxon:transform($splitter, $results)]]></samp>
         </proto>
       </signatures>
       <status-ok/>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the nodes in the node set whose value is the minimum value for the node set.</p>
       </description>
@@ -11183,7 +11248,7 @@ return saxon:transform($splitter, $results)]]></samp>
         <p>Saxon also implements the function <a class="bodylink code" href="/functions/fn/max"
             >fn:max()</a>. </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the highest value in a sequence of comparable items.</p>
       </description>
@@ -11200,7 +11265,7 @@ return saxon:transform($splitter, $results)]]></samp>
         <p>Saxon also implements the function <a class="bodylink code" href="/functions/fn/min"
             >fn:min()</a>. </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the lowest value in a sequence of comparable items.</p>
       </description>
@@ -11226,7 +11291,7 @@ return saxon:transform($splitter, $results)]]></samp>
           implements the function <a class="bodylink code" href="/functions/math/pow">math:pow()</a>
           in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns <code>$arg1</code> raised to the power of <code>$arg2</code>.</p>
       </description>
@@ -11244,7 +11309,7 @@ return saxon:transform($splitter, $results)]]></samp>
             class="bodylink code" href="/functions/exslt-random/random-sequence"
             >random:random-sequence()</a> function is preferable.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns a random number from 0 to 1.</p>
       </description>
@@ -11262,7 +11327,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:sin()</a> in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.
         </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the sine of the argument, expressed in radians.</p>
       </description>
@@ -11280,7 +11345,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:sqrt()</a> in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.
         </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the non-negative square root of the argument.</p>
       </description>
@@ -11298,7 +11363,7 @@ return saxon:transform($splitter, $results)]]></samp>
             >math:tan()</a> in namespace <code>http://www.w3.org/2005/xpath-functions/math</code>.
         </p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Returns the tangent of the argument, expressed in radians.</p>
       </description>
@@ -11327,7 +11392,7 @@ return saxon:transform($splitter, $results)]]></samp>
           useful because it will often be optimized out of a loop, resulting in the same number
           being chosen each time.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <description>
         <p>Delivers a sequence of random numbers between zero and one.</p>
       </description>
@@ -11349,7 +11414,7 @@ return saxon:transform($splitter, $results)]]></samp>
           passed as the first argument that are not in the node set passed as the second
           argument.</p>
       </description>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://exslt.org/sets">distinct</name>
@@ -11364,7 +11429,7 @@ return saxon:transform($splitter, $results)]]></samp>
           N if there is no node in the node-set that has the same string value as N, and that
           precedes N in document order.</p>
       </description>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
       <see-also name="distinct-values" namespace="http://www.w3.org/2005/xpath-functions"/>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -11381,7 +11446,7 @@ return saxon:transform($splitter, $results)]]></samp>
           set passed as the second argument. If there are no nodes that are in both node sets, then
           it returns false. </p>
       </description>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://exslt.org/sets">intersection</name>
@@ -11396,7 +11461,7 @@ return saxon:transform($splitter, $results)]]></samp>
         <p>Returns a node set comprising the nodes that are within both the node sets passed as
           arguments to it. </p>
       </description>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://exslt.org/sets">leading</name>
@@ -11418,7 +11483,7 @@ return saxon:transform($splitter, $results)]]></samp>
           pipelined implementation. Saxon returns all nodes that precede the first node of the
           second node-set in document order, whether or not the two node-sets intersect.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://exslt.org/sets">trailing</name>
@@ -11440,7 +11505,7 @@ return saxon:transform($splitter, $results)]]></samp>
           pipelined implementation. Saxon returns all nodes that follow the first node of the second
           node-set in document order, whether or not the two node-sets intersect.</p>
       </status>
-      <saxon-edition>PE/EE</saxon-edition>
+      <saxon-edition platform="J">PE/EE</saxon-edition>
     </function>
   </section>
 
