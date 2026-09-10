@@ -131,7 +131,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param xsl         - File name of the stylesheet
      * @param outFilename - the file to which the compiled package should be saved
      */
-    @CEntryPoint(name = "compileFromFileAndSave")
+    @CEntryPoint(name = "j_compileFromFileAndSave")
     public static void compileFromFileAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer xsl, CCharPointer outFilename) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
@@ -151,7 +151,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param executable
      * @param filename
      */
-    @CEntryPoint(name = "save")
+    @CEntryPoint(name = "j_save")
     public static void save(IsolateThread thread, CCharPointer cwd, ObjectHandle executableRef, CCharPointer filename) throws SaxonApiException {
         File file = SaxonCAPI.resolveFile(null, CTypeConversion.toJavaString(cwd), CTypeConversion.toJavaString(filename), null);
         FileOutputStream stream = null;
@@ -171,7 +171,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param str      - File name of the stylsheet
      * @param filename - the file to which the compiled package should be saved
      */
-    @CEntryPoint(name = "compileFromStringAndSave")
+    @CEntryPoint(name = "j_compileFromStringAndSave")
     public static void compileFromStringAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cstr, CCharPointer cfilename) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
@@ -208,7 +208,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param obj      -
      * @param filename - the file to which the compiled package should be saved
      */
-    @CEntryPoint(name = "compileFromXdmNodeAndSave")
+    @CEntryPoint(name = "j_compileFromXdmNodeAndSave")
     public static void compileFromXdmNodeAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, ObjectHandle xdmNodeRef, CCharPointer ccwd, CCharPointer cfilename) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
@@ -233,7 +233,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    @CEntryPoint(name = "compileFromAssociatedFile")
+    @CEntryPoint(name = "j_compileFromAssociatedFile")
     public static XsltExecutable compileFromAssociatedFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer cwd, CCharPointer filename, boolean jit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         try {
@@ -270,7 +270,7 @@ public class Xslt30Processor extends SaxonCAPI {
      */
 
 
-    @CEntryPoint(name = "compileFromFile")
+    @CEntryPoint(name = "j_compileFromFile")
    public static XsltExecutable compileFromFile(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cfilename, int cjit, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
@@ -306,7 +306,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
 
-    @CEntryPoint(name = "compileFromString")
+    @CEntryPoint(name = "j_compileFromString")
     public static XsltExecutable compileFromString(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer stylesheet, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
@@ -343,7 +343,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values
      * @return XsltExecutable
      */
-    @CEntryPoint(name = "compileFromXdmNode")
+    @CEntryPoint(name = "j_compileFromXdmNode")
     public static XsltExecutable compileFromXdmNode(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd,  ObjectHandle xdmNodeRef, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
@@ -550,7 +550,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values
      * @throws SaxonApiException
      */
-    @CEntryPoint(name = "applyTemplatesReturningFile")
+    @CEntryPoint(name = "j_applyTemplatesReturningFile")
     public static void applyTemplatesReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, ObjectHandle sourceObjRef, CCharPointer coutFilename , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = objectHandles.get(executableRef);
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
@@ -625,7 +625,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    @CEntryPoint(name = "applyTemplatesReturningString")
+    @CEntryPoint(name = "j_applyTemplatesReturningString")
     public static CCharPointer applyTemplatesReturningString(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, ObjectHandle sourceObjRef , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = CTypeConversion.toJavaString(ccwd);
         XsltExecutable executable = objectHandles.get(executableRef);
@@ -706,7 +706,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    @CEntryPoint(name = "callFunctionReturningFile")
+    @CEntryPoint(name = "j_callFunctionReturningFile")
     public static void callFunctionReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, CCharPointer coutFilename , ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = CTypeConversion.toJavaString(ccwd);
         String cFuncName = CTypeConversion.toJavaString(ccFuncName);
@@ -743,7 +743,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
 
-    @CEntryPoint(name = "callFunctionReturningValue")
+    @CEntryPoint(name = "j_callFunctionReturningValue")
     public static long callFunctionReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = CTypeConversion.toJavaString(ccwd);
         String cFuncName = CTypeConversion.toJavaString(ccFuncName);
@@ -769,7 +769,7 @@ public class Xslt30Processor extends SaxonCAPI {
         return handle.rawValue();
     }
 
-    @CEntryPoint(name = "callFunctionReturningString")
+    @CEntryPoint(name = "j_callFunctionReturningString")
     public static CCharPointer callFunctionReturningString(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName, ObjectHandle argumentsRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = CTypeConversion.toJavaString(ccwd);
         XsltExecutable executable = objectHandles.get(executableRef);
@@ -800,7 +800,7 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "callTemplateReturningFile")
+    @CEntryPoint(name = "j_callTemplateReturningFile")
     public static void callTemplateReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef,  CCharPointer ctemplateName, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = CTypeConversion.toJavaString(ccwd);
         XsltExecutable executable = objectHandles.get(executableRef);
@@ -837,7 +837,7 @@ public class Xslt30Processor extends SaxonCAPI {
         transformer.callTemplate(qname, serializer);
     }
 
-    @CEntryPoint(name = "callTemplateReturningValue")
+    @CEntryPoint(name = "j_callTemplateReturningValue")
     public static long callTemplateReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String clarkName = CTypeConversion.toJavaString(cclarkName);
         String cwd = CTypeConversion.toJavaString(ccwd);
@@ -912,7 +912,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    @CEntryPoint(name = "callTemplateReturningString")
+    @CEntryPoint(name = "j_callTemplateReturningString")
     public static CCharPointer callTemplateReturningString(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = objectHandles.get(executableRef);
         String cwd = CTypeConversion.toJavaString(ccwd);
@@ -966,7 +966,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param params         - parameters and property names given as an array of stings
      * @param values         - the values of the paramaters and properties. given as a array of Java objects
      */
-    @CEntryPoint(name = "transformToFile")
+    @CEntryPoint(name = "j_transformToFile")
     public static void transformToFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = objectHandles.get(executableRef);
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
@@ -1211,7 +1211,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values     - the values of the paramaters and properties. given as a array of Java objects
      * @return result as an XdmNode
      */
-    @CEntryPoint(name = "transformToValue")
+    @CEntryPoint(name = "j_transformToValue")
     public static long transformToValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = objectHandles.get(executableRef);
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
@@ -1317,7 +1317,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param values     - the values of the paramaters and properties. given as a array of Java objects
      * @return result as a string representation in a byte array
      */
-    @CEntryPoint(name = "transformToString")
+    @CEntryPoint(name = "j_transformToString")
     public static CCharPointer transformToString(IsolateThread thread, CCharPointer ccwd, ObjectHandle xslt30ProcessorRef, ObjectHandle executableRef, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = objectHandles.get(executableRef);
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
