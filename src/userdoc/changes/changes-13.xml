@@ -127,6 +127,9 @@
         
         <p>The function <code>map:values</code> is implemented.</p>
         
+        <p>The function <code>map:build</code> allows multiple index entries to be created for a single
+        input item.</p>
+        
         <p>The deep-lookup operator <code>??</code> is implemented.</p>
         
         <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
