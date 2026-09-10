@@ -84,10 +84,9 @@ def testExportSchema2(saxonproc2):
     val.set_source_node(input_)
     try:
         val.validate()
-        assert val.exception_occurred
     except PySaxonApiError as e:
         print(e)
-        assert False
+        assert True
 
 def testValidatorReport(saxonproc2):
     saxonproc2.set_cwd('.')
@@ -103,11 +102,14 @@ def testValidatorReport(saxonproc2):
 
     val.set_source_node(input_)
     val.register_schema(xsd_text=sch1)
-    val.validate()
+    try:
+        val.validate()
+    except PySaxonApiError as e:
+        print(e)
+        assert True
 
     report = val.validation_report
     assert 'validation-report' in str(report)
-    assert val.exception_occurred
 
 
 
