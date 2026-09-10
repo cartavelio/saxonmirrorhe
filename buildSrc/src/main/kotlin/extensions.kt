@@ -2,6 +2,9 @@ import com.saxonica.build.TargetHost
 import com.saxonica.build.java.BranchInfo
 import com.saxonica.build.java.JarTaskBuilder
 import com.saxonica.build.java.JarTaskBuilder.SaxonJarTasks
+import com.saxonica.build.AsInput
+import com.saxonica.build.python.PythonVersion
+import com.saxonica.build.python.PythonVersions
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -274,7 +277,7 @@ interface SaxonCPythonExtension {
     val pythonBinDirName: Property<String>
     val venvBinarySuffix: Property<String>
     val version: Property<String>
-    val releaseVersions: ListProperty<String>
+    val supportedPythonVersions: ListProperty<PythonVersion>
     val manylinuxTarget: Property<String>
 }
 
@@ -283,8 +286,8 @@ interface SaxonCPhpExtension {
 }
 
 interface PyenvExtension {
-    val devVersion: Property<String>
-    val releaseVersions: ListProperty<String>
+    val devVersion: Property<AsInput<PythonVersion>>
+    val pythonVersions: Property<PythonVersions>
     val debugVariant: Property<String>
     val definitionsDir: DirectoryProperty
     val pyenvRoot: DirectoryProperty

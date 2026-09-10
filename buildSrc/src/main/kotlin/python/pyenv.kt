@@ -1,6 +1,7 @@
 package com.saxonica.build.python
 
-import org.gradle.api.Action
+import com.saxonica.build.TargetHost
+import com.saxonica.build.AsInput
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
@@ -50,10 +51,13 @@ abstract class PyenvExe @Inject constructor(private val ex: ExecOperations) : De
 
 abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:Internal
-    abstract val os: Property<OperatingSystem>
+    abstract val targetHost: Property<TargetHost>
 
     @get:Input
-    abstract val pythonVersion: Property<String>
+    abstract val pythonVersion: Property<AsInput<PythonVersion>>
+
+    @get:Internal
+    val _pythonVersion = pythonVersion.map { it.get<PythonVersion>() }
 
     @get:InputFile
     abstract val pyenvExe: RegularFileProperty
@@ -68,20 +72,16 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
     @get:Input
     abstract val debugVariant: Property<String>
 
-    @get:Optional
-    @get:Input
-    abstract val macosxDeploymentTarget: Property<String>
-
     @get:OutputFile
-    val pythonExe = pythonVersion.map { project.layout.buildDirectory.file("python-${it}").get() }
+    val pythonExe = _pythonVersion.map { project.layout.buildDirectory.file("python-${it.version}").get() }
 
     @Internal
-    val pyenvVersionName: Provider<String> = pythonVersion.map {
-        "${it}${if (debugVariant.isPresent()) "-${debugVariant.get()}" else "" }"
+    val pyenvVersionName: Provider<String> = _pythonVersion.map {
+        "${it.buildName}${if (debugVariant.isPresent()) "-${debugVariant.get()}" else "" }"
     }
 
     private fun pythonExePath(pyenv: RegularFile): String {
-        return if (os.get().isWindows) {
+        return if (targetHost.get().isWindows) {
             windowsExePath(pyenv)
         } else {
             nonWindowsExePath(pyenv)
@@ -127,10 +127,11 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
         //      pyenv install /path/to/python/version
         //   else
         //      pyenv install version
+        val _targetHost = targetHost.get()
         val pyenv = pyenvExe.get()
         var pythonBuildVersionName = pyenvVersionName.get()
         val execResult = ex.exec {
-            if (!os.get().isWindows) {
+            if (!_targetHost.isWindows) {
                 environment("PYENV_ROOT", pyenvRoot.get())
             }
             executable(pyenv)
@@ -145,12 +146,12 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
                 pythonBuildVersionName = definitionFile.asFile.toString()
             }
             ex.exec {
-                if (!os.get().isWindows) {
+                if (!_targetHost.isWindows) {
                     environment("PYENV_ROOT", pyenvRoot.get())
                 }
                 executable(pyenv)
-                if (macosxDeploymentTarget.isPresent) {
-                    environment("MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get())
+                if (_targetHost.isMacOS) {
+                    environment("MACOSX_DEPLOYMENT_TARGET", _pythonVersion.get().macOsMinVersion(_targetHost))
                 }
                 args("install", pythonBuildVersionName)
             }

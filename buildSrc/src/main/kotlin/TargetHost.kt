@@ -1,10 +1,14 @@
 package com.saxonica.build
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.gradle.internal.os.OperatingSystem
 
 /**
  * Represents an OS ('platform') we support
  */
+@Serializable
 enum class Platforms(val value: String) {
   MACOS("macos"),
   LINUX("linux"),
@@ -14,6 +18,7 @@ enum class Platforms(val value: String) {
 /**
  * Represents an processor architecture we support
  */
+@Serializable
 enum class Architectures(val value: String) {
   X86_64("x86_64"),
   ARM64("arm64")
@@ -24,6 +29,7 @@ enum class Architectures(val value: String) {
  *
  *
  */
+@Serializable
 sealed interface TargetHost {
   companion object {
     fun current(): TargetHost {
