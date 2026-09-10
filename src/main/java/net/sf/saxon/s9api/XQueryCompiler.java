@@ -98,6 +98,9 @@ public class XQueryCompiler {
      */
 
     public URI getBaseURI() {
+        if (staticQueryContext.getBaseURI() == null) {
+            return null;
+        }
         try {
             return new URI(staticQueryContext.getBaseURI());
         } catch (URISyntaxException err) {
