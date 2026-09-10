@@ -134,7 +134,7 @@
       <xs:attribute name="initialTemplate" use="optional" type="c:EQName"/>
       <xs:attribute name="messageEmitter" use="optional" type="c:javaClassNameType"/>
       <xs:attribute name="outputUriResolver" use="optional" type="c:javaClassNameType"/>
-      <xs:attribute name="recoveryPolicy" use="optional" type="c:recoveryPolicyType"/>
+      <xs:attribute name="recoveryPolicy" use="optional" type="c:recoveryPolicyType"/> <!-- no longer used -->
       <xs:attribute name="resultDocumentThreads" use="optional" type="xs:integer"/>
       <xs:attribute name="schemaAware" use="optional" type="xs:boolean"/>
       <xs:attribute name="staticErrorListener" use="optional" type="c:javaClassNameType"/>

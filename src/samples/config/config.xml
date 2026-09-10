@@ -56,8 +56,7 @@
     <localization lang="nl-BE" class="net.sf.saxon.option.local.Numberer_nlBE"/>
     <localization lang="sv" class="net.sf.saxon.option.local.Numberer_sv"/>
   </localizations>
-  <xslt recoveryPolicy="recoverWithWarnings"
-        schemaAware="true"
+  <xslt schemaAware="true"
         messageEmitter=""
         staticUriResolver=""
         staticErrorListener="net.sf.saxon.lib.StandardErrorListener"
