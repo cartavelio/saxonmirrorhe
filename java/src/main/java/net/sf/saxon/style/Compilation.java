@@ -681,7 +681,8 @@ public class Compilation {
      */
     public NestedIntegerValue stackContainsModule(DocumentKey key) {
         for (int pos = importStack.size()-1; pos>=0; pos--) {
-            if (importStack.get(pos).key.equals(key)) {
+            DocumentKey dKey = importStack.get(pos).key;
+            if (dKey != null && dKey.equals(key)) {
                 return importStack.get(pos).precedence;
             }
         }
