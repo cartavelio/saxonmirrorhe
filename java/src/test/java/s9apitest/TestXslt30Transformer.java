@@ -130,6 +130,47 @@ public class TestXslt30Transformer {
     }
 
     /**
+     * Test message handler (see Saxon bug 7133)
+     */
+    @Test
+    public void testMessageListener() {
+        try {
+            Processor processor = new Processor(true);
+
+            String xsl = "<?xml version='1.0'?>" +
+                    "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                    "                version='3.0'>" +
+                    "                <xsl:template name='main'>" +
+                    "                   <xsl:for-each select='5 to 10'> " +
+                    "                      <xsl:message select='\"Message \" || .'/>" +
+                    "                   </xsl:for-each>" +
+                    "                </xsl:template>" +
+                    "                </xsl:stylesheet>";
+
+
+            XsltCompiler compiler = processor.newXsltCompiler();
+            compiler.setSchemaAware(false);
+            XsltExecutable exec = compiler.compile(new StreamSource(new StringReader(xsl)));
+            Xslt30Transformer transformer = exec.load30();
+            List<String> messages = new ArrayList<>();
+            var original = transformer.getMessageHandler();
+            transformer.setMessageHandler(msg -> {
+                original.accept(msg);
+                messages.add(msg.getStringValue());
+            });
+            transformer.setBaseOutputURI("http://base.output.com/");
+            XdmValue result = transformer.callTemplate(new QName("main"));
+
+            assertEquals(6, messages.size());
+            assertEquals("Message 5", messages.get(0));
+        } catch (SaxonApiException e) {
+            fail();
+        }
+
+    }
+
+
+    /**
      * Test for the case where the context item is not the root
      */
 
