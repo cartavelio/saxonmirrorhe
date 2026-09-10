@@ -9,6 +9,8 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.type.ValidationException;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
@@ -64,6 +66,8 @@ public class ErrorReporterToListener implements ErrorReporter {
                 XPathException err = XPathException.fromXmlProcessingError(error);
                 if (error.isWarning()) {
                     listener.warning(err);
+                } else if (error instanceof XmlProcessingException xex && xex.getXPathException() instanceof ValidationException) {
+                    listener.error(err);
                 } else {
                     listener.fatalError(err);
                 }
