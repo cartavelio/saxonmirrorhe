@@ -1036,20 +1036,23 @@
         </configfiledesc>
         <typedesc>string of flags or 0</typedesc>
         <desc>
-            <p>Allows individual optimizations to be enabled or disabled selectively.</p>
-            <p>There is a set of single-letter flags identifying particular optimizations:</p>
+            <p>Allows individual optimizations to be enabled or disabled selectively. There is a set of
+                single-letter flags identifying particular optimizations:</p>
             <ul>
-                <li>c: no longer used</li>
+                <li>c: (no longer used)</li>
+                <li>d: detect void path expressions</li>
                 <li>e: cache regular expressions</li>
                 <li>f: inline functions</li>
                 <li>g: extract global variables</li>
                 <li>j: just-in-time compilation of template rules</li>
                 <li>k: create keys</li>
                 <li>l: loop lifting</li>
-                <li>m: miscellaneous</li>
+                <li>m: miscellaneous (see below)</li>
                 <li>n: constant folding</li>
+                <li>p: predicate reordering</li>
                 <li>r: template rule-sets</li>
                 <li>s: extract common subexpressions</li>
+                <li>t: tail call optimization</li>
                 <li>v: inline variables</li>
                 <li>w: create switch statements</li>
                 <li>x: index predicates</li>
@@ -1062,9 +1065,12 @@
                 functions with side-effects to behave unpredictably. (Note however, that even with
                 no optimization, lazy evaluation may still cause the evaluation order to be not as
                 expected.) </p>
-            <p><i>Note that disabling optimizations may prevent streamed execution. This is because
-            there are cases where streamed execution is only possible because the optimizer is able to detect
-            that sorting nodes into document order is unnecessary.</i></p>
+            <p>The <code>m</code> (miscellaneous) flag is a prerequisite for some of the more specific optimizations.</p>
+            <p><i>Disabling optimizations may in some cases prevent streamed execution. For example, some expressions
+                only become streamable because the optimizer is able to work out that sorting nodes into
+                document order is unnecessary.</i></p>
+            <p><i>Most of these flags enable optimizations that cause extra work at compile time to improve run-time performance.
+                The <code>j</code> option is an exception: enabling this option shifts work from compile time to run time.</i></p>
         </desc>
     </feature>
     <feature>

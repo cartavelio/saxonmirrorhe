@@ -326,7 +326,7 @@
                   debugging, or causes extension functions with side-effects to behave
                   unpredictably. (Note however, that even with no optimization, lazy evaluation may
                   still cause the evaluation order to be not as expected.) </p>
-               <p>The <code>-m</code> (miscellaneous) flag is a prerequisite for some of the more specific optimizations.</p>
+               <p>The <code>m</code> (miscellaneous) flag is a prerequisite for some of the more specific optimizations.</p>
             </td>
          </tr>
          <tr>
