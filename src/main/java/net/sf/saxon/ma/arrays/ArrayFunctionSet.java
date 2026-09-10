@@ -500,7 +500,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 return array.get(checkSubscript(index, array.arrayLength()) - 1);
             } else {
                 int i = index.asSubscript();
-                if (i <= 0 || i >= array.arrayLength()) {
+                if (i <= 0 || i > array.arrayLength()) {
                     FunctionItem fn = (FunctionItem) arguments[2].head();
                     return dynamicCall(fn, context, index);
                 } else {
