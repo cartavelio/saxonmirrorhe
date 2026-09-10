@@ -102,7 +102,7 @@ public class XSDOverride extends SchemaElement {
                             schemaDoc.getDocument().getRootNode(), this);
                     originalSchema = schemaDoc.getXSDSchema().getSchema();
                     try {
-                        XSDSchema overridden = schemaDoc.getXSDSchema();
+                        XSDSchemaElement overridden = schemaDoc.getXSDSchema();
                         overridden.processAllAttributes();
                         overridden.validateSubtree(compiler);
                     } catch (SchemaException err) {
@@ -121,7 +121,7 @@ public class XSDOverride extends SchemaElement {
             }
             SchemaDocument convertedSchemaDocument = compiler.doOverrideTransformation(
                     schemaDoc.getDocument().getRootNode(), this);
-            XSDSchema top = convertedSchemaDocument.getXSDSchema();
+            XSDSchemaElement top = convertedSchemaDocument.getXSDSchema();
 
             top.processAllAttributes();
             top.validateSubtree(compiler);

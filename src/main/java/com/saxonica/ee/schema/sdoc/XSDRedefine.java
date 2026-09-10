@@ -79,7 +79,7 @@ public class XSDRedefine extends SchemaElement {
 
             try {
                 SchemaDocument schemaDoc = SchemaReader.read(source, compiler, pipe, this);
-                XSDSchema redefined = schemaDoc.getXSDSchema();
+                XSDSchemaElement redefined = schemaDoc.getXSDSchema();
                 externalSchema = redefined.getSchema();
                 externalSchemaDocumentURI = redefined.getSystemId();
             } catch (SchemaException e) {

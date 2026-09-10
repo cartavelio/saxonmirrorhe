@@ -153,7 +153,7 @@ public abstract class SchemaReader {
             }
             return schemaDocument;
         }
-        if (!(top instanceof XSDSchema)) {
+        if (!(top instanceof XSDSchemaElement)) {
             SchemaException err = new SchemaException("Outermost element of schema document must be xs:schema");
             Loc loc = new Loc(source.getSystemId(), top == null ? 1 : top.getLineNumber(), -1);
             err.setLocator(loc);
@@ -163,11 +163,11 @@ public abstract class SchemaReader {
 
         compiler.setPipelineConfiguration(pipe);
         compiler.setBeingRead(source.getSystemId());
-        ((XSDSchema) top).processAllAttributes();
-        ((XSDSchema) top).validateSubtree(compiler);
-        compiler.markAsRead(source.getSystemId(), (XSDSchema) top);
+        ((XSDSchemaElement) top).processAllAttributes();
+        ((XSDSchemaElement) top).validateSubtree(compiler);
+        compiler.markAsRead(source.getSystemId(), (XSDSchemaElement) top);
 
-        int errors = ((XSDSchema) top).getErrorCount();
+        int errors = ((XSDSchemaElement) top).getErrorCount();
         if (errors > 0) {
             String msg = errors == 1 ? "One error was" : errors + " errors were";
             throw new SchemaException(msg + " found while processing the schema");

@@ -17,7 +17,7 @@ import java.util.*;
  * An xs:schema element in an XML Schema document
  */
 
-public class XSDSchema extends SchemaElement {
+public class XSDSchemaElement extends SchemaElement {
 
     private SingleNamespaceSchema schema = null;
     private SchemaCompiler compiler;
@@ -122,7 +122,7 @@ public class XSDSchema extends SchemaElement {
      * Create an XSDSchema object, representing the xs:schema element in a schema document
      */
 
-    public XSDSchema() {
+    public XSDSchemaElement() {
     }
 
     /**

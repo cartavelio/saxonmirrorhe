@@ -4,12 +4,14 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.fsa.FiniteStateMachine;
 import com.saxonica.ee.schema.sdoc.*;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
@@ -22,6 +24,9 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AnyURIValue;
 
 import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -52,7 +57,7 @@ public class SchemaCompiler {
     private final boolean allowDanglingReferences;
 
 
-    private final HashMap<String, XSDSchema> documentsAlreadyRead = new HashMap<>(10);
+    private final HashMap<String, XSDSchemaElement> documentsAlreadyRead = new HashMap<>(10);
     private final HashSet<String> documentsBeingRead = new HashSet<>(10);
     private PipelineConfiguration pipelineConfiguration;
     private SchemaDocumentTransformer chameleonTransformer = null;
@@ -237,7 +242,7 @@ public class SchemaCompiler {
      * @param schema   the root element of the schema document constructed from this URI
      */
 
-    public void markAsRead(String systemId, XSDSchema schema) {
+    public void markAsRead(String systemId, XSDSchemaElement schema) {
         documentsBeingRead.remove(systemId);
         documentsAlreadyRead.put(systemId + "##" + schema.getTargetNamespace(), schema);
     }
@@ -264,7 +269,7 @@ public class SchemaCompiler {
      * @return the root element of the tree representing this schema document
      */
 
-    public XSDSchema getExistingSchemaDocument(String systemId, NamespaceUri targetNamespace) {
+    public XSDSchemaElement getExistingSchemaDocument(String systemId, NamespaceUri targetNamespace) {
         return documentsAlreadyRead.get(systemId + "##" + targetNamespace);
     }
 
@@ -517,7 +522,7 @@ public class SchemaCompiler {
         if (doc.isCompiledSchemaDocument()) {
             throw new SchemaException("Only source schema documents (not SCM compiled schemas) are accepted here");
         }
-        XSDSchema schemaRoot = doc.getXSDSchema();
+        XSDSchemaElement schemaRoot = doc.getXSDSchema();
         preparedSchema = schemaRoot.getSchema();
         int errors = schemaRoot.getErrorCount();
         if (errors > 0) {
@@ -803,6 +808,55 @@ public class SchemaCompiler {
 //            }
         }
     }
+
+    /**
+     * Add a built-in schema for a given namespace. This is a no-op if the configuration is not schema-aware
+     *
+     * @param namespace the namespace. Currently built-in schemas are available for the XML, XSI, and FN namespaces
+     */
+
+
+    public PreparedSchema getSchemaForBuiltInNamespace(NamespaceUri namespace) {
+        EnterpriseConfiguration config = getConfiguration();
+        PreparedSchema ps = config.getCachedSchema(namespace);
+        if (ps != null) {
+            return ps;
+        }
+        if (namespace == NamespaceUri.XML) {
+            ps = getSchemaForXmlNamespace();
+            config.setCachedSchema(namespace, ps);
+            return ps;
+        } else if (namespace == NamespaceUri.SCHEMA_INSTANCE) {
+            ps = getSchemaForXsiNamespace();
+            config.setCachedSchema(namespace, ps);
+            return ps;
+        } else if (namespace == NamespaceUri.FN) {
+            InputStream in = Version.platform.locateResource("xpath-functions.scm", new ArrayList<String>());
+            if (config.isTiming()) {
+                config.getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
+            }
+            try {
+                PreparedSchema schema = new PreparedSchema(config);
+                schema.addSchemaSource(new StreamSource(in), config.makeErrorReporter(), this);
+                in.close();
+                config.setCachedSchema(namespace, schema);
+                return schema;
+            } catch (SchemaException | IOException e) {
+                throw new IllegalStateException("Failed to load internal copy of xpath-functions.scm");
+            }
+        } else {
+            throw new IllegalArgumentException(namespace.toString());
+        }
+    }
+
+    private PreparedSchema getSchemaForXmlNamespace() {
+        return XMLNamespaceSchema.buildSchema(getConfiguration());
+    }
+
+    private PreparedSchema getSchemaForXsiNamespace() {
+        return XSINamespaceSchema.buildSchema(getConfiguration());
+    }
+
 
 }
 

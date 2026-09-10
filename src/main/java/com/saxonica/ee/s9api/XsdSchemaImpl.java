@@ -5,6 +5,7 @@ import net.sf.saxon.s9api.ItemTypeFactory;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.SchemaValidator;
 import net.sf.saxon.s9api.XsdSchema;
+import net.sf.saxon.type.Schema;
 
 public class XsdSchemaImpl extends XsdSchema {
 
@@ -53,6 +54,14 @@ public class XsdSchemaImpl extends XsdSchema {
     @Override
     public XsdSchema combine(XsdSchema other) throws SaxonApiException {
         return null;
+    }
+
+    /**
+     * Get the underlying implementation-level Schema
+     */
+
+    public Schema getUnderlyingSchema() {
+        return schema;
     }
 }
 

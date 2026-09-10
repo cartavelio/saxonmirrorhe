@@ -61,10 +61,11 @@ public class PreparedSchema implements Schema, NotationSet {
     private int xsdVersion;
 
     /**
-     * The set of all target namespaces of components in this schema
+     * The set of all target namespaces of components in this schema, mapped to the set of schemaLocations
+     * from whence the components in that namespace were loaded.
      */
 
-    private final Set<NamespaceUri> targetNamespaces = new HashSet<>();
+    private Map<NamespaceUri, List<String>> targetNamespaces = new HashMap<>();
 
     private final HashMap<NamespaceUri, Integer> namespaceStatus = new HashMap<>();
 
@@ -371,10 +372,10 @@ public class PreparedSchema implements Schema, NotationSet {
 
     public AttributeDecl getAttributeDecl(StructuredQName name) {
         AttributeDecl decl = attributesByName.get(name);
-        if (decl == null && isBuiltInNamespace(name.getNamespaceUri())) {
-            config.addSchemaForBuiltInNamespace(name.getNamespaceUri());
-            decl = attributesByName.get(name);
-        }
+//        if (decl == null && isBuiltInNamespace(name.getNamespaceUri())) {
+//            config.getSchemaForBuiltInNamespace(name.getNamespaceUri());
+//            decl = attributesByName.get(name);
+//        }
         return decl;
     }
 
@@ -415,7 +416,7 @@ public class PreparedSchema implements Schema, NotationSet {
             // register it for fixup and validation
             attributesByFingerprint.put(attribute.getFingerprint(), attribute);
             addComponent(attribute);
-            targetNamespaces.add(attribute.getTargetNamespace());
+            //targetNamespaces.add(attribute.getTargetNamespace());
         }
     }
 
@@ -457,7 +458,7 @@ public class PreparedSchema implements Schema, NotationSet {
             if (existing != attributeGroup) {
                 // register it for fixup and validation
                 addComponent(attributeGroup);
-                targetNamespaces.add(attributeGroup.getTargetNamespace());
+                //targetNamespaces.add(attributeGroup.getTargetNamespace());
             }
         }
     }
@@ -500,7 +501,7 @@ public class PreparedSchema implements Schema, NotationSet {
             if (existing != group) {
                 // register it for fixup and validation
                 addComponent(group);
-                targetNamespaces.add(group.getTargetNamespace());
+                //targetNamespaces.add(group.getTargetNamespace());
             }
         }
     }
@@ -565,7 +566,7 @@ public class PreparedSchema implements Schema, NotationSet {
             typesByName.put(type.getStructuredQName(), type);
             if (existing != type && type instanceof UserSchemaComponent) {
                 addComponent((UserSchemaComponent) type);
-                targetNamespaces.add(type.getTargetNamespace());
+                //targetNamespaces.add(type.getTargetNamespace());
             }
         }
     }
@@ -655,7 +656,7 @@ public class PreparedSchema implements Schema, NotationSet {
             if (existing != elementDecl) {
                 // register it for fixup and validation
                 addComponent(elementDecl);
-                targetNamespaces.add(elementDecl.getTargetNamespace());
+                //targetNamespaces.add(elementDecl.getTargetNamespace());
             }
         }
     }
@@ -669,10 +670,10 @@ public class PreparedSchema implements Schema, NotationSet {
 
     public ElementDecl getElementDecl(StructuredQName name) {
         ElementDecl decl = elementsByName.get(name);
-        if (decl == null && isBuiltInNamespace(name.getNamespaceUri()) ) {
-            config.addSchemaForBuiltInNamespace(name.getNamespaceUri());
-            decl = elementsByName.get(name);
-        }
+//        if (decl == null && isBuiltInNamespace(name.getNamespaceUri()) ) {
+//            config.getSchemaForBuiltInNamespace(name.getNamespaceUri());
+//            decl = elementsByName.get(name);
+//        }
         return decl;
     }
 
@@ -703,6 +704,15 @@ public class PreparedSchema implements Schema, NotationSet {
         return members;
     }
 
+    public synchronized void addSubstitutionGroupMember(ElementDecl owner, ElementDecl member) {
+        Set<ElementDecl> members = substitutionGroupsByFingerprint.get(owner.getFingerprint());
+        if (members == null) {
+            members =  new HashSet<>();
+            substitutionGroupsByFingerprint.put(owner.getFingerprint(), members);
+        }
+        members.add(member);
+    }
+
     public synchronized void setSubstitutionGroupMembers(ElementDecl owner, Set<ElementDecl> members) {
         substitutionGroupsByFingerprint.put(owner.getFingerprint(), members);
     }
@@ -731,7 +741,7 @@ public class PreparedSchema implements Schema, NotationSet {
         Notation oldNotation = nn.put(notation.getNotationName(), notation);
         if (oldNotation != notation) {
             addComponent(notation);
-            targetNamespaces.add(notation.getTargetNamespace());
+            //targetNamespaces.add(notation.getTargetNamespace());
         }
     }
 
@@ -776,7 +786,7 @@ public class PreparedSchema implements Schema, NotationSet {
         IdentityConstraint oldConstraint = identityConstraints.put(constraint.getConstraintName(), constraint);
         if (oldConstraint != constraint) {
             addComponent(constraint);
-            targetNamespaces.add(constraint.getTargetNamespace());
+            //targetNamespaces.add(constraint.getTargetNamespace());
         }
     }
 
@@ -816,7 +826,11 @@ public class PreparedSchema implements Schema, NotationSet {
      * @return the set of all target namespaces for these components
      */
 
-    public Set<NamespaceUri> getTargetNamespaces() {
+    public Iterable<NamespaceUri> getTargetNamespaces() {
+        return targetNamespaces.keySet();
+    }
+
+    public Map<NamespaceUri, List<String>> getTargetNamespaceMap() {
         return targetNamespaces;
     }
 
@@ -889,6 +903,25 @@ public class PreparedSchema implements Schema, NotationSet {
         }
     }
 
+    private void addTargetNamespaces(Map<NamespaceUri, List<String>> map) {
+        if (targetNamespaces.isEmpty()) {
+            targetNamespaces = map;
+        } else {
+            for (Map.Entry<NamespaceUri, List<String>> entry : map.entrySet()) {
+                if (targetNamespaces.containsKey(entry.getKey())) {
+                    List<String> existingLocations = targetNamespaces.get(entry.getKey());
+                    for (String newLocation : entry.getValue()) {
+                        if (!existingLocations.contains(newLocation)) {
+                            existingLocations.add(newLocation);
+                        }
+                    }
+                } else {
+                    targetNamespaces.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+    }
+
     /**
      * Copy the components of this schema to another schema, without any consistency checking
      *
@@ -896,6 +929,8 @@ public class PreparedSchema implements Schema, NotationSet {
      */
 
     private void copyWithoutChecking(PreparedSchema destination) {
+
+        destination.addTargetNamespaces(targetNamespaces);
 
         for (StructuredQName fp : typesByName.keySet()) {
             // We do it this way to allow for redefinition: the same type may have two different fingerprints
@@ -910,6 +945,9 @@ public class PreparedSchema implements Schema, NotationSet {
 
         for (ElementDecl el : elementsByName.values()) {
             destination.addElementDecl(el);
+            for (ElementDecl member : getSubstitutionGroupMembers(el)) {
+                destination.addSubstitutionGroupMember(el, member);
+            }
         }
 
         for (AttributeDecl at : attributesByName.values()) {
@@ -1241,8 +1279,8 @@ public class PreparedSchema implements Schema, NotationSet {
                 result.components.addAll(ps2.components);
             }
         }
-        result.targetNamespaces.addAll(ps1.targetNamespaces);
-        result.targetNamespaces.addAll(ps2.targetNamespaces);
+        result.addTargetNamespaces(ps1.targetNamespaces);
+        result.addTargetNamespaces(ps2.targetNamespaces);
         return result;
     }
 

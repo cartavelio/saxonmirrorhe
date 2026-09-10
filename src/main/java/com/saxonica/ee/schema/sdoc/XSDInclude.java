@@ -55,7 +55,7 @@ public class XSDInclude extends AnnotationParent {
         String documentBase = getBaseURI();
         try {
             String location = ResolveURI.makeAbsolute(schemaLocation, documentBase).toString();
-            XSDSchema existing = compiler.getExistingSchemaDocument(location, getXSDSchema().getTargetNamespace());
+            XSDSchemaElement existing = compiler.getExistingSchemaDocument(location, getXSDSchema().getTargetNamespace());
             if (existing != null) {
                 includedSchema = existing.getSchema();
                 return;
@@ -86,7 +86,7 @@ public class XSDInclude extends AnnotationParent {
             try {
                 PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
                 SchemaDocument inc = SchemaReader.read(source, compiler, pipe, this);
-                XSDSchema includedXSDSchema = inc.getXSDSchema();
+                XSDSchemaElement includedXSDSchema = inc.getXSDSchema();
                 includedXSDSchema.setReferrer(this);
                 includedSchema = includedXSDSchema.getSchema();
                 compiler.markAsRead(source.getSystemId(), includedXSDSchema);

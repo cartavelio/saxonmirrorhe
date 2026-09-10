@@ -81,7 +81,7 @@ public abstract class SchemaElement extends ElementImpl {
 
     protected boolean isTopLevel() {
         NodeInfo parent = getParent();
-        return (parent instanceof XSDSchema || parent instanceof XSDRedefine || parent instanceof XSDOverride);
+        return (parent instanceof XSDSchemaElement || parent instanceof XSDRedefine || parent instanceof XSDOverride);
     }
 
     /**
@@ -254,11 +254,11 @@ public abstract class SchemaElement extends ElementImpl {
      * @throws SchemaException if none is found (which means the schema is invalid)
      */
 
-    public XSDSchema getXSDSchema() throws SchemaException {
+    public XSDSchemaElement getXSDSchema() throws SchemaException {
         NodeInfo n = this;
         while (true) {
-            if (n instanceof XSDSchema) {
-                return (XSDSchema) n;
+            if (n instanceof XSDSchemaElement) {
+                return (XSDSchemaElement) n;
             }
             n = n.getParent();
             if (n == null) {
@@ -484,7 +484,7 @@ public abstract class SchemaElement extends ElementImpl {
     protected StructuredQName getComponentName(String name, int option)
         throws SchemaException {
         try {
-            XSDSchema root = getXSDSchema();
+            XSDSchemaElement root = getXSDSchema();
             String[] parts = NameChecker.getQNameParts(Whitespace.trim(name));
             NamespaceUri uri = null;
             if (parts[0].isEmpty()) {
@@ -562,7 +562,7 @@ public abstract class SchemaElement extends ElementImpl {
     protected void illegalElement(NodeInfo child) throws SchemaException {
         if (child.getNodeKind() == Type.TEXT) {
             // Invalid character data has already been reported
-        } else if (child instanceof XSDSchema) {
+        } else if (child instanceof XSDSchemaElement) {
             // this one needs care; if there is a misplaced XSDSchema element the normal error reporting
             // would increment the error count on this wrong element, leading to the error being undetected later.
             // See test mgO026

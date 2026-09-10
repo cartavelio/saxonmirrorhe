@@ -61,7 +61,7 @@ public class XSDImport extends AnnotationParent {
 
         NamespaceUri targetNamespace = NamespaceUri.of(namespace);
 
-        XSDSchema thisSchemaDocument = getXSDSchema();
+        XSDSchemaElement thisSchemaDocument = getXSDSchema();
         //DocumentInfo thisRoot = thisSchemaDocument.getDocumentRoot();
         EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
 
@@ -74,7 +74,7 @@ public class XSDImport extends AnnotationParent {
         if (schemaLocation != null) {
             try {
                 String location = ResolveURI.makeAbsolute(schemaLocation, documentBase).toString();
-                XSDSchema existing = compiler.getExistingSchemaDocument(location, targetNamespace);
+                XSDSchemaElement existing = compiler.getExistingSchemaDocument(location, targetNamespace);
                 if (existing != null) {
                     importedSchema = existing.getSchema();
                     return;
@@ -209,7 +209,7 @@ public class XSDImport extends AnnotationParent {
         try {
             PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
             importee = SchemaReader.read(source, compiler, pipe, null);
-            XSDSchema s = importee.getXSDSchema();
+            XSDSchemaElement s = importee.getXSDSchema();
             errors = importee.getXSDSchema().getErrorCount();
             importedSchema = s.getSchema();
         } catch (SchemaException e) {

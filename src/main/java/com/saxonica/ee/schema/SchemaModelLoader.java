@@ -372,6 +372,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             if (isGlobal) {
                 loader.schema.addElementDecl(elementDecl);
             }
+            loader.schema.addSubstitutionGroupMember(elementDecl, elementDecl);
 
         }
 

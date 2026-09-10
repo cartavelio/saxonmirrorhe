@@ -8,8 +8,6 @@ import com.saxonica.ee.parallel.ThreadManagerEE;
 import com.saxonica.ee.schema.*;
 import com.saxonica.ee.schema.sdoc.SchemaDocument;
 import com.saxonica.ee.schema.sdoc.SchemaReader;
-import com.saxonica.ee.schema.sdoc.XMLNamespaceSchema;
-import com.saxonica.ee.schema.sdoc.XSINamespaceSchema;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.feed.DecomposingFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
@@ -20,15 +18,20 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.*;
 import com.saxonica.ee.update.PendingUpdateListImpl;
 import com.saxonica.ee.update.XQueryParserExtensionEE;
-import com.saxonica.ee.validate.*;
+import com.saxonica.ee.validate.AssertionTreeBuilder;
+import com.saxonica.ee.validate.InvalidityReportGeneratorEE;
+import com.saxonica.ee.validate.SkipValidator;
+import com.saxonica.ee.validate.ValidationContext;
 import com.saxonica.expr.XQueryParserExtensionPE;
 import com.saxonica.trans.ModePE;
 import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
-import net.sf.saxon.Version;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.FilterFactory;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
@@ -67,7 +70,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -86,7 +89,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     private int licensedFeatures = 0;
     private HashMap<NamespaceUri, Integer> namespaceStatus = new HashMap<>();
-    private ConcurrentHashMap<NamespaceUri, Schema> schemaCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<NamespaceUri, PreparedSchema> schemaCache = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Schema> namedSchemaCache = new ConcurrentHashMap<>();
     private int[] occurrenceLimits = {100, 250};
     private SchemaURIResolver schemaURIResolver = null;
@@ -724,59 +727,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Add a built-in schema for a given namespace. This is a no-op if the configuration is not schema-aware
-     *
-     * @param namespace the namespace. Currently built-in schemas are available for the XML, XSI, and FN namespaces
-     */
-
-    @Override
-    public void addSchemaForBuiltInNamespace(NamespaceUri namespace) {
-        if (getNamespaceStatus(namespace) != PreparedSchema.NAMESPACE_UNKNOWN) {
-            return;
-        }
-        if (namespace == NamespaceUri.XML) {
-            addSchemaForXmlNamespace();
-        } else if (namespace == NamespaceUri.SCHEMA_INSTANCE) {
-            addSchemaForXsiNamespace();
-        } else if (namespace == NamespaceUri.FN) {
-            InputStream in = Version.platform.locateResource("xpath-functions.scm", new ArrayList<String>());
-            if (isTiming()) {
-                getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
-            }
-            try {
-                addSchemaSource(new StreamSource(in), makeErrorReporter());
-                in.close();
-            } catch (SchemaException|IOException e) {
-                throw new IllegalStateException("Failed to load internal copy of xpath-functions.scm");
-            }
-        } else {
-            throw new IllegalArgumentException(namespace.toString());
-        }
-    }
-
-    private synchronized void addSchemaForXmlNamespace() {
-        if (getNamespaceStatus(NamespaceUri.XML) == PreparedSchema.NAMESPACE_UNKNOWN) {
-            try {
-                addSchema(XMLNamespaceSchema.buildSchema(this));
-            } catch (SchemaException err) {
-                throw new AssertionError(err);
-            }
-            setNamespaceStatus(NamespaceUri.XML, PreparedSchema.NAMESPACE_KNOWN);
-        }
-    }
-
-    private synchronized void addSchemaForXsiNamespace() {
-        if (getNamespaceStatus(NamespaceUri.SCHEMA_INSTANCE) == PreparedSchema.NAMESPACE_UNKNOWN) {
-            try {
-                addSchema(XSINamespaceSchema.buildSchema(this));
-            } catch (SchemaException err) {
-                throw new AssertionError(err);
-            }
-            setNamespaceStatus(NamespaceUri.SCHEMA_INSTANCE, PreparedSchema.NAMESPACE_KNOWN);
-        }
-    }
-
-    /**
      * Get the status of a particular schema namespace.
      *
      * @param namespace the Namespace URI whose status is required (supply "" for the non-namespace)
@@ -802,6 +752,17 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         } else {
             namespaceStatus.put(namespace, status);
         }
+    }
+
+    /**
+     * Add a built-in schema for a given namespace. This is a no-op if the configuration is not schema-aware
+     *
+     * @param namespace the namespace. Currently built-in schemas are available for the XML and FN namespaces
+     */
+
+    public Schema getSchemaForBuiltInNamespace(NamespaceUri namespace) {
+        SchemaCompiler compiler = new SchemaCompiler(this);
+        return compiler.getSchemaForBuiltInNamespace(namespace);
     }
 
     /**
@@ -849,6 +810,14 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     public PreparedSchema getUnnamedSchema() {
         return unnamedSchema;
+    }
+
+    public PreparedSchema getCachedSchema(NamespaceUri namespace) {
+        return schemaCache.get(namespace);
+    }
+
+    public void setCachedSchema(NamespaceUri namespace, PreparedSchema schema) {
+        schemaCache.put(namespace, schema);
     }
 
     /**
@@ -953,7 +922,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return schemaCache.get(uri);
     }
 
-    public void registerSchemaForNamespace(NamespaceUri uri, Schema schema) {
+    public void registerSchemaForNamespace(NamespaceUri uri, PreparedSchema schema) {
         schemaCache.put(uri, schema);
     }
 

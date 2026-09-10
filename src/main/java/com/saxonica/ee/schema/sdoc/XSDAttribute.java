@@ -100,7 +100,7 @@ public class XSDAttribute extends SchemaElement {
 
         // @name
         String attValue = atts.getValue(NamespaceUri.NULL, "name");
-        StructuredQName nc = null;
+        StructuredQName attName = null;
         if (attValue != null) {
 
             attributeDecl = new AttributeDecl((EnterpriseConfiguration) getConfiguration(), isTopLevel());
@@ -111,24 +111,24 @@ public class XSDAttribute extends SchemaElement {
             }
             if (atts.getValue(NamespaceUri.NULL, "ref") != null) {
                 mutuallyExclusiveAttributes("name", "ref");
-                nc = StandardNames.SQ_XS_INVALID_NAME; // error recovery
+                attName = StandardNames.SQ_XS_INVALID_NAME; // error recovery
             } else {
                 try {
                     if (localTargetNamespace != null || "qualified".equals(form)) {
                         if (getXSDSchema().getTargetNamespace().equals(NamespaceUri.SCHEMA_INSTANCE)) {
                             error("Attributes cannot be declared in the 'xsi:' namespace");
                         }
-                        nc = getComponentName(attValue, REQUIRE_TARGET_NS);
+                        attName = getComponentName(attValue, REQUIRE_TARGET_NS);
                     } else {
-                        nc = getComponentName(attValue, REQUIRE_NULL_NS);
+                        attName = getComponentName(attValue, REQUIRE_NULL_NS);
                     }
-                    attributeDecl.setAttributeName(nc);
+                    attributeDecl.setAttributeName(attName);
                 } catch (SchemaException err) {
                     error(err.getMessage());
-                    nc = StandardNames.SQ_XS_INVALID_NAME;
+                    attName = StandardNames.SQ_XS_INVALID_NAME;
                 }
             }
-            attributeDecl.setAttributeName(nc);
+            attributeDecl.setAttributeName(attName);
 
             // If this is a local attribute declaration we create two components, an attribute declaration
             // and an attribute use.
@@ -147,24 +147,27 @@ public class XSDAttribute extends SchemaElement {
             attributeUse = new AttributeUse((EnterpriseConfiguration) getConfiguration());
             attributeUse.setLocator(this);
             try {
-                nc = getComponentName(attValue, USE_DEFAULT_NS);
-                if (nc.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
-                    getConfiguration().addSchemaForBuiltInNamespace(NamespaceUri.SCHEMA_INSTANCE);
+                attName = getComponentName(attValue, USE_DEFAULT_NS);
+                attributeUse.setTargetComponentName(attName);
+                if (attName.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
+                    SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
+                    PreparedSchema xsi = compiler.getSchemaForBuiltInNamespace(NamespaceUri.SCHEMA_INSTANCE);
+                    xsi.copyTo(compiler.getPreparedSchema(), compiler);
+                    attributeUse.tryToResolve(compiler, true);
                 }
             } catch (SchemaException err) {
-                nc = StandardNames.SQ_XS_INVALID_NAME;
+                attName = StandardNames.SQ_XS_INVALID_NAME;
                 error(err.getMessage());
             }
-            attributeUse.setTargetComponentName(nc);
         }
 
-        if (nc == null) {
-            nc = StandardNames.SQ_XS_INVALID_NAME; // error already reported
+        if (attName == null) {
+            attName = StandardNames.SQ_XS_INVALID_NAME; // error already reported
         }
 
         // @default
         attValue = atts.getValue(NamespaceUri.NULL, "default");
-        if (attValue != null && !nc.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
+        if (attValue != null && !attName.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
             ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, StringView.tidy(attValue));
             if (attributeUse != null) {
                 attributeUse.setValueConstraint(vc);
@@ -180,7 +183,7 @@ public class XSDAttribute extends SchemaElement {
         //-- @fixed
         attValue = atts.getValue(NamespaceUri.NULL, "fixed");
         if (attValue != null) {
-            if (atts.getValue(NamespaceUri.NULL, "default") != null && !nc.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
+            if (atts.getValue(NamespaceUri.NULL, "default") != null && !attName.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
                 mutuallyExclusiveAttributes("fixed", "default");
             }
             ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.FIXED, StringView.tidy(attValue));

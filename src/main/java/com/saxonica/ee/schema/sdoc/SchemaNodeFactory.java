@@ -89,7 +89,7 @@ public class SchemaNodeFactory implements NodeFactory {
 
         SchemaElement e = makeXSDElement(f, parent.getFingerprint());
 
-        if (e instanceof XSDSchema) {
+        if (e instanceof XSDSchemaElement) {
             config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
         }
 
@@ -169,7 +169,7 @@ public class SchemaNodeFactory implements NodeFactory {
                     return new XSDComplexContentRestriction();
                 }
             case StandardNames.XS_SCHEMA:
-                XSDSchema s = new XSDSchema();
+                XSDSchemaElement s = new XSDSchemaElement();
                 SingleNamespaceSchema preparedSchema = new SingleNamespaceSchema(config, NamespaceUri.NULL);
                 s.setSchema(preparedSchema);
                 s.setSchemaCompiler(compiler);

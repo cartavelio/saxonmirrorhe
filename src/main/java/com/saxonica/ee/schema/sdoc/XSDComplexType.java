@@ -352,7 +352,7 @@ public class XSDComplexType extends SchemaElement {
         String openContentMode = null;
 
         AttributeGroupReference defaultAttributes;
-        XSDSchema schemaDefiningDefaults;
+        XSDSchemaElement schemaDefiningDefaults;
         if (getParent() instanceof XSDOverride) {
             SchemaDocument original = ((XSDOverride) getParent()).getOriginalSchemaDocument();
             schemaDefiningDefaults = original.getXSDSchema();

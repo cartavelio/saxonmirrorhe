@@ -116,6 +116,7 @@ public class XSDElement extends SchemaElement {
             }
             elementName = nc;
             element.setElementName(nc);
+            schema.addSubstitutionGroupMember(element, element);
             if (!isTopLevel()) {
                 elementParticle = new ElementParticle((EnterpriseConfiguration) getConfiguration(), this);
                 elementParticle.setTargetComponentName(nc);
@@ -128,7 +129,7 @@ public class XSDElement extends SchemaElement {
                     boolean existsAsTopLevel = schema.getElementDecl(nc) != null;
                     if (!existsAsTopLevel) {
                         String localName = nc.getLocalPart();
-                        XSDSchema s = getXSDSchema();
+                        XSDSchemaElement s = getXSDSchema();
                         for (NodeInfo ignored : s.children(NodeSelector.of(x -> x instanceof XSDElement &&
                                 localName.equals(x.getAttributeValue(NamespaceUri.NULL, "name"))))) {
                             existsAsTopLevel = true;
@@ -183,6 +184,7 @@ public class XSDElement extends SchemaElement {
             element.setNamespaceResolver(getAllNamespaces());
             element.setElementName(
                     new StructuredQName("", NamespaceUri.NULL, "unnamed-error-element-at-line-" + getLineNumber()));
+            schema.addSubstitutionGroupMember(element, element);
         }
         if (elementParticle == null && !isTopLevel()) {
             element = new ElementDecl((EnterpriseConfiguration) getConfiguration(), isTopLevel(), this);
@@ -192,6 +194,7 @@ public class XSDElement extends SchemaElement {
             element.setNamespaceResolver(getAllNamespaces());
             StructuredQName nameCode = new StructuredQName("", NamespaceUri.NULL, "unnamed-error-element-at-line-" + getLineNumber());
             element.setElementName(nameCode);
+            schema.addSubstitutionGroupMember(element, element);
             elementParticle = new ElementParticle((EnterpriseConfiguration) getConfiguration(), this);
             elementParticle.setTargetComponentName(nameCode);
         }

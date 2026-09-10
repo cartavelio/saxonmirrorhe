@@ -557,19 +557,6 @@ public class ElementDecl extends SchemaStructure
         this.nillable = nillable;
     }
 
-    /**
-     * Set the name of this element declaration
-     *
-     * @param elementName the element name
-     */
-
-    public void setElementName(StructuredQName elementName, int fingerprint) {
-        this.elementName = elementName;
-        this.fingerprint = fingerprint;
-        this.targetNamespace = elementName.getNamespaceUri();
-        //substitutionGroupMembers.add(this);
-    }
-
     public void setElementName(StructuredQName elementName) {
         this.elementName = elementName;
         this.fingerprint = getConfiguration().getNamePool().allocateFingerprint(elementName.getNamespaceUri(), elementName.getLocalPart());

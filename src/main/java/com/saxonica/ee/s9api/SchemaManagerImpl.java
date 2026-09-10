@@ -164,6 +164,7 @@ public class SchemaManagerImpl extends SchemaManager {
             schema.setXsdVersion(xsdVersion);
             SchemaCompiler compiler = new SchemaCompiler(config);
             compiler.setLanguageVersion(xsdVersion);
+            compiler.setPreparedSchema(schema);
             for (Source source : sources) {
                 if (source instanceof StreamSource) {
                     if (((StreamSource) source).getInputStream() == null &&
@@ -208,6 +209,10 @@ public class SchemaManagerImpl extends SchemaManager {
         } catch (XPathException err) {
             throw new SaxonApiException(err);
         }
+        return new XsdSchemaImpl(schema);
+    }
+
+    public XsdSchema getXsdSchema() {
         return new XsdSchemaImpl(schema);
     }
 
