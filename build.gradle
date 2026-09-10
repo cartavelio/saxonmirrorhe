@@ -508,6 +508,7 @@ configurations.compileClasspath.each { cp ->
 }
 
 apply from: "build-cs.gradle"
+apply from: "build-cs-he.gradle"
 apply from: "build-graal.gradle"
 apply from: "build-c.gradle"
 apply from: "build-doc.gradle"

@@ -366,11 +366,11 @@ task eecs_generateCSharp(
   inputs.files fileTree(dir: "${buildDir}/ee_xmlout")
   inputs.file "${buildDir}/ee_refined-digest.xml"
   inputs.files fileTree(dir: "${projectDir}/tools/transpiler/xslt")
-  outputs.files fileTree(dir: "${buildDir}/cs")
+  outputs.files fileTree(dir: "${buildDir}/cs/ee")
   classpath = configurations.transpiler \
         + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
   mainClass = "ToXml"
-  args "-cs:${buildDir}/cs",
+  args "-cs:${buildDir}/cs/ee",
     "-repo:${projectDir}",
     "-xml:${buildDir}/ee_xmlout",
     "-digest:${buildDir}/ee_refined-digest.xml",
@@ -378,7 +378,7 @@ task eecs_generateCSharp(
     "-icu4j:${icu4jJar}"
     "-debug"
   doFirst {
-    mkdir("${buildDir}/cs")
+    mkdir("${buildDir}/cs/ee")
   }
 }
 
@@ -414,7 +414,7 @@ task eecs_project_files (
   description: "Prepare the project files used for EECS build"
 ) {
   from "src/main/saxon-cs/csproj"
-  into "${buildDir}/cs"
+  into "${buildDir}/cs/ee/"
   include "*.csproj"
   filter { line ->
     line.replaceAll("@@optimize@@", csoptimize)
@@ -426,9 +426,9 @@ task eecs_dll(
   dependsOn: ["eecs_project_files"],
   description: "Compile SaxonCS DLL for EE"
 ) {
-  inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
+  inputs.files fileTree(dir: "${buildDir}/cs/ee/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
-  outputs.dir "${buildDir}/csout"
+  outputs.dir "${buildDir}/cs/csout"
 
   doLast {
     if (dotnetex == null) {
@@ -436,7 +436,7 @@ task eecs_dll(
     }
 
     exec {
-        workingDir = "${buildDir}/cs"
+        workingDir = "${buildDir}/cs/ee"
         commandLine dotnetex, 'build', '--nologo', '-o', '../csout', 'engine.csproj'
     }
   }
@@ -448,7 +448,7 @@ task eecsTest(
   description: "Run SaxonCS nUnit tests"
 ) {
   def reportDir = layout.buildDirectory.dir("reports/tests/eecsTest")
-  inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
+  inputs.files fileTree(dir: "${buildDir}/cs/ee/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/test/nunit")
   outputs.dir reportDir
 
@@ -469,7 +469,7 @@ task eecsTest(
 task dotnetTestDrivers(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/test/cstestrunner")
   outputs.file "${buildDir}/testdrivers/bin/${csconfiguration}/TestDrivers.${csver}.nupkg"
 
@@ -516,7 +516,7 @@ task dotnetTestDrivers(
 task dotnetExamples(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  inputs.file "${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
   inputs.files fileTree(dir: "${projectDir}/src/samples/cs/Examples.cs")
   outputs.file "${buildDir}/examples/bin/${csconfiguration}/Examples.${csver}.nupkg"
 
@@ -561,16 +561,16 @@ task dotnetExamples(
 task dotnetRelease(
   dependsOn: ['eecs_dll']
 ) {
-  inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
+  inputs.files fileTree(dir: "${buildDir}/cs/ee/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
-  outputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
-  outputs.file "${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
+  outputs.file "${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  outputs.file "${buildDir}/cs/ee/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
 
   doFirst {
     // Delete them if they exist so that they always get rewritten
     // so that the subsequent attempt to sign them doesn't fail.
-    delete "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
-    delete "${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
+    delete "${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+    delete "${buildDir}/cs/ee/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
   }
 
   doLast {
@@ -578,7 +578,7 @@ task dotnetRelease(
       // Copy the csproj and sln files, renaming them so that the release
       // build uses the names we want the packages to have
       from "${projectDir}/src/main/saxon-cs/csproj"
-      into "${buildDir}/cs"
+      into "${buildDir}/cs/ee"
       rename { String filename ->
         filename.replace("engine", "SaxonCS")
       }
@@ -591,14 +591,14 @@ task dotnetRelease(
   doLast {
     copy {
       from "${projectDir}/tools/saxon-cs"
-      into "${buildDir}/cs"
+      into "${buildDir}/cs/ee"
       include "SaxonCS.sln"
     }
   }
 
   doLast {
     exec {
-      workingDir = "${buildDir}/cs"
+      workingDir = "${buildDir}/cs/ee"
       commandLine dotnetex, 'restore', 'SaxonCS.sln', '--verbosity', 'Normal',
         "-p:Configuration=${csconfiguration}", '-p:Platform=Any CPU'
     }
@@ -606,7 +606,7 @@ task dotnetRelease(
 
   doLast {
     exec {
-      workingDir = "${buildDir}/cs"
+      workingDir = "${buildDir}/cs/ee"
       commandLine dotnetex, 'build', 'SaxonCS.sln', '--verbosity', 'Normal',
         '--configuration', csconfiguration,  '/nodereuse:false', '--no-restore',
         '-p:SelfContained=true', '-p:PublishSingleFile=true',
@@ -616,11 +616,11 @@ task dotnetRelease(
   }
 
   doLast {
-    signExe("${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll")
+    signExe("${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll")
     if (systemOs.isWindows()) {
-      signNuget("${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg")
+      signNuget("${buildDir}/cs/ee/bin/${csconfiguration}/SaxonCS.${csver}.nupkg")
     } else {
-      signExe("${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg")
+      signExe("${buildDir}/cs/ee/bin/${csconfiguration}/SaxonCS.${csver}.nupkg")
     }
   }
 }
@@ -629,7 +629,7 @@ task copyNuGetPackage(
   dependsOn: ["dotnetRelease"],
   description: "Copy the architecture-independent .nupkg file"
 ) {
-  inputs.file "${buildDir}/cs/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
+  inputs.file "${buildDir}/cs/ee/bin/${csconfiguration}/SaxonCS.${csver}.nupkg"
   outputs.file "${buildDir}/distributions/SaxonCS.${csver}.nupkg"
 
   // This only works on the build/release machine, Wynngifu.
@@ -650,7 +650,7 @@ task copyNuGetPackage(
     } else {
       println("Creating UNSIGNED NuGet package")
       copy {
-        from "${buildDir}/cs/bin/${csconfiguration}"
+        from "${buildDir}/cs/ee/bin/${csconfiguration}"
         into "${buildDir}/distributions"
         include "SaxonCS.${csver}.nupkg"
       }
@@ -678,12 +678,12 @@ task pushNuGetPackage(
 task dotnetPublish(
   dependsOn: ['dotnetRelease']
 ) {
-  inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
-  outputs.files fileTree(dir: "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish")
+  inputs.file "${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
+  outputs.files fileTree(dir: "${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/publish")
 
   doLast {
     exec {
-      workingDir = "${buildDir}/cs"
+      workingDir = "${buildDir}/cs/ee"
       commandLine dotnetex, 'publish', 'SaxonCS.sln',
         '--configuration', csconfiguration, '-r', csrid,
         '--self-contained', 'true',
@@ -698,7 +698,7 @@ task dotnetPublish(
 
 /*
   doLast {
-    signExe("${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS", true)
+    signExe("${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/publish/SaxonCS", true)
   }
 */
 }
@@ -708,7 +708,7 @@ task dotnetMakeApp(
 ) {
   doLast {
     exec {
-      workingDir "${buildDir}/cs"
+      workingDir "${buildDir}/cs/ee"
       commandLine dotnetex, 'msbuild', '-t:BundleApp',
         "-p:Configuration=${csconfiguration}", 'SaxonCS.csproj'
     }
@@ -717,7 +717,7 @@ task dotnetMakeApp(
 // Don't sign the individual binaries; we're going to sign the universal binary
 //  doLast {
 //    exec {
-//      workingDir "${buildDir}/cs"
+//      workingDir "${buildDir}/cs/ee"
 //      commandLine 'codesign', '--force', '--options', 'runtime',
 //        '--entitlements', "${projectDir}/tools/saxon-cs/entitlements.plist",
 //        '--deep', '--sign', 'Developer ID Application: Saxonica Limited',
@@ -732,13 +732,13 @@ task dotnetPublishZip(
 ) {
   doFirst {
     copy {
-      into "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish/doc"
+      into "${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/publish/doc"
       from "${projectDir}/src/docs/doc"
     }
   }
 
   archiveFileName = "SaxonCS-${csver.replaceAll("\\.", "-")}-${csplatform}.zip"
-  from "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish"
+  from "${buildDir}/cs/ee/bin/${csconfiguration}/net6.0/${csrid}/publish"
   into "/SaxonCS-${saxonVersion}/"
 }
 
@@ -748,7 +748,7 @@ task dotnetArchive(
 ) {
   doLast {
     copy {
-      from "${buildDir}/cs/"
+      from "${buildDir}/cs/ee"
       into "${projectDir}/src/archive/csharp/build/cs"
       exclude "bin/**"
       exclude "obj/**"

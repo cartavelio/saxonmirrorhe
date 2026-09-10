@@ -1,7 +1,6 @@
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
@@ -54,7 +53,9 @@ public class ToXml {
     
     private static File repoDir = null;
     private static String repoDirName = null;
-    private static String eeJarVersion = null;
+    private static String jarVersion = null;
+
+    private static String edition = null;
     private static String icu4jJar = null; // The location of the icu4j jar to read
     private File singleInputFile = null;
     private File historicInputDir = null; // directory holding the Java prior to preprocessing
@@ -119,7 +120,11 @@ public class ToXml {
                     throw new IllegalArgumentException(xmlDir + " is not a directory");
                 }
             } else if (arg.startsWith("-ee:")) {
-                eeJarVersion = arg.substring(4);
+                edition = "ee";
+                jarVersion = arg.substring(4);
+            } else if (arg.startsWith("-he:")) {
+                edition = "he";
+                jarVersion = arg.substring(4);
             } else if (arg.startsWith("-icu4j:")) {
                 icu4jJar = arg.substring(7);
             } else if (arg.equals("-debug")) {
@@ -133,7 +138,7 @@ public class ToXml {
             }
         }
 
-        if (eeJarVersion == null) {
+        if (jarVersion == null) {
             throw new IllegalArgumentException("You must specify the EE jar version: -ee:11.2 for example");
         }
 
@@ -309,7 +314,7 @@ public class ToXml {
             });
 
             // This tells the JavaParser to use the Saxon 10.3 JAR file to resolve references to classes and methods
-            combinedTypeSolver.add(new JarTypeSolver(String.format("%s/build/libs/saxon-ee-%s.jar", repoDirName, eeJarVersion)));
+            combinedTypeSolver.add(new JarTypeSolver(String.format("%s/build/libs/saxon-%s-%s.jar", repoDirName, edition, jarVersion)));
             combinedTypeSolver.add(new JarTypeSolver(icu4jJar));
             JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
@@ -333,12 +338,18 @@ public class ToXml {
     public void processXmlDirToCSharp(File xmlDir, File digestFile, File csDir) throws Exception {
         XdmNode digest = parseDigest(digestFile);
         xmlToCSharp = compiler.compile(new StreamSource(new File(repoDir, "tools/transpiler/xslt/xml-to-cs.xsl")));
-        File xmlDirEE = new File(new File(xmlDir, "com"), "saxonica");
-        File csDirEE = new File(new File(csDir, "Saxon"), "Eej");
-        processXmlSubDirectoryToCSharp(xmlDirEE, csDirEE, digest, xmlToCSharp);
-        File xmlDirHE = new File(new File(new File(xmlDir, "net"), "sf"), "saxon");
-        File csDirHE = new File(new File(csDir, "Saxon"), "Hej");
-        processXmlSubDirectoryToCSharp(xmlDirHE, csDirHE, digest, xmlToCSharp);
+        if(edition.equals("ee")) {
+            File xmlDirEE = new File(new File(xmlDir, "com"), "saxonica");
+            File csDirEE = new File(new File(csDir, "Saxon"), "Eej");
+            processXmlSubDirectoryToCSharp(xmlDirEE, csDirEE, digest, xmlToCSharp);
+            File xmlDirHE = new File(new File(new File(xmlDir, "net"), "sf"), "saxon");
+            File csDirHE = new File(new File(csDir, "Saxon"), "Hej");
+            processXmlSubDirectoryToCSharp(xmlDirHE, csDirHE, digest, xmlToCSharp);
+        } else {
+            File xmlDirHE = new File(new File(new File(xmlDir, "net"), "sf"), "saxon");
+            File csDirHE = new File(new File(csDir, "Saxon"), "Hej");
+            processXmlSubDirectoryToCSharp(xmlDirHE, csDirHE, digest, xmlToCSharp);
+        }
     }
 
     public void processXmlSubDirectoryToCSharp(File xmlDir, File csDir, XdmNode digest, XsltExecutable xmlToCSharp) throws Exception {

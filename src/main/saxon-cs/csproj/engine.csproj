@@ -52,21 +52,21 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
   </ItemGroup>
     
     <ItemGroup>
-        <Compile Include="../../src/main/saxon-cs/**" />
+        <Compile Include="../../../src/main/saxon-cs/**" />
         <Compile Remove="**/*.csproj" />
-        <Compile Remove="../../src/main/saxon-cs/not-yet-needed/*.cs" />
-        <Compile Remove="../../src/**/*.DS_Store" />
-        <Compile Remove="../../src/main/saxon-cs/commands/*.cs" />
+        <Compile Remove="../../../src/main/saxon-cs/not-yet-needed/*.cs" />
+        <Compile Remove="../../../src/**/*.DS_Store" />
+        <Compile Remove="../../../src/main/saxon-cs/commands/*.cs" />
     </ItemGroup>
     
     <ItemGroup>
-        <None Include="../../tools/saxon-cs/LICENSE.txt" Pack="true" PackagePath=""/>
-        <None Include="../../tools/saxon-cs/README.md" Pack="true" PackagePath=""/>
+        <None Include="../../../tools/saxon-cs/LICENSE.txt" Pack="true" PackagePath=""/>
+        <None Include="../../../tools/saxon-cs/README.md" Pack="true" PackagePath=""/>
     </ItemGroup>    
 
     <ItemGroup>
-      <EmbeddedResource Include="../../src/main/resources/**/*"
-                        Exclude="../../src/main/resources/**/.DS_Store">
+      <EmbeddedResource Include="../../../src/main/resources/**/*"
+                        Exclude="../../../src/main/resources/**/.DS_Store">
         <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
       </EmbeddedResource>
     </ItemGroup>
