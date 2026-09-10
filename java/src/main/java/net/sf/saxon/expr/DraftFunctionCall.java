@@ -32,8 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static net.sf.saxon.expr.parser.XPathParser.makeNamedFunctionReference;
-
 
 /**
  * This class represents a call to a function in its raw lexical form, before it has been resolved to an
@@ -275,7 +273,7 @@ public class DraftFunctionCall extends DraftExpression {
                                            Literal.makeLiteral(Int64Value.makeIntegerValue(args.length)));
 
         }
-        Expression targetExp = makeNamedFunctionReference(name, target);
+        Expression targetExp = XPathParser.makeNamedFunctionReference(name, target);
         ExpressionTool.copyLocationInfo(this, targetExp);
         return XPathParser.curryFunction(targetExp, args, placeMarkerArgs);
     }

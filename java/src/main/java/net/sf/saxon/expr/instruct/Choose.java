@@ -1161,11 +1161,11 @@ public class Choose extends Instruction implements ConditionalInstruction {
                     final BooleanEvaluator cond0 = conditions[0];
                     final BooleanEvaluator cond1 = conditions[1];
                     final BooleanEvaluator cond2 = conditions[2];
-                    final BooleanEvaluator cond3 = conditions[2];
+                    final BooleanEvaluator cond3 = conditions[3];
                     final PushEvaluator act0 = actions[0];
                     final PushEvaluator act1 = actions[1];
                     final PushEvaluator act2 = actions[2];
-                    final PushEvaluator act3 = actions[2];
+                    final PushEvaluator act3 = actions[3];
                     return (output, context) -> {
                         if (cond0.eval(context)) return act0.processLeavingTail(output, context);
                         if (cond1.eval(context)) return act1.processLeavingTail(output, context);

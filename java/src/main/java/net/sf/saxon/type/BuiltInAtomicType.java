@@ -508,7 +508,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     /**
      * Ask whether another type is a subtype of this type (or is the type itself)
      * @param other the other type
-     * @return true if the other type is a subtype of this type
+     * @return true if the other type is a subtype of this type, which includes the case where it is the same type
      */
 
     public boolean hasSubType(ItemType other) {
@@ -516,6 +516,9 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
             return true;
         }
         if (other instanceof BuiltInAtomicType bat && bat.getBasicAlphaCode().startsWith(getBasicAlphaCode())) {
+            return true;
+        }
+        if (other == ErrorType.getInstance()) {
             return true;
         }
         return other instanceof AtomicType at && Subsumption.derivesFrom(at, this);

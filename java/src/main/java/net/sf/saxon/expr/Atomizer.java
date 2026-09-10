@@ -183,9 +183,12 @@ public final class Atomizer extends UnaryExpression {
                 String thing = operandType instanceof MapType ? "map" : "function item";
                 err = new XPathException(expandMessage("Cannot atomize a " + thing))
                         .withErrorCode("FOTY0013");
-            } else {
+            } else if (operandType instanceof XNodeType && visitor.getStaticContext().getPackageData().isSchemaAware()) {
                 err = new XPathException(
                         expandMessage("Cannot atomize an element that is defined in the schema to have element-only content"))
+                        .withErrorCode("FOTY0012");
+            } else {
+                err = new XPathException(expandMessage("Cannot atomize a value of type " + operandType ))
                         .withErrorCode("FOTY0012");
             }
             throw err.asTypeError().withLocation(getLocation());

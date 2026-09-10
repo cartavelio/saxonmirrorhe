@@ -42,20 +42,21 @@ public class FilterFn extends SystemFunction {
 
     private SequenceIterator evalFilter(
             final FunctionItem function, SequenceIterator basis, final XPathContext context) throws XPathException {
-        return switch (function.getArity()) {
-            case 0 -> {
+        switch (function.getArity()) {
+            case 0: {
                 final BooleanValue head = (BooleanValue) dynamicCall(function, context).head();
-                yield head != null && head.getBooleanValue() ? basis : EmptyIterator.INSTANCE;
+                return head != null && head.getBooleanValue() ? basis : EmptyIterator.INSTANCE;
             }
-            case 1 -> ItemMappingIterator.filter(
-                    basis,
-                    item -> {
-                        final BooleanValue head = (BooleanValue) dynamicCall(function, context, item).head();
-                        return head != null && head.getBooleanValue();
-                    });
-            case 2 ->
+            case 1:
+                return ItemMappingIterator.filter(
+                        basis,
+                        item -> {
+                            final BooleanValue head = (BooleanValue) dynamicCall(function, context, item).head();
+                            return head != null && head.getBooleanValue();
+                        });
+            case 2:
                 // New in 4.0, position() as a second argument
-                    new PositionalFilterIterator(
+                return new PositionalFilterIterator(
                             basis,
                             (item, pos) -> {
                                 try {
@@ -67,8 +68,9 @@ public class FilterFn extends SystemFunction {
                                 }
                             });
 
-            default -> throw new XPathException("Unsupported arity " + function.getArity() + " in fn:filter callback");
-        };
+            default:
+                throw new XPathException("Unsupported arity " + function.getArity() + " in fn:filter callback");
+        }
     }
 
     @Override

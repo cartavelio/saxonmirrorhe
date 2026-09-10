@@ -23,6 +23,7 @@ import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.XNodeType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 
@@ -111,9 +112,11 @@ public final class SingletonAtomizer extends UnaryExpression {
                 err = new XPathException("Cannot atomize a map (" + toShortString() + ")", "FOTY0013");
             } else if (operandType instanceof FunctionItemType) {
                 err = new XPathException("Cannot atomize a function item", "FOTY0013");
-            } else {
+            } else if (operandType instanceof XNodeType && visitor.getStaticContext().getPackageData().isSchemaAware()) {
                 err = new XPathException(
                         "Cannot atomize an element that is defined in the schema to have element-only content", "FOTY0012");
+            } else {
+                err = new XPathException("Type " + operandType + " is not atomizable", "XPTY0004");
             }
             throw err.asTypeError()
                     .withLocation(getLocation())
