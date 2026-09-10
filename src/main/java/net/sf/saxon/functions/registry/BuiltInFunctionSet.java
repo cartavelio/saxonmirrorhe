@@ -290,12 +290,30 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      *
      * @param symbolicName the qualified name of the function being called, together with its arity.
      *                     For legacy reasons, the arity may be set to -1 to mean any arity will do
+     * @param languageLevel
      * @return true if a function of this name and arity is available for calling
      */
     @Override
-    public boolean isAvailable(SymbolicName.F symbolicName) {
+    public boolean isAvailable(SymbolicName.F symbolicName, int languageLevel) {
         StructuredQName qn = symbolicName.getComponentName();
-        return qn.hasURI(getNamespace()) && getFunctionDetails(qn.getLocalPart(), symbolicName.getArity()) != null;
+        if (!qn.hasURI(getNamespace())) {
+            return false;
+        }
+        Entry entry = getFunctionDetails(qn.getLocalPart(), symbolicName.getArity());
+        if (entry == null) {
+            return false;
+        }
+        if ((entry.properties & SEQV) != 0) {
+            // sequence-variadic functions in 4.0 (e.g..concat, codepoints-to-string)
+            // combine the "variable" arguments into a single argument
+            if (languageLevel < 40 &&
+                    symbolicName.getComponentName().getLocalPart().equals("concat") &&
+                    symbolicName.getArity() < 2) {
+                return false;
+            }
+        }
+        return true;
+
     }
 
     /**

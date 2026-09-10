@@ -112,11 +112,12 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
      * <p>This supports the function-available() function in XSLT.</p>
      *
      * @param functionName the qualified name of the function being called
+     * @param languageLevel
      * @return true if a function of this name and arity is available for calling
      */
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         return functions.get(functionName) != null;
     }
 

@@ -90,7 +90,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
     }
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         if (functionName.getArity() != 1) {
             return false;
         }

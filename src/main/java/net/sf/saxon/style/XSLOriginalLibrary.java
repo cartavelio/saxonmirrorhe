@@ -54,7 +54,7 @@ public class XSLOriginalLibrary implements FunctionLibrary {
     }
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         // xsl:original is not recognized by function-available() - W3C bug 28122
         return false;
     }
