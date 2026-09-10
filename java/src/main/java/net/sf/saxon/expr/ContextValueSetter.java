@@ -125,6 +125,10 @@ public class ContextValueSetter extends BinaryExpression
 
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
+        if (getLhsExpression() instanceof ContextItemExpression) {
+            // This happens when rewriting filter expressions
+            return getRhsExpression();
+        }
         return super.optimize(visitor, contextItemType);
     }
 

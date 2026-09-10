@@ -7,8 +7,10 @@
 
 package net.sf.saxon.functions.hof;
 
-import net.sf.saxon.expr.ItemMappingIterator;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -17,12 +19,48 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class implements the function fn:filter(), which is a standard function in XQuery 3.0;
  * it is extended in 4.0 so the callback function also has access to the current position in the sequence
  */
 
 public class FilterFn extends SystemFunction {
+
+    /**
+     * Attempt to rewrite fn:filter(S, F) as S[F(.)]
+     * @param visitor the expression visitor
+     * @param contextInfo information about the context item
+     * @param arguments the supplied arguments to the function call. Note: modifying the contents
+     *                  of this array should not be attempted, it is likely to have no effect.
+     * @return
+     * @throws XPathException
+     */
+
+    public Expression makeOptimizedFunctionCall(
+            ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments)
+            throws XPathException {
+        if (arguments[1] instanceof FunctionLiteral f &&
+                f.getGroundedValue() instanceof InlineFunctionItem ifi) {
+            RetainedStaticContext rsc = arguments[0].getRetainedStaticContext();
+            List<Expression> callbackArgs = new ArrayList<>(2);
+            if (ifi.getArity() > 0) {
+                callbackArgs.add(new ContextItemExpression());
+            }
+            if (ifi.getArity() > 1) {
+                callbackArgs.add(SystemFunction.makeCall("position", rsc));
+            }
+            DynamicFunctionCall dynamicFunctionCall = new DynamicFunctionCall(f, callbackArgs);
+            Expression predicate = visitor.obtainOptimizer().tryInlineDynamicFunctionCall(
+                    dynamicFunctionCall, visitor, contextInfo);
+            return new FilterExpression(arguments[0], predicate)
+                    .typeCheck(visitor, contextInfo)
+                    .optimize(visitor, contextInfo);
+        }
+        return super.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
+    }
 
     /**
      * Evaluate the expression

@@ -85,6 +85,10 @@ public class InlineFunctionItem extends AbstractFunction {
         return new SpecificFunctionType(argTypes, declaredResultType, annotationList);
     }
 
+    public UserFunctionParameter[] getParameters() {
+        return parameters;
+    }
+
     @Override
     public StructuredQName getFunctionName() {
         return null;

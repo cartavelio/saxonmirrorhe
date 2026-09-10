@@ -375,6 +375,24 @@ public class Optimizer {
     }
 
     /**
+     * Replace a dynamic function call by the body of the function, if the target of
+     * the dynamic function call is statically known
+     *
+     * @param functionCall    the functionCall expression
+     * @param visitor         the expression visitor
+     * @param contextItemType the context item type
+     * @return either the original expression unchanged, or an expression that consists of the inlined
+     * function body, with all function parameters bound as required. In Saxon-HE, function inlining is
+     * not supported, so the original functionCall is always returned unchanged
+     */
+
+    public Expression tryInlineDynamicFunctionCall(
+            DynamicFunctionCall functionCall, ExpressionVisitor visitor, ContextItemStaticInfo contextItemType)
+            throws XPathException {
+        return functionCall;
+    }
+
+    /**
      * Identify expressions within a function or template body that can be promoted to be
      * evaluated as global variables.
      *

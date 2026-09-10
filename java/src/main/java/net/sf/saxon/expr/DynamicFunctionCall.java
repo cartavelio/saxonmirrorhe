@@ -185,6 +185,24 @@ public class DynamicFunctionCall extends Expression {
     }
 
     /**
+     * Get the expression that returns the target function
+     * @return the target function
+     */
+
+    public Expression getTargetFunction() {
+        return targetFunction.getChildExpression();
+    }
+
+    /**
+     * Get the Nth supplied argument, counting from zero. That is, N=0 returns the expression
+     * that will be supplied as the first argument to the dynamic function call.
+     */
+
+    public Expression getSuppliedArgument(int index) {
+        return suppliedArguments.getOperand(index).getChildExpression();
+    }
+
+    /**
      * Create a call on map:get() or array:get() if the function is known to be a map or array
      * @param visitor the expression visitor
      * @param fnSet the map or array function set as appropriate

@@ -7,10 +7,12 @@
 
 package net.sf.saxon.functions.hof;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.MappingIterator;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.AbstractBlockIterator;
+import net.sf.saxon.expr.instruct.ForEach;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
@@ -21,6 +23,8 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.Int64Value;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -44,6 +48,40 @@ public class ForEachFn extends SystemFunction {
         } else {
             return AnyItemType.getInstance();
         }
+    }
+
+    /**
+     * Attempt to rewrite fn:for-each(S, A) as S!A
+     *
+     * @param visitor     the expression visitor
+     * @param contextInfo information about the context item
+     * @param arguments   the supplied arguments to the function call. Note: modifying the contents
+     *                    of this array should not be attempted, it is likely to have no effect.
+     * @return the rewritten expression
+     * @throws XPathException
+     */
+
+    public Expression makeOptimizedFunctionCall(
+            ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments)
+            throws XPathException {
+        if (arguments[1] instanceof FunctionLiteral f &&
+                f.getGroundedValue() instanceof InlineFunctionItem ifi) {
+            RetainedStaticContext rsc = arguments[0].getRetainedStaticContext();
+            List<Expression> callbackArgs = new ArrayList<>(2);
+            if (ifi.getArity() > 0) {
+                callbackArgs.add(new ContextItemExpression());
+            }
+            if (ifi.getArity() > 1) {
+                callbackArgs.add(SystemFunction.makeCall("position", rsc));
+            }
+            DynamicFunctionCall dynamicFunctionCall = new DynamicFunctionCall(f, callbackArgs);
+            Expression action = visitor.obtainOptimizer().tryInlineDynamicFunctionCall(
+                    dynamicFunctionCall, visitor, contextInfo);
+            return new ForEach(arguments[0], action)
+                    .typeCheck(visitor, contextInfo)
+                    .optimize(visitor, contextInfo);
+        }
+        return super.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
     }
 
     @Override
