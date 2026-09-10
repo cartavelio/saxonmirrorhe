@@ -971,8 +971,10 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
     }
 
   } else {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)saxonMessageListenerRef);
+    if(saxonMessageListenerRef > 0) {
+      j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+          (void *)saxonMessageListenerRef);
+    }
     saxonMessageListenerRef = -1;
     setProperty("m", "off");
   }
