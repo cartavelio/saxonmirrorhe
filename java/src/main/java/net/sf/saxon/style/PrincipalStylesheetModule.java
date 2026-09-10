@@ -26,8 +26,8 @@ import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
-import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.type.gnode.NodeKindType;
@@ -98,7 +98,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     // lead to the stylesheet tree being reused
     private final HashMap<DocumentKey, XSLModuleRoot> moduleCache = new HashMap<>(4);
 
-    private final TypeAliasManager typeAliasManager;
+    private final NamedTypeManager typeAliasManager;
 
 
     private final CharacterMapIndex characterMapIndex;
@@ -142,7 +142,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         stylesheetPackage.setCharacterMapIndex(characterMapIndex);
 
         typeAliasManager = getConfiguration().makeTypeAliasManager();
-        stylesheetPackage.setTypeAliasManager(typeAliasManager);
+        stylesheetPackage.setNamedTypeManager(typeAliasManager);
 
         try {
             setInputTypeAnnotations(sourceElement.getInputTypeAnnotationsAttribute());
@@ -271,7 +271,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * @return the type alias manager
      */
 
-    public TypeAliasManager getTypeAliasManager() {
+    public NamedTypeManager getTypeAliasManager() {
         return typeAliasManager;
     }
 
@@ -1596,6 +1596,47 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
 
         }
+
+        // Adjust visibility of named item types
+
+        NamedTypeManager manager = stylesheetPackage.getNamedTypeManager();
+        List<NamedTypeManager.NamedItemType> delta = new ArrayList<>();
+        for (NamedTypeManager.NamedItemType entry : manager.getAllNamedItemTypes()) {
+            XSLExpose exposure = getBestMatchingExposeDeclaration(
+                    pool, exposeDeclarations, StandardNames.XSL_ITEM_TYPE, entry.name(),0);
+            if (exposure != null) {
+                delta.add(entry.withVisibility(exposure.getVisibility()));
+            }
+        }
+        for (NamedTypeManager.NamedItemType entry : delta) {
+            manager.setDeclaredVisibility(entry.name(), entry.visibility());
+        }
+    }
+
+    // Following method is currently used only for matching xsl:item-type declarations but it has been written
+    // to be completely general
+
+    private XSLExpose getBestMatchingExposeDeclaration(
+            NamePool pool, List<XSLExpose> exposeDeclarations, int kind, StructuredQName name, int arity) {
+        for (XSLExpose exposure : exposeDeclarations) {
+            ComponentTest exactNameTest = new ComponentTest(kind, new SpecificQNameTest(name, pool), arity);
+            Set<ComponentTest> explicitComponentTests = exposure.getExplicitComponentTests();
+            if (explicitComponentTests.contains(exactNameTest)) {
+                return exposure;
+            }
+            SymbolicName sName = new SymbolicName(kind, name);
+            for (ComponentTest test : exposure.getWildcardComponentTests()) {
+                if (test.isPartialWildcard() && test.matches(new SymbolicName(kind, name))) {
+                    return exposure;
+                }
+            }
+            for (ComponentTest test : exposure.getWildcardComponentTests()) {
+                if (test.matches(sName)) {
+                    return exposure;
+                }
+            }
+        }
+        return null;
     }
 
     private void lookForAnyWildcard(List<XSLExpose> exposeDeclarations, Component component) throws
@@ -1635,7 +1676,6 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         }
         return matched;
     }
-
 
     /**
      * Compile time error, specifying an error code

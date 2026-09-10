@@ -89,29 +89,34 @@ public abstract class XSLAcceptExpose extends StyleElement {
         } else {
             String local = Whitespace.trim(componentAtt);
             switch (local) {
-                case "function":
-                    componentTypeCode = StandardNames.XSL_FUNCTION;
-                    break;
-                case "template":
-                    componentTypeCode = StandardNames.XSL_TEMPLATE;
-                    break;
-                case "variable":
-                    componentTypeCode = StandardNames.XSL_VARIABLE;
-                    break;
-                case "attribute-set":
-                    componentTypeCode = StandardNames.XSL_ATTRIBUTE_SET;
-                    break;
-                case "mode":
-                    componentTypeCode = StandardNames.XSL_MODE;
-                    break;
-                case "*":
+                case "function" -> componentTypeCode = StandardNames.XSL_FUNCTION;
+                case "template" -> componentTypeCode = StandardNames.XSL_TEMPLATE;
+                case "variable" -> componentTypeCode = StandardNames.XSL_VARIABLE;
+                case "attribute-set" -> componentTypeCode = StandardNames.XSL_ATTRIBUTE_SET;
+                case "mode" -> componentTypeCode = StandardNames.XSL_MODE;
+                case "item-type" -> componentTypeCode = StandardNames.XSL_ITEM_TYPE;
+                case "record-type" -> componentTypeCode = StandardNames.XSL_RECORD_TYPE;
+                case "*" ->
                     // spec change bug 29478
-                    componentTypeCode = -1;
-                    break;
-                default:
-                    compileError("The component type is not one of the allowed names (function, template, variable, attribute-set, or mode)",
+                        componentTypeCode = -1;
+                default -> {
+                    compileError("The component type is not one of the allowed names "
+                                         + "(function, template, variable, attribute-set, mode, or in 4.0, item-type or record-type)",
                                  "XTSE0020");
                     return;
+                }
+            }
+            if ((componentTypeCode == StandardNames.XSL_ITEM_TYPE || componentTypeCode == StandardNames.XSL_RECORD_TYPE)) {
+                if (getCompilation().getCompilerInfo().getXsltVersion() < 40) {
+                    compileErrorInAttribute("Component type " + local + " requires 4.0 to be enabled", "XTSE0010", "component");
+                }
+                if (visibility == Visibility.FINAL) {
+                    // Treat "final" as synonym of "public" since types cannot be overridden
+                    visibility = Visibility.PUBLIC;
+                }
+                if (visibility != Visibility.PRIVATE && visibility != Visibility.PUBLIC && visibility != Visibility.HIDDEN) {
+                    compileErrorInAttribute("Invalid visibility for component type " + local, "XTSE0010", "visibility");
+                }
             }
         }
 
@@ -166,6 +171,8 @@ public abstract class XSLAcceptExpose extends StyleElement {
             wildcardComponentTests.add(new ComponentTest(StandardNames.XSL_VARIABLE, test, -1));
             wildcardComponentTests.add(new ComponentTest(StandardNames.XSL_ATTRIBUTE_SET, test, -1));
             wildcardComponentTests.add(new ComponentTest(StandardNames.XSL_MODE, test, -1));
+            wildcardComponentTests.add(new ComponentTest(StandardNames.XSL_ITEM_TYPE, test, -1));
+            wildcardComponentTests.add(new ComponentTest(StandardNames.XSL_RECORD_TYPE, test, -1));
         } else {
             wildcardComponentTests.add(new ComponentTest(componentTypeCode, test, -1));
         }

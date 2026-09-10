@@ -13,6 +13,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.DraftItemType;
@@ -21,7 +22,7 @@ import net.sf.saxon.value.SequenceType;
 
 
 /**
- * The class implements a xsl:item-type declaration in a stylesheet. This
+ * The class implements an xsl:item-type declaration in a stylesheet. This
  * declaration associates a name with an item type, allowing the name (say N)
  * to be used in an itemType with the syntax <code>type(N)</code>.
  */
@@ -29,6 +30,7 @@ import net.sf.saxon.value.SequenceType;
 public class XSLItemType extends StyleElement {
 
     private StructuredQName itemTypeName;
+    private Visibility visibility = Visibility.UNDEFINED;
     private ItemType itemType;
     private boolean resolved = false;
 
@@ -46,6 +48,7 @@ public class XSLItemType extends StyleElement {
         }
 
         String typeAtt = null;
+        String visibilityAtt = null;
 
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
@@ -59,9 +62,7 @@ public class XSLItemType extends StyleElement {
                     typeAtt = value;
                     break;
                 case "visibility":
-                    if (!value.equals("private")) {
-                        compileErrorInAttribute("Not implemented", "XTSE0010", "visibility");
-                    }
+                    visibilityAtt = value;
                     break;
                 default:
                     checkUnknownAttribute(attName);
@@ -75,6 +76,13 @@ public class XSLItemType extends StyleElement {
 
         if (typeAtt == null) {
             reportAbsence("as");
+        }
+
+        if (visibilityAtt != null) {
+            visibility = interpretVisibilityValue(visibilityAtt, "");
+            if (visibility != Visibility.PRIVATE && visibility != Visibility.PUBLIC) {
+                compileErrorInAttribute("Visibility must be private or public", "XTSE0010", "visibility");
+            }
         }
 
 

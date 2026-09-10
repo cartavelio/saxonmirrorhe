@@ -468,7 +468,7 @@ public class ExpressionContext implements StaticContext {
      */
     @Override
     public ItemType resolveTypeAlias(StructuredQName typeName) {
-        return getPackageData().obtainTypeAliasManager().getItemType(typeName);
+        return getPackageData().getNamedTypeManager().getItemType(typeName);
     }
 
     /**

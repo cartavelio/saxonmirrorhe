@@ -27,10 +27,10 @@ public class XSLAccept extends XSLAcceptExpose {
     /**
      * Check that the stylesheet element is valid. This is called once for each element, after
      * the entire tree has been built. As well as validation, it can perform first-time
-     * initialisation. The default implementation does nothing; it is normally overriden
+     * initialisation. The default implementation does nothing; it is normally overridden
      * in subclasses.
      *
-     * @param decl the declaration to be validated
+     * @param decl the xsl:accept declaration to be validated
      * @throws net.sf.saxon.trans.XPathException
      *          if any error is found during validation
      */
@@ -48,30 +48,42 @@ public class XSLAccept extends XSLAcceptExpose {
                 if (nameTest instanceof SpecificQNameTest) {
                     int kind = test.getComponentKind();
                     StructuredQName name = ((SpecificQNameTest)nameTest).getStructuredQName();
-                    SymbolicName sName = kind == StandardNames.XSL_FUNCTION ?
-                        new SymbolicName.F(name, test.getArity()) :
-                        new SymbolicName(kind, name);
-                    Component comp = pack.getComponent(sName);
-                    boolean found = false;
-                    if (comp == null) {
-                        if (kind == StandardNames.XSL_FUNCTION && test.getArity() == -1) {
-                            // This will match any function of the required name, regardless of arity
-                            for (int i = 0; i <= pack.getMaxFunctionArity(); i++) {
-                                sName = new SymbolicName.F(name, i);
-                                comp = pack.getComponent(sName);
-                                if (comp != null) {
-                                    checkCompatibility(sName, comp.getVisibility(), getVisibility());
-                                    found = true;
-                                }
-                            }
-
+                    if (kind == StandardNames.XSL_ITEM_TYPE) {
+                        NamedTypeManager typeManager = pack.getNamedTypeManager();
+                        NamedTypeManager.NamedItemType typeDecl = typeManager.getNamedItemType(name);
+                        if (typeDecl == null) {
+                            compileError("No item-type " + name.getEQName() + " exists in the used package", "XTSE3030");
+                            continue;
+                        }
+                        if (typeDecl.visibility() != Visibility.PUBLIC) {
+                            compileError("Item-type " + name.getEQName() + " in the used package is private to the package", "XTSE3030");
                         }
                     } else {
-                        checkCompatibility(sName, comp.getVisibility(), getVisibility());
-                        found = true;
-                    }
-                    if (!found) {
-                        compileError("No " + sName.toString() + " exists in the used package", "XTSE3030");
+                        SymbolicName sName = kind == StandardNames.XSL_FUNCTION ?
+                                new SymbolicName.F(name, test.getArity()) :
+                                new SymbolicName(kind, name);
+                        Component comp = pack.getComponent(sName);
+                        boolean found = false;
+                        if (comp == null) {
+                            if (kind == StandardNames.XSL_FUNCTION && test.getArity() == -1) {
+                                // This will match any function of the required name, regardless of arity
+                                for (int i = 0; i <= pack.getMaxFunctionArity(); i++) {
+                                    sName = new SymbolicName.F(name, i);
+                                    comp = pack.getComponent(sName);
+                                    if (comp != null) {
+                                        checkCompatibility(sName, comp.getVisibility(), getVisibility());
+                                        found = true;
+                                    }
+                                }
+
+                            }
+                        } else {
+                            checkCompatibility(sName, comp.getVisibility(), getVisibility());
+                            found = true;
+                        }
+                        if (!found) {
+                            compileError("No " + sName + " exists in the used package", "XTSE3030");
+                        }
                     }
                 }
             }
@@ -81,9 +93,8 @@ public class XSLAccept extends XSLAcceptExpose {
 
     protected void checkCompatibility(SymbolicName name, Visibility declared, Visibility exposed) {
         if (!isCompatible(declared, exposed)) {
-            String code = "XTSE3040";
             compileError("The " + name + " is declared as " + Err.describeVisibility(declared)
-                                 + " and cannot be accepted as " + Err.describeVisibility(exposed), code);
+                                 + " and cannot be accepted as " + Err.describeVisibility(exposed), "XTSE3040");
         }
     }
 

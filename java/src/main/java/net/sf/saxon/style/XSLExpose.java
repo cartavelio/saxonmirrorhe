@@ -41,17 +41,13 @@ public class XSLExpose extends XSLAcceptExpose {
         if (declared == exposed || declared == Visibility.UNDEFINED) {
             return true;
         }
-        switch (declared) {
-            case PUBLIC:
-                return exposed == Visibility.PRIVATE ||
-                        exposed == Visibility.FINAL || exposed == Visibility.HIDDEN;
-            case ABSTRACT:
-                return exposed == Visibility.HIDDEN;
-            case FINAL:
-                return exposed == Visibility.PRIVATE || exposed == Visibility.HIDDEN;
-            default:
-                return false;
-        }
+        return switch (declared) {
+            case PUBLIC -> exposed == Visibility.PRIVATE ||
+                    exposed == Visibility.FINAL || exposed == Visibility.HIDDEN;
+            case ABSTRACT -> exposed == Visibility.HIDDEN;
+            case FINAL -> exposed == Visibility.PRIVATE || exposed == Visibility.HIDDEN;
+            default -> false;
+        };
     }
 
     /**
@@ -82,6 +78,7 @@ public class XSLExpose extends XSLAcceptExpose {
                 SymbolicName sName = kind == StandardNames.XSL_FUNCTION ?
                     new SymbolicName.F(qName, test.getArity()) :
                     new SymbolicName(kind, qName);
+                StylesheetPackage pack = psm.getStylesheetPackage();
                 boolean found = false;
                 switch(kind) {
                     case StandardNames.XSL_TEMPLATE: {
@@ -127,7 +124,6 @@ public class XSLExpose extends XSLAcceptExpose {
                         }
                         break;
                     case StandardNames.XSL_FUNCTION:
-                        StylesheetPackage pack = psm.getStylesheetPackage();
                         if (test.getArity() == -1) {
                             // This will match any function of the required name, regardless of arity
                             for (int i = 0; i <= pack.getMaxFunctionArity(); i++) {
@@ -148,6 +144,12 @@ public class XSLExpose extends XSLAcceptExpose {
                             }
                         }
                         break;
+                    case StandardNames.XSL_ITEM_TYPE:
+                        NamedTypeManager.NamedItemType type = pack.getNamedTypeManager().getNamedItemType(qName);
+                        found = type != null;
+                        if (found) {
+                            checkCompatibility(sName, type.visibility(), getVisibility());
+                        }
                 }
                 if (!found && !qName.equals(new StructuredQName("saxon", NamespaceUri.SAXON, "error-name"))) {
                     compileError("No " + sName + " exists in the containing package", "XTSE3020");

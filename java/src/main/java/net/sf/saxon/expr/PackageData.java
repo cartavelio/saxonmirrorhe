@@ -15,7 +15,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.KeyManager;
-import net.sf.saxon.trans.TypeAliasManager;
+import net.sf.saxon.trans.NamedTypeManager;
 import net.sf.saxon.type.Schema;
 
 import java.util.*;
@@ -39,7 +39,7 @@ public class PackageData {
     private int localLicenseId = -1;
     private String targetEdition;
     private boolean relocatable;
-    private TypeAliasManager typeAliasManager;
+    private NamedTypeManager namedTypeManager;
 
 
     /**
@@ -339,8 +339,8 @@ public class PackageData {
         return globalVariables;
     }
 
-    public void setTypeAliasManager(TypeAliasManager manager) {
-        this.typeAliasManager = manager;
+    public void setNamedTypeManager(NamedTypeManager manager) {
+        this.namedTypeManager = manager;
     }
 
     /**
@@ -348,11 +348,11 @@ public class PackageData {
      * @return a type alias manager, newly created if necessary
      */
 
-    public TypeAliasManager obtainTypeAliasManager() {
-        if (typeAliasManager == null) {
-            typeAliasManager = config.makeTypeAliasManager();
+    public NamedTypeManager getNamedTypeManager() {
+        if (namedTypeManager == null) {
+            namedTypeManager = config.makeTypeAliasManager();
         }
-        return typeAliasManager;
+        return namedTypeManager;
     }
 
 

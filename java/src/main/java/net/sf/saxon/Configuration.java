@@ -2686,8 +2686,8 @@ public class Configuration implements SourceResolver {
      * @return a new TypeAliasManager
      */
 
-    public TypeAliasManager makeTypeAliasManager() {
-        return new TypeAliasManager();
+    public NamedTypeManager makeTypeAliasManager() {
+        return new NamedTypeManager();
     }
 
     /**

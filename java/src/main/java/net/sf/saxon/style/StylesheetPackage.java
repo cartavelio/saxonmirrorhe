@@ -19,6 +19,7 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.om.Action;
 import net.sf.saxon.om.SpaceStrippingRule;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.s9api.HostLanguage;
@@ -30,6 +31,7 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.Affinity;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 
 import java.util.*;
@@ -746,6 +748,31 @@ public class StylesheetPackage extends PackageData {
         if (usedPackage.isCreatesSecondaryResultDocuments()) {
             setCreatesSecondaryResultDocuments(true);
         }
+
+        // Handle named item types specially
+
+        NamedTypeManager oldTypeManager = usedPackage.getNamedTypeManager();
+        NamedTypeManager newTypeManager = getNamedTypeManager();
+        oldTypeManager.processPublicTypeAliases((name, type) -> {
+            acceptImportedType(acceptors, name, type, newTypeManager);
+        });
+    }
+
+    private void acceptImportedType(List<XSLAccept> acceptors, StructuredQName name, ItemType type, NamedTypeManager newTypeManager) {
+        SymbolicName sName = new SymbolicName(StandardNames.XSL_ITEM_TYPE, name);
+        Visibility acceptedVisibility = explicitAcceptedVisibility(sName, acceptors);
+        if (acceptedVisibility == Visibility.UNDEFINED) {
+            acceptedVisibility = wildcardAcceptedVisibility(sName, acceptors);
+        }
+        if (acceptedVisibility == Visibility.UNDEFINED) {
+            acceptedVisibility = Visibility.PRIVATE;
+        }
+        if (acceptedVisibility == Visibility.FINAL) {
+            acceptedVisibility = Visibility.PUBLIC;
+        }
+        if (acceptedVisibility != Visibility.HIDDEN) {
+            newTypeManager.addImportedTypeAlias(name, type, acceptedVisibility);
+        }
     }
 
     private void makeNewComponentBindings(Set<SymbolicName> overrides, Map<Component, Component> correspondence, List<ComponentBinding> oldBindings, List<ComponentBinding> newBindings) {
@@ -777,7 +804,7 @@ public class StylesheetPackage extends PackageData {
         }
     }
 
-    private Visibility explicitAcceptedVisibility(SymbolicName name, List<XSLAccept> acceptors) throws XPathException {
+    private Visibility explicitAcceptedVisibility(SymbolicName name, List<XSLAccept> acceptors) {
         for (XSLAccept acceptor : acceptors) {
             for (ComponentTest test : acceptor.getExplicitComponentTests()) {
                 if (test.matches(name)) {
@@ -788,7 +815,7 @@ public class StylesheetPackage extends PackageData {
         return Visibility.UNDEFINED;
     }
 
-    private Visibility wildcardAcceptedVisibility(SymbolicName name, List<XSLAccept> acceptors) throws XPathException {
+    private Visibility wildcardAcceptedVisibility(SymbolicName name, List<XSLAccept> acceptors) {
         // Note: last one wins
         Visibility vis = Visibility.UNDEFINED;
         for (XSLAccept acceptor : acceptors) {
