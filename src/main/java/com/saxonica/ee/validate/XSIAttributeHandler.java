@@ -34,6 +34,7 @@ import java.util.*;
 public class XSIAttributeHandler extends ValidatingFilter {
 
     private final HashSet<NamespaceUri> namespacesEncountered;
+    private final HashMap<NamespaceUri, URI> schemaDocumentsRead;
     private boolean useXsiSchemaLocation;
     private final List<ValidationFailure> xsiValidationErrors = new ArrayList<>(4);
     private final static String NULL_NAMESPACE_MARKER = ((char)31 + "");
@@ -48,6 +49,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
     public XSIAttributeHandler(ValidationStack out) {
         super(out);
         namespacesEncountered = new HashSet<>(10);
+        schemaDocumentsRead = new HashMap<>(10);
         useXsiSchemaLocation = getPipelineConfiguration().getParseOptions().isUseXsiSchemaLocation();
     }
 
