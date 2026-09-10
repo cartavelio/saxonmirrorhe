@@ -4551,6 +4551,8 @@ cdef class PyXdmMap(PyXdmFunctionItem):
          """
          get(self, key)
          Returns the value to which the specified key is mapped, or NULL if this map contains no mapping for the key.
+         All keys in the PyXdmMap are of type PyXdmAtomicValue, but for convenience, this method also accepts keys of
+         primitive type (str, int and float), which will be converted to PyXdmAtomicValue internally.
          Args:
              key: the key whose associated value is to be returned. The key supports the following types:
                 PyXdmAtomicValue, str, int and float
