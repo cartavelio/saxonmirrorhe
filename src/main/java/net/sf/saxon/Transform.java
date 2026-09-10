@@ -119,10 +119,8 @@ public class Transform {
                                     "Allow calls to Java extension functions and xsl:result-document");
         options.addRecognizedOption("im", CommandLineOptions.TYPE_QNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Name of initial mode");
-        //#if CSHARP==false
         options.addRecognizedOption("init", CommandLineOptions.TYPE_CLASSNAME,
-                                    "User-supplied net.sf.saxon.lib.Initializer class to initialize the Saxon Configuration");
-        //#endif
+                                    "User-supplied code to initialize the Saxon Configuration");
         options.addRecognizedOption("it", CommandLineOptions.TYPE_QNAME,
                                     "Name of initial template");
         options.addRecognizedOption("jit", CommandLineOptions.TYPE_BOOLEAN,

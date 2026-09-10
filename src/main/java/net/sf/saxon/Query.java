@@ -131,10 +131,8 @@ public class Query {
                                     "Display compiled expression tree and optimization decisions");
         options.addRecognizedOption("ext", CommandLineOptions.TYPE_BOOLEAN,
                                     "Allow calls to Java extension functions and xsl:result-document");
-        //#if CSHARP==false
         options.addRecognizedOption("init", CommandLineOptions.TYPE_CLASSNAME,
-                                    "User-supplied net.sf.saxon.lib.Initializer class to initialize the Saxon Configuration");
-        //#endif
+                                    "User-supplied code to initialize the Saxon configuration");
         options.addRecognizedOption("json", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Source file for primary JSON input");
         options.addRecognizedOption("l", CommandLineOptions.TYPE_BOOLEAN,
