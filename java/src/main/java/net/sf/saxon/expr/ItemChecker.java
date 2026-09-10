@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.TypeCheckingFilter;
 import net.sf.saxon.expr.elab.*;
@@ -15,11 +16,14 @@ import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.DocumentNodeType;
 import net.sf.saxon.value.Cardinality;
 
@@ -153,6 +157,14 @@ public final class ItemChecker extends UnaryExpression {
             }
         }
         return this;
+    }
+
+    public Pattern toPattern(Configuration config, boolean firstInPath) throws XPathException {
+        if (requiredItemType == AnyGNodeType.getInstance() || requiredItemType == AnyXNodeType.getInstance()) {
+            return getBaseExpression().toPattern(config, firstInPath);
+        } else {
+            return super.toPattern(config, firstInPath);
+        }
     }
 
     /**

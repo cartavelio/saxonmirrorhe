@@ -62,35 +62,6 @@ public class Rule {
         o.registerRule(this);
     }
 
-//    /**
-//     * Copy a rule, including optionally the chain of rules linked to it
-//     *
-//     * @param r the rule to be copied
-//     * @param copyChain true if the whole chain of rules is to be copied
-//     */
-//
-//    protected void copyFrom(Rule r, boolean copyChain) {
-//        pattern = r.pattern.copy(new RebindingMap());
-//        action = r.action instanceof TemplateRule ? ((TemplateRule) r.action).copy() : r.action;
-//        precedence = r.precedence;
-//        minImportPrecedence = r.minImportPrecedence;
-//        priority = r.priority;
-//        sequence = r.sequence;
-//        part = r.part;
-//        if (r.next == null || !copyChain) {
-//            next = null;
-//        } else {
-//            next = r.next.copy(true);
-//        }
-//        action.registerRule(this);
-//    }
-//
-//    public Rule copy(boolean copyChain) {
-//        Rule r2 = new Rule();
-//        r2.copyFrom(this, copyChain);
-//        return r2;
-//    }
-
     public int getSequence() {
         return sequence;
     }

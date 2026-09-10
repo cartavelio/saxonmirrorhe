@@ -44,12 +44,16 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
 
     public BooleanExpressionPattern(Expression expression) {
         this.expressionOp = new Operand(this, expression, OperandRole.SINGLE_ATOMIC);
-        setPriority(0.5);
+        setPriority(1);   // see QT4 issue 2499
     }
 
     @Override
     public Expression getPredicate() {
         return expressionOp.getChildExpression();
+    }
+
+    public double getDefaultPriority() {
+        return super.getDefaultPriority();
     }
 
     /**

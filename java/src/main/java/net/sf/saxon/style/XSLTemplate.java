@@ -823,10 +823,10 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
         Configuration config = getConfiguration();
 
-//        if (getTemplateName() != null) {
-//            // If this is both a named template and a template rule, treat both as separate
-//            body = body.copy(new RebindingMap());
-//        }
+        if (getTemplateName() != null) {
+            // If this is both a named template and a template rule, treat both as separate
+            body = body.copy(new RebindingMap());
+        }
 
 
         boolean first = true;
@@ -911,7 +911,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
     private void checkForJitCompilationErrors(Compilation compilation) throws XPathException {
         if (compilation.getErrorCount() > 0) {
-            XPathException e = new XPathException("Errors were reported during JIT compilation of template rule with match=\"" + matchAtt + "\"",
+            XPathException e = new XPathException(
+                    "Errors were reported during JIT compilation of template rule with match=\"" + matchAtt + "\"",
                                                   SaxonErrorCode.SXST0001, this);
             e.setHasBeenReported(true); // only intended as an exception message, not something to report to ErrorListener
             throw e;
@@ -950,9 +951,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 }
                 int part = 0;
 
+                int seq = mgr.allocateSequenceNumber();
                 for (Pattern subPattern : subPatterns) {
                     Pattern subPattern2 = subPattern;
-                    int seq = mgr.allocateSequenceNumber();
 
                     TemplateRule rule = getConfiguration().makeTemplateRule();
                     rule.setMode(mode);
@@ -1007,55 +1008,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                         }
                     }
 
-//                    if (subPatterns.size() == 1) {
-//                        String typed = (String) mode.getActivePart().getPropertyValue("typed");
-//                        if ("strict".equals(typed) || "lax".equals(typed)) {
-//                            Pattern localPattern2;
-//                            try {
-//                                localPattern2 = match.convertToTypedPattern(typed);
-//                            } catch (XPathException e) {
-//                                throw e.maybeWithLocation(this);
-//                            }
-//                            if (localPattern2 != match) {
-//                                ContextItemStaticInfo info =
-//                                        getConfiguration().makeContextItemStaticInfo(AnyItemType.INSTANCE, contextItemOptionality);
-//                                ExpressionTool.copyLocationInfo(match, localPattern2);
-//                                localPattern2.setOriginalText(match.toString());
-//                                localPattern2 = localPattern2.typeCheck(visitor, info);
-//                                rule.setMatchPattern(localPattern2);
-//                            }
-//                        }
-//
-//                        double prio = prioritySpecified ? priority : Double.NaN;
-//                        mgr.registerRule(rule.getMatchPattern(), rule, mode, module, prio, seq, part++);
-//
-//                    } else {
-//
-//                        for (Pattern subPattern : subPatterns) {
-//                            Pattern localSubPattern1 = subPattern.copy(new RebindingMap());
-//                            String typed = (String) mode.getActivePart().getPropertyValue("typed");
-//                            if ("strict".equals(typed) || "lax".equals(typed)) {
-//                                Pattern localSubPattern2;
-//                                try {
-//                                    localSubPattern2 = localSubPattern1.convertToTypedPattern(typed);
-//                                } catch (XPathException e) {
-//                                    throw e.maybeWithLocation(this);
-//                                }
-//                                if (localSubPattern2 != localSubPattern1) {
-//                                    ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(
-//                                            AnyItemType.INSTANCE, contextItemOptionality);
-//                                    ExpressionTool.copyLocationInfo(match, localSubPattern2);
-//                                    localSubPattern2.setOriginalText(match.toString());
-//                                    localSubPattern2 = localSubPattern2.typeCheck(visitor, info);
-//                                    localSubPattern1 = localSubPattern2;
-//                                }
-//                            }
+                    double prio = prioritySpecified ? priority : Double.NaN;
+                    mgr.registerRule(subPattern2, rule, mode, module, prio, seq, part++);
 
-                            double prio = prioritySpecified ? priority : Double.NaN;
-                            mgr.registerRule(subPattern2, rule, mode, module, prio, seq, part++);
-
-//                        }
-//                    }
                 }
             }
         }

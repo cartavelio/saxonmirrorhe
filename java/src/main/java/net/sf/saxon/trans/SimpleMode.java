@@ -946,7 +946,7 @@ public class SimpleMode extends Mode {
             return;
         }
         // don't report an error if the conflict is between two branches of the same Union pattern
-        if (r1.getAction() == r2.getAction() && r1.getSequence() == r2.getSequence()) {
+        if (r1.getSequence() == r2.getSequence()) {
             return;
         }
         String path;
