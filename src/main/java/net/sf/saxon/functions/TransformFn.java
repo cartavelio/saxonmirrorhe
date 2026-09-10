@@ -8,12 +8,14 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Controller;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -553,6 +555,7 @@ public class TransformFn extends SystemFunction implements Callable {
         boolean allowTypedNodes = true;
         boolean tracing = targetConfig.isTiming();
         int schemaValidation = Validation.DEFAULT;
+        boolean writeResultDocuments = false;
         
         if (vendorOptions != null) {
             Sequence optionValue = vendorOptions.get(new QNameValue("", NamespaceUri.SAXON, "configuration"));
@@ -568,6 +571,10 @@ public class TransformFn extends SystemFunction implements Callable {
             if (optionValue != null) {
                 String valOption = optionValue.head().getStringValue();
                 schemaValidation = Validation.getCode(valOption);
+            }
+            optionValue = vendorOptions.get(new QNameValue("", NamespaceUri.SAXON, "write-result-documents"));
+            if (optionValue != null) {
+                 writeResultDocuments = ExpressionTool.effectiveBooleanValue(optionValue.iterate());
             }
         }
         Processor processor = new Processor(true);
@@ -733,7 +740,13 @@ public class TransformFn extends SystemFunction implements Callable {
         }
 
         if (baseOutputUri == null) {
-            baseOutputUri = getStaticBaseUriString();
+            Controller controller = context.getController();
+            if (controller instanceof XsltController) {
+                baseOutputUri = controller.getBaseOutputURI();
+            }
+            if (baseOutputUri == null) {
+                baseOutputUri = getStaticBaseUriString();
+            }
         } else {
             try {
                 URI base = new URI(baseOutputUri);
@@ -751,6 +764,17 @@ public class TransformFn extends SystemFunction implements Callable {
         deliverer.setBaseOutputUri(baseOutputUri);
         deliverer.setPrincipalResultKey(principalResultKey);
         deliverer.setPostProcessor(postProcessor, context);
+
+        if (writeResultDocuments) {
+            Controller controller = context.getController();
+            if (controller instanceof XsltController) {
+                deliverer = new DelegatingDeliverer(deliverer,
+                                                    ((XsltController) controller).getResultDocumentResolver(),
+                                                    controller.getBaseOutputURI());
+            } else {
+                deliverer = new DelegatingDeliverer(deliverer, new StandardResultDocumentResolver(), baseOutputUri);
+            }
+        }
 
         XsltController controller = transformer.getUnderlyingController();
         controller.setResultDocumentResolver(deliverer);
@@ -1294,6 +1318,70 @@ public class TransformFn extends SystemFunction implements Callable {
                                                entry.getValue());
             }
             return resultMap;
+        }
+    }
+
+    /**
+     * This deliverer is used when the Saxon vendor option write-result-documents is set to true
+     * (new in Saxon 13). The effect is to delegate handling of the principal output document
+     * to oue of the standard deliverers based on the selected delivery-format, while delegating
+     * handling of secondary result documents to the result document handler of the invoking
+     * transformation.
+     */
+
+    private static class DelegatingDeliverer extends Deliverer {
+
+        private final Deliverer primary;
+        private final ResultDocumentResolver secondary;
+
+        public DelegatingDeliverer(Deliverer primary, ResultDocumentResolver secondary) {
+            this.primary = primary;
+            this.secondary = secondary;
+        }
+
+        /**
+         * Return a map containing information about all the secondary result documents
+         *
+         * @param resultMap a map to be populated, initially empty
+         * @return a map containing one entry for each secondary result document that has been written
+         * @throws XPathException if a failure occurs
+         */
+        @Override
+        public MapItem populateResultMap(MapItem resultMap) throws XPathException {
+            return primary.populateResultMap(resultMap);
+        }
+
+        /**
+         * Get the s9api Destination object to be used for the transformation
+         *
+         * @param serializationParamsMap the serialization parameters requested
+         * @return a suitable primaryDestination object, or null in the case of raw mode
+         * @throws XPathException if a failure occurs
+         */
+        @Override
+        public Destination getPrimaryDestination(MapItem serializationParamsMap) throws XPathException {
+            return primary.getPrimaryDestination(serializationParamsMap);
+        }
+
+        /**
+         * Get the primary result of the transformation, that is, the value to be included in the
+         * entry of the result map that describes the principal result tree
+         *
+         * @return the primary result, or null if there is no primary result (after post-processing if any)
+         */
+        @Override
+        public Sequence getPrimaryResult() throws XPathException {
+            return primary.getPrimaryResult();
+        }
+
+        /**
+         * Saxon calls this method when an {@code xsl:result-document} instruction
+         * with an {@code href} attribute is evaluated.
+         * @throws XPathException if a result document cannot be opened
+         */
+        @Override
+        public Receiver resolve(XPathContext context, String href, String baseUri, SerializationProperties properties) throws XPathException {
+            return secondary.resolve(context, href, baseUri, properties);
         }
     }
 }
