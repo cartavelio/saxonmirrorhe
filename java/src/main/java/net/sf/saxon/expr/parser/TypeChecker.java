@@ -160,7 +160,7 @@ public class TypeChecker {
                     message += ". Set Feature.ALLOW_IMPLAUSIBLE_EXPRESSIONS to suppress this 4.0 error";
                 }
 
-                String errorCode = "XPTY0004";
+                String errorCode = roleSupplier.get().getErrorCode();
                 ItemType suppliedItemType = supplied.getItemType();
                 if (suppliedItemType instanceof FunctionItemType && !(suppliedItemType instanceof ArrayItemType) && reqItemType.isAtomicType()) {
                     errorCode = "FOTY0013";
