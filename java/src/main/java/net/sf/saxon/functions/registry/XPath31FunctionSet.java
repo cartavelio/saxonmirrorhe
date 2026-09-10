@@ -19,7 +19,6 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.PortableNamedXNodeType;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.DocumentNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
@@ -86,20 +85,24 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("generate-id", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
         register("generate-id", 1, e -> e.populate( GenerateId_1::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, AnyGNodeType.getInstance(), OPT | INS, StringValue.EMPTY_STRING));
+                .arg(0, AnyXNodeType.getInstance(), OPT | INS, StringValue.EMPTY_STRING));
 
         register("has-children", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.BOOLEAN,
                  ONE, CITEM | LATE));
 
         register("has-children", 1, e -> e.populate( HasChildren_1::new, BuiltInAtomicType.BOOLEAN,
                  ONE, 0)
-                .arg(0, AnyGNodeType.getInstance(), OPT | INS, null));
+                .arg(0, AnyXNodeType.getInstance(), OPT | INS, null));
 
         register("head", 1, e -> {
             return e.populate(HeadFn::new, AnyItemType.getInstance(),
                                   OPT, FILTER)
                     .arg(0, AnyItemType.getInstance(), STAR | TRA, null);
         });
+
+        register("innermost", 1, e -> e.populate(Innermost::new, AnyXNodeType.getInstance(),
+                        STAR, 0)
+                .arg(0, AnyXNodeType.getInstance(), STAR | NAV, null));
 
         register("json-doc", 1, e -> {
             return e.populate(JsonDoc::new, AnyItemType.getInstance(),
