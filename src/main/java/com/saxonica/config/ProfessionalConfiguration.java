@@ -745,17 +745,10 @@ public class ProfessionalConfiguration extends Configuration {
         return null;
     }
 
-    public FunctionLibraryList getBuiltInExtensionLibraryList(int version) {
-        if (!isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            return super.getBuiltInExtensionLibraryList(version);
-        }
-        if (builtInExtensionLibraryList == null) {
-            builtInExtensionLibraryList = makeBuiltInExtensionLibraryList(version);
-        }
-        return builtInExtensionLibraryList;
-    }
 
-    private synchronized FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
+
+    @Override
+    protected synchronized FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
         FunctionLibraryList result = new FunctionLibraryList();
         result.addFunctionLibrary(getVendorFunctionSet());
         result.addFunctionLibrary(MathFunctionSet.getInstance());
