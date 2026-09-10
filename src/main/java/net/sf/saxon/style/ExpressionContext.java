@@ -363,7 +363,9 @@ public class ExpressionContext implements StaticContext {
 
     @Override
     public int getXPathVersion() {
-        if (element.getEffectiveVersion() == 40 || element.getCompilation().getCompilerInfo().getXsltVersion() == 40) {
+        if (element.getEffectiveVersion() == 40
+                || element.getCompilation().getCompilerInfo().getXsltVersion() == 40
+                || (attributeName != null && attributeName.hasURI(NamespaceConstant.SAXON))) {
             return 40;
         } else {
             return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);

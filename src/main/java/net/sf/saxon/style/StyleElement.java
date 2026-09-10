@@ -881,17 +881,23 @@ public abstract class StyleElement extends ElementImpl {
         return parser.parseSequenceType(sequenceType, staticContext);
     }
 
+    /**
+     * Process a saxon:as extension attribute
+     * @param sequenceType the value of the attribute
+     * @return the corresponding sequence type
+     * @throws XPathException
+     */
     SequenceType makeExtendedSequenceType(String sequenceType)
             throws XPathException {
-        getStaticContext();
+        ExpressionContext env = getStaticContext(new StructuredQName("saxon", NamespaceConstant.SAXON, "as"));
         XPathParser parser =
                 getConfiguration().newExpressionParser("XP", false);
-        QNameParser qp = new QNameParser(staticContext.getNamespaceResolver())
-                .withAcceptEQName(staticContext.getXPathVersion() >= 30)
+        QNameParser qp = new QNameParser(env.getNamespaceResolver())
+                .withAcceptEQName(true)
                 .withErrorOnBadSyntax("XPST0003")
                 .withErrorOnUnresolvedPrefix("XPST0081");
         parser.setQNameParser(qp);
-        return parser.parseExtendedSequenceType(sequenceType, staticContext);
+        return parser.parseExtendedSequenceType(sequenceType, env);
     }
 
     /**
