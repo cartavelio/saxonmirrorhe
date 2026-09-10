@@ -372,10 +372,13 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
      * Set the error event listener for the TransformerFactory, which
      * is used for the processing of transformation instructions,
      * and not for the transformation itself.
-     * <p>This method is defined in JAXP but its use with Saxon is deprecated,
-     * because the errorListener will be shared by all stylesheet compilations
+     * <p>This method is defined in JAXP but its use is troublesome,
+     * because the {@code ErrorListener} will be shared by all stylesheet compilations
      * running under this factory, which may be operating concurrently
-     * in different threads.</p>
+     * in different threads, and there is no easy way to separate error messages
+     * relating to different compilations. In this scenario it is better to
+     * use the Saxon s9api methods, which allow different error handlers to
+     * be associated with different stylesheet and query compilations.</p>
      *
      * @param listener The new error listener.
      * @throws IllegalArgumentException if listener is null.
@@ -393,6 +396,10 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
      * Get the error event handler for the TransformerFactory.
      *
      * @return The current error listener, which should never be null.
+     * If no error listener has been explicitly set, then as mandated
+     * by JAXP a non-null instance is returned, but it is not especially
+     * useful because the specification places no constraints on its
+     * behavior if called.
      */
     @Override
     public ErrorListener getErrorListener() {
