@@ -177,20 +177,20 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("escape-NCName", 1, e -> e.populate( EscapeNCName::new, BuiltInAtomicType.NCNAME, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY));
 
-//        registerVariadic("eval", 2, e -> e.populate(Eval::new, AnyItemType.getInstance(), STAR, SEQV | CITEM)
-//                .arg(0, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, null)
-//                .arg(1, AnyItemType.getInstance(), STAR, null));
-//
-//        registerVariadic("evaluate", 2, e -> e.populate(Evaluate::new, AnyItemType.getInstance(), STAR, SEQV | CITEM)
-//                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-//                .arg(1, AnyItemType.getInstance(), STAR, null));
-//
-//        register("expression", 1, e -> e.populate( ExpressionFn::new, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, 0)
-//                .arg(0, BuiltInAtomicType.STRING, ONE, null));
-//
-//        register("expression", 2, e -> e.populate( ExpressionFn::new, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, 0)
-//                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-//                .arg(1, NodeKindTest.ELEMENT, ONE, null));
+        registerVariadic("eval", 2, e -> e.populate(Eval::new, AnyItemType.getInstance(), STAR, SEQV | CITEM)
+                .arg(0, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, null)
+                .arg(1, AnyItemType.getInstance(), STAR, null));
+
+        registerVariadic("evaluate", 2, e -> e.populate(Evaluate::new, AnyItemType.getInstance(), STAR, SEQV | CITEM)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, AnyItemType.getInstance(), STAR, null));
+
+        register("expression", 1, e -> e.populate( ExpressionFn::new, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+
+        register("expression", 2, e -> e.populate( ExpressionFn::new, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, NodeKindTest.ELEMENT, ONE, null));
 
         register("function-annotations", 1, e -> e.populate( FunctionAnnotations::new, FunctionAnnotations.RETURN_TYPE, STAR, 0)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null));
