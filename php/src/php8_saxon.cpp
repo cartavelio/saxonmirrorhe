@@ -3108,11 +3108,6 @@ PHP_METHOD(XdmNode, axisNodes) {
   xdmNode = obj->xdmNode;
 
   if (xdmNode != nullptr) {
-    int count = xdmNode->getChildCount();
-    if (count == 0) {
-      RETURN_NULL();
-      return;
-    }
     if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
       RETURN_NULL();
       return;
