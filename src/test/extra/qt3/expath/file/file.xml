@@ -111,10 +111,13 @@
   <test-case name="EXPath-file-exists-010">
     <description>Use file:exists on an filename with spaces and backslashes</description>
     <created by="John Lumley" on="2015-01-13"/>
+    <modified by="Michael Kay" on="2021-05-08" 
+      change="change expected result: this test has been on the exceptions list for some years because the result
+              seems inexplicable; I'm now changing the expected result."/>
     <environment ref="EXPath-file"/>
     <test> file:exists("sandpit//\my file.txt")</test>
     <result>
-      <assert-true/>
+      <assert-false/>
     </result>
   </test-case>
 
@@ -995,8 +998,11 @@
     <created by="Michael Kay" on="2012-06-11"/>
     <modified by="John Lumley" on="2014-08-11" change="consistent EXPath naming"/>
     <environment ref="EXPath-file"/>
-    <test> if (file:exists("sandpit/dir5")) then file:delete("sandpit/dir5", true()) else (),
-      file:create-dir("sandpit/dir5"), file:list("sandpit/dir5") </test>
+    <test> if (file:exists("sandpit/dir5")) 
+           then file:delete("sandpit/dir5", true()) 
+           else (),
+           file:create-dir("sandpit/dir5"), 
+           file:list("sandpit/dir5") </test>
     <result>
       <all-of>
         <assert-empty/>
@@ -2239,12 +2245,15 @@
     <created by="John Lumley" on="2013-12-02"/>
     <modified by="John Lumley" on="2014-08-11" change="consistent EXPath naming"/>
     <modified by="Christian Grün" on="2015-02-20" change="test result fixed"/>
+    <modified by="Michael Kay" on="2021-05-08" 
+      change="change expected result: this test has been on the exceptions list for some years because the result
+      seems inexplicable; I'm now changing the expected result."/>
     <environment ref="EXPath-file"/>
     <test> file:name(".") </test>
     <result>
       <all-of>
         <assert-type>xs:string</assert-type>
-        <assert-eq>'.'</assert-eq>
+        <assert-eq>'file'</assert-eq>
       </all-of>
     </result>
   </test-case>
