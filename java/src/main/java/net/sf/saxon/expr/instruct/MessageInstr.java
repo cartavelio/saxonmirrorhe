@@ -335,10 +335,12 @@ public class MessageInstr extends Instruction {
                         throw e.getXPathException();
                     }
                 } catch (XPathException e) {
-                    rec.append(new StringValue("Error " + e.showErrorCode() +
-                                                       " while evaluating xsl:message at line "
-                                                       + expr.getLocation().getLineNumber() + " of " + expr.getLocation().getSystemId() +
-                                                       ": " + e.getMessage()));
+                    int lineno = expr.getLocation().getLineNumber();
+                    rec.append(new StringValue("Error " + e.showErrorCode()
+                                                       + " while evaluating xsl:message "
+                                                       + (lineno > 0 ? "at line " + lineno + " of ": "in ")
+                                                       + expr.getLocation().getSystemId()
+                                                       + ": " + e.getMessage()));
                 }
 
                 rec.endDocument();
