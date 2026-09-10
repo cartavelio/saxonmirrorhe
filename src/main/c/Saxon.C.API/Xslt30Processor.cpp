@@ -58,6 +58,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *p, std::string curr) {
 }
 
 Xslt30Processor::~Xslt30Processor() {
+  SaxonProcessor::attachCurrentThread();
   clearParameters();
   clearProperties();
   if (cppXT != SXN_UNSET) {
