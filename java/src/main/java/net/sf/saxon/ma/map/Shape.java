@@ -42,6 +42,13 @@ public class Shape {
         this(unicodeStringArrayFromStringList((ArrayList<String>) recordTypeDefinition.getFieldNames()));
     }
 
+    /**
+     * Helper method for converting a list of Java strings to
+     * an array of Saxon Unicode strings.
+     *
+     * @param stringList - an ArrayList of Java strings
+     * @return the same list as an array of Saxon Unicode strings (order preserved)
+     */
     private static Twine8[] unicodeStringArrayFromStringList(ArrayList<String> stringList) {
         ArrayList<Twine8> unicodeStringList = new ArrayList<Twine8>();
         stringList.forEach((fieldName) -> {
