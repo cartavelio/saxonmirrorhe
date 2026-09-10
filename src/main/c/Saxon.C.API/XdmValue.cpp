@@ -104,15 +104,15 @@ XdmValue::XdmValue(int64_t val, bool arr){
 
         } else if(typeRef == 2) {
 
-            addXdmItem(new XdmAtomicValue(results[p]));
+            addXdmItem(new XdmNode(results[p]));
 
-        }  else if (typeRef == 4) {
-            addXdmItem(new XdmAtomicValue(results[p]));
-        } else if (typeRef == 3) {
-            addXdmItem(new XdmAtomicValue(results[p]));
+        }  else if (typeRef == 3) {
+            addXdmItem(new XdmArray(results[p]));
+        } else if (typeRef == 4) {
+            addXdmItem(new XdmMap(results[p]));
 
         } else if (typeRef == 5) {
-            addXdmItem(new XdmAtomicValue(results[p]));
+            addXdmItem(new XdmFunctionItem(results[p]));
         } else {
             std::cerr<<"Error creating XdmValue from array"<<std::endl;
 
@@ -150,7 +150,7 @@ void XdmValue::addXdmItem(XdmItem* val) {
 		values.push_back(val);
         val->incrementRefCount();
 		xdmSize++;
-        if (jValues) {
+        if (jValues>=0) {
             jValues = -1;
         }
         if(toStringValue != nullptr) {

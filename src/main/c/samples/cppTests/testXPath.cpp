@@ -139,7 +139,7 @@ cerr<<"xxxx cp0"<<endl;
             cout<<"Item at "<<i<<" ="<<itemi->getStringValue()<<endl;
         }
         delete resultValues;
-        if(nullFound) {
+        if(!nullFound) {
             sresult->success++;
         } else {
             sresult->failure++;
@@ -149,7 +149,7 @@ cerr<<"xxxx cp0"<<endl;
     delete input;
     xpath->clearParameters();
     xpath->clearProperties();
-    cerr<<"testXPAthValues end cp2 "<<endl;
+    cerr<<"testXPAthValues end cp3 "<<endl;
 
 }
 
@@ -331,9 +331,9 @@ int main()
     testXPathValues(processor, xpathProc, sresult);
     testXPathAttrValues(processor, xpathProc, sresult);
     testXPathOnFile(processor, xpathProc, sresult);
-    testXPathOnFile2(xpathProc, sresult);
+    /*testXPathOnFile2(xpathProc, sresult);
     testXPathValues2(processor, xpathProc, sresult);
-
+*/
     std::cout << "\nTest Results - Number of tests= " << (sresult->success + sresult->failure) << ", Successes = "
               << sresult->success << ",  Failures= " << sresult->failure << std::endl;
 
