@@ -3299,7 +3299,7 @@ cdef class PyXPathProcessor:
          """
          py_value_string = value.encode('UTF-8') if value is not None else None
          cdef char * c_value = py_value_string if value is not None else ""
-         self.thisxqptr.setLanguageVersion(c_value)
+         self.thisxpptr.setLanguageVersion(c_value)
 
 
      def set_cwd(self, cwd):

@@ -6,12 +6,13 @@ optimizer_flags = '-'
 
 class Spec:
 
-
     def __init__(self, v, fn, sspn, sav):
         self.version = v
         self.full_name = fn
         self.short_spec_name = sspn
         self.spec_and_version = sav
+
+
     @staticmethod
     def XP20():
         return Spec("2.0", "XPath2.0", "XP", "XP20")

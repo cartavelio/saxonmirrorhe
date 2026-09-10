@@ -1244,7 +1244,7 @@ public class SaxonCAPI {
         URI cwdURI = null;
         String ffilename = filename;
 
-
+        
         if(cwd != null) {
             cwdURI =  new File(cwd).toURI();
         } /*else {
