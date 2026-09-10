@@ -20,7 +20,7 @@
       <code>SaxonProcessor</code> is created, using the <code>setConfigurationProperty()</code> method
       (<code>set_configuration_property()</code> in Python). For example in C++:</p>
 
-   <pre><code class="language-clike"><![CDATA[saxonProcessor->setConfigurationProperty("xsdversion", "1.1");
+   <pre><code class="language-cpp"><![CDATA[saxonProcessor->setConfigurationProperty("xsdversion", "1.1");
 
 saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSchemaImports",
   "on");]]></code></pre>

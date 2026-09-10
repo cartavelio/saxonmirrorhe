@@ -222,7 +222,7 @@ provide any other feedback.</p>
            file, avoiding any subsequent attempt to search for it on the classpath and elsewhere.</p>
          <p>See <a href="/configuration">Configuration</a> for more details about setting configuration
            properties with SaxonC. For example, to provide the <code>licenseFileLocation</code> in PHP:</p>
-         <pre><code class="language-clike"><![CDATA[$saxonProc = new Saxon\SaxonProcessor(true);
+         <pre><code class="language-php"><![CDATA[$saxonProc = new Saxon\SaxonProcessor(true);
 $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation",
   "/usr/lib/saxon-license.lic");]]></code></pre>
        </li>
@@ -453,11 +453,11 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
          version of the <code>SaxonProcessor</code> constructor, because there remains an issue with
          building SaxonC with PHP when using the function<code> VCWD_GETCWD</code>. That is,</p>
 
-      <pre><code class="language-clike"><![CDATA[$proc = new SaxonProcessor('C://www/html//trax//');]]></code></pre>
+      <pre><code class="language-php"><![CDATA[$proc = new SaxonProcessor('C://www/html//trax//');]]></code></pre>
 
       <p>should replace instances of</p>
 
-      <pre><code class="language-clike"><![CDATA[$proc = new SaxonProcessor();]]></code></pre>
+      <pre><code class="language-php"><![CDATA[$proc = new SaxonProcessor();]]></code></pre>
 
       <p>in your PHP scripts (see the <a href="/samples/samples_php">PHP samples</a> for an
          example). </p>

@@ -68,7 +68,7 @@
          extension function library, before running the testExtension.xsl stylesheet, using the C++
          API:</p>
 
-      <pre><code class="language-clike"><![CDATA[char fname[] = "_nativeCall";
+      <pre><code class="language-cpp"><![CDATA[char fname[] = "_nativeCall";
 char funcParameters[] = "(Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;)Ljava/lang/Object;";
 
 JNINativeMethod cppMethods[] =
@@ -151,7 +151,7 @@ void testTransformToStringExtensionFunc(SaxonProcessor * processor, XsltProcesso
             <code>registerPHPFunctions</code> function of the <code>SaxonProcessor</code>, before
          running a transform as specified:</p>
 
-      <pre><code class="language-clike"><![CDATA[// define an extension function
+      <pre><code class="language-php"><![CDATA[// define an extension function
 function userFunction($param , $param2)
 {
   if(is_numeric($param2)){
