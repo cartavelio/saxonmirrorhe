@@ -11,27 +11,21 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringValue;
 
 /**
- * Implements the XPath 2.0 fn:codepoint-equal() function.
- *
- * <p>Compares two strings using the Unicode codepoint collation. (The function was introduced
- * specifically to allow URI comparison: URIs are promoted to strings when necessary.) </p>
+ * Implements the XPath 4.0 fn:atomic-equal() function.
  */
 
-public class CodepointEqual extends SystemFunction implements Callable {
+public class AtomicEqual extends SystemFunction implements Callable {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue op1 = (StringValue) arguments[0].head();
-        StringValue op2 = (StringValue) arguments[1].head();
-        if (op1 == null || op2 == null) {
-            return EmptySequence.getInstance();
-        }
-        return BooleanValue.get(op1.getUnicodeStringValue().equals(op2.getUnicodeStringValue()));
+        AtomicValue op1 = (AtomicValue) arguments[0].head();
+        AtomicValue op2 = (AtomicValue) arguments[1].head();
+        //System.err.println("AtEq " + op1 + " , " + op2 + " = " + op1.asMapKey().equals(op2.asMapKey()));
+        return BooleanValue.get(op1.asMapKey().equals(op2.asMapKey()));
     }
 
 }

@@ -10,10 +10,8 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
@@ -64,13 +62,13 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         o.addAllowedOption("namespace-prefixes", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("nilled-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("normalize-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("preserve-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("processing-instructions", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("text-boundaries", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("timezones", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("type-annotations", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("type-variety", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("typed-values", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
-        o.addAllowedOption("whitespace-text", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
 
         o.addAllowedOption("normalization-form", SequenceType.OPTIONAL_STRING, EmptySequence.getInstance());
         o.setAllowedValues("normalization-form", "XPTY0004", "NFC", "NFD", "NFKC", "NFKD");
@@ -102,17 +100,17 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         public boolean typeVarietySignificant = true;
         public boolean typedValuesSignificant = true;
         public Set<StructuredQName> unorderedElements = Collections.emptySet();
-        public boolean whitespaceTextSignificant = true;
-        public String collationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
-        public StringCollator stringCollator = CodepointCollator.getInstance();
+        public boolean preserveSpace = true;
+        public String collationName;
+        public StringCollator stringCollator;
         public AtomicComparer comparer;
 
 
-        private static String[] booleanOptions = new String[]{
+        private static final String[] booleanOptions = new String[]{
                 "base-uri", "comments", "debug", "false-on-error", "id-property", "idrefs-property",
                 "in-scope-namespaces", "namespace-prefixes", "nilled-property", "normalize-space",
-                "processing-instructions", "text-boundaries", "timezones", "type-annotations",
-                "type-variety", "typed-values", "whitespace-text"};
+                "preserve-space", "processing-instructions", "text-boundaries", "timezones",
+                "type-annotations", "type-variety", "typed-values"};
 
 
         public DeepEqualOptions(MapItem map, String collationName, XPathContext context) throws XPathException {
@@ -179,6 +177,9 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     case "normalize-space":
                         normalizeSpace = booleanValue;
                         return;
+                    case "preserve-space":
+                        preserveSpace = booleanValue;
+                        return;
                     case "processing-instructions":
                         processingInstructionsSignificant = booleanValue;
                         return;
@@ -196,9 +197,6 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                         return;
                     case "typed-values":
                         typedValuesSignificant = booleanValue;
-                        return;
-                    case "whitespace-text":
-                        whitespaceTextSignificant = booleanValue;
                         return;
                     default:
                         throw new IllegalArgumentException();
@@ -308,12 +306,25 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                             reason = "atomic values at position " + pos1 + " differ";
                             break;
                         }
+                        if (options.typeAnnotationsSignificant && !av1.getItemType().equals(av2.getItemType())) {
+                            result = false;
+                            reason = "atomic values at position " + pos1 + " have different type annotations";
+                            break;
+                        }
                         if (options.namespacePrefixesSignificant
                                 && av1 instanceof QualifiedNameValue
                                 && av2 instanceof QualifiedNameValue
                                 && !((QualifiedNameValue)av1).getPrefix().equals(((QualifiedNameValue) av2).getPrefix())) {
                             result = false;
                             reason = "QName values at position " + pos1 + " have different namespace prefixes";
+                            break;
+                        }
+                        if (options.timezonesSignificant
+                                && av1 instanceof CalendarValue
+                                && av2 instanceof CalendarValue
+                                && ((CalendarValue) av1).getTimezoneInMinutes() != ((CalendarValue) av2).getTimezoneInMinutes()) {
+                            result = false;
+                            reason = "Values at position " + pos1 + " have different timezone";
                             break;
                         }
                     }
@@ -353,6 +364,18 @@ public class DeepEqual40 extends CollatingFunctionFixed {
 
         if (n1.getNodeKind() != n2.getNodeKind()) {
             String reason = "node kinds differ: comparing " + showKind(n1) + " to " + showKind(n2);
+            explain(reporter, reason, options, n1, n2);
+            return reason;
+        }
+
+        if (options.baseUriSignificant && !Objects.equals(n1.getBaseURI(), n2.getBaseURI())) {
+            String reason = "base URIs differ: comparing " + n1.getBaseURI() + " to " + n2.getBaseURI();
+            explain(reporter, reason, options, n1, n2);
+            return reason;
+        }
+
+        if (options.typeAnnotationsSignificant && !n1.getSchemaType().equals(n2.getSchemaType())) {
+            String reason = "nodes have different type annotations";
             explain(reporter, reason, options, n1, n2);
             return reason;
         }
@@ -468,6 +491,11 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                 }
                 if (options.idrefSignificant && n1.isIdref() != n2.isIdref()) {
                     final String reason = "one element is an IDREF, the other is not";
+                    explain(reporter, reason, options, n1, n2);
+                    return reason;
+                }
+                if (options.nilledSignificant && n1.isNilled() != n2.isNilled()) {
+                    final String reason = "one element is nilled, the other is not";
                     explain(reporter, reason, options, n1, n2);
                     return reason;
                 }
@@ -736,7 +764,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         } else if (kind == Type.PROCESSING_INSTRUCTION) {
             return !options.processingInstructionsSignificant;
         } else if (kind == Type.TEXT) {
-            return (!options.whitespaceTextSignificant) &&
+            return (!options.preserveSpace) &&
                     Whitespace.isAllWhite(node.getUnicodeStringValue());
         }
         return false;
