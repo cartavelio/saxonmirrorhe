@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class TransformTests {
     private final ConfigTest configTest = new ConfigTest();
+    private final Transform transform = new Transform();
     private static class RetentiveLogger extends Logger {
 
         private final List<String> output = new ArrayList<>();
@@ -96,7 +97,7 @@ public class TransformTests {
 
         String[] args = {"-t", "-xsl:" + configTest.getDataDir() + "play.xsl", "-s:" + configTest.getDataDir() + "othello.xml", "dir=" + configTest.getDataDir() + "samples/output"};
         try {
-            Transform.main(args);
+            transform.doTransform(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -136,7 +137,7 @@ public class TransformTests {
 
         String[] args = {"-xsl:" + configTest.getDataDir() + "threads/test.xsl", "-s:" + configTest.getDataDir() + "threads/input", "-o:" + configTest.getDataDir() + "threads/output", "-threads:2"};
         try {
-            Transform.main(args);
+            transform.doTransform(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -297,7 +298,7 @@ public class TransformTests {
                 "date=2013-01-01",
                 "?now=current-time()"};
         try {
-            Transform.main(args);
+            transform.doTransform(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -357,7 +358,7 @@ public class TransformTests {
                 "-xsl:" + configTest.getDataDir() + "samples/styles/books-pe.xsl"
         };
         try {
-            Transform.main(args);
+            transform.doTransform(args);
             fail();
         } catch (Exception e) {
             // OK
@@ -374,7 +375,7 @@ public class TransformTests {
                 "-xsl:" + configTest.getDataDir() + "books.xsl"
         };
         try {
-            Transform.main(args);
+            transform.doTransform(args);
         } catch (Exception e) {
             fail();
         }
@@ -471,7 +472,7 @@ public class TransformTests {
                 "-xsl:" + configTest.getDataDir() + "identity.xsl"
         };
         try {
-            Transform.main(args);
+            transform.doTransform(args);
             assertTrue(Files.exists(tempDir.resolve("A.xsl.xml")), "A exists");
             assertTrue(Files.exists(tempDir.resolve("B.xsl.xml")), "B exists");
         } catch (Exception e) {
@@ -504,7 +505,7 @@ public class TransformTests {
                 "-init:commands.TransformTests$RequireStreaming"
         };
         try {
-            Transform.main(args);
+            transform.doTransform(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -523,7 +524,7 @@ public class TransformTests {
                 "-export:" + configTest.getDataDir() + "sandpit/caffo.xsl.sef",
                 "-nogo"};
         try {
-            Transform.main(args);
+            transform.doTransform(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -537,7 +538,7 @@ public class TransformTests {
                 "-o:" + configTest.getDataDir() + "sandpit/caffoOut.xml",
                 "-init:commands.TransformTests$RequireStreaming"};
         try {
-            Transform.main(args2);
+            transform.doTransform(args2);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -555,7 +556,7 @@ public class TransformTests {
                 "-o:" + configTest.getDataDir() + "sandpit/catalogTestOut.xml"
         };
         try {
-            Transform.main(args);
+            transform.doTransform(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();

@@ -51,7 +51,7 @@ import java.util.function.Consumer;
  * <p>It is possible to subclass this class to provide a customized command line interface. In writing such
  * a subclass:</p>
  * <ul>
- * <li>The {@link #main} method should instantiate the class and call the {@link #doTransform} method, passing the
+ * <li>The {@link #main} method should instantiate the class and call the {@link #execute} method, passing the
  * argument list. The argument list can be augmented or modified if required: for example, by adding a -config
  * argument to cause the configuration to be initialized from a configuration file.</li>
  * <li>The {@link #initializeConfiguration} method can be implemented to customize the configuration in which
@@ -87,7 +87,15 @@ public class Transform {
 
     public static void main(String[] args) {
         // the real work is delegated to another routine so that it can be used in a subclass
-        new Transform().doTransform(args);
+        new Transform().execute(args);
+    }
+
+    public void execute(String[] args) {
+        try {
+            doTransform(args);
+        } catch (CommandExitException e) {
+            System.exit(e.getCode());
+        }
     }
 
     /**
@@ -1087,7 +1095,7 @@ public class Transform {
             System.err.println(message);
         }
         if (allowExit) {
-            System.exit(code);
+            throw new CommandExitException(code, message);
         } else {
             throw new RuntimeException(message);
         }
