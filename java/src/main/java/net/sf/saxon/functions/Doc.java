@@ -28,14 +28,11 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.*;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -47,9 +44,9 @@ public class Doc extends SystemFunction implements Callable {
 
     public static OptionsParameter makeOptionsParameter(int version) {
         OptionsParameter docOptions = new OptionsParameter(version);
-        docOptions.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        //docOptions.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        docOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.INSTANCE);
+        //docOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.INSTANCE);
         docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         docOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -236,29 +233,29 @@ public class Doc extends SystemFunction implements Callable {
             parseOptions = parseOptions.withStable(false);
         }
 
-        val = checkedOptions.get("allow-external-entities");
-        if (val != null && !val.effectiveBooleanValue()) {
-            //#if CSHARP==false
-            parser.setEntityResolver(new EntityResolver() {
+//        val = checkedOptions.get("allow-external-entities");
+//        if (val != null && !val.effectiveBooleanValue()) {
+//            //#if CSHARP==false
+//            parser.setEntityResolver(new EntityResolver() {
+//
+//                @Override
+//                public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+//                    throw new SAXException(
+//                            new XPathException("The parse-xml input references '" + systemId +
+//                                                       "' but external entity expansion is disallowed", "FODC0006"));
+//                }
+//            });
+//            //#endif
+//        }
 
-                @Override
-                public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-                    throw new SAXException(
-                            new XPathException("The parse-xml input references '" + systemId +
-                                                       "' but external entity expansion is disallowed", "FODC0006"));
-                }
-            });
-            //#endif
-        }
-
-        val = checkedOptions.get("entity-expansion-limit").head();
-        if (val != null) {
-            try {
-                parser.setProperty("http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", Integer.parseInt(val.getStringValue()));
-            } catch (SAXException e) {
-                throw new RuntimeException(e);
-            }
-        }
+//        val = checkedOptions.get("entity-expansion-limit").head();
+//        if (val != null) {
+//            try {
+//                parser.setProperty("http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", Integer.parseInt(val.getStringValue()));
+//            } catch (SAXException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
 
         val = checkedOptions.get("use-xsi-schema-location");
         if (val != null) {
