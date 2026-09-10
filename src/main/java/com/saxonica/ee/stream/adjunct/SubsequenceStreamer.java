@@ -5,7 +5,7 @@ import com.saxonica.ee.stream.feed.FilteringFeed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.Subsequence_3;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.NumericValue;
@@ -30,7 +30,7 @@ public class SubsequenceStreamer extends FilteringAdjunct implements FeedMaker {
     @Override
     public FilteringFeed.Filter makeFilter(XPathContext context, ItemFeed out) throws XPathException {
         SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-        Subsequence_3 fn = (Subsequence_3) fnc.getTargetFunction();
+        SystemFunction fn = fnc.getTargetFunction();
         int first, last;
         NumericValue startD = (NumericValue) fnc.getArg(1).evaluateItem(context);
         first = (int)startD.round(0).longValue();
