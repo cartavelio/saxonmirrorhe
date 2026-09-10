@@ -321,8 +321,8 @@ task eecs_transpile_to_xml(
     "-h:${projectDir}/src/main/java",
     "-src:${projectDir}/src/main/java",
     "-ee:${saxonVersion}",
-    "-vavr:${projectDir}/lib/vavr-0.10.5.jar",
-    "-vavrMatch:${projectDir}/lib/vavr-match-0.10.5.jar",
+    "-vavr:${vavrJar}",
+    "-vavrMatch:${vavrMatchJar}",
     "-icu4j:${icu4jJar}"
   doFirst {
     mkdir("${buildDir}/ee_xmlout")
@@ -380,8 +380,8 @@ task eecs_generateCSharp(
     "-digest:${buildDir}/ee_refined-digest.xml",
     "-ee:${saxonVersion}",
     "-icu4j:${icu4jJar}",
-    "-vavr:${projectDir}/lib/vavr-0.10.5.jar",
-    "-vavrMatch:${projectDir}/lib/vavr-match-0.10.5.jar",
+    "-vavr:${vavrJar}",
+    "-vavrMatch:${vavrMatchJar}",
     "-debug"
   doFirst {
     mkdir("${buildDir}/cs/ee")
