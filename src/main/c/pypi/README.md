@@ -1,12 +1,12 @@
 # Welcome to Saxon@@edition@@!
 
 This is the official Saxonica python wheel package for [Saxon](https://www.saxonica.com/saxon-c/documentation/index.html), an XML document processor. SaxonC includes a range of tools for XML transformations, XML queries, and schema validations. 
-The SaxonC release comes in separate wheels for the three product editions, namely: saxonche (open-source), saxoncpe and saxoncee 
-(commercial products). 
+
+The SaxonC release comes in separate wheels for the three product editions, namely: saxonche (HE: open-source), saxoncpe (PE: professional edition) and saxoncee (EE: enterprise edition). Saxon-PE and Saxon-EE are commercial products that require an activation license. 
 
 ## When to choose Saxon@@edition@@
 
-If you need to use **XSLT versions greater than 1.0** like 2.0 and 3.0, then you may use Saxon@@edition@@.
+The main reason for using Saxon@@edition@@ in preference to other XML tools available for Python is that it supports all the latest W3C standards: XSLT 3.0, XPath 3.1, XQuery 3.1, and XSD 1.1. It even includes experimental support for the draft 4.0 specifications currently under development.
 
 ## Installation
 
@@ -27,7 +27,7 @@ Import specific modules
 from saxonc import PySaxonProcessor
 ```
 
-Now, let's check what 6 other processors are available from Saxon by visiting the [Saxonica's site](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api). In the API section, you will find more info about what each processor does.
+Now, let's check what 6 other processors are available from Saxon by visiting the [Saxonica's site](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api). In the API section, you will find more information about what each processor does.
 
 Next, we will use `PySaxonProcessor` to check the Saxon version.
 ```python
@@ -41,7 +41,7 @@ It will print the version like below if your installation is successful.
 ```bash
 SaxonC-@@edition@@ @@VERSION@@ from Saxonica
 ```
-Please **note** that `license=False` indicates the open-source version of Saxon, whereas  `license=True` indicates to use the commercial product. A license is file is required for this to work. You can use the SAXONC_HOME environment variable to locate the license file or install the file next to the SaxonC library. 
+Please **note** that `license=False` requests the open-source version of Saxon, whereas  `license=True` requests the commercial product. A license file is required for this to work. You can use the SAXONC_HOME environment variable to locate the license file or install the file next to the SaxonC library. 
 
 ### Example #1
 Let's parse a toy XML.
@@ -166,16 +166,17 @@ with PySaxonProcessor(license=False) as  proc:
 	output2 = xsltproc.transform_to_string()
 	print(output2)
 ```
-Here we use an XSLT/stylesheet parameter. I just want to highlight that Python String (object) is not the same string that Saxon uses, and the same goes for other types. We need to convert to it by `make_string_value`. This may be a little exotic and not so pythonic because Saxon is written in Java and cross-compiled for C and then Python. Just be aware of it but you don't need to know anything more about Java or C to use SaxonC.
-Please check out the [Saxonica's documentation](https://www.saxonica.com/saxon-c/documentation/index.html) for `xquery`, schema validation, and others.
+Here we use an XSLT/stylesheet parameter. Note that the Python string is not the same string that Saxon uses, and the same goes for other types. We need to convert it by calling `make_string_value`. This is because there isn't an exact match between the type system used by XSLT (called XDM) and Python's data types: for some types like strings and booleans there is a very close correspondence, but for numbers, dates, URIs etc it's less exact.
 
-## Why the `with` keyword
+Please check out [Saxonica's documentation](https://www.saxonica.com/saxon-c/documentation/index.html) for `xquery`, schema validation, and others.
+
+## Why the `with` keyword?
 `with` is good to clear out the underlying processes when the program exits.
 
 ## Source code & Development
-- We downloaded the Saxonc HE from the [Saxonica's site](https://www.saxonica.com/download/c.xml) 
+- We downloaded Saxonc HE from [Saxonica's site](https://www.saxonica.com/download/c.xml) 
 - We have the source code on a [github repo](https://github.com/?????) to make the wheel packages for Linux and macOS. We have [a separate repo](https://github.com/tennom/??????-win) for Windows. 
-- We use Github actions runners for CI and releases.
+- We use Github action runners for CI and releases.
 
 ## Acknowledgement
 To create this wheel project we had help from the Saxonpy wheel package, which is a third-party project created by [github repo](https://github.com/tennom/saxonpy).
