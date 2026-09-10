@@ -276,6 +276,7 @@ public class DOMTest {
             assertTrue(sw.toString().contains("[f][f]{e}"), "Extension function not called");
         } catch (Exception e) {
             fail(e.getMessage());
+            e.printStackTrace();
         }
     }
 

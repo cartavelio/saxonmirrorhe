@@ -2212,7 +2212,7 @@ public class TestXslt30Transformer {
             XdmDestination dest = new XdmDestination();
             transformer.callTemplate(null, dest);
         } catch (SaxonApiException err) {
-            if (err.getErrorCode().getNamespaceURI().toString().equals("http://www.ctk.cz/error-code/")) {
+            if (err.getErrorCode().getNamespaceUri().toString().equals("http://www.ctk.cz/error-code/")) {
                 //return;
             } else {
                 err.printStackTrace();

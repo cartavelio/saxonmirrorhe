@@ -70,7 +70,7 @@ public class TestXdmNode {
             XdmNode doc = builder.build(new StreamSource(new StringReader("<in xmlns='http://ns.com/' foo='bar'><baz/></in>")));
             XdmNode element = doc.select(child()).firstItem();
             assertEquals("in", element.getNodeName().getLocalName());
-            assertEquals(NamespaceUri.of("http://ns.com/"), element.getNodeName().getNamespaceURI());
+            assertEquals(NamespaceUri.of("http://ns.com/"), element.getNodeName().getNamespaceUri());
             assertEquals("", element.getNodeName().getPrefix());
             assertEquals(XdmNodeKind.ELEMENT, element.getNodeKind());
             assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), element.getTypeAnnotationName());
@@ -209,7 +209,7 @@ public class TestXdmNode {
                             new StreamSource(new StringReader("<one foo='bar'>[<two xmlns='http://ns.com/'><three/></two>]</one>")));
             XdmNode grandKid = doc.select(Steps.child("one").then(Steps.child("two"))).firstItem();
             assertEquals("two", grandKid.getNodeName().getLocalName());
-            assertEquals(NamespaceUri.of("http://ns.com/"), grandKid.getNodeName().getNamespaceURI());
+            assertEquals(NamespaceUri.of("http://ns.com/"), grandKid.getNodeName().getNamespaceUri());
             String foo = grandKid.select(Steps.parent().then(Steps.attribute("foo"))).firstItem().getStringValue();
             assertEquals("bar", foo);
         } catch (SaxonApiException e) {

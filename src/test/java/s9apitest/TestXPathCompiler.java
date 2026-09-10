@@ -592,7 +592,7 @@ public class TestXPathCompiler {
             Iterator<net.sf.saxon.s9api.QName> it = exec.iterateExternalVariables();
             while (it.hasNext()) {
                 net.sf.saxon.s9api.QName qn = it.next();
-                dependencies.add(new QName(qn.getURI(), qn.getLocalName(), qn.getPrefix()));
+                dependencies.add(new QName(qn.getNamespace(), qn.getLocalName(), qn.getPrefix()));
             }
 
             if (dependencies.isEmpty()) {
