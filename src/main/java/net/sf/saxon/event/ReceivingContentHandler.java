@@ -399,6 +399,9 @@ public class ReceivingContentHandler
             flush(true);
 
             int options = ReceiverOption.NAMESPACE_OK | ReceiverOption.ALL_NAMESPACES;
+            if (localLocator.levelInEntity == 0) {
+                options |= ReceiverOption.TOP_IN_ENTITY;
+            }
             NodeName elementName = getNodeName(uri, localname, rawname);
 
             AttributeMap attributes;

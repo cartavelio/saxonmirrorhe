@@ -36,6 +36,7 @@ public class PullPushTee extends PullFilter {
     private final Receiver branch;
     boolean previousAtomic = false;
     private final Stack<NamespaceMap> nsStack = new Stack<>();
+    private final Stack<String> systemIdStack = new Stack<>();
 
     /**
      * Create a PullPushTee
@@ -106,10 +107,15 @@ public class PullPushTee extends PullFilter {
                     }
                 }
                 nsStack.push(nsMap);
+                int options = ReceiverOption.NAMESPACE_OK;
+                if (!systemIdStack.isEmpty() && !loc.getSystemId().equals(systemIdStack.peek())) {
+                    options |= ReceiverOption.TOP_IN_ENTITY;
+                }
                 out.startElement(in.getNodeName(), in.getSchemaType(),
                                  in.getAttributes(), nsMap,
-                                 loc, ReceiverOption.NAMESPACE_OK);
+                                 loc, options);
 
+                systemIdStack.push(loc.getSystemId());
                 break;
 
             case TEXT:
@@ -132,6 +138,7 @@ public class PullPushTee extends PullFilter {
 
                 out.endElement();
                 nsStack.pop();
+                systemIdStack.pop();
                 break;
 
             case END_DOCUMENT:

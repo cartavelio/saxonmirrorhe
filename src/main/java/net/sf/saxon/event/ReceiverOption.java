@@ -165,6 +165,12 @@ public class ReceiverOption {
      */
     public static final int SEPARATOR = 0x100000;
 
+    /**
+     * Flag set on startElement() to indicate that the element node is at the outermost level of an
+     * external entity
+     */
+    public static final int TOP_IN_ENTITY = 0x200000;
+
 
     public static boolean contains(int options, int option) {
         return (options & option) != 0;

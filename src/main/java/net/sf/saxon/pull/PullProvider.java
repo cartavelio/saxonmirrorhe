@@ -196,7 +196,7 @@ public interface PullProvider {
      * identify the location in the query or stylesheet that caused the node to be created.
      * A value of null can be returned if no location information is available.
      *
-     * @return the SourceLocator giving the location of the current event, or null if
+     * @return the Location object giving the location of the current event, or null if
      *         no location information is available
      */
 
