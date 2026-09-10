@@ -2549,15 +2549,15 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				<li><a
 					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#load-xquery-module-record"
 					><code>fn:load-xquery-module-record</code></a> - holds the result
-						of <code>fn:load-xquery-module</code></li>
+					of <a class="bodylink code" href="/functions/fn/load-xquery-module">fn:load-xquery-module</a></li>
 				<li><a
 					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#parsed-csv-structure-record"
 					><code>fn:parsed-csv-structure-record</code></a> - holds the result
-						of <code>fn:parse-csv</code></li>
+					of <a class="bodylink code" href="/functions/fn/parse-csv">fn:parse-csv</a></li>
 				<li><a
 					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#random-number-generator-record"
 					><code>fn:random-number-generator-record</code></a> - holds the
-						result of <code>fn:random-number-generator</code></li>
+					result of <a class="bodylink code" href="/functions/fn/random-number-generator">fn:random-number-generator</a></li>
 				<li><a
 					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#schema-type-record"
 					><code>fn:schema-type-record</code></a> - represents the properties
@@ -2565,13 +2565,16 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				<li><a
 					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#uri-structure-record"
 					><code>fn:uri-structure-record</code></a> - represents the
-						components of a URI (used by the new <code>fn:build-uri</code> and <code>fn:parse-uri</code>
-				functions)</li>
+					components of a URI (used by the new <a class="bodylink code"
+						href="/functions/fn/build-uri">fn:build-uri</a> and <a class="bodylink code"
+							href="/functions/fn/parse-uri">fn:parse-uri</a> functions)</li>
 				
 				<li><a
 					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#dateTime-record"
 					><code>fn:dateTime-record</code></a> - represents the seven components of an <code>xs:dateTime</code>
-				value (used by the new <code>fn:build-dateTime</code> and <code>fn:parts-of-dateTime</code> functions)</li>
+					value (used by the new <a class="bodylink code"
+						href="/functions/fn/build-dateTime">fn:build-dateTime</a> and <a class="bodylink code"
+							href="/functions/fn/parts-of-dateTime">fn:parts-of-dateTime</a> functions)</li>
 			</ul>
 			
 			<p>These types are used to define the argument and/or result types of functions in the standard
@@ -2876,7 +2879,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 					<code>following-or-self</code>, and <code>following-sibling-or-self</code></p>
 			</li>
 			<li>
-				<p>From 4.0, XPath expressions can be preceded by namespace declarations, allowing namespace
+				<p>From 4.0, XPath expressions can be include namespace declarations, allowing namespace
 					prefixes to be bound within the XPath expression, rather than relying entirely on the host
 					language to declare namespace prefixes.</p>
 			</li>
