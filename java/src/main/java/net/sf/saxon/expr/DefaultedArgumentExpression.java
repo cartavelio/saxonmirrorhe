@@ -72,7 +72,7 @@ public class DefaultedArgumentExpression extends PseudoExpression {
 
     @Override
     public Elaborator getElaborator() {
-        throw new UnsupportedOperationException();
+        return Literal.makeEmptySequence().getElaborator();
     }
 
     public static class DefaultCollationArgument extends DefaultedArgumentExpression {

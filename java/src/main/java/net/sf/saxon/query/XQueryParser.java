@@ -204,7 +204,7 @@ public class XQueryParser extends XPathParser {
                 expandedItemTypes.put(entry.getKey(), expanded);
             }
 
-            ((QueryModule) env).processInlineFunctionItems();
+            processInlineFunctionItems(env);
             ((QueryModule) env).setLocallyVisibleItemTypes(expandedItemTypes);
 
 

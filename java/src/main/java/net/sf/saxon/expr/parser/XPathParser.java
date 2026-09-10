@@ -144,6 +144,8 @@ public class XPathParser {
 
     }
 
+    public List<InlineFunctionItem> inlineFunctions;
+
     public interface Accelerator {
 
         /**
@@ -167,6 +169,7 @@ public class XPathParser {
 
     public XPathParser(StaticContext env) {
         this.env = env;
+        this.inlineFunctions = new ArrayList<>();
     }
 
 
@@ -636,6 +639,7 @@ public class XPathParser {
     public Expression parse(String expression, int start, Predicate<Tokenizer> finished, StaticContext env)
             throws XPathException {
         this.env = env;
+        this.inlineFunctions = new ArrayList<>();
         int languageVersion = env.getXPathVersion();
         if (languageVersion == 20 && language == ParsedLanguage.XQUERY) {
             languageVersion = 10;
@@ -699,6 +703,7 @@ public class XPathParser {
         }
         exp.setRetainedStaticContextThoroughly(env.makeRetainedStaticContext());
         //exp.verifyParentPointers();
+        processInlineFunctionItems(env);
         return exp;
     }
 
@@ -1087,10 +1092,10 @@ public class XPathParser {
                     checkLanguageVersion40("the mapping arrow =!>");
                     lhs = parseMappingArrowPostfix(lhs);
                     break;
-                case METHOD_CALL:
-                    checkLanguageVersion40("the mapping arrow =!>");
-                    lhs = parseMappingArrowPostfix(lhs);
-                    break;
+//                case METHOD_CALL:    // obvious nonsense, but should something else be here?
+//                    checkLanguageVersion40("the mapping arrow =!>");
+//                    lhs = parseMappingArrowPostfix(lhs);
+//                    break;
                 default:
                     nextToken();
                     Expression rhs = parseUnaryExpression();
@@ -2917,7 +2922,7 @@ public class XPathParser {
         nextToken();
 
         // Given STEP =?> NAME ( ARG1, ARG2, ...), construct the expression
-        // for $map in STEP as map(*) return ($map ? NAME) treat as function(*) ( $map, ARG1, ARG2, ...)
+        // for $map in STEP as map(*) return ($map ? NAME) treat as function(*)* ( $map, ARG1, ARG2, ...)
 
         ForExpression forex = new ForExpression();
         forex.setSequence(step);
@@ -2925,7 +2930,7 @@ public class XPathParser {
         forex.setRequiredType(SequenceType.SINGLE_MAP);
         VariableReference var1 = new LocalVariableReference(forex);
         Expression function = new LookupExpression(var1, new StringLiteral(methodName));
-        Expression function1 = makeSequenceTypeExpression(function, OperatorSymbol.TREAT_AS, SequenceType.SINGLE_FUNCTION);
+        Expression function1 = makeSequenceTypeExpression(function, OperatorSymbol.TREAT_AS, SequenceType.FUNCTION_ITEM_SEQUENCE);
         VariableReference var2 = new LocalVariableReference(forex);
         args.set(0, var2);
         Expression call = new DynamicFunctionCall(function1, args);
@@ -5799,9 +5804,10 @@ public class XPathParser {
 
             UserFunctionParameter[] paramArray = params.toArray(new UserFunctionParameter[0]);
             InlineFunctionItem ifi = new InlineFunctionItem(annotations, paramArray, resultType, body);
-            if (p.getStaticContext() instanceof QueryModule qm) {
-                qm.registerInlineFunctionItem(ifi);
-            }
+//            if (p.getStaticContext() instanceof QueryModule qm) {
+//                qm.registerInlineFunctionItem(ifi);
+//            }
+            p.inlineFunctions.add(ifi);
             return new FunctionLiteral(ifi);
 
         } else {
@@ -5821,9 +5827,10 @@ public class XPathParser {
                 paramArray[k++] = implicitParam;
             }
             InlineFunctionItem ifi = new InlineFunctionItem(annotations, paramArray, resultType, body);
-            if (p.getStaticContext() instanceof QueryModule qm) {
-                qm.registerInlineFunctionItem(ifi);
-            }
+//            if (p.getStaticContext() instanceof QueryModule qm) {
+//                qm.registerInlineFunctionItem(ifi);
+//            }
+            p.inlineFunctions.add(ifi);
 
             Expression[] partialArgs = new Expression[expandedArity];
             for (int i = 0; i < arity; i++) {
@@ -6634,6 +6641,27 @@ public class XPathParser {
 
     public boolean isAllowAbsentExpression() {
         return this.allowAbsentExpression;
+    }
+
+    /**
+     * At the end of parsing, process any inline functions encountered
+     * @param env the static context
+     * @throws XPathException if processing fails
+     */
+
+    public void processInlineFunctionItems(StaticContext env) throws XPathException {
+        for (InlineFunctionItem inlineFunctionItem : inlineFunctions) {
+            inlineFunctionItem.simplify();
+        }
+        ExpressionVisitor visitor = new ExpressionVisitor(env.getConfiguration());
+        visitor.setStaticContext(env);
+
+        for (InlineFunctionItem inlineFunctionItem : inlineFunctions) {
+            inlineFunctionItem.typeCheck(visitor, ContextItemStaticInfo.ABSENT);
+        }
+        for (InlineFunctionItem inlineFunctionItem : inlineFunctions) {
+            inlineFunctionItem.optimize(visitor, ContextItemStaticInfo.ABSENT);
+        }
     }
 
     /**

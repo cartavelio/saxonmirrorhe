@@ -252,6 +252,7 @@ public abstract class FunctionCall extends Expression {
                     return new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, pos);
                 };
                 Expression arg = getArg(i);
+                boolean skipCheck = false;
                 // Substitute default value expression for an argument marked for replacement. This is necessary
                 // because the default value expression was not necessarily available when the function call
                 // was first parsed, in the case where it is a forwards reference
@@ -305,13 +306,15 @@ public abstract class FunctionCall extends Expression {
                         && th.isSubType(ifi.getBody().getItemType(), sft.getResultType().getPrimaryType())
                         && Cardinality.subsumes(sft.getResultType().getCardinality(), ifi.getBody().getCardinality())
                         && noParamIsRestrictive(th, ifi, sft.getArgumentTypes())) {
+                    skipCheck = true;
                     // NO ACTION - leave arg unchanged
                     // Special-case the type checking where a system function requires a callback function
                     // and the callback function is supplied as an inline function expression. In this case
                     // the system function takes responsibility for supplying valid arguments to the
                     // callback, and for checking the result, so the callback doesn't need to be coerced
                     // to a function that performs these checks.
-                } else if (arg != null) {
+                }
+                if (arg != null && !skipCheck) {
                     setArg(i, tc.staticTypeCheck(
                             arg,
                             argTypes[i],

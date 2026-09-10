@@ -1725,24 +1725,24 @@ public class QueryModule implements StaticContext {
         return publicItemTypes;
     }
 
-    public void registerInlineFunctionItem(InlineFunctionItem inlineFunctionItem) {
-        inlineFunctionItems.add(inlineFunctionItem);
-    }
-
-    public void processInlineFunctionItems() throws XPathException {
-        for (InlineFunctionItem inlineFunctionItem : inlineFunctionItems) {
-            inlineFunctionItem.simplify();
-        }
-        ExpressionVisitor visitor = new ExpressionVisitor(getConfiguration());
-        visitor.setStaticContext(this);
-        
-        for (InlineFunctionItem inlineFunctionItem : inlineFunctionItems) {
-            inlineFunctionItem.typeCheck(visitor, ContextItemStaticInfo.ABSENT);
-        }
-        for (InlineFunctionItem inlineFunctionItem : inlineFunctionItems) {
-            inlineFunctionItem.optimize(visitor, ContextItemStaticInfo.ABSENT);
-        }
-    }
+//    public void registerInlineFunctionItem(InlineFunctionItem inlineFunctionItem) {
+//        inlineFunctionItems.add(inlineFunctionItem);
+//    }
+//
+//    public void processInlineFunctionItems() throws XPathException {
+//        for (InlineFunctionItem inlineFunctionItem : inlineFunctionItems) {
+//            inlineFunctionItem.simplify();
+//        }
+//        ExpressionVisitor visitor = new ExpressionVisitor(getConfiguration());
+//        visitor.setStaticContext(this);
+//
+//        for (InlineFunctionItem inlineFunctionItem : inlineFunctionItems) {
+//            inlineFunctionItem.typeCheck(visitor, ContextItemStaticInfo.ABSENT);
+//        }
+//        for (InlineFunctionItem inlineFunctionItem : inlineFunctionItems) {
+//            inlineFunctionItem.optimize(visitor, ContextItemStaticInfo.ABSENT);
+//        }
+//    }
 
 
 
