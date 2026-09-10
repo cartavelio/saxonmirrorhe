@@ -2,6 +2,7 @@ package com.saxonica.testdriver.ee;
 
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.sdoc.XSDSchemaElement;
 import com.saxonica.testdriver.Licensor;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
@@ -617,6 +618,7 @@ public class SchemaTestSuiteDriver {
         EnterpriseConfiguration tempConfig = (EnterpriseConfiguration) tempProcessor.getUnderlyingConfiguration();
         //AutoActivate.activate(tempConfig);
         XPathCompiler tempXPath = tempProcessor.newXPathCompiler();
+        XsdSchema xsdSchema = null;
         for (XdmItem schemaDocRefItem : xpath.evaluate("schemaDocument", schemaTest)) {
             XdmNode schemaDocumentRef = (XdmNode) schemaDocRefItem;
             println("Loading schema via SCM at " + schemaDocumentRef.getAttributeValue(QN_xlink_href));
@@ -643,7 +645,7 @@ public class SchemaTestSuiteDriver {
             props.setProperty(OutputKeys.INDENT, "yes");
             Receiver serializer = tempConfig.getSerializerFactory().getReceiver(result, props);
 
-            tempConfig.exportComponents(serializer);
+            xsdSchema.exportComponents(serializer);
             String scm = sw.toString();
             //System.err.println(scm);
             try {
