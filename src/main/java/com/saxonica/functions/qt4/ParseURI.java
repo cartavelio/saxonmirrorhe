@@ -48,7 +48,7 @@ public class ParseURI extends URIFunctions {
         }
 
         String filepath = null;
-        final String scheme;
+        String scheme;
         if (uristr.matches("^[A-Za-z][:|].*$")) {
             scheme = "file";
             // Force the second character to be a colon
@@ -63,13 +63,7 @@ public class ParseURI extends URIFunctions {
                 map = map.addEntry(SCHEME, new StringValue(scheme));
                 uristr = uristr.substring(pos + 1);
             } else {
-                if (uncPath && uristr.matches("^//[^/].*$")) {
-                    scheme = "file";
-                    map = map.addEntry(SCHEME, new StringValue(scheme));
-                    filepath = uristr;
-                } else {
-                    scheme = null;
-                }
+                scheme = null;
             }
         }
 
@@ -87,30 +81,37 @@ public class ParseURI extends URIFunctions {
         }
 
         final String authority;
-        if ((scheme == null || "file".equals(scheme)) && uristr.matches("^//*[a-zA-Z][:|].*$")) {
+        if ((scheme == null && uncPath && uristr.matches("^//[^/].*$"))) {
+            scheme = "file";
+            map = map.addEntry(SCHEME, new StringValue(scheme));
             authority = null;
-            uristr = uristr.replaceAll("^/+([a-zA-Z]).", "/$1:");
-            filepath = uristr.substring(1);
+            filepath = uristr;
         } else {
-            Pattern pattern = Pattern.compile("^(///*)([^/]+)(/.*)?$");
-            Matcher matcher = pattern.matcher(uristr);
-            if (matcher.find()) {
-                if (matcher.group(3) == null || matcher.group(3).isEmpty()) {  // second condition is for transpiled code
-                    if (matcher.group(1).length() == 2) {
+            if ((scheme == null || "file".equals(scheme)) && uristr.matches("^//*[a-zA-Z][:|].*$")) {
+                authority = null;
+                uristr = uristr.replaceAll("^/+([a-zA-Z]).", "/$1:");
+                filepath = uristr.substring(1);
+            } else {
+                Pattern pattern = Pattern.compile("^(///*)([^/]+)(/.*)?$");
+                Matcher matcher = pattern.matcher(uristr);
+                if (matcher.find()) {
+                    if (matcher.group(3) == null || matcher.group(3).isEmpty()) {  // second condition is for transpiled code
+                        if (matcher.group(1).length() == 2) {
+                            authority = matcher.group(2);
+                            map = map.addEntry(AUTHORITY, new StringValue(authority));
+                            uristr = "";
+                        } else {
+                            authority = null;
+                            uristr = "/" + matcher.group(2);
+                        }
+                    } else {
                         authority = matcher.group(2);
                         map = map.addEntry(AUTHORITY, new StringValue(authority));
-                        uristr = "";
-                    } else {
-                        authority = null;
-                        uristr = "/" + matcher.group(2);
+                        uristr = matcher.group(3);
                     }
                 } else {
-                    authority = matcher.group(2);
-                    map = map.addEntry(AUTHORITY, new StringValue(authority));
-                    uristr = matcher.group(3);
+                    authority = null;
                 }
-            } else {
-                authority = null;
             }
         }
 
