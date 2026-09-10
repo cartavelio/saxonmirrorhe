@@ -172,6 +172,10 @@ public class XSLMode extends StyleElement {
                         case "deep-skip":
                         case "fail":
                             break;
+                        case "shallow-skip-all":
+                        case "shallow-copy-all":
+                            requireXslt40("onNoMatch");
+                            break;
                         default:
                             invalidAttribute(f, "text-only-copy|shallow-copy|deep-copy|shallow-skip|deep-skip|fail");
                             break;
