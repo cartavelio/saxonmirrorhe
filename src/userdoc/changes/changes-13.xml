@@ -124,6 +124,9 @@
         
         <p>The deep-lookup operator <code>??</code> is implemented.</p>
         
+        <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
+            flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>.</p>
+        
         <h2>Dropped experimental features</h2>
         
         <p>Some proposed enhancements that didn't survive into the current 4.0 draft specifications
