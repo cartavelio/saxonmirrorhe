@@ -11,23 +11,18 @@ import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 import org.nineml.coffeefilter.InvisibleXml;
 import org.nineml.coffeefilter.InvisibleXmlDocument;
 import org.nineml.coffeefilter.InvisibleXmlParser;
-import org.nineml.coffeefilter.ParserOptions;
-import org.nineml.coffeefilter.trees.DataTree;
-import org.nineml.coffeefilter.trees.DataTreeBuilder;
-import org.nineml.coffeefilter.trees.SimpleTree;
-import org.nineml.coffeefilter.trees.SimpleTreeBuilder;
 import org.nineml.coffeegrinder.trees.Arborist;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -35,10 +30,13 @@ import org.xml.sax.SAXException;
 import javax.xml.transform.sax.SAXSource;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public class InvisibleXmlFn extends SystemFunction {
+
+    public final static SpecificFunctionType RETURN_TYPE = new SpecificFunctionType(
+            new SequenceType[]{SequenceType.SINGLE_STRING}, NodeKindTest.DOCUMENT.one());
+
 
     public static OptionsParameter getOptionDetails() {
         OptionsParameter details = new OptionsParameter(40);
@@ -88,10 +86,6 @@ public class InvisibleXmlFn extends SystemFunction {
                                         InvisibleXmlParser parser,
                                         Map<String, GroundedValue> options) throws XPathException {
         if (parser.constructed()) {
-            SequenceType[] argTypes = new SequenceType[]{SequenceType.SINGLE_STRING};
-
-            final FunctionItemType ftype;
-            ftype = new SpecificFunctionType(argTypes, NodeKindTest.DOCUMENT.one());
 
             AbstractFunction chooseAlternative = null;
             if (options.containsKey(sx("choose-alternative"))) {
@@ -127,7 +121,9 @@ public class InvisibleXmlFn extends SystemFunction {
                 }
             }
 
-            return new CallableFunction(1, new InvisibleXmlParserFunction(parser, chooseAlternative, options), ftype);
+            return new CallableFunction(1,
+                                        new InvisibleXmlParserFunction(parser, chooseAlternative, options),
+                                        RETURN_TYPE);
         } else {
             InvisibleXmlDocument failed = parser.getFailedParse();
             if (failed.getResult().succeeded()) {
