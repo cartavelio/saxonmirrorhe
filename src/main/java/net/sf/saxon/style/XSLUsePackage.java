@@ -106,7 +106,7 @@ public class XSLUsePackage extends StyleElement {
             if (f.equals("name")) {
                 nameAtt = Whitespace.trim(att.getValue());
             } else if (f.equals("package-version")) {
-                ranges = Whitespace.trim(att.getValue()).replaceAll("\\\\", "");
+                ranges = Whitespace.trim(att.getValue()).replace("\\", "");
             } else {
                 checkUnknownAttribute(attName);
             }

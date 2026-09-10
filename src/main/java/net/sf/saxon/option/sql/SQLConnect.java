@@ -242,7 +242,7 @@ public class SQLConnect extends ExtensionInstruction {
             return name;
         }
         // Surround the string with quotes, and replace any embedded '"' with '""'.
-        return "\"" + name.replaceAll("\\\"", "\"\"") + "\"";
+        return "\"" + name.replace("\"", "\"\"") + "\"";
     }
 
     private static final Pattern namePattern = Pattern.compile("\"[^\"]+\"|[A-Za-z_][A-Za-z0-9_]*");

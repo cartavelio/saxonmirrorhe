@@ -36,6 +36,6 @@ public enum Spec {
     }
 
     public int getNumericVersion() {
-        return Integer.parseInt(version.replaceAll("\\.",""));
+        return Integer.parseInt(version.replace(".",""));
     }
 }

@@ -110,7 +110,7 @@ public class Numberer_it extends AbstractNumberer {
             }
         }
         s = s.toLowerCase();
-        s = s.replaceAll("centoun", "centun");
+        s = s.replace("centoun", "centun");
         if (wordCase == UPPER_CASE) {
             s = s.toUpperCase();
         }
