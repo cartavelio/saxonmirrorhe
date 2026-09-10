@@ -260,14 +260,16 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
                 source.setSystemId(uriString);
             }
         } else {
-            try {
-                source = config.getSaxonResourceResolver().resolve(relativeURI, base);
-                if (source == null) {
-                    source = new SAXSource();
-                    setSAXInputSource((SAXSource) source, uriString);
+            if (config != null) {
+                try {
+                    source = config.getSaxonResourceResolver().resolve(relativeURI, base);
+                } catch (Exception ex) {
+                    throw XPathException.makeXPathException(ex);
                 }
-            } catch (Exception ex) {
-                throw XPathException.makeXPathException(ex);
+            }
+            if (source == null) {
+                source = new SAXSource();
+                setSAXInputSource((SAXSource) source, uriString);
             }
         }
 
