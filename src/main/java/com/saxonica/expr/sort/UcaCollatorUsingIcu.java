@@ -6,6 +6,7 @@ import com.ibm.icu.text.Collator;
 import com.ibm.icu.text.RuleBasedCollator;
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.VersionInfo;
+import net.sf.saxon.Version;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.CollationMatchKey;
 import net.sf.saxon.lib.SubstringMatcher;
@@ -268,11 +269,17 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
                  - The UCA option Blanked is expressed with Strength set to 3, and Alternate set to Shifted.
                  But see the notes on test case compare-042: if strength=identical is combined with alternate=blanked,
                  strength=identical wins.
+                 Haven't been able to get this to work on .NET with ICU4N.
                 */
                     uca.setAlternateHandlingShifted(true);
                     if ("quaternary".equals(props.getProperty("strength"))) {
                         setStrength(com.ibm.icu.text.Collator.TERTIARY);
                     }
+                    //#if CSHARP==true
+                    if (Version.platform.getPlatformSuffix().equals("CS")) {
+                        error("alternate", "non-ignorable|shifted (on .NET)", alternate);
+                    }
+                    //#endif
                     break;
                 default:
                     if (fallbackError) {
