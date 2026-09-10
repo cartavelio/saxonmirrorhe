@@ -73,6 +73,18 @@ public class SequenceType {
     }
 
     /**
+     * Test whether a supplied value is an instance of this SequenceType
+     * @param value the value to be tested
+     * @return true if <code>value</code> is an instance of this type, as defined by the XPath
+     * <code>instance of</code> operator
+     * @since 12.0
+     */
+
+    public boolean matches(XdmValue value) {
+        return value.matches(this);
+    }
+
+    /**
      * Test whether two SequenceType objects represent the same type
      *
      * @param other the other SequenceType object

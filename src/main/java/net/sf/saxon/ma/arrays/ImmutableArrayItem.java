@@ -15,7 +15,6 @@ import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Implementation of ArrayItem backed by a persistent immutable array, so that operations
@@ -26,11 +25,24 @@ public class ImmutableArrayItem extends AbstractArrayItem {
 
     private final ZenoChain<GroundedValue> vector;
 
+    /**
+     * Create an <code>ImmutableArrayItem</code> as a copy of a supplied
+     * <code>SimpleArrayItem</code>
+     * @param other the supplied <code>SimpleArrayItem</code>
+     */
+
     public ImmutableArrayItem(SimpleArrayItem other) {
         this.vector = new ZenoChain<GroundedValue>().addAll(other.getMembers());
     }
 
-    public ImmutableArrayItem(List<GroundedValue> members ) {
+    /**
+     * Create an <code>ImmutableArrayItem</code> , supplying the members of the array as a
+     * list (or other iterable) of values
+     *
+     * @param members the supplied collection of members.
+     */
+
+    public ImmutableArrayItem(Iterable<GroundedValue> members ) {
         this.vector = new ZenoChain<GroundedValue>().addAll(members);
     }
 
