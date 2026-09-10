@@ -84,8 +84,8 @@ namespace Saxon.Api {
 
         public SchemaResolver SchemaResolver {
             set {
-                // DelegatingSchemaResolver dsr = new DelegatingSchemaResolver(value, processor.Implementation);
-                // s9schemaManager.setSchemaURIResolver(dsr);
+                DelegatingSchemaResolver dsr = new DelegatingSchemaResolver(value, processor.Implementation);
+                s9schemaManager.setSchemaURIResolver(dsr);
             }
         }
 

@@ -21,8 +21,8 @@ namespace Saxon.Api.Support {
         public Source resolve(Saxon.Hej.lib.JJ_ResourceRequest jRequest) {
             IResource resource = null;
             ResourceRequest request = new() {
-                Uri = new Uri(jRequest.uri),
-                BaseUri = new Uri(jRequest.baseUri),
+                Uri = jRequest.uri == null ? null : new Uri(jRequest.uri),
+                BaseUri = jRequest.baseUri==null ? null : new Uri(jRequest.baseUri),
                 RelativeUri = jRequest.relativeUri,
                 Nature = jRequest.nature,
                 Purpose = jRequest.purpose,
@@ -41,16 +41,9 @@ namespace Saxon.Api.Support {
                 source.setSystemId(readerResource.ResourceUri.ToString());
                 return source;
             }
-            // if (resource is TextResource text) {
-            //     return StandardURIResolver.ConvertToActiveSource(text, text.ResourceUri, config);
-            // }
             
-            XdmItem item = resource.GetXdmItem();
-            if (item is XdmNode node) {
-                return new NodeSource(node.Implementation);
-            }
+            return ResourceToSource.convert(resource);
 
-            return null;
         }
     }
 }
