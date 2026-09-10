@@ -933,7 +933,8 @@
                         href="../saxon_c_php_xdmnode">XdmNode</a> $context)</span>
                   <div class="fcomment">Perform a one shot transformation, saving the results to the
                      file as previously set (e.g. using <code>setOutputFile()</code>). The global
-                     context item may be supplied in the $context argument.</div>
+                     context item may be supplied in the $context argument, but this is optional -
+                     the method will also execute without any arguments.</div>
                </td>
             </tr>
             <tr>
@@ -945,7 +946,8 @@
                         href="../saxon_c_php_xdmnode">XdmNode</a> $context)</span>
                   <div class="fcomment">Perform a one shot transformation. The result is returned as
                      a serialized string. The global context item may be supplied in the $context
-                     argument.</div>
+                     argument, but this is optional - the method will also execute without any
+                     arguments.</div>
                </td>
             </tr>
             <tr>
@@ -958,7 +960,8 @@
                   <div class="fcomment">Perform a one shot transformation. The result is returned as
                      an <a class="bodylink code" href="../saxon_c_php_xdmvalue">XdmValue</a> object.
                      If there are failures then a null is returned. The global context item may be
-                     supplied in the $context argument.</div>
+                     supplied in the $context argument, but this is optional - the method will also
+                     execute without any arguments.</div>
                </td>
             </tr>
             <tr>
