@@ -761,7 +761,7 @@ public class XMLEmitter extends Emitter {
             } else if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
                 writer.write(chars);
             } else if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
-                writeEscape(chars.tidy(), false);
+                writeEscape(chars, false);
             } else {
                 // disable-output-escaping="yes"
                 if (testCharacters(chars) == 0) {

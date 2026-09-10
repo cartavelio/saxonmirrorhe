@@ -23,6 +23,7 @@ public class StringConstants {
     }
 
     public static final UnicodeString SINGLE_SPACE = new Twine8(bytes(" "));
+    public static final UnicodeString NEWLINE = new Twine8(bytes("\n"));
     public static final UnicodeString TRUE = new Twine8(bytes("true"));
     public static final UnicodeString FALSE = new Twine8(bytes("false"));
     public static final UnicodeString ONE = new Twine8(bytes("1"));

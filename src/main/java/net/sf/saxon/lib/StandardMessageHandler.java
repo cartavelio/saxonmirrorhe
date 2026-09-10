@@ -19,7 +19,6 @@ import net.sf.saxon.str.UnicodeWriterToWriter;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.OutputKeys;
-import java.io.IOException;
 import java.io.Writer;
 import java.util.Properties;
 import java.util.function.Consumer;
@@ -76,8 +75,7 @@ public class StandardMessageHandler implements Consumer<Message> {
             out.open();
             out.append(node.getUnderlyingNode());
             out.close();
-            writer.writeCodePoint(10); // Add a newline
-        } catch (XPathException | IOException e) {
+        } catch (XPathException e) {
             // No action if xsl:message fails
         }
     }
