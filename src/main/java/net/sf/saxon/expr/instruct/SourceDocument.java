@@ -222,7 +222,7 @@ public class SourceDocument extends Instruction {
      */
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
+        ExpressionPresenter.ExportOptions options = out.getOptions();
         if ("JS".equals(options.target) && options.targetVersion == 1) {
             throw new XPathException("xsl:source-document is not supported in SaxonJS 1.*", SaxonErrorCode.SXJS0001);
         }

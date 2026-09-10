@@ -524,7 +524,7 @@ public class Literal extends Expression {
             out.startElement("node");
             final int nodeKind = ((NodeInfo) value).getNodeKind();
             out.emitAttribute("kind", nodeKind + "");
-            if (((ExpressionPresenter.ExportOptions) out.getOptions()).explaining) {
+            if (out.getOptions().explaining) {
                 String name = ((NodeInfo) value).getDisplayName();
                 if (!name.isEmpty()) {
                     out.emitAttribute("name", name);
@@ -579,7 +579,7 @@ public class Literal extends Expression {
         } else if (value instanceof FunctionItem) {
             ((FunctionItem) value).export(out);
         } else if (value instanceof AnyExternalObject) {
-            if (((ExpressionPresenter.ExportOptions)out.getOptions()).explaining) {
+            if (out.getOptions().explaining) {
                 out.startElement("externalObject");
                 out.emitAttribute("class", ((AnyExternalObject)value).getWrappedObject().getClass().getName());
                 out.endElement();
@@ -612,7 +612,7 @@ public class Literal extends Expression {
     }
 
     public static void exportAtomicValue(AtomicValue value, ExpressionPresenter out) throws XPathException {
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) out.getOptions()).target)) {
+        if ("JS".equals(out.getOptions().target)) {
             value.checkValidInJavascript();
         }
         AtomicType type = value.getItemType();

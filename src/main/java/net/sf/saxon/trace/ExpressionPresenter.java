@@ -50,7 +50,7 @@ public class ExpressionPresenter {
     private final Stack<String> nameStack = new Stack<>();
     private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
     private NamespaceUri defaultNamespace;
-    private Options options = new ExportOptions();
+    private ExportOptions options = new ExportOptions();
     private boolean relocatable = false;
 
     /**
@@ -118,7 +118,7 @@ public class ExpressionPresenter {
     public void init(Configuration config, StreamResult out, boolean checksum) {
         SerializationProperties props = makeDefaultProperties(config);
         if (config.getXMLVersion() == Configuration.XML11) {
-            if ("JS".equals(((ExportOptions) getOptions()).target)) {
+            if ("JS".equals(getOptions().target)) {
                 config.getLogger().warning("For target=JS, the SEF file will use XML 1.0, which disallows control characters");
             } else {
                 props.setProperty(OutputKeys.VERSION, "1.1");
@@ -223,7 +223,7 @@ public class ExpressionPresenter {
      * @param options the options
      */
 
-    public void setOptions(Options options) {
+    public void setOptions(ExportOptions options) {
         this.options = options;
     }
 
@@ -233,7 +233,7 @@ public class ExpressionPresenter {
      * @return the options, or null if none have been set
      */
 
-    public Options getOptions() {
+    public ExportOptions getOptions() {
         return options;
     }
 
@@ -641,9 +641,7 @@ public class ExpressionPresenter {
         return out.toString();
     }
 
-    public interface Options {}
-
-    public static class ExportOptions implements Options {
+    public static class ExportOptions {
         public String target = "";
         public int targetVersion = 0;
         public StylesheetPackage rootPackage;

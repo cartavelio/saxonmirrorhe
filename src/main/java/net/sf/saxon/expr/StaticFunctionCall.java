@@ -205,7 +205,7 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         if (target instanceof OriginalFunction) {
-            ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
+            ExpressionPresenter.ExportOptions options = out.getOptions();
             OriginalFunction pf = (OriginalFunction) target;
             out.startElement("origFC", this);
             out.emitAttribute("name", pf.getFunctionName());

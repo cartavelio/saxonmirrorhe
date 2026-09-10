@@ -359,7 +359,7 @@ public class UserFunctionReference extends Expression
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
+        ExpressionPresenter.ExportOptions options = out.getOptions();
         if ("JS".equals(options.target) && options.targetVersion == 1) {
             throw new XPathException("Higher-order functions are not available in SaxonJS v1.*",
                                      "XTSE3540", getLocation());

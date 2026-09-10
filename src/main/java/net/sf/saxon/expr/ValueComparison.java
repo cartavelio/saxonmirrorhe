@@ -498,8 +498,11 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         if (resultWhenEmpty != null) {
             out.emitAttribute("onEmpty", resultWhenEmpty.getBooleanValue() ? "1" : "0");
         }
-
-        //out.emitAttribute("comp", comparer.save());
+        if ("JS".equals(out.getOptions().target) && out.getOptions().targetVersion == 2) {
+            // for backwards compatibility, output a comp attribute
+            AtomicComparer comparer = getAtomicComparer();
+            out.emitAttribute("comp", comparer.save());
+        }
     }
 
     /**
@@ -534,7 +537,6 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             }
             final int operator = expr.getOperator();
 
-            GenericAtomicComparer.AtomicComparisonFunction comparer0;
             final int card0 = expr.getLhsExpression().getCardinality();
             final int card1 = expr.getRhsExpression().getCardinality();
             if (card0 == StaticProperty.ALLOWS_ZERO || card1 == StaticProperty.ALLOWS_ZERO) {

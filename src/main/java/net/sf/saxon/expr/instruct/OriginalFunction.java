@@ -102,7 +102,7 @@ public class OriginalFunction extends AbstractFunction implements FunctionItem, 
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
+        ExpressionPresenter.ExportOptions options = out.getOptions();
         out.startElement("origF");
         out.emitAttribute("name", getFunctionName());
         out.emitAttribute("arity", ""+getArity());

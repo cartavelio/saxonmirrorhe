@@ -8,6 +8,9 @@
 package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Controller;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.Clause;
 import net.sf.saxon.expr.flwor.FLWORExpression;
@@ -525,26 +528,26 @@ public class ExpressionTool {
         }
     }
 
-//    /**
-//     * Helper method to construct an iterator over the results of the expression when all that
-//     * the expression itself offers is a process() method. This builds the entire results of the
-//     * expression as a sequence in memory and then iterates over it.
-//     *
-//     * @param exp     the expression
-//     * @param context the dynamic evaluation context
-//     * @return an iterator over the results of the expression
-//     * @throws XPathException if a dynamic error occurs
-//     */
-//
-//    public static SequenceIterator getIteratorFromProcessMethod(
-//            Expression exp, XPathContext context) throws XPathException {
-//        Controller controller = context.getController();
-//        assert controller != null;
-//        SequenceCollector seq = controller.allocateSequenceOutputter();
-//        exp.process(new ComplexContentOutputter(seq), context);
-//        seq.close();
-//        return seq.iterate();
-//    }
+    /**
+     * Helper method to construct an iterator over the results of the expression when all that
+     * the expression itself offers is a process() method. This builds the entire results of the
+     * expression as a sequence in memory and then iterates over it.
+     *
+     * @param exp     the expression
+     * @param context the dynamic evaluation context
+     * @return an iterator over the results of the expression
+     * @throws XPathException if a dynamic error occurs
+     */
+
+    public static SequenceIterator getIteratorFromProcessMethod(
+            Expression exp, XPathContext context) throws XPathException {
+        Controller controller = context.getController();
+        assert controller != null;
+        SequenceCollector seq = controller.allocateSequenceOutputter();
+        exp.process(new ComplexContentOutputter(seq), context);
+        seq.close();
+        return seq.iterate();
+    }
 
 //    /**
 //     * Helper method to construct an item representing the results of the expression when all that

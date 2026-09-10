@@ -46,18 +46,18 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * An XsltCompiler object allows XSLT 2.0 and XSLT 3.0 stylesheets to be compiled. The compiler holds information that
+ * An XsltCompiler object allows XSLT stylesheets to be compiled. The compiler holds information that
  * represents the static context for the compilation.
  * <p>To construct an {@code XsltCompiler}, use the factory method {@link Processor#newXsltCompiler} on the Processor object.</p>
- * <p>An {@code XsltCompiler} may be used repeatedly to compile multiple queries. Any changes made to the
- * {@code XsltCompiler} (that is, to the static context) do not affect queries that have already been compiled.
+ * <p>An {@code XsltCompiler} may be used repeatedly to compile multiple stylesheets. Any changes made to the
+ * {@code XsltCompiler} (that is, to the static context) do not affect stylesheets that have already been compiled.
  * An XsltCompiler may in principle be used concurrently in multiple threads, but in practice this
- * is best avoided because all instances will share the same ErrorListener and it may therefore be
+ * is best avoided because all instances will share the same {@link ErrorReporter} and it may therefore be
  * difficult to establish which error messages are associated with each compilation.</p>
  * <p>If JIT compilation is enabled (this is the default for Saxon-EE), then static errors in template
  *  rules might be detected not during execution of the <code>compile()</code> method, but rather
  *  when the relevant code is first executed. In this situation the <code>compile()</code> method will
- *  not throw an exception, but the errors will still (eventually) be notified to the <code>ErrorListener</code>
+ *  not throw an exception, but the errors will still (eventually) be notified to the {@link ErrorReporter}
  *  associated with the compiler.</p>
  *  <p>To avoid problems with error reporting, it is recommended that:
  *  <ul>
@@ -148,7 +148,7 @@ public class XsltCompiler {
 
     /**
      * Set the value of a stylesheet parameter. Static (compile-time) parameters must be provided using
-     * this method on the XsltCompiler object, prior to stylesheet compilation. Non-static parameters
+     * this method on the <code>XsltCompiler</code> object, prior to stylesheet compilation. Non-static parameters
      * may also be provided using this method if their values will not vary from one transformation
      * to another.
      *
@@ -266,7 +266,7 @@ public class XsltCompiler {
      * from which compilation. In practice, it is only sensible to do this in an environment
      * where the stylesheets being compiled are known to be error-free.</p>
      *
-     * @param reporter a Consumer which will be notified of all Static errors and warnings
+     * @param reporter a class which will be notified of all static errors and warnings
      *                 encountered during a compilation episode.
      * @since 10.0
      */
@@ -278,7 +278,7 @@ public class XsltCompiler {
     /**
      * Get the recipient of error information previously registered using {@link #setErrorReporter(ErrorReporter)}.
      *
-     * @return the consumer previously registered explicitly using {@link #setErrorReporter(ErrorReporter)},
+     * @return the error reporter previously registered explicitly using {@link #setErrorReporter(ErrorReporter)},
      * or implicitly using {@link #setErrorListener(ErrorListener)} or {@link #setErrorList(List)}.
      * If no error reporter has been registered, the result may be null, or may return
      * a system supplied error reporter.
@@ -302,8 +302,8 @@ public class XsltCompiler {
      * not support schema processing. (Schema processing requires a Saxon-EE license.)</p>
      * 
      * @param schemaAware If true, the stylesheet will be compiled with schema-awareness
-     *                    enabled even if it contains no xsl:import-schema declarations. If false, the stylesheet
-     *                    is treated as schema-aware only if it contains one or more xsl:import-schema declarations.
+     *                    enabled even if it contains no {@code xsl:import-schema} declarations. If false, the stylesheet
+     *                    is treated as schema-aware only if it contains one or more {@code xsl:import-schema} declarations.
      * @since 9.2
      */
 
@@ -326,7 +326,7 @@ public class XsltCompiler {
     /**
      * Ask whether any package produced by this compiler can be deployed to a different location, with a different base URI
      *
-     * @return if true then static-base-uri() represents the deployed location of the package,
+     * @return if true then {@code static-base-uri()} represents the deployed location of the package,
      *                    rather than its compile time location
      * @since 9.8
      */
@@ -441,7 +441,7 @@ public class XsltCompiler {
     }
 
     /**
-     * Ask whether assertions (xsl:assert instructions) should be enabled. By default
+     * Ask whether assertions ({@code xsl:assert} instructions) should be enabled. By default
      * they are disabled. If assertions are enabled at compile time, then by
      * default they will also be enabled at run time; but they can be
      * disabled at run time by specific request
@@ -455,7 +455,7 @@ public class XsltCompiler {
     }
 
     /**
-     * Say whether assertions (xsl:assert instructions) should be enabled. By default
+     * Say whether assertions ({@code xsl:assert} instructions) should be enabled. By default
      * they are disabled. If assertions are enabled at compile time, then by
      * default they will also be enabled at run time; but they can be
      * disabled at run time by specific request
@@ -588,22 +588,21 @@ public class XsltCompiler {
 
 
     /**
-     * Get the stylesheet associated
-     * via the xml-stylesheet processing instruction (see
-     * http://www.w3.org/TR/xml-stylesheet/) with the document
-     * document specified in the source parameter, and that match
-     * the given criteria.  If there are several suitable xml-stylesheet
-     * processing instructions, then the returned Source will identify
+     * Get the stylesheet associated via the {@code xml-stylesheet} processing instruction (see
+     * <a href="http://www.w3.org/TR/xml-stylesheet/">W3C specification</a>) with the document
+     * specified in the source parameter, and that matches
+     * the given criteria.  If there are several suitable {@code xml-stylesheet}
+     * processing instructions, then the returned {@link Source} will identify
      * a synthesized stylesheet module that imports all the referenced
      * stylesheet module.
-     * <p>The returned Source will have an absolute URI, created by resolving
+     * <p>The returned {@link Source} will have an absolute URI, created by resolving
      * any relative URI against the base URI of the supplied source document,
      * and redirected if necessary by using the URIResolver associated with this
      * <code>XsltCompiler</code>.</p>
      *
      * @param source  The XML source document. Note that if the source document
      *                is available as an instance of {@link XdmNode}, a corresponding <code>Source</code>
-     *                can be obtained using the method {@link net.sf.saxon.s9api.XdmNode#asSource()}.
+     *                can be obtained using the method {@link XdmNode#asSource()}.
      *                If the source is a StreamSource or SAXSource, it will be read only as far as the
      *                xml-stylesheet processing instruction (but the Source will be consumed and must not
      *                be re-used).
@@ -615,7 +614,7 @@ public class XsltCompiler {
      *                the method {@link Configuration#setMediaQueryEvaluator(Comparator)}.
      * @param title   The value of the title attribute to match.  May be null.
      * @param charset The value of the charset attribute to match.  May be null.
-     * @return A Source object suitable for passing to {@link #compile(javax.xml.transform.Source)}.
+     * @return A Source object suitable for passing to {@link #compile(Source)}.
      * @throws SaxonApiException if any problems occur, including the case where no matching
      *                           xml-stylesheet processing instruction is found.
      * @since 9.6
@@ -1024,7 +1023,7 @@ public class XsltCompiler {
      * configuration is not a licensed Saxon-EE configuration.
      */
 
-    public void setJustInTimeCompilation(boolean jit){
+    public void setJustInTimeCompilation(boolean jit) {
         if (jit && !config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT)){
             throw new UnsupportedOperationException("XSLT just-in-time compilation requires a Saxon-EE license");
         }
@@ -1041,7 +1040,7 @@ public class XsltCompiler {
      *            it means that static errors in the stylesheet may go undetected.
      */
 
-    public boolean isJustInTimeCompilation(){
+    public boolean isJustInTimeCompilation() {
         return compilerInfo.isJustInTimeCompilation();
     }
 
@@ -1096,9 +1095,8 @@ public class XsltCompiler {
      * <p>The chosen policy affects:</p>
      * <ul>
      *     <li>Any NCName used as a node-test in an axis step (production <code>ForwardStep</code>
-     *     or <code>ReverseStep</code>) in an
-     *     XPath expression within the stylesheet, other than an axis step using the attribute or
-     *     namespace axis</li>
+     *     or <code>ReverseStep</code>) in an XPath expression within the stylesheet, other than an
+     *     axis step using the attribute or namespace axis</li>
      *     <li>Any NCName used as a node-test in an axis step (production <code>ForwardStepP</code>
      *     in a pattern within the stylesheet, other than an axis step using the attribute or namespace
      *     axis</li>

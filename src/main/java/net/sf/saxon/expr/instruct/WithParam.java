@@ -287,7 +287,6 @@ public class WithParam  {
                 if (!flags.isEmpty()) {
                     out.emitAttribute("flags", flags);
                 }
-                ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
                 if (param.getRequiredType() != SequenceType.ANY_SEQUENCE) {
                     out.emitAttribute("as", param.getRequiredType().toAlphaCode());
                 }

@@ -232,12 +232,32 @@ public class DynamicFunctionCall extends Expression {
      */
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        out.startElement("dynCall", this);
-        targetFunction.getChildExpression().export(out);
-        for (Operand o : suppliedArguments) {
-            o.getChildExpression().export(out);
+        if ("JS".equals(out.getOptions().target) && out.getOptions().targetVersion == 2) {
+            // for backwards compatibility, output a call on saxon:apply
+            out.startElement("ifCall", this);
+            out.emitAttribute("name", "Q{http://saxon.sf.net/}apply");
+            out.emitAttribute("type", "*");
+            if (targetFunction.getChildExpression() instanceof Literal) {
+                FunctionItem f = (FunctionItem)(((Literal)targetFunction.getChildExpression()).getGroundedValue());
+                if (f.getFunctionName() != null) {
+                    out.emitAttribute("dyn", f.getFunctionName().getEQName() + "#" + f.getArity());
+                }
+            }
+            targetFunction.getChildExpression().export(out);
+            out.startSubsidiaryElement("arrayBlock");
+            for (Operand o : suppliedArguments) {
+                o.getChildExpression().export(out);
+            }
+            out.endSubsidiaryElement();
+            out.endElement();
+        } else {
+            out.startElement("dynCall", this);
+            targetFunction.getChildExpression().export(out);
+            for (Operand o : suppliedArguments) {
+                o.getChildExpression().export(out);
+            }
+            out.endElement();
         }
-        out.endElement();
     }
 
     /**
