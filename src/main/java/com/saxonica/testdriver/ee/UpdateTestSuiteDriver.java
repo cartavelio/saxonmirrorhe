@@ -200,11 +200,6 @@ public class UpdateTestSuiteDriver {
                     }
             );
             fragmentParser = saConfig.getSourceParser();
-            fragmentParser.setEntityResolver(new StandardEntityResolver(saConfig));
-
-            //Configuration config11 = new Configuration();
-            //config11.setXMLVersion(Configuration.XML11);
-            //config11.setNamePool(pool);
 
             results = new FileWriter(
                     new File(saxonDir + "/results" + Version.getProductVersion() + ".xml"));
