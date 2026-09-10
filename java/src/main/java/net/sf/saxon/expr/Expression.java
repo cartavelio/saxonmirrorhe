@@ -478,7 +478,9 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     }
 
     /**
-     * Get the retained static context of the expression
+     * Get the retained static context of the expression, navigating to ancestor
+     * expressions in the expression tree to find an inherited context if none is
+     * found locally
      * @return the retained static context
      */
 
@@ -492,6 +494,12 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         return retainedStaticContext;
     }
 
+    /**
+     * Get the retained static context object actually held on this element,
+     * without navigating the expression tree to find an inherited context if
+     * none is found
+     * @return the locally-held retained static context, or null if absent.
+     */
     public RetainedStaticContext getLocalRetainedStaticContext() {
         return retainedStaticContext;
     }
