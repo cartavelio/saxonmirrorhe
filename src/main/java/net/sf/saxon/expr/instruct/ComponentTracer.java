@@ -29,8 +29,8 @@ import java.util.HashMap;
 public class ComponentTracer extends Instruction {
 
     private Operand baseOp;
-    private final HashMap<String, Object> properties = new HashMap<>(10);
-    private final TraceableComponent component;
+    private HashMap<String, Object> properties = new HashMap<>(10);
+    private TraceableComponent component;
 
     /**
      * Create a trace expression that traces execution of a given child expression
@@ -40,9 +40,10 @@ public class ComponentTracer extends Instruction {
     public ComponentTracer(TraceableComponent component) {
         this.component = component;
         baseOp = new Operand(this, component.getBody(), OperandRole.SAME_FOCUS_ACTION);
-        adoptChildExpression(component.getBody());
-        component.setBody(this);
         component.gatherProperties((k, v) -> properties.put(k, v));
+    }
+
+    private ComponentTracer() {
     }
 
     public Expression getChild() {
@@ -84,8 +85,10 @@ public class ComponentTracer extends Instruction {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        ComponentTracer t = new ComponentTracer(component);
-        Expression newBody = getBody().copy(rebindings);  // Bug 4642
+        ComponentTracer t = new ComponentTracer();
+        t.component = component;
+        t.properties = properties;
+        Expression newBody = getChild().copy(rebindings);  // Bug 4642
         t.baseOp = new Operand(t, newBody, OperandRole.SAME_FOCUS_ACTION);
         t.adoptChildExpression(newBody);
         t.setLocation(getLocation());   // Bug 3034
