@@ -52,7 +52,6 @@ namespace SaxonCS_NUnit {
 
                 // Create a serializer
                 XdmDestination serializer = new();
-                transformer.Destination = serializer;
 
                 // Transform the source XML to System.out.
                 XdmNode input = processor.NewDocumentBuilder().Build(
@@ -66,6 +65,36 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(e.Message);
             }
         }
+        
+
+        [Test]
+        public void testUseDestinationProperty() {
+            // Create a Processor instance.
+            try {
+                Processor processor = new(true);
+                processor.SetProperty("http://saxon.sf.net/feature/timing", "true");
+
+                // Create a transformer for the stylesheet.
+                XsltTransformer transformer = processor.NewXsltCompiler().Compile(
+                    new Uri(ConfigTest.DATA_DIR + "caffo/Transform2.xslt")).Load();
+
+                // Create a serializer
+                XdmDestination serializer = new();
+                transformer.Destination = serializer;
+
+                // Transform the source XML to System.out.
+                XdmNode input = processor.NewDocumentBuilder().Build(
+                    new Uri(ConfigTest.DATA_DIR + "caffo/Input.xml"));
+                // Set the root node of the source document to be the initial context node
+                transformer.InitialContextNode = input;
+                transformer.Run();
+            }
+            catch (SaxonApiException e) {
+                //e.printStackTrace();
+                Assert.Fail(e.Message);
+            }
+        }
+
 
         [Test]
         public void testXmlDeclaration() {
