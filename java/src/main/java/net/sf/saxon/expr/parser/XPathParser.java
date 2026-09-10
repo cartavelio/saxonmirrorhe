@@ -4616,13 +4616,13 @@ public class XPathParser {
                     if (keywordArgs == null) {
                         keywordArgs = new HashMap<>();
                     } else if (keywordArgs.containsKey(paramName)) {
-                        grumble("Duplicate keyword '" + paramName + "'in function arguments");
+                        grumble("Duplicate keyword '" + paramName + "' in function arguments");
                     }
                     keywordArgs.put(paramName, args.size());
                     args.add(arg);
                 } else {
                     if (keywordArgs != null) {
-                        grumble("Keyword arguments must not be followed by positional arguments in a function call");
+                        grumble("In a function call, keyword arguments must not be followed by positional arguments");
                     }
                     if (t.currentToken == Token.QMARK && (peek == Token.COMMA || peek == Token.RPAREN)) {
                         nextToken();
@@ -5050,7 +5050,7 @@ public class XPathParser {
 
         if (env instanceof QueryModule qm) {
             // In XQuery, defer binding till the end, to cope with forwards references
-            return new DraftFunctionReference(fname, qm, env.getNamespaceResolver(), arity);
+            return new DraftFunctionReference(fname, qm, arity);
         }
 
         StructuredQName functionName = null;
