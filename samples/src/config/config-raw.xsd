@@ -47,6 +47,7 @@
     </xs:annotation>
     <xs:complexType>
       <xs:attribute name="allowExternalFunctions" use="optional" type="xs:boolean"/>
+      <xs:attribute name="allowImplausibleExpressions" use="optional" type="xs:boolean"/>
       <xs:attribute name="allowMultiThreading" use="optional" type="xs:boolean"/>
       <xs:attribute name="allowOldJavaUriFormat" use="optional" type="xs:boolean"/>
       <xs:attribute name="allowSyntaxExtensions" use="optional" type="xs:boolean"/>    

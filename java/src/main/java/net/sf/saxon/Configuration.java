@@ -4885,6 +4885,7 @@ public class Configuration implements SourceResolver {
         booleanFeatures.add(FeatureCode.XQUERY_MULTIPLE_MODULE_IMPORTS);
         booleanFeatures.add(FeatureCode.RETAIN_NODE_FOR_DIAGNOSTICS);
         booleanFeatures.add(FeatureCode.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS);
+        booleanFeatures.add(FeatureCode.ALLOW_IMPLAUSIBLE_EXPRESSIONS);
 
         stringFeatures.add(FeatureCode.ZIP_URI_PATTERN);
     }

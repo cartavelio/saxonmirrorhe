@@ -350,6 +350,7 @@ public class ConfigurationReader implements Receiver {
         props.setProperty("#element", "global");
         applyProperty(props, "allowedProtocols", FeatureCode.ALLOWED_PROTOCOLS, "JN");
         applyProperty(props, "allowExternalFunctions", FeatureCode.ALLOW_EXTERNAL_FUNCTIONS, "J");
+        applyProperty(props, "allowImplausibleExpressions", FeatureCode.ALLOW_IMPLAUSIBLE_EXPRESSIONS, "JN");
         applyProperty(props, "allowMultiThreading", FeatureCode.ALLOW_MULTITHREADING, "JN");
         applyProperty(props, "allowOldJavaUriFormat", FeatureCode.ALLOW_OLD_JAVA_URI_FORMAT, "J");
         applyProperty(props, "allowSyntaxExtensions", FeatureCode.ALLOW_SYNTAX_EXTENSIONS, "JN");

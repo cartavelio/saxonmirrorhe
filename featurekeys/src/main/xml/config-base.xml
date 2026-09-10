@@ -6,6 +6,7 @@
   <global
     allowedProtocols="all"
     allowExternalFunctions="true"
+    allowImplausibleExpressions="false"
     allowMultiThreading="true"
     allowOldJavaUriFormat="false"
     allowSyntaxExtensions="false"
