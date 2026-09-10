@@ -1047,6 +1047,28 @@ cdef class PyXslt30Processor:
         """
         self.thisxptr.clearParameters()
 
+     def import_package(self, str package_file_name):
+         """
+         import_package(self, package_file_name)
+         Import a library package.  Calling this method makes the supplied package available for reference
+         in the xsl:use-package declarations of subsequent compilations performed using this
+         Xslt30Processor.
+         Args:
+             package_file_name (str): the sef file name of the package to be imported. File name resolved against the cwd
+             which is set using the setcwd
+
+         Example:
+            xsltproc = saxon_proc.new_xslt30_processor()
+            xsltproc.import_package('test-package-001.pack')
+            executable = xsltproc.compile_stylesheet(stylesheet_file="foo.xsl")
+         """
+         cdef char * c_package_file_name
+         if package_file_name is not None and len(package_file_name) > 0:
+             py_ta_string = package_file_name.encode('UTF-8') if package_file_name is not None else None
+             c_package_file_name = py_ta_string if py_lang_string is not None else ""
+             self.thisxptr.importPackage(c_package_file_name)
+
+
 
      def compile_stylesheet(self, **kwds):
         """

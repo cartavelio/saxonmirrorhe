@@ -187,6 +187,8 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         # Clear parameter values set
         void clearParameters(bool deleteValues=false)
 
+        void importPackage(const char *packageFile)
+
 
         # Perform a one shot transformation. The result is returned as a string
         const char * transformFileToString(const char* sourcefile, const char* stylesheetfile)    except +raise_py_error
