@@ -88,6 +88,7 @@ ext {
   fileSeparator = System.getProperty("file.separator")
   DSTAMP=new Date().format("yyyyMMdd")
   // Docker containers
+  sqlServer = findProperty('sqlServer') ?: "postgresql"
   c_sqlserver = "sqlserver"
   c_documentation = "saxonicadocs"
   dotnetex = null
@@ -1795,83 +1796,131 @@ task "docker-sql-down"() {
   }
 }
 
-task sqlServerStart(dependsOn: ["docker-sql-up"]) {
+task sqlServerStart() {
+  def dockerOk = true
+  def id = null
+
   doFirst {
-    DockerContainer.assertDockerAvailable()
-    DockerContainer.assertDockerComposeAvailable()
-    mkdir "${buildDir}/sql/${sqlServer}/data"
+    try {
+      DockerContainer.assertDockerAvailable()
+      DockerContainer.assertDockerComposeAvailable()
+    } catch (Exception e) {
+      dockerOk = false
+    }
   }
 
   doLast {
-    exec {
-      workingDir "tools/docker"
-      commandLine DockerContainer.dockerCompose(), "--file", "${sqlServer}-compose.yml", "up", "-d"
+    if (dockerOk) {
+      if (!DockerContainer.running(c_sqlserver)) {
+        try {
+          exec {
+            workingDir "tools/docker"
+            if (DockerContainer.dockerCompose() == "docker") {
+              commandLine DockerContainer.docker(),
+                "compose", "-f", "${sqlServer}-compose.yml",
+                "up", "-d", c_sqlserver
+            } else {
+              commandLine DockerContainer.dockerCompose(),
+                "-f", "${sqlServer}-compose.yml",
+                "up", "-d", c_sqlserver
+            }
+          }
+        } catch (Exception e) {
+          dockerOk = false
+          println("***************************************************************")
+          println("Failed to start SQL; saxon:sql tests will fail.")
+          println("***************************************************************")
+        }
+      }
+      try {
+        exec {
+          commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
+        }
+      } catch (Exception e) {
+        // nop
+      }
+    } else {
+      println("****************************************************")
+      println("Docker unavailable; saxon:sql tests will fail.")
+      println("***************************************************")
+      dockerOk = false
     }
-    exec {
-      def id = DockerContainer.containerid(c_sqlserver)
-      commandLine "${projectDir}/tools/docker/wait-for-${sqlServer}", id
+  }
+
+  doLast {
+    if (dockerOk) {
+      exec {
+        id = DockerContainer.containers()["sqlserver"]
+        commandLine "${projectDir}/tools/docker/wait-for-${sqlServer}", id
+      }
     }
   }
 
   if (sqlServer == "mysql") {
     doLast {
-      exec {
-        def id = DockerContainer.containerid(c_sqlserver)
-        commandLine DockerContainer.docker(), "exec", "-i",
-          id, "sh", "-c", "mysql --user=root --password=admin < /app/sql/setup.sql"
+      if (dockerOk) {
+        exec {
+          commandLine DockerContainer.docker(), "exec", "-i",
+            id, "sh", "-c", "mysql --user=root --password=admin < /app/sql/setup.sql"
+        }
       }
     }
   } else {
     doLast {
-      exec {
-        def id = DockerContainer.containerid(c_sqlserver)
-        commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
-          id, "psql", "-f", "/app/sql/setup.sql"
+      if (dockerOk) {
+        exec {
+          commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
+            id, "psql", "-f", "/app/sql/setup.sql"
+        }
       }
-    }
-  }
-
-  doLast {
-    exec {
-      commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
     }
   }
 }
 
 task sqlServerSetup(dependsOn: ["docker-sql-up"]) {
+  def dockerOk = true
+  def id = null
+
   doFirst {
-    DockerContainer.assertDockerAvailable()
-    DockerContainer.assertDockerComposeAvailable()
+    try {
+      DockerContainer.assertDockerAvailable()
+      DockerContainer.assertDockerComposeAvailable()
+    } catch (Exception e) {
+      dockerOk = false
+    }
+  }
+
+  doLast {
+    if (dockerOk) {
+      id = DockerContainer.containers()["sqlserver"]
+    }
   }
 
   if (sqlServer == "mysql") {
     doLast {
-      exec {
-        def id = DockerContainer.containerid(c_sqlserver)
-        commandLine DockerContainer.docker(), "exec", "-i",
-          id, "sh", "-c", "mysql --user=root --password=admin < /app/sql/setup.sql"
+      if (dockerOk) {
+        exec {
+          commandLine DockerContainer.docker(), "exec", "-i",
+            id, "sh", "-c", "mysql --user=root --password=admin < /app/sql/setup.sql"
+        }
       }
     }
   } else {
     doLast {
-      exec {
-        def id = DockerContainer.containerid(c_sqlserver)
-        commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
-          id, "psql", "-f", "/app/sql/setup.sql"
+      if (dockerOk) {
+        exec {
+          commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
+            id, "psql", "-f", "/app/sql/setup.sql"
+        }
       }
-    }
-  }
-  doLast {
-    exec {
-      commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
     }
   }
 }
 
 task sqlServerLogs(dependsOn: ["docker-sql-up"]) {
-  def id = "NA"
+  def id = null
   doFirst {
-    id = DockerContainer.containerid(c_sqlserver)
+    id = DockerContainer.containers()["sqlserver"]
   }
   doLast {
     exec {
@@ -1881,9 +1930,9 @@ task sqlServerLogs(dependsOn: ["docker-sql-up"]) {
 }
 
 task sqlServerWatch(dependsOn: ["docker-sql-up"]) {
-  def id = "NA"
+  def id = null
   doFirst {
-    id = DockerContainer.containerid(c_sqlserver)
+    id = DockerContainer.containers()["sqlserver"]
   }
   doLast {
     exec {
@@ -1896,7 +1945,15 @@ task sqlServerStop(dependsOn: ["docker-sql-up"]) {
   doLast {
     exec {
       workingDir "tools/docker"
-      commandLine DockerContainer.dockerCompose(), "--file", "${sqlServer}-compose.yml", "down"
+      if (DockerContainer.dockerCompose() == "docker") {
+        commandLine DockerContainer.docker(),
+          "compose", "-f", "${sqlServer}-compose.yml",
+          "down"
+      } else {
+        commandLine DockerContainer.dockerCompose(),
+          "-f", "${sqlServer}-compose.yml",
+          "down"
+      }
     }
   }
 }
@@ -2022,7 +2079,7 @@ task dockerDown() {
 // Testing task for various Gradle debugging efforts
 task helloWorld() {
   doLast {
-    println("Hello, world.")
+    println("Hello, ${sqlServer}.")
 /*
     project.properties.keySet().each { key ->
       if (key.startsWith("td")) {
