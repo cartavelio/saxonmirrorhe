@@ -34,6 +34,7 @@ import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.value.*;
 
 import java.util.*;
@@ -512,7 +513,9 @@ public final class EvaluateInstr extends Expression {
                         env.setDefaultElementNamespace(instr.getRetainedStaticContext().getDefaultElementNamespace());
                     }
                     if (isSchemaAware) {
-                        env.getPackageData().setImportedSchema("", instr.getRetainedStaticContext().getImportedSchema());
+                        Schema schema = instr.getRetainedStaticContext().getImportedSchema();
+                        env.setImportedSchema(schema);
+                        env.getPackageData().setImportedSchema("", schema);
                     }
                     // Copy the function library list, except for XSLT-defined system functions and private user-written functions
                     FunctionLibraryList libraryList0 = ((StylesheetPackage) instr.getRetainedStaticContext().getPackageData()).getFunctionLibrary();
