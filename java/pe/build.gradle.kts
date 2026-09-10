@@ -419,11 +419,25 @@ testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
 testSuites.configure("xslt30extra", "XT30")
 
 testSuites.configure("qt4", "XQ31")
+testSuites.configure("qt4", "XP31")
 testSuites.configure("qt4", "XQ40")
 testSuites.configure("qt4", "XP40")
 
 testSuites.configure("xslt40", "XT40")
 testSuites.configure("xslt40", "XT40", mapOf("strict" to "on"))
+
+tasks.register("aggregated-test-results") {
+  inputs.files(tasks.named("test_suite_qt3_XP31"))
+  inputs.files(tasks.named("test_suite_qt3_XQ31"))
+  inputs.files(tasks.named("test_suite_qt4_XP31"))
+  inputs.files(tasks.named("test_suite_qt4_XQ31"))
+  inputs.files(tasks.named("test_suite_qt4_XP40"))
+  inputs.files(tasks.named("test_suite_qt4_XQ40"))
+
+  doLast {
+    println(inputs.files.files)
+  }
+}
 
 val signTask = tasks.named("downloadSignedMavenJars")
 val mavenArtifactId = "Saxon-PE"

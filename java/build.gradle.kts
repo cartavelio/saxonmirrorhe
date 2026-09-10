@@ -323,6 +323,8 @@ testSuites.configure("qt3extra", "XP40")
 testSuites.configure("qt3extra", "XQ31")
 testSuites.configure("qt3extra", "XQ40")
 
+testSuites.configure("qt4", "XP31")
+
 testSuites.configure("qt4", "XQ31")
 testSuites.configure("qt4", "XQ31", mapOf("opt" to "0"))
 testSuites.configure("qt4", "XQ31", mapOf("unfolded" to "on"))
@@ -384,6 +386,20 @@ testSuites.configure("xslt40", "XT40", mapOf("jit" to "on"))
 
 testSuites.configure("xsd", "XSD11")
 testSuites.configure("xsdextra", "XSD11")
+
+tasks.register("aggregated-test-results") {
+  inputs.files(tasks.named("test_suite_qt3_XP31"))
+  inputs.files(tasks.named("test_suite_qt3_XQ31"))
+  inputs.files(tasks.named("test_suite_qt4_XP31"))
+  inputs.files(tasks.named("test_suite_qt4_XQ31"))
+  inputs.files(tasks.named("test_suite_qt4_XP40"))
+  inputs.files(tasks.named("test_suite_qt4_XQ40"))
+
+  doLast {
+    println(inputs.files.files)
+  }
+}
+
 
 tasks.named<Sync>("signingDownloadJars") {
   into(layout.buildDirectory.dir("signing/download"))
