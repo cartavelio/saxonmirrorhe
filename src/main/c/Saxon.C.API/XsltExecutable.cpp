@@ -541,7 +541,6 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
         XdmValue * value = new XdmValue();
         XdmItem * xdmItem = nullptr;
-        std::cerr<<"result ="<<(long)result<<" type"<<(long)typeRef<<std::endl;
 
         if(typeRef == 1) {
             xdmItem = new XdmAtomicValue(result);

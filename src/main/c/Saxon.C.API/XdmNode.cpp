@@ -27,16 +27,17 @@ bool XdmNode::isAtomic() {
 
     XdmNode::~XdmNode() {
        // if(getRefCount() <= 1) {
+        std::cerr<<"xdmNode destructor cp0"<<std::endl;
        if(baseURI != nullptr) {
         delete baseURI;
         baseURI = nullptr;
        }
-
+        std::cerr<<"xdmNode destructor cp1"<<std::endl;
        if(nodeName != nullptr) {
          delete nodeName;
          nodeName = nullptr;
        }
-
+        std::cerr<<"xdmNode destructor cp2"<<std::endl;
        if(localName != nullptr) {
          delete localName;
          localName = nullptr;
@@ -252,7 +253,6 @@ return this;}
         if (cached && children != nullptr) {
             return children;
         }   else {
-            std::cerr<<"getChildren value="<<((int)value)<<std::endl;
             if(childCount < 0) {
                 getChildCount();
             }
@@ -263,7 +263,6 @@ return this;}
             allocFn fn = operator new;
             long long * childNodes = j_getChildren(SaxonProcessor::sxn_environ->thread, (void*) fn, (void *)value);
             if(childNodes == nullptr) {
-                std::cerr<<"childNodes is null - possible error/bug"<<std::endl;
                 return nullptr;
             }
 

@@ -42,6 +42,15 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
 
     }
 
+    @CEntryPoint(name = "j_db_setLineNumbering", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long setLineNumbering(IsolateThread thread, ObjectHandle documentBuilderRef, int option) throws SaxonApiException {
+
+            DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);
+
+            builder.setLineNumbering(CTypeConversion.toBoolean(option));
+            return SaxonCAPI.STATUS_OK;
+    }
+
 
 
     @CEntryPoint(name = "j_db_setDTDValidation", exceptionHandler = SaxonCExceptionLongHandler.class)

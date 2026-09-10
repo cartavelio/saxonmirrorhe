@@ -739,6 +739,20 @@ public class SaxonCAPI {
            }  else {
                xml = CTypeConversion.toJavaString(cxml);
            }
+           if(xml == null) {
+               throw new SaxonApiException("XML string is null");
+           }
+
+           if(procRef == WordFactory.nullPointer()) {
+               throw new SaxonApiException("Processor pointer is null");
+           } else {
+               proci = objectHandles.get(procRef);
+               if(proci == null) {
+                   throw new SaxonApiException("Processor object is null");
+               }
+           }
+
+
             StringReader reader = new StringReader(xml);
             if(builder == null) {
                 builder = proci.newDocumentBuilder();
@@ -862,7 +876,7 @@ public class SaxonCAPI {
      * @return  XdmNode object for the XML file
      * @throws SaxonApiException
      */
-    @CEntryPoint(name = "j_parseXmlFile", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_main_parseXmlFile", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_main_parseXmlFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle builderRef, ObjectHandle procRef, ObjectHandle validatorRef, CCharPointer cfilename) throws SaxonApiException {
         DocumentBuilder builder = null;
         Processor proci = null;
@@ -870,6 +884,15 @@ public class SaxonCAPI {
         String filename = null;
 
         try {
+
+            if(procRef == WordFactory.nullPointer()) {
+                throw new SaxonApiException("Processor pointer is null");
+            } else {
+                proci = objectHandles.get(procRef);
+                if(proci == null) {
+                    throw new SaxonApiException("Processor object is null");
+                }
+            }
 
             if(builderRef == WordFactory.nullPointer()) {
 
@@ -882,6 +905,8 @@ public class SaxonCAPI {
             }
             if(cfilename == WordFactory.nullPointer()) {
                 throw new SaxonApiException("The XML file name is null");
+            } else {
+                filename = CTypeConversion.toJavaString(cfilename);
             }
 
             Source source = resolveFileToSource(proci, cwd,filename, ResourceRequest.XML_NATURE);
@@ -894,6 +919,9 @@ public class SaxonCAPI {
             ObjectHandle handle = objectHandles.create(node);
             return handle.rawValue();
         } catch (SaxonApiException ex) {
+            if(debug) {
+                System.err.println("DEBUG: "+ex.getStackTrace());
+            }
             throw ex;
         }
     }

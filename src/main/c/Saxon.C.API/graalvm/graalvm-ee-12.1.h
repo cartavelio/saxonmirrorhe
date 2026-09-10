@@ -8,6 +8,14 @@
 extern "C" {
 #endif
 
+long long int createDocumentBuilder(graal_isolatethread_t*, void *);
+
+long long int j_db_setBaseURI(graal_isolatethread_t*, void *, char*);
+
+long long int j_db_setLineNumbering(graal_isolatethread_t*, void *, int);
+
+long long int j_db_setDTDValidation(graal_isolatethread_t*, void *, int);
+
 int run_main(int argc, char** argv);
 
 long long int createProcessorDataWithArray(graal_isolatethread_t*, void *);
@@ -27,8 +35,6 @@ void clearProcessorData(graal_isolatethread_t*, void *);
 long long int createSaxonProcessor(graal_isolatethread_t*, int);
 
 void j_handles_destroy(graal_isolatethread_t*, void *);
-
-long long int createDocumentBuilder(graal_isolatethread_t*, void *);
 
 long long* j_getLongArray(graal_isolatethread_t*, void *, void *);
 
@@ -54,9 +60,13 @@ long long int parseXmlStringWithValidator(graal_isolatethread_t*, void *, void *
 
 long long int createXdmAtomicItem(graal_isolatethread_t*, char*, char*);
 
+long long int j_main_parseXmlString(graal_isolatethread_t*, char*, void *, void *, void *, char*);
+
 char* getTypeName(graal_isolatethread_t*, char*);
 
 char* j_getStringValue(graal_isolatethread_t*, void *);
+
+long long int j_main_parseXmlFile(graal_isolatethread_t*, char*, void *, void *, void *, char*);
 
 char* j_getErrorMessage(graal_isolatethread_t*, void *);
 
@@ -80,31 +90,39 @@ long long* j_getXslMessages(graal_isolatethread_t*, void *, void *);
 
 long long int createSaxonCResultDocumentHandler(graal_isolatethread_t*, int);
 
-long long int createSchemamValidator(graal_isolatethread_t*, void *);
+long long int createSchemaValidator(graal_isolatethread_t*);
 
-long long int getSchemaManager(graal_isolatethread_t*, void *);
+long long int createSchemaValidatorWithProcessor(graal_isolatethread_t*, void *);
 
-void registerSchema(graal_isolatethread_t*, void *, char*, char*, void *);
+long long int j_getSchemaManager(graal_isolatethread_t*, void *);
 
-void registerSchemaString(graal_isolatethread_t*, void *, char*, char*, void *);
+long long int j_getValidationReport(graal_isolatethread_t*, void *);
 
-void exportSchema(graal_isolatethread_t*, void *, char*, char*);
+long long int registerSchema(graal_isolatethread_t*, void *, char*, char*, void *);
+
+long long int registerSchemaString(graal_isolatethread_t*, void *, char*, char*, void *);
+
+long long int exportSchema(graal_isolatethread_t*, void *, char*, char*);
+
+long long int j_validate(graal_isolatethread_t*, void *, void *, char*, char*, char*, void *);
+
+long long int j_validateToNode(graal_isolatethread_t*, void *, void *, char*, char*, void *);
 
 long long int createXPathProcessor(graal_isolatethread_t*);
 
 long long int createXPathProcessorWithProcessor(graal_isolatethread_t*, void *);
 
-void j_declareNamespace(graal_isolatethread_t*, void *, char*, char*);
+void j_xp_declareNamespace(graal_isolatethread_t*, void *, char*, char*);
 
-void j_declareVariable(graal_isolatethread_t*, void *, char*);
+void j_xp_declareVariable(graal_isolatethread_t*, void *, char*);
 
-void j_importSchemaNamespace(graal_isolatethread_t*, void *, char*);
+void j_xp_importSchemaNamespace(graal_isolatethread_t*, void *, char*);
 
-void j_setAllowUndeclaredVariables(graal_isolatethread_t*, void *, int);
+void j_xp_setAllowUndeclaredVariables(graal_isolatethread_t*, void *, int);
 
-void j_setBackwardsCompatible(graal_isolatethread_t*, void *, int);
+void j_xp_setBackwardsCompatible(graal_isolatethread_t*, void *, int);
 
-void j_setBaseURI(graal_isolatethread_t*, void *, char*);
+void j_xp_setBaseURI(graal_isolatethread_t*, void *, char*);
 
 long long* j_evaluate(graal_isolatethread_t*, void *, void *, char*, char*, void *);
 
@@ -112,15 +130,15 @@ long long int j_evaluateSingle(graal_isolatethread_t*, void *, char*, char*, voi
 
 char j_effectiveBooleanValue(graal_isolatethread_t*, void *, char*, char*, void *);
 
-long long int createXQueryEngine(graal_isolatethread_t*);
+long long int j_createXQueryEngine(graal_isolatethread_t*);
 
-long long int createXQueryEngineWithProcessor(graal_isolatethread_t*, void *);
+long long int j_createXQueryEngineWithProcessor(graal_isolatethread_t*, void *);
 
 char* j_executeQueryToString(graal_isolatethread_t*, void *, char*, void *);
 
 long long int j_executeQueryToValue(graal_isolatethread_t*, void *, char*, void *);
 
-void j_executeQueryToFile(graal_isolatethread_t*, void *, char*, char*, void *);
+long long int j_executeQueryToFile(graal_isolatethread_t*, void *, char*, char*, void *);
 
 char* getBaseURIForXdmNode(graal_isolatethread_t*, void *);
 
@@ -157,8 +175,6 @@ char* j_getLocalName(graal_isolatethread_t*, void *);
 char* j_getNodeName(graal_isolatethread_t*, void *);
 
 char* xdmValueArrayToString(graal_isolatethread_t*, void *, void *);
-
-char* j_xdmItemToString(graal_isolatethread_t*, void *, void *);
 
 char* j_getAttributeValue(graal_isolatethread_t*, void *, char*);
 

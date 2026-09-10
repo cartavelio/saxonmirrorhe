@@ -31,7 +31,7 @@
         SaxonProcessor::attachCurrentThread();
     proc = p;
         exception = nullptr;
-        cppXQ = createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread, (void *)p->procRef);
+        cppXQ = j_createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread, (void *)p->procRef);
 
 
         if(cppXQ == -1) {

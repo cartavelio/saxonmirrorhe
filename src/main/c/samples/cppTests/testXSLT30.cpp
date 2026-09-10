@@ -515,7 +515,7 @@ void testTrackingOfValueReference(SaxonProcessor *processor, Xslt30Processor *tr
             cerr<<"TrackingOfValueReference failed to create XdmNode object" <<endl;
             sresult->failure++;
             sresult->failureList.push_back("TrackingOfValueReference");
-
+            return;
         }
     }
 
@@ -855,14 +855,17 @@ void exampleSimple2(Xslt30Processor *proc, sResultCount *sresult) {
 
 void exampleTransformToFile(SaxonProcessor * sproc, Xslt30Processor *proc, sResultCount *sresult) {
     cout << "<b>exampleTransformToFile:</b><br/>" << endl;
-
+    sproc->exceptionClear();
     XdmNode* xmlfile = sproc->parseXmlFromFile("../php/xml/foo.xml");
     if(xmlfile == nullptr) {
         sresult->failure++;
         sresult->failureList.push_back("exampleTransformToFile");
         cerr << "exampleTransformToFile NULL found" << endl;
         if (sproc->exceptionOccurred()) {
-            cerr <<"exampleTransformToFile error: "<< sproc->getErrorMessage() << endl;
+            const char * errorMessage = sproc->getErrorMessage();
+            if(errorMessage!= nullptr) {
+                cerr << "exampleTransformToFile error: " << errorMessage << endl;
+            }
         }
 
         return;
@@ -902,6 +905,7 @@ void exampleTransformToFile(SaxonProcessor * sproc, Xslt30Processor *proc, sResu
 
 void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sResultCount *sresult) {
     cout << "<b>exampleTransformToString:</b><br/>" << endl;
+    sproc->exceptionClear();
     proc->exceptionClear();
     XdmNode* xmlfile = sproc->parseXmlFromString("<xml>\n"
                                                  " <value>5</value>\n"
@@ -910,7 +914,7 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
         sresult->failure++;
         sresult->failureList.push_back("exampleTransformToString");
         cerr << "exampleTransformToFile NULL found" << endl;
-        if (sproc->exceptionOccurred()) {
+        if (sproc->exceptionOccurred() && sproc->getErrorMessage() != nullptr) {
             cerr <<"exampleTransformToFile error: "<< sproc->getErrorMessage() << endl;
         }
 
@@ -2279,7 +2283,6 @@ void testSaxSourceNoSystemId(SaxonProcessor * proc, DocumentBuilder * builder, s
          sresult->failureList.push_back("testSaxSourceNoSystemId");
 
      }
-
      delete builder;
 
     }

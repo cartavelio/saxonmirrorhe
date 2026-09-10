@@ -18,6 +18,8 @@ import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
 import com.oracle.svm.core.annotate.*;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,12 +48,18 @@ public class SaxonCException  {
         }
         if(throwable instanceof SaxonApiException) {
            exception = (SaxonApiException)throwable;
+        } if(throwable instanceof NullPointerException) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            throwable.printStackTrace(pw);
+          exception = new SaxonApiException("NullPointer exception found: "+ sw.toString());
         } else {
             exception = new SaxonApiException(throwable);
         }
         if(exception.getMessage() == null) {
             return WordFactory.nullPointer();
         }
+
         CCharPointer a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());
         return a;
     }

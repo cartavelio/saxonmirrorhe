@@ -103,10 +103,6 @@ const char *SaxonProcessor::checkException() {
 }
 */
 const char *SaxonProcessor::getErrorMessage() {
-    SaxonProcessor::attachCurrentThread();
-    if(exception == nullptr) {
-       exception =  new SaxonApiException();
-    }
     if (exception == nullptr) { return nullptr; }
     return exception->getMessage(); //- TODO remove comment
 
@@ -738,13 +734,18 @@ int SaxonProcessor::getNodeKind(int64_t nodeRef) {
 
 XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename, SchemaValidator * validator) {
     int64_t xdmNodeRef = parseXmlFileWithValidator(sxn_environ->thread, (char *)cwd.c_str(), (void *)procRef, (validator != nullptr ? (void *)validator->getUnderlyingValidator() : (void *)nullptr), (char *)filename);
-    if (xdmNodeRef >= 0) {
+    std::cerr<<"parseXmlFromFile, xdmNodeRef ="<<xdmNodeRef<<std::endl;
+    if (xdmNodeRef >= 1) {
         XdmNode *value = nullptr;
         value = new XdmNode(xdmNodeRef);
 
         return value;
     } else if (xdmNodeRef == -2) {
         createException();
+        if(exception->getMessage() != nullptr) {
+            std::cerr<<"parseXmlFromFile, message ="<<exception->getMessage()<<std::endl;
+        }
+        std::cerr<<"parseXmlFromFile, cp1"<<std::endl;
     }
     return nullptr;
 }

@@ -246,7 +246,7 @@ void XPathProcessor::declareNamespace(const char *prefix, const char * uri){
         if (uri == nullptr) {
 		return;
         }
-	j_declareNamespace(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)prefix, (char *)uri);
+	j_xp_declareNamespace(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)prefix, (char *)uri);
 
 }
 
@@ -256,7 +256,7 @@ void XPathProcessor::declareVariable(const char * name){
     if (name == nullptr) {
 		return;
     }
-    j_declareVariable(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)name);
+    j_xp_declareVariable(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)name);
 
 }
 
@@ -292,7 +292,7 @@ void XPathProcessor::importSchemaNamespace(const char* uri){
 
 
 void XPathProcessor::setBaseURI(const char * uriStr) {
-    j_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)uriStr);
+    j_xp_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)uriStr);
 
 
 }

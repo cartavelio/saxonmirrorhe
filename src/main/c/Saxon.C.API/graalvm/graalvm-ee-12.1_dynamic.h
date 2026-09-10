@@ -8,6 +8,14 @@
 extern "C" {
 #endif
 
+typedef long long int (*createDocumentBuilder_fn_t)(graal_isolatethread_t*, void *);
+
+typedef long long int (*j_db_setBaseURI_fn_t)(graal_isolatethread_t*, void *, char*);
+
+typedef long long int (*j_db_setLineNumbering_fn_t)(graal_isolatethread_t*, void *, int);
+
+typedef long long int (*j_db_setDTDValidation_fn_t)(graal_isolatethread_t*, void *, int);
+
 typedef int (*run_main_fn_t)(int argc, char** argv);
 
 typedef long long int (*createProcessorDataWithArray_fn_t)(graal_isolatethread_t*, void *);
@@ -27,8 +35,6 @@ typedef void (*clearProcessorData_fn_t)(graal_isolatethread_t*, void *);
 typedef long long int (*createSaxonProcessor_fn_t)(graal_isolatethread_t*, int);
 
 typedef void (*j_handles_destroy_fn_t)(graal_isolatethread_t*, void *);
-
-typedef long long int (*createDocumentBuilder_fn_t)(graal_isolatethread_t*, void *);
 
 typedef long long* (*j_getLongArray_fn_t)(graal_isolatethread_t*, void *, void *);
 
@@ -54,9 +60,13 @@ typedef long long int (*parseXmlStringWithValidator_fn_t)(graal_isolatethread_t*
 
 typedef long long int (*createXdmAtomicItem_fn_t)(graal_isolatethread_t*, char*, char*);
 
+typedef long long int (*j_main_parseXmlString_fn_t)(graal_isolatethread_t*, char*, void *, void *, void *, char*);
+
 typedef char* (*getTypeName_fn_t)(graal_isolatethread_t*, char*);
 
 typedef char* (*j_getStringValue_fn_t)(graal_isolatethread_t*, void *);
+
+typedef long long int (*j_main_parseXmlFile_fn_t)(graal_isolatethread_t*, char*, void *, void *, void *, char*);
 
 typedef char* (*j_getErrorMessage_fn_t)(graal_isolatethread_t*, void *);
 
@@ -80,31 +90,39 @@ typedef long long* (*j_getXslMessages_fn_t)(graal_isolatethread_t*, void *, void
 
 typedef long long int (*createSaxonCResultDocumentHandler_fn_t)(graal_isolatethread_t*, int);
 
-typedef long long int (*createSchemamValidator_fn_t)(graal_isolatethread_t*, void *);
+typedef long long int (*createSchemaValidator_fn_t)(graal_isolatethread_t*);
 
-typedef long long int (*getSchemaManager_fn_t)(graal_isolatethread_t*, void *);
+typedef long long int (*createSchemaValidatorWithProcessor_fn_t)(graal_isolatethread_t*, void *);
 
-typedef void (*registerSchema_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
+typedef long long int (*j_getSchemaManager_fn_t)(graal_isolatethread_t*, void *);
 
-typedef void (*registerSchemaString_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
+typedef long long int (*j_getValidationReport_fn_t)(graal_isolatethread_t*, void *);
 
-typedef void (*exportSchema_fn_t)(graal_isolatethread_t*, void *, char*, char*);
+typedef long long int (*registerSchema_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
+
+typedef long long int (*registerSchemaString_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
+
+typedef long long int (*exportSchema_fn_t)(graal_isolatethread_t*, void *, char*, char*);
+
+typedef long long int (*j_validate_fn_t)(graal_isolatethread_t*, void *, void *, char*, char*, char*, void *);
+
+typedef long long int (*j_validateToNode_fn_t)(graal_isolatethread_t*, void *, void *, char*, char*, void *);
 
 typedef long long int (*createXPathProcessor_fn_t)(graal_isolatethread_t*);
 
 typedef long long int (*createXPathProcessorWithProcessor_fn_t)(graal_isolatethread_t*, void *);
 
-typedef void (*j_declareNamespace_fn_t)(graal_isolatethread_t*, void *, char*, char*);
+typedef void (*j_xp_declareNamespace_fn_t)(graal_isolatethread_t*, void *, char*, char*);
 
-typedef void (*j_declareVariable_fn_t)(graal_isolatethread_t*, void *, char*);
+typedef void (*j_xp_declareVariable_fn_t)(graal_isolatethread_t*, void *, char*);
 
-typedef void (*j_importSchemaNamespace_fn_t)(graal_isolatethread_t*, void *, char*);
+typedef void (*j_xp_importSchemaNamespace_fn_t)(graal_isolatethread_t*, void *, char*);
 
-typedef void (*j_setAllowUndeclaredVariables_fn_t)(graal_isolatethread_t*, void *, int);
+typedef void (*j_xp_setAllowUndeclaredVariables_fn_t)(graal_isolatethread_t*, void *, int);
 
-typedef void (*j_setBackwardsCompatible_fn_t)(graal_isolatethread_t*, void *, int);
+typedef void (*j_xp_setBackwardsCompatible_fn_t)(graal_isolatethread_t*, void *, int);
 
-typedef void (*j_setBaseURI_fn_t)(graal_isolatethread_t*, void *, char*);
+typedef void (*j_xp_setBaseURI_fn_t)(graal_isolatethread_t*, void *, char*);
 
 typedef long long* (*j_evaluate_fn_t)(graal_isolatethread_t*, void *, void *, char*, char*, void *);
 
@@ -112,15 +130,15 @@ typedef long long int (*j_evaluateSingle_fn_t)(graal_isolatethread_t*, void *, c
 
 typedef char (*j_effectiveBooleanValue_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
 
-typedef long long int (*createXQueryEngine_fn_t)(graal_isolatethread_t*);
+typedef long long int (*j_createXQueryEngine_fn_t)(graal_isolatethread_t*);
 
-typedef long long int (*createXQueryEngineWithProcessor_fn_t)(graal_isolatethread_t*, void *);
+typedef long long int (*j_createXQueryEngineWithProcessor_fn_t)(graal_isolatethread_t*, void *);
 
 typedef char* (*j_executeQueryToString_fn_t)(graal_isolatethread_t*, void *, char*, void *);
 
 typedef long long int (*j_executeQueryToValue_fn_t)(graal_isolatethread_t*, void *, char*, void *);
 
-typedef void (*j_executeQueryToFile_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
+typedef long long int (*j_executeQueryToFile_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
 
 typedef char* (*getBaseURIForXdmNode_fn_t)(graal_isolatethread_t*, void *);
 
@@ -157,8 +175,6 @@ typedef char* (*j_getLocalName_fn_t)(graal_isolatethread_t*, void *);
 typedef char* (*j_getNodeName_fn_t)(graal_isolatethread_t*, void *);
 
 typedef char* (*xdmValueArrayToString_fn_t)(graal_isolatethread_t*, void *, void *);
-
-typedef char* (*j_xdmItemToString_fn_t)(graal_isolatethread_t*, void *, void *);
 
 typedef char* (*j_getAttributeValue_fn_t)(graal_isolatethread_t*, void *, char*);
 

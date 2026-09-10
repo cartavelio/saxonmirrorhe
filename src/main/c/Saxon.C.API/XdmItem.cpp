@@ -115,6 +115,7 @@ XDM_TYPE XdmItem::getType(){
 }
 
 XdmItem::~XdmItem() {
+    std::cerr<<"xdmItem destructor cp0"<<std::endl;
     value = -1;
     /*else {
          decrementRefCount();
