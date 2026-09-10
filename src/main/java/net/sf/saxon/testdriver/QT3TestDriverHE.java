@@ -303,7 +303,6 @@ public class QT3TestDriverHE extends TestDriver {
             } else if ("moduleImport".equals(value)) {
                 return !inverse;
             } else if ("schema-location-hint".equals(value)) {
-                env.schemaAware = !inverse;
                 return (edition.equals("PE") || edition.equals("EE")) ^ inverse;
             } else if ("infoset-dtd".equals(value)) {
                 if (treeModel == TreeModel.TINY_TREE || treeModel == TreeModel.LINKED_TREE ||
@@ -830,9 +829,7 @@ public class QT3TestDriverHE extends TestDriver {
             assertXpc.declareNamespace("bin", NamespaceUri.EXPATH_BINARY.toString());
             assertXpc.declareVariable(new QName("result"));
             assertXpc.setBaseURI(assertion.getBaseURI());
-            if (env.schemaAware) {
-                assertXpc.setSchemaAware(true);
-            }
+            assertXpc.setLanguageVersion("4.0");
 
             copySchemaNamespaces(env, assertXpc);  // ensure environment has schema namespaces
 
