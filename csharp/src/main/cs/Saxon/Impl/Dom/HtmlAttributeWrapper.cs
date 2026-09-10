@@ -115,15 +115,15 @@ namespace Saxon.Impl.Dom {
         }
 
         protected internal override SequenceIterator iterateAttributes(NodePredicate nodeTest) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
         
         protected override SequenceIterator iterateDescendants(NodePredicate nodeTest, bool includeSelf) {

@@ -20,20 +20,20 @@ namespace Saxon.Api {
         /// All whitespace text nodes are stripped
         /// </summary>
         public static WhitespacePolicy StripAll = 
-            new(Whitespace.ALL, AllElementsSpaceStrippingRule.getInstance());
+            new(Whitespace.ALL, AllElementsSpaceStrippingRule.INSTANCE);
 
         /// <summary>
         /// Whitespace text nodes other than whitespace within mixed content are stripped.
         /// Note that whitespace in text-only content models is considered ignorable under this definition.
         /// </summary>
         public static WhitespacePolicy StripIgnorable =
-            new(Whitespace.IGNORABLE, IgnorableSpaceStrippingRule.getInstance());
+            new(Whitespace.IGNORABLE, IgnorableSpaceStrippingRule.INSTANCE);
 
         /// <summary>
         /// No whitespace is stripped
         /// </summary>
         public static WhitespacePolicy PreserveAll =
-            new WhitespacePolicy(Whitespace.NONE, NoElementsSpaceStrippingRule.getInstance());
+            new WhitespacePolicy(Whitespace.NONE, NoElementsSpaceStrippingRule.INSTANCE);
 
         /// <summary>Unspecified means that no other value has been specifically requested</summary>
         public static WhitespacePolicy Unspecified = 

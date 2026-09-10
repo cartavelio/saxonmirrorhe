@@ -60,7 +60,7 @@ namespace System.Impl.Helpers {
 
         public Saxon.Hej.om.AttributeMap getAttributes() {
             if (parser.HasAttributes) {
-                Saxon.Hej.om.AttributeMap atts = Saxon.Hej.om.EmptyAttributeMap.getInstance();
+                Saxon.Hej.om.AttributeMap atts = Saxon.Hej.om.EmptyAttributeMap.INSTANCE;
                 Saxon.Hej.s9api.Location location = saveLocation();
                 for (int i = 0; (i < parser.AttributeCount); i++) {
                     parser.MoveToAttribute(i);
@@ -85,7 +85,7 @@ namespace System.Impl.Helpers {
                 return atts;
             }
             else {
-                return Saxon.Hej.om.EmptyAttributeMap.getInstance();
+                return Saxon.Hej.om.EmptyAttributeMap.INSTANCE;
             }
         }
 
@@ -203,7 +203,7 @@ namespace System.Impl.Helpers {
         }
 
         public Saxon.Hej.type.SchemaType getSchemaType() {
-            return Saxon.Hej.type.Untyped.getInstance();
+            return Saxon.Hej.type.Untyped.INSTANCE;
         }
 
         public Saxon.Hej.pull.PullEvent next() {

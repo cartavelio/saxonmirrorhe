@@ -12,7 +12,7 @@ namespace Saxon.Api {
         /// </summary>
         public static readonly XdmAnyFunctionType Instance = new();
 
-        private XdmAnyFunctionType() : base(AnyFunctionType.ANY_FUNCTION) {
+        private XdmAnyFunctionType() : base(AnyFunctionType.INSTANCE) {
         }
         
         /// <summary>

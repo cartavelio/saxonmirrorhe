@@ -6,7 +6,7 @@ namespace Saxon.Api {
     /// An implementation of <c>IResource</c> that represents an XDM node, simply by wrapping
     /// an existing <c>XdmNode</c> object
     /// </summary>
-    public class NodeResource : IResource {
+    public record NodeResource : IResource {
 
         private readonly XdmNode node;
 
