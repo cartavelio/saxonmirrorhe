@@ -123,7 +123,7 @@
     }
 
     XdmValue * XdmFunctionItem::call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) {
-          if(argument_length == 0 || arguments == nullptr || processor == nullptr) {
+          if(argument_length > 0 && arguments == nullptr || processor == nullptr) {
                       std::cerr << "Error in XdmFunctionItem.call.  nullptr arguments found." << std::endl;
                       return nullptr;
           }
@@ -132,7 +132,7 @@
           if(argumentJArrayRef == -1 && argument_length > 0) {
             std::cerr << "Error in XdmFunctionItem.call when converting arguments -   nullptr arguments found." << std::endl;
             return nullptr;
-          }
+          } 
            int64_t results = j_xdmFunctionItem_call(SaxonProcessor::sxn_environ->thread, (void *)processor->procRef, (void *)value, (argumentJArrayRef == -1 ? (void *) nullptr: (void *)argumentJArrayRef));
            if(argumentJArrayRef != -1) {
                j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)argumentJArrayRef);
