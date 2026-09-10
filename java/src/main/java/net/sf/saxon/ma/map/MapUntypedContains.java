@@ -18,7 +18,7 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 
 /**
- * Implementation of an internal function map:untyped-contains(Map, key) =&gt; boolean,
+ * Implementation of an internal function map:_untyped-contains(Map, key) =&gt; boolean,
  * which is like map:contains except that if the supplied key is untyped atomic, it
  * is converted to all the possible types present in the map and returns true if the
  * key after conversion is present. In addition, if the supplied key is NaN then the

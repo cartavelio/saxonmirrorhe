@@ -223,7 +223,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
 
-            register("untyped-contains", 2, e -> e.populate(MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+            register("_untyped-contains", 2, e -> e.populate(MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
             
