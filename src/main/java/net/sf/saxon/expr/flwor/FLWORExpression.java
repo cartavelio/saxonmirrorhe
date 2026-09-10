@@ -11,6 +11,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.TailCall;
+import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.QueryModule;
@@ -503,6 +504,7 @@ public class FLWORExpression extends Expression {
             final ContextItemStaticInfo contextItemType) throws XPathException {
 
         Optimizer opt = visitor.obtainOptimizer();
+        OptimizerOptions options = opt.getOptimizerOptions();
         //verifyParentPointers();
         // Optimize all the subexpressions
         for (Clause c : clauses) {
@@ -526,51 +528,54 @@ public class FLWORExpression extends Expression {
         // If any 'let' clause declares a variable that is used only once, then inline it. If the variable
         // is not used at all, then eliminate it
 
-        boolean tryAgain;
-        boolean changed = false;
-        do {
-            tryAgain = false;
-            for (Clause c : clauses) {
-                if (c.getClauseKey() == Clause.ClauseName.LET) {
-                    LetClause lc = (LetClause) c;
-                    if (!ExpressionTool.dependsOnVariable(this, new Binding[]{lc.getRangeVariable()})) {
-                        clauses.remove(c);
-                        opt.trace("Removed unused variable " + lc.getRangeVariable().getVariableQName().getDisplayName(), this);
-                        tryAgain = true;
-                        break;
-                    }
-                    boolean suppressInlining = false;
-                    for (Clause c2 : clauses) {
-                        if (c2.containsNonInlineableVariableReference(lc.getRangeVariable())) {
-                            suppressInlining = true;
-                            break;
-                        }
-                    }
-                    if (!suppressInlining) {
-                        boolean oneRef = lc.getRangeVariable().getNominalReferenceCount() == 1;
-                        boolean simpleSeq = lc.getSequence() instanceof VariableReference ||
-                                lc.getSequence() instanceof Literal;
-                        if (oneRef || simpleSeq) {
-                            ExpressionTool.replaceVariableReferences(this, lc.getRangeVariable(), lc.getSequence(), true);
+        if (options.isSet(OptimizerOptions.INLINE_VARIABLES)) {
+            boolean tryAgain;
+            boolean changed = false;
+            do {
+                tryAgain = false;
+                for (Clause c : clauses) {
+                    if (c.getClauseKey() == Clause.ClauseName.LET &&
+                            !(((LetClause) c).getSequence() instanceof TraceExpression)) {
+                        LetClause lc = (LetClause) c;
+                        if (!ExpressionTool.dependsOnVariable(this, new Binding[]{lc.getRangeVariable()})) {
                             clauses.remove(c);
-                            opt.trace("Inlined variable " + lc.getRangeVariable().getVariableQName().getDisplayName(), this);
-                            if (clauses.isEmpty()) {
-                                return getReturnClause();
-                            }
+                            opt.trace("Removed unused variable " + lc.getRangeVariable().getVariableQName().getDisplayName(), this);
                             tryAgain = true;
                             break;
                         }
+                        boolean suppressInlining = false;
+                        for (Clause c2 : clauses) {
+                            if (c2.containsNonInlineableVariableReference(lc.getRangeVariable())) {
+                                suppressInlining = true;
+                                break;
+                            }
+                        }
+                        if (!suppressInlining) {
+                            boolean oneRef = lc.getRangeVariable().getNominalReferenceCount() == 1;
+                            boolean simpleSeq = lc.getSequence() instanceof VariableReference ||
+                                    lc.getSequence() instanceof Literal;
+                            if (oneRef || simpleSeq) {
+                                ExpressionTool.replaceVariableReferences(this, lc.getRangeVariable(), lc.getSequence(), true);
+                                clauses.remove(c);
+                                opt.trace("Inlined variable " + lc.getRangeVariable().getVariableQName().getDisplayName(), this);
+                                if (clauses.isEmpty()) {
+                                    return getReturnClause();
+                                }
+                                tryAgain = true;
+                                break;
+                            }
+                        }
                     }
                 }
-            }
-            changed |= tryAgain;
-        } while (tryAgain);
+                changed |= tryAgain;
+            } while (tryAgain);
 
-        // If changed, remove any redundant trace clauses
-        if (changed) {
-            for (int i = clauses.size() - 1; i >= 1; i--) {
-                if (clauses.get(i).getClauseKey() == Clause.ClauseName.TRACE && clauses.get(i - 1).getClauseKey() == Clause.ClauseName.TRACE) {
-                    clauses.remove(i);
+            // If changed, remove any redundant trace clauses
+            if (changed) {
+                for (int i = clauses.size() - 1; i >= 1; i--) {
+                    if (clauses.get(i).getClauseKey() == Clause.ClauseName.TRACE && clauses.get(i - 1).getClauseKey() == Clause.ClauseName.TRACE) {
+                        clauses.remove(i);
+                    }
                 }
             }
         }

@@ -79,7 +79,8 @@ public abstract class Clause {
     /**
      * Create a copy of this clause
      *
-     * @param flwor the new FLWORExpression to contain the copied clause
+     * @param flwor the new FLWORExpression to contain the copied clause. Note that this will
+     *              not have been fully initialized.
      * @param rebindings the rebinding map
      * @return the copied clause
      */
