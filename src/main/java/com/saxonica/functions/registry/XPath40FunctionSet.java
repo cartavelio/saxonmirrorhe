@@ -294,7 +294,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, predicate2, ONE, null));
 
         SpecificFunctionType foldLeftArg = new SpecificFunctionType(
-                SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
+                SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM,
                 SequenceType.ANY_SEQUENCE);
 
         register("fold-left", 3, e -> e.populate(FoldLeftFn::new, AnyItemType.getInstance(),
@@ -304,7 +304,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(2, foldLeftArg, ONE, null));
 
         SpecificFunctionType foldRightArg = new SpecificFunctionType(
-                SequenceType.SINGLE_ITEM, SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
+                SequenceType.SINGLE_ITEM, SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE);
 
         register("fold-right", 3, e -> e.populate(FoldRightFn::new, AnyItemType.getInstance(),
