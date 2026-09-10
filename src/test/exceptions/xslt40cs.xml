@@ -33,6 +33,11 @@
       and https://www.w3.org/Bugs/Public/show_bug.cgi?id=14934</reason>
   </exception>
   
+  <exception test-case="function-available-1008" run="false" report="Bug">
+    <created by="Michael Kay" on="2021-10-01"/>
+    <reason>Saxon-CS recognizes function concat#0 even when 4.0 is not enabled.</reason>
+  </exception>
+  
 
   
   <exception test-case="id-001
