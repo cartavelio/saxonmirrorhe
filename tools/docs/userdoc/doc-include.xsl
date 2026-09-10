@@ -21,7 +21,7 @@
   
   <xsl:param name="output-uri" select="''"/>  
 
-  <xsl:output method="xml" indent="yes"/>
+  <xsl:output method="xml" indent="no"/>
   <xsl:variable name="base-uri" select="base-uri(/)"/>
 
   <xsl:mode on-no-match="shallow-copy"/>
