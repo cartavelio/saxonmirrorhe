@@ -6,30 +6,29 @@ char * resources_dir;
 int jvmCreated = 0;
 char * tempDllname =
 #if defined (__linux__)
-"/libsaxonhec.so";
+        "/libsaxonhec.so";
 #elif  defined (__APPLE__) && defined(__MACH__)
-"/libsaxonhec.dylib";
+        "/libsaxoneec.dylib";
 #else
-"\\libsaxonhec.dll";
+        "\\libsaxonhec.dll";
 #endif
-
 
 char * tempResources_dir =
 #ifdef __linux__
-"/saxon-data";
+        "/saxon-data";
 #elif  defined (__APPLE__) && defined(__MACH__)
-"/saxon-data";
+        "/saxon-data";
 #else
-"\\saxon-data";
+        "\\saxon-data";
 #endif
 
 char * dllPath =
 #if defined (__linux__)
-"/usr/lib";
+        "/usr/lib";
 #elif  defined (__APPLE__) && defined(__MACH__)
-"/usr/local/lib";
+        "/usr/local/lib";
 #else
-"C:\\Program Files\\Saxonica\\SaxonHEC1.2.1";
+        "C:\\Program Files\\Saxonica\\SaxonC HE 11.1";
 #endif
 
 /*
