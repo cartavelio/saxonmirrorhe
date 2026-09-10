@@ -158,6 +158,14 @@ public class SignificantItemDetector extends ProxyOutputter {
         super.append(item, locationId, copyNamespaces);
     }
 
+    @Override
+    public void append(Item item) throws XPathException {
+        if (isSignificant(item)) {
+            start();
+        }
+        super.append(item);
+    }
+
     /**
      * Notify the end of a document node
      */
