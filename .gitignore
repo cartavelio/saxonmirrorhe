@@ -13,6 +13,7 @@ java_*.hprof
 .DS_Store
 .vs/
 *.iml
+._.DS_Store
 
 # Created by running the unit tests :-(
 /secondary-out.xml
@@ -33,3 +34,4 @@ java_*.hprof
 
 # SaxonC Python genrated library file
 /src/main/c/Saxon.C.API/python-saxon/saxonc.cpp
+/src/main/c/Saxon.C.API/*.lo
