@@ -92,6 +92,12 @@ def testXquery_40_functions(saxonproc):
         query_text='xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang='4.0')
     assert "paragraph" in str(result)
 
+def testXquery_40_invisible_xml(saxonproc):
+    xquery_processor = saxonproc.new_xquery_processor()
+    result = xquery_processor.run_query_to_value(
+        query_text="xquery version '4.0'; invisible-xml(\"S=A. A='a'.\")('a')", lang='4.0')
+    assert "<A>a</A>" in str(result)
+
 def testXquery_40_functions_error(saxonproc):
     try:
         saxonproc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')

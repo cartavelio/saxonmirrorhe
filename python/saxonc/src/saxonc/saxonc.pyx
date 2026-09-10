@@ -4151,7 +4151,7 @@ cdef class PyXsdSchema:
         new_schema.thisxsdptr = c_new_schema
         return new_schema
 
-    def export_compoments(self, str filename):
+    def export_components(self, str filename):
         py_filename_string = filename.encode('UTF-8') if filename is not None else None
         cdef char * c_filename = py_filename_string if filename is not None else ""
         self.thisxsdptr.exportComponents(c_filename)
