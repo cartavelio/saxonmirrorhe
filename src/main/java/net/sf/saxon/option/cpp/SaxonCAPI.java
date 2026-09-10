@@ -295,9 +295,6 @@ public class SaxonCAPI {
         if (refs.length == 0) {
             return WordFactory.nullPointer();
         }
-        if(SaxonCAPI.debug) {
-            System.err.println("longArrayToNativeWithLength() length=: "+ refs.length);
-        }
         CLongPointer a = alloc.call((refs.length+1) * 8);
         a.write(0, refs.length);
         for (int i = 1; i < refs.length+1; i++) {

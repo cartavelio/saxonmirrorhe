@@ -36,7 +36,7 @@ class PyTestOutcome:
         tag = assertion.name.split("}")[1]
         assert_set.add(tag)
 
-        if "error" != tag and "any-of" != tag and "all-of" != tag and result is None:
+        if "assert-empty" != tag and "error" != tag and "any-of" != tag and "all-of" != tag and result is None:
             print("Error Found = " + str(result_as_error))
             return False
         print(assert_set)
@@ -47,7 +47,7 @@ class PyTestOutcome:
         elif "assert-eq" == tag:
             return self.assert_eq(assertion, result, assert_xpc, catalog_xpc)
         elif "assert-empty" == tag:
-            return result.size == 0
+            return result is None or result.size == 0
         elif "assert-true" == tag:
             return result.size == 1 and result.item_at(0).is_atomic and result.item_at(0).get_atomic_value().primitive_type_name
         elif "error" == tag:
@@ -194,18 +194,20 @@ class PyTestOutcome:
 
     def assert_xpath(self, assertion: PyXdmNode, result: PyXdmValue, assert_xpc: PyXPathProcessor, catalog_xpc: PyXPathProcessor):
         '''catalog_xpc.set_context(xdm_item=assertion)'''
+        if result is None:
+            return False
         xml_str = str(assertion)
         new_assertion = self.processor.parse_xml(xml_text=xml_str)
         temp_xpath_proc = self.processor.new_xpath_processor()
         temp_xpath_proc.set_context(xdm_item=new_assertion)
         namespaceValues = temp_xpath_proc.evaluate("for $i in 1 to count(//namespace::*) return if (empty(index-of((//namespace::*)[position() = (1 to ($i - 1))][name() = name((//namespace::*)[$i])], (//namespace::*)[$i]))) then (//namespace::*)[$i] else ()")
         if namespaceValues != None and namespaceValues.size > 0:
-            '''print("values = " + str(namespaceValues))
-            print("================")'''
+            print("values = " + str(namespaceValues))
+            print("================")
             ns_size = namespaceValues.size
             for x in range(ns_size):
                 itemx = namespaceValues.item_at(x)
-                '''print("namespace node=" + str(itemx.get_node_value().string_value))'''
+                print("namespace node=" + str(itemx.get_node_value().string_value))
                 if itemx is not None and isinstance(itemx, PyXdmNode):
                     itemn = itemx.get_node_value()
                     ns_name = itemn.name

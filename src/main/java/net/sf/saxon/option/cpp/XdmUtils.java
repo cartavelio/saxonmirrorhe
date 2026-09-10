@@ -1424,6 +1424,10 @@ public class XdmUtils {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         XdmSequenceIterator iter = XdmSequenceIterator.ofNodes(node.getUnderlyingNode().iterateAxis(axisNum));
 
+        if(SaxonCAPI.debug) {
+            System.err.println("Java Debug: axisNum=" + axisNum );
+        }
+
         long[] childRefs = null;
         if(iter.hasNext()) {
             childRefs = iter.stream().mapToLong(i -> {

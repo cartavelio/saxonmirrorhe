@@ -39,37 +39,51 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
 
 // test nodeAxis
 void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
-                     sResultCount *sresult) {
+                  sResultCount *sresult) {
 
   cout << endl << "Test testNodeAxis:" << endl;
-  XdmNode *node =
-      processor->parseXmlFromString("<out xmlns:my='http://www.example.com/ns/various' xmlns:f='http://www.example.com/ns/various1' xmlns='http://www.example.com'><person>text1</person><person>text2</person></out>");
-
+  XdmNode *node = processor->parseXmlFromString(
+      "<out xmlns:my='http://www.example.com/ns/various' "
+      "xmlns:f='http://www.example.com/ns/various1' "
+      "xmlns='http://www.example.com'><person>text1</person><person>text2</"
+      "person></out>");
 
   try {
-     XdmNode ** children = node->axisNodes(3);
-     int childCount = node->axisNodeCount();
-     cout<< "node type="<<node->getType()<<endl;
-     cout<<" child count = "<<childCount<<endl;
-     for(int i =0;i < childCount; i++) {
-     cout<<"child-Node type = "<<(children[i]->getType())<<endl;
-        cout<< "child node:" << (children[i]->getStringValue())<<endl;
-     }
-     cout<<"cp0"<<endl;
-     cout<< "node name="<< node->getNodeName()<<endl;
-     XdmNode ** namespaces = node->axisNodes(8);
-     int namespaceCount = node->axisNodeCount();
-     cout<<"namespace count="<<namespaceCount<<endl;
+    XdmNode *child = node->getChildren()[0];
+    XdmNode **children = child->axisNodes(3);
+    int childCount = child->axisNodeCount();
+    //     cout<< "node type="<<((node->getChildren()[0]_->toString())<<endl;
+    cout << " child count = " << childCount << endl;
+    for (int i = 0; i < childCount; i++) {
+      cout << "child-Node type = " << (children[i]->getType()) << endl;
+      cout << "child node:" << (children[i]->toString()) << endl;
+    }
+    XdmNode **namespaces = child->axisNodes(8);
+    int namespaceCount = child->axisNodeCount();
+
+    cout << "namespace count=" << namespaceCount << endl;
+    for (int i = 0; i < namespaceCount; i++) {
+      if(namespaces[i]->getNodeName() != nullptr){
+        cout << "namespace name =" << (namespaces[i]->getNodeName()) << endl;
+      }
+      cout << "namespace value =" << (namespaces[i]->getStringValue()) << endl;
+    }
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
     sresult->failure++;
-    sresult->failureList.push_back("testXPathSingle");
+    sresult->failureList.push_back("testNodeAxis");
   }
 
   xpath->clearParameters();
   xpath->clearProperties();
+  delete  [] child;
+  delete [] children;
+  delete [] namespaces;
+  delete node;
+  sresult->success++;
 
 }
+
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // more than one XdmItem.

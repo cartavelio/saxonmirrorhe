@@ -63,7 +63,7 @@ debug = False
 
 run_test = None
 '''"streamable"'''
-run_test_case_name = 'current-output-uri-006'
+run_test_case_name = None
 '''result-document-0206'''
 run_assertion = None
 '''serialization-matches'''
@@ -513,7 +513,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     initial_function = xpath_proc.evaluate_single("initial-function")
     if os.getenv("SAXONC_DEBUG_FLAG") is not None:
         print(test_case_node.base_uri)
-    print(test_case_node)
+    '''print(test_case_node)'''
 
 
     initial_match_selection = None
@@ -571,11 +571,17 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
             '''check for namespace'''
             namespace_uri = ""
             if ":" in initial_function_name:
-                prefix = initial_function_name.split(':')[0]
-                print(prefix)
-                print(initial_function_node)
+                initial_function_name_split = initial_function_name.split(':')
+                prefix = initial_function_name_split[0]
                 namespaces = initial_function_node.node_axis(8)
-                print(namespaces)
+                for ns in namespaces:
+                    uri_str = ns.string_value
+                    ns_prefix  = ns.name
+
+                    if ns_prefix is not None and prefix == ns_prefix:
+                        initial_function_name = "{" + uri_str + "}" + initial_function_name_split[1]
+
+
                 initial_function_name =  initial_function_name
 
             attributes = initial_function_node.attributes
@@ -589,8 +595,6 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                         exit()
 
             result = environment.sheet.call_function_returning_value(initial_function_name, [])
-            print(initial_function_name)
-            exit()
         else:
             result = environment.sheet.apply_templates_returning_value(xdm_value=environment.context_item,
                                                                        base_output_uri=base_output_uri)
@@ -603,6 +607,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
 
     except PySaxonApiError as ex:
+        print(ex)
         errorResult = ex
 
     assert_xpc = environment.proc.new_xpath_processor()
