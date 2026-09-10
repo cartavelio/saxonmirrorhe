@@ -9,11 +9,13 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.query.SequenceWrapper;
 import net.sf.saxon.serialize.*;
 import net.sf.saxon.stax.StAXResultHandlerImpl;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -29,7 +31,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stream.StreamResult;
-import java.io.Writer;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -241,7 +242,14 @@ public class SerializerFactory {
             props = props2;
             params = new SerializationProperties(props2, charMapIndex);
         }
-        if (result instanceof StreamResult) {
+        UnicodeWriter uWriter = null;
+        ExpandedStreamResult expandedResult = null;
+        if (result instanceof UnicodeWriterResult) {
+            uWriter = ((UnicodeWriterResult) result).getUnicodeWriter();
+        } else if (result instanceof StreamResult) {
+            expandedResult = new ExpandedStreamResult(getConfiguration(), (StreamResult)result, props);
+        }
+        if (result instanceof StreamResult || result instanceof UnicodeWriterResult) {
 
             // The "target" is the start of the output pipeline, the Receiver that
             // instructions will actually write to (except that other things like a
@@ -261,31 +269,53 @@ public class SerializerFactory {
                 case "html": {
                     emitter = newHTMLEmitter(props);
                     emitter.setPipelineConfiguration(pipe);
+                    if (uWriter == null) {
+                        uWriter = expandedResult.obtainUnicodeWriter();
+                    }
+                    emitter.setUnicodeWriter(uWriter);
                     target = createHTMLSerializer(emitter, params, pipe);
+
                     break;
                 }
                 case "xml": {
                     emitter = newXMLEmitter(props);
                     emitter.setPipelineConfiguration(pipe);
+                    if (uWriter == null) {
+                        assert expandedResult != null;
+                        uWriter = expandedResult.obtainUnicodeWriter();
+                    }
+                    emitter.setUnicodeWriter(uWriter);
                     target = createXMLSerializer((XMLEmitter) emitter, params);
                     break;
                 }
                 case "xhtml": {
                     emitter = newXHTMLEmitter(props);
                     emitter.setPipelineConfiguration(pipe);
+                    if (uWriter == null) {
+                        assert expandedResult != null;
+                        uWriter = expandedResult.obtainUnicodeWriter();
+                    }
+                    emitter.setUnicodeWriter(uWriter);
                     target = createXHTMLSerializer(emitter, params, pipe);
                     break;
                 }
                 case "text": {
                     emitter = newTEXTEmitter();
                     emitter.setPipelineConfiguration(pipe);
+                    if (uWriter == null) {
+                        assert expandedResult != null;
+                        uWriter = expandedResult.obtainUnicodeWriter();
+                    }
+                    emitter.setUnicodeWriter(uWriter);
                     target = createTextSerializer(emitter, params);
                     break;
                 }
                 case "json": {
-                    StreamResult sr = (StreamResult) result;
                     props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-                    JSONEmitter je = new JSONEmitter(pipe, sr, props);
+                    if (uWriter == null) {
+                        uWriter = expandedResult.obtainUnicodeWriter();
+                    }
+                    JSONEmitter je = new JSONEmitter(pipe, uWriter, props);
                     JSONSerializer js = new JSONSerializer(pipe, je, props);
                     String sortOrder = props.getProperty(SaxonOutputKeys.PROPERTY_ORDER);
                     if (sortOrder != null) {
@@ -297,9 +327,11 @@ public class SerializerFactory {
 
                 }
                 case "adaptive": {
-                    ExpandedStreamResult esr = new ExpandedStreamResult(pipe.getConfiguration(), (StreamResult)result, props);
-                    Writer writer = esr.obtainWriter();
-                    AdaptiveEmitter je = new AdaptiveEmitter(pipe, writer);
+                    if (uWriter == null) {
+                        assert expandedResult != null;
+                        uWriter = expandedResult.obtainUnicodeWriter();
+                    }
+                    AdaptiveEmitter je = new AdaptiveEmitter(pipe, uWriter);
                     je.setOutputProperties(props);
                     CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                     ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);
@@ -310,7 +342,7 @@ public class SerializerFactory {
                         CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                         ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);
                         target = createSaxonSerializationMethod(
-                                method, params, pipe, characterMapExpander, normalizer, (StreamResult)result);
+                                method, params, pipe, characterMapExpander, normalizer, expandedResult, result);
                         if (target instanceof Emitter) {
                             emitter = (Emitter) target;
                         }
@@ -328,8 +360,6 @@ public class SerializerFactory {
             }
             if (emitter != null) {
                 emitter.setOutputProperties(props);
-                StreamResult sr = (StreamResult) result;
-                emitter.setStreamResult(sr);
             }
             //target = new RegularSequenceChecker(target); // add this back in for diagnostics only
             target.setSystemId(result.getSystemId());
@@ -683,7 +713,7 @@ public class SerializerFactory {
     protected SequenceReceiver createSaxonSerializationMethod(
             String method, SerializationProperties params,
             PipelineConfiguration pipe, CharacterMapExpander characterMapExpander,
-            ProxyReceiver normalizer, StreamResult result) throws XPathException {
+            ProxyReceiver normalizer, ExpandedStreamResult expandedResult, Result result) throws XPathException {
         throw new XPathException("Saxon serialization methods require Saxon-PE to be enabled");
     }
 

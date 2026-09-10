@@ -11,7 +11,7 @@ import java.util.function.IntPredicate;
  * of an underlying byte array
  */
 
-class Slice16 extends UnicodeString {
+public class Slice16 extends UnicodeString {
 
     private char[] chars;
     private int start;
@@ -42,6 +42,19 @@ class Slice16 extends UnicodeString {
     public int getWidth() {
         return 16;
     }
+
+    public char[] getCharArray() {
+        return chars;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
 
     @Override
     public long indexOf(int codePoint, long from) {
@@ -81,26 +94,27 @@ class Slice16 extends UnicodeString {
         consumer.append16(chars, requireInt(start) + this.start, requireInt(len));
     }
 
-    @Override
-    public void write(Writer writer) throws IOException {
-        writer.write(chars, start, end-start);
-    }
-
-    @Override
-    public void write(Writer writer, long start, long len) throws IOException {
+    private void write(Writer writer, long start, long len) throws IOException {
         writer.write(chars, this.start + requireInt(start), requireInt(len));
     }
 
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
     @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        int end = this.start + requireInt(limit);
-        for (int i = this.start + requireInt(start); i < end; i++) {
-            if (stop.test(chars[i])) {
-                write(writer, start, i - this.start - start);
-                return i - this.start;
+    public long indexWhere(IntPredicate predicate, long from) {
+        for (int i = requireInt(from) + start; i < end; i++) {
+            if (predicate.test(chars[i])) {
+                return i - start;
             }
         }
-        write(writer, start, limit - start);
         return -1;
     }
 

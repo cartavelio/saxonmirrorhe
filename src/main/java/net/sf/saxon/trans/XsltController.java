@@ -379,7 +379,7 @@ public class XsltController extends Controller {
      * <p>
      * It is not necessary to use this interface in order to change the destination
      * to which messages are written: that can be achieved by obtaining the standard
-     * message emitter and calling its {@link Emitter#setWriter} method.</p>
+     * message emitter and calling its {@link MessageEmitter#setWriter} method.</p>
      * <p>
      * Although any <code>Receiver</code> can be supplied as the destination for messages,
      * applications may find it convenient to implement a subclass of {@link SequenceWriter},
@@ -1044,9 +1044,9 @@ public class XsltController extends Controller {
     private void openMessageEmitter() throws XPathException {
         if (explicitMessageReceiver != null) {
             explicitMessageReceiver.open();
-            if (explicitMessageReceiver instanceof Emitter && ((Emitter) explicitMessageReceiver).getWriter() == null) {
-                ((Emitter) explicitMessageReceiver).setStreamResult(getConfiguration().getLogger().asStreamResult());
-            }
+//            if (explicitMessageReceiver instanceof Emitter && ((Emitter) explicitMessageReceiver).getWriter() == null) {
+//                ((Emitter) explicitMessageReceiver).setStreamResult(getConfiguration().getLogger().asStreamResult());
+//            }
         }
     }
 

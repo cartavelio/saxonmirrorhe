@@ -8,6 +8,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.serialize.MessageEmitter;
 import net.sf.saxon.serialize.MessageWarner;
+import net.sf.saxon.str.UnicodeWriterToWriter;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
@@ -55,23 +56,23 @@ public class TransformMessageTest {
         Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(IDENTITY_STYLESHEET)));
         Transformer transformer = templates.newTransformer();
 
-        final List<String> warnings = new ArrayList<String>();
+        final List<String> warnings = new ArrayList<>();
 
         transformer.setErrorListener(new ErrorListener() {
             @Override
-            public void error(TransformerException exception) throws TransformerException
+            public void error(TransformerException exception)
             {
                 System.err.println("error: " + exception.getMessage());
             }
 
             @Override
-            public void fatalError(TransformerException exception) throws TransformerException
+            public void fatalError(TransformerException exception)
             {
                 System.err.println("fatal error: " + exception.getMessage());
             }
 
             @Override
-            public void warning(TransformerException exception) throws TransformerException
+            public void warning(TransformerException exception)
             {
                 System.err.println("warning: " + exception.getMessage());
                 warnings.add(exception.getMessage());
@@ -79,13 +80,13 @@ public class TransformMessageTest {
         });
 
         MessageWarner mw = new MessageWarner();
-        mw.setWriter(new StringWriter());
+        mw.setUnicodeWriter(new UnicodeWriterToWriter(new StringWriter()));
         ((TransformerImpl) transformer).getUnderlyingXsltTransformer().getUnderlyingController().setMessageEmitter(mw);
 
         transformer.transform(src, new StreamResult(System.out));
 
-        assertTrue(warnings.size() == 1);
-        assertTrue(warnings.get(0).equals("DONE"));
+        assertEquals(warnings.size(), 1);
+        assertEquals(warnings.get(0), "DONE");
 
     }
 
@@ -164,17 +165,17 @@ public class TransformMessageTest {
             transformer.setErrorListener(new ErrorListener() {
 
                 @Override
-                public void warning(TransformerException exception) throws TransformerException {
+                public void warning(TransformerException exception)  {
                     fail("warning");
                 }
 
                 @Override
-                public void error(TransformerException exception) throws TransformerException {
+                public void error(TransformerException exception) {
                     fail("error");
                 }
 
                 @Override
-                public void fatalError(TransformerException exception) throws TransformerException {
+                public void fatalError(TransformerException exception)  {
                     fail("fatalError");
                 }
             });
@@ -207,24 +208,24 @@ public class TransformMessageTest {
             TransformerFactory transFactory = new TransformerFactoryImpl();
             Templates templates = transFactory.newTemplates(
             new SAXSource(new InputSource(new StringReader(stylesheet))));
-            final List<TransformerException> warnings = new ArrayList<TransformerException>();
+            final List<TransformerException> warnings = new ArrayList<>();
 
             Transformer transformer = templates.newTransformer();
             transformer.setErrorListener(new ErrorListener() {
 
                 @Override
-                public void warning(TransformerException exception) throws TransformerException {
+                public void warning(TransformerException exception)  {
                     warnings.add(exception);
                 }
 
                 @Override
-                public void error(TransformerException exception) throws TransformerException {
+                public void error(TransformerException exception) {
                     System.err.println("Error: " + exception.getMessage());
                     fail("unexpected error");
                 }
 
                 @Override
-                public void fatalError(TransformerException exception) throws TransformerException {
+                public void fatalError(TransformerException exception)  {
                     fail("fatalError");
                 }
             });
@@ -245,7 +246,7 @@ public class TransformMessageTest {
 
     @Test
     public void testNonRecovery() {
-        final List<TransformerException> errors = new ArrayList<TransformerException>();
+        final List<TransformerException> errors = new ArrayList<>();
         try {
             String stylesheet =
                 "<?xml version='1.0'?>" +
@@ -265,7 +266,7 @@ public class TransformMessageTest {
             transformer.setErrorListener(new ErrorListener() {
 
                 @Override
-                public void warning(TransformerException exception) throws TransformerException {
+                public void warning(TransformerException exception) {
                     fail("warning");
                 }
 
@@ -296,7 +297,7 @@ public class TransformMessageTest {
 
     @Test
     public void testErrorNotificationSchemaAware() {
-        final List<TransformerException> errors = new ArrayList<TransformerException>();
+        final List<TransformerException> errors = new ArrayList<>();
         try {
 
             String stylesheet =
@@ -316,7 +317,7 @@ public class TransformMessageTest {
             transformerFactory.setErrorListener(new ErrorListener() {
 
                 @Override
-                public void warning(TransformerException exception) throws TransformerException {
+                public void warning(TransformerException exception)  {
                     assertTrue(exception.getMessage().contains("No schema for this namespace"));
                 }
 
@@ -375,13 +376,13 @@ public class TransformMessageTest {
                         }
 
                         @Override
-                        public Result resolve(String href, String base) throws TransformerException {
+                        public Result resolve(String href, String base)  {
                             assertEquals("http://some.base.uri/", base);
                             return new StreamResult(secondary);
                         }
 
                         @Override
-                        public void close(Result result) throws TransformerException {
+                        public void close(Result result)  {
                             assertTrue(secondary.toString().contains("<second/>"));
                         }
                     }
@@ -445,7 +446,7 @@ public class TransformMessageTest {
 
     public static class MyMessageEmitter extends MessageEmitter {
 
-        public MyMessageEmitter() throws XPathException {
+        public MyMessageEmitter()  {
         }
 
         public void setStringWriter(StringWriter sw) throws XPathException {

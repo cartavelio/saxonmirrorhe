@@ -12,8 +12,6 @@ import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
 
@@ -324,31 +322,28 @@ public class Twine16 extends UnicodeString {
         consumer.append16(chars, requireInt(start), requireInt(len));
     }
 
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
     @Override
-    public void write(Writer writer) throws IOException {
-        writer.write(chars);
-    }
-
-    @Override
-    public void write(Writer writer, long start, long len) throws IOException {
-        writer.write(chars, requireInt(start), requireInt(len));
-    }
-
-    @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        int end = requireInt(limit);
-        for (int i = requireInt(start); i < end; i++) {
-            if (stop.test((int) chars[i])) {
-                write(writer, start, i - start);
+    public long indexWhere(IntPredicate predicate, long from) {
+        for (int i = requireInt(from); i < length(); i++) {
+            if (predicate.test(chars[i] & 0xff)) {
                 return i;
             }
         }
-        write(writer, start, limit - start);
         return -1;
     }
 
     public String details() {
-        return new String("Twine16 length = " + chars.length);
+        return "Twine16 length = " + chars.length;
     }
 
 }

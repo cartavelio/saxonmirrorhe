@@ -13,8 +13,6 @@ import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
 
@@ -35,7 +33,7 @@ public class Twine24 extends UnicodeString {
 
     /**
      * Protected constructor
-     * @bytes the Unicode characters, three bytes per character
+     * @param bytes the Unicode characters, three bytes per character
      */
 
     protected Twine24(byte[] bytes) {
@@ -347,42 +345,30 @@ public class Twine24 extends UnicodeString {
         consumer.append24(bytes, requireInt(start), requireInt(len));
     }
 
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
     @Override
-    public void write(Writer writer) throws IOException {
-        writer.write(toString());
-    }
-
-    @Override
-    public void write(Writer writer, long start, long len) throws IOException {
-        long end = len + start;
-        for (long i=start; i<end; i++) {
-            int cp = codePointAt(i);
-            if (UTF16CharacterSet.isSurrogate(cp)) {
-                writer.write(UTF16CharacterSet.highSurrogate(cp));
-                writer.write(UTF16CharacterSet.lowSurrogate(cp));
-            } else {
-                writer.write(cp);
-            }
-        }
-    }
-
-    @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        int end = requireInt(limit);
-        for (int i = requireInt(start); i < end; i++) {
+    public long indexWhere(IntPredicate predicate, long from) {
+        for (int i = requireInt(from); i < length(); i++) {
             int offset = i * 3;
             int cp = ((bytes[offset] << 16 | (bytes[offset + 1] & 0xff) << 8) | (bytes[offset + 2] & 0xff)) & 0xffffff;
-            if (stop.test(cp)) {
-                write(writer, start, i - start);
+            if (predicate.test(cp)) {
                 return i;
             }
         }
-        write(writer, start, limit - start);
         return -1;
     }
 
     public String details() {
-        return new String("Twine24 bytes.length = " + bytes.length);
+        return "Twine24 bytes.length = " + bytes.length;
     }
 
 }

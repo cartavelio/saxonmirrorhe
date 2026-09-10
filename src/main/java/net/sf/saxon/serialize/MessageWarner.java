@@ -11,6 +11,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeWriterToWriter;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
 
@@ -30,10 +31,12 @@ public class MessageWarner extends XMLEmitter {
 
     private boolean abort = false;
     private String errorCode = null;
+    private StringWriter stringWriter;
 
     @Override
     public void startDocument(int properties) throws XPathException {
-        setWriter(new StringWriter());
+        stringWriter = new StringWriter();
+        writer = new UnicodeWriterToWriter(stringWriter);
         abort = ReceiverOption.contains(properties, ReceiverOption.TERMINATE);
         super.startDocument(properties);
     }
@@ -50,7 +53,7 @@ public class MessageWarner extends XMLEmitter {
     @Override
     public void endDocument() throws XPathException {
         ErrorReporter reporter = getPipelineConfiguration().getErrorReporter();
-        XmlProcessingIncident de = new XmlProcessingIncident(getWriter().toString(), errorCode==null ? "XTMM9000" : errorCode);
+        XmlProcessingIncident de = new XmlProcessingIncident(stringWriter.toString(), errorCode==null ? "XTMM9000" : errorCode);
         if (!abort) {
             de = de.asWarning();
         }

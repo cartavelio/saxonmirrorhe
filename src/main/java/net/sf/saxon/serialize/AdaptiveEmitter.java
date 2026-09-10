@@ -21,8 +21,9 @@ import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.serialize.codenorm.Normalizer;
 import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
@@ -32,7 +33,6 @@ import net.sf.saxon.value.QualifiedNameValue;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Properties;
 
 /**
@@ -41,13 +41,13 @@ import java.util.Properties;
 
 public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutputProperties {
 
-    private final Writer writer;
+    private final UnicodeWriter writer;
     private CharacterMap characterMap;
     private Properties outputProperties;
     private String itemSeparator = "\n";
     private boolean started = false;
 
-    public AdaptiveEmitter(PipelineConfiguration pipe, Writer writer)  {
+    public AdaptiveEmitter(PipelineConfiguration pipe, UnicodeWriter writer)  {
         super(pipe);
         this.writer = writer;
     }
@@ -85,9 +85,9 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         return outputProperties;
     }
 
-    private void emit(CharSequence s) throws XPathException {
+    private void emit(String s) throws XPathException {
         try {
-            writer.append(s);
+            writer.write(s);
         } catch (IOException e) {
             throw new XPathException(e);
         }
@@ -95,7 +95,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
 
     private void emit(CodePoints s) throws XPathException {
         try {
-            s.write(writer);
+            writer.write(s);
         } catch (IOException e) {
             throw new XPathException(e);
         }
@@ -112,9 +112,6 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         if (started) {
             emit(itemSeparator);
         } else {
-            if (writer == null) {
-
-            }
             started = true;
         }
         serializeItem(item);

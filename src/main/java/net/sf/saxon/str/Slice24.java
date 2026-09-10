@@ -3,8 +3,6 @@ package net.sf.saxon.str;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.function.IntPredicate;
 
 /**
@@ -56,6 +54,27 @@ class Slice24 extends UnicodeString {
         return -1;
     }
 
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
+    @Override
+    public long indexWhere(IntPredicate predicate, long from) {
+        for (int i = (start + requireInt(from)) * 3; i < end * 3; i += 3) {
+            int cp = ((bytes[i] << 16 | (bytes[i + 1] & 0xff) << 8) | (bytes[i + 2] & 0xff)) & 0xffffff;
+            if (predicate.test(cp)) {
+                return i/3 - start;
+            }
+        }
+        return -1;
+    }
+
     @Override
     public int codePointAt(long index) {
         int index32 = requireInt(index);
@@ -82,29 +101,6 @@ class Slice24 extends UnicodeString {
     @Override
     public void supplyContent(LargeTextBuffer consumer, long start, long len) {
         consumer.append24(bytes, requireInt(start) + this.start, requireInt(len));
-    }
-
-    @Override
-    public void write(Writer writer) throws IOException {
-        writer.write(toString());
-    }
-
-    @Override
-    public void write(Writer writer, long start, long len) throws IOException {
-        writer.write(substring(requireInt(start), requireInt(start + len)).toString());
-    }
-
-    @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        int end = this.start + requireInt(limit);
-        for (int i = requireInt(start); i < limit; i++) {
-            if (stop.test(codePointAt(i))) {
-                write(writer, start, i - start);
-                return i;
-            }
-        }
-        write(writer, start, limit - start);
-        return -1;
     }
 
     @Override

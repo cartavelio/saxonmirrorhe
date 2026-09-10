@@ -12,6 +12,8 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
+import net.sf.saxon.str.UnicodeWriter;
+import net.sf.saxon.str.UnicodeWriterToWriter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 
@@ -35,6 +37,7 @@ public class ExpandedStreamResult {
     private final String systemId;
     private Writer writer;
     private OutputStream outputStream;
+    private UnicodeWriter unicodeWriter;
     private CharacterSet characterSet;
     private String encoding;
     private boolean mustClose;
@@ -88,6 +91,15 @@ public class ExpandedStreamResult {
         }
     }
 
+    public UnicodeWriter obtainUnicodeWriter() throws XPathException {
+        if (writer != null) {
+            return new UnicodeWriterToWriter(writer);
+        } else {
+            OutputStream os = obtainOutputStream();
+            return makeUnicodeWriterFromOutputStream(os);
+        }
+    }
+
     protected OutputStream obtainOutputStream() throws XPathException {
         if (outputStream != null) {
             return outputStream;
@@ -111,7 +123,7 @@ public class ExpandedStreamResult {
         return outputStream;
     }
 
-
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static File makeWritableOutputFile(String uriString) throws URISyntaxException, XPathException {
         URI uri = new URI(uriString);
         if (!uri.isAbsolute()) {
@@ -189,7 +201,7 @@ public class ExpandedStreamResult {
     }
 
     /**
-     * Set the output destination as a byte stream.
+     * Make a Writer from an OutputStream.
      * <p>Note that if a specific encoding (other than the default, UTF-8) is required, then
      * it must be defined in the output properties</p>
      *
@@ -205,40 +217,51 @@ public class ExpandedStreamResult {
         // to wrap the supplied OutputStream; the complications are to ensure that
         // the character encoding is correct.
 
-        //if (usesWriter()) {
+        try {
+            String javaEncoding = encoding;
+            if (encoding.equalsIgnoreCase("iso-646") || encoding.equalsIgnoreCase("iso646")) {
+                javaEncoding = "US-ASCII";
+            }
+            if (encoding.equalsIgnoreCase("UTF8")) {
+                writer = new UTF8Writer(outputStream);
+            } else {
+                writer = new BufferedWriter(
+                    new OutputStreamWriter(
+                        outputStream, javaEncoding));
+            }
+            return writer;
+        } catch (Exception err) {
+            if (encoding.equalsIgnoreCase("UTF8")) {
+                throw new XPathException("Failed to create a UTF8 output writer");
+            }
+            throw new XPathException("Encoding " + encoding + " is not supported", "SESU0007");
+        }
+    }
 
+    /**
+     * Make a Writer from an OutputStream.
+     * <p>Note that if a specific encoding (other than the default, UTF-8) is required, then
+     * it must be defined in the output properties</p>
+     *
+     * @param stream the OutputStream being used as an output destination
+     * @throws net.sf.saxon.trans.XPathException if an error occurs
+     */
 
-            //while (true) {
-                try {
-                    String javaEncoding = encoding;
-                    if (encoding.equalsIgnoreCase("iso-646") || encoding.equalsIgnoreCase("iso646")) {
-                        javaEncoding = "US-ASCII";
-                    }
-                    if (encoding.equalsIgnoreCase("UTF8")) {
-                        writer = new UTF8Writer(outputStream);
-                    } else {
-                        writer = new BufferedWriter(
-                            new OutputStreamWriter(
-                                outputStream, javaEncoding));
-                    }
-                    return writer;
-                    //break;
-                } catch (Exception err) {
-                    if (encoding.equalsIgnoreCase("UTF8")) {
-                        throw new XPathException("Failed to create a UTF8 output writer");
-                    }
-                    throw new XPathException("Encoding " + encoding + " is not supported", "SESU0007");
-//                    XPathException de = new XPathException("Encoding " + encoding + " is not supported: using UTF8");
-//                    de.setErrorCode("SESU0007");
-//                    getPipelineConfiguration().getErrorReporter().error(de);
-//                    encoding = "UTF8";
-//                    characterSet = UTF8CharacterSet.getInstance();
-//                    allCharactersEncodable = true;
-//                    outputProperties.setProperty(OutputKeys.ENCODING, "UTF-8");
-                }
-            //}
-        //}
-
+    private UnicodeWriter makeUnicodeWriterFromOutputStream(OutputStream stream) throws XPathException {
+        outputStream = stream;
+        try {
+            if (encoding.equalsIgnoreCase("UTF8")) {
+                return new UTF8Writer(outputStream);
+            } else {
+                Writer writer = makeWriterFromOutputStream(stream);
+                return new UnicodeWriterToWriter(writer);
+            }
+        } catch (Exception err) {
+            if (encoding.equalsIgnoreCase("UTF8")) {
+                throw new XPathException("Failed to create a UTF8 output writer");
+            }
+            throw new XPathException("Encoding " + encoding + " is not supported", "SESU0007");
+        }
     }
 
     /**

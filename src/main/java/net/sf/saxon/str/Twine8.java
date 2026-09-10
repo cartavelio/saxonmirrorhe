@@ -337,17 +337,7 @@ public class Twine8 extends UnicodeString {
         consumer.append8(bytes, requireInt(start), requireInt(len));
     }
 
-    @Override
-    public void write(Writer writer) throws IOException {
-        if (writer instanceof UTF8Writer) {
-            ((UTF8Writer)writer).writeLatin1(bytes, 0, length32());
-        } else {
-            writer.write(toString());
-        }
-    }
-
-    @Override
-    public void write(Writer writer, long start, long len) throws IOException {
+    private void write(Writer writer, long start, long len) throws IOException {
         if (writer instanceof UTF8Writer) {
             ((UTF8Writer) writer).writeLatin1(bytes, requireInt(start), requireInt(len));
         } else {
@@ -355,16 +345,23 @@ public class Twine8 extends UnicodeString {
         }
     }
 
+    /**
+     * Get the position of the first occurrence of the specified codepoint,
+     * starting the search at a given position in the string
+     *
+     * @param predicate condition that the codepoint must satisfy
+     * @param from      the position from which the search should start (0-based)
+     * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
+     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     *                                       for codePoint access
+     */
     @Override
-    public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) throws IOException {
-        int end = requireInt(limit);
-        for (int i = requireInt(start); i < end; i++) {
-            if (stop.test(bytes[i] & 0xff)) {
-                write(writer, start, i-start);
+    public long indexWhere(IntPredicate predicate, long from) {
+        for (int i = requireInt(from); i < length(); i++) {
+            if (predicate.test(bytes[i] & 0xff)) {
                 return i;
             }
         }
-        write(writer, start, end - start);
         return -1;
     }
 
