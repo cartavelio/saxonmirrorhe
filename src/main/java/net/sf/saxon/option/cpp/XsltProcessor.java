@@ -309,12 +309,15 @@ public class XsltProcessor extends SaxonCAPI {
      * Here we supply parameters and properties required to do the transformation.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
      *
-     * @param cwd            - current working directory
-     * @param sourceFilename - source supplied as a file name
-     * @param stylesheet     - File name of the stylesheet
-     * @param outFilename    - Save result of transformation to the given file name
-     * @param params         - parameters and property names given as an array of stings
-     * @param values         - the values of the paramaters and properties. given as a array of Java objects
+     * @param thread - Graalvm runtime data structure for a thread
+     * @param processorRef - long value referencing Processor object in the ObjectHandle pool
+     * @param ccwd  - current working directory supplied a pointer to a C char array
+     * @param csourceFilename - source file name supplied as a pointer to a C char array
+     * @param cstylesheet   - stylesheet string  supplied as a pointer to a C char array
+     * @param coutFilename  - the output file name supplied as a pointer to a C char array
+     * @param processorDataAccumulatorRef - long value referencing processorData object in the ObjectHandle pool.  Used to pass processor data and options
+     * @return
+     * @throws SaxonApiException if error occurs in the transformation or if the processor object is null
      */
     @CEntryPoint(name = "c_xsltSaveResultToFile",exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long transformToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
@@ -608,6 +611,7 @@ public class XsltProcessor extends SaxonCAPI {
      * @param params     - parameters and property names given as an array of stings
      * @param values     - the values of the paramaters and properties. given as a array of Java objects
      * @return result as an XdmNode
+     * @throws SaxonApiException if error occurs in the transformation or if the processor object is null
      */
     public XdmNode transformToNode(String cwd, String sourceFile, String stylesheet, String[] params, Object[] values) throws SaxonApiException {
         Source source;
@@ -658,12 +662,15 @@ public class XsltProcessor extends SaxonCAPI {
      * Here we supply parameters and properties required to do the transformation.
      * The parameter names and values are supplied as a two arrays in the form of a key and value.
      *
-     * @param cwd        - current working directory
-     * @param sourceFile - source supplied as a file name
-     * @param stylesheet - File name of the stylesheet
-     * @param params     - parameters and property names given as an array of stings
-     * @param values     - the values of the paramaters and properties. given as a array of Java objects
-     * @return result as a string representation
+     *
+     * @param thread - Graalvm runtime data structure for a thread
+     * @param processorRef - long value referencing Processor object in the ObjectHandle pool
+     * @param ccwd         - current working directory
+     * @param csourceFile  - source file name supplied as a pointer to a C char array
+     * @param cstylesheet  - stylesheet string  supplied as a pointer to a C char array
+     * @param processorDataAccumulatorRef - long value referencing processorData object in the ObjectHandle pool.  Used to pass processor data and options
+     * @return  result as a string representation
+     * @throws SaxonApiException  if error occurs in the transformation or if the processor object is null
      */
     @CEntryPoint(name = "c_xsltApplyStylesheet", exceptionHandler = SaxonCExceptionCCharHandler.class)
     public static CCharPointer transformToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {

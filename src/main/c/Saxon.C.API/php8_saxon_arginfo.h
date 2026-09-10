@@ -321,11 +321,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromString, 0, 0, 1)
 ZEND_ARG_INFO(0, xml_string)
+ZEND_ARG_INFO(0, encoding_Str)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromStringAndSave, 0, 0, 2)
 ZEND_ARG_INFO(0, xml_string)
 ZEND_ARG_INFO(0, output_file_name)
+ZEND_ARG_INFO(0, encoding_Str)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_compileFromFileAndSave, 0, 0, 2)
