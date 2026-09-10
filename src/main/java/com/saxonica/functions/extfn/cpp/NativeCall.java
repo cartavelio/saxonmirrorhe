@@ -1,5 +1,6 @@
 package com.saxonica.functions.extfn.cpp;
 
+import com.oracle.svm.core.headers.LibC;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
@@ -21,13 +22,17 @@ import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.function.CLibrary;
 import org.graalvm.nativeimage.c.function.CFunction;
+import org.graalvm.nativeimage.c.CContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 /**
  * Class to call Native functions under C/C++
  */
+//@CContext(MyDirectives.class)
 public class NativeCall extends SystemFunction {
 
     /**
@@ -56,7 +61,9 @@ public class NativeCall extends SystemFunction {
         try {
             //System.out.println("Library Name=. " + libName);
             //System.err.println("Err.println Library Name=. " + libName);
-            System.load(libName); // Load native library at runtime
+            //System.load(libName); // Load native library at runtime
+            System.out.println("No loading done!");
+            
         } catch (UnsatisfiedLinkError ex) {
             System.err.println("Native code library failed to load. " + libName + "\n" + ex);
         }
@@ -174,15 +181,15 @@ public class NativeCall extends SystemFunction {
     public static void testNativeC(IsolateThread thread){
         System.err.println("In the testNativeC method");
         //NativeCall call = new NativeCall();
-        int value = nativeCall(thread);
+        int value = c_nativeCall();
         System.err.println("cp1 testNativeC method value=" + value);
         System.err.println("exit testNativeC method");
     }
 
 
     // Declare a native method _native()
-    @CFunction("c_nativeCall")
-    public static native int nativeCall(IsolateThread thread/*String name, Object[] args, String[] types*/);
+    @CFunction
+    public static native int c_nativeCall();
 
 
 }
