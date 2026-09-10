@@ -2076,7 +2076,7 @@ public class TestXslt30Transformer {
     }
 
     private void testDiagnosticsOnAtomizationFailure(boolean export) {
-        // Bug 4086
+        // Bug 4086 -- also see bug 6934
 
         String xsl = "<?xml version='1.0'?>" +
                 "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
@@ -2116,8 +2116,8 @@ public class TestXslt30Transformer {
         } catch (SaxonApiException e) {
             assertTrue(e.getMessage().contains("atomiz"));
             assertTrue(e.getMessage().contains("first argument of f:do()"));
-            assertEquals("XPTY0004", e.getErrorCode().getLocalName());
-            //assertEquals("FOTY0013", e.getErrorCode().getLocalName());
+            assertTrue("XPTY0004".equals(e.getErrorCode().getLocalName())
+                               || "FOTY0013".equals(e.getErrorCode().getLocalName()));
             System.err.println(e.getMessage());
         }
     }

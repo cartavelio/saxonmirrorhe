@@ -43,13 +43,15 @@ public class TestXPathCompiler40 {
         }
     }
 
-    private void bad(String expr) {
+    private void bad(String expr, String errorCode) {
         try {
             XPathExecutable exec = compiler.compile(expr);
             XPathSelector selector = exec.load();
             selector.setContextItem(document);
             fail("unexpected success");
         } catch (SaxonApiException e1) {
+            assertEquals(errorCode, e1.getErrorCode().getLocalName());
+            System.err.println(e1.getMessage());
             // Failure was expected
         }
     }
@@ -77,6 +79,16 @@ public class TestXPathCompiler40 {
     public void testArrayFilter() {
         String result = good("[1,2,3,4]?[. ge 2]?* => string-join('-')");
         assertEquals("2-3-4", result);
+    }
+
+    @Test
+    public void testBadRegex() {
+        bad("matches('abc', '(?<x>abc:)(def)')", "FORX0002");
+    }
+
+    @Test
+    public void testBadRegexFlags() {
+        bad("replace('abc', '(?:abc:)(def)', '$1', 'ghi')", "FORX0001");
     }
 
 
