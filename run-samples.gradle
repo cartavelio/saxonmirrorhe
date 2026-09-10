@@ -829,3 +829,16 @@ def eeSampleArgs = ["JDOM2Example": ["data/books.xml", "styles/books.xsl"],
     }
   }
 }
+
+// ============================================================
+
+task "run_eedotnet_samples"(
+  type: Exec,
+  dependsOn: ["dotnetExamples", "ee_samples_setup"],
+  description: "Run all the CS samples"
+) {
+  commandLine "${buildDir}/examples/bin/release/net6.0/Examples",
+    "-dir:${buildDir}/output/ee/resources/samples",
+    "-ask:no",
+    "-test:all"
+}
