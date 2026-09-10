@@ -116,8 +116,8 @@ public class ParseXml extends SystemFunction implements Callable {
             b.reset();
             return node;
         } catch (XPathException err) {
-            XPathException xe = new XPathException("First argument to parse-xml() is not a well-formed and namespace-well-formed XML document. XML parser reported: " +
-                    err.getMessage(), "FODC0006");
+            String msg = makeParsingErrorMessage(err);
+            XPathException xe = new XPathException(msg, "FODC0006");
             errorHandler.captureRetainedErrors(xe);
             xe.maybeSetContext(context);
             throw xe;
@@ -209,12 +209,21 @@ public class ParseXml extends SystemFunction implements Callable {
             b.reset();
             return root;
         } catch (XPathException err) {
-            XPathException xe = new XPathException("First argument to parse-xml() is not a well-formed and namespace-well-formed XML document. XML parser reported: " +
-                                                           err.getMessage(), "FODC0006");
-            //errorHandler.captureRetainedErrors(xe);
+            String msg = makeParsingErrorMessage(err);
+            XPathException xe = new XPathException(msg, "FODC0006");
             xe.maybeSetContext(context);
             throw xe;
         }
+    }
+
+    private String makeParsingErrorMessage(XPathException err) {
+        String msg = "First argument to parse-xml() is not a well-formed and namespace-well-formed XML document. ";
+        msg += err.getMessage();
+        Throwable cause = err.getCause();
+        if (cause != null) {
+            msg += cause.getMessage();
+        }
+        return msg;
     }
 
 }

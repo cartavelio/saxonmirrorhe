@@ -11,7 +11,10 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.DirectResourceResolver;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.lib.StandardUnparsedTextResolver;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
@@ -22,6 +25,8 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.z.IntPredicateProxy;
 
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
@@ -73,6 +78,17 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         } catch (XPathException err) {
             err.maybeSetErrorCode("FOUT1170");
             throw err;
+        }
+        if (reader == null) {
+            ResourceRequest request = new ResourceRequest();
+            request.uri = absoluteURI.toString();
+            request.nature = ResourceRequest.TEXT_NATURE;
+            Source src = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+            if (src instanceof StreamSource) {
+                reader = StandardUnparsedTextResolver.getReaderFromStreamSource((StreamSource)src, encoding, config, false);
+            } else {
+                throw new XPathException("unparsed-text(): resolver returned non-StreamSource");
+            }
         }
         try {
             readFile(checker, reader, output);
