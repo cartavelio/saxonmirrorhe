@@ -274,6 +274,9 @@ namespace Saxon.Api {
                         enc = null;
                     }
                     else {
+                        if (encoding == "iso-646") {
+                            encoding = "us-ascii";
+                        }
                         try {
                             enc = Encoding.GetEncoding(encoding);
                         }

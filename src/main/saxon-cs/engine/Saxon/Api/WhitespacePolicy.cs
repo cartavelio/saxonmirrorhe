@@ -1,8 +1,6 @@
 using System;
-using System.Runtime.CompilerServices;
 using Saxon.Ejava.lang;
 using Saxon.Hej.@event;
-using Saxon.Hej.s9api;
 using Saxon.Hej.value;
 using Saxon.Hej.om;
 using Saxon.Hej.trace;

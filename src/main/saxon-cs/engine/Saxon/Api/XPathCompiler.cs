@@ -27,14 +27,13 @@ namespace Saxon.Api {
     /// </remarks>
     [Serializable]
     public class XPathCompiler {
-        private Saxon.Hej.s9api.XPathCompiler compiler;
         private Processor processor;
 
         // internal constructor: the public interface is a factory method
         // on the Processor object
 
         internal XPathCompiler(Processor processor, Saxon.Hej.s9api.XPathCompiler compiler) {
-            this.compiler = compiler;
+            this.Implementation = compiler;
             this.processor = processor;
         }
 
@@ -45,7 +44,7 @@ namespace Saxon.Api {
         /// <param name="uri">the absolute URI of the default collation. This URI must identify a known collation;
         /// either one that has been explicitly declared, or one that is recognized implicitly, such as a UCA collation</param>
         public void DeclareDefaultCollation(string uri) {
-            compiler.declareDefaultCollation(uri);
+            Implementation.declareDefaultCollation(uri);
         }
 
         /// <summary>
@@ -57,7 +56,7 @@ namespace Saxon.Api {
         /// <param name="uri">The namespace URI. It is possible to specify
         /// a zero-length string to "undeclare" a namespace.</param>
         public void DeclareNamespace(string prefix, string uri) {
-            compiler.declareNamespace(prefix, uri);
+            Implementation.declareNamespace(prefix, uri);
         }
 
         /// <summary>
@@ -69,7 +68,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <remarks>The property IErrorReporter to which warnings will be notified</remarks>
         public ErrorReporter WarningHandler {
-            set => compiler.setWarningHandler(new ErrorReporterWrapper(value));
+            set => Implementation.setWarningHandler(new ErrorReporterWrapper(value));
         }
 
 
@@ -86,7 +85,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="libraryPackage">the XSLT compiled library package whose functions are to be made available</param>
         public void AddXsltFunctionLibrary(XsltPackage libraryPackage) {
-            compiler.addXsltFunctionLibrary(libraryPackage.GetUnderlyingXsltPackage());
+            Implementation.addXsltFunctionLibrary(libraryPackage.GetUnderlyingXsltPackage());
         }
 
         /// <summary>
@@ -99,20 +98,27 @@ namespace Saxon.Api {
         /// <returns>The namespace URI associated with the prefix (or absence thereof) in the supplied
         /// lexical QName. The "null namespace" is represented by a zero length string. The method returns null
         /// if there is no known binding for the prefix used in the lexical QName.</returns>
-        public string GetNamespaceURI(string lexicalName, Boolean useDefault) {
-            String[] parts =
+        public string GetNamespaceURI(string lexicalName, bool useDefault) {
+            string[] parts =
                 Saxon.Hej.om.NameChecker.checkQNameParts(Saxon.Hej.value.Whitespace.trim(lexicalName));
 
-            return compiler.getUnderlyingStaticContext().getNamespaceResolver().getURIForPrefix(parts[0], useDefault);
+            return Implementation.getUnderlyingStaticContext().getNamespaceResolver().getURIForPrefix(parts[0], useDefault);
         }
 
         /// <summary>
-        /// Get the <c>Processor</c> from which this <c>XPathCompiler</c> was constructed
+        /// The policy for matching unprefixed element names in XPath expressions
         /// </summary>
 
-        public Processor Processor {
-            get { return processor; }
+        public UnprefixedElementMatchingPolicy UnprefixedElementMatchingPolicy {
+            get => Implementation.getUnprefixedElementMatchingPolicy();
+            set => Implementation.setUnprefixedElementMatchingPolicy(value);
         }
+
+        /// <summary>
+        /// The <c>Processor</c> from which this <c>XPathCompiler</c> was constructed
+        /// </summary>
+
+        public Processor Processor => processor;
 
         /// <summary>
         /// Import schema definitions for a specified namespace. That is, add the element and attribute declarations 
@@ -132,7 +138,7 @@ namespace Saxon.Api {
         /// <param name="uri">The namespace URI whose declarations and type definitions are to
         /// be made available for use within the XPath expression.</param>
         public void ImportSchemaNamespace(String uri) {
-            compiler.importSchemaNamespace(uri);
+            Implementation.importSchemaNamespace(uri);
         }
 
 
@@ -140,9 +146,7 @@ namespace Saxon.Api {
         /// Escape hatch to the <c>Saxon.Hej.s9api.XPathCompiler</c> object in the underlying Java implementation
         /// </summary>
 
-        private Saxon.Hej.s9api.XPathCompiler Implementation {
-            get { return compiler; }
-        }
+        private Saxon.Hej.s9api.XPathCompiler Implementation { get; }
 
 
         /// <summary>
@@ -155,22 +159,22 @@ namespace Saxon.Api {
         /// variables it refers to by calling the method <c>EnumerateExternalVariables</c> on the <c>XPathExecutable</c> object.
         /// </remarks>
 
-        public Boolean AllowUndeclaredVariables {
-            get { return compiler.isAllowUndeclaredVariables(); }
-            set { compiler.setAllowUndeclaredVariables(value); }
+        public bool AllowUndeclaredVariables {
+            get => Implementation.isAllowUndeclaredVariables();
+            set => Implementation.setAllowUndeclaredVariables(value);
         }
 
         /// <summary>
-        /// Say whether XPath expressions compiled using this <c>XPathCompiler</c> are
+        /// This property indicates whether XPath expressions compiled using this <c>XPathCompiler</c> are
         /// schema-aware. They will automatically be schema-aware if the method
         /// <see cref="ImportSchemaNamespace"/> is called. An XPath expression
         /// must be marked as schema-aware if it is to handle typed (validated)
         /// input documents.
         /// </summary>
 
-        public Boolean SchemaAware {
-            get { return compiler.isSchemaAware(); }
-            set { compiler.setSchemaAware(value); }
+        public bool SchemaAware {
+            get => Implementation.isSchemaAware();
+            set => Implementation.setSchemaAware(value);
         }
 
 
@@ -204,7 +208,7 @@ namespace Saxon.Api {
         ///   or "pattern-separator".</param>
         /// <param name="value">The new value for the property.</param>
         public void SetDecimalFormatProperty(QName format, string property, string value) {
-            compiler.setDecimalFormatProperty(format, property, value);
+            Implementation.setDecimalFormatProperty(format, property, value);
         }
 
         /// <summary>
@@ -214,7 +218,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="name">The name of the variable, as a <c>QName</c></param>
         public void DeclareVariable(QName name) {
-            compiler.declareVariable(name);
+            Implementation.declareVariable(name);
         }
 
         /// <summary>
@@ -235,16 +239,16 @@ namespace Saxon.Api {
         public string XPathLanguageVersion {
             get {
                 try {
-                    return compiler.getLanguageVersion();
+                    return Implementation.getLanguageVersion();
                 }
                 catch (Exception) {
                     throw new Saxon.Api.SaxonApiException("Unknown XPath version " +
-                                                              compiler.getLanguageVersion());
+                                                              Implementation.getLanguageVersion());
                 }
             }
             set {
                 try {
-                    compiler.setLanguageVersion(value);
+                    Implementation.setLanguageVersion(value);
                 }
                 catch (Exception) {
                     throw new Saxon.Api.SaxonApiException("Unknown XPath version " + value);
@@ -260,8 +264,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public XdmItemType ContextItemType {
-            get => compiler.getRequiredContextItemType();
-            set => compiler.setRequiredContextItemType(value);
+            get => Implementation.getRequiredContextItemType();
+            set => Implementation.setRequiredContextItemType(value);
         }
 
 
@@ -272,8 +276,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public Uri BaseUri {
-            get => compiler.getBaseURI();
-            set => compiler.setBaseURI(value);
+            get => Implementation.getBaseURI();
+            set => Implementation.setBaseURI(value);
         }
 
         /// <summary>
@@ -289,8 +293,8 @@ namespace Saxon.Api {
         /// constructs.</para></remarks>
 
         public bool BackwardsCompatible {
-            get => compiler.isBackwardsCompatible();
-            set => compiler.setBackwardsCompatible(value);
+            get => Implementation.isBackwardsCompatible();
+            set => Implementation.setBackwardsCompatible(value);
         }
 
         /// <summary>
@@ -302,8 +306,8 @@ namespace Saxon.Api {
         /// </summary>
 
         public bool Caching {
-            get => compiler.isCaching();
-            set => compiler.setCaching(value);
+            get => Implementation.isCaching();
+            set => Implementation.setCaching(value);
         }
 
 
@@ -318,8 +322,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public bool FastCompilation {
-            set => compiler.setFastCompilation(value);
-            get => compiler.isFastCompilation();
+            set => Implementation.setFastCompilation(value);
+            get => Implementation.isFastCompilation();
         }
 
         /// <summary>
@@ -340,7 +344,7 @@ namespace Saxon.Api {
         /// (for example, a syntax error, or a reference to an undeclared function or variable).
         /// </exception>
         public XPathExecutable Compile(string source) {
-            Saxon.Hej.s9api.XPathExecutable executable = compiler.compile(source);
+            Saxon.Hej.s9api.XPathExecutable executable = Implementation.compile(source);
             return new XPathExecutable(executable);
         }
 
@@ -358,7 +362,7 @@ namespace Saxon.Api {
         /// if no context item was supplied.)
         /// </exception>
         public XdmValue Evaluate(string expression, XdmItem contextItem) {
-            return compiler.evaluate(expression, contextItem);
+            return Implementation.evaluate(expression, contextItem);
         }
 
         /// <summary>
@@ -379,7 +383,7 @@ namespace Saxon.Api {
         /// if no context item was supplied.)
         /// </exception>
         public XdmItem EvaluateSingle(String expression, XdmItem contextItem) {
-            return compiler.evaluateSingle(expression, contextItem);
+            return Implementation.evaluateSingle(expression, contextItem);
         }
     }
 }

@@ -137,7 +137,7 @@ namespace Saxon.Api {
                             enc = Encoding.GetEncoding(encoding);
                         }
                         catch (System.ArgumentException e) {
-                            throw new SaxonApiException(new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190"));
+                            throw new Saxon.Hej.trans.XPathException("Unparsed-text encoding problem: " + e.Message, "FOUT1190");
                         }
                     }
                     return value(uri, enc);
