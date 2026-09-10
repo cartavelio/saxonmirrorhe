@@ -4598,6 +4598,7 @@ public class XPathParser {
         }
         nextToken();
 
+        // In scanOnly mode, it doesn't matter what kind of expression we return
         if (scanOnly) {
             return new StringLiteral(StringValue.EMPTY_STRING);
         }
@@ -4605,155 +4606,144 @@ public class XPathParser {
         Expression[] arguments = new Expression[args.size()];
         arguments = args.toArray(arguments);
 
-        Expression fcall = null;
+        // In XQuery, we defer binding the function until parsing is complete
         if (env instanceof QueryModule qm) {
             if (isReservedFunctionName(fname, env.getXPathVersion())) {
                 grumble("Function name " + fname + " is a reserved name");
             }
-            fcall = new DraftFunctionCall(fname,
+            Expression fcall = new DraftFunctionCall(fname,
                                           qm,
                                           arguments,
                                           keywordArgs);
-        } else {
-            StructuredQName functionQName;
-            if (NameChecker.isValidNCName(fname) && isAllowXPath40Syntax()) {
-                // First try for a no-namespace name, otherwise a name in the default function namespace
-                StructuredQName noNamespaceName = new StructuredQName("", NamespaceUri.NULL, fname);
-                FunctionItem fit = env.getFunctionLibrary().getFunctionItem(new SymbolicName.F(noNamespaceName, arguments.length), env);
-                if (fit != null) {
-                    functionQName = noNamespaceName;
-                } else {
-                    functionQName = resolveFunctionName(fname);
-                }
+            fcall.setRetainedStaticContext(env.makeRetainedStaticContext());
+            setLocation(fcall, offset);
+            return fcall;
+
+        }
+
+        // Now bind the function name
+        StructuredQName functionQName;
+        if (NameChecker.isValidNCName(fname) && isAllowXPath40Syntax()) {
+            // First try for a no-namespace name, otherwise a name in the default function namespace
+            StructuredQName noNamespaceName = new StructuredQName("", NamespaceUri.NULL, fname);
+            FunctionItem fit = env.getFunctionLibrary().getFunctionItem(new SymbolicName.F(noNamespaceName, arguments.length), env);
+            if (fit != null) {
+                functionQName = noNamespaceName;
             } else {
                 functionQName = resolveFunctionName(fname);
             }
-            if (env.getConfiguration().isDisabledFunction(functionQName)) {
-                grumble("Function " + functionQName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
-            }
+        } else {
+            functionQName = resolveFunctionName(fname);
+        }
+        if (env.getConfiguration().isDisabledFunction(functionQName)) {
+            grumble("Function " + functionQName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
+        }
 
-            // Make a function call expression
+        // Make a function call expression
 
-            List<String> reasons = new ArrayList<>();
-            SymbolicName.F functionName = new SymbolicName.F(functionQName, arguments.length);
-            Expression exp = env.getFunctionLibrary().bind(functionName, arguments, keywordArgs, env, reasons);
-            if (exp == null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Cannot find a ").append(arguments.length).append(
-                        "-argument function named ").append(functionName.getComponentName().getEQName()).append("()");
-                for (String reason : reasons) {
-                    sb.append(". ").append(reason);
-                }
-                throw new XPathException(sb.toString(), "XPST0017").asStaticError();
-            }
+        List<String> reasons = new ArrayList<>();
+        SymbolicName.F functionName = new SymbolicName.F(functionQName, arguments.length);
+        Expression exp = env.getFunctionLibrary().bind(functionName, arguments, keywordArgs, env, reasons);
+        if (exp == null) {
+            exp = reportMissingFunction(offset, functionQName, arguments, reasons);
+//            StringBuilder sb = new StringBuilder();
+//            sb.append("Cannot find a ").append(arguments.length).append(
+//                    "-argument function named ").append(functionName.getComponentName().getEQName()).append("()");
+//            for (String reason : reasons) {
+//                sb.append(". ").append(reason);
+//            }
+//            throw new XPathException(sb.toString(), "XPST0017").asStaticError();
+        }
 
-            if (exp instanceof FunctionCall fc) {
+        // In most cases, bind() returns a function call
+        if (exp instanceof FunctionCall fc) {
 
-                // Inject any default value expressions
-                for (int i = 0; i < fc.getArguments().length; i++) {
-                    if (fc.getArg(i) instanceof DefaultedArgumentExpression) {
-                        if (fc instanceof UserFunctionCall ufc) {
-                            UserFunction uf = ufc.getFunction();
-                            Supplier<Expression> def = uf.getParameterDefinitions()[i].getDefaultValueExpression();
-                            if (def == null) {
-                                throw new XPathException("Argument " + (i + 1) + " has no default value in function " + functionQName.getEQName(), "XPST0017");
-                            }
-                            fc.setArg(i, def.get().copy(new RebindingMap()));
-                        } else if (fc instanceof SystemFunctionCall sfc) {
-                            Supplier<Expression> def = sfc.getTargetFunction().getDetails().getDefaultValueExpression(i);
-                            fc.setArg(i, def == null ? Literal.makeEmptySequence() : def.get());
-                        } else {
-                            throw new UnsupportedOperationException();
+            // Inject any default value expressions
+            for (int i = 0; i < fc.getArguments().length; i++) {
+                if (fc.getArg(i) instanceof DefaultedArgumentExpression) {
+                    if (fc instanceof UserFunctionCall ufc) {
+                        UserFunction uf = ufc.getFunction();
+                        Supplier<Expression> def = uf.getParameterDefinitions()[i].getDefaultValueExpression();
+                        if (def == null) {
+                            throw new XPathException("Argument " + (i + 1) + " has no default value in function " + functionQName.getEQName(), "XPST0017");
                         }
+                        fc.setArg(i, def.get().copy(new RebindingMap()));
+                    } else if (fc instanceof SystemFunctionCall sfc) {
+                        Supplier<Expression> def = sfc.getTargetFunction().getDetails().getDefaultValueExpression(i);
+                        fc.setArg(i, def == null ? Literal.makeEmptySequence() : def.get());
+                    } else {
+                        throw new UnsupportedOperationException();
                     }
-                    exp.adoptChildExpression(fc.getArg(i));
                 }
-
-                // If there are placeholders as well as keywords then we take advantage of the fact that
-                // the call on bind() will have dealt with mapping keyword arguments to positional arguments,
-                // and evaluating defaulted arguments
-
-                if (placeHolderSequence > 0) {
-                    SymbolicName.F sn2 = new SymbolicName.F(functionName.getComponentName(), fc.getArguments().length);
-                    FunctionItem functionItem = env.getFunctionLibrary().getFunctionItem(sn2, env);
-                    return new DynamicPartialApply(new FunctionLiteral(functionItem), fc.getArguments());
-                }
-            } else if (placeHolderSequence > 0) {
-                // For example, this happens with test xqhof10, xs:NCName(?), where bind() returns a CastExpression
-                FunctionItem functionItem = env.getFunctionLibrary().getFunctionItem(functionName, env);
-                return new DynamicPartialApply(new FunctionLiteral(functionItem), arguments);
+                exp.adoptChildExpression(fc.getArg(i));
             }
 
+            // If there are placeholders as well as keywords then we take advantage of the fact that
+            // the call on bind() will have dealt with mapping keyword arguments to positional arguments,
+            // and evaluating defaulted arguments
 
-            exp.setRetainedStaticContext(env.makeRetainedStaticContext());
-            setLocation(exp, offset);
-            return exp;
+            if (placeHolderSequence > 0) {
+                SymbolicName.F sn2 = new SymbolicName.F(functionName.getComponentName(), fc.getArguments().length);
+                FunctionItem functionItem = env.getFunctionLibrary().getFunctionItem(sn2, env);
+                return new DynamicPartialApply(new FunctionLiteral(functionItem), fc.getArguments());
+            }
 
+            // There are special rules for certain functions appearing in a pattern
+            if (language == ParsedLanguage.XSLT_PATTERN) {
+                if (exp.isCallOn(RegexGroup.class)) {
+                    return Literal.makeEmptySequence();
+                } else if (exp instanceof CurrentGroupCall) {
+                    grumble("The current-group() function cannot be used in a pattern",
+                            "XTSE1060", offset);
+                    return new ErrorExpression();
+                } else if (exp instanceof CurrentGroupingKeyCall) {
+                    grumble("The current-grouping-key() function cannot be used in a pattern",
+                            "XTSE1070", offset);
+                    return new ErrorExpression();
+                } else if (exp.isCallOn(CurrentMergeGroup.class)) {
+                    grumble("The current-merge-group() function cannot be used in a pattern",
+                            "XTSE3470", offset);
+                    return new ErrorExpression();
+                } else if (exp.isCallOn(CurrentMergeKey.class)) {
+                    grumble("The current-merge-key() function cannot be used in a pattern",
+                            "XTSE3500", offset);
+                    return new ErrorExpression();
+                } else if (exp.isCallOn(CurrentMergeKeyArray.class)) {
+                    grumble("The current-merge-key-array() function cannot be used in a pattern",
+                            "XTSE3500", offset);
+                    return new ErrorExpression();
+                }
+            }
+
+        } else if (placeHolderSequence > 0) {
+            // This is a partial apply, but bind() returned something other than a FunctionCall
+            // For example, this happens with test xqhof10, xs:NCName(?), where bind() returns a
+            // CastExpression
+            FunctionItem functionItem = env.getFunctionLibrary().getFunctionItem(functionName, env);
+            return new DynamicPartialApply(new FunctionLiteral(functionItem), arguments);
         }
-//            if (placeHolderSequence > 0) {
-//
-//                return makeStaticPartialApply(this, offset, functionName, arguments, keywordArgs);
-//            }
-//
-//            SymbolicName.F sn;
-//
-//
-//            sn = new SymbolicName.F(functionName, args.size());
-//            List<String> reasons = new ArrayList<>();
-//            try {
-//                fcall = env.getFunctionLibrary().bind(sn, arguments, keywordArgs, env, reasons);
-//            } catch (UncheckedXPathException e) {
-//                reasons.add(e.getMessage());
-//            }
-//
-//            if (fcall == null) {
-//                return reportMissingFunction(offset, functionName, arguments, reasons);
+
+
+        exp.setRetainedStaticContext(env.makeRetainedStaticContext());
+        setLocation(exp, offset);
+        return makeTracer(exp, nominalName);
+
+
+
+
+
+//        setLocation(fcall, offset);
+//        for (Expression argument : arguments) {
+//            if (fcall != argument && argument.getParentExpression() == null
+//                    && !nominalName.hasURI(NamespaceUri.GLOBAL_JS)) {
+//                // avoid doing this when the function has already been optimized away, e.g. unordered()
+//                // Also avoid doing this when a js: function is parsed into an ixsl:call()
+//                // TODO move the adoptChildExpression into individual function libraries
+//                fcall.adoptChildExpression(argument);
 //            }
 //        }
-        //}
-        //  A QName or NOTATION constructor function must be given the namespace context now
-//        if (fcall instanceof CastExpression &&
-//                ((AtomicType) fcall.getItemType()).isNamespaceSensitive()) {
-//            ((CastExpression) fcall).bindStaticContext(env);
-//        }
-        // There are special rules for certain functions appearing in a pattern
-        if (language == ParsedLanguage.XSLT_PATTERN) {
-            if (fcall.isCallOn(RegexGroup.class)) {
-                return Literal.makeEmptySequence();
-            } else if (fcall instanceof CurrentGroupCall) {
-                grumble("The current-group() function cannot be used in a pattern",
-                        "XTSE1060", offset);
-                return new ErrorExpression();
-            } else if (fcall instanceof CurrentGroupingKeyCall) {
-                grumble("The current-grouping-key() function cannot be used in a pattern",
-                        "XTSE1070", offset);
-                return new ErrorExpression();
-            } else if (fcall.isCallOn(CurrentMergeGroup.class)) {
-                grumble("The current-merge-group() function cannot be used in a pattern",
-                        "XTSE3470", offset);
-                return new ErrorExpression();
-            } else if (fcall.isCallOn(CurrentMergeKey.class)) {
-                grumble("The current-merge-key() function cannot be used in a pattern",
-                        "XTSE3500", offset);
-                return new ErrorExpression();
-            } else if (fcall.isCallOn(CurrentMergeKeyArray.class)) {
-                grumble("The current-merge-key-array() function cannot be used in a pattern",
-                        "XTSE3500", offset);
-                return new ErrorExpression();
-            }
-        }
-        setLocation(fcall, offset);
-        for (Expression argument : arguments) {
-            if (fcall != argument && argument.getParentExpression() == null
-                    && !nominalName.hasURI(NamespaceUri.GLOBAL_JS)) {
-                // avoid doing this when the function has already been optimized away, e.g. unordered()
-                // Also avoid doing this when a js: function is parsed into an ixsl:call()
-                // TODO move the adoptChildExpression into individual function libraries
-                fcall.adoptChildExpression(argument);
-            }
-        }
 
-        return makeTracer(fcall, nominalName);
+        
 
     }
 
