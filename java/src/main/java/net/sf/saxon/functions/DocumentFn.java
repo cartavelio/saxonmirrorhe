@@ -498,8 +498,14 @@ public class DocumentFn extends SystemFunction implements Callable {
             // In principle, it would be better to leave the uri relative, but historically, the
             // DocumentKey (which is always absolute) was used, and the ResourceRequest contract
             // says that the uri is absolute...
+            // Also: if the href is "", then this is a "same document reference" and the URI
+            // should *be* the base URI.
             try {
-                request.uri = new URI(baseURI).resolve(href).toString();
+                if (href.isEmpty()) {
+                    request.uri = baseURI;
+                } else {
+                    request.uri = new URI(baseURI).resolve(href).toString();
+                }
             } catch (Exception ex) {
                 // Nevermind, just leave it relative
             }
