@@ -7,8 +7,8 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -25,7 +25,7 @@ public class Bug6547 {
     private final static String catalog =
             "file:/Users/mike/bugs/2024/6547-Walters/kvk-groot-xsd/META-INF/catalog2.xml";
 
-    @Ignore("Depends on MHK filestore")
+    @Disabled("Depends on MHK filestore")
     public void bug0() {
         try {
             Processor processor = new Processor(true);
@@ -68,7 +68,7 @@ public class Bug6547 {
         }
     }
 
-    @Ignore("Depends on MHK filestore")
+    @Disabled("Depends on MHK filestore")
     public void bug1() {
         try {
             Processor processor = new Processor(true);
