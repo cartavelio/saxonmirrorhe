@@ -152,8 +152,6 @@ TODO: rethink redefines and override
         
         <h3>Schema API</h3>
         
-        <p>TODO: most of these changes apply equally to the <code>Saxon.Api</code> interface in SaxonCS.</p>
-        
         <p>Some changes have been made to the schema processing API. These arise from the
         fact that a <code>Processor</code> (and its underlying <code>Configuration</code>) can now hold multiple
         independent schemas. A schema (meaning a compiled and consistent collection of schema components) is
@@ -238,8 +236,7 @@ TODO: rethink redefines and override
     <category name="JAXP" class="javaonly">
         
         <p>The classes <code>ProfessionalXPathFactory</code> and <code>EnterpriseXPathFactory</code> are dropped. It seems there
-        were no tests referencing these classes, and JAXP XPath has gradually been deprecated. <b>TODO: Need to
-        drop the mention in the XPath documentation.</b></p>
+        were no tests referencing these classes, and JAXP XPath has gradually been deprecated.</p>
         
    
     </category>
@@ -251,7 +248,10 @@ TODO: rethink redefines and override
         by ICU4N). The features and interfaces are essentially the same as for SaxonJ.</p>
         
         <p>As with SaxonJ, there are API changes to allow multiple schemas to be compiled and
-        used for validation, rather than allowing only one schema per <code>Configuration</code> as before.</p>
+        used for validation, rather than allowing only one schema per <code>Configuration</code> as
+            before. For details, see the description of the <xref section="changes" page="s9api"
+                subpage="12-13">S9API Schema API changes</xref> - most of these changes apply
+            equally to the <code>Saxon.Api</code> interface in SaxonCS.</p>
         
         <p>New capabilities are available when an XDM document is constructed by
             wrapping a DOM (an instance of class <code>System.Xml.XmlDocument</code>). Provided DTD processing
@@ -367,8 +367,7 @@ TODO: rethink redefines and override
         <p>A new Saxon serialization property is introduced: <code>saxon:conditional-cdata</code>.
         If set to true, text is output within a CDATA section only when (a) the containing element
         is named in the <code>cdata-section-elements</code> property, and (b) the text contains
-        at least one special character, specifically a less-than or ampersand character. 
-        TODO: perhaps drop this, it didn't make it into 4.0</p>
+        at least one special character, specifically a less-than or ampersand character.</p>
         
         <p>The serialization parameter <code>saxon:stylesheet-version</code> (which in previous releases was largely
             for internal use) is now renamed <code>saxon:spec-version</code>, and can be used to control which version
