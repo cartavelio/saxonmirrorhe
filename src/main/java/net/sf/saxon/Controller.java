@@ -16,7 +16,6 @@ import net.sf.saxon.expr.instruct.Bindery;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.functions.AccessorFn;
@@ -24,6 +23,7 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.TraceEventMulticaster;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -42,6 +42,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -1290,6 +1291,15 @@ public class Controller implements ContextOriginator {
             // This option is provided to allow the parser set by applications such as Ant to be overridden by
             // the parser requested using FeatureKeys.SOURCE_PARSER
             ((SAXSource) source).setXMLReader(null);
+        } else if (source instanceof StreamSource && ((StreamSource)source).getSystemId() != null &&
+                ((StreamSource) source).getInputStream() == null && ((StreamSource) source).getReader() == null) {
+            // Check to see if the document is already in the document pool. This can happen when a Transformer
+            // is reused to perform multiple transformations on the same source document. Bug 4837.
+            DocumentKey key = new DocumentKey(source.getSystemId());
+            TreeInfo existing = sourceDocumentPool.find(key);
+            if (existing != null) {
+                return existing.getRootNode();
+            }
         }
         Builder sourceBuilder = makeBuilder();
         sourceBuilder.setUseEventLocation(true);
