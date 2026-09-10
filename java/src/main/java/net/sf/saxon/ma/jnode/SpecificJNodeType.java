@@ -9,15 +9,15 @@ import net.sf.saxon.value.SequenceType;
 import java.util.Optional;
 
 /**
- * Represents the type jnode(T) where T is a sequence type giving the type
- * of the JNode content.
+ * Represents the type jnode(S, T) where T is a sequence type giving the type
+ * of the JNode content and S is a selector value, or null meaning "*" indicating
+ * that the selector can be any value (including absent).
  */
 
 public class SpecificJNodeType extends JNodeType {
 
     private final SequenceType valueType;
     private final AtomicValue selector;
-
 
     public SpecificJNodeType(SequenceType valueType) {
         this.valueType = valueType;
@@ -28,6 +28,12 @@ public class SpecificJNodeType extends JNodeType {
         this.selector = selector;
         this.valueType = valueType;
     }
+
+    public static SpecificJNodeType jTreeRoot(SequenceType valueType) {
+        return new SpecificJNodeType(null, valueType);
+    }
+
+
 
     public SequenceType getValueType() {
         return valueType;
@@ -95,7 +101,7 @@ public class SpecificJNodeType extends JNodeType {
      */
     @Override
     public String toString() {
-        return "jnode(" + valueType.toString() + ")";
+        return "jnode(" + (selector==null ? "*" : selector.show()) + "," + valueType.toString() + ")";
     }
 
     /**

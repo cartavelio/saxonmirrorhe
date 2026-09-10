@@ -23,6 +23,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.GNodeType;
 import net.sf.saxon.type.gnode.XNodeType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -86,6 +87,13 @@ public class SequenceCoercer extends UnaryExpression {
                 result = new ItemChecker(result, requiredItemType, role);
             }
             return result;
+        }
+        if (requiredItemType instanceof GNodeType) {
+            Expression result = sequence;
+            if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
+                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
+            }
+            return new ItemChecker(result, requiredItemType, role);
         }
 //        if (requiredItemType == AnyGNodeType.getInstance()) {
 //            Expression result = sequence;

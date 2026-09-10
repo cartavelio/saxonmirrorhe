@@ -31,6 +31,7 @@ import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNodeType;
+import net.sf.saxon.ma.jnode.RootJNodeType;
 import net.sf.saxon.ma.jnode.SpecificJNodeType;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
@@ -2252,12 +2253,6 @@ public class XPathParser {
                 return parseRecordTest(this);
             case "enum":
                 return parseEnumType();
-//            case "type":
-//                checkLanguageVersion40("the syntax type(T)");
-//                if (language != ParsedLanguage.XSLT_PATTERN) {
-//                    grumble("The syntax type(N) is allowed only in XSLT patterns, not in XPath expressions");
-//                }
-//                return parseTypeQualifier();
             default:
                 grumble("Unknown item kind " + kindName);
                 return null;
@@ -3072,7 +3067,6 @@ public class XPathParser {
                         return ae;
                     }
                     case "jnode": {
-                        //notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
@@ -3083,7 +3077,6 @@ public class XPathParser {
                         return ae;
                     }
                     case "gnode": {
-                        //notAllowedInPattern();
                         if (languageVersion < 40) {
                             return parseFunctionCall(name, null);
                         }
@@ -3091,8 +3084,7 @@ public class XPathParser {
                         readToken(Token.LPAREN);
                         readToken(Token.RPAREN);
                         int defaultAxis = AxisInfo.CHILD;
-                        SpecificJNodeType test = new SpecificJNodeType(SequenceType.one(AnyGNodeType.getInstance()));
-                        AxisExpression ae = new AxisExpression(defaultAxis, test);
+                        AxisExpression ae = new AxisExpression(defaultAxis, AnyGNodeType.getInstance());
                         setLocation(ae);
                         return ae;
                     }
@@ -3873,7 +3865,7 @@ public class XPathParser {
 
     /**
      * Parse a JNode item type: jnode(selector, contentType) where
-     * selector is typically "*" or an NCName or a Constant, and contentType
+     * selector is typically "*" or an NCName or a Constant or (), and contentType
      * is a sequence type
      * @return the parsed jnode item type
      * @throws XPathException on failure
@@ -3896,7 +3888,7 @@ public class XPathParser {
                 nextToken();
                 if (t.currentToken == Token.RPAREN) {
                     nextToken();
-                    return new SpecificJNodeType(null);
+                    return new RootJNodeType(SequenceType.ANY_SEQUENCE);
                 }
             } else if (firstArg == Token.STAR) {
                 nextToken();
@@ -3909,15 +3901,29 @@ public class XPathParser {
                 if (!NameChecker.isValidNCName(key)) {
                     grumble("JNode selector " + key + " is not a valid NCName");
                 }
-                selector = new StringValue(key);
+                if (t.peekAhead() == Token.LPAREN) {
+                    // true() or false()
+                    selector = parseConstant();
+                } else {
+                    selector = new StringValue(key);
+                    nextToken();
+                }
             } else {
                 selector = parseConstant();
             }
             if (t.currentToken == Token.COMMA) {
                 nextToken();
-                SequenceType contentType = parseSequenceType();
+                SequenceType contentType;
+                if (t.currentToken == Token.STAR) {
+                    contentType = SequenceType.ANY_SEQUENCE;
+                    nextToken();
+                } else {
+                    contentType = parseSequenceType();
+                }
                 readToken(Token.RPAREN);
-                return new SpecificJNodeType(contentType);
+                return firstArg == Token.LPAREN 
+                        ? new RootJNodeType(contentType)
+                        : new SpecificJNodeType(selector, contentType);
             } else {
                 return new SpecificJNodeType(selector, SequenceType.ANY_SEQUENCE);
             }
@@ -4119,20 +4125,19 @@ public class XPathParser {
             case "record": {
                 checkLanguageVersion40("nodeTest record(...)");
                 ItemType type = parseRecordTest(this);
-                return new SpecificJNodeType(SequenceType.one(type)
-                );
+                return SpecificJNodeType.jTreeRoot(SequenceType.one(type));
             }
 
             case "array": {
                 checkLanguageVersion40("nodeTest " + kind + "()");
                 ItemType type = parseArrayItemType();
-                return new SpecificJNodeType(SequenceType.one(type)
+                return SpecificJNodeType.jTreeRoot(SequenceType.one(type)
                 );
             }
             case "map": {
                 checkLanguageVersion40("nodeTest " + kind + "()");
                 ItemType type = parseMapItemType();
-                return new SpecificJNodeType(SequenceType.one(type)
+                return SpecificJNodeType.jTreeRoot(SequenceType.one(type)
                 );
             }
             case "enum": {

@@ -12,7 +12,9 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.ma.jnode.RootJNodeType;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -25,7 +27,9 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.value.SequenceType;
 
 
 /**
@@ -39,6 +43,7 @@ public class RootExpression extends Expression {
 
     private boolean contextMaybeUndefined = true;
     private boolean doneWarnings = false;
+    private ItemType itemType = null;
 
     public RootExpression() {
     }
@@ -56,24 +61,30 @@ public class RootExpression extends Expression {
                     .withErrorCode("XPDY0002").asTypeError().withLocation(getLocation());
         } else if (!doneWarnings && contextInfo.isParentless()
                 && th.relationship(contextInfo.getItemType(), NodeKindType.DOCUMENT) == Affinity.DISJOINT) {
+            // Note that isParentless() can only be true when we are processing XNode trees
             visitor.issueWarning(noContextMessage() + ": the context item is parentless and is not a document node", SaxonErrorCode.SXWN9026, getLocation());
             doneWarnings = true;
         }
         contextMaybeUndefined = contextInfo.getOptionality() != Optionality.REQUIRED;
-        if (th.isSubType(contextInfo.getItemType(), NodeKindType.DOCUMENT)) {
-            // this rewrite is important for streamability analysis
-            ContextItemExpression cie = new ContextItemExpression();
-            ExpressionTool.copyLocationInfo(this, cie);
-            cie.setStaticInfo(contextInfo);
-            return cie;
-        }
-
-        Affinity relation = th.relationship(contextInfo.getItemType(), AnyGNodeType.getInstance());
-        if (relation == Affinity.DISJOINT) {
-            throw new XPathException(noContextMessage() + ": the context item is not a node")
-                    .withErrorCode("XPTY0020")
-                    .asTypeError()
-                    .withLocation(getLocation());
+        if (th.isSubType(contextInfo.getItemType(), AnyXNodeType.getInstance())) {
+            itemType = NodeKindType.DOCUMENT;
+            if (th.isSubType(contextInfo.getItemType(), NodeKindType.DOCUMENT)) {
+                // this rewrite is important for streamability analysis
+                ContextItemExpression cie = new ContextItemExpression();
+                ExpressionTool.copyLocationInfo(this, cie);
+                cie.setStaticInfo(contextInfo);
+                return cie;
+            }
+        } else if (th.isSubType(contextInfo.getItemType(), AnyJNodeType.getInstance())) {
+            itemType = new RootJNodeType(SequenceType.ANY_SEQUENCE);
+        } else {
+            Affinity relation = th.relationship(contextInfo.getItemType(), AnyGNodeType.getInstance());
+            if (relation == Affinity.DISJOINT) {
+                throw new XPathException(noContextMessage() + ": the context item is not a node")
+                        .withErrorCode("XPTY0020")
+                        .asTypeError()
+                        .withLocation(getLocation());
+            }
         }
         return this;
     }
@@ -154,7 +165,11 @@ public class RootExpression extends Expression {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return NodeKindType.DOCUMENT;
+        if (itemType == null) {
+            return ChoiceItemType.of(new RootJNodeType(SequenceType.ANY_SEQUENCE), NodeKindType.DOCUMENT);
+        } else {
+            return itemType;
+        }
     }
 
 
@@ -166,7 +181,17 @@ public class RootExpression extends Expression {
      */
     @Override
     public UType getStaticUType(UType contextItemType) {
-        return UType.DOCUMENT;
+        boolean maybeX = contextItemType.overlaps(UType.XNODE);
+        boolean maybeJ = contextItemType.overlaps(UType.JNODE);
+        if (maybeX && maybeJ) {
+            return UType.DOCUMENT.union(UType.JNODE);
+        } else if (maybeX) {
+            return UType.DOCUMENT;
+        } else if (maybeJ) {
+            return UType.JNODE;
+        } else {
+            return UType.VOID;
+        }
     }
 
 
