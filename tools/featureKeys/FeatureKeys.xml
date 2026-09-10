@@ -1475,13 +1475,13 @@
                 stream (System.err). This is the fallback destination for various tracing and
                 diagnostic output. In some cases a more specific mechanism exists to select the
                 destination for particular kinds of output.</p>
-            <p>Saxon generally writes such messages via the <code>net.sf.saxon.lib.Logger</code> object
+            <p>Saxon generally writes such messages via the <link>net.sf.saxon.lib.Logger</link> object
                registered with the <code>Configuration</code> object. The default <code>Logger</code>
                writes to the standard error output by default, but this can be changed by setting
                this feature. For finer control (for example, sending different messages to different
             destinations, or suppressing some entirely) it is possible to register a user-defined
-            <code>Logger</code> with the <code>Configuration.</code> Saxon also supplies a <code>Logger</code>
-            implementation <code>net.sf.saxon.lib.SystemLogger</code> which directs output to 
+            <code>Logger</code> with the <code>Configuration</code>. Saxon also supplies a <code>Logger</code>
+            implementation <link>net.sf.saxon.lib.SystemLogger</link> which directs output to 
             the standard JDK <code>java.util.logging.Logger</code> framework. In such cases this
             feature will have no effect.</p>
             <p>Note that if the <code>Configuration</code> is used in more than one processing
@@ -1709,14 +1709,15 @@
         <getter class="net.sf.saxon.Configuration">isTiming</getter>
         <configfile>global/@timing</configfile>
         <configfiledesc>
-            <p>Outputs progress messages to the <code>Logger</code>, which by default
+            <p>Outputs progress messages to the <link>net.sf.saxon.lib.Logger</link>, which by default
                 writes to <code>System.err</code>. Enabled by the
                 <code>-t</code> option on the command line.</p>
         </configfiledesc>
         <commandline for="TQV">-t</commandline>
         <desc>
             <p>This is set to true to cause basic timing and tracing information to be output to the
-                registered <code>Logger</code>, which by default writes to the standard error output stream.</p>
+                registered <link>net.sf.saxon.lib.Logger</link>, which by default writes to the
+                standard error output stream.</p>
             <p>The name of the feature is poorly chosen, since much
                 of the information that is output has nothing to do with timing, for example the
                 names of output files for <code>xsl:result-document</code> are traced, as are the
@@ -1731,7 +1732,7 @@
                 <li><p>Indicating when files are processed in streaming mode;</p></li>
                 <li><p>Enabling JDBC diagnostics when the SQL extensions are used;</p></li>
                 <li><p>Reporting details of any parser loaded using JAXP;</p></li>
-                <li><p>Statistics for documents loaded using the DocumentBuilder;</p></li>
+                <li><p>Statistics for documents loaded using the <code>DocumentBuilder</code>;</p></li>
                 <li><p>Identifying documents written using <code>xsl:result-document</code>;</p></li>
                 <li><p>Tracing execution of <code>fn:transform()</code>;</p></li>
                 <li><p>Tracing calls on the standard <code>URIResolver</code>.</p></li>
@@ -1758,8 +1759,8 @@
                 namespaces (including user-written functions in XSLT or XQuery).</p>
             <p>The output messages are sent to the <code>Logger</code> registered with
             the Saxon <code>Configuration</code>. By default this writes to the standard error output,
-            but this may be redirected using the <code>http://saxon.sf.net/feature/standardErrorOutput</code>
-            configuration property.</p>
+                but this may be redirected using the
+                <link>net.sf.saxon.lib.Feature#STANDARD_ERROR_OUTPUT_FILE</link> property.</p>
         </desc>
     </feature>
     <feature>
@@ -1844,7 +1845,7 @@
                 purpose of performance analysis and tuning.</p>
             <p>This option produces the same trace information as the <code>-explain</code>
             command line option, but without the final display of the expression tree. That display
-            can be achieved by calling the <code>explain</code> method of the <code>XsltExecutable</code>
+            can be achieved by calling the <code>explain()</code> method of the <code>XsltExecutable</code>
             or <code>XQueryExecutable</code> objects.</p>
         </desc>
     </feature>

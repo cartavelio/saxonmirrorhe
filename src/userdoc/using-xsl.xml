@@ -179,8 +179,8 @@
                   This combines the XSLT instructions and the XPath expressions into a single tree. If
                   no file name is specified the output is sent to the standard error stream. The
                   output is in XML format.</p>
-               <p>Equivalent to setting the configuration option <code>http://saxon.sf.net/feature/trace-optimizer-decisions</code>
-               and then calling the <code>explain</code> method of the <code>XsltExecutable</code>.</p>
+               <p>Equivalent to setting the configuration option <a class="feature" href="TRACE_OPTIMIZER_DECISIONS"/>
+               and then calling the <code>explain()</code> method of the <code>XsltExecutable</code>.</p>
             </td>
          </tr>
          <tr>
@@ -645,7 +645,7 @@
                   also traces the files that are read and written, and extension modules that are
                   loaded.</p>
                <p>More specifically, the command-line option <code>-t</code> has two effects: firstly, it sets
-               the configuration option <code>http://saxon.sf.net/feature/timing</code>,
+                  the configuration option <a class="feature" href="TIMING"/>,
                and secondly, it outputs various messages that are specific to command-line
                invocation, including the full names of input and output files, and the
                time spent compiling and executing the stylesheet.</p>
