@@ -32,9 +32,9 @@ import com.nwalsh.gradle.docker.DockerContainer
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-compileJava {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-  targetCompatibility = JavaVersion.VERSION_1_8
+java {
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
 }
 
 project.extensions.create("testSuite", SaxonTestSuite, project)
