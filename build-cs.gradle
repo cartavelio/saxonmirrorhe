@@ -503,6 +503,13 @@ task dotnetPublishZip(
   dependsOn: ['dotnetPublish'],
   type: Zip
 ) {
+  doFirst {
+    copy {
+      into "${buildDir}/cs/bin/Release/net5.0/${csrid}/publish/doc"
+      from "${projectDir}/src/docs/doc"
+    }
+  }
+
   archiveFileName = "SaxonCS-${saxonVersion}-${csplatform}.zip"
   from "${buildDir}/cs/bin/Release/net5.0/${csrid}/publish"
   into "/SaxonCS-${saxonVersion}/"
