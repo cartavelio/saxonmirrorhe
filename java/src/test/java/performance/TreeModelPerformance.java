@@ -229,7 +229,7 @@ public class TreeModelPerformance extends PerformanceTestCase {
                     ComplexContentOutputter cco = new ComplexContentOutputter(reducer);
                     cco.open();
                     cco.startDocument(ReceiverOption.NONE);
-                    cco.startElement(new NoNamespaceName("wrapper"), Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
+                    cco.startElement(new NoNamespaceName("wrapper"), Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
 
                     finalDocumentElement.copy(cco, CopyOptions.ALL_NAMESPACES, Loc.NONE);
 
@@ -334,7 +334,7 @@ public class TreeModelPerformance extends PerformanceTestCase {
             ComplexContentOutputter cco = new ComplexContentOutputter(reducer);
             cco.open();
             cco.startDocument(ReceiverOption.NONE);
-            cco.startElement(new NoNamespaceName("wrapper"), Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
+            cco.startElement(new NoNamespaceName("wrapper"), Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
 
             finalDocumentElement.copy(cco, CopyOptions.ALL_NAMESPACES, Loc.NONE);
 
@@ -452,7 +452,7 @@ public class TreeModelPerformance extends PerformanceTestCase {
             ComplexContentOutputter cco = new ComplexContentOutputter(reducer);
             cco.open();
             cco.startDocument(ReceiverOption.NONE);
-            cco.startElement(new NoNamespaceName("wrapper"), Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
+            cco.startElement(new NoNamespaceName("wrapper"), Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
 
             finalDocumentElement.copy(cco, CopyOptions.ALL_NAMESPACES, Loc.NONE);
 

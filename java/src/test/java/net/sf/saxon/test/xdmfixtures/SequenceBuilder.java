@@ -20,7 +20,7 @@ public class SequenceBuilder implements BuilderDsl {
     }
 
     public static GroundedValue empty() {
-        return EmptySequence.getInstance();
+        return EmptySequence.INSTANCE;
     }
 
     public SequenceBuilder append(String... strings) {

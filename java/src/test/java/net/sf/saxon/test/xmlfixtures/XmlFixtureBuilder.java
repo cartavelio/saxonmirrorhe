@@ -90,7 +90,7 @@ public class XmlFixtureBuilder {
         public BuilderDsl element(String name, DslLambda definition) throws XPathException {
             NodeName qn = makeElementName(name);
             out.startContent();
-            out.startElement(qn, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
+            out.startElement(qn, Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
             definition.buildWith(this);
             out.endElement();
             return this;

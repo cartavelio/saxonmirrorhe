@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -81,6 +82,40 @@ public class NamespaceMapTest {
         assertEquals(NamespaceUri.IXSL, map3.getNamespaceUri("saxon"));
         assertEquals(NamespaceUri.ARRAY_FUNCTIONS, map3.getNamespaceUri("array"));
         assertNull(map3.getNamespaceUri(""));
+    }
+
+    @Test
+    public void testMergeReturningFirstMap() {
+        NamespaceMap map1 = NamespaceMap.emptyMap();
+        map1 = map1.put("xml", NamespaceUri.XML);
+        map1 = map1.put("xsl", NamespaceUri.XSLT);
+        map1 = map1.put("saxon", NamespaceUri.SAXON);
+        map1 = map1.put("fn", NamespaceUri.FN);
+
+        NamespaceMap map2 = NamespaceMap.emptyMap();
+        map2 = map2.put("xsl", NamespaceUri.XSLT);
+        map2 = map2.put("saxon", NamespaceUri.SAXON);
+
+        NamespaceMap map3 = map1.putAll(map2);
+        assertSame(map1, map3);
+
+    }
+
+    @Test
+    public void testMergeReturningSecondMap() {
+        NamespaceMap map1 = NamespaceMap.emptyMap();
+        map1 = map1.put("xsl", NamespaceUri.XSLT);
+        map1 = map1.put("saxon", NamespaceUri.SAXON);
+
+        NamespaceMap map2 = NamespaceMap.emptyMap();
+        map2 = map2.put("fn", NamespaceUri.FN);
+        map1 = map1.put("xml", NamespaceUri.XML);
+        map2 = map2.put("xsl", NamespaceUri.XSLT);
+        map2 = map2.put("saxon", NamespaceUri.IXSL);
+
+        NamespaceMap map3 = map1.putAll(map2);
+        assertSame(map2, map3);
+
     }
 
     @Test

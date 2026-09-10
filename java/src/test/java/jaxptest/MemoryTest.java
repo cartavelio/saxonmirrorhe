@@ -31,7 +31,7 @@ public class MemoryTest {
             StreamSource source = new StreamSource(configTest.getXMarkDir() + "xmark1.xml"); //Use 100Mb for real work
             Configuration config = new Configuration();
             ParseOptions options = config.getParseOptions()
-                    .withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                    .withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE);
             config.setTreeModel(Builder.TINY_TREE_CONDENSED);
             NodeInfo doc = config.buildDocumentTree(source, options).getRootNode();
             System.gc();
@@ -54,7 +54,7 @@ public class MemoryTest {
             StreamSource source = new StreamSource(configTest.getXMarkDir() + "xmark1.xml");  //Use 100Mb for real work
             Configuration config = new Configuration();
             ParseOptions options = config.getParseOptions()
-                    .withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+                    .withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE);
             config.setTreeModel(Builder.LINKED_TREE);
             NodeInfo doc = config.buildDocumentTree(source, options).getRootNode();
             System.gc();

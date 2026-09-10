@@ -107,7 +107,7 @@ public class BaseUriTestBug5691 {
 
     public static class TreeWriter {
 
-        protected static final AttributeMap emptyAttributeMap = EmptyAttributeMap.getInstance();
+        protected static final AttributeMap emptyAttributeMap = EmptyAttributeMap.INSTANCE;
         protected Controller controller = null;
         protected Executable exec = null;
         protected NamePool pool = null;
@@ -197,7 +197,7 @@ public class BaseUriTestBug5691 {
         }
 
         public void addStartElement(QName nodeName) {
-            addStartElement(nodeName, EmptyAttributeMap.getInstance());
+            addStartElement(nodeName, EmptyAttributeMap.INSTANCE);
         }
 
         public void addStartElement(XdmNode node) {
