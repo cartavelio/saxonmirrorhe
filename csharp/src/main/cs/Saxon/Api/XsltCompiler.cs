@@ -147,14 +147,14 @@ namespace Saxon.Api {
             get => _usedSchema;
             set { 
                 SchemaAware = true;
-                jXsltCompiler.getUnderlyingCompilerInfo().preLoadSchema(value.UnderlyingSchema);
+                jXsltCompiler.getUnderlyingCompilerInfo().preLoadSchema("", value.UnderlyingSchema);
                 _usedSchema = value;
             }
         }
 
         public void UseSchema(XsdSchema schema) {
             SchemaAware = true;
-            jXsltCompiler.getUnderlyingCompilerInfo().preLoadSchema(schema.UnderlyingSchema);
+            jXsltCompiler.getUnderlyingCompilerInfo().preLoadSchema("", schema.UnderlyingSchema);
             _usedSchema = schema;
         }
 
