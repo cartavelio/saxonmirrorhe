@@ -140,7 +140,7 @@ namespace Saxon.Api {
         /// <para>When validation is invoked within the XSLT code (using a validation or type attribute),
         /// all the schema components supplied in this schema are available for use during the validation
         /// episode, whether or not they have been imported into the static context by means of an
-        /// <c>xsl:import-schema</c> declaration.
+        /// <c>xsl:import-schema</c> declaration.</para>
         /// </remarks>
 
         public XsdSchema Schema {

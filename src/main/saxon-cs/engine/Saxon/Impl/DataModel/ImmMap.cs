@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using SCI = System.Collections.Immutable;
 using Saxon.Hej.expr.sort;
 using Saxon.Hej.ma.map;
 using Saxon.Hej.om;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
-using KeyValuePair = Saxon.Hej.ma.map.KeyValuePair;
+using SaxonKVP = Saxon.Hej.ma.map.KeyValuePair;
 using Type = Saxon.Hej.type.Type;
 
 namespace Saxon.Impl.DataModel {
     /**
      * This is a re-implementation of the Java class Saxon.Hej.ma.map.HashTrieMap,
-     * rewritten to use the .NET ImmutableDictionary class in place of the homebrew
+     * rewritten to use the .NET ImmutableDictionary class in place of the open source
      * immutable trie structure used in the Java product.
      */
     public class ImmMap : MapItem {
@@ -23,7 +23,7 @@ namespace Saxon.Impl.DataModel {
         // equals method (to take account of collations, etc). The value in the trie is
         // actually a tuple holding both the real key, and the value.
 
-        private ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap;
+        protected SCI.ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap;
 
         // The following values are maintained incrementally when
         // entries are added to the map. They are not changed when entries are removed,
@@ -49,15 +49,51 @@ namespace Saxon.Impl.DataModel {
         // The "envelope" cardinality of values in the map (0:1, 0:0, 1:1, 0:many, 1:many)
         private int valueCardinality = 0;
 
-        // The number of entries in the map; -1 if unknown
-        private int nrOfEntries = -1;
+        
+        protected class GeneralMapBuilder : Saxon.Hej.ma.map.MapBuilder {
+            protected SCI.ImmutableDictionary<Saxon.Hej.expr.sort.AtomicMatchKey,Saxon.Hej.ma.map.KeyValuePair>? imap 
+                = SCI.ImmutableDictionary.Create<AtomicMatchKey, SaxonKVP>();
+
+            public virtual void put(Saxon.Hej.value.AtomicValue key, Saxon.Hej.om.GroundedValue value) {
+                imap = imap.Add(key.asMapKey(), new SaxonKVP(key, value));
+            }
+            public virtual void put(string key, Saxon.Hej.om.GroundedValue value) {
+                put(new Saxon.Hej.value.StringValue(key), value);
+            }
+
+            protected virtual void put(SaxonKVP kvp) {
+                imap = imap.Add(kvp.key.asMapKey(), kvp);
+            }
+            
+            public virtual bool contains(string key) {
+                return (get(key) != null);
+            }
+            public virtual Saxon.Hej.om.GroundedValue get(string key) {
+                return get(new Saxon.Hej.value.StringValue(key));
+            }
+            public virtual Saxon.Hej.om.GroundedValue get(Saxon.Hej.value.AtomicValue key) {
+                AtomicMatchKey matchKey = key.asMapKey();
+                if (imap.ContainsKey(matchKey)) {
+                    return imap[matchKey].value;
+                }
+                return null;
+            }
+            public virtual Saxon.Hej.ma.map.MapItem getCompletedMap() {
+                Saxon.Impl.DataModel.ImmMap result = new Saxon.Impl.DataModel.ImmMap(imap);
+                imap = null;
+                return result;
+            }
+        
+        }
+        public static Saxon.Hej.ma.map.MapBuilder getBuilder() {
+            return new GeneralMapBuilder();
+        }
 
         /**
          * Create an empty map
          */
         public ImmMap() {
-            this.imap = ImmutableDictionary.Create<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair>();
-            this.nrOfEntries = 0;
+            this.imap = SCI.ImmutableDictionary.Create<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair>();
         }
 
 
@@ -75,9 +111,8 @@ namespace Saxon.Impl.DataModel {
          * Create a map whose contents are a copy of an existing immutable map
          * @param imap the map to be copied
          */
-        public ImmMap(ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap) {
+        public ImmMap(SCI.ImmutableDictionary<AtomicMatchKey, SaxonKVP> imap) {
             this.imap = imap;
-            nrOfEntries = -1;
         }
 
         /**
@@ -92,7 +127,7 @@ namespace Saxon.Impl.DataModel {
             }
 
             ImmMap m2 = new ImmMap();
-            foreach (Saxon.Hej.ma.map.KeyValuePair pair in map.keyValuePairs()) {
+            foreach (SaxonKVP pair in map.keyValuePairs()) {
                 m2 = (ImmMap) m2.addEntry(pair.key, pair.value);
             }
 
@@ -105,7 +140,7 @@ namespace Saxon.Impl.DataModel {
          * @param val the new associated value
          * @param wasEmpty true if the map was empty before adding these values
          */
-        private void updateTypeInformation(AtomicValue key, Sequence val, bool wasEmpty) {
+        protected void updateTypeInformation(AtomicValue key, Sequence val, bool wasEmpty) {
             if (wasEmpty) {
                 keyUType = key.getUType();
                 valueUType = SequenceTool.getUType(val);
@@ -127,21 +162,19 @@ namespace Saxon.Impl.DataModel {
             }
         }
 
+        public void copyTypeInfoFrom(ImmMap m2) {
+            valueCardinality = m2.valueCardinality;
+            keyUType = m2.keyUType;
+            valueUType = m2.valueUType;
+            keyAtomicType = m2.keyAtomicType;
+            valueItemType = m2.valueItemType;
+        }
+        
         /**
          * Get the size of the map
          */
         public override int size() {
-            if (nrOfEntries >= 0) {
-                return nrOfEntries;
-            }
-
-            int count = 0;
-            //noinspection UnusedDeclaration
-            foreach (Saxon.Hej.ma.map.KeyValuePair entry in keyValuePairs()) {
-                count++;
-            }
-
-            return nrOfEntries = count;
+            return imap.Count;
         }
 
         /**
@@ -150,7 +183,7 @@ namespace Saxon.Impl.DataModel {
          * @return true if and only if the size of the map is zero
          */
         public override bool isEmpty() {
-            return nrOfEntries == 0 || !imap.GetEnumerator().MoveNext();
+            return imap.IsEmpty;
         }
 
         /**
@@ -292,9 +325,9 @@ namespace Saxon.Impl.DataModel {
 
             bool isNew = !imap.ContainsKey(amk);
             bool empty = isEmpty();
-            ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> imap2 =
-                imap.SetItem(amk, new Saxon.Hej.ma.map.KeyValuePair(key, value));
-            ImmMap t2 = new ImmMap(imap2) {
+            SCI.ImmutableDictionary<AtomicMatchKey, SaxonKVP> imap2 =
+                imap.SetItem(amk, new SaxonKVP(key, value));
+            ImmMap t2 = new (imap2) {
                 valueCardinality = this.valueCardinality,
                 keyUType = keyUType,
                 valueUType = valueUType,
@@ -302,9 +335,6 @@ namespace Saxon.Impl.DataModel {
                 valueItemType = valueItemType
             };
             t2.updateTypeInformation(key, value, empty);
-            if (nrOfEntries >= 0) {
-                t2.nrOfEntries = isNew ? nrOfEntries + 1 : nrOfEntries;
-            }
 
             return t2;
         }
@@ -322,9 +352,8 @@ namespace Saxon.Impl.DataModel {
             AtomicMatchKey amk = makeKey(key);
             bool empty = isEmpty();
             bool exists = imap.ContainsKey(amk);
-            imap = imap.SetItem(amk, new Saxon.Hej.ma.map.KeyValuePair(key, value));
+            imap = imap.SetItem(amk, new SaxonKVP(key, value));
             updateTypeInformation(key, value, empty);
-            nrOfEntries = -1;
             return exists;
         }
 
@@ -341,18 +370,17 @@ namespace Saxon.Impl.DataModel {
          *         unchanged if the specified key was not present
          */
         public override MapItem remove(AtomicValue key) {
-            ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> m2
+            SCI.ImmutableDictionary<AtomicMatchKey, SaxonKVP> m2
                 = imap.Remove(makeKey(key));
             if (m2 == imap) {
                 // The key is not present; the map is unchanged
                 return this;
             }
 
-            ImmMap result = new ImmMap(m2) {
+            ImmMap result = new (m2) {
                 keyUType = keyUType,
                 valueUType = valueUType,
                 valueCardinality = valueCardinality,
-                nrOfEntries = nrOfEntries - 1
             };
             return result;
         }
@@ -365,8 +393,8 @@ namespace Saxon.Impl.DataModel {
          */
         public override GroundedValue get(AtomicValue key) {
             AtomicMatchKey matchKey = makeKey(key);
-            if (imap.ContainsKey(matchKey)) {
-                return imap[matchKey].value;
+            if (imap.TryGetValue(matchKey, out SaxonKVP? value)) {
+                return value.value;
             }
 
             return null;
@@ -395,15 +423,14 @@ namespace Saxon.Impl.DataModel {
             return new KeyIterator(imap);
         }
 
-        public override IEnumerable<KeyValuePair> keyValuePairs() {
+        public override IEnumerable<SaxonKVP> keyValuePairs() {
             return imap.Values;
         }
 
         public class KeyIterator : AtomicIterator {
-            private IEnumerator<Saxon.Hej.ma.map.KeyValuePair> _enumerator;
-            private Saxon.Hej.ma.map.KeyValuePair _current;
+            private readonly IEnumerator<Saxon.Hej.ma.map.KeyValuePair> _enumerator;
 
-            public KeyIterator(ImmutableDictionary<AtomicMatchKey, Saxon.Hej.ma.map.KeyValuePair> dictionary) {
+            public KeyIterator(SCI.ImmutableDictionary<AtomicMatchKey, SaxonKVP> dictionary) {
                 _enumerator = dictionary.Values.GetEnumerator();
             }
 
@@ -438,4 +465,4 @@ namespace Saxon.Impl.DataModel {
     }
 }
 
-// Copyright (c) 2021 - 2023 Saxonica Limited
+// Copyright (c) 2021 - 2024 Saxonica Limited

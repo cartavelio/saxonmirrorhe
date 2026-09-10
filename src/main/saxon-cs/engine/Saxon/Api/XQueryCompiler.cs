@@ -117,7 +117,7 @@ namespace Saxon.Api {
         /// <para>When validation is invoked within the XQuery code (using a validate expression),
         /// all the schema components supplied in this schema are available for use during the validation
         /// episode, whether or not they have been imported into the static context by means of an
-        /// <c>import schema</c> declaration.
+        /// <c>import schema</c> declaration.</para>
         /// </remarks>
 
         public XsdSchema Schema {

@@ -1,6 +1,10 @@
 using System;
 using SysCollGen = System.Collections.Generic;
 using System.Linq;
+using NSec.Cryptography;
+using Saxon.Hej.value;
+using KeyValuePair = Saxon.Hej.ma.map.KeyValuePair;
+
 namespace Saxon.Impl.Helpers {
     public class MapUtils {
         public static V Get<K,V>(SysCollGen.IDictionary<K, V> map, K key) /*where V : class*/ {
@@ -56,6 +60,25 @@ namespace Saxon.Impl.Helpers {
                 map[key] = newVal;
                 return default(V);
             } 
+        }
+
+        /// <summary>
+        /// Custom method to support iteration over a DictionaryMap. The method returns an iteration
+        /// of Saxon KeyValuePair objects, produced by converting the .NET KeyValuePair objects
+        /// delivered from the dictionary iteration; the String keys in the .NET KVP are converted
+        /// to StringValue keys in the Saxon KVP.
+        /// </summary>
+        /// <param name="map">The map to be interated over.</param>
+        /// <returns>An iterator of key value pairs</returns>
+        /// <remarks>
+        /// <para>I tried to make this more generic but it got too complicated.
+        /// </remarks>
+
+        public static SysCollGen.IEnumerator<Saxon.Hej.ma.map.KeyValuePair> convertStringKeyValuePairs(
+                SysCollGen.IDictionary<string, Saxon.Hej.om.GroundedValue> map) {
+            foreach (SysCollGen.KeyValuePair<string, Saxon.Hej.om.GroundedValue> kvp in map) {
+                yield return new Saxon.Hej.ma.map.KeyValuePair(new StringValue(kvp.Key), kvp.Value);
+            }
         }
     }
 }
