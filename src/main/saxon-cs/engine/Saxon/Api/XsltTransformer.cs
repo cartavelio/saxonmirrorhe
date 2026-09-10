@@ -388,6 +388,22 @@ namespace Saxon.Api {
             s9Transformer.setDestination(destination.UnderlyingDestination);
             s9Transformer.transform();
         }
+        
+        /// <summary>
+        /// Run the transformation, sending the result to the destination set in the
+        /// <c>Destination</c> property (which must have been given a value).
+        /// </summary>
+        /// <exception cref="Saxon.Api.SaxonApiException">Throws a <c>SaxonApiException</c> if the transformation
+        /// fails, or if no destination has been set.</exception>
+        
+        public void Run() {
+            if (xmlDestination == null) {
+                throw new SaxonApiException("Destination has not been set");
+            }
+            s9Transformer.setDestination(xmlDestination.UnderlyingDestination);
+            s9Transformer.transform();
+        }
+
 
         /// <summary>
         /// Escape hatch to the underlying implementation
