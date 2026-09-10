@@ -47,23 +47,20 @@ public abstract class CsvRepresentationGenerator {
 
     protected NumberOfColumns numberOfColumnsMode() throws XPathException {
         Optional<Item> opt = getNumberOfColumnsOpt();
-        if (!opt.isPresent()) return NumberOfColumns.ALL;
+        if (!opt.isPresent()) {
+            return NumberOfColumns.ALL;
+        }
         AtomicValue value = opt.get().atomize().head();
         if (value.getPrimitiveType() == BuiltInAtomicType.INTEGER) {
             return NumberOfColumns.SPECIFIED;
-        } else {
-            switch (value.getStringValue()) {
-                case "first-row":
-                    return NumberOfColumns.FIRST_ROW;
-                default:
-                    return NumberOfColumns.ALL;
-            }
+        } else if (value.getStringValue().equals("first-row")) {
+            return NumberOfColumns.FIRST_ROW;
         }
+        return NumberOfColumns.ALL;
     }
 
-    protected Item getColumnNamesOpt() throws XPathException {
-        Optional<Item> opt = Optional.ofNullable(options.getOrDefault("column-names", EmptySequence.getInstance()).head());
-        return opt.orElse(BooleanValue.FALSE);
+    protected Item getColumnNamesOpt() {
+        return options.getOrDefault("column-names", BooleanValue.FALSE).head();
     }
 
     private List<Integer> getColumnFilter() {
@@ -75,7 +72,9 @@ public abstract class CsvRepresentationGenerator {
     }
 
     protected List<Integer> getColumnIndexes(ArrayItem rowArray) throws XPathException {
-        if (columnIndexes != null) return columnIndexes;
+        if (columnIndexes != null) {
+            return columnIndexes;
+        }
         if (_shouldFilterColumns) {
             columnIndexes = getColumnFilter();
         } else {
@@ -89,6 +88,7 @@ public abstract class CsvRepresentationGenerator {
                     break;
                 default:
                     numberOfColumns = rowArray.arrayLength();
+                    break;
             }
             columnIndexes = new ArrayList<>();
             for (int i = 1; i <= numberOfColumns; i++) {
@@ -123,6 +123,7 @@ public abstract class CsvRepresentationGenerator {
                     break;
                 default:
                     filteredRow = row.members();
+                    break;
             }
         }
         return filteredRow;
@@ -132,8 +133,9 @@ public abstract class CsvRepresentationGenerator {
 
     protected GroundedValue rowAsSequence(Iterable<GroundedValue> row) {
         ArrayList<Item> members = new ArrayList<>();
-        row.forEach(item -> members.add((Item) item));
-
+        for (GroundedValue item : row) {
+            members.add((Item) item);
+        }
         return SequenceExtent.makeSequenceExtent(members);
     }
 
@@ -196,7 +198,7 @@ public abstract class CsvRepresentationGenerator {
      * Represents a single row in the CSV that has been explicitly bounded at a certain size (number of columns), that
      * can be iterated over as with any Iterable.
      */
-    class BoundedRow implements Iterable<GroundedValue> {
+    static class BoundedRow implements Iterable<GroundedValue> {
         private final ArrayItem row;
         private final int size;
 

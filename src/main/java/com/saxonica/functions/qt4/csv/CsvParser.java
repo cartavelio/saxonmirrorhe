@@ -93,7 +93,7 @@ public class CsvParser {
      */
     private static class CodepointsRewindableIterator {
         private final IntIterator codepoints;
-        private final int bufferCapacity = 8;
+        private static final int bufferCapacity = 8;
         private final int[] buffer = new int[bufferCapacity];
         private final int bufferEndPosition = bufferCapacity - 1;
         private boolean bufferFilled = false;
@@ -315,7 +315,7 @@ public class CsvParser {
             needNewRow = false;
         }
         handler.appendField(currentField.toString());
-        currentField.delete(0, currentField.length());
+        currentField.setLength(0);
         processingField = false;
         inQuotedField = false;
         atFieldStart = true;

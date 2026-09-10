@@ -36,7 +36,7 @@ class FieldGetter implements Callable {
     private final UnboundFieldGetter fieldGetter;
     private final List<GroundedValue> fields;
 
-    static CallableFunction createBoundFunction(UnboundFieldGetter fieldGetter, Iterable<GroundedValue> fields) {
+    public static CallableFunction createBoundFunction(UnboundFieldGetter fieldGetter, Iterable<GroundedValue> fields) {
         return new CallableFunction(1, new FieldGetter(fieldGetter, fields), FIELD_FN_TYPE);
     }
 
@@ -49,7 +49,9 @@ class FieldGetter implements Callable {
     public FieldGetter(UnboundFieldGetter fieldGetter, Iterable<GroundedValue> iterable) {
         this.fieldGetter = fieldGetter;
         fields = new ArrayList<>();
-        iterable.forEach(fields::add);
+        for (GroundedValue gv : iterable) {
+            fields.add(gv);
+        }
     }
 
     /**

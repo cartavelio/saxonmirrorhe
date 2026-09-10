@@ -4,7 +4,9 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 
@@ -30,8 +32,11 @@ public class CsvFetchFieldByColumn extends SystemFunction {
 
         UnboundFieldGetter fieldGetter = new UnboundFieldGetter(columns);
         List<GroundedValue> fieldsList = new ArrayList<>();
-        fields.materialize().asIterable().forEach(fieldsList::add);
-
+        SequenceIterator iter = fields.iterate();
+        Item item;
+        while ((item = iter.next()) != null) {
+            fieldsList.add(item);
+        }
         return fieldGetter.get(key, fieldsList);
     }
 }

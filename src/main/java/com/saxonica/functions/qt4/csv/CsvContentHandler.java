@@ -10,7 +10,6 @@ import net.sf.saxon.value.StringValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * A CsvContentHandler's methods are called to create the output sequences from parsing a CSV, much like a SAX ContentHandler
@@ -47,6 +46,11 @@ public class CsvContentHandler {
      * @return a sequence of rows
      */
     public Sequence getSequence() {
-        return SequenceExtent.makeSequenceExtent(rows.stream().map(SimpleArrayItem::new).collect(Collectors.toList()));
+        List<SimpleArrayItem> rowSet = new ArrayList<>();
+        for (List<GroundedValue> row : rows) {
+             SimpleArrayItem array = new SimpleArrayItem(row);
+             rowSet.add(array);
+        }
+        return SequenceExtent.makeSequenceExtent(rowSet);
     }
 }

@@ -31,7 +31,7 @@ public abstract class CsvFunction extends SystemFunction {
      *
      * @return an OptionsParameter instance with the core options already added.
      */
-    static OptionsParameter coreOptions() {
+    public static OptionsParameter coreOptions() {
         OptionsParameter opts = new OptionsParameter(40);
         List<StringValue> defaultRowDelimiter = Arrays.asList(StringValue.CRLF, StringValue.LF, StringValue.CR);
         opts.addAllowedOption("trim-whitespace", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -52,7 +52,7 @@ public abstract class CsvFunction extends SystemFunction {
         NUMBER_OF_COLUMNS_TYPE = SequenceType.makeSequenceType(numberOfColumnsItemType, StaticProperty.EXACTLY_ONE);
     }
 
-    static OptionsParameter extendedOptions() {
+    public static OptionsParameter extendedOptions() {
         OptionsParameter opts = coreOptions();
         opts.addAllowedOption("column-names", SequenceType.SINGLE_ITEM, BooleanValue.FALSE);
         opts.addAllowedOption("filter-columns", SequenceType.INTEGER_SEQUENCE, EmptyAtomicSequence.getInstance());

@@ -65,7 +65,6 @@ class UnboundFieldGetter {
      * @param idx    the index of the column to fetch (zero-based)
      * @param fields the fields to lookup within
      * @return the field value
-     * @throws XPathException if the named column does not exist
      */
     public Sequence get(Int64Value idx, List<GroundedValue> fields) {
         // keys are 1-based indexes, while the array item here is 0-based

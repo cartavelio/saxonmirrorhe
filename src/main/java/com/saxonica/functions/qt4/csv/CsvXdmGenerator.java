@@ -2,44 +2,36 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 
-import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Handles generating a <code>parsed-csv-record-structure</code> from a sequence of array items
  * (<code>array(xs:string)*</code>).
  */
 public class CsvXdmGenerator extends CsvRepresentationGenerator {
+
+    private static final Shape COLUMNS_RECORD_SHAPE = new Shape(new Twine8("names"), new Twine8("fields"));
+    private static final Shape ROW_RECORD_SHAPE = new Shape(new Twine8("fields"), new Twine8("field"));
+    private static final Shape RESULT_RECORD_SHAPE = new Shape(new Twine8("columns"), new Twine8("rows"));
     /**
      * Represents an empty <code>csv-columns-record</code>, used when a CSV has no column information.
      */
-    public static MapItem EMPTY_COLUMNS_RECORD;
-    static {
-        DictionaryMap item = new DictionaryMap();
-        item.initialPut("names", new HashTrieMap());
-        item.initialPut("fields", EmptySequence.getInstance());
-        EMPTY_COLUMNS_RECORD = HashTrieMap.copy(item);
-    }
+    public static MapItem EMPTY_COLUMNS_RECORD =
+            new ShapedMap(COLUMNS_RECORD_SHAPE, new HashTrieMap(), EmptySequence.getInstance());
+
 
     /**
      * Represents an entirely empty CSV - no column information, and no rows of data.
      */
-    public static MapItem EMPTY_CSV;
-    static {
-        DictionaryMap item = new DictionaryMap();
-        item.initialPut("columns", CsvXdmGenerator.EMPTY_COLUMNS_RECORD);
-        item.initialPut("rows", EmptySequence.getInstance());
-        EMPTY_CSV = HashTrieMap.copy(item);
-    }
+    public static MapItem EMPTY_CSV =
+            new ShapedMap(RESULT_RECORD_SHAPE, EMPTY_COLUMNS_RECORD, EmptySequence.getInstance());
 
     /**
      * Construct an instance using the passed in options Map.
@@ -58,7 +50,7 @@ public class CsvXdmGenerator extends CsvRepresentationGenerator {
      *
      * @param rows  the sequence of rows (ArrayItems)
      * @return the <code>parsed-csv-structure-record</code> MapItem
-     * @throws XPathException
+     * @throws XPathException  if it fails
      */
     @Override
     public MapItem fromRowSequence(Sequence rows) throws XPathException {
@@ -72,10 +64,7 @@ public class CsvXdmGenerator extends CsvRepresentationGenerator {
     }
 
     private MapItem generateCsvRecord(MapItem columns, SequenceIterator iter) throws XPathException {
-        DictionaryMap csvRecord = new DictionaryMap();
-        csvRecord.initialPut("columns", columns);
-        csvRecord.initialPut("rows", generateRows(iter, columns));
-        return csvRecord;
+        return new ShapedMap(RESULT_RECORD_SHAPE, columns, generateRows(iter, columns));
     }
 
     private MapItem generateColumnsRecord(SequenceIterator rowsIter) throws XPathException {
@@ -90,44 +79,45 @@ public class CsvXdmGenerator extends CsvRepresentationGenerator {
     private MapItem generateColumnsRecord(MapItem columnNamesMap) throws XPathException {
         List<GroundedValue> fields = new ArrayList<>();
         Map<Integer, GroundedValue> fieldsMap = new HashMap<>();
-        IterationUtils.forEach(columnNamesMap.keyValuePairs(), kvPair -> {
-            IntegerValue idx = (IntegerValue) kvPair.value.head();
-            fieldsMap.put((int) idx.longValue(), kvPair.key);
-        });
-
-        int fieldsLength = Collections.max(fieldsMap.entrySet(), Comparator.comparingInt(Map.Entry::getKey)).getKey();
+        int fieldsLength = 0;
+        for (KeyValuePair kvPair : columnNamesMap.keyValuePairs()) {
+            int idx = (int)((IntegerValue) kvPair.value.head()).longValue();
+            if (idx > fieldsLength) {
+                fieldsLength = idx;
+            }
+            fieldsMap.put(idx, kvPair.key);
+        }
 
         for (int i = 1; i <= fieldsLength; i++) {
             fields.add(fieldsMap.getOrDefault(i, StringValue.EMPTY_STRING));
         }
-        if (numberOfColumnsMode() == NumberOfColumns.FIRST_ROW) numberOfColumns = fieldsLength;
-        DictionaryMap columns = new DictionaryMap();
-        columns.initialPut("names", HashTrieMap.copy(columnNamesMap));
-        columns.initialPut("fields", rowAsSequence(fields));
-        return HashTrieMap.copy(columns);
+        if (numberOfColumnsMode() == NumberOfColumns.FIRST_ROW) {
+            numberOfColumns = fieldsLength;
+        }
+        return new ShapedMap(COLUMNS_RECORD_SHAPE, columnNamesMap, rowAsSequence(fields));
     }
 
     private MapItem generateColumnsRecord(ArrayItem rowArray) throws XPathException {
-        if (rowArray == null) return EMPTY_COLUMNS_RECORD;
-
-        DictionaryMap columns = new DictionaryMap();
+        if (rowArray == null) {
+            return EMPTY_COLUMNS_RECORD;
+        }
         DictionaryMap names = new DictionaryMap();
         ArrayList<GroundedValue> wantedFields = new ArrayList<>();
-        getColumnIndexes(rowArray).forEach(oneBasedIndex -> wantedFields.add(rowArray.get(oneBasedIndex - 1)));
-        AtomicInteger currentIndex = new AtomicInteger(1);
-        IterationUtils.forEach(wantedFields, field -> {
-            names.initialPut(field.getStringValue(), IntegerValue.makeIntegerValue(BigInteger.valueOf(currentIndex.get())));
-            currentIndex.incrementAndGet();
-        });
-        columns.initialPut("names", HashTrieMap.copy(names));
-        columns.initialPut("fields", rowAsSequence(wantedFields));
-        return HashTrieMap.copy(columns);
+        for (int index : getColumnIndexes(rowArray)) {
+            wantedFields.add(rowArray.get(index - 1));
+        }
+        int currentIndex = 1;
+        for (GroundedValue field : wantedFields) {
+            names.initialPut(field.getStringValue(), Int64Value.makeIntegerValue(currentIndex++));
+        }
+        return new ShapedMap(COLUMNS_RECORD_SHAPE, names, rowAsSequence(wantedFields));
     }
 
     private GroundedValue generateRows(SequenceIterator rows, MapItem columns) throws XPathException {
         UnboundFieldGetter fieldGetter = new UnboundFieldGetter(columns);
         try {
-            return SequenceExtent.from(ItemMappingIterator.map(rows, row -> generateRowRecord((ArrayItem) row, fieldGetter)));
+            return SequenceExtent.from(
+                    ItemMappingIterator.map(rows, row -> generateRowRecord((ArrayItem) row, fieldGetter)));
         } catch (UncheckedXPathException ex) {
             throw ex.getXPathException();
         }
@@ -139,15 +129,14 @@ public class CsvXdmGenerator extends CsvRepresentationGenerator {
      * @param row         The source row.
      * @param fieldGetter The unbound field getter for the CSV this row is part of.
      * @return The resulting <code>csv-row-record</code>
-     * @throws XPathException
+     * @throws XPathException if it fails
      */
     private MapItem generateRowRecord(ArrayItem row, UnboundFieldGetter fieldGetter) throws XPathException {
-        DictionaryMap rowMap = new DictionaryMap();
-        Iterable<GroundedValue> filteredRow = filteredRow(row);
-
-        rowMap.initialPut("fields", rowAsSequence(filteredRow));
-        rowMap.initialPut("field", fieldGetter.boundGetterFunction(filteredRow));
-
-        return rowMap;
+        Iterable<GroundedValue> theFilteredRow = filteredRow(row);
+        return new ShapedMap(ROW_RECORD_SHAPE,
+                             rowAsSequence(theFilteredRow),
+                             fieldGetter.boundGetterFunction(theFilteredRow));
     }
+
+
 }

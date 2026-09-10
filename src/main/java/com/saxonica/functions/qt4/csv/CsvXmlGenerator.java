@@ -7,6 +7,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -95,12 +96,14 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
     private List<GroundedValue> generateColumnsFields(MapItem columnNamesMap) throws XPathException {
         List<GroundedValue> fields = new ArrayList<>();
         Map<Integer, GroundedValue> fieldsMap = new HashMap<>();
-        IterationUtils.forEach(columnNamesMap.keyValuePairs(), kvPair -> {
-            IntegerValue idx = (IntegerValue) kvPair.value.head();
-            fieldsMap.put((int) idx.longValue(), kvPair.key);
-        });
-
-        int fieldsLength = Collections.max(fieldsMap.entrySet(), Comparator.comparingInt(Map.Entry::getKey)).getKey();
+        int fieldsLength = 0;
+        for (KeyValuePair kvPair : columnNamesMap.keyValuePairs()) {
+            int idx = (int) ((IntegerValue) kvPair.value.head()).longValue();
+            if (idx > fieldsLength) {
+                fieldsLength = idx;
+            }
+            fieldsMap.put(idx, kvPair.key);
+        }
 
         for (int i = 1; i <= fieldsLength; i++) {
             fields.add(fieldsMap.getOrDefault(i, StringValue.EMPTY_STRING));
@@ -110,7 +113,9 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
 
     private List<GroundedValue> generateColumnsFields(ArrayItem rowArray) throws XPathException {
         List<GroundedValue> wantedFields = new ArrayList<>();
-        getColumnIndexes(rowArray).forEach(oneBasedIndex -> wantedFields.add(rowArray.get(oneBasedIndex - 1)));
+        for (int oneBasedIndex : getColumnIndexes(rowArray)) {
+            wantedFields.add(rowArray.get(oneBasedIndex - 1));
+        }
         return wantedFields;
     }
 
@@ -119,7 +124,6 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
         SequenceTool.supply(rows, row -> {
             generator.row(plainRow(filteredRow((ArrayItem) row)));
         });
-//        IterationUtils.forEach(rows, row -> plainRow(filteredRow((ArrayItem) row)));
         generator.endRows();
     }
 
@@ -128,14 +132,14 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
         SequenceTool.supply(rows, row -> {
             generator.row(namedRow(filteredRow((ArrayItem) row), columnFields));
         });
-
-//        IterationUtils.forEach(rows, row -> generator.row(namedRow(filteredRow((ArrayItem) row), columnFields)));
         generator.endRows();
     }
 
     private Iterable<IterationUtils.XPEConsumer<Outputter>> plainRow(Iterable<GroundedValue> fields) {
         List<IterationUtils.XPEConsumer<Outputter>> plainFields = new ArrayList<>();
-        fields.forEach(field -> plainFields.add(generator.plainField((StringValue) field)));
+        for (GroundedValue field : fields) {
+            plainFields.add(generator.plainField((StringValue) field));
+        }
         return plainFields;
     }
 
