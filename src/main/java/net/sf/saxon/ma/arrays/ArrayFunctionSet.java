@@ -101,9 +101,15 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(2, foldFunctionType, ONE | INS, null));
 
 
-        ItemType forEachFunctionType = new SpecificFunctionType(
+        SpecificFunctionType forEachFunctionType31 = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
+
+        SpecificFunctionType forEachFunctionType40 = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
+
+        SpecificFunctionType forEachFunctionType = version >= 40 ? forEachFunctionType40 : forEachFunctionType31;
 
         register("for-each", 2, e -> e.populate( ArrayForEach::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
@@ -495,9 +501,18 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
             FunctionItem fn = (FunctionItem) arguments[1].head();
+            int arity = fn.getArity();
+            Sequence[] args = new Sequence[arity];
             List<GroundedValue> list = new ArrayList<>(expectedSize());
+            int position = 0;
             for (GroundedValue gv : array.members()) {
-                list.add(dynamicCall(fn, context, new GroundedValue[]{gv}).materialize());
+                if (arity > 0) {
+                    args[0] = gv;
+                    if (arity > 1) {
+                        args[1] = new Int64Value(++position);
+                    }
+                }
+                list.add(dynamicCall(fn, context, args).materialize());
             }
             return makeArray(list);
         }
