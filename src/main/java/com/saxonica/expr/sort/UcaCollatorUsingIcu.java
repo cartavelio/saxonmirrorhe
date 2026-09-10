@@ -13,6 +13,7 @@ import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
@@ -401,7 +402,10 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
             uca.setReorderCodes(codes);
         }
 
+        // VariableTop is deprecated in C#, we should use MaxVariable, but it doesn't seem to work (MHK 2021-09-11)
+        CSharp.emitCode("#pragma warning disable 618");
         int m = uca.getVariableTop();
+        CSharp.emitCode("#pragma warning restore 618");
         maxIgnorable = new int[]{m, m, m, m, 0};
     }
 
