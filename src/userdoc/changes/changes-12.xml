@@ -269,9 +269,6 @@
                 href="https://qt4cg.org/">QT4CG Specifications</a>, and documentation about the Saxon
             implementations at <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</p>
         
-        <p><code>saxon:parse-html()</code> is now a synonym for <code>fn:parse-html()</code>, a new function
-        proposed for 4.0.</p>
-        
         <!--<h2>Changes to Extension Functions</h2>-->
         
         <h2>New Extension Functions</h2>
@@ -311,15 +308,12 @@
             aligned with the proposed 4.0 function <code>fn:in-scope-namespaces()</code> in that the returned map now always includes an entry for the
             XML namespace.</p>
         
-        <p>The extension function <code>saxon:parse-html()</code> (which is now also available as
-        <code>fn:parse-html()</code> if 4.0 is enabled) has been reimplemented on SaxonJ to use
-        the <code>validator.nu</code> library in place of <code>TagSoup</code>. In SaxonCS, it
-            has been reimplemented to use <code>AngleSharp</code> in place of <code>HtmlAgilityPack</code>.
-            In both cases this gives much closer conformance to the HTML5 parsing algorithm; 
-            the function has also been much more thoroughly tested.
-        However, a handful of the 1300 new tests are currently giving unexplained results
-        (some of these may turn out to be correct), so it remains work in progress.
-        </p>
+        <p>The extension function <a class="bodylink code" href="/functions/saxon/parse-html">saxon:parse-html()</a> is now a synonym for
+            <code>fn:parse-html()</code>, a new function proposed for 4.0. The function has been reimplemented on SaxonJ to use the
+            <code>validator.nu</code> library in place of <code>TagSoup</code>. In SaxonCS, it has been reimplemented to use <code>AngleSharp</code>
+            in place of <code>HtmlAgilityPack</code>. In both cases this gives much closer conformance to the HTML5 parsing algorithm; the function
+            has also been much more thoroughly tested. However, a handful of the 1300 new tests are currently giving unexplained results (some of
+            these may turn out to be correct), so it remains work in progress.</p>
         
         
         <!--<h2>Extension Instructions</h2>-->
