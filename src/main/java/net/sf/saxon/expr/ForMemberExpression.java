@@ -1,7 +1,6 @@
-package com.saxonica.expr;
+package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;

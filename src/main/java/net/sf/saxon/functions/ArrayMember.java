@@ -1,7 +1,7 @@
-package com.saxonica.functions.extfn;
+package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.ma.arrays.ArrayMemberValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
@@ -14,7 +14,7 @@ import net.sf.saxon.trans.XPathException;
  * object that is invaluable during the construction of nested arrays.
  */
 
-public class ArrayMember extends SystemFunction {
+public class ArrayMember0 extends SystemFunction {
 
     /**
      * Evaluate this function call at run-time

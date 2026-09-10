@@ -1,4 +1,4 @@
-package com.saxonica.functions.extfn;
+package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.value.ObjectValue;
