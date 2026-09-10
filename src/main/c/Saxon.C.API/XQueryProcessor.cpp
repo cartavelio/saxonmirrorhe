@@ -247,6 +247,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
         if(status == -2) {
             exception = new SaxonApiException();
+            throw exception;
         }
         if(processorDataRef > 0) {
             j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
@@ -275,6 +276,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
          return SaxonProcessor::makeXdmValueFromRef(result);
         } else if (result == -2) {
             exception = new SaxonApiException();
+            throw exception;
         }
 
 
@@ -298,6 +300,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
 
         if(result == nullptr){
             exception = new SaxonApiException();
+            throw exception;
         }
         if(processorDataRef > 0) {
             j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);

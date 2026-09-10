@@ -21,12 +21,7 @@ SchemaValidator::SchemaValidator(SaxonProcessor* p, std::string curr){
 
     if(cppV < 0) {
 
-        std::cerr<<"Error: Failed to create the SchemaValidator object - check license exists"<<std::endl;
         exception = new SaxonApiException();
-        const char * message = exception->getMessage();
-        if(message != nullptr) {
-            std::cerr<<exception->getMessage()<<std::endl;
-        }
         throw exception;
     }
 
@@ -111,6 +106,7 @@ void SchemaValidator::setLax(bool l){
 		return node;
 	} else if( result == -2){
         exception = new SaxonApiException();
+        throw exception;
     }
 	return nullptr;
 }
@@ -128,6 +124,7 @@ void SchemaValidator::setLax(bool l){
       int64_t  status = j_registerSchemaNode(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)node->getUnderlyingValue(), (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
       if(status == -2) {
           exception = new SaxonApiException();
+          throw exception;
       }
       if(processorDataRef > 0) {
           j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
@@ -139,8 +136,8 @@ void SchemaValidator::setLax(bool l){
       SaxonProcessor::attachCurrentThread();
   	setProperty("resources", proc->getResourcesDirectory());
 	if (sourceFile == nullptr) {
-		 exception = new SaxonApiException("Error:: sourceFile string cannot be empty or NULL");
-	     return;
+		 exception = new SaxonApiException("Error: sourceFile string cannot be empty or NULL");
+	     throw exception;
 	}
 
       int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
@@ -148,6 +145,7 @@ void SchemaValidator::setLax(bool l){
       int64_t  status = j_registerSchema(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,(char *)cwdV.c_str(), (char *)sourceFile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
       if(status == -2) {
           exception = new SaxonApiException();
+          throw exception;
       }
       if(processorDataRef > 0) {
           j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
@@ -165,6 +163,7 @@ void SchemaValidator::setLax(bool l){
      int64_t  status = j_exportSchema(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (char *)cwdV.c_str(), (char *)fileName);
      if(status == -2) {
          exception = new SaxonApiException();
+         throw exception;
      }
 
 
@@ -182,6 +181,7 @@ void SchemaValidator::setLax(bool l){
       int64_t  status = j_registerSchema(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (char *)sourceStr, (char *)systemID, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
       if(status == -2) {
           exception = new SaxonApiException();
+          throw exception;
       }
     
 }
@@ -197,6 +197,7 @@ void SchemaValidator::setLax(bool l){
       int64_t  status = j_validate(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV, (char *)cwdV.c_str(), (char *)sourceFile, (char *) nullptr, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
       if(status == -2) {
           exception = new SaxonApiException();
+          throw exception;
       }
       if(processorDataRef > 0) {
           j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
@@ -222,6 +223,7 @@ XdmNode * SchemaValidator::validateToNode(const char * sourceFile){
         return node;
     } else if(result == -2) {
         exception = new SaxonApiException();
+        throw exception;
     }
 
 	return nullptr;

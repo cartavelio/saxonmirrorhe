@@ -938,6 +938,7 @@ task all_saxonc_releases() {
         include "readme.txt"
         filter { line ->
           line.replace('@@edition@@', edition)
+          line.replace('@@location@@', "../")
         }
       }
     }

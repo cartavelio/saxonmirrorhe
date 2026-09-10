@@ -46,6 +46,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 
 	if(cppXT < 0) {
         createException();
+        throw exception;
 	}
 
 	if(!(proc->cwd.empty()) && curr.empty()){
@@ -357,7 +358,7 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
     int64_t  objRef = j_compileFromFile(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheet, (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(objRef == -2) {
         createException();
-        return nullptr;
+        throw exception;
     }
     XsltExecutable * executable = new XsltExecutable(proc,objRef, cwdXT, proc->getResourcesDirectory());
     if(processorDataRef > 0) {
@@ -374,7 +375,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,const ch
 
 	if(sourcefile == nullptr && stylesheetfile == nullptr){
         createException("Found null file name");
-		return nullptr;
+		throw exception;
 	}
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -386,10 +387,8 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,const ch
     if (result > 0) {
          return SaxonProcessor::makeXdmValueFromRef(result);
     }else if(result == -2) {
-
 			createException();
-
-
+            throw exception;
 	}
 	return nullptr;
 
@@ -413,6 +412,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
     long status = j_transformToFile(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)source, (char *)stylesheet, (char *)outputfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(status == -2) {
         createException();
+        throw exception;
     }
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
@@ -439,6 +439,7 @@ const char * Xslt30Processor::transformFileToString(const char* source,
     char * result = j_transformToString(SaxonProcessor::sxn_environ->thread,(void *)fn, (char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)source, (char *)stylesheet, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(result == nullptr) {
         createException();
+        throw exception;
     }
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
