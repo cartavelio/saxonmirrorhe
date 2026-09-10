@@ -69,6 +69,7 @@ public class ValidatorImpl extends Validator {
             ParseOptions options = pipe.getParseOptions()
                     .withSchemaValidationMode(Validation.STRICT)
                     .withContinueAfterValidationErrors(true);
+            pipe.setParseOptions(options);
             pipe.setErrorReporter(new SchemaFactoryImpl.ErrorReporterWrappingErrorHandler(getErrorHandler()));
             Sender.send(source, out, options);
 
@@ -339,7 +340,7 @@ public class ValidatorImpl extends Validator {
         switch (name) {
             case XMLConstants.FEATURE_SECURE_PROCESSING:
             case XMLConstants.ACCESS_EXTERNAL_DTD:
-                pipe.setParseOptions(pipe.getParseOptions().withAdditionalParserProperties(name, object));
+                pipe.setParseOptions(pipe.getParseOptions().withParserProperty(name, object));
                 break;
             case XMLConstants.ACCESS_EXTERNAL_SCHEMA:
                 throw new SAXNotSupportedException();
