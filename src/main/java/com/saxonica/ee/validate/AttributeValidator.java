@@ -443,6 +443,9 @@ public abstract class AttributeValidator extends ContentValidator {
         idAttributes = 0;
         checkNoChildrenWhenNil(location);
 
+        if (childValidator instanceof SkipValidator) {
+            properties |= ReceiverOption.SKIP_VALIDATION;
+        }
         super.startElement(elemName, type, attributes, namespaces, location, properties);
 
         if (locallyInvalid && pendingMessages != null) {

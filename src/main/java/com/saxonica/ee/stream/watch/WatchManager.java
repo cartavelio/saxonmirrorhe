@@ -5,6 +5,7 @@ import com.saxonica.ee.stream.om.FleetingDocumentNode;
 import com.saxonica.ee.stream.om.FleetingElementNode;
 import com.saxonica.ee.stream.om.FleetingNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
+import com.saxonica.ee.validate.SelectorWatch;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.XPathContext;
@@ -142,6 +143,10 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
             return;
         }
         this.pipelineConfiguration = pipelineConfiguration;
+    }
+
+    protected boolean isSkipValidation() {
+        return false;
     }
 
     /**
@@ -282,6 +287,9 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
             for (int i = 0; i < watchList.size(); i++) {
                 // NB: watchList is modified within the loop
                 Watch watch = watchList.get(i);
+                if (watch instanceof SelectorWatch && isSkipValidation()) {
+                    continue;
+                }
                 boolean matches = watch.matchesNode(element, context);
                 if (matches) {
                     //System.err.println("WatchManager matches");

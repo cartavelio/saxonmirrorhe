@@ -6,10 +6,16 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.jiter.ConcatenatingIterator;
+import net.sf.saxon.type.SchemaType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,6 +32,7 @@ import java.util.List;
 public class ConstraintChecker extends WatchManager {
 
     private ValidationContext validationContext;
+    private int skipValidationLevel = -1;
     private final List<Watch> prearrangedWatches = new ArrayList<>(4);
 
     public ConstraintChecker(PipelineConfiguration pipe) {
@@ -103,6 +110,26 @@ public class ConstraintChecker extends WatchManager {
             addWatch(prearrangedWatch, true);
         }
         prearrangedWatches.clear();
+    }
+
+    @Override
+    public void startElement(NodeName elementName, SchemaType typeCode, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
+        if ((properties & ReceiverOption.SKIP_VALIDATION) != 0) {
+            skipValidationLevel = elementStackTop;
+        }
+        super.startElement(elementName, typeCode, attributes, namespaces, location, properties);
+    }
+
+    @Override
+    public void endElement() throws XPathException {
+        super.endElement();
+        if (elementStackTop == skipValidationLevel) {
+            skipValidationLevel = -1;
+        }
+    }
+
+    protected boolean isSkipValidation() {
+        return skipValidationLevel > 0;
     }
 
 }
