@@ -535,6 +535,17 @@ task dotnetRelease(
   }
 }
 
+task copyNuGetPackage(
+  type: Copy,
+  dependsOn: ["dotnetRelease"],
+  description: "Copy the architecture-independent .nupkg file"
+) {
+  from "${buildDir}/cs/bin/Release"
+  into "${buildDir}/distributions"
+  include "SaxonCS.${csver}.nupkg"
+}
+dotnetRelease.finalizedBy copyNuGetPackage
+
 task dotnetPublish(
   dependsOn: ['dotnetRelease']
 ) {
