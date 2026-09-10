@@ -1958,6 +1958,12 @@ public class XPathParser {
         RecordTest recordTest = new RecordTest();
         while (true) {
             String name;
+            if (t.currentToken == Token.STAR || t.currentToken == Token.MULT) {
+                extensible = true;
+                p.nextToken();
+                p.expect(Token.RPAR);
+                break;
+            }
             if (t.currentToken == Token.NAME) {
                 name = t.currentTokenValue;
                 if (!NameChecker.isValidNCName(name)) {
@@ -1999,12 +2005,6 @@ public class XPathParser {
                 break;
             } else if (t.currentToken == Token.COMMA) {
                 p.nextToken();
-                if (t.currentToken == Token.STAR || t.currentToken == Token.MULT) {
-                    extensible = true;
-                    p.nextToken();
-                    p.expect(Token.RPAR);
-                    break;
-                }
             } else {
                 p.grumble("Expected ',' or ')' after field in RecordTest, found '" +
                                   Token.tokens[t.currentToken] + '\'');
