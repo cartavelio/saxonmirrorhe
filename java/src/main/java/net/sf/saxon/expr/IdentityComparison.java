@@ -318,7 +318,7 @@ public final class IdentityComparison extends BinaryExpression {
             final boolean generateIdEmulation = exp.isGenerateIdEmulation();
 
             switch (operator) {
-                case IS:
+                case IS -> {
                     if (nullable0 || nullable1) {
                         if (generateIdEmulation) {
                             return context -> {
@@ -342,7 +342,8 @@ public final class IdentityComparison extends BinaryExpression {
                     } else {
                         return context -> p0.eval(context).equals(p1.eval(context));
                     }
-                case IS_NOT:
+                }
+                case IS_NOT -> {
                     if (nullable0 || nullable1) {
                         return context -> {
                             NodeInfo v0 = (NodeInfo) p0.eval(context);
@@ -355,7 +356,8 @@ public final class IdentityComparison extends BinaryExpression {
                     } else {
                         return context -> !p0.eval(context).equals(p1.eval(context));
                     }
-                case PRECEDES:
+                }
+                case PRECEDES -> {
                     return context -> {
                         GNode v0 = (GNode) p0.eval(context);
                         GNode v1 = (GNode) p1.eval(context);
@@ -364,7 +366,18 @@ public final class IdentityComparison extends BinaryExpression {
                         }
                         return GlobalOrderComparer.getInstance().compare(v0, v1) < 0;
                     };
-                case FOLLOWS:
+                }
+                case PRECEDES_OR_IS -> {
+                    return context -> {
+                        GNode v0 = (GNode) p0.eval(context);
+                        GNode v1 = (GNode) p1.eval(context);
+                        if (v0 == null || v1 == null) {
+                            return false;
+                        }
+                        return GlobalOrderComparer.getInstance().compare(v0, v1) <= 0;
+                    };
+                }
+                case FOLLOWS -> {
                     return context -> {
                         GNode v0 = (GNode) p0.eval(context);
                         GNode v1 = (GNode) p1.eval(context);
@@ -373,8 +386,18 @@ public final class IdentityComparison extends BinaryExpression {
                         }
                         return GlobalOrderComparer.getInstance().compare(v0, v1) > 0;
                     };
-                default:
-                    throw new IllegalStateException();
+                }
+                case FOLLOWS_OR_IS -> {
+                    return context -> {
+                        GNode v0 = (GNode) p0.eval(context);
+                        GNode v1 = (GNode) p1.eval(context);
+                        if (v0 == null || v1 == null) {
+                            return false;
+                        }
+                        return GlobalOrderComparer.getInstance().compare(v0, v1) >= 0;
+                    };
+                }
+                default -> throw new IllegalStateException();
             }
         }
 
@@ -388,7 +411,7 @@ public final class IdentityComparison extends BinaryExpression {
             final boolean generateIdEmulation = exp.isGenerateIdEmulation();
 
             switch (operator) {
-                case IS:
+                case IS -> {
                     if (nullable0 || nullable1) {
                         if (generateIdEmulation) {
                             return context -> {
@@ -423,7 +446,8 @@ public final class IdentityComparison extends BinaryExpression {
                     } else {
                         return context -> BooleanValue.get(p0.eval(context).equals(p1.eval(context)));
                     }
-                case IS_NOT:
+                }
+                case IS_NOT -> {
                     if (nullable0 || nullable1) {
                         return context -> {
                             GNode v0 = (GNode) p0.eval(context);
@@ -439,7 +463,8 @@ public final class IdentityComparison extends BinaryExpression {
                     } else {
                         return context -> BooleanValue.get(!p0.eval(context).equals(p1.eval(context)));
                     }
-                case PRECEDES:
+                }
+                case PRECEDES -> {
                     return context -> {
                         GNode v0 = (GNode) p0.eval(context);
                         if (v0 == null) {
@@ -451,7 +476,8 @@ public final class IdentityComparison extends BinaryExpression {
                         }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) < 0);
                     };
-                case FOLLOWS:
+                }
+                case FOLLOWS -> {
                     return context -> {
                         GNode v0 = (GNode) p0.eval(context);
                         if (v0 == null) {
@@ -463,7 +489,8 @@ public final class IdentityComparison extends BinaryExpression {
                         }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) > 0);
                     };
-                case PRECEDES_OR_IS:
+                }
+                case PRECEDES_OR_IS -> {
                     return context -> {
                         GNode v0 = (GNode) p0.eval(context);
                         if (v0 == null) {
@@ -475,7 +502,8 @@ public final class IdentityComparison extends BinaryExpression {
                         }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) <= 0);
                     };
-                case FOLLOWS_OR_IS:
+                }
+                case FOLLOWS_OR_IS -> {
                     return context -> {
                         GNode v0 = (GNode) p0.eval(context);
                         if (v0 == null) {
@@ -487,8 +515,8 @@ public final class IdentityComparison extends BinaryExpression {
                         }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) >= 0);
                     };
-                default:
-                    throw new IllegalStateException();
+                }
+                default -> throw new IllegalStateException();
             }
 
         }
