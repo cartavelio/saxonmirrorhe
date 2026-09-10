@@ -453,9 +453,9 @@ public class TestDocumentBuilder {
         try {
             Processor proc = new Processor(true);
 
-            XsdCompiler mgr = proc.newXsdCompiler();
-            XsdSchema schema = mgr.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
-            SchemaValidator v = schema.newValidator();
+            SchemaManager mgr = proc.getSchemaManager();
+            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            SchemaValidator v = mgr.newSchemaValidator();
             v.setExpandAttributeDefaults(expandDefaults);
 
             Serializer serializer = proc.newSerializer();
@@ -588,9 +588,9 @@ public class TestDocumentBuilder {
                     super.error(message);
                 }
             });
-            XsdCompiler mgr = proc.newXsdCompiler();
-            XsdSchema schema = mgr.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
-            SchemaValidator v = schema.newValidator();
+            SchemaManager mgr = proc.getSchemaManager();
+            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            SchemaValidator v = mgr.newSchemaValidator();
 
             v.setInvalidityHandler(new InvalidityHandler() {
                 @Override
@@ -646,6 +646,22 @@ public class TestDocumentBuilder {
             File file = new File(configTest.getDataDir() + "books.xml");
             proc.newDocumentBuilder().parse(file, proc.newSerializer(sw));
             assertTrue(sw.toString().startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><?xml-stylesheet"), "serialization");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testBug6453() {
+        try {
+            Processor proc = new Processor(false);
+            DocumentBuilder builder1 = proc.newDocumentBuilder();
+            DocumentBuilder builder2 = proc.newDocumentBuilder();
+            File file1 = new File(configTest.getDataDir() + "books-with-dtd.xml");
+            builder1.setDTDValidation(true);
+            builder1.build(file1);
+            File file2 = new File(configTest.getDataDir() + "books-invalid.xml");
+            builder2.build(file2);
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
