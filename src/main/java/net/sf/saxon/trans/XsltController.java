@@ -24,6 +24,7 @@ import net.sf.saxon.serialize.PrincipalOutputGatekeeper;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.TemplateRuleTraceListener;
 import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -65,9 +66,12 @@ public class XsltController extends Controller {
 
     public XsltController(Configuration config, PreparedStylesheet pss) {
         super(config, pss);
-        //#if CSHARP==false
+        initMessageHandler(config);
+    }
+
+    @CSharpReplaceBody(code="Saxon.Callbacks.StandardMessageHandler smh = new (config); setMessageHandler(message => smh.accept(message));")
+    private void initMessageHandler(Configuration config) {
         messageHandler = new StandardMessageHandler(config);
-        //#endif
     }
 
     /**
