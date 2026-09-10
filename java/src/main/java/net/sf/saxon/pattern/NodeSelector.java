@@ -26,9 +26,9 @@ import java.util.function.Predicate;
 
 public class NodeSelector extends NodeTest {
 
-    private final Predicate<? super NodeInfo> predicate;
+    private final Predicate<? super GNode> predicate;
 
-    private NodeSelector(Predicate<? super NodeInfo> predicate) {
+    private NodeSelector(Predicate<? super GNode> predicate) {
         this.predicate = predicate;
     }
 
@@ -38,7 +38,7 @@ public class NodeSelector extends NodeTest {
      * @param predicate the supplied predicate (a boolean function of a node)
      * @return a NodeTest matching the selected nodes
      */
-    public static NodeSelector of(Predicate<? super NodeInfo> predicate) {
+    public static NodeSelector of(Predicate<? super GNode> predicate) {
         return new NodeSelector(predicate);
     }
 

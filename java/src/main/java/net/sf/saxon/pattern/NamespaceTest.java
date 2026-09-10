@@ -115,37 +115,14 @@ public final class NamespaceTest extends NodeTest {
      * method is used in the case of nodes where calculating the fingerprint is expensive,
      * for example DOM or JDOM nodes.
      *
-     * @param node the node to be matched
+     * @param gnode the node to be matched
      */
 
     @Override
-    public boolean test(GNode node) {
+    public boolean test(GNode gnode) {
+        NodeInfo node = (NodeInfo)gnode;
         return node.getNodeKind() == nodeKind && node.getNamespaceUri().equals(uri);
     }
-
-//    /**
-//     * Test whether this NamespaceTest matches a given QName
-//     *
-//     * @param qname the QName to be matched
-//     * @return true if the name matches, false if not
-//     */
-//
-//    @Override
-//    public boolean matches(StructuredQName qname) {
-//        return qname.hasURI(uri);
-//    }
-
-//    /**
-//     * Test whether the QNameTest matches a given fingerprint
-//     *
-//     * @param namePool the name pool
-//     * @param fp       the fingerprint of the QName to be matched
-//     * @return true if the name matches, false if not
-//     */
-//    @Override
-//    public boolean matchesFingerprint(NamePool namePool, int fp) {
-//        return namePool.getURI(fp).equals(uri);
-//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern

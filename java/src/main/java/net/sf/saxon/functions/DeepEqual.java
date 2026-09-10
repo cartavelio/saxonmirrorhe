@@ -721,8 +721,8 @@ public class DeepEqual extends CollatingFunctionFixed {
                 CSharp.emitCode("goto case Saxon.Hej.type.Type.DOCUMENT;");
                 // fall through
             case Type.DOCUMENT:
-                SequenceIterator c1 = n1.iterateAxis(AxisInfo.CHILD, NodeSelector.of(node -> !isIgnorable(node, options)));
-                SequenceIterator c2 = n2.iterateAxis(AxisInfo.CHILD, NodeSelector.of(node -> !isIgnorable(node, options)));
+                SequenceIterator c1 = n1.iterateAxis(AxisInfo.CHILD, NodeSelector.of(node -> !isIgnorable((NodeInfo)node, options)));
+                SequenceIterator c2 = n2.iterateAxis(AxisInfo.CHILD, NodeSelector.of(node -> !isIgnorable((NodeInfo)node, options)));
 
                 c1 = mergeAdjacentTextNodes(c1);
                 c2 = mergeAdjacentTextNodes(c2);

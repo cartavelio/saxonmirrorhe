@@ -8,11 +8,11 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
-
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
@@ -125,7 +125,7 @@ public final class MultipleNodeKindTest extends NodeTest {
 
     @Override
     public boolean test(GNode node) {
-        int nodeKind = node.getNodeKind();
+        int nodeKind = ((NodeInfo)node).getNodeKind();
         return (nodeKindMask & (1<<nodeKind)) != 0;
     }
 

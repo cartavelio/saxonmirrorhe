@@ -292,7 +292,7 @@ public class PackageLoaderHE implements IPackageLoader {
         pack.setStripsTypeAnnotations("1".equals(packageElement.getAttributeValue(NamespaceUri.NULL,"stripType")));
         pack.setKeyManager(new KeyManager(pack.getConfiguration(), pack));
         pack.setDeclaredModes("1".equals(packageElement.getAttributeValue(NamespaceUri.NULL,"declaredModes")));
-        for (NodeInfo usePack : packageElement.children(NodeSelector.of(n -> n.getLocalPart().equals("package")))) {
+        for (NodeInfo usePack : packageElement.children(NodeSelector.of(n -> ((NodeInfo)n).getLocalPart().equals("package")))) {
             StylesheetPackage subPack = config.makeStylesheetPackage();
             subPack.setRuleManager(new RuleManager(pack));
             subPack.setCharacterMapIndex(new CharacterMapIndex());
@@ -373,7 +373,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private void readGlobalContext(NodeInfo packageElement) throws XPathException {
         GlobalContextRequirement req = null;
         //NameTest condition = new NameTest(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "glob", config.getNamePool());
-        for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> n.getLocalPart().equals("glob")))) {
+        for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> ((NodeInfo)n).getLocalPart().equals("glob")))) {
             if (req == null) {
                 req = new GlobalContextRequirement();
                 packStack.peek().setContextItemRequirements(req);
@@ -2254,7 +2254,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
             List<WithParam> nonTunnelParams = new ArrayList<>();
             int slotNumber = 0;
-            for (NodeInfo wp : element.children(NodeSelector.of(n -> n.getLocalPart().equals("withParam")))) {
+            for (NodeInfo wp : element.children(NodeSelector.of(n -> ((NodeInfo)n).getLocalPart().equals("withParam")))) {
                 WithParam withParam = new WithParam();
                 StructuredQName paramName = loader.getQNameAttribute(wp, "name");
                 withParam.setVariableQName(paramName);

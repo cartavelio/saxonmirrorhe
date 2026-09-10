@@ -153,7 +153,7 @@ public class NodeKindTest extends NodeTest {
 
     @Override
     public boolean test(GNode node) {
-        return node.getNodeKind() == kind;
+        return ((NodeInfo)node).getNodeKind() == kind;
     }
 
 

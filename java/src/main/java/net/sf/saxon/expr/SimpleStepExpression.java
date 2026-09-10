@@ -147,7 +147,7 @@ public final class SimpleStepExpression extends SlashExpression {
         if (origin == null) {
             return EmptyIterator.getInstance();
         }
-        return ((AxisExpression) getStep()).iterate(origin);
+        return ((AxisExpression) getStep()).iterate((NodeInfo)origin);
     }
 
     @Override

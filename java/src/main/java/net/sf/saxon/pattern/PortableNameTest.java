@@ -105,11 +105,12 @@ public class PortableNameTest extends NodeTest {
      * method is used in the case of nodes where calculating the fingerprint is expensive,
      * for example DOM or JDOM nodes.
      *
-     * @param node the node to be matched
+     * @param gnode the node to be matched
      */
 
     @Override
-    public boolean test(GNode node) {
+    public boolean test(GNode gnode) {
+        NodeInfo node = (NodeInfo)gnode;
         return node.getNodeKind() == this.nodeKind
                 && node.getNamespaceUri() == uri
                 && node.getLocalPart().equals(localName);

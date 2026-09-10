@@ -32,13 +32,11 @@ import net.sf.saxon.value.ObjectValue;
 
 public final class Bindery {
 
-    private SlotManager slotManager;
     private GroundedValue[] globals;          // values of global variables and parameters
 
 
     public Bindery(PackageData pack) {
-        this.slotManager = pack.getGlobalSlotManager();
-        allocateGlobals(slotManager);
+        allocateGlobals(pack.getGlobalSlotManager());
     }
 
     /**

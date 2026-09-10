@@ -133,38 +133,15 @@ public class SameNameTest extends NodeTest {
      * method is used in the case of nodes where calculating the fingerprint is expensive,
      * for example DOM or JDOM nodes.
      *
-     * @param node the node to be matched
+     * @param gnode the node to be matched
      */
 
     @Override
-    public boolean test(GNode node) {
+    public boolean test(GNode gnode) {
+        NodeInfo node = (NodeInfo) gnode;
         return node == origin ||
             (node.getNodeKind() == origin.getNodeKind() && Navigator.haveSameName(node, origin));
     }
-
-//    /**
-//     * Test whether the NameTest matches a given QName
-//     *
-//     * @param qname the QName to be matched
-//     * @return true if the name matches
-//     */
-//
-//    @Override
-//    public boolean matches(StructuredQName qname) {
-//        return NameOfNode.makeName(origin).getStructuredQName().equals(qname);
-//    }
-//
-//    /**
-//     * Test whether the QNameTest matches a given fingerprint
-//     *
-//     * @param namePool the name pool
-//     * @param fp       the fingerprint of the QName to be matched
-//     * @return true if the name matches, false if not
-//     */
-//    @Override
-//    public boolean matchesFingerprint(NamePool namePool, int fp) {
-//        return fp == getFingerprint();
-//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
