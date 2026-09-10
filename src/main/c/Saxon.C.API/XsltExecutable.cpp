@@ -1163,7 +1163,6 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
 
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 
-
     static jmethodID ctsvmID = nullptr;
     if (ctsvmID == nullptr) {
         ctsvmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,

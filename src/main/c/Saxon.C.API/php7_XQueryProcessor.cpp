@@ -147,7 +147,7 @@ PHP_METHOD(XQueryProcessor, setQueryFile)
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &fileName, &len1) == FAILURE) {
         RETURN_NULL();
     }
-    if(fileName != nullptr) {
+    if(len1>0) {
     	zend_object* pobj = Z_OBJ_P(getThis());
     	xqueryProcessor_object *obj = (xqueryProcessor_object *)((char *)pobj - XtOffsetOf(xqueryProcessor_object, std));
     	xqueryProcessor = obj->xqueryProcessor;
@@ -165,7 +165,7 @@ PHP_METHOD(XQueryProcessor, setQueryBaseURI)
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &base, &len1) == FAILURE) {
         RETURN_NULL();
     }
-    if(base != nullptr) {
+    if(len1>0) {
     	zend_object* pobj = Z_OBJ_P(getThis());
     	xqueryProcessor_object *obj = (xqueryProcessor_object *)((char *)pobj - XtOffsetOf(xqueryProcessor_object, std));
     	xqueryProcessor = obj->xqueryProcessor;
@@ -184,7 +184,7 @@ PHP_METHOD(XQueryProcessor, declareNamespace)
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &prefix, &len1, &ns, &len2) == FAILURE) {
         RETURN_NULL();
     }
-    if(prefix != nullptr && ns != nullptr) {
+    if(len1 > 0 && len2 >0) {
     	zend_object* pobj = Z_OBJ_P(getThis());
     	xqueryProcessor_object *obj = (xqueryProcessor_object *)((char *)pobj - XtOffsetOf(xqueryProcessor_object, std));
     	xqueryProcessor = obj->xqueryProcessor;

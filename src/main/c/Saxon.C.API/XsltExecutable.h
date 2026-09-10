@@ -375,7 +375,7 @@ public:
     * @param templateName - the name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
     * @param outputfile - The file name where results will be stored,
     */
-    const char* callTemplateReturningString(const char* templateName);
+    const char* callTemplateReturningString(const char* templateName=nullptr);
 
     //! Invoke a transformation by calling a named template and return result as a XdmValue.
     /** The results of calling the template are wrapped in a document node, which is then returned as an XdmValue.
@@ -384,7 +384,7 @@ public:
     * occurs if parameters are supplied that are not used).
     * @param templateName - the name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
     */
-    XdmValue* callTemplateReturningValue(const char* templateName);
+    XdmValue* callTemplateReturningValue(const char* templateName=nullptr);
 
 
 
