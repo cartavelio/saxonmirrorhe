@@ -51,6 +51,10 @@ public class SubscriptExpression extends SingleItemFilter {
         subscriptOp.setChildExpression(subscript);
     }
 
+    @Override
+    public boolean isNavigational() {
+        return getBaseExpression().isNavigational();
+    }
 
     /**
      * Type-check the expression.

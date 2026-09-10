@@ -18,7 +18,6 @@ import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.functions.Doc;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.KeyFn;
-import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
@@ -315,13 +314,6 @@ public class SlashExpression extends BinaryExpression
     private static boolean isChildSelectorExpression(Expression expr) {
         if (expr.isNavigational()) {
             return false;
-        }
-        // cases that we generate as part of optimization rewrites...
-        if (expr instanceof SystemFunctionCall functionCall) {
-            Expression arg0 = functionCall.getArg(0);
-            if (expr.isCallOn(Reverse.class) && arg0.isNavigational()) {
-                return false;
-            }
         }
         return true;
 //        if (expr instanceof Literal || expr instanceof VariableReference) {
