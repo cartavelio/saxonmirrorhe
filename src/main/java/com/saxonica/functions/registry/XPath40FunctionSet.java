@@ -309,7 +309,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null));
 
-        LocalUnionType<AtomicType> hashInput = LocalUnionType.of(BuiltInAtomicType.STRING,
+        LocalUnionType hashInput = LocalUnionType.of(BuiltInAtomicType.STRING,
                                                       BuiltInAtomicType.HEX_BINARY,
                                                       BuiltInAtomicType.BASE64_BINARY);
         register("hash", 1, 2, e -> e.populate(HashFn::new, BuiltInAtomicType.HEX_BINARY, OPT, 0)

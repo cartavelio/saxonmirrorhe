@@ -94,23 +94,23 @@ public class NativeCall extends SystemFunction {
                         funcArgs[i] = value.getUnicodeStringValue();
                     } else if (isInteger) {
                         funcArgTypes[i] = "integer";
-                        funcArgs[i] = new Integer((int) ((IntegerValue) value).longValue());
+                        funcArgs[i] = ((int) ((IntegerValue) value).longValue());
                     } else if (th.isSubType(operandType, BuiltInAtomicType.DOUBLE)) {
                         funcArgTypes[i] = "double";
-                        funcArgs[i] = new Double(((DoubleValue) value).getDoubleValue());
+                        funcArgs[i] = (((DoubleValue) value).getDoubleValue());
                     } else if (th.isSubType(operandType, BuiltInAtomicType.LONG)) {
                         funcArgTypes[i] = "long";
-                        funcArgs[i] = new Long(((Int64Value) value).longValue());
+                        funcArgs[i] = (((Int64Value) value).longValue());
                     } else if (th.isSubType(operandType, BuiltInAtomicType.FLOAT)) {
                         funcArgTypes[i] = "float";
-                        funcArgs[i] = new Float(((FloatValue) value).getFloatValue());
+                        funcArgs[i] = (((FloatValue) value).getFloatValue());
 
-                    } else if ((!isInteger) && th.isSubType(operandType, BuiltInAtomicType.DECIMAL)) {
+                    } else if (th.isSubType(operandType, BuiltInAtomicType.DECIMAL)) {
                         funcArgTypes[i - 1] = "double";
-                        funcArgs[i - 1] = new Double(((DecimalValue) value).getDoubleValue());
+                        funcArgs[i - 1] = (((DecimalValue) value).getDoubleValue());
                     } else if (th.isSubType(operandType, BuiltInAtomicType.BOOLEAN)) {
                         funcArgTypes[i - 1] = "boolean";
-                        funcArgs[i - 1] = new Boolean(((BooleanValue) value).getBooleanValue());
+                        funcArgs[i - 1] = (((BooleanValue) value).getBooleanValue());
                     }
                 } else {
 
