@@ -8,11 +8,11 @@ char * dllname;
 int jvmCreated = 0;
 char * tempDllname =
 #if defined (__linux__)
-"/libsaxon@@release@@c.so";
+"/libsaxon@@edition@@c.so";
 #elif  defined (__APPLE__) && defined(__MACH__)
-"/libsaxon@@release@@c.dylib";
+"/libsaxon@@edition@@c.dylib";
 #else
-"\\libsaxon@@release@@c.dll";
+"\\libsaxon@@edition@@c.dll";
 #endif
 
 char * tempResources_dir =
@@ -30,7 +30,7 @@ char * dllPath =
 #elif  defined (__APPLE__) && defined(__MACH__)
 "/usr/local/lib";
 #else
-"C:\\Program Files\\Saxonica\\Saxon@@RELEASE@@C @@VERSION@@";
+"C:\\Program Files\\Saxonica\\Saxon@@EDITION@@C @@VERSION@@";
 #endif*/
 
 
