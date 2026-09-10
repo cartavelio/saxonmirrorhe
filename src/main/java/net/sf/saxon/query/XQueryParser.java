@@ -893,12 +893,31 @@ public class XQueryParser extends XPathParser {
                             arg = (Literal) parseBinaryLiteral(false);
                             break;
 
+                        case Token.FUNCTION:
+                            // true() and folse() allowed in 4.0
+                            if (t.currentTokenValue.equals("true")) {
+                                arg = Literal.makeLiteral(BooleanValue.TRUE);
+                            } else if (t.currentTokenValue.equals("false")) {
+                                arg = Literal.makeLiteral(BooleanValue.FALSE);
+                            } else {
+                                grumble("The only function calls allowed in an annotation are true() and false()");
+                                return null;
+                            }
+                            if (!allowXPath40Syntax) {
+                                grumble("Annotation values true() and false() require 4.0 to be enabled");
+                                return null;
+                            }
+                            nextToken();
+                            expect(Token.RPAR);
+                            nextToken();
+                            break;
+
                         default:
                             grumble("Annotation parameter must be a literal");
                             return null;
                     }
                     GroundedValue val = arg.getGroundedValue();
-                    if (val instanceof StringValue || val instanceof NumericValue) {
+                    if (val instanceof StringValue || val instanceof NumericValue || val instanceof BooleanValue) {
                         annotation.addAnnotationParameter((AtomicValue) val);
                     } else {
                         grumble("Annotation parameter must be a string or number");
