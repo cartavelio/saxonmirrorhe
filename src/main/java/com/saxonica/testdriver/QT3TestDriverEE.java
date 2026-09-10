@@ -90,6 +90,10 @@ public class QT3TestDriverEE extends QT3TestDriverPE {
          if (inverse) {
              // force use of a non-schema-aware processor by creating a ProfessionalConfiguration
              final Processor savedProcessor = env.processor;
+             final XPathCompiler savedXPathCompiler = env.xpathCompiler;
+             final XQueryCompiler savedXQueryCompiler = env.xqueryCompiler;
+             final XsltCompiler savedXsltCompiler = env.xsltCompiler;
+
              env.processor = new Processor(new Configuration());
 
              com.saxonica.config.ProfessionalConfiguration pConfig = new com.saxonica.config.ProfessionalConfiguration();
@@ -97,11 +101,6 @@ public class QT3TestDriverEE extends QT3TestDriverPE {
              env.processor = new Processor(pConfig);
              env.processor.setConfigurationProperty(Feature.STABLE_UNPARSED_TEXT, true);
 
-
-             // Note that at present no variables are copied across
-             final boolean xpcState = env.xpathCompiler.isSchemaAware();
-             final boolean xqcState = env.xqueryCompiler.isSchemaAware();
-             final boolean xtState = env.xsltCompiler != null && env.xsltCompiler.isSchemaAware();
              env.xpathCompiler = env.processor.newXPathCompiler();
              env.xqueryCompiler = env.processor.newXQueryCompiler();
              env.xsltCompiler = env.processor.newXsltCompiler();
@@ -111,11 +110,10 @@ public class QT3TestDriverEE extends QT3TestDriverPE {
              env.resetActions.add(new Environment.ResetAction() {
                  @Override
                  public void reset(Environment env) {
-                     env.xpathCompiler.setSchemaAware(xpcState);
-                     env.xqueryCompiler.setSchemaAware(xqcState);
-                     if (env.xsltCompiler != null) {
-                         env.xsltCompiler.setSchemaAware(xtState);
-                     }
+                     env.processor = savedProcessor;
+                     env.xpathCompiler = savedXPathCompiler;
+                     env.xqueryCompiler = savedXQueryCompiler;
+                     env.xsltCompiler = savedXsltCompiler;
                  }
              });
          } else {

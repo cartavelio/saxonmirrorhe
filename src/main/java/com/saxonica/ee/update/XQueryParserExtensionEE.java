@@ -39,10 +39,12 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     private boolean foundRevalidationDeclaration = false;
 
     private SchemaCompiler schemaCompiler;
+    private XQueryParser parser;
 
 
-    public XQueryParserExtensionEE(boolean updating, com.saxonica.ee.schema.SchemaCompiler schemaCompiler) {
+    public XQueryParserExtensionEE(XQueryParser parser, boolean updating, com.saxonica.ee.schema.SchemaCompiler schemaCompiler) {
         acceptUpdateSyntax = updating;
+        this.parser = parser;
         this.schemaCompiler = schemaCompiler;
 
     }
@@ -136,7 +138,11 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
         }
         List<Source> sources = new ArrayList<>();
         for (XQueryParser.Import schemaImport : schemaImports) {
-            gatherSources(module, schemaImport, sources);
+            try {
+                gatherSources(module, schemaImport, sources);
+            } catch (XPathException e) {
+                throw e.maybeWithLocation(parser.makeLocation(schemaImport.offset));
+            }
         }
         PreparedSchema schema = schemaCompiler.loadSources(sources);
         module.getPackageData().setImportedSchema(schema);

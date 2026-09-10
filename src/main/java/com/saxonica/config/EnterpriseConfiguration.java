@@ -978,7 +978,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             XQueryParser parser = new XQueryParser(env);
             if (isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY)) {
                 SchemaCompiler schemaCompiler = env.getPackageData().isSchemaAware() ? new SchemaCompiler(this) : null;
-                parser.setParserExtension(new XQueryParserExtensionEE(updating, schemaCompiler));
+                parser.setParserExtension(new XQueryParserExtensionEE(parser, updating, schemaCompiler));
             } else if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                 parser.setParserExtension(new XQueryParserExtensionPE());
             }
