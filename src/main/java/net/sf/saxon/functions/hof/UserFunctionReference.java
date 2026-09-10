@@ -276,6 +276,15 @@ public class UserFunctionReference extends Expression
     }
 
     /**
+     * Compute the special properties of this expression.
+     * @return the special properties, as a bit-significant integer
+     */
+
+    protected int computeSpecialProperties() {
+        return StaticProperty.COMPUTED_FUNCTION;
+    }
+
+    /**
      * Get the static type of the expression as a UType, following precisely the type
      * inference rules defined in the XSLT 3.0 specification.
      *

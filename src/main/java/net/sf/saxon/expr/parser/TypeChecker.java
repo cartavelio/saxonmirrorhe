@@ -133,7 +133,11 @@ public class TypeChecker {
                 // rule 1: Atomize
                 if (!suppliedItemType.isPlainType() &&
                         !(suppliedCard == StaticProperty.EMPTY)) {
-                    if (!suppliedItemType.isAtomizable(th)) {
+                    boolean atomizable = suppliedItemType.isAtomizable(th);
+                    if (atomizable && (exp.getSpecialProperties() & StaticProperty.COMPUTED_FUNCTION) != 0) {
+                        atomizable = false; // in this case we know the function isn't going to be an array
+                    }
+                    if (!atomizable) {
                         String shortItemType;
                         if (suppliedItemType instanceof RecordType) {
                             shortItemType = "a record type";

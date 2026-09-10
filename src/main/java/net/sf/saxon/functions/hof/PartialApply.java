@@ -149,9 +149,22 @@ public class PartialApply extends Expression {
         return new SpecificFunctionType(argTypes, resultType);
     }
 
+    /**
+     * Compute the special properties of this expression. These properties are denoted by a bit-significant
+     * integer, possible values are in class {@link StaticProperty}. The "special" properties are properties
+     * other than cardinality and dependencies, and most of them relate to properties of node sequences, for
+     * example whether the nodes are in document order.
+     *
+     * @return the special properties, as a bit-significant integer
+     */
+    @Override
+    protected int computeSpecialProperties() {
+        return StaticProperty.COMPUTED_FUNCTION;
+    }
+
     @Override
     public Iterable<Operand> operands() {
-        List<Operand> operanda = new ArrayList<Operand>(boundArgumentsOp.length + 1);
+        List<Operand> operanda = new ArrayList<>(boundArgumentsOp.length + 1);
         operanda.add(baseOp);
         for (Operand o : boundArgumentsOp) {
             if (o != null) {
