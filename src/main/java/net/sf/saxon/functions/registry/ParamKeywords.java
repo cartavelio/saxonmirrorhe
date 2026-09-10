@@ -239,6 +239,7 @@ public class ParamKeywords {
         fnParamNames.put("tokenize", "value|pattern|flags");
         fnParamNames.put("trace", "value|label");
         fnParamNames.put("transform", "options");
+        fnParamNames.put("transitive-closure", "step|min|max");
         fnParamNames.put("translate", "value|replace|with");
         fnParamNames.put("true", "");
         fnParamNames.put("trunk", "input");
