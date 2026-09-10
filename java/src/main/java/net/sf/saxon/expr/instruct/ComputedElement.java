@@ -144,7 +144,7 @@ public class ComputedElement extends ElementCreator {
         final SchemaType schemaType = getSchemaType();
         if (schemaType != null) {
             itemType = new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), schemaType, false, config);
-            schemaType.analyzeContentExpression(getContentExpression(), Type.ELEMENT, getRetainedStaticContext().getPackageData().getImportedSchema());
+            schemaType.analyzeContentExpression(getContentExpression(), Type.ELEMENT, getRetainedStaticContext().getImportedSchema());
         } else if (getValidationAction() == Validation.STRIP || !schemaAware) {
             itemType = new ContentTypeTest(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
         } else {
@@ -619,7 +619,7 @@ public class ComputedElement extends ElementCreator {
             SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
                     ? AnyType.getInstance()
                     : Untyped.getInstance();
-            Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
+            Schema schema = expr.getRetainedStaticContext().getImportedSchema();
             return (out, context) -> {
                 try {
 

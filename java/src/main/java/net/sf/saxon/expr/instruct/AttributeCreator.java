@@ -235,7 +235,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
         } else if (validationAction == Validation.STRICT ||
                 validationAction == Validation.LAX) {
             try {
-                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                Schema schema = getRetainedStaticContext().getImportedSchema();
                 ann = schema.validateAttribute(attName.getStructuredQName(), value, validationAction);
             } catch (ValidationException e) {
                 throw XPathException.makeXPathException(e)
@@ -281,7 +281,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
             }
         } else if (validationAction == Validation.STRICT || validationAction == Validation.LAX) {
             try {
-                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                Schema schema = getRetainedStaticContext().getImportedSchema();
                 SimpleType ann = schema.validateAttribute(
                         NameOfNode.makeName(orphan).getStructuredQName(), orphan.getUnicodeStringValue(), validationAction);
                 orphan.setTypeAnnotation(ann);

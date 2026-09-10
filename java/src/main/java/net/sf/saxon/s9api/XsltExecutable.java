@@ -117,12 +117,13 @@ public class XsltExecutable {
      * <p>This schema can usefully be used for validating source documents that are to be supplied as input to
      * the stylesheet.</p>
      *
+     * @param role the role-name of the schema: supply null or "" for the default/unnamed role
      * @return the schema used by the top-level package of the stylesheet
      * @since 13.0
      */
 
-    public XsdSchema getImportedSchema() {
-        Schema schema = preparedStylesheet.getTopLevelPackage().getImportedSchema();
+    public XsdSchema getImportedSchema(String role) {
+        Schema schema = preparedStylesheet.getTopLevelPackage().getImportedSchema(role);
         return processor.newXsdCompiler().wrapInternalSchema(schema);
     }
 

@@ -258,7 +258,7 @@ public class PatternParser extends XPathParser {
             String name = readName();
             StructuredQName typeName = makeStructuredQName(name, env.getDefaultElementNamespace());
             readToken(Token.RPAREN);
-            Schema schema = env.getPackageData().getImportedSchema();
+            Schema schema = env.getImportedSchema();
             SchemaType type = schema.getSchemaType(typeName);
 
             if (type == null || !type.isAtomicType()) {

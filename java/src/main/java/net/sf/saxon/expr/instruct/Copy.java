@@ -144,7 +144,7 @@ public class Copy extends ElementCreator {
             this.resultItemType = selectItemType;
         }
 
-        checkContentSequence(visitor.getStaticContext());
+        checkContentSequence();
         return this;
     }
 
@@ -284,7 +284,7 @@ public class Copy extends ElementCreator {
                         if (fp != -1) {
                             Affinity e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                                Schema schema = getRetainedStaticContext().getImportedSchema();
                                 IElementDecl elem = schema.getElementDecl(fp);
                                 if (elem != null) {
                                     try {
@@ -299,7 +299,7 @@ public class Copy extends ElementCreator {
                             }
                             Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                                Schema schema = getRetainedStaticContext().getImportedSchema();
                                 IAttributeDecl attr = schema.getAttributeDecl(fp);
                                 if (attr != null) {
                                     try {
@@ -516,7 +516,7 @@ public class Copy extends ElementCreator {
         @Override
         public PushEvaluator elaborateForPush() {
             Copy expr = (Copy)getExpression();
-            Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
+            Schema schema = expr.getRetainedStaticContext().getImportedSchema();
             PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
 
             SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE

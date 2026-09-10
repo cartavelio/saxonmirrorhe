@@ -21,6 +21,7 @@ import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Schema;
 
 /**
  * A StaticContext contains the information needed while an expression or pattern
@@ -43,6 +44,12 @@ public interface StaticContext {
      */
 
     PackageData getPackageData();
+
+    /**
+     * Get the in-scope schema declarations for the static context
+     */
+
+    Schema getImportedSchema();
 
     /**
      * Construct a dynamic context for early evaluation of constant subexpressions.

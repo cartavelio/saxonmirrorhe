@@ -342,7 +342,7 @@ public class PackageLoaderHE implements IPackageLoader {
             importedSchema = packageSchema;
         }
         if (importedSchema != null) {
-            pack.setImportedSchema(importedSchema);
+            pack.setImportedSchema("", importedSchema);
         }
         readKeys(packageElement);
         readComponents(packageElement, false);
@@ -778,7 +778,7 @@ public class PackageLoaderHE implements IPackageLoader {
         BuiltInRuleSet base;
         if (onNoMatch != null) {
             String asAtt = modeElement.getAttributeValue(NamespaceUri.NULL, "as");
-            SequenceType requiredType = asAtt == null ? SequenceType.ANY_SEQUENCE : AlphaCode.toSequenceType(asAtt, pack.getImportedSchema());
+            SequenceType requiredType = asAtt == null ? SequenceType.ANY_SEQUENCE : AlphaCode.toSequenceType(asAtt, pack.getImportedSchema(""));
             base = mode.getBuiltInRuleSetForCode(onNoMatch, requiredType);
             mode.setBuiltInRuleSet(base);
         }
@@ -2707,7 +2707,7 @@ public class PackageLoaderHE implements IPackageLoader {
             String typeAtt = element.getAttributeValue(NamespaceUri.NULL, "type");
             if (typeAtt != null) {
                 final StylesheetPackage pack = loader.getPackStack().peek();
-                type = AlphaCode.toSequenceType(typeAtt, pack.getImportedSchema());
+                type = AlphaCode.toSequenceType(typeAtt, pack.getImportedSchema(""));
             }
             return new LookupAllExpression(select);  // TODO: add modifier and type
         });
@@ -3120,7 +3120,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 schemaType = loader.getSchema().getSchemaType(typeAtt);
                 validation = Validation.BY_TYPE;
             }
-            ResultDocument instr = new ResultDocument(globals, locals, href, format, validation, schemaType,
+            ResultDocument instr = new ResultDocument(globals, locals, href, format, validation, loader.getSchema(), schemaType,
                                                       dynamicProperties, loader.packStack.peek().getCharacterMapIndex());
             instr.setContentExpression(content);
             if ("a".equals(element.getAttributeValue(NamespaceUri.NULL,"flags"))) {

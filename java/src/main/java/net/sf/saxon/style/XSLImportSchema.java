@@ -7,21 +7,11 @@
 
 package net.sf.saxon.style;
 
-import com.saxonica.ee.schema.CachedSchemaSource;
-import com.saxonica.ee.schema.PreparedSchema;
-import com.saxonica.ee.schema.SchemaCompiler;
-import com.saxonica.ee.schema.sdoc.SchemaReader;
-import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.AugmentedSource;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
-import net.sf.saxon.trans.LicenseException;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Schema;
-import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.Whitespace;
-
-import javax.xml.transform.Source;
 
 
 /**
@@ -30,6 +20,8 @@ import javax.xml.transform.Source;
  */
 
 public class XSLImportSchema extends StyleElement {
+
+    private String role = null;
 
     /**
      * Ask whether this node is a declaration, that is, a permitted child of xsl:stylesheet
@@ -56,6 +48,13 @@ public class XSLImportSchema extends StyleElement {
                 //
             } else if (f.equals("namespace")) {
                 namespace = Whitespace.trim(value);
+            } else if (f.equals("role")) {
+                if (requireXslt40Attribute("role")) {
+                    role = Whitespace.trim(value);
+                    if (!NameChecker.isValidNCName(role)) {
+                        compileErrorInAttribute("Value of @role must be a valid NCName", "XTSE0020", "role");
+                    }
+                }
             } else {
                 checkUnknownAttribute(attName);
             }
@@ -80,6 +79,16 @@ public class XSLImportSchema extends StyleElement {
     @Override
     public void compileDeclaration(Compilation compilation, ComponentDeclaration decl) throws XPathException {
         // No action. The effect of import-schema is compile-time only
+    }
+
+    /**
+     * Get the schema role (4.0)
+     * @return the value of the @role attribute, or null if absent
+     */
+
+    public String getSchemaRole() {
+        // Called before prepareAttributes() has run
+        return getAttributeValue("role");
     }
 }
 

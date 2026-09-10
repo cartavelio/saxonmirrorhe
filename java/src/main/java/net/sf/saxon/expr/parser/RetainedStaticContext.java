@@ -18,6 +18,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,6 +36,7 @@ public class RetainedStaticContext implements NamespaceResolver {
 
     private final Configuration config;
     private PackageData packageData;
+    private Schema importedSchema;
     private URI staticBaseUri;
     private String staticBaseUriString;
     private String defaultCollationName;
@@ -55,6 +57,7 @@ public class RetainedStaticContext implements NamespaceResolver {
     public RetainedStaticContext(StaticContext sc) {
         this.config = sc.getConfiguration();
         this.packageData = sc.getPackageData();
+        this.importedSchema = sc.getImportedSchema();
         if (sc.getStaticBaseURI() != null) {
             staticBaseUriString = sc.getStaticBaseURI();
             try {
@@ -202,6 +205,14 @@ public class RetainedStaticContext implements NamespaceResolver {
     }
 
     /**
+     * Get the imported schema (the in-scope schema declarations)
+     * @return the imported schema for this static context
+     */
+    public Schema getImportedSchema() {
+        return importedSchema;
+    }
+
+    /**
      * Set the default namespace for elements and type
      *
      * @param ns the default namespace for elements and types.
@@ -315,7 +326,8 @@ public class RetainedStaticContext implements NamespaceResolver {
         return ExpressionTool.equalOrNull(staticBaseUriString, r.staticBaseUriString)
                 && defaultCollationName.equals(r.defaultCollationName)
                 && defaultFunctionNamespace.equals(r.defaultFunctionNamespace)
-                && namespaces.equals(r.namespaces);
+                && namespaces.equals(r.namespaces)
+                && importedSchema == r.getImportedSchema();
     }
 
     /**

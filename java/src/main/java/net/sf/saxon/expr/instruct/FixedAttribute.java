@@ -115,7 +115,7 @@ public final class FixedAttribute extends AttributeCreator {
         if (schemaType == null) {
             int validation = getValidationAction();
             if (validation == Validation.STRICT) {
-                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                Schema schema = getRetainedStaticContext().getImportedSchema();
                 StructuredQName attributeName = nodeName.getStructuredQName();
                 IAttributeDecl decl = schema.getAttributeDecl(attributeName);
                 if (decl == null) {
@@ -128,7 +128,7 @@ public final class FixedAttribute extends AttributeCreator {
                 errorCode = "XTTE1510";
             } else if (validation == Validation.LAX) {
                 StructuredQName attributeName = nodeName.getStructuredQName();
-                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                Schema schema = getRetainedStaticContext().getImportedSchema();
                 IAttributeDecl decl = schema.getAttributeDecl(attributeName);
                 if (decl != null) {
                     schemaType = (SimpleType) decl.getType();
@@ -243,7 +243,7 @@ public final class FixedAttribute extends AttributeCreator {
         try {
             type = ((ComplexType) parentType).getAttributeUseType(
                     nodeName.getStructuredQName(),
-                    getRetainedStaticContext().getPackageData().getImportedSchema());
+                    getRetainedStaticContext().getImportedSchema());
         } catch (SchemaException e) {
             throw new XPathException(e);
         }

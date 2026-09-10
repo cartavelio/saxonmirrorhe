@@ -580,6 +580,7 @@ public abstract class StyleElement extends ElementImpl {
         processDefaultXPathNamespaceAttribute(namespace);
         processDefaultValidationAttribute(namespace);
         processExpandTextAttribute(namespace);
+        processSchemaRoleAttribute(namespace);
     }
 
     /**
@@ -1368,6 +1369,42 @@ public abstract class StyleElement extends ElementImpl {
     }
 
     /**
+     * Get the schema role for this element
+     *
+     * @return the default namespace for elements and types.
+     * Return {@link NamespaceConstant#NULL} for the non-namespace
+     */
+
+    public String getSchemaRole() {
+        NodeInfo anc = this;
+        while (anc instanceof StyleElement) {
+            StyleElement el = (StyleElement)anc; 
+            String x = anc.getNamespaceUri() == NamespaceUri.XSLT 
+                    ? el.getAttributeValue("schema-role")
+                    : el.getAttributeValue(NamespaceUri.XSLT, "schema-role");
+            if (x != null) {
+                return x;
+            }
+            anc = anc.getParent();
+        }
+        return "";
+    }
+
+    /**
+     * Get the in-scope imported schema (determined in part by the nearest
+     * [xsl:]schema-role attribute on a containing element)
+     * @return the in-scope schema declarations for this element
+     */
+
+    public Schema getImportedSchema() {
+        Schema s = getContainingPackage().getImportedSchema(getSchemaRole());
+        if (s == null) {
+            compileError("There is no imported schema with role '" + getSchemaRole() + "'", "XTSE4045");
+        }
+        return s;
+    }
+
+    /**
      * Process the [xsl:]expand-text attribute if there is one (and if XSLT 3.0 is enabled)
      *
      * @param ns the namespace URI of the attribute required  (the default namespace or the XSLT namespace.)
@@ -1382,6 +1419,23 @@ public abstract class StyleElement extends ElementImpl {
             expandText = parent instanceof StyleElement && ((StyleElement) parent).expandText;
         }
     }
+
+    /**
+     * Process the [xsl:]schema-rolw attribute if there is one (and if XSLT 4.0 is enabled)
+     *
+     * @param ns the namespace URI of the attribute required  (the default namespace or the XSLT namespace.)
+     */
+
+    void processSchemaRoleAttribute(NamespaceUri ns) {
+        String v = getAttributeValue(ns, "schema-role");
+        if (v != null) {
+            requireXslt40Attribute("schema-role");
+            // We can't yet check that this role has actually been defined. We currently
+            // do this only if the schema is actually used within the scope of the schema-role
+            // attribute.
+        }
+    }
+
 
     /**
      * Process the [xsl:]expand-text attribute if there is one
@@ -1458,7 +1512,7 @@ public abstract class StyleElement extends ElementImpl {
 //                return null;
 //            }
             StructuredQName qName = new StructuredQName("", uri, lname);
-            SchemaType stype = getPackageData().getImportedSchema().getSchemaType(qName);
+            SchemaType stype = getImportedSchema().getSchemaType(qName);
             if (stype == null) {
                 compileError("There is no type named " + typeAtt + " in an imported schema", "XTSE1520");
             }

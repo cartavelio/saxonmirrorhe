@@ -320,6 +320,7 @@ public class XSLResultDocument extends StyleElement {
                 href,
                 formatExpression,
                 validationAction,
+                getImportedSchema(),
                 schemaType,
                 serializationAttributes,
                 getContainingPackage().getCharacterMapIndex()

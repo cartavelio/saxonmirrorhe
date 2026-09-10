@@ -70,7 +70,7 @@ public class StandardDiagnostics {
      * @return a message describing the location
      */
 
-    public String getLocationMessageText(SourceLocator loc) {
+    public static String getLocationMessageText(SourceLocator loc) {
         String locMessage = "";
         String systemId = null;
         NodeInfo node = null;
@@ -102,7 +102,7 @@ public class StandardDiagnostics {
         } else if (loc instanceof ValidationException && loc.getLineNumber() == -1 && (path = ((ValidationException) loc).getPath()) != null) {
             nodeMessage = "at " + path + ' ';
         } else if (loc instanceof Instruction) {
-            String instructionName = getInstructionName((Instruction) loc);
+            String instructionName = getInstructionNameDefault((Instruction) loc);
             if (!"".equals(instructionName)) {
                 nodeMessage = "at " + instructionName + ' ';
             }
@@ -167,7 +167,7 @@ public class StandardDiagnostics {
             }
         }
         if (systemId != null && !systemId.isEmpty()) {
-            locMessage += (containsLineNumber ? "of " : "in ") + abbreviateLocationURI(systemId) + ':';
+            locMessage += (containsLineNumber ? "of " : "in ") + abbreviateLocationURIDefault(systemId) + ':';
         }
         return locMessage;
     }

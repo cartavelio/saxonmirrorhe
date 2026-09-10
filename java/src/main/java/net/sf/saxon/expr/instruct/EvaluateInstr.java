@@ -544,7 +544,7 @@ public final class EvaluateInstr extends Expression {
                         env.setDefaultElementNamespace(instr.getRetainedStaticContext().getDefaultElementNamespace());
                     }
                     if (isSchemaAware) {
-                        env.getPackageData().setImportedSchema(instr.getPackageData().getImportedSchema());
+                        env.getPackageData().setImportedSchema("", instr.getRetainedStaticContext().getImportedSchema());
                     }
                     // Copy the function library list, except for XSLT-defined system functions and private user-written functions
                     FunctionLibraryList libraryList0 = ((StylesheetPackage) instr.getRetainedStaticContext().getPackageData()).getFunctionLibrary();

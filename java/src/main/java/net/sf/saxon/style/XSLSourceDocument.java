@@ -68,8 +68,7 @@ public class XSLSourceDocument extends StyleElement {
     @Override
     protected void prepareAttributes() {
 
-        parseOptions = getConfiguration().getParseOptions()
-                .withSchema(getContainingPackage().getImportedSchema());
+        parseOptions = getConfiguration().getParseOptions().withSchema(getImportedSchema());
 
         String hrefAtt = null;
         String validationAtt = null;

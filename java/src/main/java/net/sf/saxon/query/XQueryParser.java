@@ -3205,7 +3205,7 @@ public class XQueryParser extends XPathParser {
             if (!NameChecker.isQName(StringTool.codePoints(typeName))) {
                 grumble("Schema type name expected after 'validate type");
             }
-            requiredType = env.getPackageData().getImportedSchema().getSchemaType(
+            requiredType = env.getImportedSchema().getSchemaType(
                     makeStructuredQName(typeName, env.getDefaultElementNamespace()));
             if (requiredType == null) {
                 grumble("Unknown schema type " + typeName, "XQST0104");
@@ -3221,7 +3221,7 @@ public class XQueryParser extends XPathParser {
         Expression exp = parseExpression();
         if (exp instanceof ParentNodeConstructor) {
             ((ParentNodeConstructor) exp).setValidationAction(
-                    env.getPackageData().getImportedSchema(),
+                    env.getImportedSchema(),
                     mode,
                     mode == Validation.BY_TYPE ? requiredType : null);
         } else {
@@ -3301,7 +3301,7 @@ public class XQueryParser extends XPathParser {
                         grumble("Schema type name expected in saxon:validate-type pragma: found " + Err.wrap(typeName));
                     }
                     StructuredQName name = makeStructuredQName(typeName, env.getDefaultElementNamespace());
-                    Schema schema = env.getPackageData().getImportedSchema();
+                    Schema schema = env.getImportedSchema();
                     requiredType = schema.getSchemaType(name);
                     if (requiredType == null) {
                         grumble("Unknown schema type " + typeName);
@@ -3330,7 +3330,7 @@ public class XQueryParser extends XPathParser {
         if (validateType) {
             if (expr instanceof ParentNodeConstructor) {
                 ((ParentNodeConstructor) expr).setValidationAction(
-                        env.getPackageData().getImportedSchema(), Validation.BY_TYPE, requiredType);
+                        env.getImportedSchema(), Validation.BY_TYPE, requiredType);
                 return expr;
             } else if (expr instanceof AttributeCreator) {
                 if (!(requiredType instanceof SimpleType)) {
@@ -3500,7 +3500,7 @@ public class XQueryParser extends XPathParser {
         if (!((QueryModule) env).isPreserveNamespaces()) {
             content = new CopyOf(content, false, Validation.PRESERVE, null, true);
         }
-        doc.setValidationAction(env.getPackageData().getImportedSchema(),
+        doc.setValidationAction(env.getImportedSchema(),
                                 ((QueryModule) env).getConstructionMode(), null);
         doc.setContentExpression(content);
         setLocation(doc, offset);
@@ -3531,7 +3531,7 @@ public class XQueryParser extends XPathParser {
             // suppress validation, as the parent already takes care of it
             if (content instanceof ElementCreator && ((ElementCreator) content).getSchemaType() == null) {
                 ((ElementCreator) content).setValidationAction(
-                        env.getPackageData().getImportedSchema(),
+                        env.getImportedSchema(),
                         Validation.PRESERVE, null);
             }
             expect(Token.RCURLY);
@@ -3571,7 +3571,7 @@ public class XQueryParser extends XPathParser {
                 grumble("Element name must be either a string or a QName", "XPTY0004", offset);
                 return new ErrorExpression();
             }
-            Schema schema = env.getPackageData().getImportedSchema();
+            Schema schema = env.getImportedSchema();
             inst = new FixedElement(elemName,
                                     ((QueryModule) env).getActiveNamespaceBindings(),
                                     ((QueryModule) env).isInheritNamespaces(),
@@ -3592,7 +3592,7 @@ public class XQueryParser extends XPathParser {
             NamespaceResolver ns = new NamespaceResolverWithDefault(
                     env.getNamespaceResolver(),
                     env.getDefaultElementNamespace());
-            Schema schema = env.getPackageData().getImportedSchema();
+            Schema schema = env.getImportedSchema();
             inst = new ComputedElement(name, null, schema, null,
                                        ((QueryModule) env).getConstructionMode(),
                                        ((QueryModule) env).isInheritNamespaces(),
@@ -3630,7 +3630,7 @@ public class XQueryParser extends XPathParser {
             expect(Token.RCURLY);
         }
         nextToken();
-        Schema schema = env.getPackageData().getImportedSchema();
+        Schema schema = env.getImportedSchema();
         FixedElement el2 = new FixedElement(nodeName,
                                             ((QueryModule) env).getActiveNamespaceBindings(),
                                             ((QueryModule) env).isInheritNamespaces(),
@@ -4301,7 +4301,7 @@ public class XQueryParser extends XPathParser {
         int validationMode = ((QueryModule) env).getConstructionMode();
         FingerprintedQName fqn = new FingerprintedQName(
                 qName.getPrefix(), qName.getNamespaceUri(), qName.getLocalPart(), pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart()));
-        Schema schema = env.getPackageData().getImportedSchema();
+        Schema schema = env.getImportedSchema();
         FixedElement elInst = new FixedElement(fqn,
                                                ((QueryModule) env).getActiveNamespaceBindings(),
                                                ((QueryModule) env).isInheritNamespaces(),

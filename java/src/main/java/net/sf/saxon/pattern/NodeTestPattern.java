@@ -128,7 +128,7 @@ public class NodeTestPattern extends Pattern {
     public Pattern convertToTypedPattern(String val) throws XPathException {
         if (nodeTest instanceof NameTest && nodeTest.getUType() == UType.ELEMENT) {
             StructuredQName qName = nodeTest.getMatchingNodeName();
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+            Schema schema = getRetainedStaticContext().getImportedSchema();
             IElementDecl decl = schema.getElementDecl(qName);
             if (decl == null) {
                 if ("lax".equals(val)) {

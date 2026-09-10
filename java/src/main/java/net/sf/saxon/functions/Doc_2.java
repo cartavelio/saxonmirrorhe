@@ -78,16 +78,16 @@ public class Doc_2 extends SystemFunction implements Callable {
             }
             result = result
                     .withSchemaValidationMode(v)
-                    .withSchema(rsc.getPackageData().getImportedSchema());
+                    .withSchema(rsc.getImportedSchema());
         }
         value = checkedOptions.get("type");
         if (value != null) {
             QNameValue qval = (QNameValue) value.head();
             StructuredQName name = qval.getStructuredQName();
             result = result
-                    .withTopLevelType(rsc.getPackageData().getImportedSchema().getSchemaType(name))
+                    .withTopLevelType(rsc.getImportedSchema().getSchemaType(name))
                     .withSchemaValidationMode(Validation.BY_TYPE)
-                    .withSchema(rsc.getPackageData().getImportedSchema());
+                    .withSchema(rsc.getImportedSchema());
         }
         value = checkedOptions.get("strip-space");
         if (value != null) {

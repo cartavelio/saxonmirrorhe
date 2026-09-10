@@ -18,9 +18,7 @@ import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.TypeAliasManager;
 import net.sf.saxon.type.Schema;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Information about a unit of compilation: in XSLT, a package; in XQuery, a module. May also be a single
@@ -29,7 +27,7 @@ import java.util.Objects;
 public class PackageData {
 
     protected Configuration config;
-    private Schema importedSchema;
+    private Map<String, Schema> importedSchemata;
     private HostLanguage hostLanguage;
     protected int hostLanguageVersion;
     private boolean schemaAware;
@@ -57,7 +55,8 @@ public class PackageData {
         targetEdition = config.getEditionCode();
         globalSlotManager = config.makeSlotManager();
 
-        importedSchema = config.emptySchema();
+        importedSchemata = new HashMap<>(4);
+        importedSchemata.put("", config.emptySchema());
         hostLanguageVersion = config.getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) ? 40 : 31;
         hostLanguage = HostLanguage.XPATH;
 
@@ -121,13 +120,25 @@ public class PackageData {
         this.hostLanguageVersion = version;
     }
 
-    public void setImportedSchema(Schema schema) {
+    /**
+     * Set an imported schema for this package
+     *
+     * @param role   the role name of the schema: supply an empty string for the default schema
+     * @param schema the schema
+     */
+    public void setImportedSchema(String role, Schema schema) {
         Objects.requireNonNull(schema);
-        this.importedSchema = schema;
+        this.importedSchemata.put(role, schema);
     }
 
-    public Schema getImportedSchema() {
-        return this.importedSchema;
+    /**
+     * Get an imported schema for this package
+     *
+     * @param role the role name of the schema: supply an empty string for the default schema
+     * @return the schema for this role, or null if the role has not been defined
+     */
+    public Schema getImportedSchema(String role) {
+        return this.importedSchemata.get(role);
     }
 
     /**

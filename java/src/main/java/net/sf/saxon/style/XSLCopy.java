@@ -179,7 +179,7 @@ public class XSLCopy extends StyleElement {
             content = Literal.makeEmptySequence();
         }
 
-        Schema schema = getContainingPackage().getImportedSchema();
+        Schema schema = getImportedSchema();
         Copy inst = new Copy(//select,
                              //selectSpecified,
                              copyNamespaces,

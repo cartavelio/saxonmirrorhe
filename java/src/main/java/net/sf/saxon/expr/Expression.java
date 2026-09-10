@@ -18,6 +18,7 @@ import net.sf.saxon.functions.KeyFn;
 import net.sf.saxon.functions.SuperId;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Logger;
+import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeSetPattern;
@@ -161,6 +162,17 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
             }
         }
         return ops;
+    }
+
+    /**
+     * Issue a warning related to this expression
+     * @param message the warning message
+     */
+
+    public void warning(String message, String code) {
+        Logger logger = getConfiguration().getLogger();
+        String loc = StandardDiagnostics.getLocationMessageText(getLocation());
+        logger.warning("Warning " + code + " " + loc + ": " + message);
     }
 
     /**

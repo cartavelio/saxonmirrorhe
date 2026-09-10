@@ -1421,7 +1421,7 @@ public class Transform {
                         changedOptions = true;
                     }
                     if (opt.getSchemaValidationMode() != Validation.SKIP && opt.getSchema() == null) {
-                        opt = opt.withSchema(top.getImportedSchema());
+                        opt = opt.withSchema(pss.getTopLevelPackage().getImportedSchema(""));
                         changedOptions = true;
                     }
                     if (changedOptions) {

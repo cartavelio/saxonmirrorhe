@@ -190,12 +190,11 @@ public abstract class ElementCreator extends ParentNodeConstructor {
      * Check statically whether the content of the element creates attributes or namespaces
      * after creating any child nodes
      *
-     * @param env the static context
      * @throws XPathException if the content is found to be incorrect
      */
 
     @Override
-    protected void checkContentSequence(StaticContext env) throws XPathException {
+    protected void checkContentSequence() throws XPathException {
         Operand[] components;
         if (getContentExpression() instanceof Block) {
             components = ((Block) getContentExpression()).getOperanda();
@@ -256,13 +255,13 @@ public abstract class ElementCreator extends ParentNodeConstructor {
                     de.setLocator(component.getLocation());
                     throw de;
                 } else if ((foundChild || foundPossibleChild) && possibleNodeKinds == UType.ATTRIBUTE) {
-                    env.issueWarning(
+                    warning(
                             "Creating an attribute here will fail if previous instructions create any children",
-                            SaxonErrorCode.SXWN9030, component.getLocation());
+                            SaxonErrorCode.SXWN9030);
                 } else if ((foundChild || foundPossibleChild) && possibleNodeKinds == UType.NAMESPACE) {
-                    env.issueWarning(
+                    warning(
                             "Creating a namespace node here will fail if previous instructions create any children",
-                            SaxonErrorCode.SXWN9030, component.getLocation());
+                            SaxonErrorCode.SXWN9030);
                 }
             }
 

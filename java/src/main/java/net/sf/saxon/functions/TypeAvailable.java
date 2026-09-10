@@ -53,7 +53,7 @@ public class TypeAvailable extends SystemFunction {
                 return false;
             }
         } else {
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+            Schema schema = getRetainedStaticContext().getImportedSchema();
             SchemaType type = schema.getSchemaType(qName);
             if (type == null) {
                 return false;

@@ -772,7 +772,7 @@ public abstract class TestDriver {
     protected void copySchemaNamespaces(Environment env, XPathCompiler testXpc) {
         Schema schema = env.xqueryCompiler.getUnderlyingStaticContext().getPreLoadedSchema();
         if (schema != null) {
-            testXpc.getUnderlyingStaticContext().getPackageData().setImportedSchema(schema);
+            testXpc.getUnderlyingStaticContext().getPackageData().setImportedSchema("", schema);
         }
     }
 

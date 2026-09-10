@@ -281,7 +281,7 @@ public final class AxisExpression extends Expression {
                                     outermostElementNames.get().size() == 1) {
                                 IntIterator oeni = outermostElementNames.get().iterator();
                                 int outermostElementName = oeni.hasNext() ? oeni.next() : -1;
-                                IElementDecl decl = env.getPackageData().getImportedSchema().getElementDecl(outermostElementName);
+                                IElementDecl decl = env.getImportedSchema().getElementDecl(outermostElementName);
                                 if (decl == null) {
                                     if (warnings) {
                                         visitor.issueWarning("Element " + config.getNamePool().getEQName(outermostElementName) +
@@ -558,7 +558,7 @@ public final class AxisExpression extends Expression {
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
         if (axis == AxisInfo.ATTRIBUTE && nodeTest instanceof NameTest) {
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+            Schema schema = getRetainedStaticContext().getImportedSchema();
             SchemaType contentType = originNodeType.getContentType();
             if (contentType instanceof ComplexType) {
                 try {
@@ -572,7 +572,7 @@ public final class AxisExpression extends Expression {
             }
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
         } else if (axis == AxisInfo.CHILD && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+            Schema schema = getRetainedStaticContext().getImportedSchema();
             SchemaType contentType = originNodeType.getContentType();
             if (contentType instanceof ComplexType) {
                 return ((ComplexType) contentType).getElementParticleCardinality(nodeTest.getFingerprint(), schema, true);
@@ -580,7 +580,7 @@ public final class AxisExpression extends Expression {
                 return StaticProperty.EMPTY;
             }
         } else if (axis == AxisInfo.DESCENDANT && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+            Schema schema = getRetainedStaticContext().getImportedSchema();
             SchemaType contentType = originNodeType.getContentType();
             if (contentType instanceof ComplexType) {
                 try {

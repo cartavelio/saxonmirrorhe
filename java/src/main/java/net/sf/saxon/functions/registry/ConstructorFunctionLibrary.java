@@ -66,7 +66,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         if (arity == 0 && staticContext.getPackageData().getHostLanguageVersion() < 40) {
             return null;
         }
-        Schema schema = staticContext.getPackageData().getImportedSchema();
+        Schema schema = staticContext.getImportedSchema();
         final NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
         if (uri.equals(NamespaceUri.ANONYMOUS)) {
             return null;
@@ -228,7 +228,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         // Now see if it's a constructor function for a user-defined type
 
         if (arguments.length == 1) {
-            Schema schema = env.getPackageData().getImportedSchema();
+            Schema schema = env.getImportedSchema();
             SchemaType st = schema.getSchemaType(new StructuredQName("", uri, localName));
             if (st instanceof SimpleType) {
                 if (st instanceof AtomicType) {

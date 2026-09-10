@@ -62,6 +62,7 @@ public class LiteralResultElement extends StyleElement {
             StandardNames.XSL_EXPAND_TEXT,
             StandardNames.XSL_VERSION,
             StandardNames.XSL_XPATH_DEFAULT_NAMESPACE,
+            StandardNames.XSL_SCHEMA_ROLE,
             StandardNames.XSL_TYPE,
             StandardNames.XSL_USE_WHEN,
             StandardNames.XSL_VALIDATION);
@@ -340,7 +341,7 @@ public class LiteralResultElement extends StyleElement {
         if (toplevel) {
             return null;
         }
-        Schema schema = getContainingPackage().getImportedSchema();
+        Schema schema = getImportedSchema();
         FixedElement inst = new FixedElement(
                 resultNodeName,
                 retainedNamespaces,

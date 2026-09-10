@@ -103,16 +103,15 @@ public class DocumentInstr extends ParentNodeConstructor {
      * Check statically that the sequence of child instructions doesn't violate any obvious constraints
      * on the content of the node
      *
-     * @param env the static context
      * @throws XPathException if the check fails
      */
 
     @Override
-    protected void checkContentSequence(StaticContext env) throws XPathException {
-        checkContentSequence(env, getContentOperand(), getValidationOptions());
+    protected void checkContentSequence() throws XPathException {
+        checkContentSequence(getContentOperand(), getValidationOptions());
     }
 
-    protected static void checkContentSequence(StaticContext env, Operand content, ParseOptions validationOptions)
+    protected static void checkContentSequence(Operand content, ParseOptions validationOptions)
             throws XPathException {
         Operand[] components;
         if (content.getChildExpression() instanceof Block) {
@@ -154,7 +153,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                     }
                     if (validation == Validation.STRICT && component instanceof FixedElement) {
                         int fingerprint = ((FixedElement) component).getFixedElementName().getFingerprint();
-                        Schema schema = env.getPackageData().getImportedSchema();
+                        Schema schema = validationOptions.getSchema();
                         IElementDecl decl = schema.getElementDecl(fingerprint);
                         if (decl != null) {
                             ((FixedElement) component).getContentExpression().
@@ -329,7 +328,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                         return null;
                     };
                 } else {
-                    Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
+                    Schema schema = expr.getRetainedStaticContext().getImportedSchema();
                     ParseOptions options = expr.getValidationOptions();
                     return (output, context) -> {
                         context.getConfiguration().prepareValidationReporting(context, options);

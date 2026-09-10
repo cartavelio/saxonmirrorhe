@@ -33,6 +33,7 @@ public abstract class ParentNodeConstructor extends Instruction
 
     protected Operand contentOp;
     private ParseOptions validationOptions = null;
+    protected Schema schema;
 
     /**
      * Flag set to true if validation=preserve and no schema type supplied for validation; also true
@@ -86,6 +87,7 @@ public abstract class ParentNodeConstructor extends Instruction
 
 
     public void setValidationAction(Schema schema, int mode, /*@Nullable*/ SchemaType schemaType) {
+        this.schema = schema;
         preservingTypes = mode == Validation.PRESERVE && schemaType == null;
         if (!preservingTypes) {
             if (validationOptions == null) {
@@ -114,7 +116,7 @@ public abstract class ParentNodeConstructor extends Instruction
 
 
     public Schema getSchema() {
-        return validationOptions == null ? null : validationOptions.getSchema();
+        return schema;
     }
 
     /**
@@ -170,7 +172,7 @@ public abstract class ParentNodeConstructor extends Instruction
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
-        checkContentSequence(visitor.getStaticContext());
+        checkContentSequence();
         return this;
     }
 
@@ -190,11 +192,10 @@ public abstract class ParentNodeConstructor extends Instruction
     /**
      * Check that the child instructions don't violate any obvious constraints for this kind of node
      *
-     * @param env the static context
      * @throws XPathException if the check fails
      */
 
-    protected abstract void checkContentSequence(StaticContext env) throws XPathException;
+    protected abstract void checkContentSequence() throws XPathException;
 
     /*@NotNull*/
     @Override

@@ -402,7 +402,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
         if (minArity <= 1 && maxArity >= 1) {
             StructuredQName name = getObjectName();
-            SchemaType type = getPackageData().getImportedSchema().getSchemaType(name);
+            SchemaType type = getImportedSchema().getSchemaType(name);
             if (type instanceof PlainType) {
                 compileError("Stylesheet function clashes with constructor function for an imported atomic type", "XTSE0770");
             }

@@ -95,6 +95,7 @@ public class ResultDocument extends Instruction
                           Expression href,
                           Expression formatExpression,      // AVT defining the output format
                           int validationAction,
+                          Schema schema,
                           SchemaType schemaType,
                           Map<StructuredQName, Expression> serializationAttributes,  // computed local properties only
                           CharacterMapIndex characterMapIndex) {
@@ -106,7 +107,7 @@ public class ResultDocument extends Instruction
         if (formatExpression != null) {
             formatOp = new Operand(this, formatExpression, OperandRole.SINGLE_ATOMIC);
         }
-        setValidationAction(validationAction, schemaType);
+        setValidationAction(schema, validationAction, schemaType);
         this.serializationAttributes = new HashMap<>(serializationAttributes.size());
         for (Map.Entry<StructuredQName, Expression> entry : serializationAttributes.entrySet()) {
             this.serializationAttributes.put(entry.getKey(), new Operand(this, entry.getValue(), OperandRole.SINGLE_ATOMIC));
@@ -181,11 +182,12 @@ public class ResultDocument extends Instruction
      */
 
 
-    public void setValidationAction(int mode, /*@Nullable*/ SchemaType schemaType) {
+    private void setValidationAction(Schema schema, int mode, SchemaType schemaType) {
         boolean preservingTypes = mode == Validation.PRESERVE && schemaType == null;
         if (!preservingTypes) {
             if (validationOptions == null) {
                 validationOptions = new ParseOptions()
+                        .withSchema(schema)
                         .withSchemaValidationMode(mode)
                         .withTopLevelType(schemaType);
             }
@@ -254,7 +256,7 @@ public class ResultDocument extends Instruction
         if (buildTree || contentDependentMethod ||
                 "xml".equals(method) || "html".equals(method) || "xhtml".equals(method) || "text".equals(method)) {
             try {
-                DocumentInstr.checkContentSequence(visitor.getStaticContext(), contentOp, validationOptions);
+                DocumentInstr.checkContentSequence(contentOp, validationOptions);
             } catch (XPathException err) {
                 throw err.maybeWithLocation(getLocation());
             }
@@ -304,6 +306,7 @@ public class ResultDocument extends Instruction
                 getHref() == null ? null : getHref().copy(rebindings),
                 getFormatExpression() == null ? null : getFormatExpression().copy(rebindings),
                 getValidationAction(),
+                validationOptions.getSchema(),
                 getSchemaType(),
                 map,
                 characterMapIndex);
@@ -442,7 +445,7 @@ public class ResultDocument extends Instruction
         // which can then be injected at an appropriate point into the output pipeline
 
         if (validationOptions != null && validationOptions.getSchemaValidationMode() != Validation.PRESERVE) {
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+            Schema schema = getRetainedStaticContext().getImportedSchema();
             serParams.setValidationFactory(
                     output -> {
                         // Validation can add redundant namespace declarations so we

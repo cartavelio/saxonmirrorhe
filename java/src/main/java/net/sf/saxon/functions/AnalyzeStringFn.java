@@ -94,7 +94,7 @@ public class AnalyzeStringFn extends RegexFunction {
             Configuration config = context.getConfiguration();
             Schema schema = null;
             if (schemaAware) {
-                schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                schema = getRetainedStaticContext().getImportedSchema();
                 if ((schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "analyze-string-result-type"))) == null) {
                     schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
                 }

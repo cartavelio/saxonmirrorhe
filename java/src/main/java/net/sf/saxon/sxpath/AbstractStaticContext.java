@@ -29,6 +29,7 @@ import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Schema;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -111,6 +112,11 @@ public abstract class AbstractStaticContext implements StaticContext {
 
     public void setSchemaAware(boolean aware) {
         getPackageData().setSchemaAware(aware);
+    }
+
+    @Override
+    public Schema getImportedSchema() {
+        return getPackageData().getImportedSchema("");
     }
 
     /**

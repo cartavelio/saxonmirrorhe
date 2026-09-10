@@ -28,6 +28,7 @@ import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.Type;
 
 /**
@@ -83,6 +84,14 @@ public class ExpressionContext implements StaticContext {
      */
     public boolean isSchemaAware() {
         return element.isSchemaAware();
+    }
+
+    /**
+     * Get the in-scope schema declarations for the static context
+     */
+    @Override
+    public Schema getImportedSchema() {
+        return element.getImportedSchema();
     }
 
     /**

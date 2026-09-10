@@ -80,7 +80,7 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
         if (validation != Validation.PRESERVE) {
             options = options.withSchemaValidationMode(validation);
             options = options.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-            Schema schema = transformer.getUnderlyingXsltExecutable().getUnderlyingCompiledStylesheet().getTopLevelPackage().getImportedSchema();
+            Schema schema = transformer.getUnderlyingXsltExecutable().getUnderlyingCompiledStylesheet().getTopLevelPackage().getImportedSchema("");
             receiver = schema.getDocumentValidator(receiver, getSystemId(), options, null);
         }
         pipe.setParseOptions(options);

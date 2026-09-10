@@ -157,7 +157,7 @@ public class XSLElement extends StyleElement {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
-        Schema schema = getContainingPackage().getImportedSchema();
+        Schema schema = getImportedSchema();
 
         // deal specially with the case where the element name is known statically
 

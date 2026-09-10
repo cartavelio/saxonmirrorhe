@@ -328,7 +328,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         if (fp != -1) {
                             Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                                Schema schema = getRetainedStaticContext().getImportedSchema();
                                 IElementDecl elem = schema.getElementDecl(fp);
                                 if (elem != null) {
                                     try {
@@ -343,7 +343,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                             }
                             Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
                             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                                Schema schema = getRetainedStaticContext().getImportedSchema();
                                 IAttributeDecl attr = schema.getAttributeDecl(fp);
                                 if (attr != null) {
                                     try {
@@ -555,7 +555,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     .withErrorCode("XQTY0030");
         }
         final Configuration config = controller.getConfiguration();
-        Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+        Schema schema = getRetainedStaticContext().getImportedSchema();
         switch (kind) {
 
             case Type.ELEMENT: {
@@ -737,7 +737,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             throws XPathException {
         int opt = rejectDuplicates ? ReceiverOption.REJECT_DUPLICATES : ReceiverOption.NONE;
         UnicodeString value = source.getUnicodeStringValue();
-        Schema schema = instruction.getRetainedStaticContext().getPackageData().getImportedSchema();
+        Schema schema = instruction.getRetainedStaticContext().getImportedSchema();
         SimpleType annotation = validateAttribute(schema, source, schemaType, validation, context);
         try {
             output.attribute(NameOfNode.makeName(source), annotation, value.toString(), instruction.getLocation(), opt);

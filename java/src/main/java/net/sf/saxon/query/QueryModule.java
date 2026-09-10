@@ -146,7 +146,7 @@ public class QueryModule implements StaticContext {
 //            for (Map.Entry<NamespaceUri, List<String>> entry : ((PreparedSchema)preloadedSchema).getTargetNamespaceMap().entrySet()) {
 //                addImportedSchema(entry.getKey(), null, entry.getValue());
 //            }
-            getPackageData().setImportedSchema(preloadedSchema);
+            getPackageData().setImportedSchema("", preloadedSchema);
         }
     }
 
@@ -314,6 +314,14 @@ public class QueryModule implements StaticContext {
         } else {
             return config.getXPathFunctionSet(languageLevel);
         }
+    }
+
+    /**
+     * Get the in-scope schema declarations for the static context
+     */
+    @Override
+    public Schema getImportedSchema() {
+        return getPackageData().getImportedSchema("");
     }
 
     /**
@@ -1028,7 +1036,7 @@ public class QueryModule implements StaticContext {
     public void declareFunction(/*@NotNull*/ XQueryFunction function) throws XPathException {
         Configuration config = getConfiguration();
         if (function.getMinimumArity() <= 1 && function.getNumberOfParameters() >= 1) {
-            Schema schema = getPackageData().getImportedSchema();
+            Schema schema = getPackageData().getImportedSchema("");
             StructuredQName name = function.getFunctionName();
             SchemaType t = schema.getSchemaType(name);
             if (t != null && t.isAtomicType()) {

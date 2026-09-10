@@ -1814,7 +1814,7 @@ public class XPathParser {
                     return it;
                 }
             }
-            SchemaType st = env.getPackageData().getImportedSchema().getSchemaType(sq);
+            SchemaType st = env.getImportedSchema().getSchemaType(sq);
             if (st == null) {
                 grumble("Unknown simple type " + qname, "XPST0051");
             } else if (st.isAtomicType()) {
@@ -1906,7 +1906,7 @@ public class XPathParser {
 
         } else {
 
-            SchemaType st = env.getPackageData().getImportedSchema().getSchemaType(new StructuredQName("", uri, local));
+            SchemaType st = env.getImportedSchema().getSchemaType(new StructuredQName("", uri, local));
             if (st == null) {
                 if (allowXPath30Syntax) {
                     grumble("Unknown simple type " + qname, "XQST0052");
@@ -3757,12 +3757,12 @@ public class XPathParser {
                     fp = makeFingerprint(name, false);
                     expect(Token.RPAREN);
                     nextToken();
-                    IAttributeDecl decl = env.getPackageData().getImportedSchema().getAttributeDecl(fp);
+                    IAttributeDecl decl = env.getImportedSchema().getAttributeDecl(fp);
                     if (decl == null) {
                         grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
                         return null;
                     } else {
-                        return env.getPackageData().getImportedSchema().makeSchemaAttributeTest(fp);
+                        return env.getImportedSchema().makeSchemaAttributeTest(fp);
                     }
                 }
             case "schema-element":
@@ -3774,13 +3774,13 @@ public class XPathParser {
                     fp = makeFingerprint(name, true);
                     expect(Token.RPAREN);
                     nextToken();
-                    IElementDecl decl = env.getPackageData().getImportedSchema().getElementDecl(fp);
+                    IElementDecl decl = env.getImportedSchema().getElementDecl(fp);
 
                     if (decl == null) {
                         grumble("There is no declaration for element " + name + " in an imported schema", "XPST0008");
                         return null;
                     } else {
-                        return env.getPackageData().getImportedSchema().makeSchemaElementTest(fp);
+                        return env.getImportedSchema().makeSchemaElementTest(fp);
                     }
                 }
 
@@ -3814,7 +3814,7 @@ public class XPathParser {
                     if (t.currentToken instanceof Token.NameToken) {
                         StructuredQName contentType = makeStructuredQName(
                                 ((Token.NameToken) t.currentToken).getValue(), env.getDefaultElementNamespace());
-                        SchemaType schemaType = env.getPackageData().getImportedSchema().getSchemaType(contentType);
+                        SchemaType schemaType = env.getImportedSchema().getSchemaType(contentType);
 
                         if (schemaType == null) {
                             grumble("Unknown type name " + contentType.getEQName(), "XPST0008");
@@ -4454,7 +4454,7 @@ public class XPathParser {
             for (int i = 0; i < arguments.length + 5; i++) {
                 if (i != arguments.length) {
                     SymbolicName.F sn = new SymbolicName.F(functionName, i);
-                    if (env.getFunctionLibrary().isAvailable(sn, env.getPackageData().getImportedSchema(), 31)) {
+                    if (env.getFunctionLibrary().isAvailable(sn, env.getImportedSchema(), 31)) {
                         existsWithDifferentArity = true;
                         break;
                     }

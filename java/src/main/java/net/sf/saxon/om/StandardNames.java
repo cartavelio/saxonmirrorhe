@@ -131,12 +131,13 @@ public abstract class StandardNames {
     public static final int XSL_EXPAND_TEXT = XSL + 104;
     public static final int XSL_EXTENSION_ELEMENT_PREFIXES = XSL + 105;
     public static final int XSL_INHERIT_NAMESPACES = XSL + 106;
-    public static final int XSL_TYPE = XSL + 107;
-    public static final int XSL_USE_ATTRIBUTE_SETS = XSL + 108;
-    public static final int XSL_USE_WHEN = XSL + 109;
-    public static final int XSL_VALIDATION = XSL + 110;
-    public static final int XSL_VERSION = XSL + 111;
-    public static final int XSL_XPATH_DEFAULT_NAMESPACE = XSL + 112;
+    public static final int XSL_SCHEMA_ROLE = XSL + 107;
+    public static final int XSL_TYPE = XSL + 108;
+    public static final int XSL_USE_ATTRIBUTE_SETS = XSL + 109;
+    public static final int XSL_USE_WHEN = XSL + 110;
+    public static final int XSL_VALIDATION = XSL + 111;
+    public static final int XSL_VERSION = XSL + 112;
+    public static final int XSL_XPATH_DEFAULT_NAMESPACE = XSL + 113;
 
 
     public static final int SAXON_ASSIGN = SAXON + 1;
@@ -432,6 +433,7 @@ public abstract class StandardNames {
         bindXSLTName(XSL_EXCLUDE_RESULT_PREFIXES, "exclude-result-prefixes");
         bindXSLTName(XSL_EXTENSION_ELEMENT_PREFIXES, "extension-element-prefixes");
         bindXSLTName(XSL_INHERIT_NAMESPACES, "inherit-namespaces");
+        bindXSLTName(XSL_SCHEMA_ROLE, "schema-role");
         bindXSLTName(XSL_TYPE, "type");
         bindXSLTName(XSL_USE_ATTRIBUTE_SETS, "use-attribute-sets");
         bindXSLTName(XSL_USE_WHEN, "use-when");

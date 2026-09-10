@@ -25,6 +25,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
@@ -97,10 +98,10 @@ public class ParseXml extends SystemFunction implements Callable {
             validating = !"skip".equals(validationValue);
             if (validationValue.equals("strict")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.STRICT);
-                parseOptions = parseOptions.withSchema(getRetainedStaticContext().getPackageData().getImportedSchema());
+                parseOptions = parseOptions.withSchema(getRetainedStaticContext().getImportedSchema());
             } else if (validationValue.equals("lax")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.LAX);
-                parseOptions = parseOptions.withSchema(getRetainedStaticContext().getPackageData().getImportedSchema());
+                parseOptions = parseOptions.withSchema(getRetainedStaticContext().getImportedSchema());
             } else if (validationValue.equals("skip")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
             } else if (validationValue.startsWith("type ")) {
@@ -114,12 +115,13 @@ public class ParseXml extends SystemFunction implements Callable {
                 } catch (XPathException e) {
                     throw e.withErrorCode("FODC0008");
                 }
-                SchemaType type = pd.getImportedSchema().getSchemaType(typeName);
+                Schema schema = getRetainedStaticContext().getImportedSchema();
+                SchemaType type = schema.getSchemaType(typeName);
                 if (type == null) {
                     throw new XPathException("Unknown type " + eqName, "FODC0008");
                 }
                 parseOptions = parseOptions
-                        .withSchema(pd.getImportedSchema())
+                        .withSchema(schema)
                         .withSchemaValidationMode(Validation.BY_TYPE)
                         .withTopLevelType(type);
             } else {
