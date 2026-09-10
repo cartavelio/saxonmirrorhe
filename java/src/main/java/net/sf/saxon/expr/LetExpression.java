@@ -980,7 +980,7 @@ public class LetExpression extends Assignation {
             Sequence value = selectEval.evaluate(context);
             context.setLocalVariable(slot, value);
             context.setTemporaryOutputState(savedOutputState);
-            return actionEval.evaluate(context);
+            return actionEval.evaluate(context).materialize();
         }
 
     }
