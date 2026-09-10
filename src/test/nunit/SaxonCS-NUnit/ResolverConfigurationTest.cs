@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Xml;
 using NUnit.Framework;
 using Org.XmlResolver.Features;
 using Saxon.Api;
@@ -73,12 +74,8 @@ namespace SaxonCS_NUnit {
                 return this;
             }
 
-            public override IResource DereferenceLocation(ResourceRequest request) {
-                return resolver.DereferenceLocation(request);
-            }
-
-            public override IResource DereferenceNamespace(string namespaceUri, ResourceRequest request) {
-                return resolver.DereferenceNamespace(namespaceUri, request);
+            public override IResource Resolve(ResourceRequest request) {
+                return resolver.Resolve(request);
             }
 
             public override void SetFeature(ResolverFeature feature, object value) {
@@ -89,13 +86,10 @@ namespace SaxonCS_NUnit {
                 return resolver.GetFeature(feature);
             }
 
-            public override object GetEntity(Uri absoluteUri, string? role, Type? ofObjectToReturn) {
+            public override XmlResolver GetEntityResolver() {
                 throw new NotImplementedException();
             }
-
-            public override Uri ResolveUri(Uri? baseUri, string? relativeUri) {
-                return resolver.ResolveUri(baseUri, relativeUri);
-            }
+            
         }
     }
 }

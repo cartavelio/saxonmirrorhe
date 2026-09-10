@@ -16,7 +16,7 @@ namespace SaxonCS_NUnit {
     public class CatalogResolverTest {
         [Test]
         public void noResolverFail() {
-            Processor processor = new Processor();
+            Processor processor = new ();
             DocumentBuilder builder = processor.NewDocumentBuilder();
             builder.DtdValidation = true;
             try {
@@ -35,7 +35,7 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void noResolverPass() {
-            Processor processor = new Processor();
+            Processor processor = new ();
             DocumentBuilder builder = processor.NewDocumentBuilder();
             builder.DtdValidation = (true);
             try {
@@ -50,12 +50,9 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void xmlResolverParse() {
-            Configuration config = new EnterpriseConfiguration();
-            CommonResourceResolver resolver = config.getCommonResourceResolver();
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
-                resolver.SetFeature(ResolverFeature.CATALOG_FILES,
-                    Collections.singletonList(ConfigTest.DATA_DIR + "resolvers/catalog.xml"));
-                Processor processor = new Processor(config);
                 DocumentBuilder builder = processor.NewDocumentBuilder();
                 builder.DtdValidation = (true);
                 XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri,"resolvers/input.xml"));
@@ -70,12 +67,9 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void xmlResolverUriResolver() {
-            Configuration config = new EnterpriseConfiguration();
-            CommonResourceResolver resolver = config.getCommonResourceResolver();
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
-                resolver.SetFeature(ResolverFeature.CATALOG_ADDITIONS,
-                    Collections.singletonList(ConfigTest.DATA_DIR + "resolvers/catalog.xml"));
-                Processor processor = new Processor(config);
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
                 Stream xsl = new FileStream(ConfigTest.DATA_DIR + "resolvers/style.xsl", FileMode.Open);
@@ -103,12 +97,9 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void xmlResolverStylesheetUriResolver() {
-            Configuration config = new EnterpriseConfiguration();
-            CommonResourceResolver resolver = config.getCommonResourceResolver();
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
-                resolver.SetFeature(ResolverFeature.CATALOG_FILES,
-                    Collections.singletonList(ConfigTest.DATA_DIR + "resolvers/catalog.xml"));
-                Processor processor = new Processor(config);
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
                 Stream xsl = new FileStream(ConfigTest.DATA_DIR + "resolvers/stylesheet.xsl", FileMode.Open);
@@ -136,12 +127,9 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void xmlResolverUnparsedTextUriResolver() {
-            Configuration config = new EnterpriseConfiguration();
-            CommonResourceResolver resolver = config.getCommonResourceResolver();
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
-                resolver.SetFeature(ResolverFeature.CATALOG_ADDITIONS,
-                    Collections.singletonList(ConfigTest.DATA_DIR + "resolvers/catalog.xml"));
-                Processor processor = new Processor(config);
                 XsltCompiler compiler = processor.NewXsltCompiler();
 
                 Stream xsl = new FileStream(ConfigTest.DATA_DIR + "resolvers/stylesheet.xsl", FileMode.Open);
@@ -169,12 +157,9 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void xmlResolverModuleUriResolver() {
-            Configuration config = new EnterpriseConfiguration();
-            CommonResourceResolver resolver = config.getCommonResourceResolver();
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
-                resolver.SetFeature(ResolverFeature.CATALOG_FILES,
-                    Collections.singletonList(ConfigTest.DATA_DIR + "resolvers/catalog.xml"));
-                Processor processor = new Processor(config);
                 XQueryCompiler compiler = processor.NewXQueryCompiler();
 
                 Stream xqy = new FileStream(ConfigTest.DATA_DIR + "resolvers/module.xqy", FileMode.Open);

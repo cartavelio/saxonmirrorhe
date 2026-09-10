@@ -463,20 +463,19 @@ namespace SaxonCS_NUnit {
         public void TestXmlResolver() {
             try {
                 Processor proc =  new();
-                StringReader source = new StringReader("<doc><e>text</e></doc>");
+                string source = "<doc><e>text</e></doc>";
 
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 builder.LineNumbering = true;
                 builder.BaseUri = new Uri("http://importer/");
-                XdmNode node = builder.Build(source);
+                XdmNode node = builder.Build(new StringReader(source));
                 XsltCompiler xqcomp = proc.NewXsltCompiler();
                 StringReader sr = new StringReader(
                     "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
                     "<xsl:template match='e' as='node()'>\n" +
                     "<xsl:param name='x' select='0'/>\n" +
                     "<xsl:param name='p' as='node()*' select='()'/>\n" +
-                    //"<e1/>" +
-                    //"<e2/>" +
+                    "<e1/>" +
                     "<xsl:sequence select='$p'/>\n" +
                     "</xsl:template>\n" +
                     "</xsl:stylesheet>");
@@ -485,8 +484,9 @@ namespace SaxonCS_NUnit {
                 XsltExecutable exec = xqcomp.Compile(new Uri("http://random-stylesheet.org/"));
                 Xslt30Transformer trans = exec.Load30();
                 RawDestination dest = new RawDestination();
-                trans.ApplyTemplates(source, new Uri("http://random-source.org/"));
-                Assert.True(dest.XdmValue.Empty);
+                trans.ApplyTemplates(node, dest);
+                Assert.True(dest.XdmValue[0] is XdmNode);
+                Assert.True(((XdmNode)dest.XdmValue[0]).NodeName.LocalName.Equals("e1"));
             }
             catch (Exception exc) {
                 Assert.Fail(exc.Message);

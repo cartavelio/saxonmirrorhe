@@ -142,5 +142,16 @@ namespace SaxonCS_NUnit {
             // ItemType arrayOfArray = factory.getArrayType(SequenceType.makeSequenceType(arrayOfString, OccurrenceIndicator.ONE));
             //  Assert.True(arrayOfArray.matches(result));
         }
+        
+        [Test]
+        public void TestArrayToString() {
+            XdmArray a = new XdmArray();
+            a = a.AppendMember(new XdmAtomicValue("a"));
+            a = a.AppendMember(new XdmAtomicValue("b"));
+            a = a.AppendMember(new XdmAtomicValue(3));
+            string result = a.ToString();
+            //Console.WriteLine(result);
+            Assert.AreEqual(result, "[\"a\",\"b\",3]"); 
+        }
     }
 }

@@ -159,18 +159,20 @@ namespace SaxonCS_NUnit {
                     "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace='http://ns.example.com/'>" +
                     "<xs:element name=\"b\"/>\n" +
                     "</xs:schema>";
-                p.XmlResolver = new SimpleUriResolver(
-                    uri => {
-                        if ("file:///1" == uri.ToString()) {
-                            return new MemoryStream(new UTF8Encoding().GetBytes(xsd1));
-                        }
 
-                        if ("file:///2" == uri.ToString()) {
-                            return new MemoryStream(new UTF8Encoding().GetBytes(xsd2));
-                        }
+                sm.SchemaResolver = (ns, baseUri, hint) => {
+                    if ("file:///1" == hint.ToString()) {
+                        return new TextResource(xsd1, hint);
+                    }
 
-                        return null;
-                    });
+                    if ("file:///2" == hint.ToString()) {
+                        return new TextResource(xsd2, hint);
+                    }
+
+                    return null;
+
+                };
+
                 sm.Compile(new StringReader(xsd0), new Uri("file:///0"));
                 SchemaValidator sv = sm.NewSchemaValidator();
                 string xml0 = "<a xmlns='http://ns.example.com/'/>";
@@ -220,17 +222,20 @@ namespace SaxonCS_NUnit {
                     "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>" +
                     "<xs:element name='c'/>\n" +
                     "</xs:schema>";
-                p.XmlResolver = new SimpleUriResolver(uri => {
-                    if ("file:///1" == uri.ToString()) {
-                        return new MemoryStream(new UTF8Encoding().GetBytes(xsd1));
+                
+                sm.SchemaResolver = (ns, baseUri, hint) => {
+                    if ("file:///1" == hint.ToString()) {
+                        return new TextResource(xsd1, hint);
                     }
 
-                    if ("file:///2" == uri.ToString()) {
-                        return new MemoryStream(new UTF8Encoding().GetBytes(xsd2));
+                    if ("file:///2" == hint.ToString()) {
+                        return new TextResource(xsd2, hint);
                     }
 
                     return null;
-                });
+
+                };
+
                 sm.Compile(new StringReader(xsd0), new Uri("file:///0"));
             }
             catch (SaxonApiException err) {
@@ -303,11 +308,11 @@ namespace SaxonCS_NUnit {
                 SchemaManager sm = p.SchemaManager;
                 sm.SchemaResolver = (targetNamespace, uri, hints) => {
                     if (targetNamespace == "http://two/") {
-                        return p.NewDocumentBuilder().Build(new StringReader(
+                        return new NodeResource(p.NewDocumentBuilder().Build(new StringReader(
                             "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" targetNamespace=\"http://two/\">\n" +
                             "    <xs:simpleType name='date'><xs:restriction base='xs:date'/></xs:simpleType>\n" +
                             "</xs:schema> "
-                        ));
+                        )));
                     }
                     else {
                         return null;
@@ -656,7 +661,7 @@ namespace SaxonCS_NUnit {
                 SchemaManager sm = proc.SchemaManager;
                 sm.SchemaResolver = (targetNamespace, uri, hints) => {
                     if (targetNamespace == "http://x.com/ns") {
-                        return proc.NewDocumentBuilder().Build(new StringReader(xsd2));
+                        return new NodeResource(proc.NewDocumentBuilder().Build(new StringReader(xsd2)));
                     }
                     else {
                         return null;
