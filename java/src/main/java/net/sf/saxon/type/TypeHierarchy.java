@@ -104,11 +104,11 @@ public class TypeHierarchy {
      *     <li>{@link Affinity#DISJOINT} if the two types are disjoint (have an empty intersection)</li></ul>
      */
 
-    public Affinity relationship(/*@Nullable*/ ItemType t1, /*@NotNull*/ ItemType t2) {
+    public Affinity relationship(ItemType t1, ItemType t2) {
         Objects.requireNonNull(t1);
         Objects.requireNonNull(t2);
-        t1 = normalizeItemType(t1);
-        t2 = normalizeItemType(t2);
+        t1 = t1.normalizeItemType();
+        t2 = t2.normalizeItemType();
         if (t1.equals(t2)) {
             return SAME_TYPE;
         }

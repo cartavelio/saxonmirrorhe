@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Copyright (c) 2020 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -304,7 +304,7 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     public double getDefaultPriority() {
         double result = Double.NEGATIVE_INFINITY;
         for (ItemType t : memberTypes) {
-             result = Double.max(result, t.getDefaultPriority());
+            result = Double.max(result, t.getDefaultPriority());
         }
         return result;
     }
@@ -318,19 +318,19 @@ public class ChoiceItemType implements ItemType, ChoiceType {
                 && other.getMemberTypes().size() == memberTypes.size()
                 && other.getUType().equals(getUType())
                 && other.hashCode() == hashCode()) {
-           for (ItemType member : memberTypes) {
-               boolean foundMatch = false;
-               for (ItemType otherMember : other.memberTypes) {
-                   if (member.equals(otherMember)) {
-                       foundMatch = true;
-                       break;
-                   }
-               }
-               if (!foundMatch) {
-                   return false;
-               }
-           }
-           return true;
+            for (ItemType member : memberTypes) {
+                boolean foundMatch = false;
+                for (ItemType otherMember : other.memberTypes) {
+                    if (member.equals(otherMember)) {
+                        foundMatch = true;
+                        break;
+                    }
+                }
+                if (!foundMatch) {
+                    return false;
+                }
+            }
+            return true;
         }
         return false;
     }
@@ -342,6 +342,15 @@ public class ChoiceItemType implements ItemType, ChoiceType {
             h ^= member.hashCode();
         }
         return h;
+    }
+
+    @Override
+    public ItemType normalizeItemType() {
+        List<ItemType> m2 = new ArrayList<>(memberTypes.size());
+        for (ItemType member : memberTypes) {
+            m2.add(member.normalizeItemType());
+        }
+        return ChoiceItemType.makeChoiceItemType(m2);
     }
 
     /**

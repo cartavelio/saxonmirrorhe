@@ -253,9 +253,15 @@ public class NodeKindType extends XNodeType implements NodeVectorMatchMaker {
     /**
      * Indicates whether some other object is "equal to" this one.
      */
+    @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     public boolean equals(Object other) {
-        return other instanceof NodeKindType &&
-                ((NodeKindType) other).kind == kind;
+        if (other instanceof NodeKindType k2) {
+            return k2.kind == this.kind;
+        }
+        if (other instanceof NamedXNodeType t2) {
+            return t2.equals(this);
+        }
+        return false;
     }
 
     /**

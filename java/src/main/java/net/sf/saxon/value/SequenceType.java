@@ -656,19 +656,35 @@ public final class SequenceType {
     }
 
     /**
-     * Indicates whether some other object is "equal to" this one.
+     * Indicates whether some other object is "equal to" this one. Note that equality for sequence types
+     * and item types is stricter than the relation established using
+     * {@link #isSameType)}: for example the two
+     * types map(*) and record(*) are considered distinct types by equals(), but the same type
+     * by {@code Affinity.SAME_TYPE}.
      */
     public boolean equals(/*@NotNull*/ Object obj) {
         return obj instanceof SequenceType &&
-                this.primaryType.equals(((SequenceType) obj).primaryType) &&
+                this.primaryType.normalizeItemType().equals(((SequenceType) obj).primaryType.normalizeItemType()) &&
                 this.cardinality == ((SequenceType) obj).cardinality;
     }
+
+    public SequenceType normalizeSequenceType() {
+        ItemType it2 = this.primaryType.normalizeItemType();
+        if (it2 == primaryType) {
+            return this;
+        }
+        return new SequenceType(it2, cardinality);
+    }
+
+    /**
+     * Indicates whether some other sequence type is "the same as" this one. Unlike the equals() method,
+     * this treats two types A and B as "the same" if each subsumes the other; for example element() and element(*)
+     * do not compare equal(), but they are the same type under this method.
+     */
 
     public boolean isSameType(SequenceType other, TypeHierarchy th) {
         return cardinality == other.cardinality && th.relationship(primaryType, other.primaryType) == Affinity.SAME_TYPE;
     }
-
-
 
 
 }

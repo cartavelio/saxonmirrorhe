@@ -185,6 +185,17 @@ public interface ItemType {
         return toString();
     }
 
+    /**
+     * Normalize this item type, returning a potentially different item type that matches the same
+     * items. For example, {@code record(*)} and {@code map(*)} match the same items. The default
+     * implementation returns the item type unchanged.
+     * <p>Item types should be normalized before comparison using equals().</p>
+     * @return the normalized item type.
+     */
+
+    default ItemType normalizeItemType() {
+        return this;
+    }
 
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this

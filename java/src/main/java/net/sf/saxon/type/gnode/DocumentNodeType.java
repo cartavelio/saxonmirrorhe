@@ -14,6 +14,7 @@ import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.qname.NoQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
@@ -150,6 +151,11 @@ public class DocumentNodeType extends XNodeType {
     public boolean equals(/*@NotNull*/ Object other) {
         return other instanceof DocumentNodeType &&
                 ((DocumentNodeType) other).elementTest.equals(elementTest);
+    }
+
+    @Override
+    public ItemType normalizeItemType() {
+        return new DocumentNodeType((XNodeType)elementTest.normalizeItemType());
     }
 
     @Override

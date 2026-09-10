@@ -456,6 +456,14 @@ public class RecordTest implements FunctionItemType {
                         && optionalFields.equals(((RecordTest) other).optionalFields);
     }
 
+    @Override
+    public ItemType normalizeItemType() {
+        if (fieldTypes.isEmpty()) {
+            return _extensible ? MapType.ANY_MAP_TYPE : MapType.EMPTY_MAP_TYPE;
+        }
+        return this;
+    }
+
     /**
      * Returns a hash code value for the object.
      */

@@ -19,7 +19,10 @@ import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntPredicate;
 
 /**
@@ -460,11 +463,36 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
      * Indicates whether some other object is "equal to" this one.
      */
     public boolean equals(Object other) {
-        return other instanceof NamedXNodeType &&
-                ((NamedXNodeType) other).kind == kind &&
-                ((NamedXNodeType) other).nameTest.equals(nameTest) &&
-                ((NamedXNodeType) other).schemaType == schemaType &&
-                ((NamedXNodeType) other).nillable == nillable;
+        if (other instanceof NamedXNodeType t2) {
+            return t2.kind == kind &&
+                    t2.nameTest.equals(nameTest) &&
+                    t2.schemaType == schemaType &&
+                    t2.nillable == nillable;
+        }
+        return false;
+    }
+
+    @Override
+    public ItemType normalizeItemType() {
+        if (nameTest instanceof UnionQNameTest u) {
+            // Convert element(a|b, T) to element(a, T) | element(b, T)
+            Configuration config = getConfiguration();
+            Set<QNameTest> tests = u.getTests();
+            SchemaType contentType = getContentType();
+            int nodeKind = getNodeKind();
+            List<ItemType> memberTypes = new ArrayList<>();
+            boolean nillable = isNillable();
+            for (QNameTest test : tests) {
+                NamedXNodeType contentTypeTest = new NamedXNodeType(
+                        nodeKind, test, contentType, nillable, config);
+                memberTypes.add(contentTypeTest);
+            }
+            return new ChoiceItemType(memberTypes);
+        }
+        if (nameTest instanceof AnyQNameTest && nillable && schemaType == AnyType.INSTANCE) {
+            return NodeKindType.of(kind);
+        }
+        return this;
     }
 
     /**

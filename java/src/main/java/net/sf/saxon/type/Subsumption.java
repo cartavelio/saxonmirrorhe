@@ -63,8 +63,8 @@ public abstract class Subsumption {
         }
 
         if (t1 instanceof ChoiceItemType || t2 instanceof ChoiceItemType) {
-            t1 = TypeHierarchy.normalizeItemType(t1);
-            t2 = TypeHierarchy.normalizeItemType(t2);
+            t1 = t1.normalizeItemType();
+            t2 = t2.normalizeItemType();
             ChoiceItemType c1 = t1 instanceof ChoiceItemType ? (ChoiceItemType) t1 : ChoiceItemType.of(t1);
             ChoiceItemType c2 = t2 instanceof ChoiceItemType ? (ChoiceItemType) t2 : ChoiceItemType.of(t2);
             return choiceItemRelationship(c1, c2);
@@ -231,7 +231,7 @@ public abstract class Subsumption {
 
     private static Affinity relationshipFromXNode(XNodeType n1, ItemType t2) {
 
-        ItemType t1 = TypeHierarchy.normalizeItemType(n1);
+        ItemType t1 = n1.normalizeItemType();
         if (t1 instanceof ChoiceItemType) {
             return computeRelationship(t1, t2);
         }

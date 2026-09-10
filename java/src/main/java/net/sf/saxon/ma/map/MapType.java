@@ -262,11 +262,10 @@ public class MapType extends AnyFunctionType {
         if (this == other) {
             return true;
         }
-        if (other instanceof MapType) {
-            MapType f2 = (MapType) other;
+        if (other instanceof MapType f2) {
             return keyType.equals(f2.keyType) && valueType.equals(f2.valueType) && mustBeEmpty == f2.mustBeEmpty;
         }
-        return false;
+        return this == MapType.ANY_MAP_TYPE && other instanceof RecordTest r && r.isExtensible() && r.getSize() == 0;
     }
 
     /**

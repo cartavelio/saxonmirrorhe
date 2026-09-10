@@ -241,14 +241,14 @@ public class SpecificFunctionType extends AnyFunctionType {
     public boolean equals(Object other) {
         if (other instanceof SpecificFunctionType) {
             SpecificFunctionType f2 = (SpecificFunctionType) other;
-            if (!resultType.equals(f2.resultType)) {
+            if (!resultType.normalizeSequenceType().equals(f2.resultType.normalizeSequenceType())) {
                 return false;
             }
             if (argTypes.length != f2.argTypes.length) {
                 return false;
             }
             for (int i = 0; i < argTypes.length; i++) {
-                if (!argTypes[i].equals(f2.argTypes[i])) {
+                if (!argTypes[i].normalizeSequenceType().equals(f2.argTypes[i].normalizeSequenceType())) {
                     return false;
                 }
             }
