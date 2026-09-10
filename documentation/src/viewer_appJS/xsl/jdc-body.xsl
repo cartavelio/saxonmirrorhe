@@ -80,8 +80,9 @@
                 select="string(@visibility),
                         if (@abstract and not(@interface)) then 'abstract' else (),
                         if (@static) then 'static' else (),
-                        if (@final and not($isEnum)) then 'final' else (),
+                        if (@final and not($isEnum) and not(@record)) then 'final' else (),
                         if (@interface) then 'interface' 
+                            else if (@record) then 'record'
                             else if ($isEnum) then 'enum'
                             else if (name(.) eq 'delegate') then 'delegate'
                             else if (name(.) eq 'class') then 'class' else ()" />
@@ -593,6 +594,28 @@
         <xsl:value-of select="concat('&lt;', string-join($ptstr), '&gt;')"/>
     </xsl:function>
     
+    <!-- Produce a string (starting with '(' and ending with ')') showing the types of the record
+        components of $class, with details obtained from the params child. -->
+    <xsl:function name="f:flatRecordComponents" as="xs:string">
+        <xsl:param name="class" as="node()"/>
+        <xsl:choose>
+            <xsl:when test="$class/@record">
+                <xsl:variable name="ptstr" as="xs:string*">
+                    <xsl:for-each select="$class/recordcomponents/recordcomponent">
+                        <xsl:value-of select="concat(f:flatGenericType(.), ' ', @name)"/>
+                        <xsl:if test="position() ne last()">
+                            <xsl:value-of select="', '"/>
+                        </xsl:if>
+                    </xsl:for-each>
+                </xsl:variable>
+                <xsl:value-of select="concat('(', string-join($ptstr), ')')"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="''"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+    
     <!-- Produce a string containing the modifiers for $member -->
     <xsl:function name="f:modifiers" as="xs:string">
         <xsl:param name="member" as="node()"/>
@@ -791,7 +814,10 @@
         <h1>
             <span class="classLabel">
                 <xsl:value-of
-                    select="if ($isInterface) then 'Interface ' else if (self::enum or @superclass='Enum') then 'Enum ' else 'Class '"
+                    select="if ($isInterface) then 'Interface ' 
+                    else if (self::enum or @superclass='Enum') then 'Enum ' 
+                    else if (@record) then 'Record Class '
+                    else 'Class '"
                 />
             </span>
             <xsl:value-of select="@id"/>
@@ -945,7 +971,8 @@
         
         <hr style="margin:8px;"/>
         <p><code><xsl:value-of select="f:class-parts(.),' '"/></code>&#160;<span
-            class="classLabel"><strong><xsl:value-of select="concat(@id, f:flatParamTypes(.))"/></strong></span>
+            class="classLabel"><strong><xsl:value-of select="concat(@id, f:flatParamTypes(.),
+                f:flatRecordComponents(.))"/></strong></span>
             <xsl:for-each select="extends/interface">
                 <br/>extends <xsl:sequence select="f:showType(., false() , false())"/>
             </xsl:for-each>
@@ -1027,7 +1054,8 @@
                                                 <xsl:value-of select="string-join((
                                                     if (@visibility eq 'public') then '' else string(@visibility),
                                                     if (@static) then 'static' else '',
-                                                    if (@interface) then 'interface' else 'class'), ' ')" />
+                                                    if (@interface) then 'interface' else if
+                                                    (@record) then 'final record' else 'class'), ' ')" />
                                             </xsl:when>
                                             <xsl:when test="$i = (2,3)">
                                                 <xsl:value-of select="f:modifiers(.)"/>

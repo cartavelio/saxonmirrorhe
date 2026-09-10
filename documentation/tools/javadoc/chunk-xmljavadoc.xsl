@@ -133,7 +133,7 @@ History
 
     </xsl:template>
 
-    <xsl:template match="d:class|d:interface|d:enum" mode="tree">
+    <xsl:template match="d:class|d:interface|d:enum|d:record" mode="tree">
         <xsl:variable name="name" select="tokenize(@name,'\.')[last()]"/>
         <xsl:variable name="has-nonPP-implementing-classes" as="xs:boolean" 
             select="self::d:interface and exists(key('implementing-classes',
@@ -146,7 +146,7 @@ History
         <xsl:if test="@access ne 'private' or (empty(@access) and not($has-PP-members-only) and
             ($has-nonPP-implementing-classes or $has-nonPP-subclasses))">
             <j id="{$name}" in="{f:get-att-name(.)}">
-                <xsl:apply-templates select="d:class|d:interface|d:enum" mode="tree">
+                <xsl:apply-templates select="d:class|d:interface|d:enum|d:record" mode="tree">
                     <xsl:sort select="upper-case(@name)"/>
                 </xsl:apply-templates>
             </j>
@@ -176,7 +176,7 @@ History
         <!--<xsl:message>Duplicate method name <xsl:value-of select="@name"/></xsl:message>-->
     </xsl:template>
     
-    <xsl:template match="d:class|d:interface|d:enum" mode="deeptree">
+    <xsl:template match="d:class|d:interface|d:enum|d:record" mode="deeptree">
         <xsl:variable name="name" select="tokenize(@name,'\.')[last()]"/>
         
         <xsl:variable name="has-nonPP-implementing-classes" as="xs:boolean" 
@@ -190,7 +190,7 @@ History
         <xsl:if test="@access ne 'private' or (empty(@access) and not($has-PP-members-only) and
             ($has-nonPP-implementing-classes or $has-nonPP-subclasses))">
             <j id="{$name}" in="c" qy="{lower-case($name)}">
-                <xsl:apply-templates select="d:class|d:interface|d:enum|d:field[@access ne
+                <xsl:apply-templates select="d:class|d:interface|d:enum|d:record|d:field[@access ne
                     'private']|d:constant[@access ne 'private']" mode="deeptree">
                     <xsl:sort select="upper-case(@name)"/>
                 </xsl:apply-templates>
@@ -295,7 +295,7 @@ History
 
     
 
-    <xsl:template match="d:class|d:interface|d:enum">
+    <xsl:template match="d:class|d:interface|d:enum|d:record">
         <!-- Don't include class if @access='private' and no non-package-private classes-implemented-by-interface or
             subclasses, or no non-package-private members -->
         <xsl:variable name="implementing-classes" as="element(implemented-by)?">
@@ -333,9 +333,17 @@ History
                 <xsl:if test="self::d:interface">
                     <xsl:attribute name="interface" select="'true'"/>
                 </xsl:if>
+                <xsl:if test="self::d:record">
+                    <xsl:attribute name="record" select="'true'"/>
+                </xsl:if>
                 <xsl:apply-templates select="d:interfaces"/>
                 <xsl:apply-templates select="d:typeparams"/>
                 <xsl:apply-templates select="d:superclass"/>
+                <xsl:if test="self::d:record and d:recordcomponent">
+                    <recordcomponents>
+                        <xsl:apply-templates select="d:recordcomponent"/>
+                    </recordcomponents>
+                </xsl:if>
                 <xsl:if test="d:purpose|d:description|d:since|d:see|d:deprecated">
                     <comment>
                         <xsl:if test="d:description">
@@ -374,7 +382,7 @@ History
                         </xsl:apply-templates>
                     </enumConstants>
                 </xsl:if>
-                <xsl:apply-templates select="d:class|d:interface|d:enum">
+                <xsl:apply-templates select="d:class|d:interface|d:enum|d:record">
                     <xsl:sort select="upper-case(@name)"/>
                 </xsl:apply-templates>
                 <xsl:sequence select="$implementing-classes"/>
@@ -538,10 +546,25 @@ History
         <field><xsl:value-of select="@name"/></field>
     </xsl:template>
     
+    <xsl:template match="d:recordcomponent">
+        <recordcomponent>
+            <xsl:apply-templates select="@*"/>
+            <xsl:call-template name="type-attributes"/>
+            <xsl:apply-templates select="d:type/d:param|d:type/d:wildcard"/>
+            <xsl:if test="d:purpose">
+                <body>
+                    <div>
+                        <xsl:apply-templates select="d:purpose/h:body/node()"/>
+                    </div>
+                </body>
+            </xsl:if>
+        </recordcomponent>
+    </xsl:template>
+    
     <xsl:template match="d:constructor">
         <constructor>
             <xsl:apply-templates select="@* except @fullsig"/>
-            <xsl:attribute name="id" select="tokenize(parent::d:class/@name,'\.')[last()]"/>
+            <xsl:attribute name="id" select="tokenize((parent::d:class|parent::d:record)/@name,'\.')[last()]"/>
             <xsl:if test="d:purpose|d:description|d:since|d:see|d:deprecated">
                 <comment>
                     <xsl:apply-templates select="d:purpose"/>
@@ -658,7 +681,8 @@ History
         </type>
     </xsl:template>
     
-    <xsl:template match="d:parameter/@name"><!-- Usually @name becomes @id, but not for param -->
+    <xsl:template match="(d:parameter|d:recordcomponent)/@name"><!-- Usually @name becomes @id, but
+        not for param or recordcomponent -->
         <xsl:attribute name="name" select="."/>
     </xsl:template>
     
