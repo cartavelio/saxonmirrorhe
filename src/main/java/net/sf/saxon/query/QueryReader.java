@@ -7,6 +7,7 @@
 
 package net.sf.saxon.query;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.str.UnicodeString;
@@ -48,7 +49,7 @@ public class QueryReader {
      * @throws XPathException if the input cannot be read
      */
 
-    public static String readSourceQuery(/*@NotNull*/ StreamSource ss, IntPredicateProxy charChecker) throws XPathException {
+    public static String readSourceQuery(Configuration config, /*@NotNull*/ StreamSource ss, IntPredicateProxy charChecker) throws XPathException {
         CharSequence queryText;
         if (ss.getInputStream() != null) {
             InputStream is = ss.getInputStream();
@@ -59,8 +60,7 @@ public class QueryReader {
             queryText = readQueryFromReader(ss.getReader(), charChecker);
         } else if (ss.getSystemId() != null) {
             try {
-                URL url = new URL(ss.getSystemId());
-                InputStream stream = ResourceLoader.urlStream(url);
+                InputStream stream = ResourceLoader.urlStream(config, ss.getSystemId());
                 stream = InputStreamMarker.ensureMarkSupported(stream);
                 String encoding = readEncoding(stream);
                 queryText = readInputStream(stream, encoding, charChecker);

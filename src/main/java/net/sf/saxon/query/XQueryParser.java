@@ -1426,7 +1426,7 @@ public class XQueryParser extends XPathParser {
             }
 
             try {
-                String queryText = QueryReader.readSourceQuery(ss, charChecker);
+                String queryText = QueryReader.readSourceQuery(env.getConfiguration(), ss, charChecker);
                 try {
                     if (ss.getInputStream() != null) {
                         ss.getInputStream().close();

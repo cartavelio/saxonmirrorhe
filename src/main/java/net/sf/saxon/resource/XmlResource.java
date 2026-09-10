@@ -122,7 +122,7 @@ public class XmlResource implements Resource {
                 source = new StreamSource(new ByteArrayInputStream(details.binaryContent), resourceURI);
             } else {
                 try {
-                    InputStream stream = details.getInputStream();
+                    InputStream stream = details.getInputStream(config);
                     source = new StreamSource(stream, resourceURI);
                 } catch (IOException e) {
                     if (details.onError == URIQueryParameters.ON_ERROR_FAIL) {

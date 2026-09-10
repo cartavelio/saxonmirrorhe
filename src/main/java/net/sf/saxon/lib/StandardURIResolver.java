@@ -346,17 +346,8 @@ public class StandardURIResolver implements NonDelegatingURIResolver {
      */
 
     protected void setSAXInputSource(SAXSource source, String uriString) {
-        if (uriString.startsWith("classpath:") && uriString.length() > 10) {
-            InputStream is = getConfiguration().getDynamicLoader().getResourceAsStream(uriString.substring(10));
-            if (is != null) {
-                source.setInputSource(new InputSource(is));
-                source.setSystemId(uriString);
-                return;
-            }
-        }
-
         try {
-            InputStream is = ResourceLoader.urlStream(new URL(uriString));
+            InputStream is = ResourceLoader.urlStream(config, uriString);
             source.setInputSource(new InputSource(is));
             source.setSystemId(uriString);
         } catch (IOException e) {

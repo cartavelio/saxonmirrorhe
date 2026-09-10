@@ -7,6 +7,7 @@
 
 package net.sf.saxon.resource;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
@@ -25,6 +26,7 @@ import java.util.Map;
  */
 
 public class JSONResource implements Resource {
+    private final Configuration config;
     private final String href;
     private String jsonStr;
     private Item item;
@@ -41,6 +43,7 @@ public class JSONResource implements Resource {
      */
 
     public JSONResource(XPathContext context, AbstractResourceCollection.InputDetails details) {
+        this.config = context.getConfiguration();
         this.href = details.resourceUri;
         this.context = context;
         if (details.encoding == null) {
@@ -71,7 +74,7 @@ public class JSONResource implements Resource {
             return item;
         }
         if (jsonStr == null) {
-            jsonStr = details.obtainCharacterContent();
+            jsonStr = details.obtainCharacterContent(config);
             if (jsonStr == null) {
                 // implies errors are being ignored
                 return null;

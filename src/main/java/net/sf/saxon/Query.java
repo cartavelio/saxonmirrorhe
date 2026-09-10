@@ -882,7 +882,7 @@ public class Query {
                         quit("Module URI Resolver must return a single StreamSource", 2);
                     }
                     try {
-                        String queryText = QueryReader.readSourceQuery((StreamSource) sources[0], config.getValidCharacterChecker());
+                        String queryText = QueryReader.readSourceQuery(config, (StreamSource) sources[0], config.getValidCharacterChecker());
                         exp = compiler.compile(queryText);
                     } catch (XPathException e) {
                         throw new SaxonApiException(e);

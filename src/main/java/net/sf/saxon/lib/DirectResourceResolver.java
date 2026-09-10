@@ -10,6 +10,7 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.event.IDFilter;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;
@@ -83,46 +84,20 @@ public class DirectResourceResolver implements ResourceResolver {
 
         Source ss;
 
-        if (ResourceRequest.XSLT_NATURE.equals(request.nature)) {
-            InputStream stream;
-            try {
-                if (request.uri.startsWith("classpath:")) {
-                    String s = request.uri.substring(10);
-                    if (s.startsWith("/")) {
-                        s = s.substring(1);
-                    }
-                    stream = config.getDynamicLoader().getResourceAsStream(s);
-                } else {
-                    stream = ResourceLoader.urlStream(new URL(request.uri));
-                }
-            } catch (IOException e) {
-                stream = null; // Carry on, the XML parser might know what to do with it.
-            }
-            InputSource is = new InputSource(request.uri);
-            is.setByteStream(stream);
-            ss = new SAXSource(config.getStyleParser(), is);
-            if (stream != null) {
-                // We created the stream, so we must close it after use
-                ss = AugmentedSource.makeAugmentedSource(ss);
-                ((AugmentedSource) ss).setPleaseCloseAfterUse(true);
-            }
-        } else if (ResourceRequest.XML_NATURE.equals(request.nature) || ResourceRequest.XSD_NATURE.equals(request.nature)) {
-            InputStream stream;
-            try {
-                stream = ResourceLoader.urlStream(new URL(request.uri));
-            } catch (IOException e) {
-                stream = null; // Carry on, the XML parser might know what to do with it.
-            }
-            ss = new StreamSource(stream, request.uri);
-            if (stream != null) {
-                // We created the stream, so we must close it after use
-                ss = AugmentedSource.makeAugmentedSource(ss);
-                ((AugmentedSource) ss).setPleaseCloseAfterUse(true);
-            }
-        } else {
-            ss = new StreamSource(request.uri);
+        InputStream stream;
+        try {
+            stream = ResourceLoader.urlStream(config, request.uri);
+        } catch (IOException e) {
+            stream = null; // Carry on, the XML parser might know what to do with it.
         }
-
+        InputSource is = new InputSource(request.uri);
+        is.setByteStream(stream);
+        ss = new SAXSource(config.getStyleParser(), is);
+        if (stream != null) {
+            // We created the stream, so we must close it after use
+            ss = AugmentedSource.makeAugmentedSource(ss);
+            ((AugmentedSource) ss).setPleaseCloseAfterUse(true);
+        }
 
         if (id != null) {
             final String idFinal = id;
