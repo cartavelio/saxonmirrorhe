@@ -867,7 +867,9 @@ public class Transform {
                     sheet.explain(out);
                 }
                 if (export) {
-                    sheet.export(new FileOutputStream(exportOutputFileName));
+                    File sef = new File(exportOutputFileName);
+                    Query.createFileIfNecessary(sef);
+                    sheet.export(new FileOutputStream(sef));
                     if (showTime) {
                         config.getLogger().info("Stylesheet exported to: " + new File(exportOutputFileName).getAbsolutePath());
                     }
