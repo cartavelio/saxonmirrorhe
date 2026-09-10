@@ -1165,8 +1165,14 @@
                     </xsl:choose>
                 </xsl:when>
                 <xsl:otherwise>
+                    <xsl:variable name="current-hash" select="f:get-hash()"/>
+                    <!--<xsl:message>current-hash {$current-hash}</xsl:message>-->
+                    <xsl:variable name="simple-hash" select="if (contains($current-hash, '@'))
+                        then substring-before($current-hash, '@') else $current-hash"/>
+                    <!--<xsl:message>simple-hash {$simple-hash}</xsl:message>-->
                     <xsl:variable name="ahref"
-                        select="resolve-uri($c/@data-href, concat('http://a.com/', f:get-hash(),'/'))"/>
+                        select="resolve-uri($c/@data-href, concat('http://a.com/',
+                        $simple-hash, (if (starts-with($c/@data-href, '#')) then '' else '/')))"/>
                     <xsl:value-of select="substring(string($ahref), 14)"/>
                     <!--<xsl:message>anchor-navigation {substring(string($ahref), 14)}</xsl:message>-->
                 </xsl:otherwise>

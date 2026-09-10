@@ -194,15 +194,16 @@ $a/ancestor::def:function|$a/ancestor::def:functions)[last()]"/>
                          </xsl:when>
                          <xsl:otherwise>
                               <xsl:variable name="r-href"
-                                   select="resolve-uri($href, concat('http://a.com/', $base-path,'/'))"/>
+                                   select="resolve-uri($href, concat('http://a.com/',
+                                   $base-path, (if (starts-with($href, '#')) then '' else '/')))"/>
                               <xsl:sequence select="substring($r-href, 14)"/>
                          </xsl:otherwise>
                     </xsl:choose>
                </xsl:variable>
-               <xsl:variable name="fragment" select="if (contains($resolved-ref, '@')) then
-                    concat('#', substring-after($resolved-ref, '@')) else ''"/>
-               <xsl:variable name="resolved-ref" select="if (contains($resolved-ref, '@')) then
-                    substring-before($resolved-ref, '@') else $resolved-ref"/>
+               <xsl:variable name="fragment" select="if (contains($resolved-ref, '#')) then
+                    concat('#', substring-after($resolved-ref, '#')) else ''"/>
+               <xsl:variable name="resolved-ref" select="if (contains($resolved-ref, '#')) then
+                    substring-before($resolved-ref, '#') else $resolved-ref"/>
 
                <!-- Fix for links to javadoc and dotnetdoc APIs -->
                <xsl:choose>

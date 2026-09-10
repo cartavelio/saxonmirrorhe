@@ -69,7 +69,7 @@
   <xsl:template match="*:a[@class='feature']">
     <xsl:copy>
       <xsl:attribute name="class" select="'bodylink'"/>
-      <xsl:attribute name="href" select="concat('/configuration/config-features@',@href)"/>
+      <xsl:attribute name="href" select="concat('/configuration/config-features#',@href)"/>
       <xsl:value-of select="@href"/>
     </xsl:copy>   
   </xsl:template>
