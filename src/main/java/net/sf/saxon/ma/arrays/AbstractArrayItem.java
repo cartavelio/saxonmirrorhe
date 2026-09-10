@@ -18,10 +18,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.List;

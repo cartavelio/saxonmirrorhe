@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.parser;
 
+import com.saxonica.expr.DeepUpdate2;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
@@ -1280,8 +1281,30 @@ public class XPathParser {
 
     /*@NotNull*/
     protected Expression parseDeepUpdateExpression() throws XPathException {
-        grumble("update map/array expressions are not allowed in XPath");
-        return new ErrorExpression();
+//        grumble("update map/array expressions are not allowed in XPath");
+//        return new ErrorExpression();
+        // TODO: supported here in XPath temporarily for use in Gizmo demo, June 2024.
+        XPathParser parser = this;
+        Tokenizer t = parser.getTokenizer();
+        if (!parser.isAllowXPath40Syntax()) {
+            parser.grumble("update map/array syntax requires 4.0 to be enabled");
+        }
+
+        int operation = t.currentToken;
+        parser.nextToken();
+        Expression rootExpr = parser.parseExprSingle();
+        if (t.currentToken != Token.REPLACE && !parser.isKeyword("replace")) {
+            parser.grumble("expected keyword 'replace'");
+        }
+        parser.nextToken();
+        Expression selectExpr = parser.parseExprSingle();
+        if (t.currentToken != Token.WITH && !parser.isKeyword("with")) {
+            parser.grumble("expected keyword 'with");
+        }
+        parser.nextToken();
+        Expression actionExpr = parser.parseExprSingle();
+
+        return new DeepUpdate2(operation, rootExpr, selectExpr, actionExpr);
     }
 
     /**

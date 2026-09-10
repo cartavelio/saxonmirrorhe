@@ -27,6 +27,7 @@ import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.str.StringView;
@@ -175,7 +176,7 @@ public class Gizmo {
         initSubCommands();
         config = Configuration.newConfiguration();
         // TODO: temporary
-        config.setResourceResolver(request -> null);
+        //config.setResourceResolver(request -> null);
         // TODO: above is temporary
         boolean allow40 = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY);
         if (allow40) {
@@ -957,7 +958,9 @@ public class Gizmo {
                 SerializationProperties props = new SerializationProperties();
                 props.setProperty("method", "adaptive");
                 props.setProperty("indent", "yes");
-                Receiver r = config.getSerializerFactory().getReceiver(new StreamResult(sw), props);
+                PipelineConfiguration pipe = config.makePipelineConfiguration();
+                pipe.setHostLanguage(HostLanguage.XPATH, 40);
+                Receiver r = config.getSerializerFactory().getReceiver(new StreamResult(sw), props, pipe);
                 r.append(item);
                 sysOut.println(sw);
             }

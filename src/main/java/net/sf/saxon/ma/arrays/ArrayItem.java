@@ -15,6 +15,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntSet;
 
@@ -61,6 +62,24 @@ public abstract class ArrayItem implements FunctionItem {
      */
 
     public abstract GroundedValue get(int index);
+
+    /**
+     * Get a member of the array at a specific offset, or an empty sequence
+     * if the supplied offset is out of range
+     *
+     * @param index the position of the member to retrieve (zero-based)
+     * @return the value at the given position, or an empty sequence
+     * if the index is out of range
+     */
+
+    public GroundedValue getIfPresent(int index) {
+        if (index >= 0 && index < arrayLength()) {
+            return get(index);
+        } else {
+            return EmptySequence.getInstance();
+        }
+    }
+
 
     /**
      * Replace a member of the array

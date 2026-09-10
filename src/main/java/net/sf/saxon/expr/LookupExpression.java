@@ -16,7 +16,6 @@ import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.ConstantAnonymousFunction;
-import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
@@ -431,8 +430,7 @@ public class LookupExpression extends BinaryExpression {
                                 array = LabeledArrayItem.makePinnedArrayItem(array);
                             }
                             IntegerValue subscript = (IntegerValue) rhs.eval(context);
-                            int index = ArrayFunctionSet.checkSubscript(subscript, array.arrayLength());
-                            return array.get(index - 1).iterate();
+                            return array.getIfPresent(subscript.asSubscript() - 1).iterate();
                         };
                     } else if (expr.isSingleEntry) {
                         PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
@@ -446,13 +444,7 @@ public class LookupExpression extends BinaryExpression {
                                 if (!(array instanceof LabeledArrayItem)) {
                                     array = LabeledArrayItem.makePinnedArrayItem(array);
                                 }
-                                if (subscript >= 0 && subscript < array.arrayLength()) {
-                                    return array.get(subscript).iterate();
-                                } else {
-                                    // reuse the diagnostic logic
-                                    ArrayFunctionSet.checkSubscript(subscriptValue, array.arrayLength());
-                                    return null; // shouldn't happen
-                                }
+                                return array.getIfPresent(subscript).iterate();
                             });
                         };
 
@@ -473,8 +465,7 @@ public class LookupExpression extends BinaryExpression {
                                         if (!(array instanceof LabeledArrayItem)) {
                                             array = LabeledArrayItem.makePinnedArrayItem(array);
                                         }
-                                        int subscript = ArrayFunctionSet.checkSubscript((IntegerValue) index, array.arrayLength()) - 1;
-                                        return array.get(subscript).iterate();
+                                        return array.get(((IntegerValue) index).asSubscript() - 1).iterate();
                                     })
                             );
                         };
@@ -538,18 +529,24 @@ public class LookupExpression extends BinaryExpression {
                                 case ARRAY: {
                                     MappingFunction arrayAccess = SequenceMapper.of(index -> {
                                         if (index instanceof IntegerValue) {
-                                            int subscript = ArrayFunctionSet.checkSubscript(
-                                                    (IntegerValue) index, ((ArrayItem) baseItem).arrayLength()) - 1;
-                                            GroundedValue member = ((ArrayItem) baseItem).get(subscript);
-                                            return member.iterate();
-                                        } else {
-                                            throw new XPathException(
-                                                    "An item on the LHS of the '?' operator (" + expr.getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
-                                                            baseItem.toShortString() + ") is not an integer", "XPTY0004")
-                                                    .asTypeError()
-                                                    .withLocation(expr.getLocation())
-                                                    .withFailingExpression(expr);
+                                            int i = ((IntegerValue)index).asSubscript();
+                                            if (i > 0 && i < ((ArrayItem) baseItem).arrayLength()) {
+                                                GroundedValue member = ((ArrayItem) baseItem).get(i - 1);
+                                                return member.iterate();
+                                            }
+//                                            int subscript = ArrayFunctionSet.checkSubscript(
+//                                                    (IntegerValue) index, ((ArrayItem) baseItem).arrayLength()) - 1;
+//                                            GroundedValue member = ((ArrayItem) baseItem).get(subscript);
+//                                            return member.iterate();
                                         }
+                                            return EmptyIterator.getInstance();
+//                                            throw new XPathException(
+//                                                    "An item on the LHS of the '?' operator (" + expr.getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
+//                                                            baseItem.toShortString() + ") is not an integer", "XPTY0004")
+//                                                    .asTypeError()
+//                                                    .withLocation(expr.getLocation())
+//                                                    .withFailingExpression(expr);
+                                        //}
                                     });
                                     SequenceIterator rhsIter = rhsVal.iterate();
                                     return new MappingIterator(rhsIter, arrayAccess);
