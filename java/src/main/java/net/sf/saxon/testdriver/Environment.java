@@ -67,6 +67,7 @@ public class Environment implements ResourceResolver {
     }
 
     public Processor processor;
+    public XdmNode envNode;
     public Map<String, XdmNode> sourceDocs = new HashMap<>();
     public Map<String, String> streamedSecondaryDocs = new HashMap<>();
     public String streamedContent;
@@ -101,12 +102,9 @@ public class Environment implements ResourceResolver {
      * Construct a local default environment for a test set
      */
 
-    public static Environment createLocalEnvironment(URI baseURI, boolean unfolded, Spec spec, TestDriver testDriver) {
+    public static Environment createDefaultEnvironment(URI baseURI, boolean unfolded, Spec spec, TestDriver testDriver) {
         final Environment environment = new Environment();
         environment.processor = new Processor(!testDriver.driverProc.getSaxonEdition().equals("HE"));
-
-        //testDriver.getLicensor().activate(environment.processor);
-        //AutoActivate.activate(environment.processor);
 
         if (unfolded) {
             if (!"-".equals(testDriver.optimizerFlags)) {
@@ -160,18 +158,19 @@ public class Environment implements ResourceResolver {
      * Construct an Environment
      *
      * @param xpc          the XPathCompiler used to process the catalog file
-     * @param env          the Environment element in the catalog file
+     * @param envNode      the Environment element in the catalog file
      * @param environments the set of environments to which this one should be added (may be null)
      * @return the constructed Environment object
-     * @throws SaxonApiException
+     * @throws SaxonApiException if it fails
      */
 
     public static Environment processEnvironment(
             final TestDriver driver,
-            XPathCompiler xpc, XdmNode env, Map<String, Environment> environments, Environment defaultEnvironment)
+            XPathCompiler xpc, XdmNode envNode, Map<String, Environment> environments, Environment defaultEnvironment)
             throws SaxonApiException {
         Environment environment = new Environment();
-        String name = env.attribute("name");
+        environment.envNode = envNode;
+        String name = envNode.attribute("name");
         if (name != null && !driver.quiet) {
             System.err.println("Loading environment " + name);
         }
@@ -197,10 +196,10 @@ public class Environment implements ResourceResolver {
             xpVersion = "3.1";
         }
         environment.xpathCompiler = environment.processor.newXPathCompiler();
-        environment.xpathCompiler.setBaseURI(env.getBaseURI());
+        environment.xpathCompiler.setBaseURI(envNode.getBaseURI());
         environment.xpathCompiler.setLanguageVersion(xpVersion);
         environment.xqueryCompiler = environment.processor.newXQueryCompiler();
-        environment.xqueryCompiler.setBaseURI(env.getBaseURI());
+        environment.xqueryCompiler.setBaseURI(envNode.getBaseURI());
         environment.xqueryCompiler.setLanguageVersion(xpVersion.equals("2.0") ? "3.1" : xpVersion);
         if (driver.spec.shortSpecName.equals("XT")) {
             environment.xsltCompiler = environment.processor.newXsltCompiler();
@@ -214,19 +213,17 @@ public class Environment implements ResourceResolver {
             environment.xsltCompiler.setRelocatable(driver.relocatable);
         }
 
-        if (driver.unfolded && !env.getBaseURI().toString().contains("/upd/")) {
+        if (driver.unfolded && !envNode.getBaseURI().toString().contains("/upd/")) {
             // Don't use code injection for update queries because it affects "void" expressions
             driver.addInjection(environment.xqueryCompiler);
         }
 
-        DocumentBuilder builder = environment.processor.newDocumentBuilder();
-        builder.setTreeModel(driver.treeModel);
         environment.sourceDocs = new HashMap<>();
         if (environments != null && name != null) {
             environments.put(name, environment);
         }
 
-        for (XdmNode prop : env.children("http://saxon.sf.net/", "property")) {
+        for (XdmNode prop : envNode.children("http://saxon.sf.net/", "property")) {
             String propName = prop.attribute("name");
             String propValue = prop.attribute("value");
             try {
@@ -237,14 +234,14 @@ public class Environment implements ResourceResolver {
         }
 
         // QT3 - dependency as sibling of environment
-        for (XdmNode dependency : env.getParent().children("dependency")) {
+        for (XdmNode dependency : envNode.getParent().children("dependency")) {
             if (!driver.ensureDependencySatisfied(dependency, environment)) {
                 environment.usable = false;
             }
         }
 
         // XSLT3 - dependencies as sibling of environment
-        for (XdmNode dependency : env.getParent().select(child("dependencies").then(child("*"))).asIterable()) {
+        for (XdmNode dependency : envNode.getParent().select(child("dependencies").then(child("*"))).asIterable()) {
                 //xpc.evaluate("../dependencies/*", env)) {
             if (!driver.ensureDependencySatisfied(dependency, environment)) {
                 environment.usable = false;
@@ -253,54 +250,57 @@ public class Environment implements ResourceResolver {
 
         // set the base URI if specified
 
-        setBaseUri(driver, xpc, env, environment);
+        setBaseUri(driver, xpc, envNode, environment);
 
         // set any requested collations
 
-        registerCollations(xpc, env, environment);
+        registerCollations(xpc, envNode, environment);
 
         // declare the requested namespaces
 
-        declareNamespaces(xpc, env, environment);
+        declareNamespaces(xpc, envNode, environment);
 
         // load the requested schema documents
 
         if (needsLicense && "EE".equals(driver.driverProc.getSaxonEdition()) /*xpc.isSchemaAware()*/) {
             XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
-            environment.xsdSchema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
+            environment.xsdSchema = loadSchemaDocuments(driver, xpc, envNode, environment, xsdCompiler);
             if (environment.xsdSchema != null && environment.xsltCompiler != null) {
                 environment.xsltCompiler.setSchemaAware(true);
             }
         }
 
         // set up the sandpit, if there is one
-        createSandpit(name, env, environment);
+        createSandpit(name, envNode, environment);
 
-        // load the requested source documents
+        // load the requested source documents. Skip this step if exporting and schema-aware, as we will need to rebuild
+        // the documents with the schema contained in the imported stylesheet
 
-        loadSourceDocuments(driver, xpc, env, environment, builder, environment.xsdSchema);
+        if (!(driver.export && environment.schemaAware)) {
+            loadSourceDocuments(driver, environment, environment.xsdSchema);
+        }
 
         // create a collection URI resolver to handle the requested collections
 
-        createCollectionUriResolver(driver, xpc, env, environment, builder);
+        createCollectionUriResolver(driver, envNode, environment);
 
         // create an unparsed text resolver to handle any unparsed text resources
 
-        createLocalResourceResolver(driver, xpc, env, environment);
+        createLocalResourceResolver(driver, xpc, envNode, environment);
 
         // register any required decimal formats
 
-        registerDecimalFormats(driver, xpc, env, environment);
+        registerDecimalFormats(driver, xpc, envNode, environment);
 
         // declare any variables
 
-        declareExternalVariables(driver, xpc, env, environment);
+        declareExternalVariables(driver, xpc, envNode, environment);
 
         // declare any output controls
-        declareOutputControls(driver, xpc, env, environment);
+        declareOutputControls(driver, xpc, envNode, environment);
 
         // handle requested context item
-        for (XdmNode param : env.children("context-item")) {
+        for (XdmNode param : envNode.children("context-item")) {
             String select = param.attribute("select");
             XdmValue value = xpc.evaluate(select, null);
             environment.contextItem = value.itemAt(0);
@@ -308,11 +308,11 @@ public class Environment implements ResourceResolver {
 
         // compile any stylesheet packages defined as part of the environment
         // Support this only in EE - an unusable environment in PE/HE
-        for (XdmNode stylesheet : env.select(child("package")
+        for (XdmNode stylesheet : envNode.select(child("package")
                                      .where(attributeEq("role", "secondary")))
                                      .asIterable()) {
             String fileName = stylesheet.attribute("file");
-            Source styleSource = new StreamSource(env.getBaseURI().resolve(fileName).toString());
+            Source styleSource = new StreamSource(envNode.getBaseURI().resolve(fileName).toString());
             try {
                 XsltPackage pkg = environment.xsltCompiler.compilePackage(styleSource);
                 environment.xsltCompiler.importPackage(pkg);
@@ -333,13 +333,13 @@ public class Environment implements ResourceResolver {
 
         // compile any stylesheet defined as part of the environment (only one allowed)
         // use the XSLT processor version associated with the stylesheet/@version attribute
-        for (XdmNode stylesheet : env.select(child("stylesheet").where(not(attributeEq("role", "secondary")))).asIterable()) {
+        for (XdmNode stylesheet : envNode.select(child("stylesheet").where(not(attributeEq("role", "secondary")))).asIterable()) {
             String fileName = stylesheet.attribute("file");
-            Source styleSource = new StreamSource(env.getBaseURI().resolve(fileName).toString());
+            Source styleSource = new StreamSource(envNode.getBaseURI().resolve(fileName).toString());
             try {
-                if (driver.export && !environment.schemaAware) {  // TODO: remove this condition
+                if (driver.export /* && !environment.schemaAware */) {
                     if (driver.runWithJS) {
-                        String sourceFile = env.getBaseURI().resolve(fileName).toString();
+                        String sourceFile = envNode.getBaseURI().resolve(fileName).toString();
                         environment.exportedStylesheet = driver.exportStylesheet(environment.xsltCompiler, sourceFile);
                     } else {
                         File exportFile = new File(driver.resultsDir + "/export/" + name + ".sef");
@@ -347,6 +347,10 @@ public class Environment implements ResourceResolver {
                         XsltPackage compiledPack = environment.xsltCompiler.compilePackage(styleSource);
                         compiledPack.save(exportFile);
                         environment.xsltExecutable = environment.xsltCompiler.loadExecutablePackage(exportFile.toURI());
+                        if (environment.schemaAware) {
+                            XsdSchema schema = environment.xsltExecutable.getImportedSchema("");
+                            Environment.loadSourceDocuments(driver, environment, schema);
+                        }
                     }
                 } else {
                     environment.xsltExecutable = environment.xsltCompiler.compile(styleSource);
@@ -727,11 +731,15 @@ public class Environment implements ResourceResolver {
 
     private final static String DEFAULT_COLLECTION_URI = "http://www.w3.org/qt3-test-suite/default.collection.uri";
 
-    private static void createCollectionUriResolver(final TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, DocumentBuilder builder) throws SaxonApiException {
+    private static void createCollectionUriResolver(final TestDriver driver, XdmNode env, Environment environment) throws SaxonApiException {
         if (!environment.usable) {
             // Can't run collection tests with XQuery 1.0
             return;
         }
+
+        DocumentBuilder builder = environment.processor.newDocumentBuilder();
+        builder.setTreeModel(driver.treeModel);
+
         final HashMap<String, ResourceCollection> collections = new HashMap<>();
         AbstractResourceCollection collectioni = null;
         final Configuration config = environment.processor.getUnderlyingConfiguration();
@@ -898,15 +906,21 @@ public class Environment implements ResourceResolver {
         }
     }
 
-    private static void loadSourceDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, DocumentBuilder builder, XsdSchema schema) throws SaxonApiException {
-        for (XdmNode source : env.children("source")) {
+    public static void loadSourceDocuments(TestDriver driver, Environment environment, XsdSchema schema) throws SaxonApiException {
+
+        DocumentBuilder builder = environment.processor.newDocumentBuilder();
+        builder.setTreeModel(driver.treeModel);
+
+        XdmNode envNode = environment.envNode;
+
+        for (XdmNode source : envNode.children("source")) {
 
             CatalogResource res = new CatalogResource();
             String rawUri = source.attribute("uri");
             String role = source.attribute("role");
             boolean mutable = isTrue("mutable").test(source);
             if (rawUri != null) {
-                res.uri = env.getBaseURI().resolve(rawUri).toString();
+                res.uri = envNode.getBaseURI().resolve(rawUri).toString();
                 environment.catalogResources.put(res.uri, res);
             } else if (".".equals(role)) {
                 environment.catalogResources.put("", res);
@@ -951,14 +965,14 @@ public class Environment implements ResourceResolver {
             if ("true".equals(streaming)) {
                 if (".".equals(role)) {
                     if (href == null) {
-                        environment.streamedContent = xpc.evaluate("string(content)", source).toString();
+                        environment.streamedContent = source.select("content").asNode().getStringValue();
                     } else {
-                        environment.streamedFile = new File(((XdmNode) env).getBaseURI().resolve(href));
+                        environment.streamedFile = new File(envNode.getBaseURI().resolve(href));
                         res.file = environment.streamedFile;
                     }
                     environment.streamedInputValidation = validation;
                 } else {
-                    File file = new File(env.getBaseURI().resolve(href));
+                    File file = new File(envNode.getBaseURI().resolve(href));
                     environment.streamedSecondaryDocs.put(file.toURI().toString(), validation);
                     res.file = file;
                 }
@@ -969,14 +983,14 @@ public class Environment implements ResourceResolver {
                 }
                 if (".".equals(role)) {
                     if (href == null) {
-                        environment.streamedContent = xpc.evaluate("string(content)", source).toString();
+                        environment.streamedContent = source.select("content").asNode().getStringValue();
                     } else {
-                        environment.streamedFile = new File(env.getBaseURI().resolve(href));
+                        environment.streamedFile = new File(envNode.getBaseURI().resolve(href));
                         res.file = environment.streamedFile;
                     }
                     environment.streamedInputValidation = validation;
                 } else {
-                    File file = new File(env.getBaseURI().resolve(href));
+                    File file = new File(envNode.getBaseURI().resolve(href));
                     environment.streamedSecondaryDocs.put(file.toURI().toString(), validation);
                     res.file = file;
                 }
@@ -987,10 +1001,10 @@ public class Environment implements ResourceResolver {
                 StringReader stringReader = null;
                 String baseUri = null;
                 if (href != null) {
-                    URI fileLoc = env.getBaseURI().resolve(href);
+                    URI fileLoc = envNode.getBaseURI().resolve(href);
                     baseUri = fileLoc.toString();
                     if (fileLoc.getScheme().equals("file")) {
-                        file = new File(env.getBaseURI().resolve(href));
+                        file = new File(envNode.getBaseURI().resolve(href));
                         if (res.uri == null) {
                             res.uri = file.toURI().toString();
                         }
@@ -1028,9 +1042,9 @@ public class Environment implements ResourceResolver {
                     // content is inline in the catalog
                     baseUri = res.uri;
                     if (res.uri == null) {
-                        baseUri = env.getBaseURI().toString();
+                        baseUri = envNode.getBaseURI().toString();
                     }
-                    String content = xpc.evaluate("string(content)", source).toString();
+                    String content = source.select("content").asNode().getStringValue();
                     stringReader = new StringReader(content);
                     ss = new StreamSource(stringReader, baseUri);
                 } else {
@@ -1204,5 +1218,6 @@ public class Environment implements ResourceResolver {
             }
         });
     }
+
 }
 

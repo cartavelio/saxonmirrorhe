@@ -1978,10 +1978,17 @@ public class PackageLoaderHE implements IPackageLoader {
                 // Atomic type
                 return new CastExpression(body, (AtomicType) itemType, allowEmpty);
             } else if (flags.contains("l")) {
-                SchemaType type = loader.getSchema().getSchemaType(typeName);
-                NamespaceResolver resolver = element.getAllNamespaces();
-                ListConstructorFunction ucf = new ListConstructorFunction((ListType) type, resolver, allowEmpty);
-                return new StaticFunctionCall(ucf, new Expression[]{body});
+                if (toAtt != null) {
+                    SchemaType type = loader.getSchema().getSchemaType(typeName);
+                    NamespaceResolver resolver = element.getAllNamespaces();
+                    ListConstructorFunction ucf = new ListConstructorFunction((ListType) type, resolver, allowEmpty);
+                    return new StaticFunctionCall(ucf, new Expression[]{body});
+                } else {
+                    SchemaType type = (SchemaType) itemType;
+                    NamespaceResolver resolver = element.getAllNamespaces();
+                    ListConstructorFunction ucf = new ListConstructorFunction((ListType) type, resolver, allowEmpty);
+                    return new StaticFunctionCall(ucf, new Expression[]{body});
+                }
             } else if (flags.contains("u")) {
                 if (toAtt != null) {
                     SchemaType type = loader.getSchema().getSchemaType(typeName);

@@ -1,6 +1,8 @@
 package net.sf.saxon.type.gnode;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.om.Genre;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
@@ -34,6 +36,11 @@ public abstract class XNodeType extends GNodeType {
     @Override
     public Genre getGenre() {
         return Genre.XNODE;
+    }
+
+    @Override
+    public NodeTest asXNodeTest(Configuration config) {
+        return this;
     }
 
     /**

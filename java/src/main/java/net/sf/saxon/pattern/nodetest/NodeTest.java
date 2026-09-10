@@ -7,6 +7,7 @@
 
 package net.sf.saxon.pattern.nodetest;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -59,6 +60,13 @@ public interface NodeTest extends NodePredicate {
      */
 
     ItemType getItemType();
+
+    /**
+     * Get an XNodeTest that will match any XNode that this NodeTest matches: that is,
+     * eliminate the possibility of matching a JNode.
+     */
+
+    NodeTest asXNodeTest(Configuration config);
 
     /**
      * Get a UType that all matching nodes must satisfy

@@ -592,21 +592,14 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         // treat it as if it only matched XNodes. See spec issue 2444.
 
         boolean splitGNode = false;
-        if (match instanceof NodeTestPattern ntp && ntp.getNodeTest() instanceof SelectorTest st) {
+        if (match instanceof NodeTestPattern ntp && ntp.getNodeTest().getUType().overlaps(UType.JNODE)) {
             // TODO: this doesn't handle other cases such as match="order[price = 3]"
             double priority = match.getDefaultPriority();
             Configuration config = getConfiguration();
-            Pattern p1 = new NodeTestPattern(st.asXNodeTest(config));
+            Pattern p1 = new NodeTestPattern(ntp.getNodeTest().asXNodeTest(config));
             p1.setPriority(priority);
             ExpressionTool.copyLocationInfo(match, p1);
             match = p1;
-//            ExpressionTool.copyLocationInfo(match, p1);
-//            Pattern p2 = st.asJNodePattern();
-//            p2.setPriority(priority);
-//            ExpressionTool.copyLocationInfo(match, p2);
-//            Pattern unionPattern = new UnionPattern(p1, p2);
-//            ExpressionTool.copyLocationInfo(match, unionPattern);
-//            match = unionPattern;
             match.setPriority(priority);
             splitGNode = true;
         }

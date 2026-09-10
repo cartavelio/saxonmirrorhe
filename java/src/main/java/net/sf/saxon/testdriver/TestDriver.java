@@ -12,10 +12,6 @@ import net.sf.saxon.Version;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
-import net.sf.saxon.option.axiom.AxiomObjectModel;
-import net.sf.saxon.option.dom4j.DOM4JObjectModel;
-import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
-import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.sxpath.IndependentContext;
@@ -515,7 +511,7 @@ public abstract class TestDriver {
     protected void createLocalEnvironments(XdmNode testSetDocNode) {
         localEnvironments.clear();
         Environment defaultEnvironment =
-                Environment.createLocalEnvironment(testSetDocNode.getBaseURI(), unfolded, spec, this);
+                Environment.createDefaultEnvironment(testSetDocNode.getBaseURI(), unfolded, spec, this);
         localEnvironments.put("default", defaultEnvironment);
     }
 
@@ -523,7 +519,7 @@ public abstract class TestDriver {
         String testCaseName = testCase.attribute("name");
         Optional<XdmNode> environmentNode = testCase.select("environment").asOptionalNode();
         Environment env;
-        if (!environmentNode.isPresent()) {
+        if (environmentNode.isEmpty()) {
             env = localEnvironments.get("default");
         } else {
             String envName = environmentNode.get().attribute("ref");

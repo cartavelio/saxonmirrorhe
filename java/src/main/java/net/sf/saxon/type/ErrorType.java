@@ -8,10 +8,12 @@
 package net.sf.saxon.type;
 
 import com.saxonica.ee.schema.UserSimpleType;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.CoercionPlan;
@@ -45,6 +47,11 @@ public final class ErrorType extends GNodeType implements AtomicType, UnionType,
     @Override
     public Genre getGenre() {
         return Genre.ANY;
+    }
+
+    @Override
+    public NodeTest asXNodeTest(Configuration config) {
+        return this;
     }
 
     /**

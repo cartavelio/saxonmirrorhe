@@ -7,6 +7,7 @@
 
 package net.sf.saxon.pattern;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GNode;
@@ -62,65 +63,18 @@ public class CombinedNodeTest implements NodeTest {
     public UType getUType() {
         UType u1 = nodetest1.getUType();
         UType u2 = nodetest2.getUType();
-        switch (operator) {
-            case UNION:
-                return u1.union(u2);
-            case INTERSECT:
-                return u1.intersection(u2);
-            case EXCEPT:
-                return u1;
-            default:
-                throw new IllegalArgumentException("Unknown operator in Combined Node Test");
-        }
+        return switch (operator) {
+            case UNION -> u1.union(u2);
+            case INTERSECT -> u1.intersection(u2);
+            case EXCEPT -> u1;
+            default -> throw new IllegalArgumentException("Unknown operator in Combined Node Test");
+        };
     }
 
-//    /**
-//     * Test whether this node test is satisfied by a given node. This method is only
-//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-//     * node tests where the node kind is known to be an attribute.
-//     *
-//     * @param nodeKind   The kind of node to be matched
-//     * @param name       identifies the expanded name of the node to be matched.
-//     *                   The value should be null for a node with no name.
-//     * @param annotation The actual content type of the node
-//     */
-//    @Override
-//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-//        switch (operator) {
-//            case UNION:
-//                return nodetest1 == null ||
-//                        nodetest2 == null ||
-//                        nodetest1.matches(nodeKind, name, annotation) ||
-//                        nodetest2.matches(nodeKind, name, annotation);
-//            case INTERSECT:
-//                return (nodetest1 == null || nodetest1.matches(nodeKind, name, annotation)) &&
-//                        (nodetest2 == null || nodetest2.matches(nodeKind, name, annotation));
-//            case EXCEPT:
-//                return (nodetest1 == null || nodetest1.matches(nodeKind, name, annotation)) &&
-//                        !(nodetest2 == null || nodetest2.matches(nodeKind, name, annotation));
-//            default:
-//                throw new IllegalArgumentException("Unknown operator in Combined Node Test");
-//        }
-//    }
-//
-//    @Override
-//    public IntPredicateProxy getMatcher(NodeVectorTree tree) {
-//        switch (operator) {
-//            case UNION:
-//                return IntUnionPredicate.makeUnion(nodetest1.getMatcher(tree), (nodetest2.getMatcher(tree)));
-//            case INTERSECT:
-//                return IntIntersectionPredicate.makeIntersection(nodetest1.getMatcher(tree), (nodetest2.getMatcher(tree)));
-//            case EXCEPT:
-//                return IntExceptPredicate.makeDifference(nodetest1.getMatcher(tree), nodetest2.getMatcher(tree));
-//            default:
-//                throw new IllegalArgumentException("Unknown operator in Combined Node Test");
-//        }
-//    }
+    @Override
+    public NodeTest asXNodeTest(Configuration config) {
+        return new CombinedNodeTest(nodetest1.asXNodeTest(config), operator, nodetest2.asXNodeTest(config));
+    }
 
     /**
      * Test whether this node test is satisfied by a given node. This alternative
@@ -132,17 +86,15 @@ public class CombinedNodeTest implements NodeTest {
 
     @Override
     public boolean test(GNode node) {
-        switch (operator) {
-            case UNION:
-                return nodetest1.test(node) || nodetest2.test(node);
-            case INTERSECT:
-                return nodetest1.test(node) && nodetest2.test(node);
-            case EXCEPT:
-                return nodetest1.test(node) && !nodetest2.test(node);
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (operator) {
+            case UNION -> nodetest1.test(node) || nodetest2.test(node);
+            case INTERSECT -> nodetest1.test(node) && nodetest2.test(node);
+            case EXCEPT -> nodetest1.test(node) && !nodetest2.test(node);
+            default -> throw new IllegalArgumentException();
+        };
     }
+
+
 
     public String toString() {
         return makeString(false);
@@ -291,7 +243,7 @@ public class CombinedNodeTest implements NodeTest {
     /**
      * Get a concise string representation of this node test for use in diagnostics
      *
-     * @return a suitably abbreviated respresention of the node test
+     * @return a suitably abbreviated represention of the node test
      */
     @Override
     public String toShortString() {

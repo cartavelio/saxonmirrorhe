@@ -10,6 +10,8 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.functions.Subsequence_2;
+import net.sf.saxon.functions.Subsequence_3;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.trans.XPathException;
 
@@ -65,8 +67,10 @@ public class PatternMaker {
         } else if (step instanceof ContextItemExpression) {
             return AxisInfo.SELF;
         } else if (Literal.isEmptySequence(step)) {
-            // Can happen after a rewrite of a pattern than never matches anything
+            // Can happen after a rewrite of a pattern that never matches anything
             return AxisInfo.SELF;
+        } else if (step.isCallOn(Subsequence_2.class) || step.isCallOn(Subsequence_3.class)) {
+            return getAxisForPathStep(((SystemFunctionCall)step).getArg(0));
         } else {
             throw new XPathException("The path in a pattern must contain simple steps");
         }

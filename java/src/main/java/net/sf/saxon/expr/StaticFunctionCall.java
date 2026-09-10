@@ -257,7 +257,7 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
             } else if (target instanceof ListConstructorFunction) {
                 // Bug 2611.
                 out.startElement("cast", this);
-                out.emitAttribute("as", ((ListConstructorFunction) target).getTargetType().getStructuredQName());
+                out.emitAttribute("to", ((ListConstructorFunction) target).getTargetType().getStructuredQName());
                 out.emitAttribute("flags", "l" + (((ListConstructorFunction) target).isAllowEmpty() ? "e" : ""));
                 for (Operand o : operands()) {
                     o.getChildExpression().export(out);

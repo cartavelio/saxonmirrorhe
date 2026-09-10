@@ -252,16 +252,12 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
                 @Override
                 public String getEnvironmentVariable(String name) {
-                    switch (name) {
-                        case "QTTEST":
-                            return "42";
-                        case "QTTEST2":
-                            return "other";
-                        case "QTTESTEMPTY":
-                            return "";
-                        default:
-                            return null;
-                    }
+                    return switch (name) {
+                        case "QTTEST" -> "42";
+                        case "QTTEST2" -> "other";
+                        case "QTTESTEMPTY" -> "";
+                        default -> null;
+                    };
                 }
             };
             env.processor.setConfigurationProperty(Feature.ENVIRONMENT_VARIABLE_RESOLVER, resolver);
@@ -351,7 +347,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             XsltCompiler compiler = env.xsltCompiler;
             compiler.setErrorReporter(collector);
             compiler.setCompileForExport(export);
-            initPatternOptimization(compiler);
             compiler.clearParameters();
             prepareForSQL(compiler.getProcessor());
 
@@ -380,6 +375,10 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             }
             sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
 
+            if (export && sheet != null && compiler.isSchemaAware() && env.envNode != null) {
+                XsdSchema schema = sheet.getImportedSchema("");
+                Environment.loadSourceDocuments(this, env, schema);
+            }
 
             String optimizationAssertion = optimizationAssertions.get(testName);
             if (optimizationAssertion != null && sheet != null) {
@@ -599,10 +598,10 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         XPathCompiler assertionXPath = env.processor.newXPathCompiler();
         assertionXPath.setSchemaAware(env.processor.isSchemaAware());
         assertionXPath.setBaseURI(assertion.get().getBaseURI());
-        if (env.xsltCompiler.getUsedSchema("") != null) {
-            assertionXPath.useSchema(env.xsltCompiler.getUsedSchema(""));
+        if (sheet != null && sheet.getImportedSchema("") != null) {
+            assertionXPath.useSchema(sheet.getImportedSchema(""));
         }
-        copySchemaNamespaces(env, assertionXPath);  // ensure environment has schema namespaces
+        //copySchemaNamespaces(env, assertionXPath);  // ensure environment has schema namespaces
         boolean success = outcome.testAssertion(assertion.get(), outcome, outcome.getPrincipalResultDoc(), assertionXPath, xpath, debug);
         if (success) {
             successes++;
@@ -873,7 +872,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 src = contextNode.getUnderlyingNode();
             }
             if (src != null && !"skip".equals(env.streamedInputValidation)) {
-                SchemaValidator validator = env.xsdSchema.newValidator();
+                SchemaValidator validator = sheet.getImportedSchema("").newValidator();
                 src = validator.asSource(src);
             }
 
@@ -1000,13 +999,10 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         return false;
     }
 
-    protected void initPatternOptimization(XsltCompiler compiler) {
-    }
-
     protected XsltExecutable exportImport(String testName, String testSetName, TestOutcome outcome, XsltCompiler compiler,
                                           XsltExecutable sheet, ErrorCollector collector, Source styleSource) {
         try {
-            if (export && isExportable(testName) && !compiler.isSchemaAware()) {
+            if (export && isExportable(testName) /*&& !compiler.isSchemaAware() */) {
                 sheet = exportStylesheet(testName, testSetName, compiler, styleSource);
             } else if (sheet == null) {
                 sheet = compiler.compile(styleSource);

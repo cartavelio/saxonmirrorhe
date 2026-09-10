@@ -7,9 +7,10 @@
 
 package net.sf.saxon.type.gnode;
 
-import net.sf.saxon.ma.jnode.AnyJNodeType;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.type.ChoiceItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
@@ -51,6 +52,11 @@ public final class AnyGNodeType extends GNodeType {
     @Override
     public UType getUType() {
         return UType.GNODE;
+    }
+
+    @Override
+    public NodeTest asXNodeTest(Configuration config) {
+        return AnyXNodeType.getInstance();
     }
 
     /**

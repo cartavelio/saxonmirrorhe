@@ -7,6 +7,7 @@
 
 package net.sf.saxon.pattern;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.nodetest.NodeTest;
@@ -83,6 +84,11 @@ public final class MultipleNodeKindTest implements NodeTest {
     @Override
     public ItemType getItemType() {
         return ChoiceItemType.of(uType);
+    }
+
+    @Override
+    public NodeTest asXNodeTest(Configuration config) {
+        return this;
     }
 
     /**

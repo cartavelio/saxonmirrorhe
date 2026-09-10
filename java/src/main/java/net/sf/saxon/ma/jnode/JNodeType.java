@@ -1,6 +1,9 @@
 package net.sf.saxon.ma.jnode;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.om.Genre;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
@@ -102,6 +105,9 @@ public abstract class JNodeType extends GNodeType {
         return "J";
     }
 
-
+    @Override
+    public NodeTest asXNodeTest(Configuration config) {
+        return ErrorType.getInstance();
+    }
 }
 

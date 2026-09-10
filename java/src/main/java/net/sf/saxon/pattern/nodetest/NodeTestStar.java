@@ -1,5 +1,6 @@
 package net.sf.saxon.pattern.nodetest;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.GNode;
@@ -69,7 +70,7 @@ public class NodeTestStar implements NodeTest {
      * Convert to a test that only matches XNodes
      */
 
-    public NodeTest asXNodeTest() {
+    public NodeTest asXNodeTest(Configuration config) {
         return NodeKindType.of(defaultNodeKind);
     }
 
