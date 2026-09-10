@@ -2857,13 +2857,15 @@ public class XPathParser {
 
 
     protected Expression parseFilterExprAM(Expression step) throws XPathException {
-        checkLanguageVersion40("the `?[...]` syntax to filter maps and arrays");
-        nextToken();
-        Expression predicate = parsePredicate();
-        readToken(Token.RSQB);
-        step = new FilterExpressionAM(step, predicate);
-        setLocation(step);
+        grumble("The `?[...]` syntax to filter maps and arrays has been dropped from the draft 4.0 specifications");
         return step;
+//        checkLanguageVersion40("the `?[...]` syntax to filter maps and arrays");
+//        nextToken();
+//        Expression predicate = parsePredicate();
+//        readToken(Token.RSQB);
+//        step = new FilterExpressionAM(step, predicate);
+//        setLocation(step);
+//        return step;
     }
 
 
