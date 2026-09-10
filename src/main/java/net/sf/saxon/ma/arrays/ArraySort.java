@@ -63,7 +63,7 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
             member.value = seq;
             member.originalPosition = i++;
             if (key != null) {
-                member.sortKey = dynamicCall(key, context, new Sequence[]{seq}).materialize();
+                member.sortKey = dynamicCall(key, context, seq).materialize();
             } else {
                 member.sortKey = atomize(seq);
             }
@@ -93,28 +93,32 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
         return makeArray(outputList);
     }
 
+    /**
+     * Lexicographic sort: given two atomic sequences, compare them by comparing individual
+     * items until a pair of items is found that differs.
+     * @param a the first sequence (must be a sequence of atomic items)
+     * @param b the second sequence  (must be a sequence of atomic items)
+     * @param comparer comparer for individual items
+     * @return -1, 0, or +1 depending on the magnitude relationship
+     */
     public static int compareSortKeys(GroundedValue a, GroundedValue b, AtomicComparer comparer) {
         SequenceIterator iteratora = a.iterate();
         SequenceIterator iteratorb = b.iterate();
-        while (true){
-            AtomicValue firsta = (AtomicValue) iteratora.next();
-            AtomicValue firstb = (AtomicValue) iteratorb.next();
-            if (firsta == null){
-                if (firstb == null){
+        while (true) {
+            AtomicValue a0 = (AtomicValue) iteratora.next();
+            AtomicValue b0 = (AtomicValue) iteratorb.next();
+            if (a0 == null) {
+                if (b0 == null) {
                     return 0;
                 }
                 else {
                     return -1;
                 }
-            }
-            else if (firstb == null){
+            } else if (b0 == null) {
                 return +1;
-            }
-            else {
-                int first = comparer.compareAtomicValues(firsta, firstb);
-                if (first == 0){
-                    continue;
-                } else {
+            } else {
+                int first = comparer.compareAtomicValues(a0, b0);
+                if (first != 0) {
                     return first;
                 }
             }

@@ -283,8 +283,12 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
         }
     }
 
+    //private static long counter = 0;
     @Override
     public boolean equals(Object obj) {
+//        if (counter++ % 100000 == 0) {
+//            System.err.println("calls on UnicodeString.equals() = " + counter);
+//        }
         if (obj instanceof UnicodeString) {
             UnicodeString other = (UnicodeString) obj;
             IntIterator iter1 = codePoints();

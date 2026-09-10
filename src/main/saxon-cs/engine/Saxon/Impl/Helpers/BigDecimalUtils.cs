@@ -1,5 +1,6 @@
 using System;
 using Saxon.Hej.functions;
+using Saxon.Hej.ma.map;
 using Saxon.Hej.value;
 using Singulink.Numerics;
 
@@ -31,6 +32,17 @@ namespace Saxon.Impl.Helpers {
         public static Singulink.Numerics.BigDecimal[] DivideAndRemainder(Singulink.Numerics.BigDecimal a, Singulink.Numerics.BigDecimal b) {
             BigDecimal quot = Idiv(a, b);
             return new BigDecimal[]{quot, a - quot*b};
+        }
+        
+        public static MapItem DivideDecimals(DecimalValue a, DecimalValue b, int precision) {
+            BigDecimal quotient = Singulink.Numerics.BigDecimal.Divide(
+                a.getDecimalValue(), b.getDecimalValue(), precision, Singulink.Numerics.RoundingMode.ToZero);
+            BigDecimal roundedQuotient = BigDecimal.Round(quotient, precision, RoundingMode.ToZero);
+            BigDecimal remainder = a.getDecimalValue() - roundedQuotient * b.getDecimalValue();
+            return new ShapedMap(Saxon.Eej.functions.qt4.DivideDecimals.quotientAndRemainder,
+                new BigDecimalValue(roundedQuotient),
+                new BigDecimalValue(remainder));
+
         }
         
         public static Singulink.Numerics.BigDecimal Idiv(Singulink.Numerics.BigDecimal a, Singulink.Numerics.BigDecimal b) {

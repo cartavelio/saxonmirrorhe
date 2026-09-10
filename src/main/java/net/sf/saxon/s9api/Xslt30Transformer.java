@@ -673,7 +673,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      *
      * @return a {@link Destination} which accepts an XML document (typically as a stream
      * of events) and which transforms this supplied XML document (possibly using streaming)
-     * as defined by the stylesheet from which which this {@code Xslt30Transformer} was generated,
+     * as defined by the stylesheet from which this {@code Xslt30Transformer} was generated,
      * sending the principal result of the transformation to the supplied {@code finalDestination}.
      * The transformation is performed as if by the {@link #applyTemplates(Source, Destination)}
      * method: that is, by applying templates to the root node of the supplied XML document.

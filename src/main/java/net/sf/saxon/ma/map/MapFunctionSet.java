@@ -9,10 +9,14 @@ package net.sf.saxon.ma.map;
 
 //import com.saxonica.functions.qt4.ma.OrderedDictionaryMap;
 //import com.saxonica.functions.qt4.ma.OrderedMap;
+
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.InsertBefore;
+import net.sf.saxon.functions.OptionsParameter;
+import net.sf.saxon.functions.SimpleBinaryFunction;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -603,6 +607,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            //MapBuilder mapBuilder = OrderedMap.getBuilder();
             MapBuilder mapBuilder = HashTrieMap.getBuilder();
             FunctionItem keyFunction = (FunctionItem)arguments[1].head();
             FunctionItem valueFunction = (FunctionItem) arguments[2].head();

@@ -44,7 +44,6 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
         private final JsonParser parser;
         private final int flags;
         public Builder(JsonParser parser, int flags) {
-            Instrumentation.count("LazyStringMapBuilder");
             this.parser = parser;
             this.flags = flags;
         }
@@ -189,7 +188,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      */
     public synchronized boolean contains(String key) {
         prepare();
-        return baseMap.containsKey(key);
+        return baseMap.containsKey(StringView.of(key));
     }
 
     /**
@@ -199,7 +198,8 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      * @return true if the key is present
      */
     public boolean containsU(UnicodeString key) {
-        return contains(key.toString());
+        prepare();
+        return baseMap.containsKey(key);
     }
 
     /**
@@ -265,8 +265,8 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      */
     @Override
     public AtomicIterator keys() {
-        Instrumentation.count("Map keys()");
-        return new MappedAtomicIterator<>(keyList.iterator(), StringValue::new);
+        // Written this way for transpilation
+        return new MappedAtomicIterator<UnicodeString>(keyList.iterator(), u -> new StringValue(u));
     }
 
     /**
@@ -276,7 +276,6 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      */
     @Override
     public Iterator<KeyValuePair> iterator() {
-        Instrumentation.count("Map keyValuePairs()");
         return new KeyValuePairIterator(keyList, valueList);
     }
 

@@ -72,7 +72,7 @@ public enum OccurrenceIndicator {
      * @return the corresponding {@link OccurrenceIndicator}
      */
 
-    static OccurrenceIndicator getOccurrenceIndicator(int cardinality) {
+    public static OccurrenceIndicator getOccurrenceIndicator(int cardinality) {
         switch (cardinality) {
             case StaticProperty.EMPTY:
                 return ZERO;

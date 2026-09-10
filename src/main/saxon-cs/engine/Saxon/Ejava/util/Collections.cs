@@ -60,7 +60,7 @@ namespace Saxon.Ejava.util
         }
         
         public static void reverse<T>(System.Collections.Generic.IList<T> list) {
-            list.Reverse();
+            throw new System.NotImplementedException();
         }
         
         public static SysCollGen.List<T> singletonList<T>(T entry) {

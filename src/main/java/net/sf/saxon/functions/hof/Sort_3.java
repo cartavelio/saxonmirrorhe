@@ -44,7 +44,7 @@ public class Sort_3 extends Sort_2 {
             ItemToBeSorted member = new ItemToBeSorted();
             member.value = item;
             member.originalPosition = i++;
-            member.sortKey = dynamicCall(key, context, new Sequence[]{item}).materialize();
+            member.sortKey = dynamicCall(key, context, item).materialize();
             inputList.add(member);
         }
         return doSort(inputList, getCollation(context, arguments[1]), context);
