@@ -116,11 +116,11 @@ public class SaxonCException  {
             System.err.println("Java Debug: Exception found: " + messageStr);
             if(messageStr.contains("Invalid handle")){
                 System.err.println("Found Invalid Handle error");
-                StringWriter sw = new StringWriter();
-               PrintWriter pw = new PrintWriter(sw);
-               throwable.printStackTrace(pw);
-               System.err.println(sw.toString());
             }
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            throwable.printStackTrace(pw);
+            System.err.println(sw.toString());
 
         }
         CCharPointer a = null;
