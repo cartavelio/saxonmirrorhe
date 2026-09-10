@@ -9,9 +9,9 @@ namespace Saxon.Impl.Dom {
     /// <summary>
     /// Implements Saxon.Hej.om.NodeInfo as a wrapper over an attribute node in the HtmlAgilityPack
     /// HTML document tree. The attribute node always has a parent element, and is always part of a tree
-    /// rooted at a document node. There are no namespaces, and names comprise a local name only. The
-    /// attributes of an element have an arbitrary ordering (document order), represented by an
-    /// "index" property indicating the position relative to the containing element.
+    /// rooted at a document node. There are namespaces for specific vocabularies that are part of HTML5,
+    /// such as SVG and MathML. The attributes of an element have an arbitrary ordering (document order),
+    /// represented by an "index" property indicating the position relative to the containing element.
     /// </summary>
     public class HtmlAttributeWrapper : AbstractNodeWrapper, SteppingNode, SiblingCountingNode {
         private readonly AngleSharp.Dom.IAttr htmlAttribute;
@@ -80,7 +80,7 @@ namespace Saxon.Impl.Dom {
         }
         
         public override Saxon.Hej.om.NamespaceUri getNamespaceUri() {
-            return NamespaceUri.NULL;
+            return htmlAttribute.NamespaceUri == null ? NamespaceUri.NULL : NamespaceUri.of(htmlAttribute.NamespaceUri);
         }
 
         public override string getURI() {
