@@ -68,6 +68,10 @@ namespace Saxon.Callbacks {
                 // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent URI
                 return new StreamSource(request.uri);
             }
+            catch (System.Net.Http.HttpRequestException) {
+                // Seen in 11.5, running under Gradle
+                return new StreamSource(request.uri);
+            }
             catch (System.ArgumentException) {
                 // Thrown for an unknown URI scheme
                 return new StreamSource(request.uri);
