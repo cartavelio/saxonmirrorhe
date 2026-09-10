@@ -741,14 +741,7 @@ class SaxonTestSuite {
   }
 
   public void saveTheXsdResults(options, arcpath) {
-    // This is a complete hack!
-    def fn = options['reportFilename']
-    if (options['name'] == options['reportFilename']
-        && options['name'].startsWith('eedotnet_xsd')) {
-      fn = "SaxonResults${project.ext.saxonVersion}n.xml"
-    }
-
-    def arcfn = "${arcpath}/${fn}.xml"
+    def arcfn = "${arcpath}/${options['reportFilename']}.xml"
 
     // This is all an awful hack because the XSD tests write
     // results using filenames calculated internally, e.g.:
