@@ -15,12 +15,10 @@ import java.util.Optional;
 public class SpecificJNodeType extends JNodeType {
 
     private final SequenceType valueType;
-    private final TypeHierarchy typeHierarchy;
 
 
-    public SpecificJNodeType(SequenceType valueType, TypeHierarchy th) {
+    public SpecificJNodeType(SequenceType valueType) {
         this.valueType = valueType;
-        this.typeHierarchy = th;
     }
 
     public SequenceType getValueType() {
@@ -36,7 +34,7 @@ public class SpecificJNodeType extends JNodeType {
      */
     @Override
     public boolean matches(Item item) {
-        return item instanceof JNode && valueType.matches(((JNode)item).getContent(), typeHierarchy);
+        return item instanceof JNode && valueType.matches(((JNode)item).getContent());
     }
 
     /**

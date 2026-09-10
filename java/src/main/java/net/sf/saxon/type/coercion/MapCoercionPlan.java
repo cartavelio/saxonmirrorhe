@@ -44,7 +44,7 @@ public final class MapCoercionPlan extends CoercionPlan {
             return SequenceExtent.from(coercedValue);
         }
         if (item instanceof MapItem) {
-            if (requiredType.matches(item, request.config.getTypeHierarchy())) {
+            if (requiredType.matches(item)) {
                 return item;
             } else {
                 GeneralMapBuilder builder = item instanceof ExtensibleMap ? new GeneralMapBuilder(40) : FixedMap.getBuilder(40);

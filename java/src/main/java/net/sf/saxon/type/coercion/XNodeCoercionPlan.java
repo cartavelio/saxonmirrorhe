@@ -39,7 +39,7 @@ public final class XNodeCoercionPlan extends CoercionPlan {
 
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         TypeHierarchy th = request.config.getTypeHierarchy();
-        if (requiredType.matches(item, th)) {
+        if (requiredType.matches(item)) {
             return item;
         }
         if (item instanceof JNode) {
@@ -55,7 +55,7 @@ public final class XNodeCoercionPlan extends CoercionPlan {
             } else {
                 List<Item> result = new ArrayList<>();
                 for (Item it : content.asIterable()) {
-                    if (requiredType.matches(it, th)) {
+                    if (requiredType.matches(it)) {
                         return content;
                     } else {
                         throw coercionError(it, requiredType, request);
@@ -67,7 +67,7 @@ public final class XNodeCoercionPlan extends CoercionPlan {
         if (item instanceof Parcel) {
             GroundedValue val = ((Parcel) item).getValue();
             for (Item it : val.asIterable()) {
-                if (!requiredType.matches(it, th)) {
+                if (!requiredType.matches(it)) {
                     throw coercionError(item, requiredType, request);
                 }
             }

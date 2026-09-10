@@ -347,7 +347,7 @@ public final class InstanceOfExpression extends UnaryExpression {
                 final ItemEvaluator itemEval = arg.makeElaborator().elaborateForItem();
                 return context -> {
                     Item item = itemEval.eval(context);
-                    return item != null && requiredType.matches(item, th);
+                    return item != null && requiredType.matches(item);
                 };
             } else {
                 final PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
@@ -357,7 +357,7 @@ public final class InstanceOfExpression extends UnaryExpression {
                     int count = 0;
                     for (Item item; (item = iter.next()) != null; ) {
                         count++;
-                        if (!itemTypeOK && !requiredType.matches(item, th)) {
+                        if (!itemTypeOK && !requiredType.matches(item)) {
                             iter.close();
                             return false;
                         }

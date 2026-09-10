@@ -220,7 +220,7 @@ public final class ItemChecker extends UnaryExpression {
         final Expression baseExpr = getBaseExpression();
         final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Consumer<Item> checker = item -> {
-            if (!requiredItemType.matches(item, th)) {
+            if (!requiredItemType.matches(item)) {
                 int version = baseExpr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
                 RoleDiagnostic role = roleSupplier.get();
                 String message = role.composeErrorMessage(requiredItemType, item, th);
@@ -250,7 +250,7 @@ public final class ItemChecker extends UnaryExpression {
         if (item == null) {
             return null;
         }
-        if (requiredItemType.matches(item, th)) {
+        if (requiredItemType.matches(item)) {
             return item;
         } else {
             RoleDiagnostic role = roleSupplier.get();

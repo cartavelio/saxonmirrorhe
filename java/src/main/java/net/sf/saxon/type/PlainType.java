@@ -39,12 +39,11 @@ public interface PlainType extends ItemType, HyperType {
      * Test whether a given item conforms to this type
      *
      * @param item The item to be tested
-     * @param th   The type hierarchy cache. Currently used only when matching function items.
      * @return true if the item is an instance of this type; false otherwise
      */
 
     @Override
-    boolean matches(Item item, TypeHierarchy th);
+    boolean matches(Item item);
 
     /**
      * Redeclare getPrimitiveItemType() to return a more specific result type

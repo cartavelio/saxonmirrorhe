@@ -64,7 +64,7 @@ public class XPathDynamicContext {
             }
         }
         TypeHierarchy th = contextObject.getConfiguration().getTypeHierarchy();
-        if (!contextItemType.matches(item, th)) {
+        if (!contextItemType.matches(item)) {
             throw new XPathException("Supplied context item does not match required context item type " +
                                              contextItemType);
         }

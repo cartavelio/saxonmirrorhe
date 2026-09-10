@@ -141,7 +141,7 @@ public class MapType extends AnyFunctionType {
      * Test whether a given item conforms to this type
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
+    public boolean matches(Item item) {
         if (!(item instanceof MapItem)){
             return false;
         }
@@ -153,7 +153,7 @@ public class MapType extends AnyFunctionType {
         if (this == ANY_MAP_TYPE) {
             return true;
         } else {
-            return ((MapItem)item).conforms(keyType, valueType, th);
+            return ((MapItem)item).conforms(keyType, valueType);
         }
     }
 
@@ -284,7 +284,7 @@ public class MapType extends AnyFunctionType {
      */
 
     @Override
-    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
+    public Affinity relationship(FunctionItemType other) {
         if (other == INSTANCE) {
             return Affinity.SUBSUMED_BY;
         } else if (equals(other)) {
@@ -294,16 +294,16 @@ public class MapType extends AnyFunctionType {
         } else if (other.isArrayType()) {
             return Affinity.DISJOINT;
         } else if (other instanceof RecordTest) {
-            return TypeHierarchy.inverseRelationship(other.relationship(this, th));
+            return Subsumption.inverseRelationship(other.relationship(this));
         } else if (other instanceof MapType) {
             // See bug 3720. Two map types can never be disjoint because the empty
             // map is an instance of every map type
             MapType f2 = (MapType) other;
-            Affinity keyRel = th.relationship(keyType, f2.keyType);
+            Affinity keyRel = Subsumption.computeRelationship(keyType, f2.keyType);
             if (keyRel == Affinity.DISJOINT) {
                 return Affinity.OVERLAPS;
             }
-            Affinity valueRel = th.sequenceTypeRelationship(valueType, f2.valueType);
+            Affinity valueRel = Subsumption.sequenceTypeRelationship(valueType, f2.valueType);
 
             if (valueRel == Affinity.DISJOINT) {
                 return Affinity.OVERLAPS;
@@ -328,7 +328,7 @@ public class MapType extends AnyFunctionType {
             }
             return new SpecificFunctionType(
                     SequenceType.ATOMIC_SEQUENCE, st)
-                    .relationship(other, th);
+                    .relationship(other);
         }
     }
 
@@ -346,12 +346,12 @@ public class MapType extends AnyFunctionType {
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item instanceof MapItem) {
             for (KeyValuePair kvp : ((MapItem)item).keyValuePairs()) {
-                if (!keyType.matches(kvp.key, th)) {
+                if (!keyType.matches(kvp.key)) {
                     String s = "The map contains a key (" + kvp.key.show() + ") of type " + kvp.key.getItemType() +
                             " that is not an instance of the required type " + keyType;
                     return Optional.of(s);
                 }
-                if (!valueType.matches(kvp.value, th)) {
+                if (!valueType.matches(kvp.value)) {
                     String s = "The map contains an entry with key (" + kvp.key.show() +
                             ") whose corresponding value (" + Err.depictSequence(kvp.value) +
                             ") is not an instance of the required type " + valueType;

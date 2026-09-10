@@ -911,7 +911,7 @@ public class XQueryParser extends XPathParser {
             }
             annotations.add(annotation);
             if (t.currentToken != Token.PERCENT) {
-                return new AnnotationList(annotations);
+                return new AnnotationList(annotations).withConfiguration(env.getConfiguration());
             }
         }
     }
@@ -1797,7 +1797,7 @@ public class XQueryParser extends XPathParser {
             for (SequenceType otherType : gcr.getRequiredTypes()) {
                 if (otherType != SequenceType.ANY_SEQUENCE) {
                     TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
-                    Affinity rel = th.sequenceTypeRelationship(requiredSequenceType, otherType);
+                    Affinity rel = Subsumption.sequenceTypeRelationship(requiredSequenceType, otherType);
                     if (rel == Affinity.DISJOINT) {
                         // the two types are incompatible: fail now
                         grumble("Different modules specify incompatible requirements for the type of the initial context item", "XPTY0004");

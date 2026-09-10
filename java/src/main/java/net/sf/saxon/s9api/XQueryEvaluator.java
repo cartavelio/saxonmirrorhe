@@ -802,7 +802,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
             for (int i = 0; i < arguments.length; i++) {
                 net.sf.saxon.value.SequenceType type = fn.getParameterDefinitions()[i].getRequiredType();
                 GroundedValue gVal = arguments[i].getUnderlyingValue();
-                if (!type.matches(gVal, th)) {
+                if (!type.matches(gVal)) {
                     final int pos = i;
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, function.getStructuredQName().getDisplayName(), pos);

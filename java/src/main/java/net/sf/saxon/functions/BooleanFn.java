@@ -66,15 +66,14 @@ public class BooleanFn extends SystemFunction implements ArityOneFunction {
                 BooleanValue.get(
                     ExpressionTool.effectiveBooleanValue(val.iterate())), exp);
         }
-        if (exp instanceof ValueComparison) {
-            ValueComparison vc = (ValueComparison) exp;
+        if (exp instanceof ValueComparison vc) {
             if (vc.getResultWhenEmpty() == null) {
                 vc.setResultWhenEmpty(BooleanValue.FALSE);
             }
             return exp;
         } else if (exp.isCallOn(BooleanFn.class)) {
             return ((SystemFunctionCall) exp).getArg(0);
-        } else if (th.isSubType(exp.getItemType(), BuiltInAtomicType.BOOLEAN) &&
+        } else if (BuiltInAtomicType.BOOLEAN.hasSubType(exp.getItemType()) &&
                 exp.getCardinality() == StaticProperty.EXACTLY_ONE) {
             return exp;
         } else if (exp.isCallOn(Count.class)) {

@@ -121,11 +121,10 @@ public class EmptyMap extends MapItem {
      *
      * @param keyType   the required keyType
      * @param valueType the required valueType
-     * @param th        the type hierarchy cache for the configuration
      * @return true if the map conforms to the required type
      */
     @Override
-    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
+    public boolean conforms(PlainType keyType, SequenceType valueType) {
         return true;
     }
 

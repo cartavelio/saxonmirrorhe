@@ -615,7 +615,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             net.sf.saxon.value.SequenceType type = params[i].getRequiredType();
             if (i < arguments.length) {
                 vr[i] = arguments[i].getUnderlyingValue();
-                if (!type.matches(vr[i], config.getTypeHierarchy())) {
+                if (!type.matches(vr[i])) {
                     final int pos = i;
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, uf.getFunctionName().getDisplayName(), pos);

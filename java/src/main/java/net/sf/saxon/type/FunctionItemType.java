@@ -17,7 +17,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.function.Supplier;
 
 /**
- * An ItemType representing the type of a function item (subclasses are used for maps and arrays)
+ * An ItemType representing the type signature of a function item (subclasses are used for maps and arrays)
  */
 
 public interface FunctionItemType extends ItemType {
@@ -53,12 +53,12 @@ public interface FunctionItemType extends ItemType {
     /**
      * Determine the relationship of one function item type to another. This method is only concerned
      * with the type signatures of the two function item types, and not with their annotation assertions.
+     *
      * @param other the other function item type
-     * @param th the type hierarchy cache
      * @return for example {@link Affinity#SUBSUMES}, {@link Affinity#SAME_TYPE}
      */
 
-    Affinity relationship(FunctionItemType other, TypeHierarchy th);
+    Affinity relationship(FunctionItemType other);
 
     /**
      * Get the list of Annotation Assertions associated with this function item type

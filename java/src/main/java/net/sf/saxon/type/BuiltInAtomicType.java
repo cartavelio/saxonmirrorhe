@@ -458,15 +458,13 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
     @Override
     public boolean isAbstract() {
-        switch (fingerprint) {
-            case StandardNames.XS_NOTATION:
-            case StandardNames.XS_ANY_ATOMIC_TYPE:
-            case StandardNames.XS_NUMERIC:
-            case StandardNames.XS_ANY_SIMPLE_TYPE:
-                return true;
-            default:
-                return false;
-        }
+        return switch (fingerprint) {
+            case StandardNames.XS_NOTATION,
+                 StandardNames.XS_ANY_ATOMIC_TYPE,
+                 StandardNames.XS_NUMERIC,
+                 StandardNames.XS_ANY_SIMPLE_TYPE -> true;
+            default -> false;
+        };
     }
 
     /**
@@ -505,6 +503,22 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     @Override
     public String getBasicAlphaCode() {
         return alphaCode;
+    }
+
+    /**
+     * Ask whether another type is a subtype of this type (or is the type itself)
+     * @param other the other type
+     * @return true if the other type is a subtype of this type
+     */
+
+    public boolean hasSubType(ItemType other) {
+        if (this == other) {
+            return true;
+        }
+        if (other instanceof BuiltInAtomicType bat && bat.getBasicAlphaCode().startsWith(getBasicAlphaCode())) {
+            return true;
+        }
+        return other instanceof AtomicType at && Subsumption.derivesFrom(at, this);
     }
 
     /**
@@ -799,14 +813,11 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     /**
      * Test whether a given item conforms to this type
      *
-     *
-     *
-     * @param item    The item to be tested
-     * @param th      The type hierarchy cache
+     * @param item The item to be tested
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
+    public boolean matches(Item item) {
         return item instanceof AtomicValue && Type.isSubType(((AtomicValue) item).getItemType(), this);
     }
 

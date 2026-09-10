@@ -126,8 +126,7 @@ public class ChoiceItemType implements ItemType, ChoiceType {
 
 
     protected boolean someMemberTypeSatisfies(Predicate<? super ItemType> condition) {
-        for (int i=0; i< memberTypes.size(); i++) {
-            ItemType member = memberTypes.get(i);
+        for (ItemType member : memberTypes) {
             if (condition.test(member)) {
                 return true;
             }
@@ -190,14 +189,14 @@ public class ChoiceItemType implements ItemType, ChoiceType {
 
     /**
      * Test whether a given item conforms to this type
-     * @param item    The item to be tested
-     * @param th   The type hierarchy
+     *
+     * @param item The item to be tested
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
+    public boolean matches(Item item) {
         for (ItemType member : memberTypes) {
-            if (member.matches(item, th)) {
+            if (member.matches(item)) {
                 return true;
             }
         }
@@ -288,7 +287,41 @@ public class ChoiceItemType implements ItemType, ChoiceType {
              result *= t.getDefaultPriority();
         }
         return result;
+    }
 
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ChoiceItemType other
+                && other.getMemberTypes().size() == memberTypes.size()
+                && other.getUType().equals(getUType())
+                && other.hashCode() == hashCode()) {
+           for (ItemType member : memberTypes) {
+               boolean foundMatch = false;
+               for (ItemType otherMember : other.memberTypes) {
+                   if (member.equals(otherMember)) {
+                       foundMatch = true;
+                       break;
+                   }
+               }
+               if (!foundMatch) {
+                   return false;
+               }
+           }
+           return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 0x0123abcd;
+        for (ItemType member : memberTypes) {
+            h ^= member.hashCode();
+        }
+        return h;
     }
 
     /**

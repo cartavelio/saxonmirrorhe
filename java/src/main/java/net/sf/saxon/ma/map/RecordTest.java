@@ -278,11 +278,10 @@ public class RecordTest implements RecordType {
      * Test whether a given item conforms to this type
      *
      * @param item The item to be tested
-     * @param th type hierarchy data
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
+    public boolean matches(Item item) {
         if (!(item instanceof MapItem)) {
             return false;
         }
@@ -293,7 +292,7 @@ public class RecordTest implements RecordType {
                 if (!isOptionalField(field.getKey())) {
                     return false;
                 }
-            } else if (!field.getValue().matches(val, th)) {
+            } else if (!field.getValue().matches(val)) {
                 return false;
             }
         }
@@ -489,27 +488,27 @@ public class RecordTest implements RecordType {
      */
 
     @Override
-    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
+    public Affinity relationship(FunctionItemType other) {
         if (other == AnyFunctionType.INSTANCE) {
             return Affinity.SUBSUMED_BY;
         } else if (other instanceof RecordTest) {
-            return recordTypeRelationship((RecordTest)other, th);
+            return recordTypeRelationship((RecordTest)other);
         } else if (other == MapType.ANY_MAP_TYPE) {
             return Affinity.SUBSUMED_BY;
         } else if (other.isArrayType()) {
             return Affinity.DISJOINT;
         } else if (other instanceof MapType) {
-            return recordToMapRelationship((MapType)other, th);
+            return recordToMapRelationship((MapType)other);
         } else {
             Affinity rel;
-            rel = new SpecificFunctionType(getArgumentTypes(), getResultType()).relationship(other, th);
+            rel = new SpecificFunctionType(getArgumentTypes(), getResultType()).relationship(other);
             return rel;
         }
     }
 
-    private Affinity recordToMapRelationship(MapType other, TypeHierarchy th) {
+    private Affinity recordToMapRelationship(MapType other) {
         AtomicType recordKeyType = isExtensible() ? BuiltInAtomicType.ANY_ATOMIC : BuiltInAtomicType.STRING;
-        Affinity keyRel = th.relationship(recordKeyType, other.getKeyType());
+        Affinity keyRel = Subsumption.computeRelationship(recordKeyType, other.getKeyType());
         if (keyRel == Affinity.DISJOINT) {
             return Affinity.DISJOINT;
         }
@@ -525,7 +524,7 @@ public class RecordTest implements RecordType {
         } else {
             // The type of every field in the record must be a subtype of the map value type
             for (SequenceType entry : fieldTypes.values()) {
-                Affinity rel = th.sequenceTypeRelationship(entry, other.getValueType());
+                Affinity rel = Subsumption.sequenceTypeRelationship(entry, other.getValueType());
                 if (!(rel == Affinity.SUBSUMED_BY || rel == Affinity.SAME_TYPE)) {
                     return Affinity.OVERLAPS;
                 }
@@ -534,7 +533,7 @@ public class RecordTest implements RecordType {
         }
     }
 
-    private Affinity recordTypeRelationship(RecordTest other, TypeHierarchy th) {
+    private Affinity recordTypeRelationship(RecordTest other) {
         Set<String> keys = new HashSet<>(fieldTypes.keySet());
         keys.addAll(other.fieldTypes.keySet());
         boolean foundSubsuming = false;
@@ -577,7 +576,7 @@ public class RecordTest implements RecordType {
                     return Affinity.DISJOINT;
                 }
             } else {
-                Affinity a = th.sequenceTypeRelationship(t1, t2);
+                Affinity a = Subsumption.sequenceTypeRelationship(t1, t2);
                 switch (a) {
                     case SAME_TYPE:
                         break;
@@ -626,11 +625,11 @@ public class RecordTest implements RecordType {
                         return Optional.of("Field " + key + " is absent; it must have a value");
                     }
                 } else {
-                    if (!required.matches(value, th)) {
+                    if (!required.matches(value)) {
                         String s = "Field " + key + " has value "
                                 + Err.depictSequence(value)
                                 + " which does not match the required type "
-                                + required.toString();
+                                + required;
                         Optional<String> more = required.explainMismatch(value, th);
                         if (more.isPresent()) {
                             s += ". " + more.get();

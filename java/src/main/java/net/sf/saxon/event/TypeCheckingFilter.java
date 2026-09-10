@@ -328,7 +328,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
     }
 
     private void checkItem(Item item, Location locationId) throws XPathException {
-        if (!requiredType.matches(item, typeHierarchy)) {
+        if (!requiredType.matches(item)) {
             throwTypeError(requiredType, item, locationId);
         }
     }

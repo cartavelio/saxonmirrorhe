@@ -54,7 +54,7 @@ public final class RecordCoercionPlan extends CoercionPlan {
                      SequenceType fieldType = test.getFieldType(s);
                      if (fieldType != null) {
                          CoercionPlan fieldPlan = fieldType.getPrimaryType().getCoercionPlan(40);
-                         if (!fieldType.matches(val, th)) {
+                         if (!fieldType.matches(val)) {
                              Supplier<RoleDiagnostic> fieldRoleSupplier = () ->
                                      new RoleDiagnostic(RoleDiagnostic.OPTION, s, 0);
                              CoercionRequest subRequest = new CoercionRequest(

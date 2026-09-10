@@ -197,7 +197,7 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
                 converted = EmptySequence.INSTANCE;
             }
 
-            if (required != null && !required.matches(converted, config.getTypeHierarchy())) {
+            if (required != null && !required.matches(converted)) {
                 Supplier<RoleDiagnostic> role =
                         () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, qName.toString(), -1);
                 converted = coercionRules.coerce(

@@ -262,6 +262,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
                                 && tree.getFingerprint(nodeNr) == requiredFingerprint;
             }
         }
+        final TypeHierarchy th = tree.getConfiguration().getTypeHierarchy();
         return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind
                                       && matches(tree.getNode(nodeNr));
     }
@@ -282,7 +283,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         }
 
         // see if the type annotation is a subtype of the required type
-        Affinity r = config.getTypeHierarchy().schemaTypeRelationship(annotation, schemaType);
+        Affinity r = Subsumption.schemaTypeRelationship(annotation, schemaType);
         return r == Affinity.SAME_TYPE || r == Affinity.SUBSUMED_BY;
     }
 

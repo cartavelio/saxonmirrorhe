@@ -240,14 +240,14 @@ public class LocalUnionType extends ChoiceItemType implements PlainType, UnionTy
 
     /**
      * Test whether a given item conforms to this type
-     * @param item    The item to be tested
-     * @param th   The type hierarchy
+     *
+     * @param item The item to be tested
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
+    public boolean matches(Item item) {
         if (item instanceof AtomicValue) {
-            return someMemberTypeSatisfies(at -> at.matches(item, th));
+            return someMemberTypeSatisfies(at -> at.matches(item));
         } else {
             return false;
         }

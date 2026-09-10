@@ -627,7 +627,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                         new Literal(new Int64Value(range.getStart())),
                         new Literal(new Int64Value(range.getLength())));
 
-            } else if (isXPath40 && SequenceType.NUMERIC_SEQUENCE.matches(val, th)) {
+            } else if (isXPath40 && SequenceType.NUMERIC_SEQUENCE.matches(val)) {
                 return new MultiSubscriptExpression(getBase(), getFilter());
             } else {
                 Expression result = ExpressionTool.effectiveBooleanValue(val.iterate()) ? getBase() : Literal.makeEmptySequence();

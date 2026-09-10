@@ -147,10 +147,10 @@ public class Literal extends Expression {
             return th.isSubType(BuiltInAtomicType.INTEGER, requiredType);
         }
         if (value instanceof Item it) {
-            return requiredType.matches(it, th);
+            return requiredType.matches(it);
         }
         for (Item item : value.asIterable()) {
-            if (!requiredType.matches(item, th)) {
+            if (!requiredType.matches(item)) {
                 return false;
             }
         }

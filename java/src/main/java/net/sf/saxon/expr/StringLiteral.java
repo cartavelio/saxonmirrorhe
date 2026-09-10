@@ -114,7 +114,7 @@ public class StringLiteral extends Literal {
         if ((requiredCardinality & StaticProperty.ALLOWS_ONE) == 0) {
             return false;
         }
-        return req.getPrimaryType().matches(getGroundedValue(), th);
+        return req.getPrimaryType().matches(getGroundedValue());
     }
 
     /**

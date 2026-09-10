@@ -281,21 +281,18 @@ public class SpecificFunctionType extends AnyFunctionType {
      */
 
     @Override
-    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
+    public Affinity relationship(FunctionItemType other) {
         if (other == INSTANCE || other instanceof AnyFunctionTypeWithAssertions) {
             return Affinity.SUBSUMED_BY;
         } else if (equals(other)) {
             return Affinity.SAME_TYPE;
         } else if (other instanceof ArrayItemType || other instanceof MapType) {
-            Affinity rrel = other.relationship(this, th);
-            switch (rrel) {
-                case SUBSUMES:
-                    return Affinity.SUBSUMED_BY;
-                case SUBSUMED_BY:
-                    return Affinity.SUBSUMES;
-                default:
-                    return rrel;
-            }
+            Affinity rrel = other.relationship(this);
+            return switch (rrel) {
+                case SUBSUMES -> Affinity.SUBSUMED_BY;
+                case SUBSUMED_BY -> Affinity.SUBSUMES;
+                default -> rrel;
+            };
         } else {
             if (argTypes.length != other.getArgumentTypes().length) {
                 return Affinity.DISJOINT;
@@ -303,43 +300,35 @@ public class SpecificFunctionType extends AnyFunctionType {
             boolean wider = false;
             boolean narrower = false;
             for (int i = 0; i < argTypes.length; i++) {
-                Affinity argRel = th.sequenceTypeRelationship(argTypes[i], other.getArgumentTypes()[i]);
+                Affinity argRel = Subsumption.sequenceTypeRelationship(argTypes[i], other.getArgumentTypes()[i]);
                 switch (argRel) {
-                    case DISJOINT:
+                    case DISJOINT -> {
                         return Affinity.DISJOINT;
-                    case SUBSUMES:
-                        narrower = true;
-                        break;
-                    case SUBSUMED_BY:
-                        wider = true;
-                        break;
-                    case OVERLAPS:
+                    }
+                    case SUBSUMES -> narrower = true;
+                    case SUBSUMED_BY -> wider = true;
+                    case OVERLAPS -> {
                         wider = true;
                         narrower = true;
-                        break;
-                    case SAME_TYPE:
-                    default:
-                        break;
+                    }
+                    default -> {
+                    }
                 }
             }
 
-            Affinity resRel = th.sequenceTypeRelationship(resultType, other.getResultType());
+            Affinity resRel = Subsumption.sequenceTypeRelationship(resultType, other.getResultType());
             switch (resRel) {
-                case DISJOINT:
+                case DISJOINT -> {
                     return Affinity.DISJOINT;
-                case SUBSUMES:
-                    wider = true;
-                    break;
-                case SUBSUMED_BY:
-                    narrower = true;
-                    break;
-                case OVERLAPS:
+                }
+                case SUBSUMES -> wider = true;
+                case SUBSUMED_BY -> narrower = true;
+                case OVERLAPS -> {
                     wider = true;
                     narrower = true;
-                    break;
-                case SAME_TYPE:
-                default:
-                    break;
+                }
+                default -> {
+                }
             }
 
             if (wider) {
@@ -375,13 +364,11 @@ public class SpecificFunctionType extends AnyFunctionType {
     /**
      * Test whether a given item conforms to this type
      *
-     *
      * @param item The item to be tested
-     * @param th the type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
+    public boolean matches(Item item) {
         if (!(item instanceof FunctionItem)) {
             return false;
         }
@@ -396,7 +383,7 @@ public class SpecificFunctionType extends AnyFunctionType {
                     argTypes[0].getPrimaryType().isPlainType() &&
                     Cardinality.allowsZero(resultType.getCardinality())) {
                 for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
-                    if (!resultType.matches(pair.value, th)) {
+                    if (!resultType.matches(pair.value)) {
                         return false;
                     }
                 }
@@ -412,12 +399,12 @@ public class SpecificFunctionType extends AnyFunctionType {
             if (getArity() == 1 &&
                     argTypes[0].getCardinality() == StaticProperty.EXACTLY_ONE &&
                     argTypes[0].getPrimaryType().isPlainType()) {
-                Affinity rel = th.relationship(argTypes[0].getPrimaryType(), BuiltInAtomicType.INTEGER);
+                Affinity rel = Subsumption.computeRelationship(argTypes[0].getPrimaryType(), BuiltInAtomicType.INTEGER);
                 if (!(rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY)) {
                     return false;
                 }
                 for (GroundedValue member : ((ArrayItem) item).members()) {
-                    if (!resultType.matches(member, th)) {
+                    if (!resultType.matches(member)) {
                         return false;
                     }
                 }
@@ -427,7 +414,7 @@ public class SpecificFunctionType extends AnyFunctionType {
             }
         }
 
-        Affinity affinity = th.relationship(((FunctionItem) item).getFunctionItemType(), this);
+        Affinity affinity = Subsumption.computeRelationship(((FunctionItem) item).getFunctionItemType(), this);
         return affinity == Affinity.SAME_TYPE || affinity == Affinity.SUBSUMED_BY;
     }
 
@@ -452,7 +439,7 @@ public class SpecificFunctionType extends AnyFunctionType {
                 if (argTypes[0].getCardinality() == StaticProperty.EXACTLY_ONE &&
                     argTypes[0].getPrimaryType().isPlainType()) {
                     for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
-                        if (!resultType.matches(pair.value, th)) {
+                        if (!resultType.matches(pair.value)) {
                             String s = "The supplied map contains an entry with key (" + pair.key +
                                     ") whose corresponding value (" + Err.depictSequence(pair.value) +
                                     ") is not an instance of the return type in the function signature (" +
@@ -488,7 +475,7 @@ public class SpecificFunctionType extends AnyFunctionType {
                         return Optional.of(s);
                     } else {
                         for (GroundedValue member : ((ArrayItem) item).members()) {
-                            if (!resultType.matches(member, th)) {
+                            if (!resultType.matches(member)) {
                                 String s = "The supplied array contains an entry (" + Err.depictSequence(member) +
                                         ") is not an instance of the return type in the function signature (" +
                                         resultType + ")";
@@ -517,14 +504,14 @@ public class SpecificFunctionType extends AnyFunctionType {
                     "; the supplied function has arity " + ((FunctionItem) item).getArity();
             return Optional.of(s);
         }
-        Affinity affinity = th.sequenceTypeRelationship(resultType, other.getResultType());
+        Affinity affinity = Subsumption.sequenceTypeRelationship(resultType, other.getResultType());
         if (affinity != Affinity.SAME_TYPE && affinity != Affinity.SUBSUMES) {
             String s = "The return type of the required function is " + resultType +
                     " but the return type of the supplied function is " + other.getResultType();
             return Optional.of(s);
         }
         for (int j=0; j<getArity(); j++) {
-            affinity = th.sequenceTypeRelationship(argTypes[j], other.getArgumentTypes()[j]);
+            affinity = Subsumption.sequenceTypeRelationship(argTypes[j], other.getArgumentTypes()[j]);
             if (affinity != Affinity.SAME_TYPE && affinity != Affinity.SUBSUMED_BY) {
                 String s = "The type of the " + RoleDiagnostic.ordinal(j+1) +
                         " argument of the required function is " + argTypes[j] +

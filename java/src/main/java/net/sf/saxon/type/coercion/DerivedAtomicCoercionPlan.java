@@ -29,8 +29,8 @@ public class DerivedAtomicCoercionPlan extends AtomicCoercionPlan {
         ConversionRules rules = request.config.getConversionRules();
         TypeHierarchy th = request.config.getTypeHierarchy();
 
-        if (prim.matches(atom, th)
-                && !req.matches(atom, th)
+        if (prim.matches(atom)
+                && !req.matches(atom)
                 && req.validate(atom, null, rules) == null) {
             return atom.withMetadata(req);
             // TODO: else error?

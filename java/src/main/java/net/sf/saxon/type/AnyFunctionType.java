@@ -144,14 +144,11 @@ public class AnyFunctionType implements FunctionItemType {
     /**
      * Test whether a given item conforms to this type
      *
-     *
-     *
-     * @param item    The item to be tested
-     * @param th   The type hierarchy cache
+     * @param item The item to be tested
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
+    public boolean matches(Item item) {
         return item instanceof FunctionItem;
     }
 
@@ -232,7 +229,7 @@ public class AnyFunctionType implements FunctionItemType {
      */
 
     @Override
-    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
+    public Affinity relationship(FunctionItemType other) {
         if (other == this) {
             return Affinity.SAME_TYPE;
         } else {

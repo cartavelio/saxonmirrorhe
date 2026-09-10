@@ -2213,7 +2213,7 @@ public class XPathParser {
                 } else {
                     SequenceType valueType = parseSequenceType();
                     readToken(Token.RPAREN);
-                    return new SpecificJNodeType(valueType, env.getConfiguration().getTypeHierarchy());
+                    return new SpecificJNodeType(valueType);
                 }
             case "map":
                 return parseMapItemType();
@@ -3129,7 +3129,7 @@ public class XPathParser {
                         } else {
                             SequenceType contentType = parseSequenceType();
                             TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
-                            jType = new SpecificJNodeType(contentType, th);
+                            jType = new SpecificJNodeType(contentType);
                         }
                         int defaultAxis = AxisInfo.CHILD;
                         AxisExpression ae = new AxisExpression(defaultAxis, jType);
@@ -3145,7 +3145,7 @@ public class XPathParser {
                         readToken(Token.RPAREN);
                         int defaultAxis = AxisInfo.CHILD;
                         TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
-                        SpecificJNodeType test = new SpecificJNodeType(SequenceType.one(AnyGNodeType.getInstance()), th);
+                        SpecificJNodeType test = new SpecificJNodeType(SequenceType.one(AnyGNodeType.getInstance()));
                         AxisExpression ae = new AxisExpression(defaultAxis, test);
                         setLocation(ae);
                         return ae;
@@ -3179,7 +3179,7 @@ public class XPathParser {
                         readToken(Token.RPAREN);
                         AxisExpression typeExpr = new AxisExpression(
                                 AxisInfo.CHILD,
-                                new SpecificJNodeType(type, env.getConfiguration().getTypeHierarchy()));
+                                new SpecificJNodeType(type));
                         setLocation(typeExpr);
                         return typeExpr;
                     }
@@ -3190,8 +3190,8 @@ public class XPathParser {
                         ItemType type = parseRecordTest(this);
                         AxisExpression recordExpr = new AxisExpression(
                                 AxisInfo.CHILD,
-                                new SpecificJNodeType(SequenceType.one(type),
-                                                      env.getConfiguration().getTypeHierarchy()));
+                                new SpecificJNodeType(SequenceType.one(type)
+                                ));
                         setLocation(recordExpr);
                         return recordExpr;
                     }
@@ -3205,8 +3205,8 @@ public class XPathParser {
                         ItemType type = parseItemType();
                         AxisExpression axisExpr = new AxisExpression(
                                 AxisInfo.CHILD,
-                                new SpecificJNodeType(SequenceType.one(type),
-                                                      env.getConfiguration().getTypeHierarchy()));
+                                new SpecificJNodeType(SequenceType.one(type)
+                                ));
                         setLocation(axisExpr);
                         return axisExpr;
                     }
@@ -4109,16 +4109,16 @@ public class XPathParser {
                 }
                 SequenceType type = parseSequenceType();
                 readToken(Token.RPAREN);
-                return new SpecificJNodeType(type,
-                                             env.getConfiguration().getTypeHierarchy());
+                return new SpecificJNodeType(type
+                );
 
             }
             case "gnode":
                 checkLanguageVersion40("NodeTest gnode()");
                 expectEmptyParens();
                 // TODO: why create a JNodeType here????
-                return new SpecificJNodeType(AnyGNodeType.getInstance().one(),
-                                             env.getConfiguration().getTypeHierarchy());
+                return new SpecificJNodeType(AnyGNodeType.getInstance().one()
+                );
 
             case "type": {
                 checkLanguageVersion40("nodeTest type()");
@@ -4126,34 +4126,34 @@ public class XPathParser {
                 readToken(Token.LPAREN);
                 SequenceType type = parseSequenceType();
                 readToken(Token.RPAREN);
-                return new SpecificJNodeType(type,
-                                              env.getConfiguration().getTypeHierarchy());
+                return new SpecificJNodeType(type
+                );
 
             }
             case "record": {
                 checkLanguageVersion40("nodeTest record(...)");
                 ItemType type = parseRecordTest(this);
-                return new SpecificJNodeType(SequenceType.one(type),
-                                             env.getConfiguration().getTypeHierarchy());
+                return new SpecificJNodeType(SequenceType.one(type)
+                );
             }
 
             case "array": {
                 checkLanguageVersion40("nodeTest " + kind + "()");
                 ItemType type = parseArrayItemType();
-                return new SpecificJNodeType(SequenceType.one(type),
-                                             env.getConfiguration().getTypeHierarchy());
+                return new SpecificJNodeType(SequenceType.one(type)
+                );
             }
             case "map": {
                 checkLanguageVersion40("nodeTest " + kind + "()");
                 ItemType type = parseMapItemType();
-                return new SpecificJNodeType(SequenceType.one(type),
-                                             env.getConfiguration().getTypeHierarchy());
+                return new SpecificJNodeType(SequenceType.one(type)
+                );
             }
             case "enum": {
                 checkLanguageVersion40("nodeTest " + kind + "()");
                 ItemType type = parseEnumType();
-                return new SpecificJNodeType(SequenceType.one(type),
-                                             env.getConfiguration().getTypeHierarchy());
+                return new SpecificJNodeType(SequenceType.one(type)
+                );
             }
             default:
                 // can't happen!

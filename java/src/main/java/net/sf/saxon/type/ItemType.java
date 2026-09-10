@@ -62,12 +62,12 @@ public interface ItemType {
 
     /**
      * Test whether a given item conforms to this type
-     * @param item    The item to be tested
-     * @param th      The type hierarchy cache. Currently used only when matching function items.
+     *
+     * @param item The item to be tested
      * @return true if the item is an instance of this type; false otherwise
      */
 
-    boolean matches(Item item, TypeHierarchy th);
+    boolean matches(Item item);
 
     /**
      * Get the primitive item type corresponding to this item type. For item(),

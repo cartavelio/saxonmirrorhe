@@ -129,7 +129,7 @@ public class JsonHandler {
                 }
                 SpecificFunctionType required = new SpecificFunctionType(
                         SequenceType.SINGLE_STRING, SequenceType.ANY_SEQUENCE);
-                if (!required.matches(fallbackFunction, context.getConfiguration().getTypeHierarchy())) {
+                if (!required.matches(fallbackFunction)) {
                     throw new XPathException("Fallback function does not match the required type", "XPTY0004");
                 }
             } else {

@@ -152,7 +152,7 @@ public class XPathExpression {
         if (contextItem != null) {
             ItemType type = env.getRequiredContextItemType();
             TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
-            if (!type.matches(contextItem, th)) {
+            if (!type.matches(contextItem)) {
                 throw new XPathException("Supplied context item does not match required context item type " +
                                                  type);
             }

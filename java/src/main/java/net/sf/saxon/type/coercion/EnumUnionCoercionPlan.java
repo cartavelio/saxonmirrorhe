@@ -46,13 +46,13 @@ public class EnumUnionCoercionPlan extends UnionCoercionPlan {
             return result;
         }
 
-        if (requiredType.matches(item, th)) {
+        if (requiredType.matches(item)) {
             return item;
         }
         if (item instanceof StringValue) {
             // Convert xs:untypedAtomic and xs:anyURI to xs:string
             StringValue s = new StringValue(item.getUnicodeStringValue());
-            if (requiredType.matches(s, th)) {
+            if (requiredType.matches(s)) {
                 return s;
             }
         }

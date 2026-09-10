@@ -108,7 +108,7 @@ public abstract class CoercionPlan {
      * @throws XPathException if the item is not an instance of the required type
      */
     protected final void check(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
-        if (!requiredType.matches(item, request.config.getTypeHierarchy())) {
+        if (!requiredType.matches(item)) {
             throw coercionError(item, requiredType, request);
         }
     }

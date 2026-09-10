@@ -154,11 +154,10 @@ public class ArrayItemType extends AnyFunctionType {
      * Test whether a given item conforms to this type
      *
      * @param item The item to be tested
-     * @param th  The type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
+    public boolean matches(Item item) {
         if (!(item instanceof ArrayItem)) {
             return false;
         }
@@ -166,7 +165,7 @@ public class ArrayItemType extends AnyFunctionType {
             return true;
         } else {
             for (GroundedValue s : ((ArrayItem) item).members()){
-                if (!memberType.matches(s, th)){
+                if (!memberType.matches(s)){
                     return false;
                 }
             }
@@ -258,7 +257,7 @@ public class ArrayItemType extends AnyFunctionType {
      */
 
     @Override
-    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
+    public Affinity relationship(FunctionItemType other) {
         if (other == INSTANCE) {
             return Affinity.SUBSUMED_BY;
         } else if (equals(other)) {
@@ -271,10 +270,10 @@ public class ArrayItemType extends AnyFunctionType {
             // See bug 3720. Array types are never disjoint, because the empty array
             // is an instance of every array type
             ArrayItemType f2 = (ArrayItemType) other;
-            Affinity rel = th.sequenceTypeRelationship(memberType, f2.memberType);
+            Affinity rel = Subsumption.sequenceTypeRelationship(memberType, f2.memberType);
             return rel== Affinity.DISJOINT ? Affinity.OVERLAPS : rel;
         } else {
-            Affinity rel = new SpecificFunctionType(getArgumentTypes(), getResultType()).relationship(other, th);
+            Affinity rel = new SpecificFunctionType(getArgumentTypes(), getResultType()).relationship(other);
             if (rel == Affinity.SUBSUMES || rel == Affinity.SAME_TYPE) {
                 rel = Affinity.OVERLAPS;
             }
@@ -303,7 +302,7 @@ public class ArrayItemType extends AnyFunctionType {
         if (item instanceof ArrayItem) {
             for (int i=0; i<((ArrayItem)item).arrayLength(); i++) {
                 GroundedValue member = ((ArrayItem) item).get(i);
-                if (!memberType.matches(member, th)) {
+                if (!memberType.matches(member)) {
                     String s = "The " + RoleDiagnostic.ordinal(i+1) +
                             " member of the supplied array {" +
                             Err.depictSequence(member) +

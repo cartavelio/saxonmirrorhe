@@ -134,12 +134,11 @@ public class EnumerationUnionType extends LocalUnionType {
      * Test whether a given item conforms to this type
      *
      * @param item The item to be tested
-     * @param th   The type hierarchy
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
-        if (item instanceof StringValue && BuiltInAtomicType.STRING.matches(item, th)) {
+    public boolean matches(Item item) {
+        if (item instanceof StringValue && BuiltInAtomicType.STRING.matches(item)) {
             return dictionary.containsKey(item.getUnicodeStringValue());
         } else {
             return false;

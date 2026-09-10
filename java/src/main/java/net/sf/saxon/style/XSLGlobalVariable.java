@@ -19,6 +19,7 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.Subsumption;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
@@ -153,7 +154,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
         }
         GlobalVariable other = (GlobalVariable) component.getActor();
         TypeHierarchy th = component.getDeclaringPackage().getConfiguration().getTypeHierarchy();
-        Affinity relation = th.sequenceTypeRelationship(st1, other.getRequiredType());
+        Affinity relation = Subsumption.sequenceTypeRelationship(st1, other.getRequiredType());
         if (relation != Affinity.SAME_TYPE) {
             compileError(
                 "The declared type of the overriding variable $" + getVariableQName().getDisplayName() +

@@ -69,12 +69,11 @@ public class PortableNamedXNodeType extends XNodeType {
      */
     @Override
     public boolean matches(Item item) {
-        if (!(item instanceof NodeInfo)) {
-            return false;
+        if (item instanceof NodeInfo node) {
+            return node.getNodeKind() == nodeKind
+                    && qNameTest.matches(node.getQName());
         }
-        NodeInfo node = (NodeInfo)item;
-        return node.getNodeKind() == nodeKind
-                && qNameTest.matches(node.getQName());
+        return false;
 
     }
 

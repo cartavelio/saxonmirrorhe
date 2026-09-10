@@ -557,21 +557,20 @@ public final class SequenceType {
      * Determine whether a given value is a valid instance of this SequenceType
      *
      * @param value the value to be tested
-     * @param th    the type hierarchy cache
      * @return true if the value is a valid instance of this type
      */
 
-    public boolean matches(GroundedValue value, TypeHierarchy th) {
+    public boolean matches(GroundedValue value) {
         int count = 0;
 
         if (value instanceof Item it) {
-            return primaryType.matches(it, th);
+            return primaryType.matches(it);
         }
 
         SequenceIterator iter = value.iterate();
         for (Item item; (item = iter.next()) != null; ) {
             count++;
-            if (!primaryType.matches(item, th)) {
+            if (!primaryType.matches(item)) {
                 return false;
             }
         }
@@ -594,7 +593,7 @@ public final class SequenceType {
         SequenceIterator iter = value.iterate();
         for (Item item; (item = iter.next()) != null; ) {
             count++;
-            if (!primaryType.matches(item, th)) {
+            if (!primaryType.matches(item)) {
                 String s = "The " + RoleDiagnostic.ordinal(count) + " item is not an instance of the required type";
                 Optional<String> more = primaryType.explainMismatch(item, th);
                 if (more.isPresent()) {

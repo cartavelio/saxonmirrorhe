@@ -105,22 +105,11 @@ public abstract class GNodeType implements ItemTypeWithSequenceTypeCache, ItemTy
      * Test whether a given item conforms to this type
      *
      * @param item The item to be tested
-     * @param th   The type hierarchy cache. Currently used only when matching function items.
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public final boolean matches(Item item, TypeHierarchy th) {
-        return matches(item);
-    }
-
-    /**
-     * Test whether a given item conforms to this type
-     *
-     * @param item The item to be tested
-     * @return true if the item is an instance of this type; false otherwise
-     */
-
     public abstract boolean matches(Item item);
+
 
     /**
      * Test whether a given item conforms to this type (to implement {@link NodePredicate)}

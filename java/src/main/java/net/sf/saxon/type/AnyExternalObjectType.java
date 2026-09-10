@@ -30,7 +30,7 @@ public class AnyExternalObjectType implements ItemType {
     }
 
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
+    public boolean matches(Item item) {
         return item.getGenre() == Genre.EXTERNAL;
     }
 

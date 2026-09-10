@@ -56,7 +56,7 @@ public class ItemTypeCheckingFunction implements ItemMappingFunction {
 
     private void testConformance(Item item, Configuration config) throws XPathException {
         final TypeHierarchy th = config.getTypeHierarchy();
-        if (requiredItemType.matches(item, th)) {
+        if (requiredItemType.matches(item)) {
             // OK, no action
 //        } else if (requiredItemType.getUType().subsumes(UType.STRING) && BuiltInAtomicType.ANY_URI.matches(item, th)) {
 //            // OK, no action

@@ -48,12 +48,11 @@ public class AnyFunctionTypeWithAssertions extends AnyFunctionType {
      * Test whether a given item conforms to this type
      *
      * @param item The item to be tested
-     * @param th the type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th)  {
-        return item instanceof FunctionItem && checkAnnotationAssertions(assertions, (FunctionItem) item, th.getConfiguration());
+    public boolean matches(Item item)  {
+        return item instanceof FunctionItem && checkAnnotationAssertions(assertions, (FunctionItem) item, config);
     }
 
     private static boolean checkAnnotationAssertions(AnnotationList assertions, FunctionItem item, Configuration config) {

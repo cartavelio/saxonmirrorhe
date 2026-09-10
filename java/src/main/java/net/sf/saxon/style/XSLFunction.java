@@ -21,10 +21,7 @@ import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpUsing;
-import net.sf.saxon.type.Affinity;
-import net.sf.saxon.type.PlainType;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
@@ -205,7 +202,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                 extraResultType = resultType;
             }
             if (asAtt != null) {
-                Affinity rel = getConfiguration().getTypeHierarchy().sequenceTypeRelationship(extraResultType, resultType);
+                Affinity rel = Subsumption.sequenceTypeRelationship(extraResultType, resultType);
                 if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY) {
                     resultType = extraResultType;
                 } else {

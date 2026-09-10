@@ -443,7 +443,7 @@ public class TypeChecker {
         int count = 0;
         for (Item item; (item = iter.next()) != null; ) {
             count++;
-            if (!reqItemType.matches(item, context.getConfiguration().getTypeHierarchy())) {
+            if (!reqItemType.matches(item)) {
                 return new XPathException("Required type is " + reqItemType +
                                                                 "; supplied value has type " + UType.getUType(val.materialize()))
                         .asTypeError().withErrorCode("XPTY0004");

@@ -218,7 +218,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             GlobalContextRequirement gcr = main.getExecutable().getGlobalContextRequirement();
             if (gcr != null) {
                 SequenceType req = gcr.getRequiredSequenceType();
-                if (req != null && !req.matches(contextValue, config.getTypeHierarchy())) {
+                if (req != null && !req.matches(contextValue)) {
                     throw new XPathException("Required context item type is " + req, "FOQM0005");
                 }
             }

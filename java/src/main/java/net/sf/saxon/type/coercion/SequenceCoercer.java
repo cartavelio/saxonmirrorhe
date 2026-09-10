@@ -63,24 +63,6 @@ public final class SequenceCoercer extends UnaryExpression {
         // we use an ItemChecker and/or CardinalityChecker.
 
         ItemType requiredItemType = requiredType.getPrimaryType();
-//        if (requiredItemType instanceof NodeTest) {
-//            // the only allowed coercion to nodes is to wrap arrays and maps in a JNode.
-//            // but we may also need to check cardinality
-//        }
-//        if (requiredItemType.getGenre() == Genre.XNODE) {
-//            Expression result = new ItemChecker(sequence, requiredItemType, role);
-//            if (!Cardinality.subsumes(requiredType.getCardinality(),sequence.getCardinality())) {
-//                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
-//            }
-//            return result;
-//        }
-//        if (requiredItemType.getGenre() == Genre.JNODE) {
-//            Expression result = new ItemChecker(sequence, requiredItemType, role);
-//            if (!Cardinality.subsumes(requiredType.getCardinality(), sequence.getCardinality())) {
-//                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
-//            }
-//            return result;
-//        }
         Genre supplied = sequence.getItemType().getGenre();
         if (requiredItemType.isAtomicType() && supplied == Genre.XNODE) {
             sequence = new Atomizer(sequence, role);
@@ -149,10 +131,6 @@ public final class SequenceCoercer extends UnaryExpression {
                 // no item type check needed
                 return supplied;
             }
-//            else if (th.isSubType(reqItemType, supplied.getItemType())) {
-//                // need item type check only (note: this rewrite needed for streaming use cases)
-//                return new ItemChecker(getBaseExpression(), reqItemType, roleSupplier);
-//            }
         }
 
         return this;

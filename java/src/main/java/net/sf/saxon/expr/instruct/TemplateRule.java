@@ -360,7 +360,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         //initialize();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         if (requiredContextItemType != AnyItemType.INSTANCE &&
-                !requiredContextItemType.matches(context.getContextItem(), th)) {
+                !requiredContextItemType.matches(context.getContextItem())) {
             RoleDiagnostic role = new RoleDiagnostic(
                     RoleDiagnostic.MISC, "context item for the template rule", 0);
             String message = role.composeErrorMessage(requiredContextItemType, context.getContextItem(), th);

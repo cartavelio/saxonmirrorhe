@@ -178,7 +178,7 @@ public class XdmFunctionItem extends XdmItem {
             for (int i = 0; i < arguments.length; i++) {
                 net.sf.saxon.value.SequenceType required = type.getArgumentTypes()[i];
                 GroundedValue val = arguments[i].getUnderlyingValue();
-                if (!required.matches(val, th)) {
+                if (!required.matches(val)) {
                     final int pos = i;
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", pos);
@@ -195,7 +195,7 @@ public class XdmFunctionItem extends XdmItem {
             GroundedValue groundedResult = result.materialize();
             if (!fi.isTrustedResultType()) {
                 net.sf.saxon.value.SequenceType required = type.getResultType();
-                if (!required.matches(groundedResult, th)) {
+                if (!required.matches(groundedResult)) {
                     Supplier<RoleDiagnostic> role =
                             () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
                     groundedResult = coercionRules.coerce(

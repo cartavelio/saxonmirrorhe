@@ -129,12 +129,11 @@ public class SelfReferenceRecordTest extends AnyFunctionType implements RecordTy
      * Test whether a given item conforms to this type
      *
      * @param item The item to be tested
-     * @param th type hierarchy data
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(Item item, TypeHierarchy th) {
-        return containingType.matches(item, th);
+    public boolean matches(Item item) {
+        return containingType.matches(item);
     }
 
     /**
@@ -243,8 +242,8 @@ public class SelfReferenceRecordTest extends AnyFunctionType implements RecordTy
      */
 
     @Override
-    public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
-        return containingType.relationship(other, th);
+    public Affinity relationship(FunctionItemType other) {
+        return containingType.relationship(other);
     }
 
     @Override

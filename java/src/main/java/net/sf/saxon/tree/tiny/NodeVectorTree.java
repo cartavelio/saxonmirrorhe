@@ -7,6 +7,7 @@
 
 package net.sf.saxon.tree.tiny;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.nodetest.NodeTest;
@@ -18,6 +19,13 @@ import net.sf.saxon.type.Type;
  * the NodeInfo object
  */
 public interface NodeVectorTree {
+
+    /**
+     * Get the Saxon Configuration
+     * @return the Saxon Configuration
+     */
+
+    Configuration getConfiguration();
 
     /**
      * Ask whether the tree contains non-trivial type information (from schema validation)

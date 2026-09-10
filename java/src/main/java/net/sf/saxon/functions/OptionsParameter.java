@@ -147,7 +147,7 @@ public class OptionsParameter {
             SequenceType required = allowed.getValue();
             GroundedValue actual = supplied.get(actualKey);
             if (actual != null) {
-                if (!required.matches(actual, th)) {
+                if (!required.matches(actual)) {
                     boolean ok = false;
                     if (actual instanceof StringValue && allowCastFromString
                             && required.getPrimaryType() instanceof AtomicType) {

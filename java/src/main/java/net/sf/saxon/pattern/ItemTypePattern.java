@@ -50,7 +50,7 @@ public class ItemTypePattern extends Pattern {
 
     @Override
     public boolean matches(Item item, XPathContext context) throws XPathException {
-        return itemType.matches(item, context.getConfiguration().getTypeHierarchy());
+        return itemType.matches(item);
     }
 
     /**

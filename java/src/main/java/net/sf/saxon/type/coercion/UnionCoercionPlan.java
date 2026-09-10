@@ -49,11 +49,11 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
             }
             return result;
         }
-        if (requiredType.matches(item, th)) {
+        if (requiredType.matches(item)) {
             // Generally we can return the item as is if it matches the required type. But
             // function coercion is needed even if the supplied item matches the required type
             for (ItemType it : reqType.getAlternatives()) {
-                if (it.matches(item, th)) {
+                if (it.matches(item)) {
                     if (it instanceof SpecificFunctionType) {
                         boolean is40 = version >= 40;
                         return new CoercedFunction((FunctionItem) item, ((SpecificFunctionType) it), is40, is40);
@@ -64,7 +64,7 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
             }
             throw new AssertionError("Item matches the choice type but doesn't match any of the alternatives");
         }
-        if (version >= 40 || BuiltInAtomicType.UNTYPED_ATOMIC.matches(item, th) ) {
+        if (version >= 40 || BuiltInAtomicType.UNTYPED_ATOMIC.matches(item) ) {
             List<XPathException> errors = null;
             for (ItemType it : reqType.getAlternatives()) {
                 CoercionPlan plan = it.getCoercionPlan(version);

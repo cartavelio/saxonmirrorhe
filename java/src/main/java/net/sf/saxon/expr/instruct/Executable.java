@@ -619,7 +619,7 @@ public class Executable {
                 contextValue = converted.materialize();
             }
             for (SequenceType type : globalContextRequirement.getRequiredTypes()) {
-                if (!type.matches(contextValue, th)) {
+                if (!type.matches(contextValue)) {
                     if (contextValue.getLength() == 0) {
                         throw new XPathException(
                                 "The global context item must not be an empty sequence", "XPTY0004").asTypeError();

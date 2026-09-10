@@ -140,12 +140,12 @@ public class JavaExternalObjectType extends ExternalObjectType {
 
     /**
      * Test whether a given item conforms to this type
-     * @param item    The item to be tested
-     * @param th      The type hierarchy cache
+     *
+     * @param item The item to be tested
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
-    public boolean matches(/*@NotNull*/ Item item, /*@NotNull*/TypeHierarchy th) {
+    public boolean matches(/*@NotNull*/ Item item /*@NotNull*/) {
         if (item.getGenre() == Genre.EXTERNAL) {
             Object obj = ((ObjectValue<?>) item).getObject();
             return javaClass.isAssignableFrom(obj.getClass());

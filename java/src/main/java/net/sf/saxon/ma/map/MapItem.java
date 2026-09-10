@@ -248,17 +248,17 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
     /**
      * Ask whether the map conforms to a given map type. This implementation performs
      * no optimization, it simply scans the entries in the map.
-     * @param keyType the required keyType
+     *
+     * @param keyType   the required keyType
      * @param valueType the required valueType
-     * @param th the type hierarchy cache for the configuration
      * @return true if the map conforms to the required type
      */
-    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
+    public boolean conforms(PlainType keyType, SequenceType valueType) {
         for (KeyValuePair pair : keyValuePairs()) {
-            if (!keyType.matches(pair.key, th)) {
+            if (!keyType.matches(pair.key)) {
                 return false;
             }
-            if (!valueType.matches(pair.value, th)) {
+            if (!valueType.matches(pair.value)) {
                 return false;
             }
         }

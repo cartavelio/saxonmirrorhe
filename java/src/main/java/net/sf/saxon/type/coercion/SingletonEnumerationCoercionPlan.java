@@ -27,7 +27,7 @@ public class SingletonEnumerationCoercionPlan extends AtomicCoercionPlan {
     protected AtomicValue promote(AtomicValue atom, ItemType requiredType, CoercionRequest request) throws XPathException {
         SingletonEnumType enumType = (SingletonEnumType)requiredType;
         TypeHierarchy th = request.config.getTypeHierarchy();
-        if (enumType.matches(atom, th)) {
+        if (enumType.matches(atom)) {
             return atom;
         } else if (enumType.matchesString(atom.getUnicodeStringValue())) {
             return new StringValue(atom.getUnicodeStringValue(), enumType);

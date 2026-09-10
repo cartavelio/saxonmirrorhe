@@ -219,7 +219,7 @@ public abstract class Type {
         } else if (item instanceof JNode) {
             return th == null
                     ? AnyJNodeType.getInstance()
-                    : new SpecificJNodeType(SequenceTool.getSequenceType(((JNode)item).getContent(), th), th);
+                    : new SpecificJNodeType(SequenceTool.getSequenceType(((JNode)item).getContent(), th));
         } else { //if (item instanceof FunctionItem) {
             return ((FunctionItem) item).getFunctionItemType();
         }

@@ -316,7 +316,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
             final ItemType type = resultType.getPrimaryType();
             if (type != AnyItemType.INSTANCE) {
                 result = new ItemMappingIterator(result, ItemMapper.of(item -> {
-                     if (!type.matches(item, th)) {
+                     if (!type.matches(item)) {
                          String msg = role.get().composeErrorMessage(type, item, th);
                          throw new XPathException(msg, "XPTY0004").withLocation(getLocation());
                      }
@@ -352,7 +352,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
         }
         if (!definition.trustResultType()) {
             final ItemType type = resultType.getPrimaryType();
-            if (result == null ? !Cardinality.allowsZero(resultType.getCardinality()) : !type.matches(result, th)) {
+            if (result == null ? !Cardinality.allowsZero(resultType.getCardinality()) : !type.matches(result)) {
                 String msg = role.composeErrorMessage(type, result, th);
                 throw new XPathException(msg, "XPTY0004")
                     .withLocation(getLocation());

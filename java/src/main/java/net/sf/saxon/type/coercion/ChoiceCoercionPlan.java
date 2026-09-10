@@ -40,11 +40,11 @@ public class ChoiceCoercionPlan extends AtomicCoercionPlan {
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         ChoiceType reqType = (ChoiceType)requiredType;
         TypeHierarchy th = request.config.getTypeHierarchy();
-        if (requiredType.matches(item, th)) {
+        if (requiredType.matches(item)) {
             // Generally we can return the item as is if it matches the required type. But
             // function coercion is needed even if the supplied item matches the required type
             for (ItemType it : reqType.getAlternatives()) {
-                if (it.matches(item, th)) {
+                if (it.matches(item)) {
                     if (it instanceof SpecificFunctionType) {
                         boolean is40 = version >= 40;
                         return new CoercedFunction((FunctionItem) item, ((SpecificFunctionType) it), is40, is40);

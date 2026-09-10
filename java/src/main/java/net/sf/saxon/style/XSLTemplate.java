@@ -388,7 +388,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 extraResultType = requiredType; // error recovery
             }
             if (asAtt != null) {
-                Affinity rel = getConfiguration().getTypeHierarchy().sequenceTypeRelationship(extraResultType, requiredType);
+                Affinity rel = Subsumption.sequenceTypeRelationship(extraResultType, requiredType);
                 if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY) {
                     requiredType = extraResultType;
                 } else {
@@ -957,7 +957,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                         rule.setRequiredType(mode.getDefaultResultType());
                     } else {
                         TypeHierarchy th = getConfiguration().getTypeHierarchy();
-                        Affinity aff = th.sequenceTypeRelationship(requiredType, mode.getDefaultResultType());
+                        Affinity aff = Subsumption.sequenceTypeRelationship(requiredType, mode.getDefaultResultType());
                         if (aff != Affinity.SAME_TYPE && aff != Affinity.SUBSUMED_BY) {
                             compileError("Type declared in xsl:template/@as must be a subtype of the type declared in xsl:mode/@as",
                                          "XTSE4040");

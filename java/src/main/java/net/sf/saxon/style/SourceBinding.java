@@ -247,7 +247,7 @@ public class SourceBinding {
                 extraResultType = SequenceType.ANY_SEQUENCE;
             }
             if (asAtt != null) {
-                Affinity rel = sourceElement.getConfiguration().getTypeHierarchy().sequenceTypeRelationship(extraResultType, declaredType);
+                Affinity rel = Subsumption.sequenceTypeRelationship(extraResultType, declaredType);
                 if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY) {
                     declaredType = extraResultType;
                 } else {

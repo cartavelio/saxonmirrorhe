@@ -220,7 +220,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
         } else {
             TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
             if (requiredContextItemType != AnyItemType.INSTANCE &&
-                    !requiredContextItemType.matches(contextItem, th)) {
+                    !requiredContextItemType.matches(contextItem)) {
                 RoleDiagnostic role = new RoleDiagnostic(
                         RoleDiagnostic.MISC, "context item for the named template", 0);
                 String message = role.composeErrorMessage(requiredContextItemType, contextItem, th);

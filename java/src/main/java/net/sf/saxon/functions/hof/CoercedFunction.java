@@ -186,7 +186,7 @@ public class CoercedFunction extends AbstractFunction {
         Sequence[] targetArgs = new Sequence[suppliedArity];
         for (int i = 0; i < suppliedArity; i++) {
             GroundedValue gVal = args[i].materialize();
-            if (argTypes[i].matches(gVal, th)) {
+            if (argTypes[i].matches(gVal)) {
                 targetArgs[i] = gVal;
             } else {
                 final int pos = i;
@@ -197,7 +197,7 @@ public class CoercedFunction extends AbstractFunction {
         }
         // TODO: don't materialize the result if static type checking tells us the result will be OK
         GroundedValue rawResult = targetFunction.call(context, targetArgs).materialize();
-        if (req.getResultType().matches(rawResult, th)) {
+        if (req.getResultType().matches(rawResult)) {
             return rawResult;
         } else {
             Supplier<RoleDiagnostic> role =

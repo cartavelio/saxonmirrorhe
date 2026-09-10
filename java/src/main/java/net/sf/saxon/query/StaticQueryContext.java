@@ -892,7 +892,7 @@ public class StaticQueryContext {
         if (value == null && !external) {
             throw new NullPointerException("No initial value for declared variable");
         }
-        if (value != null && !type.matches(value, getConfiguration().getTypeHierarchy())) {
+        if (value != null && !type.matches(value)) {
             throw new XPathException("Value of declared variable does not match its type");
         }
         GlobalVariable var = external ? new GlobalParam() : new GlobalVariable();

@@ -322,7 +322,7 @@ public class Serialize extends SystemFunction implements Callable {
             if (((StringValue) key).length() != 1) {
                 throw new XPathException("Keys in a character map must all be one-character strings. Found " + Err.wrap(key.show()), "SEPM0016");
             }
-            if (!SequenceType.SINGLE_STRING.matches(pair.value, th)) {
+            if (!SequenceType.SINGLE_STRING.matches(pair.value)) {
                 throw new XPathException("Values in a character map must all be single strings. Found " + Err.wrap(key.show()), "XPTY0004");
             }
         }

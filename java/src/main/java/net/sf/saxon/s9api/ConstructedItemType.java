@@ -69,7 +69,7 @@ class ConstructedItemType extends ItemType {
     @Override
     public boolean matches(XdmItem item) {
         TypeHierarchy th = config.getTypeHierarchy();
-        return underlyingType.matches(item.getUnderlyingValue(), th);
+        return underlyingType.matches(item.getUnderlyingValue());
     }
 
     /**
