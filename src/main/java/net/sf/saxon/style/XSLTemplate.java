@@ -12,6 +12,7 @@ import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.ErrorExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.instruct.ComponentTracer;
 import net.sf.saxon.expr.instruct.NamedTemplate;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.TemplateRule;
@@ -797,6 +798,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             } else {
                 if (rule.getBody() == null) {
                     body = body.copy(new RebindingMap());
+                    if (body instanceof ComponentTracer) {
+                        ((ComponentTracer) body).setProperty("match", rule.getMatchPattern());
+                    }
                 } else {
                     body = rule.getBody();
                 }

@@ -90,7 +90,7 @@ public class ComponentTracer extends Instruction {
     public Expression copy(RebindingMap rebindings) {
         ComponentTracer t = new ComponentTracer();
         t.component = component;
-        t.properties = properties;
+        t.properties = new HashMap<>(properties);
         Expression newBody = getChild().copy(rebindings);  // Bug 4642
         t.baseOp = new Operand(t, newBody, OperandRole.SAME_FOCUS_ACTION);
         t.adoptChildExpression(newBody);
@@ -137,6 +137,16 @@ public class ComponentTracer extends Instruction {
     public int getImplementationMethod() {
         return getChild().getImplementationMethod();
     }
+
+    /**
+     * Set a property name/value pair to be included in trace output
+     * @param name the property name
+     * @param value the property value
+     */
+    public void setProperty(String name, Object value) {
+        properties.put(name, value);
+    }
+
 
     /**
      * Get the item type of the items returned by evaluating this instruction
