@@ -31,6 +31,9 @@ import java.util.List;
  * This class <code>InvalidityReportGenerator</code> extends the standard error handler for errors found during validation
  * of an instance document against a schema, used if user specifies -report option on validate. Its effect is to output
  * the validation errors found into the filename specified in an XML format.
+ *
+ * <p>The generated report is an XML document whose schema, validation-reports.xsd, is issued in the samples directory.
+ * The format is expected to remain compatible across releases, so that the failure report can be analysed by software.</p>
  */
 public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
 
@@ -62,8 +65,6 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         super(config);
         this.destination = destination;
         Receiver r = destination.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
-//        r = new NamespaceReducer(r);
-//        writer = new StreamWriterToReceiver(r);
         doc = new PushToReceiver(r).document(true);
     }
 
@@ -84,7 +85,6 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         } catch (SaxonApiException e) {
             throw XPathException.makeXPathException(e);
         }
-        //writer = new StreamWriterToReceiver(r);
     }
 
     public void setReceiver(Receiver receiver){
@@ -97,7 +97,6 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         } catch (SaxonApiException e) {
             throw new UncheckedXPathException(XPathException.makeXPathException(e));
         }
-        //writer = new StreamWriterToReceiver(r);
     }
 
 
@@ -112,8 +111,6 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
                 getConfiguration().makePipelineConfiguration(),
                 getConfiguration().obtainDefaultSerializationProperties());
         doc = new PushToReceiver(r).document(true);
-//        r = new NamespaceReducer(r);
-//        writer = new StreamWriterToReceiver(r);
     }
 
     /**
@@ -152,10 +149,6 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         xsdversion = version;
     }
 
-//    public XMLStreamWriter getWriter() {
-//        return writer;
-//    }
-
 
     /**
      * Receive notification of a validity error.
@@ -183,6 +176,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
             if (failure instanceof ValidationFailure) {
                 List<NodeInfo> offenders = ((ValidationFailure) failure).getOffendingNodes();
                 for (NodeInfo node : offenders) {
+                    error.text("\n          ");
                     error.element("contributing-node")
                             .attribute("type",
                                        Type.displayTypeName(node))
@@ -232,9 +226,6 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
         if (!started) {
             try {
                 started = true;
-//                writer.writeStartDocument();
-//                writer.setDefaultNamespace(REPORT_NS);
-//                writer.writeStartElement(REPORT_NS, "validation-report");
                 doc.setDefaultNamespace(REPORT_NS.toString());
                 report = doc.element("validation-report");
 
@@ -258,8 +249,6 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
             if (!started) {
                 throw new IllegalStateException("Reporting not started");
             }
-//            writer.writeEndElement();//</validation-report>
-//            writer.writeEndDocument();
             report.close();
             doc.close();
 
