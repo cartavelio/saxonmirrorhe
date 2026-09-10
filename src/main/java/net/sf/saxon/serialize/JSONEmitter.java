@@ -139,11 +139,12 @@ public class JSONEmitter {
      */
 
     public void writeKey(String key) throws XPathException {
+        boolean oneLiner = oneLinerStack.peek();
         conditionalComma(false);
         emit('"');
         emit(escape(key));
         emit("\":");
-        if (isIndenting) {
+        if (isIndenting && !oneLiner) {
             emit(" ");
         }
         afterKey = true;
@@ -262,11 +263,15 @@ public class JSONEmitter {
 
     private void conditionalComma(boolean opening) throws XPathException {
         boolean wasFirst = first;
-        boolean actuallyIndenting = isIndenting && level != 0 && !oneLinerStack.peek();
+        boolean oneLiner = !oneLinerStack.isEmpty() && oneLinerStack.peek();
+        boolean actuallyIndenting = isIndenting && level != 0 && !oneLiner;
         if (first) {
             first = false;
         } else if (!afterKey) {
             emit(',');
+            if (oneLiner && isIndenting) {
+                emit(' ');
+            }
         }
         if ((wasFirst && afterKey)) {
             emit(' ');
