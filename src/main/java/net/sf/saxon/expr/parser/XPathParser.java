@@ -3304,7 +3304,6 @@ public class XPathParser {
         if (deep) {
             checkLanguageVersion40();
         }
-        Tokenizer t = getTokenizer();
         int offset = t.currentTokenStartOffset;
         t.setState(Tokenizer.BARE_NAME_STATE); // Prevent mis-recognition of x?f(2)
         t.currentToken = Token.LPAR;  // Hack to force following symbol to be recognised in post-operator mode

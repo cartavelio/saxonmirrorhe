@@ -271,18 +271,18 @@ public class DeepEqual40 extends CollatingFunctionFixed {
     private static long hash(Item item, DeepEqualOptions options) {
         switch (item.getGenre()) {
             case ATOMIC:
-                return 0x01L << 56 | ((AtomicValue)item).asMapKey().hashCode();
+                return 0x01L << 56 | (long)((AtomicValue)item).asMapKey().hashCode();
             case NODE:
-                return 0x02L << 56 | nodeHashCode(((NodeInfo)item), options);
+                return 0x02L << 56 | (long)nodeHashCode(((NodeInfo)item), options);
             case MAP:
-                return 0x03L << 56 | ((MapItem)item).size();   // TODO: improve this
+                return 0x03L << 56 | (long)((MapItem)item).size();   // TODO: improve this
             case ARRAY:
-                return 0x04L << 56 | ((ArrayItem) item).arrayLength();   // TODO: improve this
+                return 0x04L << 56 | (long)((ArrayItem) item).arrayLength();   // TODO: improve this
             case FUNCTION:
-                return 0x05L << 56 | System.identityHashCode(item);
+                return 0x05L << 56 | (long)System.identityHashCode(item);
             case EXTERNAL:
             default:
-                return 0x06L << 56 | ((ObjectValue<?>)item).getObject().hashCode();
+                return 0x06L << 56 | (long)((ObjectValue<?>)item).getObject().hashCode();
         }
     }
 
@@ -293,7 +293,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         while ((item = iter.next()) != null) {
             //count++;
             long itemHash = hash(item, options);
-            List<Item> bucket = result.computeIfAbsent(itemHash, k -> new ArrayList<>());
+            List<Item> bucket = result.computeIfAbsent(itemHash, k -> new ArrayList<Item>());
             bucket.add(item);
         }
         //System.err.println("*** Hash: " + count + " items in " + result.size() + " buckets");

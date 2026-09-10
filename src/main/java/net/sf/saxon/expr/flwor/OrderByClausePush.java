@@ -51,7 +51,7 @@ public class OrderByClausePush extends TuplePush {
      */
     @Override
     public void processTuple(XPathContext context) throws XPathException {
-        FlworTuple tuple = tupleExpr.evaluateItem(context);
+        FlworTuple<Sequence> tuple = tupleExpr.evaluateItem(context);
         SortKeyDefinitionList sortKeyDefinitions = orderByClause.getSortKeyDefinitions();
         ItemToBeSorted itbs = new ItemToBeSorted(sortKeyDefinitions.size());
         itbs.value = tuple;

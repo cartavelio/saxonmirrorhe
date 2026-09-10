@@ -60,7 +60,7 @@ public class OrderByClausePull extends TuplePull {
             int position = 0;
 
             while (base.nextTuple(context)) {
-                FlworTuple tuple = tupleExpr.evaluateItem(context);
+                FlworTuple<Sequence> tuple = tupleExpr.evaluateItem(context);
                 SortKeyDefinitionList sortKeyDefinitions = orderByClause.getSortKeyDefinitions();
                 ItemToBeSorted itbs = new ItemToBeSorted(sortKeyDefinitions.size());
                 itbs.value = tuple;
