@@ -161,7 +161,7 @@ public class ForMemberExpression extends Assignation {
         int slot = getLocalSlotNumber();
         ArrayItem theArray = ((ArrayItem)getSequence().evaluateItem(context));
         int length = theArray.arrayLength();
-        RangeIterator base = new RangeIterator(0, length-1);
+        AscendingRangeIterator base = new AscendingRangeIterator(0, 1, length-1);
         return new MappingIterator(base, index -> {
             Sequence member = theArray.get((int)((IntegerValue)index).longValue());
             context.setLocalVariable(slot, member);

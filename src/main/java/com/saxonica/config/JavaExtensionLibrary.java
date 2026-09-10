@@ -1148,7 +1148,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
             }
             if (method == null) {
                 XPathException err = new XPathException("There is more than one method matching the function call " +
-                                                                getFunctionName().getDisplayName() +
+                                                                getFunctionName().getEQName() + "#" + getArity() +
                                                                 ", and there is insufficient type information to determine which one should be used", "XPST0017");
                 err.setLocation(getLocation());
                 err.setIsStaticError(true);
@@ -1164,7 +1164,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
             AccessibleObject method = getBestFit(candidateMethods, argTypes, theClass, debug);
             if (method == null) {
                 XPathException err = new XPathException("There is more than one method matching the function call " +
-                                                                getFunctionName().getDisplayName() +
+                                                                getFunctionName().getEQName() + "#" + getArity() +
                                                                 ", and there is insufficient type information to determine which one should be used", "XPST0017");
                 err.setLocation(getLocation());
                 err.setIsStaticError(true);
@@ -1199,7 +1199,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
             AccessibleObject method = getBestFit(candidateMethods, argTypes, theClass, false);
             if (method == null) {
                 XPathException err = new XPathException("There is more than one method matching the dynamic function call " +
-                                                                getFunctionName().getDisplayName() +
+                                                                getFunctionName().getEQName() + "#" + getArity() +
                                                                 ", and there is insufficient type information to determine which one should be used", "XPST0017");
                 //err.setLocation(getLocation());
                 err.setIsStaticError(true);

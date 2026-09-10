@@ -332,6 +332,10 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, AnyNodeTest.getInstance(), ONE, null)
                 .arg(1, AnyItemType.getInstance(), ONE, null);
 
+        register("slice", 2, Slice.class, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, BuiltInAtomicType.INTEGER, STAR, null);
+
         register("timestamp", 0, TimestampFn.class, BuiltInAtomicType.DATE_TIME_STAMP, ONE, SIDE|LATE);
 
         register("transform", 2, TransformFn.class, NodeKindTest.DOCUMENT, OPT, 0)
