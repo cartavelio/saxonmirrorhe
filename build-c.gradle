@@ -631,6 +631,9 @@ task eec_jar(
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
   }
+  from ("src/main/resources") {
+    include "net/**"
+  }
   from ("${buildDir}/xerces") {
       include "**/*.class"
       include "**/*.properties"
