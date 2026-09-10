@@ -107,7 +107,16 @@ public class Environment implements ResourceResolver {
 
         //testDriver.getLicensor().activate(environment.processor);
         //AutoActivate.activate(environment.processor);
+
+        if (unfolded) {
+            if (!"-".equals(testDriver.optimizerFlags)) {
+                System.err.println("The -unfolded option overrides optimizer flags. Using -fmnsvw.");
+            }
+            testDriver.optimizerFlags = "-fmnsvw";
+        }
+
         environment.processor.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, testDriver.optimizerFlags);
+        //environment.processor.setConfigurationProperty(Feature.TRACE_OPTIMIZER_DECISIONS, true);
 
         environment.xpathCompiler = environment.processor.newXPathCompiler();
         environment.xpathCompiler.setBaseURI(baseURI);
