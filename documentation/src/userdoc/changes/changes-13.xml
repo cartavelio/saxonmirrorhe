@@ -111,10 +111,6 @@ TODO: rethink redefines and override
         extension functions, as well as diagnostic output including the results
         of schema validation, the output of <code>-T</code> tracing, and so on.</p>
         
-        <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
-        
-        <p>TODO: the XInclude section of the documentation needs updating to mention fn:doc options.</p>
-        
     </category>
     
     <category name="functions31">

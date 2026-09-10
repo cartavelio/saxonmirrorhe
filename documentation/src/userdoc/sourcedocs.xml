@@ -1854,7 +1854,10 @@ documentBuilder.build(as);]]></code></pre>
           Saxon's implementation of the JAXP <code>DocumentBuilderFactory</code>. When the
           <code>doc()</code> or <code>document()</code> or <code>collection()</code> function is
           called from an XPath expression, XInclude processing can be enabled by including
-          <code>xinclude=yes</code> among the query parameters in the URI.</p>
+          <code>xinclude=yes</code> among the query parameters in the URI. Alternatively, from Saxon
+          13 with XPath 4.0 enabled, the <code>xinclude</code> option can be supplied in the new
+          <code>$options</code> argument for the <code>doc()</code> and <code>document()</code>
+          functions.</p>
         
         <p>It is possible to request XInclude processing for the documents in a collection by including
           the query parameter <code>xinclude=yes</code> in the collection URI. Similarly, for a document

@@ -1252,7 +1252,7 @@
         <proto return-type="document-node()?">
           <arg name="source" type="xs:string?"
             desc="The URI of the required document (relative to the static base URI)"/>
-          <arg name="options" type="map(*)?" default="{}"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -1305,6 +1305,11 @@
               option).</p>
           </li>
         </ul>
+        <p class="qt4">From Saxon 13, when XPath 4.0 is enabled, the new two-argument version of the
+          function allows some of these options (<code>strip-space</code>, <code>xinclude</code>,
+          and <code>xsd-validation</code>), plus other new ones, to be set using a map in the second
+          argument. (But note that XInclude processing is not available in SaxonCS, and
+          <code>trusted="no"</code> is not yet implemented in SaxonCS.)</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
@@ -1318,7 +1323,7 @@
         <proto return-type="xs:boolean">
           <arg name="source" type="xs:string?"
             desc="The URI of the required document (relative to the static base URI)"/>
-          <arg name="options" type="map(*)?" default="{}"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -3737,7 +3742,7 @@
         <proto return-type="document-node(*)?">
           <arg name="value" type="(xs:string | xs:hexBinary | xs:base64Binary)?"
             desc="The lexical XML string to be parsed as a document"/>
-          <arg name="options" type="map(*)?" default="{}"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
@@ -3767,7 +3772,7 @@
         <proto return-type="document-node()?">
           <arg name="value" type="(xs:string | xs:hexBinary | xs:base64Binary)?"
             desc="The lexical XML string to be parsed as a document fragment"/>
-          <arg name="options" type="map(*)?" default="{}"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
@@ -3841,7 +3846,7 @@
         <proto return-type="xs:string?">
           <arg name="node" type="gnode()?" default="."
             desc="The node whose path is to be determined"/>
-          <arg name="options" type="map(*)?" default="{}"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
           <in-spec>xpath40</in-spec>
@@ -4161,7 +4166,7 @@
             desc="The number of decimal places required"/>
           <arg name="mode"
             type="enum('floor',&#xA; 'ceiling',&#xA; 'toward-zero',&#xA; 'away-from-zero',&#xA; 'half-to-floor',&#xA; 'half-to-ceiling',&#xA; 'half-toward-zero',&#xA; 'half-away-from-zero',&#xA; 'half-to-even')?"
-            default="'half-to-ceiling'"/>
+            default="'half-to-ceiling'" desc="The rounding mode"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
