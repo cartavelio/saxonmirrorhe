@@ -207,10 +207,7 @@ cdef class PySaxonProcessor:
             py_config_string = config_file.encode('UTF-8') if config_file is not None else None
             c_str = py_config_string if config_file is not None else ""
             if c_str is not NULL:
-                try:
-                    self.thisptr = new saxoncClasses.SaxonProcessor(c_str)
-                except:
-                    raise Exception("Failed to create PySaxonProcessor object - with configuration file") from None
+                self.thisptr = new saxoncClasses.SaxonProcessor(c_str)
         else:
             try:
                 self.thisptr = new saxoncClasses.SaxonProcessor(l)
