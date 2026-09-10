@@ -30,41 +30,41 @@ public class VendorFunctionSetEE extends BuiltInFunctionSet {
 
         importFunctionSet(new VendorFunctionSetPE(config));
 
-        register("schema", 0, SchemaFn.class, AnyFunctionType.getInstance(), OPT, 0);
+        register("schema", 0, SchemaFn::new, AnyFunctionType.getInstance(), OPT, 0);
 
-        register("schema", 2, SchemaFn.class, AnyFunctionType.getInstance(), OPT, 0)
+        register("schema", 2, SchemaFn::new, AnyFunctionType.getInstance(), OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.QNAME, ONE, null);
 
-        register("stream", 1, StreamFn.class, AnyItemType.getInstance(), STAR, 0)
+        register("stream", 1, StreamFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY);
 
-        register("validate", 1, ValidateFn.class, MapType.getInstance(), OPT, 0)
+        register("validate", 1, ValidateFn::new, MapType.getInstance(), OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT, null);
 
-        register("validate", 2, ValidateFn.class, MapType.getInstance(), OPT, 0)
+        register("validate", 2, ValidateFn::new, MapType.getInstance(), OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY)
                 .arg(1, MapType.getInstance(), ONE, null);
 
-        register("validate", 3, ValidateFn.class, MapType.getInstance(), OPT, 0)
+        register("validate", 3, ValidateFn::new, MapType.getInstance(), OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT, EMPTY)
                 .arg(1, MapType.getInstance(), ONE, null)
                 .arg(2, MapType.getInstance(), ONE, null);
 
-        register("compile-XPath", 3, CompileXPath.class, AnyItemType.getInstance(), ONE, BuiltInFunctionSet.LATE)
+        register("compile-XPath", 3, CompileXPath::new, AnyItemType.getInstance(), ONE, BuiltInFunctionSet.LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)
                 .arg(1, AnyItemType.getInstance(), OPT, null)
                 .arg(2, AnyItemType.getInstance(), OPT, null);
 
-        register("marshal-type", 1, CompileXPath.class, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
+        register("marshal-type", 1, CompileXPath::new, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY);
 
-        register("parse-sequence-type", 3, CompileXPath.class, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
+        register("parse-sequence-type", 3, CompileXPath::new, MapType.getInstance(), ONE, BuiltInFunctionSet.LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)
                 .arg(1, NodeKindTest.ELEMENT, ONE, EMPTY)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null);
 
-        register("type", 1, SchemaTypeFn.class, SpecificFunctionType.COMPONENT_FUNCTION_TYPE, OPT, 0)
+        register("type", 1, SchemaTypeFn::new, SpecificFunctionType.COMPONENT_FUNCTION_TYPE, OPT, 0)
                 .arg(0, AnyItemType.getInstance(), OPT, null);
 
     }

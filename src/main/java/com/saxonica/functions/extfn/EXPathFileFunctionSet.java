@@ -61,138 +61,138 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("append", 2, FileAppend.class, AnyItemType.getInstance(), STAR, LATE|SIDE)
+        register("append", 2, FileAppend::new, AnyItemType.getInstance(), STAR, LATE|SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null);
-        register("append", 3, FileAppend.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("append", 3, FileAppend::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
                 .arg(2, NodeKindTest.ELEMENT, ONE, null);
-        register("append-binary", 2, FileAppendBinary.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("append-binary", 2, FileAppendBinary::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.BASE64_BINARY, ONE, null);
-        register("append-text", 2, FileAppendText.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("append-text", 2, FileAppendText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("append-text", 3, FileAppendText.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("append-text", 3, FileAppendText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("append-text-lines", 2, FileAppendTextLines.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("append-text-lines", 2, FileAppendTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, STAR, null);
-        register("append-text-lines", 3, FileAppendTextLines.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("append-text-lines", 3, FileAppendTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, STAR, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("base-dir", 0, FileBaseDir.class, AnyItemType.getInstance(), OPT, 0);
-        register("children", 1, FileChildren.class, BuiltInAtomicType.STRING, STAR, LATE)
+        register("base-dir", 0, FileBaseDir::new, AnyItemType.getInstance(), OPT, 0);
+        register("children", 1, FileChildren::new, BuiltInAtomicType.STRING, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("copy", 2, FileCopy.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("copy", 2, FileCopy::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("create-dir", 1, FileCreateDir.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("create-dir", 1, FileCreateDir::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("create-temp-dir", 2, FileCreateTempDir.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("create-temp-dir", 2, FileCreateTempDir::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("create-temp-dir", 3, FileCreateTempDir.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("create-temp-dir", 3, FileCreateTempDir::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("create-temp-file", 2, FileCreateTempFile.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("create-temp-file", 2, FileCreateTempFile::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("create-temp-file", 3, FileCreateTempFile.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("create-temp-file", 3, FileCreateTempFile::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("current-dir", 0, FileCurrentDir.class, BuiltInAtomicType.STRING, ONE, 0);
-        register("delete", 1, FileDelete.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("current-dir", 0, FileCurrentDir::new, BuiltInAtomicType.STRING, ONE, 0);
+        register("delete", 1, FileDelete::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("delete", 2, FileDelete.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("delete", 2, FileDelete::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.BOOLEAN, ONE, null);
-        register("dir-separator", 0, FileDirSeparator.class, BuiltInAtomicType.STRING, ONE, 0);
-        register("exists", 1, FileExists.class, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+        register("dir-separator", 0, FileDirSeparator::new, BuiltInAtomicType.STRING, ONE, 0);
+        register("exists", 1, FileExists::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("is-dir", 1, FileIsDir.class, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+        register("is-dir", 1, FileIsDir::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("is-file", 1, FileIsFile.class, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+        register("is-file", 1, FileIsFile::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("last-modified", 1, FileLastModified.class, BuiltInAtomicType.DATE_TIME_STAMP, ONE, LATE)
+        register("last-modified", 1, FileLastModified::new, BuiltInAtomicType.DATE_TIME_STAMP, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("line-separator", 0, FileLineSeparator.class, BuiltInAtomicType.STRING, ONE, 0);
-        register("list", 1, FileList.class, BuiltInAtomicType.STRING, STAR, LATE)
+        register("line-separator", 0, FileLineSeparator::new, BuiltInAtomicType.STRING, ONE, 0);
+        register("list", 1, FileList::new, BuiltInAtomicType.STRING, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("list", 2, FileList.class, BuiltInAtomicType.STRING, STAR, LATE)
+        register("list", 2, FileList::new, BuiltInAtomicType.STRING, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.BOOLEAN, ONE, null);
-        register("list", 3, FileList.class, BuiltInAtomicType.STRING, STAR, LATE)
+        register("list", 3, FileList::new, BuiltInAtomicType.STRING, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.BOOLEAN, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("move", 2, FileMove.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("move", 2, FileMove::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("name", 1, FileName.class, BuiltInAtomicType.STRING, ONE, LATE)
+        register("name", 1, FileName::new, BuiltInAtomicType.STRING, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("parent", 1, FileParent.class, BuiltInAtomicType.STRING, OPT, LATE)
+        register("parent", 1, FileParent::new, BuiltInAtomicType.STRING, OPT, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("path-separator", 0, FilePathSeparator.class, BuiltInAtomicType.STRING, ONE, 0);
-        register("path-to-native", 1, FilePathToNative.class, BuiltInAtomicType.STRING, ONE, LATE)
+        register("path-separator", 0, FilePathSeparator::new, BuiltInAtomicType.STRING, ONE, 0);
+        register("path-to-native", 1, FilePathToNative::new, BuiltInAtomicType.STRING, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("path-to-uri", 1, FilePathToUri.class, BuiltInAtomicType.ANY_URI, ONE, LATE)
+        register("path-to-uri", 1, FilePathToUri::new, BuiltInAtomicType.ANY_URI, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("read-binary", 1, FileReadBinary.class, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
+        register("read-binary", 1, FileReadBinary::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("read-binary", 2, FileReadBinary.class, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
+        register("read-binary", 2, FileReadBinary::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
-        register("read-binary", 3, FileReadBinary.class, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
+        register("read-binary", 3, FileReadBinary::new, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
-        register("read-text", 1, FileReadText.class, BuiltInAtomicType.STRING, ONE, LATE)
+        register("read-text", 1, FileReadText::new, BuiltInAtomicType.STRING, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("read-text", 2, FileReadText.class, BuiltInAtomicType.STRING, ONE, LATE)
+        register("read-text", 2, FileReadText::new, BuiltInAtomicType.STRING, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("read-text-lines", 1, FileReadTextLines.class, BuiltInAtomicType.STRING, STAR, LATE)
+        register("read-text-lines", 1, FileReadTextLines::new, BuiltInAtomicType.STRING, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("read-text-lines", 2, FileReadTextLines.class, BuiltInAtomicType.STRING, STAR, LATE)
+        register("read-text-lines", 2, FileReadTextLines::new, BuiltInAtomicType.STRING, STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("resolve-path", 1, FileResolvePath.class, BuiltInAtomicType.STRING, ONE, LATE)
+        register("resolve-path", 1, FileResolvePath::new, BuiltInAtomicType.STRING, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("size", 1, FileSize.class, BuiltInAtomicType.INTEGER, ONE, LATE)
+        register("size", 1, FileSize::new, BuiltInAtomicType.INTEGER, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        register("temp-dir", 0, FileTempDir.class, BuiltInAtomicType.STRING, ONE, LATE);
-        register("write", 2, FileWrite.class, AnyItemType.getInstance(), STAR, LATE)
+        register("temp-dir", 0, FileTempDir::new, BuiltInAtomicType.STRING, ONE, LATE);
+        register("write", 2, FileWrite::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null);
-        register("write", 3, FileWrite.class, AnyItemType.getInstance(), STAR, LATE)
+        register("write", 3, FileWrite::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
                 .arg(2, NodeKindTest.ELEMENT, ONE, null);
-        register("write-binary", 2, FileWriteBinary.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("write-binary", 2, FileWriteBinary::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.BASE64_BINARY, ONE, null);
-        register("write-binary", 3, FileWriteBinary.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("write-binary", 3, FileWriteBinary::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.BASE64_BINARY, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
-        register("write-text", 2, FileWriteText.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("write-text", 2, FileWriteText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
-        register("write-text", 3, FileWriteText.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("write-text", 3, FileWriteText::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
-        register("write-text-lines", 2, FileWriteTextLines.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("write-text-lines", 2, FileWriteTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, STAR, null);
-        register("write-text-lines", 3, FileWriteTextLines.class, AnyItemType.getInstance(), STAR, LATE | SIDE)
+        register("write-text-lines", 3, FileWriteTextLines::new, AnyItemType.getInstance(), STAR, LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, STAR, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);

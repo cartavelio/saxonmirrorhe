@@ -1,7 +1,6 @@
 package com.saxonica.xsltextn.style;
 
-import com.saxonica.xsltextn.ExtensionElementFactory;
-import net.sf.saxon.style.StyleElement;
+import com.saxonica.xsltextn.ExtensionElementCreator;
 import net.sf.saxon.style.XSLResultDocument;
 
 /**
@@ -9,25 +8,19 @@ import net.sf.saxon.style.XSLResultDocument;
  * of people running the docbook stylesheets.
  */
 
-public class Saxon6ElementFactory implements ExtensionElementFactory {
+public abstract class Saxon6ElementFactory {
 
     /**
      * Identify the class to be used for stylesheet elements with a given local name.
      * The returned class must extend net.sf.saxon.style.StyleElement
-     *
-     * @return null if the local name is not a recognised element type in this
-     *         namespace.
      */
 
-    /*@Nullable*/
-    @Override
-    public Class<? extends StyleElement> getExtensionClass(String localname) {
-        if (localname.equals("output")) {
-            // reinstated in 9.9 for docbook purposes
-            return XSLResultDocument.class;
+    public final static ExtensionElementCreator FACTORY = (localName -> {
+        if (localName.equals("output")) {
+            return new XSLResultDocument();
         }
         return null;
-    }
+    });
 
 }
 

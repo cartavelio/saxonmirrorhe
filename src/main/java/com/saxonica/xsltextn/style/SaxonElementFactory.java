@@ -1,60 +1,58 @@
 package com.saxonica.xsltextn.style;
 
-import com.saxonica.xsltextn.ExtensionElementFactory;
-import net.sf.saxon.style.*;
+import com.saxonica.xsltextn.ExtensionElementCreator;
+import net.sf.saxon.style.XSLArray;
+import net.sf.saxon.style.XSLArrayMember;
+import net.sf.saxon.style.XSLItemType;
 
 /**
  * A Factory for Saxon extension nodes in the stylesheet tree. <br>
  */
 
-public class SaxonElementFactory implements ExtensionElementFactory {
+public class SaxonElementFactory {
 
     /**
      * Identify the class to be used for stylesheet elements with a given local name.
-     * The returned class must extend net.sf.saxon.style.StyleElement
-     *
-     * @return null if the local name is not a recognised element type in this
-     *         namespace.
      */
 
-    /*@Nullable*/
-    @Override
-    public Class<? extends StyleElement> getExtensionClass(String localname) {
+
+    public final static ExtensionElementCreator FACTORY = (localname -> {
         if (localname.equals("array")) {
-            return XSLArray.class;
+            return new XSLArray();
         }
         if (localname.equals("array-member")) {
-            return XSLArrayMember.class;
+            return new XSLArrayMember();
         }
         if (localname.equals("assign")) {
-            return SaxonAssign.class;
+            return new SaxonAssign();
         }
         if (localname.equals("deep-update")) {
-            return SaxonDeepUpdate.class;
+            return new SaxonDeepUpdate();
         }
         if (localname.equals("do")) {
-            return SaxonDo.class;
+            return new SaxonDo();
         }
         if (localname.equals("doctype")) {
-            return SaxonDoctype.class;
+            return new SaxonDoctype();
         }
         if (localname.equals("entity-ref")) {
-            return SaxonEntityRef.class;
+            return new SaxonEntityRef();
         }
         if (localname.equals("import-query")) {
-            return SaxonImportQuery.class;
+            return new SaxonImportQuery();
         }
         if (localname.equals("item-type")) {
-            return XSLItemType.class;
+            return new XSLItemType();
         }
         if (localname.equals("tabulate-maps")) {
-            return SaxonTabulateMaps.class;
+            return new SaxonTabulateMaps();
         }
         if (localname.equals("while")) {
-            return SaxonWhile.class;
+            return new SaxonWhile();
         }
         return null;
-    }
+    });
+
 
 }
 

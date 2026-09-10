@@ -2082,9 +2082,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public void declareBuiltInExtensionElementNamespaces() {
         try {
-            setExtensionElementNamespace(NamespaceConstant.SAXON, new SaxonElementFactoryEE());
-            setExtensionElementNamespace(NamespaceConstant.SAXON6, new Saxon6ElementFactory());
-            setExtensionElementNamespace("http://saxonica.com/ns/interactiveXSLT", new IXSLElementFactory());
+            setExtensionElementCreator(NamespaceConstant.SAXON, SaxonElementFactoryEE.FACTORY);
+            setExtensionElementCreator(NamespaceConstant.SAXON6, Saxon6ElementFactory.FACTORY);
+            setExtensionElementCreator("http://saxonica.com/ns/interactiveXSLT", IXSLElementFactory.FACTORY);
         } catch (XPathException e) {
             throw new IllegalStateException(e.getMessage());
         }

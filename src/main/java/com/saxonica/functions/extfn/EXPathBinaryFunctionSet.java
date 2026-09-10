@@ -62,171 +62,171 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("and", 2, BinaryAnd.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("and", 2, BinaryAnd::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance());
 
-        register("bin", 1, BinaryBin.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("bin", 1, BinaryBin::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EmptySequence.getInstance());
 
-        register("decode-string", 1, BinaryDecodeString.class, BuiltInAtomicType.STRING, OPT, 0)
+        register("decode-string", 1, BinaryDecodeString::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance());
 
-        register("decode-string", 2, BinaryDecodeString.class, BuiltInAtomicType.STRING, OPT, 0)
+        register("decode-string", 2, BinaryDecodeString::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("decode-string", 3, BinaryDecodeString.class, BuiltInAtomicType.STRING, OPT, 0)
+        register("decode-string", 3, BinaryDecodeString::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("decode-string", 4, BinaryDecodeString.class, BuiltInAtomicType.STRING, OPT, 0)
+        register("decode-string", 4, BinaryDecodeString::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(3, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("encode-string", 1, BinaryEncodeString.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("encode-string", 1, BinaryEncodeString::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EmptySequence.getInstance());
 
-        register("encode-string", 2, BinaryEncodeString.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("encode-string", 2, BinaryEncodeString::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("find", 3, BinaryFind.class, BuiltInAtomicType.INTEGER, OPT, 0)
+        register("find", 3, BinaryFind::new, BuiltInAtomicType.INTEGER, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.BASE64_BINARY, ONE, null);
 
-        register("from-octets", 1, BinaryFromOctets.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
+        register("from-octets", 1, BinaryFromOctets::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, STAR, null);
 
-        register("hex", 1, BinaryHex.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("hex", 1, BinaryHex::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EmptySequence.getInstance());
 
-        register("insert-before", 3, BinaryInsertBefore.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("insert-before", 3, BinaryInsertBefore::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.BASE64_BINARY, OPT, null);
 
-        register("join", 1, BinaryJoin.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
+        register("join", 1, BinaryJoin::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, STAR, null);
 
-        register("length", 1, BinaryLength.class, BuiltInAtomicType.INTEGER, ONE, 0)
+        register("length", 1, BinaryLength::new, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, EmptySequence.getInstance());
 
-        register("not", 1, BinaryNot.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("not", 1, BinaryNot::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance());
 
-        register("octal", 1, BinaryOctal.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("octal", 1, BinaryOctal::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EmptySequence.getInstance());
 
-        register("or", 2, BinaryOr.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("or", 2, BinaryOr::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance());
 
-        register("pack-double", 1, BinaryPackDouble.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
+        register("pack-double", 1, BinaryPackDouble::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.DOUBLE, ONE, null);
 
-        register("pack-double", 2, BinaryPackDouble.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
+        register("pack-double", 2, BinaryPackDouble::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.DOUBLE, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("pack-float", 1, BinaryPackFloat.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
+        register("pack-float", 1, BinaryPackFloat::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.FLOAT, ONE, null);
 
-        register("pack-float", 2, BinaryPackFloat.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
+        register("pack-float", 2, BinaryPackFloat::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.FLOAT, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("pack-integer", 2, BinaryPackInteger.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
+        register("pack-integer", 2, BinaryPackInteger::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("pack-integer", 3, BinaryPackInteger.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
+        register("pack-integer", 3, BinaryPackInteger::new, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
-        register("pad-left", 2, BinaryPadLeft.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("pad-left", 2, BinaryPadLeft::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("pad-left", 3, BinaryPadLeft.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("pad-left", 3, BinaryPadLeft::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("pad-right", 2, BinaryPadRight.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("pad-right", 2, BinaryPadRight::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("pad-right", 3, BinaryPadRight.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("pad-right", 3, BinaryPadRight::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
 
 
-        register("part", 2, BinaryPart.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("part", 2, BinaryPart::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("part", 3, BinaryPart.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("part", 3, BinaryPart::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("shift", 2, BinaryShift.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("shift", 2, BinaryShift::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("to-octets", 1, BinaryToOctets.class, BuiltInAtomicType.INTEGER, STAR, 0)
+        register("to-octets", 1, BinaryToOctets::new, BuiltInAtomicType.INTEGER, STAR, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null);
 
-        register("unpack-double", 2, BinaryUnpackDouble.class, BuiltInAtomicType.DOUBLE, ONE, 0)
+        register("unpack-double", 2, BinaryUnpackDouble::new, BuiltInAtomicType.DOUBLE, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("unpack-double", 3, BinaryUnpackDouble.class, BuiltInAtomicType.DOUBLE, ONE, 0)
+        register("unpack-double", 3, BinaryUnpackDouble::new, BuiltInAtomicType.DOUBLE, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
-        register("unpack-float", 2, BinaryUnpackFloat.class, BuiltInAtomicType.FLOAT, ONE, 0)
+        register("unpack-float", 2, BinaryUnpackFloat::new, BuiltInAtomicType.FLOAT, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("unpack-float", 3, BinaryUnpackFloat.class, BuiltInAtomicType.FLOAT, ONE, 0)
+        register("unpack-float", 3, BinaryUnpackFloat::new, BuiltInAtomicType.FLOAT, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
-        register("unpack-integer", 3, BinaryUnpackInteger.class, BuiltInAtomicType.INTEGER, ONE, 0)
+        register("unpack-integer", 3, BinaryUnpackInteger::new, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("unpack-integer", 4, BinaryUnpackInteger.class, BuiltInAtomicType.INTEGER, ONE, 0)
+        register("unpack-integer", 4, BinaryUnpackInteger::new, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(3, BuiltInAtomicType.STRING, ONE, null);
 
-        register("unpack-unsigned-integer", 3, BinaryUnpackUnsignedInteger.class, BuiltInAtomicType.INTEGER, ONE, 0)
+        register("unpack-unsigned-integer", 3, BinaryUnpackUnsignedInteger::new, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
 
-        register("unpack-unsigned-integer", 4, BinaryUnpackUnsignedInteger.class, BuiltInAtomicType.INTEGER, ONE, 0)
+        register("unpack-unsigned-integer", 4, BinaryUnpackUnsignedInteger::new, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null)
                 .arg(3, BuiltInAtomicType.STRING, ONE, null);
 
-        register("version", 0, BinaryVersion.class, BuiltInAtomicType.DECIMAL, ONE, 0); // not in spec
+        register("version", 0, BinaryVersion::new, BuiltInAtomicType.DECIMAL, ONE, 0); // not in spec
 
-        register("xor", 2, BinaryXor.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
+        register("xor", 2, BinaryXor::new, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
                 .arg(1, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance());
     }

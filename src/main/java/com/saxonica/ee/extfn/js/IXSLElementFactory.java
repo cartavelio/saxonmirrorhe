@@ -1,7 +1,6 @@
 package com.saxonica.ee.extfn.js;
 
-import com.saxonica.xsltextn.ExtensionElementFactory;
-import net.sf.saxon.style.StyleElement;
+import com.saxonica.xsltextn.ExtensionElementCreator;
 
 /**
  * Class IXSLElementFactory.
@@ -10,35 +9,30 @@ import net.sf.saxon.style.StyleElement;
  * However, it can be registered under a different namespace if required.</p>
  */
 
-public class IXSLElementFactory implements ExtensionElementFactory {
+public abstract class IXSLElementFactory {
 
     /**
      * Identify the class to be used for stylesheet elements with a given local name.
      * The returned class must extend net.sf.saxon.style.StyleElement
-     *
-     * @return null if the local name is not a recognised element type in this
-     *         namespace.
      */
 
-    /*@Nullable*/
-    @Override
-    public Class<? extends StyleElement> getExtensionClass(String localname) {
+    public final static ExtensionElementCreator FACTORY = localname -> {
         switch (localname) {
             case "schedule-action":
-                return IXSLScheduleAction.class;
+                return new IXSLScheduleAction();
             case "set-attribute":
-                return IXSLSetAttribute.class;
+                return new IXSLSetAttribute();
             case "remove-attribute":
-                return IXSLRemoveAttribute.class;
+                return new IXSLRemoveAttribute();
             case "set-property":
-                return IXSLSetProperty.class;
+                return new IXSLSetProperty();
             case "remove-property":
-                return IXSLRemoveProperty.class;
+                return new IXSLRemoveProperty();
             case "set-style":
-                return IXSLSetStyle.class;
+                return new IXSLSetStyle();
         }
         return null;
-    }
+    };
 
 }
 

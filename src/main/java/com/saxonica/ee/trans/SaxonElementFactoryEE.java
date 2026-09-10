@@ -1,6 +1,7 @@
 package com.saxonica.ee.trans;
 
 import com.saxonica.ee.xtupdate.*;
+import com.saxonica.xsltextn.ExtensionElementCreator;
 import com.saxonica.xsltextn.style.*;
 import net.sf.saxon.style.*;
 
@@ -8,73 +9,67 @@ import net.sf.saxon.style.*;
  * A Factory for Saxon extension nodes in the stylesheet tree. <br>
  */
 
-public class SaxonElementFactoryEE extends SaxonElementFactory {
+public abstract class SaxonElementFactoryEE {
 
     /**
      * Identify the class to be used for stylesheet elements with a given local name.
      * The returned class must extend net.sf.saxon.style.StyleElement
-     *
-     * @return null if the local name is not a recognised element type in this
-     *         namespace.
      */
 
-    /*@Nullable*/
-    @Override
-    public Class<? extends StyleElement> getExtensionClass(String localname) {
+    public final static ExtensionElementCreator FACTORY = localname -> {
         if (localname.equals("array")) {
-            return XSLArray.class;
+            return new XSLArray();
         }
         if (localname.equals("array-member")) {
-            return XSLArrayMember.class;
+            return new XSLArrayMember();
         }
         if (localname.equals("assign")) {
-            return SaxonAssign.class;
+            return new SaxonAssign();
         }
         if (localname.equals("change")) {
-            return SaxonChange.class;
+            return new SaxonChange();
         }
         if (localname.equals("deep-update")) {
-            return SaxonDeepUpdate.class;
+            return new SaxonDeepUpdate();
         }
         if (localname.equals("delete")) {
-            return SaxonDelete.class;
+            return new SaxonDelete();
         }
         if (localname.equals("do")) {
-            return SaxonDo.class;
+            return new SaxonDo();
         }
         if (localname.equals("doctype")) {
-            return SaxonDoctype.class;
+            return new SaxonDoctype();
         }
         if (localname.equals("entity-ref")) {
-            return SaxonEntityRef.class;
+            return new SaxonEntityRef();
         }
         if (localname.equals("import-query")) {
-            return SaxonImportQuery.class;
+            return new SaxonImportQuery();
         }
         if (localname.equals("insert")) {
-            return SaxonInsert.class;
+            return new SaxonInsert();
         }
         if (localname.equals("item-type")) {
-            return net.sf.saxon.style.XSLItemType.class;
+            return new net.sf.saxon.style.XSLItemType();
         }
         if (localname.equals("rename")) {
-            return SaxonRename.class;
+            return new SaxonRename();
         }
         if (localname.equals("replace")) {
-            return SaxonReplace.class;
+            return new SaxonReplace();
         }
         if (localname.equals("tabulate-maps")) {
-            return SaxonTabulateMaps.class;
+            return new SaxonTabulateMaps();
         }
-
         if (localname.equals("update")) {
-            return SaxonUpdate.class;
+            return new SaxonUpdate();
         }
         if (localname.equals("while")) {
-            return SaxonWhile.class;
+            return new SaxonWhile();
         }
-        return null;
-    }
+        return SaxonElementFactory.FACTORY.createExtensionElement(localname);
+    };
 
 }
 

@@ -38,7 +38,7 @@ public class PHPFunctionSet extends BuiltInFunctionSet {
     }
 
     private void init() {
-        register("function", 2, PHPFunction.class, AnyItemType.getInstance(), OPT, SIDE | LATE)
+        register("function", 2, PHPFunction::new, AnyItemType.getInstance(), OPT, SIDE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, ArrayItemType.getInstance(), STAR, null);
 
