@@ -2,12 +2,6 @@ META-INF/
 META-INF/MANIFEST.MF
 com/
 com/saxonica/
-com/saxonica/js/
-com/saxonica/js/JSHelper.class
-com/saxonica/js/RunJS2Transform.class
-com/saxonica/js/RunJSTransform.class
-com/saxonica/js/RunNodeJSTransform.class
-com/saxonica/js/XsltTestSuiteDriverJS.class
 com/saxonica/testdriver/
 com/saxonica/testdriver/Licensor.class
 com/saxonica/testdriver/QT3TestDriverEE.class

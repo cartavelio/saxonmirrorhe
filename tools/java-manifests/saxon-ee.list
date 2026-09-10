@@ -1729,7 +1729,6 @@ net/sf/saxon/lib/SourceResolver.class
 net/sf/saxon/lib/StAXResultHandler.class
 net/sf/saxon/lib/StandardCollationURIResolver.class
 net/sf/saxon/lib/StandardDiagnostics.class
-net/sf/saxon/lib/StandardEntityResolver.class
 net/sf/saxon/lib/StandardEnvironmentVariableResolver.class
 net/sf/saxon/lib/StandardErrorHandler.class
 net/sf/saxon/lib/StandardErrorListener.class
