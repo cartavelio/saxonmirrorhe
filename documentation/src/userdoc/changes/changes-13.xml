@@ -840,6 +840,19 @@ TODO: rethink redefines and override
         the current 4.0 specification in the case where the required type is a GNode or JNode. In this situation Saxon will automatically
         wrap a supplied map or array in a root JNode. The specification requires this implicit conversion only for the
         left-hand operand of the "/" operator.</p>
+        
+        <p>In the current 4.0 specification, an XSLT match pattern of the form <code>match="order"</code> is defined to
+        match both an element node with node-name <code>"order"</code>, and a JNode with selector value "order".
+        This has proved troublesome from an implementation viewpoint (it affects type-checking and streamability analysis)
+        and it's not especially intuitive: Saxonica has therefore proposed a change to the specification. In the meantime,
+        in Saxon 13, the pattern <code>match="order"</code> will only match element nodes. JNodes can be matched
+        using a pattern of the form <code>match="~jnode(order)"</code>.</p>
+        
+        <p>The serialization parameter <code>saxon:stylesheet-version</code> (which in previous releases was largely
+        for internal use) is now renamed <code>saxon:spec-version</code>, and can be used to control which version
+        of the serialization specification is to be used. The differences are minor, but with version 4.0, for example,
+        JSON output adopts a fallback representation of Infinity and NaN rather than rejecting these values with an
+        error. When the serializer is invoked directly from XQuery or XSLT then the </p>
     
     </category>
     
