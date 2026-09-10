@@ -1,4 +1,5 @@
 using System;
+using System.Xml.XPath;
 using Saxon.Hej.functions;
 using Saxon.Hej.ma.map;
 using Saxon.Hej.value;
@@ -34,11 +35,22 @@ namespace Saxon.Impl.Helpers {
             return new BigDecimal[]{quot, a - quot*b};
         }
         
-        public static MapItem DivideDecimals(DecimalValue a, DecimalValue b, int precision) {
-            BigDecimal quotient = Singulink.Numerics.BigDecimal.Divide(
-                a.getDecimalValue(), b.getDecimalValue(), precision, Singulink.Numerics.RoundingMode.ToZero);
-            BigDecimal roundedQuotient = BigDecimal.Round(quotient, precision, RoundingMode.ToZero);
-            BigDecimal remainder = a.getDecimalValue() - roundedQuotient * b.getDecimalValue();
+        public static MapItem DivideDecimals(DecimalValue a, DecimalValue b, int requiredDecimalPlaces) {
+            // The Singulink Divide method allows us to specify the total number of digits in the result, whereas we want
+            // to specify the number of digits after the decimal point. So we do a full-precision division and then round
+            // the result.
+            BigDecimal aDec = a.getDecimalValue();
+            BigDecimal bDec = b.getDecimalValue();
+            BigDecimal preciseQuotient;
+            try {
+                preciseQuotient = BigDecimal.Divide(
+                    aDec, bDec, Math.Max(requiredDecimalPlaces, 50), RoundingMode.ToZero);
+            }
+            catch (System.DivideByZeroException e) {
+                throw new Saxon.Hej.trans.XPathException("Division by zero", "FOAR0001");
+            }
+            BigDecimal roundedQuotient = Round(preciseQuotient, requiredDecimalPlaces);
+            BigDecimal remainder = aDec - roundedQuotient * bDec;
             return new ShapedMap(quotientAndRemainder,
                 new BigDecimalValue(roundedQuotient),
                 new BigDecimalValue(remainder));

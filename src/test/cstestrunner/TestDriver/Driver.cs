@@ -258,6 +258,7 @@ namespace TestDriver {
 
                 schemaAware = edition == "EE";
                 driverSerializer.OutputStream = Console.OpenStandardError();
+                driverSerializer.SetOutputProperty(Serializer.METHOD, "adaptive");
                 driverSerializer.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
                 DateTime start = DateTime.Now;
                 processCatalog(catalog);
