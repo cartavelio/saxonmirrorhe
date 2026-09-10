@@ -201,6 +201,7 @@
          <xsl:when test="name/@identifier='DEFAULT_NAMESPACE'">Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespace</xsl:when>
          <xsl:when test="name/@identifier='ANY_NAMESPACE'">Saxon.Api.UnprefixedElementMatchingPolicy.AnyNamespace</xsl:when>
          <xsl:when test="name/@identifier='DEFAULT_NAMESPACE_OR_NONE'">Saxon.Api.UnprefixedElementMatchingPolicy.DefaultNamespaceOrNone</xsl:when>
+         <xsl:when test="name/@identifier='UNSPECIFIED'">Saxon.Api.UnprefixedElementMatchingPolicy.Unspecified</xsl:when>
          <xsl:otherwise>
             <xsl:next-match/>
          </xsl:otherwise>
