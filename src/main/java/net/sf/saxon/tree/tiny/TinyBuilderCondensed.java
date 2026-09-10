@@ -54,7 +54,7 @@ public class TinyBuilderCondensed extends TinyBuilder {
 //            if ((isTextualElement || hasFinalTextNode) && (tree.beta[last] <= 256)) {
 //                // Get the string value of this final node: works both for text nodes and textual element nodes
 //                CodePoints chars = TinyTextImpl.getStringValue(tree, last);
-//                // We rely on all relevant implementations of UniString having compatible hashcodes (but if they
+//                // We rely on all relevant implementations of UnicodeString having compatible hashcodes (but if they
 //                // don't, the only consequence is that we get less compression)
 //                int hash = chars.hashCode();
 //                int[] nodes = textValues.get(hash);

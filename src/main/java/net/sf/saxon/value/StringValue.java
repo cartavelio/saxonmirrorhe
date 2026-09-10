@@ -53,7 +53,7 @@ public class StringValue extends AtomicValue {
     }
 
     /**
-     * Construct an instance that wraps a supplied {@code UniString}, with the default
+     * Construct an instance that wraps a supplied {@code UnicodeString}, with the default
      * type xs:string
      */
 
@@ -62,7 +62,7 @@ public class StringValue extends AtomicValue {
     }
 
     /**
-     * Construct an instance that wraps a supplied {@code UniString}, with a supplied atomic type
+     * Construct an instance that wraps a supplied {@code UnicodeString}, with a supplied atomic type
      */
 
     public StringValue(UnicodeString content, AtomicType type) {

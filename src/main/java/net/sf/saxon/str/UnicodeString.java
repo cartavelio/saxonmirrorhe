@@ -81,7 +81,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      * @param codePoint the sought codePoint
      * @return the position (0-based) of the first occurrence found, or -1 if not found,
      * counting codePoints rather than UTF16 chars.
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      * for codePoint access
      */
 
@@ -95,7 +95,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      * @param codePoint the sought codePoint
      * @param from the position from which the search should start (0-based)
      * @return the position (0-based) of the first occurrence found, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      * for codePoint access
      */
 
@@ -108,7 +108,7 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      * @param predicate condition that the codepoint must satisfy
      * @param from      the position from which the search should start (0-based)
      * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UniString} has not been prepared
+     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
 
