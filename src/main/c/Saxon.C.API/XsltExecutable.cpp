@@ -214,7 +214,7 @@ void XsltExecutable::setInitialTemplateParameters(std::map<std::string, XdmValue
     }
 }
 
-void XsltExecutable::setSaveResultDocument(bool flag) {
+void XsltExecutable::setCaptureResultDocuments(bool flag) {
     if(flag) {
         resultDocumentMap.clear();
         if(saxonResultDocObj != nullptr) {

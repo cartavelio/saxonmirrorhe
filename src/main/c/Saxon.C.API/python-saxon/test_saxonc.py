@@ -528,7 +528,7 @@ def testResultDocumentAsMap(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     executable = trans.compile_stylesheet(stylesheet_text=xsl)
     assert executable is not None
-    executable.set_save_result_document(True)
+    executable.set_capture_result_documents(True)
     executable.set_initial_match_selection(xdm_value=inputDoc)
     executable.apply_templates_returning_value()
 
