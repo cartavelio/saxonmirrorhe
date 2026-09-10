@@ -414,46 +414,46 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
     public void write(UnicodeString chars) throws IOException {
         if (chars instanceof StringView || chars instanceof BMPString) {
             write(chars.toString());
-        } else {
-            if (chars instanceof UnicodeChar) {
-                writeCodePoint(((UnicodeChar) chars).getCodepoint());
-            } else if (chars.getWidth() <= 8) {
-                if (chars instanceof Twine8) {
-                    int width = chars.getWidth();
-                    if (width == 7) {
-                        writeAscii(((Twine8) chars).getByteArray(), 0, chars.length32());
-                    } else if (width == 8) {
-                        writeLatin1(((Twine8) chars).getByteArray(), 0, chars.length32());
-                    }
-                } else if (chars instanceof Slice8) {
-                    Slice8 s8 = (Slice8) chars;
-                    int width = chars.getWidth();
-                    if (width == 7) {
-                        writeAscii(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
-                    } else if (width == 8) {
-                        writeLatin1(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
-                    }
-                } else if (chars instanceof CompressedWhitespace) {
-                    ((CompressedWhitespace)chars).write(this);
-                } else {
-                    // probably doesn't happen
-                    IntIterator iter = chars.codePoints();
-                    while (iter.hasNext()) {
-                        write(iter.next());
-                    }
+        } else if (chars instanceof UnicodeChar) {
+            writeCodePoint(((UnicodeChar) chars).getCodepoint());
+        } else if (chars instanceof ZenoString) {
+            ((ZenoString)chars).writeSegments(this);
+        } else if (chars.getWidth() <= 8) {
+            if (chars instanceof Twine8) {
+                int width = chars.getWidth();
+                if (width == 7) {
+                    writeAscii(((Twine8) chars).getByteArray(), 0, chars.length32());
+                } else if (width == 8) {
+                    writeLatin1(((Twine8) chars).getByteArray(), 0, chars.length32());
                 }
-            } else if (chars.getWidth() == 16) {
-                if (chars instanceof Twine16) {
-                    write(((Twine16)chars).getCharArray());
-                } else if (chars instanceof Slice16) {
-                    Slice16 s16 = (Slice16) chars;
-                    write(s16.getCharArray(), s16.getStart(), s16.getEnd() - s16.getStart());
+            } else if (chars instanceof Slice8) {
+                Slice8 s8 = (Slice8) chars;
+                int width = chars.getWidth();
+                if (width == 7) {
+                    writeAscii(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
+                } else if (width == 8) {
+                    writeLatin1(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
                 }
+            } else if (chars instanceof CompressedWhitespace) {
+                ((CompressedWhitespace)chars).write(this);
             } else {
+                // probably doesn't happen
                 IntIterator iter = chars.codePoints();
                 while (iter.hasNext()) {
                     write(iter.next());
                 }
+            }
+        } else if (chars.getWidth() == 16) {
+            if (chars instanceof Twine16) {
+                write(((Twine16)chars).getCharArray());
+            } else if (chars instanceof Slice16) {
+                Slice16 s16 = (Slice16) chars;
+                write(s16.getCharArray(), s16.getStart(), s16.getEnd() - s16.getStart());
+            }
+        } else {
+            IntIterator iter = chars.codePoints();
+            while (iter.hasNext()) {
+                write(iter.next());
             }
         }
     }
