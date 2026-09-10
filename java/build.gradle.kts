@@ -311,7 +311,13 @@ testSuites.configure("expath", "XQ31")
 testSuites.configure("expath", "XQ40")
 
 testSuites.configure("qt3", "XP31")
+//testSuites.configure("qt3", "XP31", mapOf("tree" to "JDOM"))
+testSuites.configure("qt3", "XP31", mapOf("tree" to "JDOM2"))
+testSuites.configure("qt3", "XP31", mapOf("tree" to "XOM"))
+//testSuites.configure("qt3", "XP31", mapOf("tree" to "Axiom"))
+
 testSuites.configure("qt3", "XP31", mapOf("unfolded" to "on"))
+
 testSuites.configure("qt3", "XQ31")
 testSuites.configure("qt3", "XQ31", mapOf("unfolded" to "on"))
 
@@ -325,6 +331,10 @@ testSuites.configure("qt4", "XQ31", mapOf("unfolded" to "on"))
 testSuites.configure("qt4", "XQ40")
 
 testSuites.configure("xslt30", "XT30")
+//testSuites.configure("xslt30", "XT30", mapOf("tree" to "JDOM"))
+//testSuites.configure("xslt30", "XT30", mapOf("tree" to "JDOM2"))
+//testSuites.configure("xslt30", "XT30", mapOf("tree" to "XOM"))
+//testSuites.configure("xslt30", "XT30", mapOf("tree" to "Axiom"))
 testSuites.configure("xslt30", "XT30", mapOf("export" to "on"))
 testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
 

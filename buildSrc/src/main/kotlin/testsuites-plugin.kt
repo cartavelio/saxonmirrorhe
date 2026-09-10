@@ -51,7 +51,16 @@ abstract class TestSuitesExtension
       if (keys.isEmpty()) {
         "test_suite_${suite}_${language}"
       } else {
-        "test_suite_${suite}_${language}_${keys.joinToString("_")}"
+        val parts = mutableListOf<String>()
+        for (key in keys) {
+          val kvalue = options[key]
+          if (kvalue == "on") {
+            parts.add(key)
+          } else {
+            parts.add("${key}_${kvalue}")
+          }
+        }
+        "test_suite_${suite}_${language}_${parts.joinToString("_")}"
       }
     } else {
       "test_suite_${taskName}"
@@ -124,6 +133,7 @@ abstract class TestSuitesExtension
       this.language = language
       this.suiteDir = actualSuiteDir
       this.options = options
+      this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
       exceptionsFile = exceptions(suite)
       reportingRootDir = layout.buildDirectory.dir("test-results")
       classpath.from(testclasspath)
