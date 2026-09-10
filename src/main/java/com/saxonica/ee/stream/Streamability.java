@@ -1,6 +1,5 @@
 package com.saxonica.ee.stream;
 
-import com.saxonica.ee.bytecode.CompiledExpression;
 import com.saxonica.ee.stream.adjunct.StreamingAdjunct;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
@@ -369,27 +368,15 @@ public class Streamability {
         PostureAndSweep postureAndSweep = getPostureAndSweepIfKnown(exp);
         if (postureAndSweep != null) {
             return postureAndSweep.getPosture();
-        } else if (isCompiledExpression(exp)) {
-            return getPosture(exp.getInterpretedExpression());
         } else {
             throw new IllegalStateException("getPosture() called when streamability has not yet been computed");
         }
-    }
-
-    private static boolean isCompiledExpression(Expression exp) {
-        boolean result = false;
-        //#if BYTECODE==true
-        result = exp instanceof CompiledExpression;
-        //#endif
-        return result;
     }
 
     public static Sweep getSweep(Expression exp) {
         PostureAndSweep postureAndSweep = getPostureAndSweepIfKnown(exp);
         if (postureAndSweep != null) {
             return postureAndSweep.getSweep();
-        } else if (isCompiledExpression(exp)) {
-            return getSweep(exp.getInterpretedExpression());
         } else {
             throw new IllegalStateException(exp.getClass().getName() + ".getSweep() called when streamability has not yet been computed");
         }

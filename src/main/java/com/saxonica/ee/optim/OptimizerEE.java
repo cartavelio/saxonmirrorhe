@@ -1,10 +1,5 @@
 package com.saxonica.ee.optim;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.bytecode.ByteCodeCandidate;
-import com.saxonica.ee.bytecode.CompiledExpression;
-import com.saxonica.ee.bytecode.util.CannotCompileException;
-import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.parallel.MultithreadedForEach;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
@@ -17,7 +12,10 @@ import net.sf.saxon.expr.accum.AccumulatorRule;
 import net.sf.saxon.expr.compat.GeneralComparison10;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.expr.sort.*;
+import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.expr.sort.ConditionalSorter;
+import net.sf.saxon.expr.sort.DocumentSorter;
+import net.sf.saxon.expr.sort.UntypedNumericComparer;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
@@ -1649,8 +1647,8 @@ public class OptimizerEE extends Optimizer {
         if (condition instanceof OrExpression) {
             // See bug 3261. In 9.7 and 9.8, an action associated with several alternative key values was duplicated.
             // In 9.9.1.1 this changes to introduce an indirection in the data structure so that two key values
-            // can point to the same action expression, reducing duplication in the expression tree and in compiled
-            // bytecode. The duplication still exists if the switch expression is exported and re-imported.
+            // can point to the same action expression, reducing duplication in the expression tree.
+            // The duplication still exists if the switch expression is exported and re-imported.
             boolean b = processSwitchCondition(((OrExpression) condition).getLhsExpression(), action, switchCaseInfo);
             return b && processSwitchCondition(((OrExpression) condition).getRhsExpression(), action, switchCaseInfo);
         }
@@ -1941,108 +1939,6 @@ public class OptimizerEE extends Optimizer {
     }
 
 
-//#if BYTECODE == true
-    /**
-     * Generate Java byte code for an expression
-     *
-     *
-     * @param compilerService   the compiler service
-     * @param expr              the expression to be compiled
-     * @param objectName        the name of the object to be compiled, used as a hint for the Java class/method name
-     * @param evaluationMethods The evaluation modes for which code is generated. Currently a subset of
-     *                          {@link Expression#PROCESS_METHOD}, {@link Expression#ITERATE_METHOD}. If no code is generated for
-     *                          a given evaluation method, the fallback implementation from the superclass is used.
-     * @return the compiled expression if possible, or null if compilation is not possible
-     */
-    @Override
-    public Expression compileToByteCode(ICompilerService compilerService, Expression expr, String objectName, int evaluationMethods) {
-        if (expr instanceof CompiledExpression || expr instanceof Literal || expr instanceof VariableReference) {
-            return expr;
-        }
-        try {
-            return ((CompilerService)compilerService).compileToByteCode(expr, objectName, evaluationMethods);
-        } catch (CannotCompileException e) {
-            return expr;
-        }
-    }
-
-
-    /**
-     * Insert a ByteCodeCandidate into the expression tree. A ByteCodeCandidate monitors how many
-     * times it is executed, and after reaching a certain threshold, generates bytecode for faster
-     * evaluation of its target expression
-     * @param owner the owning construct in the expression tree
-     * @param expr the child (target) expression
-     * @param objectName name to be used in forming the name of the bytecode class
-     * @param requiredEvaluationModes the evaluation modes for which code should be generated
-     * @return a new ByteCodeCandidate if the expression is suitable for bytecode generation,
-     * or the supplied target expression otherwise.
-     */
-
-    @Override
-    public Expression makeByteCodeCandidate(ExpressionOwner owner, Expression expr, String objectName, int requiredEvaluationModes) {
-        if (!isOptionSet(OptimizerOptions.BYTE_CODE) || !config.getBooleanProperty(Feature.GENERATE_BYTE_CODE)) {
-            return expr;
-        }
-        if (owner instanceof TemplateRule && ((TemplateRule) owner).isDeclaredStreamable()) {
-            return expr;
-        }
-        if (expr instanceof CompiledExpression || expr instanceof Literal || expr instanceof VariableReference || expr instanceof ByteCodeCandidate) {
-            return expr;
-        }
-        final ByteCodeCandidate candidate = new ByteCodeCandidate(owner, expr, objectName, requiredEvaluationModes);
-        candidate.setCountDown(config.getCountDown());
-        if (config.getBooleanProperty(Feature.MONITOR_HOT_SPOT_BYTE_CODE)) {
-            candidate.setByteCodeMonitor(((EnterpriseConfiguration)config).obtainByteCodeMonitor());
-        }
-        return candidate;
-    }
-
-    @Override
-    public void injectByteCodeCandidates(Expression expression) {
-        if (getOptimizerOptions().isSet(OptimizerOptions.BYTE_CODE) && config.getBooleanProperty(Feature.GENERATE_BYTE_CODE)) {
-            if (expression instanceof FilterExpression) {
-                BinaryExpression owner = (BinaryExpression) expression;
-                Operand actionOp = owner.getRhs();
-                Expression action = actionOp.getChildExpression();
-
-                owner.setRhsExpression(
-                        makeByteCodeCandidate(actionOp, action, expression.getExpressionName(), Expression.EFFECTIVE_BOOLEAN_VALUE)
-                );
-            } else if (expression instanceof ForExpression) {
-                ForExpression owner = (ForExpression) expression;
-                Operand actionOp = owner.getActionOp();
-                Expression action = actionOp.getChildExpression();
-
-                owner.setAction(
-                        makeByteCodeCandidate(actionOp, action, expression.getExpressionName(), 0)
-                );
-            } else if (expression instanceof TryCatch) {
-                TryCatch owner = (TryCatch) expression;
-                Operand actionOp = owner.getTryOperand();
-                Expression action = actionOp.getChildExpression();
-
-                actionOp.setChildExpression(
-                        makeByteCodeCandidate(actionOp, action, expression.getExpressionName(), 0)
-                );
-            } else if (expression instanceof SortExpression) {
-                SortKeyDefinitionList skdl = ((SortExpression) expression).getSortKeyDefinitionList();
-                for (SortKeyDefinition skd : skdl) {
-                    Operand sk = skd.getSortKeyOperand();
-                    sk.setChildExpression(
-                            makeByteCodeCandidate(sk, sk.getChildExpression(), expression.getExpressionName(), 0)
-                    );
-                }
-            } else if (expression instanceof StreamInstr) {
-                return;
-            }
-            for (Operand o : expression.operands()) {
-                injectByteCodeCandidates(o.getChildExpression());
-            }
-        }
-    }
-
-//#endif
 
     @Override
     public Expression optimizeNumberInstruction(NumberInstruction ni, ContextItemStaticInfo contextInfo) {

@@ -10,7 +10,6 @@ import net.sf.saxon.lib.DirectResourceResolver;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.*;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.trans.*;
@@ -284,7 +283,6 @@ public class SerializerFactoryPE extends SerializerFactory {
                 throw XPathException.makeXPathException(e);
             }
             CompilerInfo compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());
-            compilerInfo.setGenerateByteCode(config.isGenerateByteCode(HostLanguage.XSLT));
             compilerInfo.setTargetEdition(config.getEditionCode());
             compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
             next = Compilation.compileSingletonPackage(config, compilerInfo, source);

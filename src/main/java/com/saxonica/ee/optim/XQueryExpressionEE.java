@@ -1,7 +1,6 @@
 
 package com.saxonica.ee.optim;
 
-import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.watch.StreamWatch;
 import com.saxonica.ee.stream.watch.Watch;
@@ -16,9 +15,7 @@ import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.expr.parser.PathMap;
-import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.lib.StandardLogger;
@@ -43,7 +40,7 @@ import java.util.*;
 
 /**
  * Saxon-EE version of XQueryExpression. Supports additional EE features including
- * XQuery update, bytecode generation, document projection, streaming
+ * XQuery update, document projection, streaming
  */
 
 
@@ -117,33 +114,6 @@ public class XQueryExpressionEE extends XQueryExpression {
         }
 
         boolean isUpdatingExpression = mainModule.isUpdating() && expression.isUpdatingExpression();
-
-        if (config.getConfigurationProperty(Feature.GENERATE_BYTE_CODE)
-                && config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY)
-                && !streaming
-                && !isUpdatingExpression) {
-
-            Optimizer optimizer = config.obtainOptimizer();
-//#if BYTECODE == true
-            Expression cexp;
-            if (config.getCountDown() == 0) {
-                if (config.isTiming()) {
-                    config.getLogger().info("Generating byte code...");
-                }
-                CompilerService compilerService = new CompilerService(config, HostLanguage.XQUERY);
-                cexp = optimizer.compileToByteCode(compilerService, getExpression(), "main",
-                                                   Expression.PROCESS_METHOD | Expression.ITERATE_METHOD);
-            } else {
-                optimizer.injectByteCodeCandidates(getExpression());
-                cexp = optimizer.makeByteCodeCandidate(this, getExpression(),
-                                                       "main", Expression.PROCESS_METHOD | Expression.ITERATE_METHOD);
-            }
-            if (cexp != null) {
-                expression = cexp;
-                ExpressionTool.copyLocationInfo(exp, expression);
-            }
-            //#endif
-        }
 
         isUpdating = isUpdatingExpression;
     }

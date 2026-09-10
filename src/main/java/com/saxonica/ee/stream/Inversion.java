@@ -1,6 +1,5 @@
 package com.saxonica.ee.stream;
 
-import com.saxonica.ee.bytecode.ByteCodeCandidate;
 import com.saxonica.ee.stream.adjunct.StreamingAdjunct;
 import com.saxonica.ee.stream.feed.CopyOfFeed;
 import com.saxonica.ee.stream.feed.FeedMaker;
@@ -120,11 +119,6 @@ public class Inversion {
         Expression firstStreamingChild = null;
         for (Operand info : parent.operands()) {
             Expression child = info.getChildExpression();
-            //#if BYTECODE==true
-            if (child instanceof ByteCodeCandidate) {
-                child = ((ByteCodeCandidate)child).getBaseExpression();
-            }
-            //#endif
             if (info.hasSameFocus()) {
                 Sweep sweep = Streamability.getSweep(child);
                 if (sweep == Sweep.CONSUMING) {

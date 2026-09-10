@@ -48,7 +48,7 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
 
     public static void usage() {
         System.err.println("java com.saxonica.testdriver.QT3TestSuiteDriverPE testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
-                                   " [-t:testNamePattern] [-unfolded] [-bytecode:on|off|debug] [-tree] [-lang:XP20|XP30|XQ10|XQ30]");
+                                   " [-t:testNamePattern] [-unfolded] [-tree] [-lang:XP20|XP30|XQ10|XQ30]");
 
     }
 
@@ -105,7 +105,7 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
         public Expression inject(Expression exp) {
             if (exp instanceof Literal) {
                 if (exp instanceof StringLiteral && ((StringLiteral)exp).getString().toString().startsWith("http://www.w3.org/")) {
-                    // This is to avoid dynamic computation of Collation uris, which tends to disable bytecode generation
+                    // This is to avoid dynamic computation of Collation uris, which affects optimization paths
                     return exp;
                 }
                 StructuredQName name = new StructuredQName("saxon", NamespaceUri.SAXON, "lazy-literal");

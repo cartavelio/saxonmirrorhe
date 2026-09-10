@@ -1,18 +1,12 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.bytecode.simtype.AtomicTypeValidator;
-import com.saxonica.ee.bytecode.util.CannotCompileException;
-import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import com.saxonica.ee.validate.ValidationContext;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -33,14 +27,6 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     private Optional<Boolean> namespaceSensitive = Optional.empty();
     // Converter to be used for converting strings to this type
     private StringConverter stringConverter;
-    
-    //#if BYTECODE == true
-    private AtomicTypeValidator compiledValidator;
-    private ConversionRules compiledConversionRules;
-    private int counter = 0;
-    private int thresholdForCompilation = 100;
-    private boolean uncompilable = false;
-    //#endif
 
     private final static Set<Class<? extends Facet>> STRING_FACETS = newFacetSet();
     private final static Set<Class<? extends Facet>> BOOLEAN_FACETS = newFacetSet();
@@ -115,9 +101,6 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
 
     public UserAtomicType(EnterpriseConfiguration config) {
         setConfiguration(config);
-        //#if BYTECODE == true
-        thresholdForCompilation = config.getConfigurationProperty(Feature.THRESHOLD_FOR_COMPILING_TYPES);
-        //#endif
     }
 
     /**
@@ -369,26 +352,6 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
         return item instanceof AtomicValue && Type.isSubType(((AtomicValue) item).getItemType(), this);
     }
 
-    /**
-     * Ask whether it is possible to generate bytecode to perform validation
-     * against this atomic type
-     *
-     * @return true if bytecode generation is possible
-     */
-
-    public boolean isCompilable() {
-        BuiltInAtomicType base = (BuiltInAtomicType) getBuiltInBaseType();
-        if (base.isNamespaceSensitive()) {
-            return false;
-        }
-        for (Facet f : getExtendedFacetList()) {
-            if (f instanceof PreprocessFacet) {
-                return false;
-            }
-        }
-        return true;
-    }
-
 
     /**
      * Check whether a given input string is valid according to this SimpleType
@@ -408,37 +371,6 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     @Override
     public ValidationFailure validateContent(
             /*@NotNull*/ UnicodeString value, /*@Nullable*/ NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
-//#if BYTECODE == true
-        if (compiledValidator != null) {
-            if (rules == compiledConversionRules) {
-                return compiledValidator.validate(value);
-            }
-        } else if (!uncompilable) {
-            uncompilable = !isCompilable();
-        }
-        if (!uncompilable && counter++ >= thresholdForCompilation) {
-            Configuration config = getConfiguration();
-            if (config.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION) &&
-                    config.getBooleanProperty(Feature.GENERATE_BYTE_CODE)) {
-                try {
-                    compiledValidator = new CompilerService(config, HostLanguage.XSLT).compileAtomicValidator(this, rules);
-                    compiledConversionRules = rules;
-                    if (compiledValidator != null) {
-                        if (config.getBooleanProperty(Feature.DEBUG_BYTE_CODE)) {
-                            config.getLogger().info("Compiled bytecode for type " + getDescription());
-                        }
-                        return compiledValidator.validate(value);
-                    }
-                } catch (CannotCompileException e) {
-                    //assert false;
-                    thresholdForCompilation = Integer.MAX_VALUE;
-                    uncompilable = true;
-                }
-            } else {
-                uncompilable = true;
-            }
-        }
-//#endif
         StringConverter converter = getStringConverter(rules);
         if (isNamespaceSensitive()) {
             if (nsResolver == null) {
@@ -677,15 +609,6 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
         return Collections.singletonList(this);
     }
 
-    /**
-     * Say that compilation to bytecode for this type has failed, and should not
-     * be attempted again
-     * @param flag true if bytecode generation has failed
-     */
-
-//    public void setUncompilable(boolean flag) {
-//        uncompilable = flag;
-//    }
 
 }
 

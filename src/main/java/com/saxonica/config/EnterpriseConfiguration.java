@@ -1,7 +1,5 @@
 package com.saxonica.config;
 
-import com.saxonica.ee.bytecode.ByteCodeMonitor;
-import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.config.*;
 import com.saxonica.ee.extfn.VendorFunctionSetEE;
 import com.saxonica.ee.extfn.js.IXSLElementFactory;
@@ -92,7 +90,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     private SchemaURIResolver schemaURIResolver = null;
     private final SchemaURIResolver standardSchemaResolver;
     private transient PreparedSchema superSchema;
-    private String debugByteCodeDirectory = "Saxon-bytecode";
     private int resultDocumentThreadsLimit = Runtime.getRuntime().availableProcessors();
     private int thresholdForCompilingTypes = 100;
     private int thresholdForInliningFunctions = 100;
@@ -101,9 +98,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     private final ConcurrentHashMap<String, RegularExpression> regexCache = new ConcurrentHashMap<>();
     private long regexAttempts = 0;
     private MultithreadingFactory multithreadingFactory;
-    //#if BYTECODE == true
-        private ByteCodeMonitor byteCodeMonitor;
-    //#endif
 
 
     /**
@@ -114,7 +108,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         super();
         multithreadingFactory = new MultithreadingFactory(this);
         internalSetBooleanProperty(FeatureCode.ALLOW_MULTITHREADING, FeatureKeys.ALLOW_MULTITHREADING, true);
-        internalSetBooleanProperty(FeatureCode.GENERATE_BYTE_CODE, FeatureKeys.GENERATE_BYTE_CODE, true);
         setStaticQueryContextFactory(new StaticQueryContextFactory() {
             @Override
             public StaticQueryContext newStaticQueryContext(Configuration config, boolean copyFromDefault) {
@@ -167,39 +160,15 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         String name = featureData.uri;
         switch (code) {
             case FeatureCode.GENERATE_BYTE_CODE: {
-                if (value instanceof Boolean) {
-                    internalSetBooleanProperty(code, name, value);
-                } else if ("true".equals(value) || "on".equals(value) || "yes".equals(value) || "1".equals(value)) {
-                    internalSetBooleanProperty(code, name, true);
-                    byteCodeThreshold = 0;
-                } else if ("false".equals(value) || "off".equals(value) || "no".equals(value) || "0".equals(value)) {
-                    internalSetBooleanProperty(code, name, false);
-                } else if (value instanceof Integer) {
-                    internalSetBooleanProperty(code, name, true);
-                    byteCodeThreshold = (Integer) value;
-                } else {
-                    internalSetBooleanProperty(code, name, true);
-                    try {
-                        byteCodeThreshold = Integer.parseInt(value.toString());
-                    } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("Value of " + name + " must be a boolean or an integer");
-                    }
-                }
+                // no action, obsolete
                 break;
             }
             case FeatureCode.THRESHOLD_FOR_HOTSPOT_BYTE_CODE: {
-
-                int val = requireInteger(name, value);
-                if (val <= 0) {
-                    internalSetBooleanProperty(code, name, false);
-                } else {
-                    internalSetBooleanProperty(code, name, true);
-                    byteCodeThreshold = val;
-                }
+                // no action, obsolete
                 break;
             }
             case FeatureCode.DEBUG_BYTE_CODE_DIR: {
-                debugByteCodeDirectory = value.toString();
+                // no action, obsolete
                 break;
             }
             case FeatureCode.OCCURRENCE_LIMITS: {
@@ -290,7 +259,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
         switch (code) {
             case FeatureCode.DEBUG_BYTE_CODE_DIR:
-                return debugByteCodeDirectory;
+                return ""; // obsolete
             case FeatureCode.OCCURRENCE_LIMITS:
                 return (occurrenceLimits[0] + "," + occurrenceLimits[1]);
             case FeatureCode.THRESHOLD_FOR_COMPILING_TYPES:
@@ -1817,43 +1786,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
 
-    /**
-     * Ask whether bytecode should be generated. The default setting
-     * is true in Saxon Enterprise Edition and false in all other cases. Setting the option to
-     * true has no effect if Saxon-EE is not available (but if it is set to true, this method will
-     * return true). Setting the option to false in Saxon-EE
-     * is permitted if for some reason bytecode generation is to be suppressed (one possible reason
-     * is to improve compilation performance at the expense of evaluation performance).
-     *
-     * @param hostLanguage one of XSLT or XQUERY
-     * @return true if the option is switched on
-     */
-
-    @Override
-    public boolean isGenerateByteCode(HostLanguage hostLanguage) {
-        return getBooleanProperty(Feature.GENERATE_BYTE_CODE) &&
-                isLicensedFeature(hostLanguage == HostLanguage.XSLT ?
-                                          LicenseFeature.ENTERPRISE_XSLT :
-                                          LicenseFeature.ENTERPRISE_XQUERY);
-    }
-
-    /**
-     * Ask whether bytecode should be generated in Just-In-time compilation and therefore deferring the byte code generation. The default setting
-     * is false. Setting the option to
-     * true has no effect if Saxon-EE is not available (but if it is set to true, this method will
-     * return true). Setting the option to false in Saxon-EE
-     * is permitted and therefore byte code generation will be generated in the compile phase.
-     *
-     * @param hostLanguage one of XSLT or XQUERY
-     * @return true if the option is switched on
-     */
-    @Override
-    public boolean isDeferredByteCode(HostLanguage hostLanguage) {
-        return byteCodeThreshold > 0 &&
-                isLicensedFeature(hostLanguage == HostLanguage.XSLT ?
-                                          LicenseFeature.ENTERPRISE_XSLT :
-                                          LicenseFeature.ENTERPRISE_XQUERY);
-    }
 
     @Override
     public boolean isJITEnabled() {
@@ -2179,54 +2111,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return super.makeCompilerInfo();
     }
 
-//#if BYTECODE == true
 
-    /**
-     * Make a CompilerService object, to handle byte code generation, or null if byte code
-     * generation is not available
-     *
-     * @param hostLanguage for example Configuration.XSLT
-     * @return a CompilerService, or null
-     */
-    @Override
-    public CompilerService makeCompilerService(HostLanguage hostLanguage) {
-        return new CompilerService(this, hostLanguage);
-    }
-
-    /**
-     * Obtain a ByteCodeMonitor for monitoring hotspot bytecode generation
-     *
-     * @return the existing ByteCodeMonitor if there is one, or a new one if not
-     */
-
-    public ByteCodeMonitor obtainByteCodeMonitor() {
-        if (byteCodeMonitor == null) {
-            byteCodeMonitor = new ByteCodeMonitor();
-        }
-        return byteCodeMonitor;
-    }
-
-    /**
-     * Generate a report on byte code instrumentation to a specified file
-     *
-     * @param fileName the specified file name
-     */
-
-    @Override
-    public void createByteCodeReport(String fileName) {
-        try {
-            PrintWriter w = new PrintWriter(new File(fileName));
-            if (byteCodeMonitor != null) {
-                byteCodeMonitor.report(w);
-            } else {
-                w.println("<no-hot-spot-byte-code-generated/>");
-            }
-            w.close();
-        } catch (FileNotFoundException e) {
-            System.err.println("Unable to produce bytecode monitoring report: " + e.getMessage());
-        }
-    }
-//#endif
 
 }
 

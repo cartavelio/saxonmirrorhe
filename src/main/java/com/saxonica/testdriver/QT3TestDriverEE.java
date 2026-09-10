@@ -42,7 +42,7 @@ public class QT3TestDriverEE extends QT3TestDriverPE {
 
     public static void usage() {
         System.err.println("java com.saxonica.testdriver.QT3TestSuiteDriverEE testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
-                                   " [-t:testNamePattern] [-unfolded] [-bytecode:on|off|debug] [-tree] [-lang:XP20|XP30|XQ10|XQ30]");
+                                   " [-t:testNamePattern] [-unfolded] [-tree] [-lang:XP20|XP30|XQ10|XQ30]");
 
     }
 
