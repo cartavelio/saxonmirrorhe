@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.resource;
 
 import net.sf.saxon.Configuration;
@@ -10,8 +17,17 @@ import org.xml.sax.XMLReader;
 
 import javax.xml.transform.stream.StreamSource;
 
+/**
+ * An extension of the {@link StreamSource} object providing a {@link #deliver(Receiver, ParseOptions)} method
+ * so that the contents of the source can be delivered to a supplied {@link Receiver}
+ */
+
 public class ActiveStreamSource extends StreamSource implements ActiveSource {
 
+    /**
+     * Create an <code>ActiveStreamSource</code> wrapping a supplied {@link StreamSource}
+     * @param in the supplied {@link StreamSource}
+     */
     public ActiveStreamSource(StreamSource in) {
         setInputStream(in.getInputStream());
         setReader(in.getReader());

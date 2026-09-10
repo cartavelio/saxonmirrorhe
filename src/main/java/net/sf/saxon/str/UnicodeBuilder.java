@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.str;
 
 import net.sf.saxon.om.Item;
@@ -7,7 +14,6 @@ import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 /**
  * Builder class to construct a UnicodeString by appending text incrementally
@@ -16,19 +22,20 @@ import java.util.function.Consumer;
 public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     ZenoString content = ZenoString.of(EmptyUnicodeString.getInstance());
-    Consumer<UnicodeString> segmentConsumer = null;
 
+    /**
+     * Create a Unicode builder
+     */
     public UnicodeBuilder() {
 
     }
 
+    /**
+     * Create a Unicode builder with an initial space allocation
+     * @param allocate the initial space allocation (currently ignored)
+     */
     public UnicodeBuilder(int allocate) {  // used by bytecode, for compatibility with StringBuilder
 
-    }
-
-    public UnicodeBuilder(Consumer<UnicodeString> consumer) {
-        //segments = new ArrayList<>();
-        segmentConsumer = consumer;
     }
 
     /**

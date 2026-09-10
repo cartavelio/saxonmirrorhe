@@ -1,14 +1,27 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2022 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.str;
 
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntRangeToIntMap;
 
+/**
+ * Class to perform lowercase conversion.
+ * <p>Note we could use the built-in Java function (the rules are compatible with the XPath rules), but
+ * we would then need to convert the UnicodeString to a Java String.</p>
+ */
+
 public class ToLower {
 
-    private static IntRangeToIntMap ranges = new IntRangeToIntMap(650);
-    private static IntHashMap<String> specials = new IntHashMap<>(10);  // Actually there's only one, but keep it general
-    private static char[] latin = new char[256];
+    private final static IntRangeToIntMap ranges = new IntRangeToIntMap(650);
+    private final static IntHashMap<String> specials = new IntHashMap<>(10);  // Actually there's only one, but keep it general
+    private final static char[] latin = new char[256];
 
     private static void range(int start, int end, int delta) {
         ranges.addEntry(start, end, delta);
