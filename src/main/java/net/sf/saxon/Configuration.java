@@ -1522,7 +1522,7 @@ public class Configuration implements SourceResolver, NotationSet {
     protected FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
         FunctionLibraryList result = new FunctionLibraryList();
         result.addFunctionLibrary(VendorFunctionSetHE.getInstance());
-        result.addFunctionLibrary(MathFunctionSet.getInstance());
+        result.addFunctionLibrary(MathFunctionSet.getInstance(version));
         result.addFunctionLibrary(MapFunctionSet.getInstance(version));
         result.addFunctionLibrary(ArrayFunctionSet.getInstance(version));
         result.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
@@ -1595,7 +1595,7 @@ public class Configuration implements SourceResolver, NotationSet {
             } else if (ns.equals(NamespaceUri.SCHEMA)) {
                 lib = new ConstructorFunctionLibrary(this);
             } else if (ns.equals(NamespaceUri.MATH)) {
-                lib = MathFunctionSet.getInstance();
+                lib = MathFunctionSet.getInstance(version);
             } else if (ns.equals(NamespaceUri.MAP_FUNCTIONS)) {
                 lib = MapFunctionSet.getInstance(version);
             } else if (ns.equals(NamespaceUri.ARRAY_FUNCTIONS)) {

@@ -299,7 +299,7 @@ public class PackageLoaderHE implements IPackageLoader {
         addVendorFunctionLibrary(functionLibrary, config);
         functionLibrary.addFunctionLibrary(MapFunctionSet.getInstance(xpathVersion));
         functionLibrary.addFunctionLibrary(ArrayFunctionSet.getInstance(xpathVersion));
-        functionLibrary.addFunctionLibrary(MathFunctionSet.getInstance());
+        functionLibrary.addFunctionLibrary(MathFunctionSet.getInstance(xpathVersion));
         //functionLibrary.addFunctionLibrary(overriding);
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(pack, true));
 
@@ -2332,7 +2332,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 StructuredQName qName = StructuredQName.fromEQName((name));
                 NamespaceUri uri = qName.getNamespaceUri();
                 if (uri == NamespaceUri.MATH) {
-                    f = MathFunctionSet.getInstance().makeFunction(qName.getLocalPart(), arity);
+                    f = MathFunctionSet.getInstance(40).makeFunction(qName.getLocalPart(), arity);
                 } else if (uri == NamespaceUri.MAP_FUNCTIONS) {
                     f = MapFunctionSet.getInstance(40).makeFunction(qName.getLocalPart(), arity);
                 } else if (uri == NamespaceUri.ARRAY_FUNCTIONS) {
@@ -2494,7 +2494,7 @@ public class PackageLoaderHE implements IPackageLoader {
             StructuredQName name = loader.getQNameAttribute(element, "name");
             Expression exp = null;
             if (name.hasURI(NamespaceUri.MATH)) {
-                exp = MathFunctionSet.getInstance().makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
+                exp = MathFunctionSet.getInstance(40).makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
             } else if (name.hasURI(NamespaceUri.MAP_FUNCTIONS)) {
                 exp = MapFunctionSet.getInstance(40).makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
             } else if (name.hasURI(NamespaceUri.ARRAY_FUNCTIONS)) {
