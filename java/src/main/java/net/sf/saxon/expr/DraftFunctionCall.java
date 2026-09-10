@@ -285,6 +285,10 @@ public class DraftFunctionCall extends DraftExpression {
                 FunctionItem functionItem = lib.getFunctionItem(sn2, queryModule);
                 return new DynamicPartialApply(new FunctionLiteral(functionItem), fc.getArguments());
             }
+        } else if (hasPlaceholders()) {
+            // For example, this happens with test xqhof10, xs:NCName(?), where bind() returns a CastExpression
+            FunctionItem functionItem = lib.getFunctionItem(functionName, queryModule);
+            return new DynamicPartialApply(new FunctionLiteral(functionItem), getArguments());
         }
 
         exp.setRetainedStaticContext(getRetainedStaticContext());

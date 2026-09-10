@@ -83,7 +83,7 @@ public abstract class PseudoExpression extends Expression {
      */
     @Override
     public Elaborator getElaborator() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Cannot evaluate pseudo-expression " + getClass().getName());
     }
 }
 
