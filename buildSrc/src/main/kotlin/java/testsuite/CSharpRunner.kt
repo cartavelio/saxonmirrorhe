@@ -30,6 +30,8 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   abstract val language: Property<String>
   @get:Input
   abstract val edition: Property<String>
+  @get:Input
+  abstract val showOutput: Property<Boolean>
   @get:InputDirectory
   abstract val suiteDir: DirectoryProperty
   @get:InputFile
@@ -81,16 +83,6 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   fun execute() {
     val stdOutput = ByteArrayOutputStream()
     val errOutput = ByteArrayOutputStream()
-    var showOutput = true
-
-    for (task in project.gradle.taskGraph.getAllTasks()) {
-      // If the testsuites task(s) are in the graph, assume we're doing
-      // a longer run and we don't want to see all the detailed output
-      if (task.name == "testsuites") {
-        showOutput = false
-        break;
-      }
-    }
 
     val relprefix = "${arch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
     val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
@@ -119,7 +111,7 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
     println(listOf(driverargs))
 
     ex.exec {
-      if (!showOutput) {
+      if (!showOutput.get()) {
         println("(buffering output)")
         standardOutput = stdOutput
         errorOutput = errOutput
@@ -130,7 +122,7 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
       commandLine = driverargs
     }
 
-    if (!showOutput) {
+    if (!showOutput.get()) {
       println("==> ${reportDir.get()}/stderr.txt")
       var outputStream = PrintStream(File("${reportDir.get()}/stderr.txt"))
       outputStream.println(driverargs.joinToString(" "))

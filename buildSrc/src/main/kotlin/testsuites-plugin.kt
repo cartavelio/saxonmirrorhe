@@ -230,6 +230,7 @@ abstract class TestSuitesExtension
       dependsOn("dotnetBuild")
       dependsOn("dotnetBuildTestDrivers")
       this.edition = plugin.edition
+      this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
       this.suite = suite
       this.language = language
       this.suiteDir = suiteDir(suite)
