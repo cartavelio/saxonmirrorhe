@@ -72,6 +72,12 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
         return e;
     }
 
+    public final SystemFunctionCall makeTrueFunctionCall(Expression... arguments) {
+        SystemFunctionCall e = new SystemFunctionCall(this, arguments);
+        e.setRetainedStaticContext(getRetainedStaticContext());
+        return e;
+    }
+
     /**
      * Make a system function item (one in the standard function namespace).
      *

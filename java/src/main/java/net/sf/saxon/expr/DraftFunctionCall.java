@@ -9,13 +9,12 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.functions.IContextAccessorFunction;
-import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.functions.registry.XPath31FunctionSet;
+import net.sf.saxon.functions.hof.DynamicPartialApply;
+import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryParser;
@@ -23,14 +22,12 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpUsing;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.QNameValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 
 /**
@@ -240,16 +237,10 @@ public class DraftFunctionCall extends DraftExpression {
                     .withLocation(getLocation());
         }
 
-        for (Operand op : operanda) {
-            if (op.getChildExpression() instanceof PlaceHolder) {
-                // If there are any placeholders, make a partial function application expression
-                return makePartialApplication(qName);
-            }
-        }
-
-        // Make a function call expression (and return it)
-
         SymbolicName.F functionName = new SymbolicName.F(qName, arity);
+
+        // Make a function call expression
+
         List<String> reasons = new ArrayList<>();
         Expression[] args = getArguments();
         Expression exp = lib.bind(functionName, args, keywordArgs, queryModule, reasons);
@@ -262,33 +253,87 @@ public class DraftFunctionCall extends DraftExpression {
             }
             throw new XPathException(sb.toString(), "XPST0017").asStaticError();
         }
+
+        if (exp instanceof FunctionCall fc) {
+
+            // Inject any default value expressions
+            for (int i = 0; i < fc.getArguments().length; i++) {
+                if (fc.getArg(i) instanceof DefaultedArgumentExpression) {
+                    if (fc instanceof UserFunctionCall ufc) {
+                        UserFunction uf = ufc.getFunction();
+                        Supplier<Expression> def = uf.getParameterDefinitions()[i].getDefaultValueExpression();
+                        if (def == null) {
+                            throw new XPathException("Argument " + (i+1) + " has no default value in function " + qName.getEQName(), "XPST0017");
+                        }
+                        fc.setArg(i, def.get().copy(new RebindingMap()));
+                    } else if (fc instanceof SystemFunctionCall sfc) {
+                        Supplier<Expression> def = sfc.getTargetFunction().getDetails().getDefaultValueExpression(i);
+                        fc.setArg(i, def==null ? Literal.makeEmptySequence() : def.get());
+                    } else {
+                        throw new UnsupportedOperationException();
+                    }
+                }
+                adoptChildExpression(fc.getArg(i));
+            }
+
+            // If there are placeholders as well as keywords then we take advantage of the fact that
+            // the call on bind() will have dealt with mapping keyword arguments to positional arguments,
+            // and evaluating defaulted arguments
+
+            if (hasPlaceholders()) {
+                SymbolicName.F sn2 = new SymbolicName.F(functionName.getComponentName(), fc.getArguments().length);
+                FunctionItem functionItem = lib.getFunctionItem(sn2, queryModule);
+                return new DynamicPartialApply(new FunctionLiteral(functionItem), fc.getArguments());
+            }
+        }
+
         exp.setRetainedStaticContext(getRetainedStaticContext());
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
 
-    private Expression makePartialApplication(StructuredQName name) throws XPathException {
-
-        FunctionLibrary lib = queryModule.getFunctionLibrary();
-        int arity = operanda.length;
-        SymbolicName.F sn = new SymbolicName.F(name, arity);
-        FunctionItem target = lib.getFunctionItem(sn, queryModule);
-        if (target == null) {
-            String msg = "Cannot find a " + arity
-                    + "-argument function named " + name.getEQName() + "()";
-            throw new XPathException(msg, "XPST0017").asStaticError();
+    private boolean hasPlaceholders() {
+        for (Operand op : operanda) {
+            if (op.getChildExpression() instanceof PlaceHolder) {
+                return true;
+            }
         }
-        if (target instanceof IContextAccessorFunction) {
-            // For a context-dependent function, return a call on function-lookup(), which saves the context
-            SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
-            lookup.setRetainedStaticContext(queryModule.makeRetainedStaticContext());
-            return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(name, BuiltInAtomicType.QNAME)),
-                                           Literal.makeLiteral(Int64Value.makeIntegerValue(arity)));
+        return false;
+    }
 
-        }
-        Expression targetExp = XPathParser.makeNamedFunctionReference(name, target);
-        ExpressionTool.copyLocationInfo(this, targetExp);
-        return XPathParser.makePartialApplication(targetExp, getArguments(), keywordArgs);
+    private boolean hasKeywordArgs() {
+        return keywordArgs != null && !keywordArgs.isEmpty();
+    }
+
+    private Expression makePartialApplication(Expression functionCall) throws XPathException {
+
+        return null;
+
+//        if (functionCall instanceof FunctionCall) {
+//            // This will be a function call that includes placeholders in the argument list
+//            // For example, if we have a call such as f(1, 2, ?), then we construct a function
+//            // item with one argument $X whose effect is to call f(1, 2, $X)
+//        }
+//
+//        FunctionItem target = lib.getFunctionItem(sn, queryModule);
+//        if (target == null) {
+//            String msg = "Cannot find a " + arity
+//                    + "-argument function named " + name.getEQName() + "()";
+//            throw new XPathException(msg, "XPST0017").asStaticError();
+//        }
+//        if (target instanceof IContextAccessorFunction) {
+//            // For a context-dependent function, return a call on function-lookup(), which saves the context
+//            SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
+//            lookup.setRetainedStaticContext(queryModule.makeRetainedStaticContext());
+//            return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(name, BuiltInAtomicType.QNAME)),
+//                                           Literal.makeLiteral(Int64Value.makeIntegerValue(arity)));
+//
+//        }
+//        Expression targetExp = XPathParser.makeNamedFunctionReference(name, target);
+//        ExpressionTool.copyLocationInfo(this, targetExp);
+//
+//
+//        return new DynamicPartialApply(targetExp, getArguments());
     }
 
 

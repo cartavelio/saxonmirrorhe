@@ -1,7 +1,6 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 
@@ -18,35 +17,20 @@ import net.sf.saxon.trans.XPathException;
 
 public class PlaceHolder extends PseudoExpression {
 
-    private final StructuredQName paramName;
-    private final int argumentPosition;
     private final int placeHolderSequence;
 
     /**
      * Create a placeholder, representing a "?" in a partial function application
-     * @param paramName the keyword associated with the placeholder, or null if there is no keyword
-     * @param argumentPosition the 0-based position of the placeholder in the sequence of arguments
-     *                         passed in the partial function call
      * @param placeHolderSequence the 0-based position of this placeholder among all the
      *                            placeholders in the partial function call
      */
 
-    public PlaceHolder(StructuredQName paramName, int argumentPosition, int placeHolderSequence) {
-        this.paramName = paramName;
-        this.argumentPosition = argumentPosition;
+    public PlaceHolder(int placeHolderSequence) {
         this.placeHolderSequence = placeHolderSequence;
-    }
-
-    public int getArgumentPosition() {
-        return argumentPosition;
     }
 
     public int getPlaceHolderSequence() {
         return placeHolderSequence;
-    }
-
-    public StructuredQName getParamName() {
-        return paramName;
     }
 
     /**
@@ -72,7 +56,7 @@ public class PlaceHolder extends PseudoExpression {
      */
     @Override
     public Expression copy(RebindingMap rebindings) {
-        return this;
+        return new PlaceHolder(placeHolderSequence);
     }
 }
 

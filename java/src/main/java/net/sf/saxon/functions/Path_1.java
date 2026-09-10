@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * Implement the fn:path function with one or two arguments
  */
-public class Path_1 extends SystemFunction implements IContextAccessorFunction {
+public class Path_1 extends SystemFunction /*implements IContextAccessorFunction */ {
 
     public static OptionsParameter getOptionDetails() {
 //        ItemType inScopeNamespacesResult = new MapType(
@@ -51,10 +51,10 @@ public class Path_1 extends SystemFunction implements IContextAccessorFunction {
         return pathOptions;
     }
 
-    @Override
-    public FunctionItem bindContext(XPathContext context) throws XPathException {
-        return null;
-    }
+//    @Override
+//    public FunctionItem bindContext(XPathContext context) throws XPathException {
+//        return null;
+//    }
 
     /**
      * Call the function.

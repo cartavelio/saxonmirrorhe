@@ -549,7 +549,8 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                 Supplier<Expression> expr = declaredFunction.getParameterDefinitions()[i].getDefaultValueExpression();
                 extendedArguments[i] = expr.get().makeElaborator().eagerly().evaluate(context);
             }
-            return userFunction.call(context, extendedArguments);
+            XPathContextMajor c2 = userFunction.makeNewContext(context, userFunction);
+            return userFunction.call(c2, extendedArguments);
         }
 
     }

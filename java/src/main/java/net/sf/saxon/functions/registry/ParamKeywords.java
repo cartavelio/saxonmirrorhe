@@ -121,8 +121,8 @@ public class ParamKeywords {
         fnParamNames.put("doc-available", "source|options");
         fnParamNames.put("document-uri", "node");
         fnParamNames.put("duplicate-values", "values|collation");
-        fnParamNames.put("element-number", "values|node");
-        fnParamNames.put("element-with-id", "element|root|predicate");
+        //fnParamNames.put("element-number", "values|node");
+        fnParamNames.put("element-with-id", "values|node");
         fnParamNames.put("element-to-map", "element|options");
         fnParamNames.put("element-to-map-plan", "input");
         fnParamNames.put("empty", "input");

@@ -1208,6 +1208,8 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
                         computeSpecialProperties();
     }
 
+
+
     /**
      * Reset the static properties of the expression to -1, so that they have to be recomputed
      * next time they are used.

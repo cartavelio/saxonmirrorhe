@@ -9,53 +9,34 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
-import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.functions.registry.FunctionDefinition;
-import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
+import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.jiter.ConcatenatingIterable;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * This expression class implements the operation of currying (or performing partial application) of a function.
- * That is, it takes a function and a set of argument bindings as input, and produces a new function as output.
- * The result of evaluating a {@code PartialApply} expression is generally a {@link CurriedFunction}, which is a type
+ * This expression class implements the operation of currying (or performing partial application) of a function item.
+ * That is, it takes a function item and a set of argument bindings as input, and produces a new function as output.
+ * The result of evaluating a {@code DynamicPartialApply} expression is generally a {@link CurriedFunction}, which is a type
  * of {@link FunctionItem}.
- * 
- * <p>Here are some notes on how partial function application works.</p>
- * 
- * <p>A static function call that includes placeholders (for example fn:contains(?, 'e')
- * is handled by the XPath parser as follows:</p>
  *
- * <ul>
- *       <li>{@code Expression targetExp = XPathParser.makeNamedFunctionReference(name, target);}</li>
- *       <li>{@code return XPathParser.curryFunction(targetExp, args, placeMarkerArgs);}</li>
- * </ul>
+ * This class handles dynamic function calls where one or more of the supplied arguments is a "?" placeholder.
  *
- * <pSo we first create a named function reference {@code fn:contains#2}, and then
- *       pass this to {@code curryFunction}, passing (a) the function reference, (b) the
- *       arguments as supplied, with null representing a placeholder `?`, and
- *       (c) a list containing for each placeholder arguments, either its integer position
- *       if supplied positionally, or its name (keyword) if written as a keyword argument.</p>
- *      
- * <p>The call {@code XPathParser.curryFunction} delivers a {@link PartialApply} expression.</p>
- *      
- * <p>Evaluation of the {@link PartialApply} expression returns a function item, specifically
+ * <p>Evaluation of the {@link DynamicPartialApply} expression returns a function item, specifically
  *       a {@link CurriedFunction} instance. This implements the {@link FunctionItem} interface,
  *       and can therefore be called in the same way as any other function item, by means of a
  *       {@link DynamicFunctionCall}.</p>
@@ -66,44 +47,29 @@ import java.util.function.Supplier;
  *
  **/
 
-public class PartialApply extends Expression {
+public class DynamicPartialApply extends Expression {
 
     private final Operand functionItemOperand;
     private final Operand[] operanda;
-    private final ArrayList<PlaceHolder> placeHolders;
-    private final Map<StructuredQName, Integer> keywordArgs;
 
     /**
-     * Create a partial function application expression
+     * Create a dynamic partial function application expression
      *
      * @param functionItem   the expression that returns the function to be called
      * @param arguments      an array corresponding to the declared arguments of the base function, in order. Each entry
      *                       in the array is either an expression which is evaluated and bound to the corresponding
      *                       argument of the base function, or a {@link PlaceHolder} pseudo-expression.
-     * @param keywordArgs    if keywords are used in the function call, a mapping from keywords to the integer
-     *                       argument positions (0-based) where the keyword is used. May be null.
      */
 
-    public PartialApply(Expression functionItem, Expression[] arguments, Map<StructuredQName, Integer> keywordArgs) {
+    public DynamicPartialApply(Expression functionItem, Expression[] arguments) {
         functionItemOperand = new Operand(this, functionItem, OperandRole.INSPECT);
         adoptChildExpression(functionItem);
-        placeHolders = new ArrayList<>();
-        for (Expression argument : arguments) {
-            if (argument instanceof PlaceHolder ph) {
-                placeHolders.add(ph);
-            }
-        }
-        operanda = new Operand[arguments.length - placeHolders.size()];
-        this.keywordArgs = keywordArgs;
 
-        int j = 0;
+        operanda = new Operand[arguments.length];
         for (int i = 0; i < arguments.length; i++) {
-            if (!(arguments[i] instanceof PlaceHolder)) {
-                operanda[j] = new Operand(this, arguments[i], OperandRole.NAVIGATE);
-                positionMap[j] = i;
-                j++;
-            }
-            adoptChildExpression(arguments[i]);
+            Expression argCopy = arguments[i];
+            operanda[i] = new Operand(this, argCopy, OperandRole.NAVIGATE);
+            adoptChildExpression(argCopy);
         }
     }
 
@@ -116,7 +82,13 @@ public class PartialApply extends Expression {
     }
 
     public int getNumberOfPlaceHolders() {
-        return placeHolders.size();
+        int n = 0;
+        for (Operand o : operanda) {
+            if (o.getChildExpression() instanceof PlaceHolder) {
+                n++;
+            }
+        }
+        return n;
     }
 
 
@@ -158,7 +130,7 @@ public class PartialApply extends Expression {
                 new RoleDiagnostic(RoleDiagnostic.DYNAMIC_FUNCTION, getBaseExpression().toShortString(), 0);
 
         setBaseExpression(tc.staticTypeCheck(
-                getBaseExpression(), SequenceType.SINGLE_FUNCTION, role, visitor));
+                getBaseExpression(), SequenceType.FUNCTION_ITEM_SEQUENCE, role, visitor));
 
         return this;
     }
@@ -186,6 +158,8 @@ public class PartialApply extends Expression {
         return new SpecificFunctionType(argTypes, resultType);
     }
 
+
+
     /**
      * Compute the special properties of this expression. These properties are denoted by a bit-significant
      * integer, possible values are in class {@link StaticProperty}. The "special" properties are properties
@@ -201,7 +175,7 @@ public class PartialApply extends Expression {
 
     @Override
     public Iterable<Operand> operands() {
-        return Arrays.asList(operanda);
+        return new ConcatenatingIterable<>(functionItemOperand, Arrays.asList(operanda));
     }
 
     @Override
@@ -217,7 +191,7 @@ public class PartialApply extends Expression {
      */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof PartialApply pa2) {
+        if (other instanceof DynamicPartialApply pa2) {
             if (!getBaseExpression().isEqual(pa2.getBaseExpression())) {
                 return false;
             }
@@ -273,7 +247,7 @@ public class PartialApply extends Expression {
 
     @Override
     protected int computeCardinality() {
-        return StaticProperty.EXACTLY_ONE;
+        return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
     /*@NotNull*/
@@ -283,7 +257,7 @@ public class PartialApply extends Expression {
         for (int i = 0; i < operanda.length; i++) {
             boundArgumentsCopy[i] = operanda[i].getChildExpression().copy(rebindings);
         }
-        PartialApply exp = new PartialApply(getBaseExpression().copy(rebindings), boundArgumentsCopy);
+        DynamicPartialApply exp = new DynamicPartialApply(getBaseExpression().copy(rebindings), boundArgumentsCopy);
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
@@ -336,8 +310,8 @@ public class PartialApply extends Expression {
      */
 
     @Override
-    public FunctionItem evaluateItem(XPathContext context) throws XPathException {
-        return (FunctionItem)makeElaborator().elaborateForItem().eval(context);
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -359,92 +333,55 @@ public class PartialApply extends Expression {
      */
     @Override
     public Elaborator getElaborator() {
-        return new PartialApplyElaborator();
+        return new DynamicPartialApplyElaborator();
     }
 
-    private static class PartialApplyElaborator extends ItemElaborator {
+    private static class DynamicPartialApplyElaborator extends PullElaborator {
 
         @Override
-        public ItemEvaluator elaborateForItem() {
-            PartialApply expr = (PartialApply)getExpression();
-            ItemEvaluator functionEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
-//            final int len = expr.operanda.length + expr.getNumberOfPlaceHolders();
-//            SequenceEvaluator[] boundArgumentsEvaluators = new SequenceEvaluator[len];
-//            int[] unboundArgumentMap = new int[expr.getNumberOfPlaceHolders()];
-//            int j = 0;
-//            for (int i = 0; i < len; i++) {
-//                Expression boundArg = expr.operanda[i].getChildExpression();
-//                if (boundArg instanceof PlaceHolder) {
-//                    boundArgumentsEvaluators[i] = null;
-//                    unboundArgumentMap[j++] = ((PlaceHolder)boundArg).getArgumentPosition();
-//                } else {
-//                    boundArgumentsEvaluators[i] = boundArg.makeElaborator().eagerly();
-//                }
-//            }
-            final Map<StructuredQName, Integer> keywords =
-                    (expr.keywordArgs == null || expr.keywordArgs.isEmpty()) ? null : expr.keywordArgs; {
-//                final int len = expr.operanda.length + expr.getNumberOfPlaceHolders();
-//                SequenceEvaluator[] boundArgumentsEvaluators = new SequenceEvaluator[len];
-            Expression[] arguments = new Expression[len];
+        public PullEvaluator elaborateForPull() {
+            DynamicPartialApply expr = (DynamicPartialApply) getExpression();
+            PullEvaluator functionEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            final int len = expr.operanda.length;
+            SequenceEvaluator[] boundArgumentsEvaluators = new SequenceEvaluator[len];
+            final int phCount = expr.getNumberOfPlaceHolders();
+            int[] mapping = new int[phCount];
             for (int i = 0; i < len; i++) {
-                arguments[i] = expr.operanda[i].getChildExpression();
-            }
-            return context -> {
-                FunctionItem f = (FunctionItem) functionEval.eval(context);
-                assert f != null;
-                if (f.getArity() != len) {
-                    throw new XPathException(
-                            "The number of arguments supplied in the partial function application is " + len +
-                                    ", but the arity of the function item is " + f.getArity(), "XPTY0004");
-                }
-
-                Expression[] expandedArgs = arguments.clone();
-                int maxArity = fd.getNumberOfParameters();
-
-                // If there are keyword arguments, we first reposition them to the correct position in the argument sequence
-                if (expr.keywordArgs != null && !expr.keywordArgs.isEmpty()) {
-                    expandedArgs = new Expression[maxArity];
-                    int positionalArgs = arguments.length - keywords.size();
-                    System.arraycopy(arguments, 0, expandedArgs, 0, positionalArgs);
-                    for (Map.Entry<StructuredQName, Integer> entry : keywords.entrySet()) {
-                        StructuredQName key = entry.getKey();
-                        int argPos = entry.getValue();
-                        int paramPos = fd.getPositionOfParameter(key);
-                        if (paramPos < 0) {
-                            throw new XPathException("Keyword " + key +
-                                                             " does not match the name of any declared parameter of function "
-                                                             + fd.getFunctionName(), "XPST0142");
-                        }
-                        if (paramPos < positionalArgs) {
-                            throw new XPathException("Parameter " + key + " of function " + fd.getFunctionName() +
-                                                             " is supplied both by position and by keyword", "XPST0017");
-                        }
-                        Expression supplied = arguments[argPos];
-                        expandedArgs[paramPos] = supplied;
-                    }
+                if (expr.operanda[i].getChildExpression() instanceof PlaceHolder ph) {
+                    mapping[ph.getPlaceHolderSequence()] = i;
                 } else {
-                    expandedArgs = Arrays.copyOf(arguments, maxArity);
+                    boundArgumentsEvaluators[i] = expr.operanda[i].getChildExpression().makeElaborator().eagerly();
                 }
-
-                // We now have all the supplied parameters, including placeholders, in the right place
-                // Next step is to add values for defaulted parameters
-                for (int a = 0; a < maxArity; a++) {
-                    if (expandedArgs[a] == null) {
-                        expandedArgs[a] = new DefaultedArgumentExpression(); // to be fixed up later;
-                    }
-                }
-
-                
-
-
-                return new CurriedFunction(f, expandedArgs, unboundArgumentMap);
-            };
-            } else {
-
             }
 
+
+            return context -> {
+                SequenceIterator fnIter = functionEval.iterate(context);
+                FunctionItem f;
+                List<Item> result = new ArrayList<>();
+                while ((f = (FunctionItem) fnIter.next()) != null) {
+
+                    if (f.getArity() != len) {
+                        throw new XPathException(
+                                "The number of arguments supplied in the partial function application is " + len +
+                                        ", but the arity of the function item is " + f.getArity(), "XPTY0004");
+                    }
+                    Sequence[] values = new Sequence[len];
+                    for (int i = 0; i < boundArgumentsEvaluators.length; i++) {
+                        if (boundArgumentsEvaluators[i] != null) {
+                            values[i] = boundArgumentsEvaluators[i].evaluate(context);
+                        }
+                    }
+
+                    result.add(new CurriedFunction(f, values, mapping));
+                }
+                return new ListIterator.Of<>(result);
+            };
         }
+
     }
+
+
 }
 
-// Copyright (c) 2011-2023 Saxonica Limited
+// Copyright (c) 2021-2026 Saxonica Limited

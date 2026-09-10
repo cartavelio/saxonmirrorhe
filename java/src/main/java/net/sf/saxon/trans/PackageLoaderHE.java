@@ -3175,13 +3175,13 @@ public class PackageLoaderHE implements IPackageLoader {
                     base = loader.loadExpression(child);
                 } else if (child.getLocalPart().equals("null")) {
                     int newPos = loader.getIntegerAttribute(child, "at");
-                    args[count - 1] = new PlaceHolder(null, newPos, -9999); // TODO
+                    args[count - 1] = new PlaceHolder(newPos);
                 } else {
                     args[count - 1] = loader.loadExpression(child);
                 }
                 count++;
             }
-            return new PartialApply(base, args, null);
+            return new DynamicPartialApply(base, args);
         });
 
         eMap.put("precedes", (loader, element) -> {
