@@ -195,7 +195,7 @@ protected:
     refCount  = 0;
     valueType = nullptr;
     xdmSize   = 0;
-    toStringValue ="";
+    toStringValue = nullptr;
   }
 
     char* valueType;  /*!< Cached. The type of the XdmValue */
@@ -205,7 +205,7 @@ protected:
 	int xdmSize; 	/*!< Cached. The count of items in the XdmValue */
 	int refCount; /*!< The reference count of this XdmValue. If >1 this object should not be deleted */
 private:
-	std::string toStringValue;  /*!< Cached. String representation of the XdmValue, if available */
+	char * toStringValue;  /*!< Cached. String representation of the XdmValue, if available */
 	int64_t jValues; /*!< If this XdmValue is a sequence we store values as an ProcessorDataAccumulator object  */
 };
 

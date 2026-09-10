@@ -25,7 +25,7 @@
 
 
     DocumentBuilder::DocumentBuilder(SaxonProcessor* p, int64_t docObject, std::string cwd) {
-        SaxonProcessor::attachCurrentThread();
+
            /*
              * Look for class.
              */
@@ -47,7 +47,6 @@
 
 
     DocumentBuilder::DocumentBuilder(const DocumentBuilder &other) {
-        SaxonProcessor::attachCurrentThread();
 
         docBuilderObject = other.docBuilderObject;
         lineNumbering = other.lineNumbering;
@@ -58,7 +57,6 @@
     }
 
     DocumentBuilder::~DocumentBuilder(){
-        SaxonProcessor::attachCurrentThread();
         if(docBuilderObject != -1) {
             docBuilderObject = -1;
         }
@@ -68,7 +66,7 @@
     }
 
     void DocumentBuilder::setLineNumbering(bool option){
-        SaxonProcessor::attachCurrentThread();
+
         /*static jmethodID db_lineID = nullptr;
 
 			db_lineID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(docBuilderClass,

@@ -133,3 +133,13 @@ SaxonApiException::SaxonApiException(const char * m){
 	}
 
 
+    const char * SaxonApiException::getCombinedStaticErrorMessages(){
+        allocFn fn = operator new;
+        return j_getCombinedStaticErrorMessages(SaxonProcessor::sxn_environ->thread, (void *)fn);
+	}
+
+	int SaxonApiException::staticErrorCount(){
+	    return j_staticErrorCount(SaxonProcessor::sxn_environ->thread);
+	}
+
+

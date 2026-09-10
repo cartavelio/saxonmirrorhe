@@ -88,6 +88,11 @@ public:
 	const char * getMessage();
 
 
+    const char * getCombinedStaticErrorMessages();
+
+    int staticErrorCount();
+
+
 	/**
 	* Get the URI of the module associated with the exception, if known.
 	*/

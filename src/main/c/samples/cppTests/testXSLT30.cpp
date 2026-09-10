@@ -464,13 +464,22 @@ void testTransformFromstring2Err(SaxonProcessor *processor, Xslt30Processor *tra
     cout << endl << "Test: testTransfromFromstring2-Error:" << endl;
 
     XsltExecutable * executable = trans->compileFromString(
-            "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out><xsl:for-each></output></xsl:template><xsl:stylesheet>");
+            "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' fail='no' /><xsl:template match='*'><output><xsl:for-each select1='$values' ><out><xsl:value-of select1='. * 3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>");
 
     if(executable== nullptr) {
         sresult->success++;
 
         if (trans->exceptionOccurred()) {
-            cerr <<"Error expected: "<< trans->getErrorMessage() << endl;
+            SaxonApiException * exception = trans->getException();
+            cerr <<"Error expected: "<< exception->getMessage() << endl;
+
+            const char * smessages = exception->getCombinedStaticErrorMessages();
+            cerr <<"Static Error count: "<< exception->staticErrorCount() << endl;
+            if(smessages != nullptr) {
+                cerr <<"Static Error expected: "<< smessages << endl;
+            } else {
+                cerr <<"Static Errors is null: "<< endl;
+            }
         }
         trans->exceptionClear();
         return;
@@ -919,6 +928,9 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
                                                           "    </xsl:result-document>\n"
                                                           "  </xsl:template>\n"
                                                           "</xsl:stylesheet>");
+
+    string baseURI = string("file://")+sproc->getcwd();
+    executable->setBaseOutputURI(baseURI.c_str());
     if(executable== nullptr) {
         sresult->failure++;
         sresult->failureList.push_back("exampleTransformToString");
@@ -1430,6 +1442,8 @@ void testPackage2_Error(Xslt30Processor *trans, sResultCount *sresult) {
         trans->exceptionClear();
         return;
 
+    } else {
+        cout << "Test failed - no error message produced"  << endl;
     }
 
     trans->exceptionClear();
@@ -1993,6 +2007,8 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
 
     if (data != NULL) {
         cout << "d1 result=" << data << endl;
+        delete data;
+        data = nullptr;
     } else {
 
         cout << "d1 result Error - toString is NULL" << endl;
@@ -2031,6 +2047,11 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
         delete stage5;
         delete trans;
         return;
+    } else {
+        const char *data2 = d2->toString();
+        cout << "d2 result=" << data2 << endl;
+        delete data2;
+        data2 = nullptr;
     }
     stage3->setProperty("!indent", "no");
     stage3->setInitialMatchSelection(d2);
@@ -2059,6 +2080,7 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
         delete trans;
         return;
       }
+    cout << "after d2 result cp2"  << endl;
     stage4->setProperty("!indent", "no");
     stage4->setInitialMatchSelection(d3);
     XdmValue * d4 = stage4->applyTemplatesReturningValue();
@@ -2231,10 +2253,7 @@ void testSaxSourceNoSystemId(SaxonProcessor * proc, DocumentBuilder * builder, s
      //DocumentBuilder * builder = proc->newDocumentBuilder();
 
      XdmNode * d = builder->parseXmlFromString("<doc/>");
-    cout << endl << "Test: testSaxSourceNoSystemId" << endl;
-#ifdef MEM_DEBUG
-    SaxonProcessor::getInfo();
-#endif
+
      if(d != nullptr) {
                 if(d->getBaseUri() != nullptr) {
                     std::cout<<"BaseUri:"<<d->getBaseUri()<<endl;
@@ -2428,7 +2447,7 @@ int main(int argc, char* argv[]) {
     int check =0;
     //cin>>check;
     SaxonProcessor *processor = new SaxonProcessor(true);
-    //setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
 #if defined (__linux__)
     processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/lib/saxon-license.lic");
 #elif  defined (__APPLE__) && defined(__MACH__)

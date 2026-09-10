@@ -110,7 +110,7 @@ public class XdmUtils {
         return a;
     }
 
-    @CEntryPoint(name = "xdmItemToString")
+    @CEntryPoint(name = "xdmItemToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
     public static CCharPointer toString_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
         if(value == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
@@ -483,21 +483,18 @@ public class XdmUtils {
             return WordFactory.nullPointer();
         }
         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
-        XdmValue [] values = (XdmValue[]) processorDataAccumulator.getValues();
+        Object objs [] = processorDataAccumulator.getValues();
+        XdmValue [] values = new XdmValue[objs.length];
+        for(int i = 0; i< objs.length;i++) {
+             values[i]  = (XdmValue) objs[i];
+        }
 
         CCharPointer a = SaxonCAPI.stringToNative2(alloc, buildXdmValue(values).toString());
         return a;
     }
 
 
-
-
-
-
-
-
-
-
+    
     /**
      * Get the string value of a named attribute of the element passed
      *
