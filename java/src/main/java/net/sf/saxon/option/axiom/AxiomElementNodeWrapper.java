@@ -201,31 +201,14 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
         if (!((OMElement) node).getAllAttributes().hasNext()) {
             return EmptyIterator.INSTANCE;
-        } else if (nodeTest instanceof NamedXNodePredicate) {
-            NamedXNodePredicate fpTest = ((NamedXNodePredicate) nodeTest);
-            StructuredQName requiredName = fpTest.getMatchingNodeName();
-            if (requiredName == null) {
-                // We don't have a specific name, so look for a match.
-                if (fpTest instanceof NamedXNodeType ftType) {
-                    Iterator attiter =((OMElement) node).getAllAttributes();
-                    while (attiter.hasNext()) {
-                        OMAttribute att = (OMAttribute) attiter.next();
-                        StructuredQName name = new StructuredQName(att.getQName().getPrefix(), att.getQName().getNamespaceURI(), att.getQName().getLocalPart());
-                        if (ftType.getQNameTest().matches(name)) {
-                            return SingletonIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
-                        }
-                    }
-                }
+        } else if (nodeTest instanceof NamedXNodePredicate nxp && nxp.getMatchingNodeName() != null) {
+            String uri = nxp.getMatchingNodeName().getURI();
+            String local = nxp.getMatchingNodeName().getLocalPart();
+            OMAttribute att = ((OMElement) node).getAttribute(new QName(uri, local));
+            if (att == null) {
                 return EmptyIterator.INSTANCE;
             } else {
-                String uri = requiredName.getURI();
-                String local = requiredName.getLocalPart();
-                OMAttribute att = ((OMElement) node).getAttribute(new QName(uri, local));
-                if (att == null) {
-                    return EmptyIterator.INSTANCE;
-                } else {
-                    return SingletonIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
-                }
+                return SingletonIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
             }
         } else {
             return new AttributeAxisIterator(this, nodeTest);
