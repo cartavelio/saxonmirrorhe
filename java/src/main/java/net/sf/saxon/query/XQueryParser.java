@@ -1846,7 +1846,7 @@ public class XQueryParser extends XPathParser {
         NamespaceUri uri;
         StructuredQName qName;
         if (fName.indexOf(':') < 0) {
-            if (isReservedUnprefixedFunctionName(fName)) {
+            if (isReservedFunctionName(fName, languageVersion)) {
                 grumble("The name '" + fName + "' is reserved: it cannot be used as an unprefixed function name");
             }
             uri = env.getDefaultFunctionNamespace();
