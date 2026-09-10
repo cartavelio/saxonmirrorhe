@@ -8,11 +8,16 @@
 package net.sf.saxon.testdriver;
 
 
+import com.saxonica.ee.domino.DominoTreeModel;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
+import net.sf.saxon.option.axiom.AxiomObjectModel;
+import net.sf.saxon.option.dom4j.DOM4JObjectModel;
+import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
+import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.sxpath.IndependentContext;
@@ -276,6 +281,16 @@ public abstract class TestDriver {
         TreeModel tree = null;
         if (s.equalsIgnoreCase("dom")) {
             tree = new DOMObjectModel();
+        } else if (s.equalsIgnoreCase("xom")) {
+            tree = new XOMObjectModel();
+        } else if (s.equalsIgnoreCase("jdom2")) {
+            tree = new JDOM2ObjectModel();
+        } else if (s.equalsIgnoreCase("dom4j")) {
+            tree = new DOM4JObjectModel();
+        } else if (s.equalsIgnoreCase("domino")) {
+            tree = new DominoTreeModel();
+        } else if (s.equalsIgnoreCase("axiom")) {
+            tree = new AxiomObjectModel();
         } else if (s.equalsIgnoreCase("tinytree")) {
             tree = TreeModel.TINY_TREE;
         } else if (s.equalsIgnoreCase("condensed")) {

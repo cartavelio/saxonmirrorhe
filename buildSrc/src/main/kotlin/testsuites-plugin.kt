@@ -70,6 +70,14 @@ abstract class TestSuitesExtension
     }
 
     val testargs = mutableListOf<String>()
+    for((optname, optvalue) in options) {
+      if (optvalue == "") {
+        testargs.add("-${optname}")
+      } else {
+        testargs.add("-${optname}:${optvalue}")
+      }
+    }
+
     for((optname, optvalue) in propertyOptions.get()) {
       if (optvalue == "") {
         testargs.add("-${optname}")
@@ -144,15 +152,6 @@ abstract class TestSuitesExtension
       exceptionsFile = exceptions(suite)
       reportingRootDir = layout.buildDirectory.dir("test-results")
       classpath.from(testclasspath)
-
-      doFirst {
-        println("HERE ${taskName}")
-        testclasspath.get().forEach {
-                        println("IT: ${it}")
-                      }
-      }
-
-
     }
 
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
