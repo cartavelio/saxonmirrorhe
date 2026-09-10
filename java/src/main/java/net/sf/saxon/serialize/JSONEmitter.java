@@ -202,15 +202,15 @@ public class JSONEmitter {
                 // Avoid exponential notation
                 emit(num.getUnicodeStringValue());
             } else if (num.isNaN()) {
-                if (unfailing) {
+                if (unfailing && !canonical) {
                     emit("NaN");
-                } else if (is40) {
+                } else if (is40 && !canonical) {
                     emit("null");
                 } else {
                     throw new XPathException("JSON has no way of representing NaN", "SERE0020");
                 }
             } else if (Double.isInfinite(num.getDoubleValue())) {
-                if (unfailing || is40) {
+                if ((unfailing || is40) & !canonical) {
                     emit(num.getDoubleValue() < 0 ? "-1e9999" : "1e9999");
                 } else {
                     throw new XPathException("JSON has no way of representing Infinity", "SERE0020");
