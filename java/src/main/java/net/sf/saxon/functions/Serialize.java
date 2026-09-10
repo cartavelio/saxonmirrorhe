@@ -83,6 +83,7 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption(sx("double-space"), listOfQNames);
         //eqnames
         op.addAllowedOption(sx("indent-spaces"), SequenceType.SINGLE_INTEGER); //integer
+        op.addAllowedOption(sx("internal-dtd-subset"), SequenceType.SINGLE_STRING); //string
         op.addAllowedOption(sx("line-length"), SequenceType.SINGLE_INTEGER); //integer
         op.addAllowedOption(sx("newline"), SequenceType.SINGLE_STRING); //integer
         //requiredTypes.put("next-in-chain", SequenceType.SINGLE_STRING); //uri
