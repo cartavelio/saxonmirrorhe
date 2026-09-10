@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Item;
@@ -54,7 +53,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
 //    private boolean mayOmitContextItem = true;
 //    private boolean absentFocus = false;
     private List<LocalParamInfo> localParamDetails = new ArrayList<>(4);
-    private PushEvaluator bodyEvaluator;
+
 
     /**
      * Create a named template
@@ -233,12 +232,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
                 context.setCurrentIterator(null);
             }
         }
-        synchronized(this) {
-            if (bodyEvaluator == null) {
-                bodyEvaluator = getBody().makeElaborator().elaborateForPush();
-            }
-        }
-
+        makeBodyEvaluator();
         return bodyEvaluator.processLeavingTail(output, context);
     }
 

@@ -18,6 +18,7 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.trans.rules.Rule;
@@ -241,6 +242,9 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setLocalParameters(ParameterSet localParameters) {
+        if (localParameters != null) {
+            Instrumentation.count("LocalParams " + localParameters.size());
+        }
         this.localParameters = localParameters;
     }
 
@@ -262,6 +266,9 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setTunnelParameters(ParameterSet tunnelParameters) {
+        if (tunnelParameters != null) {
+            Instrumentation.count("TunnelParams " + tunnelParameters.size());
+        }
         this.tunnelParameters = tunnelParameters;
     }
 

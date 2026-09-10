@@ -542,6 +542,7 @@ public class Copy extends ElementCreator {
 
             return (output, context) -> {
                 Controller controller = context.getController();
+                Configuration config = controller.getConfiguration();
                 Item item = context.getContextItem();
                 if (item == null) {
                     throw new XPathException("There is no context item for xsl:copy", "XTTE0945")
@@ -566,7 +567,7 @@ public class Copy extends ElementCreator {
                             if (!expr.preservingTypes) {
                                 ParseOptions options = expr.getValidationOptions()
                                         .withTopLevelElement(elemName.getStructuredQName());
-                                context.getConfiguration().prepareValidationReporting(context, options);
+                                config.prepareValidationReporting(context, options);
                                 Receiver validator = schema.getElementValidator(
                                         elemOut, options, expr.getLocation());
 
@@ -641,7 +642,7 @@ public class Copy extends ElementCreator {
                         if (!expr.preservingTypes) {
                             ParseOptions options = expr.getValidationOptions()
                                     .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-                            controller.getConfiguration().prepareValidationReporting(context, options);
+                            config.prepareValidationReporting(context, options);
                             Receiver val = schema.getDocumentValidator(output, source.getBaseURI(), options, expr.getLocation());
                             output = new ComplexContentOutputter(val);
                         }

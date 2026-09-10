@@ -140,8 +140,8 @@ public class TinyBuilder extends Builder {
         }
         if (useEventLocation) {
             Object copier = getPipelineConfiguration().getComponent(CopyInformee.class.getName());
-            if (copier instanceof LocationCopier) {
-                setSystemId(((LocationCopier) copier).getSystemId());
+            if (copier instanceof LocationCopier locCopier) {
+                setSystemId(locCopier.getSystemId());
             }
         }
         super.open();
@@ -293,14 +293,8 @@ public class TinyBuilder extends Builder {
     }
 
     private void startElementSetupNamespaces(NamespaceMap namespaces) {
-        noNewNamespaces = true;
-        if (namespaceStack.isEmpty()) {
-            noNewNamespaces = false;
-            namespaceStack.push(namespaces);
-        } else {
-            noNewNamespaces = namespaces == namespaceStack.peek();
-            namespaceStack.push(namespaces);
-        }
+        noNewNamespaces = !namespaceStack.isEmpty() && namespaces == namespaceStack.peek();
+        namespaceStack.push(namespaces);
     }
 
     private void startElementSetupSiblings() {
@@ -422,11 +416,11 @@ public class TinyBuilder extends Builder {
             // we're relying on the fact that an ID element has no element children!
             tree.indexIDElement(currentRoot, prevAtDepth[currentDepth]);
             isIDElement = false;
-        } else if (eligibleAsTextualElement &&
+        } else if (noNewNamespaces &&
+                eligibleAsTextualElement &&
                 tree.nodeKind[nodeNr] == Type.TEXT &&
                 tree.nodeKind[nodeNr-1] == Type.ELEMENT &&
-                tree.alpha[nodeNr-1] == -1 &&
-                noNewNamespaces) {
+                tree.alpha[nodeNr-1] == -1) {
             // Collapse a simple element with text content and no attributes or namespaces into a single node
             // of type TRIVIAL_ELEMENT
             //System.err.println("Created textual element");

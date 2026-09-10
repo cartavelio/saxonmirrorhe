@@ -210,11 +210,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     @Override
     public int getLineNumber() {
         DocumentImpl root = getPhysicalRoot();
-        if (root == null) {
-            return -1;
-        } else {
-            return root.getLineNumber(getRawSequenceNumber());
-        }
+        return root == null ? -1 : root.getLineNumber(getRawSequenceNumber());
     }
 
     /**

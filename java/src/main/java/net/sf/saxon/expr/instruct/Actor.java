@@ -23,6 +23,8 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.VisibilityProvenance;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.List;
 
@@ -35,7 +37,7 @@ import java.util.List;
  * required type, and calls on the function must be wrapped at compile time to check or
  * convert the supplied arguments.</p>
  */
-
+@CSharpInjectMembers(code={"private readonly object _lock = new();"})
 public abstract class Actor implements ExpressionOwner, Location {
 
     protected Expression body;
@@ -47,7 +49,7 @@ public abstract class Actor implements ExpressionOwner, Location {
     private Component declaringComponent;
     private Visibility declaredVisibility = Visibility.UNDEFINED;
     private RetainedStaticContext retainedStaticContext;
-    private PushEvaluator bodyEvaluator;
+    protected PushEvaluator bodyEvaluator;
 
     public Actor() {
     }
@@ -309,13 +311,29 @@ public abstract class Actor implements ExpressionOwner, Location {
         setBody(expr);
     }
 
+    @CSharpReplaceBody(code="if (System.Threading.Volatile.Read(ref bodyEvaluator) == null) {\n"
+            + "                lock (_lock) {\n"
+            + "                    bodyEvaluator = body.makeElaborator().elaborateForPush();\n"
+            + "                    bodyEvaluator ??= body.makeElaborator().elaborateForPush();\n"
+            + "                }\n"
+            + "            }\n"
+            + "            return bodyEvaluator(@out, context);")
     protected TailCall process(Outputter out, XPathContext context) throws XPathException {
+        makeBodyEvaluator();
+        return bodyEvaluator.processLeavingTail(out, context);
+    }
+
+    @CSharpReplaceBody(code = "if (System.Threading.Volatile.Read(ref bodyEvaluator) == null) {\n"
+            + "                lock (_lock) {\n"
+            + "                    bodyEvaluator ??= body.makeElaborator().elaborateForPush();\n"
+            + "                }\n"
+            + "            }\n")
+    protected void makeBodyEvaluator() {
         synchronized(this) {
             if (bodyEvaluator == null) {
                 bodyEvaluator = body.makeElaborator().elaborateForPush();
             }
         }
-        return bodyEvaluator.processLeavingTail(out, context);
     }
 }
 

@@ -9,6 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Closure;
 
@@ -97,6 +98,7 @@ public class ParameterSet {
      */
 
     public void put(StructuredQName id, Sequence value, boolean checked) {
+        Instrumentation.count("ParameterSet.put()");
         for (int i = 0; i < used; i++) {
             if (keys[i].equals(id)) {
                 values[i] = value;
@@ -132,6 +134,7 @@ public class ParameterSet {
      */
 
     public int getIndex(StructuredQName id) {
+        Instrumentation.count("ParameterSet.getIndex()");
         for (int i = 0; i < used; i++) {
             if (keys[i].equals(id)) {
                 return i;

@@ -50,8 +50,8 @@ public class XHTMLPrefixRemover extends ProxyReceiver {
             }
         }
 
-        if (isSpecial(elemName.getNamespaceUri())) {
-            NamespaceUri uri = elemName.getNamespaceUri();
+        NamespaceUri uri = elemName.getNamespaceUri();
+        if (isSpecial(uri)) {
             if (!elemName.getPrefix().isEmpty()) {
                 elemName = new FingerprintedQName("", uri, elemName.getLocalPart());
             }
@@ -59,8 +59,10 @@ public class XHTMLPrefixRemover extends ProxyReceiver {
         }
 
         for (AttributeInfo att : attributes) {
-            if (isSpecial(att.getNodeName().getNamespaceUri())) {
-                namespaces = namespaces.put(att.getNodeName().getPrefix(), att.getNodeName().getNamespaceUri());
+            NodeName name = att.getNodeName();
+            NamespaceUri attUri = name.getNamespaceUri();
+            if (isSpecial(attUri)) {
+                namespaces = namespaces.put(name.getPrefix(), attUri);
             }
         }
 
