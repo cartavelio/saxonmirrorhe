@@ -14,6 +14,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeString;
@@ -29,6 +30,7 @@ import java.util.Stack;
  */
 public class JsonHandlerXML extends JsonHandler {
 
+    private Schema schema;
     private final Outputter out;
     private final Builder builder;
 
@@ -90,14 +92,15 @@ public class JsonHandlerXML extends JsonHandler {
      * Make the handler to construct the XML tree representation for JSON
      *
      * @param context       the context in which the result tree is to be built
-     * @param staticBaseUri the static base URI, used for the base URI of the constructed tree
+     * @param rsc           the retained static context, used for schema information and for the base URI of the constructed tree
      * @param flags         flags indicating the chosen options
      * @throws XPathException if initialization fails, for example because of problems loading the schema
      */
-    public JsonHandlerXML(XPathContext context, String staticBaseUri, int flags) throws XPathException {
+    public JsonHandlerXML(XPathContext context, RetainedStaticContext rsc, int flags) throws XPathException {
+        schema = rsc.getImportedSchema();
         init(context, flags);
         builder = context.getController().makeBuilder();
-        builder.setSystemId(staticBaseUri);
+        builder.setSystemId(rsc.getStaticBaseUriString());
         builder.setTiming(false);
         builder.setDurability(Durability.TEMPORARY);
         out = new ComplexContentOutputter(builder);
@@ -145,7 +148,9 @@ public class JsonHandlerXML extends JsonHandler {
 
 
             Configuration config = context.getConfiguration();
-            Schema schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
+            if (schema == null || schema.getElementDecl(mapQN.getFingerprint()) == null) {
+                schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
+            }
             String[] typeNames = {"mapType", "arrayType", "stringType", "numberType", "booleanType", "nullType",
                 "mapWithinMapType", "arrayWithinMapType", "stringWithinMapType",
                 "numberWithinMapType", "booleanWithinMapType", "nullWithinMapType"};

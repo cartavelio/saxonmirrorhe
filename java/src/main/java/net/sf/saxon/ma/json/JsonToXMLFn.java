@@ -128,7 +128,7 @@ public class JsonToXMLFn extends SystemFunction {
             flags = JsonParser.DUPLICATES_RETAINED;
         }
         flags |= JsonParser.NUMERIC_FORMAT_RETAINED;
-        JsonHandlerXML handler = new JsonHandlerXML(context, getStaticBaseUriString(), flags);
+        JsonHandlerXML handler = new JsonHandlerXML(context, getRetainedStaticContext(), flags);
         if (options != null) {
             handler.setFallbackFunction(checkedOptions, context);
             parser.setNumberParser(checkedOptions);
