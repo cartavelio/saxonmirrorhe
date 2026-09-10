@@ -6,6 +6,7 @@ import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
 
 import java.util.Map;
@@ -16,7 +17,6 @@ import java.util.Map;
  */
 public class CsvToArrays extends CsvFunction {
     public static OptionsParameter OPTION_DETAILS = coreOptions();
-    private static final Sequence EMPTY_CSV = EmptyAtomicSequence.getInstance();
 
     /**
      * Execute a dynamic call to the function
@@ -31,7 +31,7 @@ public class CsvToArrays extends CsvFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item arg0 = arguments[0].head();
         if (arg0 == null) {
-            return EMPTY_CSV;
+            return EmptySequence.getInstance();
         }
         StringValue input = (StringValue) arg0;
         MapItem options = new DictionaryMap();

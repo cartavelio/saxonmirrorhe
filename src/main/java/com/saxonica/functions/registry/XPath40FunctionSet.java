@@ -6,6 +6,7 @@ import com.saxonica.functions.qt4.csv.CsvToArrays;
 import com.saxonica.functions.qt4.csv.CsvToXml;
 import com.saxonica.functions.qt4.csv.ParseCsv;
 import com.saxonica.functions.qt4.ixml.InvisibleXmlFn;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
@@ -18,9 +19,12 @@ import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.PortableNameTest;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
@@ -158,23 +162,18 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .setOptionDetails(CsvToArrays.OPTION_DETAILS));
 
         register("csv-to-arrays", 2, e -> e.populate(CsvToArrays::new, new ArrayItemType(SequenceType.SINGLE_STRING), STAR, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(CsvToArrays.OPTION_DETAILS));
-
-//        register("csv-fetch-field-by-column", 3, e -> e.populate(CsvFetchFieldByColumn::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
-//                .arg(0, MapType.ANY_MAP_TYPE, ONE, null)
-//                .arg(1, BuiltInAtomicType.STRING, STAR, null)
-//                .arg(2, new LocalUnionType(BuiltInAtomicType.STRING, BuiltInAtomicType.INTEGER), ONE, null)
-//                .setOptionDetails(CsvToXdm.OPTION_DETAILS));
-
-        register("csv-to-xml", 1, e -> e.populate(CsvToXml::new, AnyItemType.getInstance(), ONE, LATE | NEW)
+        
+        ItemType csvToXmlResultType = new PortableNameTest(Type.ELEMENT, NamespaceUri.FN, "csv");
+        register("csv-to-xml", 1, e -> e.populate(CsvToXml::new, csvToXmlResultType, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .setOptionDetails(CsvToXml.OPTION_DETAILS));
 
-        register("csv-to-xml", 2, e -> e.populate(CsvToXml::new, AnyItemType.getInstance(), ONE, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+        register("csv-to-xml", 2, e -> e.populate(CsvToXml::new, csvToXmlResultType, OPT, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(CsvToXml.OPTION_DETAILS));
 
         register("deep-equal", 2, 3, e -> e.populate(DeepEqual.makeDeepEqual(40), BuiltInAtomicType.BOOLEAN, ONE, BASE)
@@ -452,13 +451,31 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("parcel", 1, e -> e.populate(ParcelFn::new, Parcel.TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("parse-csv", 1, e -> e.populate(com.saxonica.functions.qt4.csv.ParseCsv::new, MapType.ANY_MAP_TYPE, OPT, LATE | NEW)
+        // record(
+        //columns?	as xs:string*,
+        //columns-index?	as map(xs:string,xs:integer)?,
+        //rows?	as array(xs:string)*,
+        //get?	as function(xs:positiveInteger, (xs:positiveInteger | xs:string)) as xs:string?
+        //)
+        ItemType parseCsvResultType = RecordTest.nonExtensible(
+                new RecordTest.Field("columns", SequenceType.STRING_SEQUENCE, true),
+                new RecordTest.Field("columns-index", SequenceType.makeSequenceType(
+                        new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_INTEGER), StaticProperty.ALLOWS_ZERO_OR_ONE), true),
+                new RecordTest.Field("rows", SequenceType.makeSequenceType(new ArrayItemType(SequenceType.SINGLE_STRING), StaticProperty.ALLOWS_ZERO_OR_MORE), true),
+                new RecordTest.Field("get", SequenceType.makeSequenceType(
+                        new SpecificFunctionType(new SequenceType[]{
+                                BuiltInAtomicType.POSITIVE_INTEGER.one(),
+                                SequenceType.makeSequenceType(
+                                        LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER, BuiltInAtomicType.STRING), StaticProperty.EXACTLY_ONE)
+                        }, SequenceType.OPTIONAL_STRING), StaticProperty.EXACTLY_ONE), true));
+
+        register("parse-csv", 1, e -> e.populate(com.saxonica.functions.qt4.csv.ParseCsv::new, parseCsvResultType, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .setOptionDetails(ParseCsv.OPTION_DETAILS));
 
         register("parse-csv", 2, e -> e.populate(com.saxonica.functions.qt4.csv.ParseCsv::new, MapType.ANY_MAP_TYPE, OPT, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(ParseCsv.OPTION_DETAILS));
 
         //#if EE==true || PE==true
