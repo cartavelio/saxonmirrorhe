@@ -68,7 +68,7 @@ public class QT3TestReport extends TestReport {
 
 
         Map<String, QT3TestDriverHE.Dependency> dependencyMap = ((QT3TestDriverHE) testDriver).getDependencyMap();
-        if (!dependencyMap.isEmpty()) {
+        if (dependencyMap != null && !dependencyMap.isEmpty()) {
             for (Map.Entry<String, QT3TestDriverHE.Dependency> entry : dependencyMap.entrySet()) {
                 QT3TestDriverHE.Dependency dep = entry.getValue();
                 if (!"spec".equals(dep.dType)) {

@@ -118,6 +118,7 @@ public abstract class TestDriver {
 
             if (args[i].startsWith("-t:")) {
                 testPattern = Pattern.compile(argValue);
+                debug=true;
             }
             if (args[i].startsWith("-s:")) {
                 requestedTestSet = argValue;

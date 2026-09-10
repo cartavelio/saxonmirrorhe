@@ -268,6 +268,12 @@ public class Environment implements ResourceResolver {
             if (environment.xsdSchema != null && environment.xsltCompiler != null) {
                 environment.xsltCompiler.setSchemaAware(true);
             }
+        } else {
+            for (XdmNode schema : envNode.children("schema")) {
+                // If there's a schema, and we're in an HE/PE configuration, skip this test
+                environment.schemaAware = true;
+                environment.usable = false;
+            }
         }
 
         // set up the sandpit, if there is one

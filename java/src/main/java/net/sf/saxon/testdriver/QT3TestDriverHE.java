@@ -137,12 +137,12 @@ public class QT3TestDriverHE extends TestDriver {
                 System.err.println("Failed to load environment");
             }
         }
-        try {
-            buildDependencyMap(driverProc, catalog, environment);
-        } catch (Exception ex) {
-            System.err.println("Environment map error" + ex.getMessage());
-            ex.printStackTrace();
-        }
+//        try {
+//            buildDependencyMap(driverProc, catalog, environment);
+//        } catch (Exception ex) {
+//            System.err.println("Environment map error" + ex.getMessage());
+//            ex.printStackTrace();
+//        }
     }
 
     /**
@@ -159,6 +159,8 @@ public class QT3TestDriverHE extends TestDriver {
         String type = dependency.attribute("type");
         String value = dependency.attribute("value");
         boolean inverse = "false".equals(dependency.attribute("satisfied"));
+
+        
         if ("saxon:config".equals(type)) {
             // Used in QT3Extra tests
             final String name = dependency.attribute("name");
@@ -264,6 +266,7 @@ public class QT3TestDriverHE extends TestDriver {
         } else if ("unicode-normalization-form".equals(type)) {
             return value.equalsIgnoreCase("FULLY-NORMALIZED") == inverse;
         } else if ("feature".equals(type)) {
+            
             String edition = env.processor.getSaxonEdition();
             if ("namespace-axis".equals(value)) {
                 return !inverse;
@@ -1061,8 +1064,6 @@ public class QT3TestDriverHE extends TestDriver {
             String value = node.attribute("value");
             addDependency(type, value, ensureDependencySatisfied(node, env));
         }
-
-
     }
 
 
