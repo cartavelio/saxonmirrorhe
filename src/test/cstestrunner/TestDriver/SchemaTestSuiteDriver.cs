@@ -186,7 +186,10 @@ namespace TestDriver {
                 foreach (XdmNode exception in exceptionsDoc.Select(Steps.Descendant("exception"))) {
                     string set = exception.GetAttributeValue("test-set");
                     string group = exception.GetAttributeValue("test-case");
-                    string comment = exception.Children("reason").First().StringValue;
+                    string comment = "unspecified reason";
+                    if (exception.Children("reason").Count() > 0) {
+                        comment = exception.Children("reason").First().StringValue;
+                    }
                     exceptions[set + "#" + group] = comment;
                 }
 
