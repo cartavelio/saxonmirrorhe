@@ -25,7 +25,7 @@ else:
 
 # extented modules
 ext_modules = [Extension(
-                        "saxonc@@edition@@", 
+                         "saxonc@@edition@@", 
                         sources=[
                             "python_saxon/saxonc.pyx", 
                             "Saxon.C.API/SaxonProcessor.cpp",
@@ -61,9 +61,8 @@ setup(
     author='ONeil Delpratt',
     author_email='oneil@saxonica.com',
     include_package_data=True,
-    url='https://github.com/tennom/saxonpy?????',     # TODO change github project
-    # packages=find_packages(),
-    package_dir={'saxonc@@edition@@':'src'},
+    url='https://www.saxonica.com/download/c.xml',
+    package_dir={'saxonc@@edition@@':'.'},
     packages=['saxonc@@edition@@'],
     python_requires='>=3.8',                # Minimum version requirement of the package
     ext_modules=cythonize(ext_modules,
