@@ -66,7 +66,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
         schemaManager = processor.getSchemaManager();
 
         if (debug && !processor.isSchemaAware()) {
-            throw new SaxonCException("Processor is not licensed for schema processing!");
+            throw new SaxonApiException("Processor is not licensed for schema processing!");
             //saxonExceptions.add(ex);
         }
     }

@@ -7,34 +7,22 @@
 
 package net.sf.saxon.option.cpp;
 
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.trans.XPathException;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
 
 /**
  * * This class is to use with Saxon on C++
  */
-public class SaxonCException extends SaxonApiException {
-    private String errorCode;
-    private int linenumber = -1;
-    private boolean isTypeError = false;
-    private boolean isStaticError = false;
-    private boolean isGlobalError = false;
+public class SaxonCException {
+    private SaxonApiException saxonException = null;
 
     public SaxonCException(Throwable cause) {
-        super(cause);
-        errorCode = "";
-        if(cause instanceof XPathException) {
-            XPathException exception = (XPathException)cause;
-            isStaticError = exception.isStaticError();
-            isTypeError = exception.isTypeError();
-            StructuredQName errorCodeQN = exception.getErrorCodeQName();
-            if(errorCodeQN != null) {
-                errorCode = errorCodeQN.toString();
-
-            } else {
-                errorCode = "";
-            }
+        if(cause instanceof SaxonApiException) {
+            this.saxonException = (SaxonApiException) cause;
+        }  else {
+            saxonException = new SaxonApiException(cause);
         }
 
     }
@@ -59,44 +47,35 @@ public class SaxonCException extends SaxonApiException {
      */
 
     public SaxonCException(String message) {
-        super(message);
-        errorCode = "";
+        saxonException = new SaxonApiException(message);
 
     }
 
-    public SaxonCException(String message, Throwable cause) {
-        super(message, cause);
-        if(cause instanceof XPathException) {
-            XPathException exception = (XPathException)cause;
-            isStaticError = exception.isStaticError();
-            isTypeError = exception.isTypeError();
-            errorCode = exception.getErrorCodeQName().toString();
-        }
 
-    }
 
 
 
     public String getErrorCodeString(){
-        if(errorCode != null) {
-            return errorCode;
-        } else if (super.getErrorCode() != null){
-            return super.getErrorCode().toString();
-        } else {
+
             return "";
-        }
+
 
     }
 
     public String getErrorMessage(){
-        String message = super.getMessage();
-        if(message == null) {
-            return "";
+        if(saxonException != null) {
+            return saxonException.getMessage();
         }
-        return message;
+        return "";
     }
 
-    public int getLinenumber(){
+    @CEntryPoint(name = "j_getErrorMessage")
+    public static String j_getErrorMessage(IsolateThread thread, ObjectHandle exceptionRef){
+        SaxonCException exception = SaxonCAPI.objectHandles.get(exceptionRef);
+        return exception.getErrorMessage();
+    }
+
+    /*public int getLinenumber(){
         return linenumber;
     }
 
@@ -110,5 +89,5 @@ public class SaxonCException extends SaxonApiException {
 
     public boolean isStaticError(){
         return isStaticError;
-    }
+    }  */
 }

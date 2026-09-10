@@ -65,6 +65,9 @@ public class SaxonCAPI {
     public static boolean debug = false;
     protected boolean schemaAware = false;
     public static String RESOURCES_DIR = null;
+    public static boolean exceptionCheck =false;
+
+    public static SaxonCException exceptionThrown;
 
     public static ObjectHandles objectHandles = ObjectHandles.create();
 
@@ -112,7 +115,7 @@ public class SaxonCAPI {
     }
 
     @CEntryPoint(name = "createSaxonProcessor")
-    public static long createSaxonProcessor(IsolateThread thread, int license) throws SaxonApiException {
+    public static long createSaxonProcessor(IsolateThread thread, int license) {
            /*Properties systemProperties = System.getProperties();
            systemProperties.put ("xml.catalog.defaultLoggerLogLevel", "debug");
            System.setProperties (systemProperties); */
@@ -126,14 +129,15 @@ public class SaxonCAPI {
 
 
     @CEntryPoint(name = "createDocumentBuilder")
-    public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef) throws SaxonApiException {
+    public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef) {
         if(processorRef != WordFactory.nullPointer()) {
             Processor processor = objectHandles.get(processorRef);
 
             ObjectHandle handle = objectHandles.create(processor.newDocumentBuilder());
             return handle.rawValue();
         }
-        throw new SaxonApiException("Cannot create DocumentBuilder - Processor is null");
+        exceptionThrown = new SaxonCException(new SaxonApiException("Cannot create DocumentBuilder - Processor is null"));
+        return -1;
     }
 
     public static class DataWrapper{
@@ -593,7 +597,7 @@ public class SaxonCAPI {
     /**
      * parse XML document supplied by file
      *
-     * @param cwd      - Current Working directory
+     * @param ccwd      - Current Working directory
      * @param filename - File name of the XML document to parse
      * @return XdmNode
      */
