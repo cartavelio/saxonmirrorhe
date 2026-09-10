@@ -9,12 +9,9 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.FocusTrackingIterator;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-
-import java.util.function.Function;
 
 /**
  * This instruction represents an xsl:for-each instruction using more than one thread
@@ -188,9 +185,7 @@ public class MultithreadedForEach extends ForEach {
                 int threads = evaluateThreads(forEach, context);
                 XPathContextMinor c2 = context.newMinorContext();
                 SequenceIterator iter = select.iterate(context);
-                Function<SequenceIterator, FocusTrackingIterator> factory =
-                        c2.getController().getFocusTrackerFactory(true);
-                FocusIterator fit = factory.apply(iter);
+                FocusIterator fit = c2.getController().makeFocusTracker(iter, true);
                 c2.setCurrentIterator(fit);
                 return new MultithreadedContextMappingIterator(action, c2, threads);
             };

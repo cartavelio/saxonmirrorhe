@@ -7,10 +7,10 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.FocusIterator;
