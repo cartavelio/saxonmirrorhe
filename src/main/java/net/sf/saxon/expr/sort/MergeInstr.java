@@ -883,7 +883,7 @@ public class MergeInstr extends Instruction {
             Item currentItem = context.getContextItem();
             manualIterator.setContextItem(currentItem);
             ItemWithMergeKeys newItem = new ItemWithMergeKeys(currentItem, ms.mergeKeyDefinitions, ms.sourceName, keyContext);
-            return SingletonIterator.makeIterator(new ObjectValue<ItemWithMergeKeys>(newItem));
+            return SingletonIterator.makeIterator(new ObjectValue<ItemWithMergeKeys>(newItem, ItemWithMergeKeys.class));
 
         }
     }

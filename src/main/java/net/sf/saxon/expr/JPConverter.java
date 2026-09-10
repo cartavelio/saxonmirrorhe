@@ -671,7 +671,7 @@ public abstract class JPConverter {
             if (object == null) {
                 return null;
             } else if (resultType.getJavaClass().isInstance(object)) {
-                return new ObjectValue<>(object);
+                return new ObjectValue<>(object, resultType.getJavaClass());
             } else {
                 throw new XPathException("Java external object of type " + object.getClass().getName() +
                     " is not an instance of the required type " + resultType.getJavaClass().getName(), "XPTY0004");

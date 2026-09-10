@@ -43,6 +43,7 @@ import java.util.Objects;
 public class ObjectValue<T> implements AnyExternalObject {
 
     /*@NotNull*/ private final T value;
+    private final Class<? extends T> theInterface;
 
     /**
      * Constructor
@@ -52,6 +53,16 @@ public class ObjectValue<T> implements AnyExternalObject {
 
     public ObjectValue(/*@NotNull*/ T object) {
         value = Objects.requireNonNull(object, "External object cannot wrap a Java null");
+        theInterface = null;
+    }
+
+    public ObjectValue(/*@NotNull*/ T object, Class<? extends T> theInterface) {
+        value = Objects.requireNonNull(object, "External object cannot wrap a Java null");
+        this.theInterface = Objects.requireNonNull(theInterface);
+    }
+
+    public Class<? extends T> getInterface() {
+        return theInterface;
     }
 
     /**

@@ -150,7 +150,7 @@ public class ParseXml extends SystemFunction implements Callable {
             if (!retainedErrors.isEmpty()) {
                 List<Item> wrappedErrors = new ArrayList<>();
                 for (SAXParseException e : retainedErrors) {
-                    wrappedErrors.add(new ObjectValue<SAXParseException>(e));
+                    wrappedErrors.add(new ObjectValue<SAXParseException>(e, SAXParseException.class));
                 }
                 xe.setErrorObject(SequenceExtent.makeSequenceExtent(wrappedErrors));
             }
