@@ -105,27 +105,48 @@ public class FunctionLookup extends ContextAccessorFunction {
         ic.setNamespaceResolver(rsc);
         ic.setPackageData(pd);
         try {
-            FunctionItem fi = lib.getFunctionItem(sn, ic);
-            if (fi instanceof UserFunction) {
-                Visibility vis = ((UserFunction) fi).getDeclaredVisibility();
-                if (vis == Visibility.ABSTRACT) {
-                    return null;
+            FunctionItem functionSupplier = lib.getFunctionItemSupplier(sn, ic);
+            if (functionSupplier instanceof ConstantFunction0) {
+                // Indicates a function with no dynamic context dependencies
+                FunctionItem fi = (FunctionItem)((ConstantFunction0)functionSupplier).getConstantValue();
+                if (fi instanceof UserFunction) {
+                    Visibility vis = ((UserFunction) fi).getDeclaredVisibility();
+                    if (vis == Visibility.ABSTRACT) {
+                        return null;
+                    }
+                }
+                return fi;
+            } else {
+                assert functionSupplier.getArity() == 0;
+                FunctionItem fi = (FunctionItem) functionSupplier.call(context, new Sequence[]{});
+                if (fi instanceof ContextItemAccessorFunction) {
+                    return ((ContextItemAccessorFunction) fi).bindContext(context);
+                } else if (fi instanceof SystemFunction && ((SystemFunction) fi).dependsOnContextItem()) {
+                    return new SystemFunctionWithBoundContextItem((SystemFunction) fi, context);
                 }
             }
-            if (fi instanceof CallableFunction) {
-                ((CallableFunction) fi).setCallable(new CallableWithBoundFocus(((CallableFunction) fi).getCallable(), context));
-            } else if (fi instanceof ContextItemAccessorFunction) {
-                return ((ContextItemAccessorFunction) fi).bindContext(context);
-            } else if (fi instanceof SystemFunction && ((SystemFunction) fi).dependsOnContextItem()) {
-                return new SystemFunctionWithBoundContextItem((SystemFunction) fi, context);
-            }
-            return fi;
+//            FunctionItem fi = lib.getFunctionItem(sn, ic);
+//            if (fi instanceof UserFunction) {
+//                Visibility vis = ((UserFunction) fi).getDeclaredVisibility();
+//                if (vis == Visibility.ABSTRACT) {
+//                    return null;
+//                }
+//            }
+//            if (fi instanceof CallableFunction) {
+//                ((CallableFunction) fi).setCallable(new CallableWithBoundFocus(((CallableFunction) fi).getCallable(), context));
+//            } else if (fi instanceof ContextItemAccessorFunction) {
+//                return ((ContextItemAccessorFunction) fi).bindContext(context);
+//            } else if (fi instanceof SystemFunction && ((SystemFunction) fi).dependsOnContextItem()) {
+//                return new SystemFunctionWithBoundContextItem((SystemFunction) fi, context);
+//            }
+//            return fi;
         } catch (XPathException e) {
             if (e.hasErrorCode("XPST0017")) {
                 return null;
             }
             throw e;
         }
+        return null;
     }
 
     /**

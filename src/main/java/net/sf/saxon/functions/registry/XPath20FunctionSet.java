@@ -219,7 +219,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("exists", 1, e -> e.populate(Exists::new, BuiltInAtomicType.BOOLEAN, ONE, UO)
                 .arg(0, Type.ITEM_TYPE, STAR | INS, BooleanValue.FALSE));
 
-        register("false", 0, e -> e.populate(() -> new ConstantFunction.False(), BuiltInAtomicType.BOOLEAN, ONE, 0));
+        register("false", 0, e -> e.populate(() -> new ConstantSystemFunction.False(), BuiltInAtomicType.BOOLEAN, ONE, 0));
 
         register("floor", 1, e -> e.populate(Floor::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY));
@@ -557,7 +557,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-        register("true", 0, e -> e.populate(() -> new ConstantFunction.True(), BuiltInAtomicType.BOOLEAN, ONE, 0));
+        register("true", 0, e -> e.populate(() -> new ConstantSystemFunction.True(), BuiltInAtomicType.BOOLEAN, ONE, 0));
 
         register("unordered", 1, e -> e.populate(Unordered::new, Type.ITEM_TYPE, STAR, AS_ARG0 | FILTER | UO)
                 .arg(0, Type.ITEM_TYPE, STAR | TRA, EMPTY));

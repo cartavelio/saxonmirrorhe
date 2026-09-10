@@ -8,7 +8,6 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
@@ -18,17 +17,7 @@ import net.sf.saxon.trans.XPathException;
  * not at the point where the function is called.
  */
 
-public abstract class ContextAccessorFunction extends SystemFunction {
-
-    /**
-     * Bind context information to appear as part of the function's closure. If this method
-     * has been called, the supplied context will be used in preference to the
-     * context at the point where the function is actually called.
-     * @param context the context to which the function applies. Must not be null.
-     */
-
-    public abstract FunctionItem bindContext(XPathContext context) throws XPathException;
-
+public abstract class ContextAccessorFunction extends SystemFunction implements ContextAccessorFunction0 {
 
     /**
      * Evaluate the expression

@@ -14,6 +14,7 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * Implements the XSLT function current-group()
@@ -44,10 +45,7 @@ public class CurrentGroup extends ContextAccessorFunction {
             throw new XPathException("There is no current group", "XTDE1061");
         }
         GroundedValue group = gi.currentGroup();
-        ConstantFunction fn = new ConstantFunction(group);
-        fn.setDetails(getDetails());
-        fn.setRetainedStaticContext(getRetainedStaticContext());
-        return fn;
+        return new ConstantFunction0(getFunctionName(), group, SequenceType.ANY_SEQUENCE);
     }
 
     /**

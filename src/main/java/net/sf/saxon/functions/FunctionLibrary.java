@@ -10,10 +10,12 @@ package net.sf.saxon.functions;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.List;
 import java.util.Map;
@@ -96,13 +98,18 @@ public interface FunctionLibrary {
     /**
      * Test whether a function with a given name and arity is available; if so, return a function
      * item that can be dynamically called.
-     * <p>This supports the function-lookup() function in XPath 3.0.</p>
+     * <p>This supports function references and the function-lookup() function in XPath 3.0.</p>
      *
-     * @param functionName  the qualified name of the function being called
+     * @param functionName  the symbolic name of the function being called, which includes
+     *                      its qualified name and its arity
      * @param staticContext the static context to be used by the function, in the event that
      *                      it is a system function with dependencies on the static context
-     * @return if a function of this name and arity is available for calling, then a corresponding
-     *         function item; or null if the function does not exist
+     * @return if a function with the required name and arity is available, returns that function;
+     * otherwise null. If the required function is context-sensitive (for example, {@code fn:name#0}
+     * or {@code fn:lang#1} or {@code fn:position#0}, then the result will be a function item
+     * that implements the interface {@link ContextAccessorFunction0}, which means that the
+     * returned function item can be turned into a non-context-sensitive function item by calling
+     * the method {@link ContextAccessorFunction0#bindContext(XPathContext)}.
      * @throws XPathException in the event of certain errors, for example attempting to get a function
      *                        that is private
      */
@@ -110,6 +117,25 @@ public interface FunctionLibrary {
     /*@Nullable*/
     FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext)
             throws XPathException;
+
+    /**
+     * Get a zero-arity function that can be evaluated (in some dynamic context) to return
+     * a function item. In many cases (in particular, where the function required is
+     * context-independent) this will be an {@link ConstantFunction0} that returns
+     * a {@link FunctionItem}. But for function references to context-dependent
+     * functions such as {@code fn:name#0}, evaluating the returned zero-arity function
+     * will "bake in" the context item at the point where it is evaluated
+     */
+
+    default FunctionItem getFunctionItemSupplier(SymbolicName.F functionName, StaticContext staticContext)
+            throws XPathException {
+        FunctionItem fit = getFunctionItem(functionName, staticContext);
+        if (fit != null) {
+            return new ConstantFunction0(functionName.getComponentName(), fit, SequenceType.SINGLE_FUNCTION);
+        } else {
+            return null;
+        }
+    }
 
 
 

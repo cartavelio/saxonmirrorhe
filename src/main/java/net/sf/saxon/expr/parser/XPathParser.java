@@ -19,7 +19,6 @@ import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
-import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
@@ -865,19 +864,6 @@ public class XPathParser {
                 }
                 return e1;
         }
-    }
-
-    /**
-     * Parse a ternary conditional expression
-     */
-
-    private Expression parseTernaryExpression(Expression condition) throws XPathException {
-        nextToken();
-        Expression e2 = parseExprSingle();
-        expect(Token.BANG_BANG);
-        nextToken();
-        Expression e3 = parseExprSingle();
-        return Choose.makeConditional(condition, e2, e3);
     }
 
     /**
@@ -3745,7 +3731,7 @@ public class XPathParser {
             } else {
                 break;
             }
-        };
+        }
         if (matchesAll) {
             // If there's a "*" in the list, then anything else gets swallowed
             tests.clear();
@@ -4163,18 +4149,6 @@ public class XPathParser {
         parserExtension.needExtension(p, "External function declarations");
     }
 
-
-    private Expression makeMapExpression(Map<String, Expression> keywordArgs) throws XPathException {
-        Expression[] block = new Expression[keywordArgs.size()];
-        int i=0;
-        for (Map.Entry<String, Expression> entry : keywordArgs.entrySet()) {
-            StringLiteral key = new StringLiteral(entry.getKey());
-            block[i++] = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, entry.getValue());
-        }
-        Block entries = new Block(block);
-        return MapFunctionSet.getInstance(31).makeFunction("merge", 1).makeFunctionCall(entries);
-    }
-
     /*@NotNull*/
     public Expression reportMissingFunction(int offset, StructuredQName functionName, Expression[] arguments, List<String> reasons) throws XPathException {
         StringBuilder sb = new StringBuilder();
@@ -4361,7 +4335,7 @@ public class XPathParser {
             functionName = getQNameParser().parse(fname, env.getDefaultFunctionNamespace());
             if (functionName.getPrefix().equals("")) {
                 if (XPathParser.isReservedFunctionName(functionName.getLocalPart(), languageVersion)) {
-                    grumble("The unprefixed function name '" + functionName.getLocalPart() + "' is reserved in XPath 3.1");
+                    grumble("The unprefixed function name '" + functionName.getLocalPart() + "' is reserved");
                 }
             }
         } catch (XPathException e) {
@@ -4369,36 +4343,52 @@ public class XPathParser {
             assert functionName != null;
         }
 
-        FunctionItem fcf = null;
         try {
             FunctionLibrary lib = env.getFunctionLibrary();
             SymbolicName.F sn = new SymbolicName.F(functionName, arity);
-            fcf = lib.getFunctionItem(sn, env);
-            if (fcf == null) {
+            FunctionItem functionSupplier = lib.getFunctionItemSupplier(sn, env);
+            if (functionSupplier == null) {
                 grumble("Function " + functionName.getEQName() + "#" + arity + " not found", "XPST0017", offset);
             }
+
+            // functionSupplier is a zero-arity function G, such that calling G() with
+            // a particular run-time context returns the function item we are looking for,
+            // bound to that context. In many cases, where the function reference is
+            // not context-dependent, functionSupplier will be a ConstantFunction wrapping
+            // the required function item, in which case we can simply unwrap it.
+            if (functionSupplier instanceof ConstantFunction0) {
+                return new FunctionLiteral((FunctionItem)((ConstantFunction0)functionSupplier).getConstantValue());
+            }
+
+            // In other cases we construct a call of the returned function G(), and this
+            // function call is the expression that we add to the parsed expression tree.
+            DynamicFunctionCall dfc = new DynamicFunctionCall(
+                    new FunctionLiteral(functionSupplier), Collections.emptyList());
+            setLocation(dfc, offset);
+            return dfc;
         } catch (XPathException e) {
             grumble(e.getMessage(), "XPST0017", offset);
+            return null;
         }
 
-        // Special treatment of functions in the system function library that depend on dynamic context; turn these
-        // into calls on function-lookup()
-
-        if (functionName.hasURI(NamespaceUri.FN) && fcf instanceof SystemFunction) {
-            final BuiltInFunctionSet.Entry details = ((SystemFunction) fcf).getDetails();
-            if (fcf instanceof ContextAccessorFunction || (details != null &&
-                    (details.properties & (BuiltInFunctionSet.FOCUS | BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) != 0)) {
-                // For a context-dependent function, return a call on function-lookup(), which saves the context
-                SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
-                lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
-                return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(functionName, BuiltInAtomicType.QNAME)),
-                                               Literal.makeLiteral(Int64Value.makeIntegerValue(arity)));
-            }
-        }
-
-        Expression ref = makeNamedFunctionReference(functionName, fcf);
-        setLocation(ref, offset);
-        return ref;
+//        // Special treatment of functions in the system function library that depend on dynamic context; turn these
+//        // into calls on function-lookup()
+//
+//        if (functionName.hasURI(NamespaceUri.FN) && fcf instanceof SystemFunction) {
+//            final BuiltInFunctionSet.Entry details = ((SystemFunction) fcf).getDetails();
+//            if (fcf instanceof ContextAccessorFunction || (details != null &&
+//                    (details.properties & (BuiltInFunctionSet.FOCUS | BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) != 0)) {
+//                // For a context-dependent function, return a call on function-lookup(), which saves the context
+//                SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
+//                lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
+//                return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(functionName, BuiltInAtomicType.QNAME)),
+//                                               Literal.makeLiteral(Int64Value.makeIntegerValue(arity)));
+//            }
+//        }
+//
+//        Expression ref = makeNamedFunctionReference(functionName, fcf);
+//        setLocation(ref, offset);
+//        return ref;
     }
 
     private static Expression makeNamedFunctionReference(StructuredQName functionName, FunctionItem fcf) {
@@ -5342,7 +5332,7 @@ public class XPathParser {
     }
 
     /**
-     * Set that we are parsing in "scan only"
+     * Set that we are parsing in "scan only" mode
      *
      * @param scanOnly true if parsing is to proceed in scan-only mode. In this mode
      *                 namespace bindings are not yet known, so no attempt is made to look up namespace

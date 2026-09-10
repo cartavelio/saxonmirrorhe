@@ -50,10 +50,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
             FunctionItemType fit = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
             return new CallableFunction(new SymbolicName.F(getFunctionName(), 0), callable, fit);
         }
-        ConstantFunction fn = new ConstantFunction(evaluate(ci, context));
-        fn.setDetails(getDetails());
-        fn.setRetainedStaticContext(getRetainedStaticContext());
-        return fn;
+        return new ConstantFunction0(getFunctionName(), evaluate(ci, context), getFunctionItemType().getResultType());
     }
 
     /**
@@ -179,6 +176,25 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
             }
         }
 
+    }
+
+    /**
+     * Given an arity-1 function of the form name#1, construct an arity-0 function
+     * of the form name#0, that invokes name#1 with the first argument bound to
+     * the value of the context item.
+     * @param fi
+     * @param context
+     * @return
+     */
+
+    public static FunctionItem bindContextItem(FunctionItem fi, XPathContext context) throws XPathException {
+        Item item = context.getContextItem();
+        GroundedValue gv = fi.call(context, new Sequence[]{item}).materialize();
+        return new ConstantFunction0(fi.getFunctionName(), gv, fi.getFunctionItemType().getResultType());
+//        return new CallableFunction(
+//                new SymbolicName.F(fi.getFunctionName(), 0),
+//                new CallableDelegate((cxt, args) -> gv),
+//                new SpecificFunctionType(new SequenceType[0], fi.getFunctionItemType().getResultType()));
     }
 
 

@@ -22,6 +22,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.SequenceType;
 
 
 public abstract class PositionAndLast extends ContextAccessorFunction {
@@ -63,10 +64,7 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
             });
             return new CallableFunction(name, callable, getFunctionItemType());
         }
-        ConstantFunction fn = new ConstantFunction(value);
-        fn.setDetails(getDetails());
-        fn.setRetainedStaticContext(getRetainedStaticContext());
-        return fn;
+        return new ConstantFunction0(getFunctionName(), value, SequenceType.SINGLE_INTEGER);
     }
 
     /**

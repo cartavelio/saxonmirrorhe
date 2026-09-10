@@ -14,6 +14,7 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.SequenceType;
 
 
 /**
@@ -45,10 +46,7 @@ public class CurrentGroupingKey extends ContextAccessorFunction {
             throw new XPathException("There is no current grouping key", "XTDE1071");
         }
         AtomicSequence groupingKey = gi.getCurrentGroupingKey();
-        ConstantFunction fn = new ConstantFunction(groupingKey);
-        fn.setDetails(getDetails());
-        fn.setRetainedStaticContext(getRetainedStaticContext());
-        return fn;
+        return new ConstantFunction0(getFunctionName(), groupingKey, SequenceType.ATOMIC_SEQUENCE);
     }
 
     /**

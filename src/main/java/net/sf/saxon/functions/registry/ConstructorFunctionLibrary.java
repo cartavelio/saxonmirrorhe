@@ -10,6 +10,8 @@ package net.sf.saxon.functions.registry;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.ConstantFunction0;
+import net.sf.saxon.functions.ContextItemAccessorFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.AtomicConstructorFunction;
 import net.sf.saxon.om.FunctionItem;
@@ -65,13 +67,12 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         if (functionName.getArity() != 1) {
             return null;
         }
-        Schema schema = staticContext.getPackageData().getImportedSchema();
         final NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
         if (uri.equals(NamespaceUri.ANONYMOUS)) {
             return null;
         }
         final String localName = functionName.getComponentName().getLocalPart();
-        final SchemaType type = schema.getSchemaType(new StructuredQName("", uri, localName));
+        final SchemaType type = config.getSchemaType(new StructuredQName("", uri, localName));
         if (type == null || type.isComplexType()) {
             return null;
         }
@@ -94,13 +95,63 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         }
     }
 
+    /**
+     * Get an expression that can be evaluated (in some dynamic context) to return
+     * a function item based on the requested function.
+     *
+     * @param functionName
+     * @param staticContext
+     */
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
+    public FunctionItem getFunctionItemSupplier(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
+
+        if (functionName.getArity() > 1) {
+            return null;
+        }
+        if (functionName.getArity() == 1) {
+            // Look for an arity-1 constructor function, which is simple
+            // because there is no context dependency
+            FunctionItem fit = getFunctionItem(functionName, staticContext);
+            if (fit != null) {
+                return new ConstantFunction0(
+                        functionName.getComponentName(), fit, SequenceType.SINGLE_FUNCTION);
+            } else {
+                return null;
+            }
+        }
+        final SchemaType type = config.getSchemaType(functionName.getComponentName());
+        if (type == null || type.isComplexType()) {
+            return null;
+        }
+
+        SymbolicName.F f1Name = new SymbolicName.F(functionName.getComponentName(), 1);
+        FunctionItem f1Function = getFunctionItem(f1Name, staticContext);
+        if (f1Function == null) {
+            return null;
+        }
+
+        // Arity-0 constructor function.
+
+        // OK, hold on to your hat, this is going to be a rough ride.
+        // The expression xs:integer#0, when evaluated in a specific context C,
+        // returns a function item F. If the context item of C is 23, then
+        // F() will always return 23: it is in effect a constant function.
+        // This method returns a function G, such that G() returns F.
+
+        Callable f0Callable = new CallableDelegate(
+                (context, args) -> ContextItemAccessorFunction.bindContextItem(
+                        f1Function, context));
+        FunctionItemType f0Type = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
+        return new CallableFunction(functionName, f0Callable, f0Type);
+
+    }
+
+    @Override
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         if (functionName.getArity() != 1) {
             return false;
         }
-        StructuredQName name = functionName.getComponentName();
-        final SchemaType type = schema.getSchemaType(name);
+        final SchemaType type = config.getSchemaType(functionName.getComponentName());
         if (type == null || type.isComplexType()) {
             return false;
         }
@@ -197,8 +248,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         // Now see if it's a constructor function for a user-defined type
 
         if (arguments.length == 1) {
-            Schema schema = env.getPackageData().getImportedSchema();
-            SchemaType st = schema.getSchemaType(new StructuredQName("", uri, localName));
+            SchemaType st = config.getSchemaType(new StructuredQName("", uri, localName));
             if (st instanceof SimpleType) {
                 if (st instanceof AtomicType) {
                     return new CastExpression(arguments[0], (AtomicType) st, true);
