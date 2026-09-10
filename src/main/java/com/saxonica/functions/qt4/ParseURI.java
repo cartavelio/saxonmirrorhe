@@ -47,24 +47,30 @@ public class ParseURI extends URIFunctions {
             query = null;
         }
 
-        String filepath = null;
-        String scheme;
-        if (uristr.matches("^[A-Za-z][:|].*$")) {
-            scheme = "file";
-            // Force the second character to be a colon
-            uristr = uristr.charAt(0) + ":" + uristr.substring(2);
-            map = map.addEntry(SCHEME, new StringValue(scheme));
-            filepath = uristr;
-            uristr = "/" + uristr;
-        } else {
-            if (uristr.matches("^[A-Za-z]+:.*$")) {
-                pos = uristr.indexOf(":");
-                scheme = uristr.substring(0, pos);
-                map = map.addEntry(SCHEME, new StringValue(scheme));
-                uristr = uristr.substring(pos + 1);
+        String scheme = null;
+
+        Pattern pattern = Pattern.compile("^([A-Za-z][-+.A-Za-z0-9]+):(.*)$");
+        Matcher matcher = pattern.matcher(uristr);
+        if (matcher.matches()) {
+            scheme = matcher.group(1).toLowerCase();
+            uristr = matcher.group(2);
+        }
+
+        if (scheme == null || "file".equals(scheme)) {
+            pattern = Pattern.compile("^/*([A-Za-z])[:|](.*)$");
+            matcher = pattern.matcher(uristr);
+            if (matcher.find()) {
+                scheme = "file";
+                uristr = "/" + matcher.group(1) + ":" + matcher.group(2);
             } else {
-                scheme = null;
+                if (uncPath) {
+                    scheme = "file";
+                }
             }
+        }
+
+        if (scheme != null) {
+            map = map.addEntry(SCHEME, new StringValue(scheme));
         }
 
         if (scheme != null && hierarchicalSchemes.contains(scheme)) {
@@ -80,39 +86,49 @@ public class ParseURI extends URIFunctions {
             }
         }
 
+        String filepath = null;
         final String authority;
-        if ((scheme == null && uncPath && uristr.matches("^//[^/].*$"))) {
-            scheme = "file";
-            map = map.addEntry(SCHEME, new StringValue(scheme));
+        if ("file".equals(scheme)) {
             authority = null;
-            filepath = uristr;
-        } else {
-            if ((scheme == null || "file".equals(scheme)) && uristr.matches("^//*[a-zA-Z][:|].*$")) {
-                authority = null;
-                uristr = uristr.replaceAll("^/+([a-zA-Z]).", "/$1:");
-                filepath = uristr.substring(1);
+            pattern = Pattern.compile("^/*(//[^/].*)$");
+            matcher = pattern.matcher(uristr);
+            if (uncPath && matcher.find()) {
+                uristr = matcher.group(1);
+                filepath = uristr;
             } else {
-                Pattern pattern = Pattern.compile("^(///*)([^/]+)(/.*)?$");
-                Matcher matcher = pattern.matcher(uristr);
+                uristr = uristr.replaceAll("^/+", "/");
+                if (uristr.matches("^/[A-Za-z]:.*$")) {
+                    filepath = uristr.substring(1);
+                } else {
+                    filepath = uristr;
+                }
+            }
+        } else if (hierarchical) {
+            pattern = Pattern.compile("^//([^/]+)$");
+            matcher = pattern.matcher(uristr);
+            if (matcher.find()) {
+                authority = matcher.group(1);
+                uristr = "";
+            } else {
+                pattern = Pattern.compile("^//([^/]*)(/.*)$");
+                matcher = pattern.matcher(uristr);
                 if (matcher.find()) {
-                    if (matcher.group(3) == null || matcher.group(3).isEmpty()) {  // second condition is for transpiled code
-                        if (matcher.group(1).length() == 2) {
-                            authority = matcher.group(2);
-                            map = map.addEntry(AUTHORITY, new StringValue(authority));
-                            uristr = "";
-                        } else {
-                            authority = null;
-                            uristr = "/" + matcher.group(2);
-                        }
+                    if (matcher.group(1) != null && !matcher.group(1).isEmpty()) {
+                        authority = matcher.group(1);
                     } else {
-                        authority = matcher.group(2);
-                        map = map.addEntry(AUTHORITY, new StringValue(authority));
-                        uristr = matcher.group(3);
+                        authority = null;
                     }
+                    uristr = matcher.group(2);
                 } else {
                     authority = null;
                 }
             }
+        } else {
+            authority = null;
+        }
+
+        if (authority != null) {
+            map = map.addEntry(AUTHORITY, new StringValue(authority));
         }
 
         String port = null;
@@ -130,8 +146,8 @@ public class ParseURI extends URIFunctions {
                 map = map.addEntry(USERINFO, new StringValue(userinfo));
             }
 
-            Pattern pattern = Pattern.compile("^([^@]*@)?(\\[[^]]*])(:([^:]*))?$");
-            Matcher matcher = pattern.matcher(authority);
+            pattern = Pattern.compile("^([^@]*@)?(\\[[^]]*])(:([^:]*))?$");
+            matcher = pattern.matcher(authority);
             if (matcher.find()) {
                 map = map.addEntry(HOST, new StringValue(matcher.group(2)));
                 port = "".equals(matcher.group(4)) ? null : matcher.group(4);
@@ -181,8 +197,8 @@ public class ParseURI extends URIFunctions {
         }
 
         if (filepath != null) {
-             filepath = DecodeFromURI.decode(filepath);
-            map = map.addEntry(FILEPATH, new StringValue(filepath));
+             String decoded = DecodeFromURI.decode(filepath);
+            map = map.addEntry(FILEPATH, new StringValue(decoded));
         }
 
         if (query != null) {
@@ -214,4 +230,4 @@ public class ParseURI extends URIFunctions {
     }
 }
 
-// Copyright (c) 2009-2023 Saxonica Limited
+// Copyright (c) 2023-2024 Saxonica Limited
