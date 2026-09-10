@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.lib.ErrorReporter;
@@ -107,6 +108,20 @@ public class XQueryCompiler {
         } catch (URISyntaxException err) {
             throw new IllegalStateException("Invalid base URI for query: " + staticQueryContext.getBaseURI());
         }
+    }
+
+    /**
+     * Set the {@link XsdSchema} to be used with this XQueryCompiler.
+     *
+     * <p>This is equivalent to importing the schema from within the query.
+     * Any <code>import schema</code> declarations within the query itself
+     * must be consistent with the supplied schema.</p>
+     *
+     */
+
+    public void useSchema(XsdSchema schema) {
+        staticQueryContext.setSchemaAware(true);
+        staticQueryContext.preLoadSchema((PreparedSchema)schema.getUnderlyingSchema());
     }
 
     //#if CSHARP==false

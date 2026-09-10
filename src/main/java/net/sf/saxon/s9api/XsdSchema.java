@@ -1,5 +1,7 @@
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.type.Schema;
+
 public abstract class XsdSchema {
 
 
@@ -34,5 +36,11 @@ public abstract class XsdSchema {
      */
 
     public abstract XsdSchema combine(XsdSchema other) throws SaxonApiException;
+
+    /**
+     * Get the underlying implementation-level Schema
+     */
+
+    public abstract Schema getUnderlyingSchema();
 }
 

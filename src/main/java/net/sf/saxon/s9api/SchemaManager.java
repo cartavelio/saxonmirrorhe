@@ -150,6 +150,8 @@ public abstract class SchemaManager {
         return load(new StreamSource(file));
     }
 
+    public abstract XsdSchema getXsdSchema();
+
     /**
      * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
      * document are added to the cache of schema components maintained by this SchemaManager

@@ -129,7 +129,7 @@ public class XSLImportSchema extends StyleElement {
                     namespace.equals(NamespaceConstant.FN) ||
                     namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
                 targetNamespace = NamespaceUri.of(namespace);
-                config.addSchemaForBuiltInNamespace(targetNamespace);
+                config.getSchemaForBuiltInNamespace(targetNamespace);
                 getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
                 return;
             }

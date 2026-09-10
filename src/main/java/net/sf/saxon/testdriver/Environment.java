@@ -467,6 +467,7 @@ public class Environment implements ResourceResolver {
             } catch (SaxonApiException err) {
                 driver.println("*** Failed to load schema: " + err.getMessage());
             }
+            environment.xqueryCompiler.useSchema(manager.getXsdSchema());
         }
         return validateSources;
     }

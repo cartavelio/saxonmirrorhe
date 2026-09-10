@@ -1286,7 +1286,7 @@ public class XQueryParser extends XPathParser {
                 } else if (sImport.namespaceURI.equals(NamespaceUri.XML) ||
                         sImport.namespaceURI.equals(NamespaceUri.FN) ||
                         sImport.namespaceURI.equals(NamespaceUri.SCHEMA_INSTANCE)) {
-                    config.addSchemaForBuiltInNamespace(sImport.namespaceURI);
+                    config.getSchemaForBuiltInNamespace(sImport.namespaceURI);
                 } else {
                     grumble("Unable to locate requested schema " + sImport.namespaceURI, "XQST0059", sImport.offset);
                 }

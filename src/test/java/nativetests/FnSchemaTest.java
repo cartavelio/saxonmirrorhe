@@ -19,7 +19,7 @@ public class FnSchemaTest {
     public void testSchema() {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.addSchemaForBuiltInNamespace(NamespaceUri.FN);
+            config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
             config.setSchemaValidationMode(Validation.STRICT);
             String instance = "<fn:analyze-string-result xmlns:fn=\"http://www.w3.org/2005/xpath-functions\">" +
                     "<fn:non-match>(</fn:non-match><fn:match>(banana)</fn:match><fn:non-match>)</fn:non-match>" +
@@ -35,7 +35,7 @@ public class FnSchemaTest {
     public void testSchema2() {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.addSchemaForBuiltInNamespace(NamespaceUri.FN);
+            config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
             config.setSchemaValidationMode(Validation.STRICT);
             String instance = "<fn:analyze-string-result xmlns:fn=\"http://www.w3.org/2005/xpath-functions\">" +
                     "<fn:match><fn:group nr=\"1\">b<fn:group nr=\"2\"/></fn:group></fn:match>" +
@@ -53,7 +53,7 @@ public class FnSchemaTest {
         // 2016-11-03: the instance actually validates, see bug 29976. Changed to an instance that doesn't validate.
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.addSchemaForBuiltInNamespace(NamespaceUri.FN);
+            config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
             config.setSchemaValidationMode(Validation.STRICT);
             String instance = "<fn:analyze-string-result xmlns:fn=\"http://www.w3.org/2005/xpath-functions\">" +
                     "<fn:match><fn:group nr=\"1\">b<fn:group nr=\"2\"/></fn:group></fn:match>" +

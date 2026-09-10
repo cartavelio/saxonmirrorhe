@@ -7,6 +7,7 @@
 
 package net.sf.saxon.query;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.*;
@@ -141,6 +142,15 @@ public class QueryModule implements StaticContext {
         }
         optimizerOptions = sqc.getOptimizerOptions();
         unprefixedElementMatchingPolicy = sqc.getUnprefixedElementMatchingPolicy();
+
+        Schema preloadedSchema = sqc.getPreLoadedSchema();
+        if (preloadedSchema != null) {
+            // TODO: HE build...
+            for (Map.Entry<NamespaceUri, List<String>> entry : ((PreparedSchema)preloadedSchema).getTargetNamespaceMap().entrySet()) {
+                addImportedSchema(entry.getKey(), null, entry.getValue());
+            }
+            getPackageData().setImportedSchema(preloadedSchema);
+        }
     }
 
     /**

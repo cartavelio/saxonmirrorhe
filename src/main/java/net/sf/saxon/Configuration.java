@@ -3161,8 +3161,8 @@ public class Configuration implements SourceResolver {
      * @param namespace the namespace. Currently built-in schemas are available for the XML and FN namespaces
      */
 
-    public void addSchemaForBuiltInNamespace(NamespaceUri namespace) {
-        // no action
+    public Schema getSchemaForBuiltInNamespace(NamespaceUri namespace) {
+        return null;
     }
 
     /**
