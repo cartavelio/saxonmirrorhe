@@ -1082,7 +1082,8 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                                                Configuration config, boolean debug) {
             details.name = functionName;
             details.arity = staticArgs.length;
-            details.implementationClass = theClass;
+            //details.implementationClass = theClass;
+
             details.argumentTypes = new SequenceType[staticArgs.length];
             details.itemType = AnyItemType.getInstance();
             details.cardinality = StaticProperty.ALLOWS_ZERO_OR_MORE;
