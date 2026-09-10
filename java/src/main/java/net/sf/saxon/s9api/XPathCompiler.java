@@ -9,6 +9,7 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticContext;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.functions.FunctionLibraryList;
@@ -569,6 +570,8 @@ public class XPathCompiler {
         }
         XPathEvaluator eval = evaluator;
         IndependentContext ic = env;
+        String module = getBaseURI() == null ? null : getBaseURI().toString();
+        env.setContainingLocation(new Loc(module, 1, 1));
         if (ic.isAllowUndeclaredVariables()) {
             // self-declaring variables modify the static context. The XPathCompiler must not change state
             // as the result of compiling an expression, so we need to copy the static context.
@@ -670,6 +673,8 @@ public class XPathCompiler {
         }
 
         try {
+            String module = getBaseURI() == null ? null : getBaseURI().toString();
+            env.setContainingLocation(new Loc(module, 1, 1));
             XPathExpression cexp = evaluator.createPattern(source);
             return new XPathExecutable(cexp, processor, env);
         } catch (XPathException e) {

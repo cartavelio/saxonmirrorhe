@@ -79,4 +79,30 @@ public class TestXPathCompiler40 {
         assertEquals("2-3-4", result);
     }
 
+
+    @Test
+    public void testLineNumberOfExpression() {
+        try {
+            XPathExecutable exec = compiler.compile("/dmAddress/\ndmIdent/\ndmCode/\n@modelIdentCode[");
+            XPathSelector selector = exec.load();
+            selector.setContextItem(document);
+            fail("unexpected success");
+        } catch (SaxonApiException e1) {
+            assertEquals(4, e1.getLineNumber());
+        }
+    }
+
+    @Test
+    public void testLineNumberOfPattern() {
+        try {
+            XPathExecutable exec = compiler.compilePattern("/dmAddress/\ndmIdent/\ndmCode/\n@modelIdentCode[");
+            XPathSelector selector = exec.load();
+            selector.setContextItem(document);
+            fail("unexpected success");
+        } catch (SaxonApiException e1) {
+            assertEquals(4, e1.getLineNumber());
+        }
+    }
+
+
 }
