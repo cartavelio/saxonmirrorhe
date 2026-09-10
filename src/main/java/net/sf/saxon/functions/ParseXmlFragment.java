@@ -20,6 +20,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.resource.ActiveSAXSource;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
@@ -92,6 +93,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                     reader = Version.platform.loadParserForXmlFragments();
                 }
 
+                ActiveSAXSource.configureParser(reader);
                 source.setXMLReader(reader);
                 source.setSystemId(baseURI);
 
