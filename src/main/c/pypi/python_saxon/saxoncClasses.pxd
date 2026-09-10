@@ -27,9 +27,9 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void setcwd(char* cwd)
         const char* getcwd()
 
-        void registerUserFunction(const char * ns, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON) except +raise_py_error
+        void registerUserFunction(const char * ns, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON, bool useNativeTypes) except +raise_py_error
 
-        void registerUserFunctionWithVoid(void * proc_ptr, const char * ns, const char * functionName, void * func, const char * signatureJSON) except +raise_py_error
+        void registerUserFunctionWithProcessor(void * proc_ptr, const char * ns, const char * functionName, void * func, const char * signatureJSON, bool useNativeTypes) except +raise_py_error
 
         void attachCurrentThread() except +raise_py_error
 

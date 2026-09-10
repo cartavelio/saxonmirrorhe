@@ -1366,7 +1366,7 @@ sizeof(phpMethods) / sizeof(phpMethods[0]));
         enumArrXdmValue
 };*/
 
-/*
+
 jobject JNICALL phpNativeCall
         (JNIEnv *env, jobject object, jstring funcName, jobjectArray arguments,
 jobjectArray argTypes){ JNIEnv *senv = SaxonProcessor::sxn_environ->env; char
@@ -1567,7 +1567,7 @@ extension function", 0);
     delete nprocessor;
     zval_ptr_dtor(&retval);
     return obj;
-} */
+}
 
 /*     ============== PHP Interface of   XdmValue =============== */
 void xdmValue_free_storage(zend_object *object) {

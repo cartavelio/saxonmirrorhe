@@ -3,7 +3,7 @@
 
 extern "C" PyObject * CythonUserFunctionHandler;
 
-void * python_nativeFunctionCall(char * functionName, void * proc, void * func, int numOfArguments,  XdmValue ** arguments){
+void * python_nativeFunctionCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  XdmValue ** arguments){
     //PyObject_CallNoArgs((PyObject *)func);
     PyObject* argsList = nullptr;
     PyObject* arg = nullptr;
@@ -21,12 +21,12 @@ void * python_nativeFunctionCall(char * functionName, void * proc, void * func, 
         argsList = PyList_New(numOfArguments);
 
         if(argsList == nullptr) {
-            std::cerr << "Failed to construct list for arguments" << std::endl;
+            //std::cerr << "Failed to construct list for arguments" << std::endl;
             return nullptr;
 
         }
 
-        std::cerr << "arguments count="<< numOfArguments << std::endl;
+        //std::cerr << "arguments count="<< numOfArguments << std::endl;
 
         //args = new PyObject[numOfArguments];
         PyObject * argi = nullptr;
@@ -37,18 +37,16 @@ void * python_nativeFunctionCall(char * functionName, void * proc, void * func, 
             //Py_INCREF(argi);
 
             if(argi == nullptr) {
-                std::cerr << "Argument is null "<< std::endl;
                 return nullptr;
 
             }
             err = PyList_SetItem(argsList, i, argi);
             if (err < 0) {
-                std::cerr << "Failed construction of Argument for list i="<<i << std::endl;
-                std::cerr << "Error code"<<err << std::endl;
+                //std::cerr << "Failed construction of Argument for list i="<<i << std::endl;
+                //std::cerr << "Error code"<<err << std::endl;
                 return nullptr;
             }
 
-            std::cerr << "CthonUserFunction cp0" << std::endl;
 
         }
     }
@@ -61,7 +59,7 @@ void * python_nativeFunctionCall(char * functionName, void * proc, void * func, 
 
     //PyObject* result = PyObject_CallObject((PyObject *)func, argsList);
 
-    PyObject* result = PyObject_CallFunctionObjArgs((PyObject *)func, argsList, NULL);
+    PyObject* result = PyObject_CallFunctionObjArgs((PyObject *)func, (PyObject *) proc, argsList, NULL);
 
     if(argsList != nullptr){
         //TODO decrement ref counts
@@ -88,23 +86,13 @@ void * python_nativeFunctionCall(char * functionName, void * proc, void * func, 
             return nullptr;
         }
 
-
-
-        std::cerr<< "Type of userFunction result = "<<c_typeObjStr<<std::endl;
-
-
+        //std::cerr<< "Type of userFunction result = "<<c_typeObjStr<<std::endl;
 
     }
 
-
-
     long resulti = PyLong_AsLong(PyObject_CallMethodNoArgs(result, PyUnicode_FromString("__get_underlying_int_value")));
 
-
-
-    fprintf(stderr, "We are end of CythonUserFunctionHandler cp2\n");
-
-    fflush(stdout);
+    //fflush(stdout);
 
     return  (void *)resulti;
 

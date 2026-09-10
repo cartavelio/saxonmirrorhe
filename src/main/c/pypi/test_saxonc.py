@@ -1714,12 +1714,19 @@ def testMap2():
         assert avar.head.integer_value == 4
 
 
-def user_function(value):
+def user_function(PySaxonProcessor: saxonproc, values):
+    ''' values: PyXdmValue '''
     print("In python user function")
-    saxonproc = PySaxonProcessor()
-    print(value)
-    n_value  = value[0].head.integer_value + 2
+    #saxonproc = PySaxonProcessor()
+    print(values)
+    n_value  = values[0].head.integer_value + 2
     return saxonproc.make_integer_value(n_value)
+
+'''
+Return value: List atomic types and check if we have a python mapping for  it
+Create a function to do type conversion between PyXdm and Python types
+
+'''
 
 
 def testUserFunction():
@@ -1732,10 +1739,12 @@ def testUserFunction():
                                                           "      ],"
                                                           "      \"arity\": [1]"
                                                           "    }"
-                                                          "}")
+                                                          "}", use_python_types=False)
+            #add flag to prevent auto converted values
 
             xpath_processor = proc.new_xpath_processor()
             xpath_processor.declare_namespace("dy", "http://www.example.com")
+
             result = xpath_processor.evaluate_single("dy:myFunc(3)")
 
             '''assert result is not None'''

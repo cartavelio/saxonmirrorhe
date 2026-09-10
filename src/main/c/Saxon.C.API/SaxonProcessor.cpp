@@ -76,7 +76,7 @@ void SaxonProcessor::getInfo() {
 
 #endif
 
-extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int numOfArguments, void ** arguments) {
+extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments) {
     if (getenv("SAXONC_DEBUG_FLAG")) {
         fprintf(stdout, "We are in a c function\n");
     }
@@ -95,7 +95,7 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
     fprintf(stdout, "We are in a c function preprocessor directive\n");
     fflush(stdout);
     fflush(stdout);
-    return python_nativeFunctionCall(functionName, proc, func, numOfArguments, arguments1);
+    return python_nativeFunctionCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
 #else
 
     fprintf(stdout, "We are in a c function name= %s\n", functionName);
@@ -395,7 +395,7 @@ SaxonProcessor::~SaxonProcessor() {
   // exceptionClear();
 }
 
-void SaxonProcessor::registerUserFunctionWithVoid(void * python_procPtr, const char * ns1, const char * functionName, void * func, const char * signature)
+void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, const char * functionName, void * func, const char * signature, bool useNativeTypes)
 {
  fprintf(stderr, "We are in a C++ registerUserFunctionForPython\n");
 
@@ -429,7 +429,7 @@ void SaxonProcessor::registerUserFunctionWithVoid(void * python_procPtr, const c
     allocFn alloc = operator new;
 
     long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1, (char *)functionName,
-                                               (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc);
+                                               (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc, (int)useNativeTypes);
 
 
     if (status == SXN_EXCEPTION) {
@@ -452,10 +452,10 @@ void SaxonProcessor::registerUserFunctionWithVoid(void * python_procPtr, const c
               throw SaxonApiException();
         }
 
-
+        //TODO this might not be needed
         int64_t paramValues = j_getArgumentTypesFromSignature(SaxonProcessor::sxn_environ->thread,
                                                               (void *) signatureMap->getUnderlyingValue());
-           std::cerr<<"We are in a C++ registerUserFunction cp2"<<std::endl;
+
         argValue = new XdmArray(paramValues);
       //  userFunctionDescriptor1->argumentTypes = argValue;
 
@@ -478,7 +478,7 @@ void SaxonProcessor::registerUserFunctionWithVoid(void * python_procPtr, const c
 
 }
 
-void SaxonProcessor::registerUserFunction(const char * ns1, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signature)
+void SaxonProcessor::registerUserFunction(const char * ns1, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signature, bool isNativeTypes)
 {
 
     /*UserFunctionDescriptor * userFunctionDescriptor1 = new UserFunctionDescriptor;
@@ -489,7 +489,7 @@ void SaxonProcessor::registerUserFunction(const char * ns1, const char * functio
     userFunctionDescriptor1->arguments = signature;
     userFunctionDescriptor1->argumentTypes = nullptr; */
 
-    registerUserFunctionWithVoid(nullptr, ns1, functionName, (void *)func,signature);
+    registerUserFunctionWithProcessor(nullptr, ns1, functionName, (void *)func,signature, isNativeTypes);
 
 }
 

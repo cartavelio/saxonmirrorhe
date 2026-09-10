@@ -121,7 +121,7 @@ struct UserFunctionDescriptor{
 
 typedef XdmValue *(*sxnExtensionFunction)(int, XdmValue **);
 
-extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int numOfArguments, void ** arguments);
+extern "C" void * c_nativeCall(char * functionName, void * proc, void * func,  int useNativeTypes, int numOfArguments, void ** arguments);
 
 
 
@@ -660,9 +660,9 @@ public:
    */
   const char *version();
 
-  void registerUserFunction(const char * ns, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON);
+  void registerUserFunction(const char * ns, const char * functionName, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON, bool useNativeTypes=false);
 
-  void registerUserFunctionWithVoid(void * procPtr, const char * ns, const char * functionName, void * func, const char * signatureJSON);
+  void registerUserFunctionWithProcessor(void * procPtr, const char * ns, const char * functionName, void * func, const char * signatureJSON, bool useNativeTypes=false);
 
   //! Add a native method.
   /**

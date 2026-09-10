@@ -906,55 +906,36 @@ public function testSingle()
     );
     $this->assertEquals($item, "<person>text1</person>");
     }
-    /*  public function testItemSeparatorToSerializer(): void {
-          try {
 
-              String sr =
-                      "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
-                              "  <xsl:template name='go'>"
-                              + "<xsl:comment>start</xsl:comment><a><b/><c/></a><xsl:comment>end</xsl:comment>"
-                              + "</xsl:template>" +
-                              "</xsl:stylesheet>";
-              $transformer = self::$saxonProc->newXslt30Processor();
-              transformer.compileFromString(null, sr, null, null);
-              String[] params = new String[]{"!method", "!indent", "!item-separator"};
-              Object[] pvalues = new Object[]{"xml", "no", "+++"};
-              String sw = transformer.callTemplateReturningString(null, null, "go", params, pvalues);
-              System.err.println(sw);
-              assertTrue(sw.contains("<!--start-->+++"));
-              assertTrue(sw.contains("+++<!--end-->"));
-              assertTrue(sw.contains("<a><b/><c/></a>"));
-          } catch (Exception e) {
-              e.printStackTrace();
-              fail(e.getMessage());
-          }
+    public function testUserDefinedFunction(): void
+     {
+         if (getenv("SAXONC_DEBUG_FLAG")) {
+             print("Test: testUserDefinedFunction");
+         }
+         $saxonProc1 = new Saxon\SaxonProcessor(True);
 
-      }
+         $saxonProc1->registerUserFunction("http://www.example.com", "myFunc", user_function, "{ \"myFunc\": {".
+                                                        "      \"as\": \"xs:integer?\"," .
+                                                        "      \"param\": [" .
+                                                        "        \"xs:integer\"" .
+                                                        "      ],".
+                                                        "      \"arity\": [1]" .
+                                                        "    }".
+                                                        "}", False);
 
-      public function testSequenceResult() throws SaxonApiException {
-          try {
+         $xpathProc = $saxonProc1->newXPathProcessor();
+         xpathProc->declareNamespace("dy", "http://www.example.com");
 
-              String source = "<?xml version='1.0'?>" +
-                      "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                      "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                      "                version='3.0'>" +
-                      "                <xsl:template name='xsl:initial-template' as='xs:integer+'>" +
-                      "                     <xsl:sequence select='(1 to 5)' />        " +
-                      "                </xsl:template>" +
-                      "                </xsl:stylesheet>";
-
-              $transformer = self::$saxonProc->newXslt30Processor();
-              transformer.compileFromString(null, source, null, null);
-              String[] params = new String[]{"outvalue"};
-              Object[] pvalues = new Object[]{true};
-              XdmValue res = transformer.callTemplateReturningValue(null, null, null, params, pvalues);
-              int count = res.size();
-              XdmAtomicValue value = (XdmAtomicValue) res.itemAt(0);
-          } catch (SaxonApiException e) {
-              e.printStackTrace();
-              fail();
-          }
-      }
-
-  */
+         try {
+             $result = $xpathProc->evaluateSingle("dy:myFunc(3)");
+             $this->assertNotNull($result);
+             $this->assertInstanceOf(Saxon\XdmItem::class, $result);
+             $this->assertTrue($result->isAtomic());
+             $value = $result->getAtomicValue()->getIntegerValue();
+             $this->assertEquals($value, "3");
+         } catch (Exception $e) {
+             echo 'Caught exception: ', $e->getMessage(), "\n";
+             $this->assertTrue(False, 'Caught exception: ' . $e->getMessage());
+         }
+     }
 }
