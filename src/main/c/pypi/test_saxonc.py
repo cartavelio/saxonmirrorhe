@@ -1192,6 +1192,23 @@ def test_static_base_uri(saxonproc):
     except  Exception as err:
         assert False
 
+def test_static_base_http_uri(saxonproc):
+    xquery1 = '"Static base uri : " || static-base-uri()'
+
+    xqueryProcessor = saxonproc.new_xquery_processor()
+    workingDirPath = 'http://www.example.com/base'
+
+    assert workingDirPath is not None
+
+    xqueryProcessor.set_cwd(workingDirPath)
+
+    try:
+        result = xqueryProcessor.run_query_to_string(query_text=xquery1)
+        assert result is not None
+        assert 'http://' in result
+    except  Exception as err:
+        assert False
+
 def test_default_namespace2(saxonproc):
     query_proc = saxonproc.new_xquery_processor()
     query_proc.declare_namespace("", "http://one.uri/")

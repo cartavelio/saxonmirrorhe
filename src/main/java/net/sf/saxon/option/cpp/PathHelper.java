@@ -42,6 +42,7 @@ public class PathHelper {
         }
     }
 
+
     /**
      * Resolve a supplied relative or absolute file path, or URI, to a Source.
      * Relative paths will be resolved against the supplied current working
@@ -134,6 +135,13 @@ public class PathHelper {
             }
             throw new SaxonApiException(ex);
         }
+    }
+
+    public static URI pathToURI(Configuration config, String path) throws SaxonApiException {
+        Path currentRelativePath = Paths.get("");
+        String crp = currentRelativePath.toAbsolutePath().toString();
+        URI uri = PathHelper.resolveToURI(config, crp , path);
+        return uri;
     }
 
     private static String normalisePathToRelativeURI(String path) {

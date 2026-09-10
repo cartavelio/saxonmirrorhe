@@ -216,11 +216,7 @@ public class XQueryEngine extends SaxonCAPI {
 
         compiler.setErrorReporter(SaxonCException.errorReporter);
         if(cwd != null) {
-            PathHelper helper = new PathHelper();
-            Path currentRelativePath = Paths.get("");
-            String crp = currentRelativePath.toAbsolutePath().toString();
-
-            URI baseURI = helper.resolveToURI(processor.getUnderlyingConfiguration(), crp , cwd);
+            URI baseURI = PathHelper.pathToURI(processor.getUnderlyingConfiguration(), cwd);
             compiler.setBaseURI(baseURI);
         }
         if(query != null) {
