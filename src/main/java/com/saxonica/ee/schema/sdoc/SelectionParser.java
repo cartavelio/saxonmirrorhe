@@ -139,6 +139,10 @@ public class SelectionParser extends XPathParser {
             Expression cie = new ContextItemExpression();
             setLocation(cie);
             return cie;
+        } else if (t.currentToken instanceof Token.NameToken || t.currentToken instanceof Token.Wildcard) {
+            Expression ae = new AxisExpression(AxisInfo.CHILD, parseNodeTest(Type.ELEMENT));
+            setLocation(ae);
+            return ae;
         } else if (t.currentToken == Token.STAR) {
             nextToken();
             Expression ae2 = new AxisExpression(AxisInfo.CHILD, NodeKindTest.ELEMENT);
@@ -172,12 +176,12 @@ public class SelectionParser extends XPathParser {
             nextToken();
             if (t.currentToken == Token.STAR) {
                 nextToken();
-                Expression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, AnyNodeTest.getInstance());
+                Expression ae2 = new AxisExpression(axis, AnyNodeTest.getInstance());
                 setLocation(ae2);
                 return ae2;
             } else {
-                NodeTest test = parseNodeTest(Type.ATTRIBUTE);
-                Expression ae2 = new AxisExpression(AxisInfo.ATTRIBUTE, test);
+                NodeTest test = parseNodeTest(principalNodeType);
+                Expression ae2 = new AxisExpression(axis, test);
                 setLocation(ae2);
                 return ae2;
             }
