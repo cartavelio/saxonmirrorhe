@@ -121,7 +121,7 @@ public class TabulateMaps extends Instruction {
         SequenceType required = SequenceType.FUNCTION_ITEM_SEQUENCE;
         setRootExpression(tc.staticTypeCheck(getRootExpression(), required, role, visitor));
 
-        required = MapType.SEQUENCE_OF_MAPS;
+        required = SequenceType.MAP_SEQUENCE;
         role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "saxon:tabulate-maps/select", 0);
         setSelectExpression(tc.staticTypeCheck(getSelectExpression(), required, role, visitor));
 

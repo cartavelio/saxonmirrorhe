@@ -8,7 +8,6 @@ import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -311,7 +310,7 @@ public class Parts extends SystemFunction implements Callable {
                      return SingletonIterator.makeIterator((StringValue) map.get(new StringValue("fragment")));
                  }
         );
-        register(BuiltInAtomicType.ANY_URI, "query-parameters", MapType.SINGLE_MAP_ITEM,
+        register(BuiltInAtomicType.ANY_URI, "query-parameters", SequenceType.SINGLE_MAP,
                  a -> {
                      MapItem map = uriComponents(a.getStringValue());
                      return SingletonIterator.makeIterator((MapItem) map.get(new StringValue("queryParams")));

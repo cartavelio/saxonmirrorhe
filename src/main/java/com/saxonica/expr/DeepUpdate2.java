@@ -14,7 +14,6 @@ import net.sf.saxon.functions.hof.FilterFn;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -107,7 +106,7 @@ public class DeepUpdate2 extends Instruction {
 
         if (operation != UpdateTarget.UNKNOWN) {
             Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.SUBEXPRESSION, "update/root", 0);
-            SequenceType required = operation == UpdateTarget.MAP ? MapType.SINGLE_MAP_ITEM : ArrayItemType.SINGLE_ARRAY;
+            SequenceType required = operation == UpdateTarget.MAP ? SequenceType.SINGLE_MAP : ArrayItemType.SINGLE_ARRAY;
             setRootExpression(tc.staticTypeCheck(getRootExpression(), required, role, visitor));
         }
 

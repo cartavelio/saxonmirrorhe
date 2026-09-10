@@ -467,12 +467,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new RecordTest.Field("columns-index", SequenceType.optional(
                         new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_INTEGER)), true),
                 new RecordTest.Field("rows", SequenceType.zeroOrMore(new ArrayItemType(SequenceType.SINGLE_STRING)), true),
-                new RecordTest.Field("get", SequenceType.makeSequenceType(
+                new RecordTest.Field("get", SequenceType.one(
                         new SpecificFunctionType(new SequenceType[]{
                                 BuiltInAtomicType.POSITIVE_INTEGER.one(),
                                 SequenceType.one(
                                         LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER, BuiltInAtomicType.STRING))
-                        }, SequenceType.OPTIONAL_STRING), StaticProperty.EXACTLY_ONE), true));
+                        }, SequenceType.OPTIONAL_STRING)), true));
 
         register("parse-csv", 1, e -> e.populate(com.saxonica.functions.qt4.csv.ParseCsv::new, parseCsvResultType, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)

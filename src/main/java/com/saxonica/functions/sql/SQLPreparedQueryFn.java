@@ -6,7 +6,6 @@ import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.NotFn;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
@@ -75,7 +74,7 @@ public class SQLPreparedQueryFn extends SystemFunction {
             int arity = metaData.getParameterCount();
             SequenceType[] parameterTypes = new SequenceType[arity];
             SQLFunctionSet.supplyParameters(metaData, parameterTypes);
-            FunctionItemType type = new SpecificFunctionType(parameterTypes, MapType.SEQUENCE_OF_MAPS);
+            FunctionItemType type = new SpecificFunctionType(parameterTypes, SequenceType.MAP_SEQUENCE);
             return new CallableFunction(arity, callable, type);
 
         } catch (SQLException ex) {

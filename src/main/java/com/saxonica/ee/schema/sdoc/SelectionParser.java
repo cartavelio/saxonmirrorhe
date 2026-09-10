@@ -140,7 +140,22 @@ public class SelectionParser extends XPathParser {
             setLocation(cie);
             return cie;
         } else if (t.currentToken instanceof Token.NameToken || t.currentToken instanceof Token.Wildcard) {
-            Expression ae = new AxisExpression(AxisInfo.CHILD, parseNodeTest(Type.ELEMENT));
+            int axis = AxisInfo.CHILD;
+            if (t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.COLON_COLON) {
+                axis = AxisInfo.getAxisNumber(((Token.NameToken) t.currentToken).getValue());
+                if (isFieldSubset) {
+                    if (axis != AxisInfo.CHILD && axis != AxisInfo.ATTRIBUTE) {
+                        grumble("The only axes allowed in the xs:field XPath are the child and attribute axes");
+                    }
+                } else {
+                    if (axis != AxisInfo.CHILD) {
+                        grumble("The only axis allowed in the xs:selector XPath is the child axis");
+                    }
+                }
+                nextToken();
+                readToken(Token.COLON_COLON);
+            }
+            Expression ae = new AxisExpression(axis, parseNodeTest(axis == AxisInfo.CHILD ? Type.ELEMENT : Type.ATTRIBUTE));
             setLocation(ae);
             return ae;
         } else if (t.currentToken == Token.STAR) {
@@ -186,6 +201,7 @@ public class SelectionParser extends XPathParser {
                 return ae2;
             }
         }
+        grumble("Unexpected token " + t.currentToken);
         return null;
     }
 
