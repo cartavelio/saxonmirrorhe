@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ValidationException;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ErrorHandler;
@@ -1710,7 +1710,7 @@ public class TestValidator {
         }
     }
 
-    @Ignore
+    @Disabled
     public void testBug4507() {
         try {
             Processor proc = new Processor(true);
@@ -1729,7 +1729,7 @@ public class TestValidator {
     }
 
 
-    @Ignore
+    @Disabled
     public void testBug4507bytecode() {
         try {
             Processor proc = new Processor(true);

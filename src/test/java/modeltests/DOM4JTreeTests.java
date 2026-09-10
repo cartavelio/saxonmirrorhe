@@ -11,7 +11,7 @@ import org.dom4j.io.SAXReader;
 
 import java.io.File;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class DOM4JTreeTests extends ObjectModelTests {
 

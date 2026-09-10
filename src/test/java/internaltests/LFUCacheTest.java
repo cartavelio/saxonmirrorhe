@@ -15,9 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 
 /**
  *  Tests of caching
@@ -45,9 +42,9 @@ public class LFUCacheTest {
                 executables.put(exec, exec);
             }
             //System.err.println(executables.size());
-            assertTrue(executables.size() <= 150);
+            Assertions.assertTrue(executables.size() <= 150);
         } catch (SaxonApiException e) {
-            fail();
+            Assertions.fail();
         }
     }
 
@@ -127,7 +124,7 @@ public class LFUCacheTest {
             e.printStackTrace();
             Assertions.fail(e.getMessage());
         } catch (SaxonApiException e) {
-            fail(e.getMessage());
+            Assertions.fail(e.getMessage());
         }
     }
 }

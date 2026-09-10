@@ -2,8 +2,8 @@ package resolvers;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.s9api.*;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
@@ -12,8 +12,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Iterator;
 
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class CatalogResolverTest {
     @Test
@@ -54,7 +54,7 @@ public class CatalogResolverTest {
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(true);
             XdmNode doc = builder.build(new File("src/test/testdata/resolvers/input.xml"));
-            Assert.assertNotNull(doc);
+            Assertions.assertNotNull(doc);
         } catch (Exception ex) {
             fail();
         }

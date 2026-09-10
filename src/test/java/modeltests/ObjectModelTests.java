@@ -5,7 +5,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.HashMap;
@@ -24,8 +24,8 @@ import static net.sf.saxon.s9api.streams.Predicates.isText;
 import static net.sf.saxon.s9api.streams.Steps.attribute;
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static net.sf.saxon.s9api.streams.Steps.descendant;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * This is an abstract class containing tests designed to exercise common functionality against

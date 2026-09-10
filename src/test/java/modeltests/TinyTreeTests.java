@@ -1,12 +1,11 @@
 package modeltests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 
 import java.io.File;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TinyTreeTests extends ObjectModelTests {
 

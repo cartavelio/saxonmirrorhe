@@ -1,17 +1,17 @@
 package resolvers;
 
 import net.sf.saxon.s9api.*;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xmlresolver.utils.URIUtils;
 
 import javax.xml.transform.sax.SAXSource;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
 
-import static junit.framework.TestCase.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ClasspathUriTest {
 
@@ -25,11 +25,11 @@ public class ClasspathUriTest {
             absoluteURI = new URI(base);
             resolvedURI = absoluteURI.resolve(relativeURI);
 
-            Assert.assertEquals("my-style.xslt", resolvedURI.toString());
+            assertEquals("my-style.xslt", resolvedURI.toString());
 
             resolvedURI = URIUtils.resolve(absoluteURI, relativeURI);
 
-            Assert.assertEquals("classpath:my/class/path/my-style.xslt", resolvedURI.toString());
+            assertEquals("classpath:my/class/path/my-style.xslt", resolvedURI.toString());
         } catch (Exception ex) {
             fail();
         }
@@ -40,15 +40,15 @@ public class ClasspathUriTest {
         try {
             Processor processor = new Processor(false);
             InputStream stream = ClassLoader.getSystemResourceAsStream("classpath-testing/doc.xml");
-            Assert.assertNotNull(stream);
+            assertNotNull(stream);
             InputSource source = new InputSource(stream);
             source.setSystemId("classpath:classpath-testing/doc.xml");
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode document = builder.build(new SAXSource(source));
-            Assert.assertNotNull(document);
+            assertNotNull(document);
 
             stream = ClassLoader.getSystemResourceAsStream("classpath-testing/style.xsl");
-            Assert.assertNotNull(stream);
+            assertNotNull(stream);
             source = new InputSource(stream);
             source.setSystemId("classpath:classpath-testing/doc.xml");
 
@@ -63,7 +63,7 @@ public class ClasspathUriTest {
             transformer.transform();
 
             XdmNode result = destination.getXdmNode();
-            Assert.assertNotNull(result);
+            assertNotNull(result);
         } catch (Exception ex) {
             fail();
         }

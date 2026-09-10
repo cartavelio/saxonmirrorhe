@@ -6,7 +6,7 @@ import net.sf.saxon.s9api.*;
 
 import java.io.File;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class LinkedTreeTests extends ObjectModelTests {
 
