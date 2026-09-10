@@ -7,21 +7,22 @@ from time import sleep
 
 
 class myThread(threading.Thread):
-    def __init__(self, threadID, name, counter, node, xslt_executable):
+    def __init__(self, threadID, name, counter, node, xslt_executable, saxon_proc):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.counter = counter
         self.name = name
         self.node = node
         self.xslt_executable = xslt_executable
+        self.saxon_proc = saxon_proc
 
     def run(self):
         print("Starting " + self.name)
-        run_transform(self.name, self.counter, self.node, self.xslt_executable)
+        run_transform(self.name, self.counter, self.node, self.xslt_executable, self.saxon_proc)
         print("Exiting " + self.name)
 
 
-def run_transform(threadName, counter, node, xslt_executable):
+def run_transform(threadName, counter, node, xslt_executable, saxon_proc):
     result_file = "threading-example/result-{}.xml".format(counter)
     '''print('Transforming with', sheet_file, 'to', result_file)'''
 
@@ -35,6 +36,7 @@ def run_transform(threadName, counter, node, xslt_executable):
             print('Message =', ex)
     else:
         print("Exception is NULL")
+    saxon_proc.detach_current_thread
 
 
 saxon_proc = saxonc.PySaxonProcessor(license=False)
@@ -61,12 +63,15 @@ for i in range(1, 4):
     xdm_node = saxon_proc.parse_xml(xml_file_name=mySourceList[i - i])
     xslt_executable_clone = xslt_executable.clone()
 
-    thread = myThread(i, "Thread-{}".format(i), i, xdm_node, xslt_executable_clone)
+    thread = myThread(i, "Thread-{}".format(i), i, xdm_node, xslt_executable_clone, saxon_proc)
     myList.append(thread)
-
-# Start new Threads
-for thread in myList:
+    thread.daemon = True
     thread.start()
+
+'''thread1 = myThread(1, "Thread-1", 1, xdm_node, saxon_proc)
+thread2 = myThread(2, "Thread-2", 2, xdm_node, saxon_proc)
+thread3 = myThread(3, "Thread-3", 3, xdm_node, saxon_proc)'''
+
 
 for thread in myList:
     thread.join()
