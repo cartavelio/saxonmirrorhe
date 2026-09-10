@@ -538,11 +538,12 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     public SteppingNode getSuccessorElement(SteppingNode anchor, NamespaceUri uri, String local) {
         Node stop = anchor == null ? null : ((XOMNodeWrapper)anchor).node;
         Node next = node;
+        String requiredUri = uri == null ? null : uri.toString();
         do {
             next = getSuccessorNode(next, stop);
         } while (next != null &&
                 !(next instanceof Element &&
-                        (uri == null || uri.equals(((Element) next).getNamespaceURI())) &&
+                        (uri == null || requiredUri.equals(((Element) next).getNamespaceURI())) &&
                         (local == null || local.equals(((Element) next).getLocalName()))));
         if (next == null) {
             return null;
