@@ -18,17 +18,19 @@
         <xsl:value-of select="'JS'"/>
     </xsl:variable>
     
-    <xsl:variable name="version" select="featureMatrix/@version"/>
-    <xsl:variable name="js-version" select="featureMatrix/@JSversion"/>
-    <xsl:variable name="c-version" select="featureMatrix/@Cversion"/>
+    <xsl:variable name="version" select="featureMatrix/@version" as="xs:string"/>
+    <xsl:variable name="c-version" select="if (featureMatrix/@Cversion) then featureMatrix/@Cversion else featureMatrix/@version" as="xs:string"/>
+    <xsl:variable name="js-version" select="featureMatrix/@JSversion" as="xs:string"/>
 
     <xsl:template match="featureMatrix">
-        <xsl:variable name="release-date" select="@release"/>
-        <xsl:variable name="js-release-date" select="@JSrelease"/>
-        <xsl:variable name="c-release-date" select="@Crelease"/>
-        <doc version="Version {$version} released {$release-date}" 
-            js-version="Version {$js-version} released {$js-release-date}" 
-            c-version="Version {$c-version} released {$c-release-date}">
+        <xsl:variable name="j-release-date" select="if (@Jrelease) then @Jrelease else @release" as="xs:string"/>
+        <xsl:variable name="cs-release-date" select="if (@CSrelease) then @CSrelease else @release" as="xs:string"/>
+        <xsl:variable name="c-release-date" select="if (@Crelease) then @Crelease else @release" as="xs:string"/>
+        <xsl:variable name="js-release-date" select="@JSrelease" as="xs:string"/>
+        <doc j-version="Version {$version} released {$j-release-date}" 
+            cs-version="Version {$version} released {$cs-release-date}" 
+            c-version="Version {$c-version} released {$c-release-date}"
+            js-version="Version {$js-version} released {$js-release-date}" >
             <xsl:text>&#xa;</xsl:text>
             <xsl:comment>Generated - <xsl:value-of select="current-dateTime()"/> from
                 tools/docs/feature-matrix/feature-matrix.xml,

@@ -135,8 +135,22 @@
       <xsl:map>
         <xsl:for-each select="$variants">
           <xsl:variable name="platform" select="tokenize(., '-')[1]"/>
-          <xsl:variable name="version" select="if ($platform eq 'C') then $prod.doc/@c-version else (if
-            ($platform eq 'JS') then $prod.doc/@js-version else $prod.doc/@version)"/>
+          <xsl:variable name="version">
+            <xsl:choose>
+              <xsl:when test="$platform eq 'J'">
+                <xsl:value-of select="$prod.doc/@j-version"/>
+              </xsl:when>
+              <xsl:when test="$platform eq 'CS'">
+                <xsl:value-of select="$prod.doc/@cs-version"/>
+              </xsl:when>
+              <xsl:when test="$platform eq 'C'">
+                <xsl:value-of select="$prod.doc/@c-version"/>
+              </xsl:when>
+              <xsl:when test="$platform eq 'JS'">
+                <xsl:value-of select="$prod.doc/@js-version"/>
+              </xsl:when>
+            </xsl:choose>
+          </xsl:variable>
           <xsl:map-entry key=".">
             <xsl:apply-templates select="$prod.doc" mode="variant">
               <xsl:with-param name="variant" select="." tunnel="yes"/>
