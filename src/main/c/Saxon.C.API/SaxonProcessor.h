@@ -204,10 +204,10 @@ public:
   ~SaxonProcessor();
 
   /**
-   * Get any error message thrown by the processor.
+   * Deprecated. Get any error message thrown by the processor.
    * @return String value of the error message. JNI exceptions thrown by this
    * processor are handled internally and can be retrieved by this method.
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    */
   const char *getErrorMessage();
 
@@ -518,7 +518,7 @@ public:
 
   /**
    * Deprecated. Checks for thrown exceptions.
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    * @return True when there is a pending exception; false otherwise
    */
   bool exceptionOccurred();
@@ -527,7 +527,7 @@ public:
   * Deprecated. Clears any exception that is currently being thrown.
   * If no exception is currently being thrown, this routine has no effect.
   *
-  * @deprecated - This method is no longer used. We now throw exceptions
+  * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
   */
   void exceptionClear();
 
@@ -561,7 +561,7 @@ public:
 
  /**
   * Deprecated. Checks for pending exceptions and creates a SaxonApiException object.
-  * @deprecated - This method is no longer used. We now throw exceptions
+  * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
   */
   static SaxonApiException *checkForExceptionCPP(
       /*JNIEnv *env, jclass callingClass, jobject callingObject*/);

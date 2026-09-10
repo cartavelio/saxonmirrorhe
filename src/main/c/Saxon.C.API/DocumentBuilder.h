@@ -179,34 +179,34 @@ public:
   /**
    * Deprecated. Checks for pending exceptions without creating a local reference to the
    * exception object
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    * @return True when there is a pending exception; otherwise false
    */
   bool exceptionOccurred();
 
  /**
   * Deprecated. Clear any thrown exceptions.
-  * @deprecated - This method is no longer used. We now throw exceptions
+  * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
   */
   void exceptionClear();
 
   /**
    * Deprecated. Get the first error message if there are any errors.
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    * @return The message of the exception
    */
   const char *getErrorMessage();
 
   /**
    * Deprecated. Get the first error code if there are any errors.
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    * @return The error code of the exception
    */
   const char *getErrorCode();
 
   /**
    * Deprecated. Get the SaxonApiException object created when we have an error.
-   * @deprecated - This method is no longer used. We now throw exceptions
+   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
    * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
    */
   SaxonApiException *getException();
