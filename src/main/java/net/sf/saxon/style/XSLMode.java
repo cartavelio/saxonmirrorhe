@@ -128,7 +128,7 @@ public class XSLMode extends StyleElement {
     }
 
     @Override
-    protected void prepareAttributes() {
+    public void prepareAttributes() {
 
         String nameAtt = null;
         String visibilityAtt = null;
@@ -141,13 +141,13 @@ public class XSLMode extends StyleElement {
 
         Visibility visibility = Visibility.PRIVATE;
 
-        for(AttributeInfo att : attributes()){
+        for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             String f = attName.getDisplayName();
             String value = att.getValue();
             switch (f) {
                 case "streamable":
-                    streamable = processStreamableAtt(value);
+                    boolean streamable = processStreamableAtt(value);
                     break;
                 case "name":
                     nameAtt = Whitespace.trim(value);
@@ -163,7 +163,7 @@ public class XSLMode extends StyleElement {
                 case "on-multiple-match": {
                     switch (Whitespace.trim(value)) {
                         case "fail":
-                            failOnMultipleMatch = true;
+                            boolean failOnMultipleMatch = true;
                             break;
                         case "use-last":
                             failOnMultipleMatch = false;
@@ -180,7 +180,7 @@ public class XSLMode extends StyleElement {
                             // no action, this is the default
                             break;
                         case "shallow-copy":
-                            defaultRules = ShallowCopyRuleSet.getInstance();
+                            BuiltInRuleSet defaultRules = ShallowCopyRuleSet.getInstance();
                             break;
                         case "deep-copy":
                             defaultRules = DeepCopyRuleSet.getInstance();
@@ -200,11 +200,11 @@ public class XSLMode extends StyleElement {
                     }
                     break;
                 case "warning-on-multiple-match": {
-                    warningOnMultipleMatch = processBooleanAttribute("warning-on-multiple-match", value);
+                    boolean warningOnMultipleMatch = processBooleanAttribute("warning-on-multiple-match", value);
                     break;
                 }
                 case "warning-on-no-match": {
-                    warningOnNoMatch = processBooleanAttribute("warning-on-no-match", value);
+                    boolean warningOnNoMatch = processBooleanAttribute("warning-on-no-match", value);
                     break;
                 }
                 case "typed": {
@@ -246,36 +246,18 @@ public class XSLMode extends StyleElement {
         } else {
             Mode m = manager.obtainMode(getObjectName(), true);
             if (m instanceof SimpleMode) {
-                mode = (SimpleMode)m;
+                mode = (SimpleMode) m;
             } else {
                 compileError("Mode name refers to an overridden mode");
                 mode = manager.getUnnamedMode();
             }
         }
 
-        mode.setStreamable(streamable);
-        if (streamable) {
-            Mode omniMode = manager.obtainMode(Mode.OMNI_MODE, true);
-            omniMode.setStreamable(true);
-        }
-        if (warningOnNoMatch) {
-            defaultRules = new RuleSetWithWarnings(defaultRules);
-        }
-        mode.setBuiltInRuleSet(defaultRules);
 
-        RecoveryPolicy recoveryPolicy;
-        if (failOnMultipleMatch) {
-            recoveryPolicy = RecoveryPolicy.DO_NOT_RECOVER;
-        } else if (warningOnMultipleMatch) {
-            recoveryPolicy = RecoveryPolicy.RECOVER_WITH_WARNINGS;
-        } else {
-            recoveryPolicy = RecoveryPolicy.RECOVER_SILENTLY;
-        }
-        mode.setRecoveryPolicy(recoveryPolicy);
-        mode.obtainDeclaringComponent(this);
-        mode.setModeTracing(traceMatching);
+        mode.obtainDeclaringComponent(this);    // TODO: how does this work with multiple mode declarations?
+        mode.setModeTracing(traceMatching);     // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
 
-        if (extraAsAtt != null) {
+        if (extraAsAtt != null) {               // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
             SequenceType extraResultType = null;
             try {
                 extraResultType = makeExtendedSequenceType(extraAsAtt);
@@ -297,12 +279,13 @@ public class XSLMode extends StyleElement {
             String f = attName.getDisplayName();
             String attValue = att.getValue();
             if (f.equals("streamable") || f.equals("on-multiple-match") || f.equals("on-no-match") ||
-                    f.equals("warning-on-multiple-match") || f.equals("warning-on-no-match") || f.equals("typed")) {
+                    f.equals("warning-on-multiple-match") || f.equals("warning-on-no-match") ||
+                    f.equals("typed") || f.equals("visibility")) {
                 String trimmed = Whitespace.trim(attValue);
                 String normalizedAtt;
-                if ("true".equals(trimmed)||"1".equals(trimmed)){
+                if ("true".equals(trimmed) || "1".equals(trimmed)) {
                     normalizedAtt = "yes";
-                } else if ("false".equals(trimmed)||"0".equals(trimmed)){
+                } else if ("false".equals(trimmed) || "0".equals(trimmed)) {
                     normalizedAtt = "no";
                 } else {
                     normalizedAtt = trimmed;
@@ -313,13 +296,22 @@ public class XSLMode extends StyleElement {
                 }
             } else if (f.equals("use-accumulators") && accumulators != null /*Can be null after an error*/) {
                 String[] names = new String[accumulators.size()];
-                int i=0;
-                for (Accumulator acc: accumulators) {
+                int i = 0;
+                for (Accumulator acc : accumulators) {
                     names[i++] = acc.getAccumulatorName().getEQName();
                 }
                 Arrays.sort(names);
-                String allNames = Arrays.toString(names);
-                mode.getActivePart().setExplicitProperty(f, allNames, decl.getPrecedence());
+                StringBuilder allNames = new StringBuilder();
+                boolean first = true;
+                for (String name : names) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        allNames.append(" ");
+                    }
+                    allNames.append(name);
+                }
+                mode.getActivePart().setExplicitProperty(f, allNames.toString(), decl.getPrecedence());
             }
         }
         checkEmpty();
@@ -333,9 +325,10 @@ public class XSLMode extends StyleElement {
         if (c == null) {
             throw new AssertionError();
         }
-        if (accumulators != null) {
-            mode.setAccumulators(accumulators);
-        }
+    }
+
+    public SimpleMode getMode() {
+        return mode;
     }
 
 
