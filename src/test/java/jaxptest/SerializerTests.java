@@ -3,7 +3,6 @@ package jaxptest;
 import com.saxonica.config.ProfessionalTransformerFactory;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
-import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
 import org.junit.jupiter.api.Test;
@@ -16,11 +15,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test for s9api serialization
@@ -157,7 +152,7 @@ public class SerializerTests {
                             "</xsl:stylesheet>";
 
             TransformerFactory tFactory = new net.sf.saxon.TransformerFactoryImpl();
-            tFactory.setAttribute(Feature.ALLOW_MULTITHREADING.name, false);
+            tFactory.setAttribute(FeatureKeys.ALLOW_MULTITHREADING, false);
             Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
             Transformer trans = templates.newTransformer();
             StreamSource input = new StreamSource(new StringReader(stylesheet));

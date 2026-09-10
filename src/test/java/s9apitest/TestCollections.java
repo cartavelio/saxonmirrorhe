@@ -593,7 +593,7 @@ public class TestCollections {
             contents.add(new File(ConfigTest.DATA_DIR + "trax/xml/baz.xml"));
             config.registerCollection("ftp://myCollection", new AbstractResourceCollection(config) {
                 @Override
-                public Iterable<String> getResourceURIs(XPathContext context) throws XPathException {
+                public Iterator<String> getResourceURIs(XPathContext context) throws XPathException {
                     return contents.stream().map(File::toURI).map(URI::toString).iterator();
                 }
 
