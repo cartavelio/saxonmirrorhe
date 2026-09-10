@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Saxonica Limited.
+// Copyright (c) 2022 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -12,22 +12,60 @@
 
 class SaxonProcessor;
 
+/**
+ * The class XdmItem represents an item in a sequence, as defined by the XDM data model.
+ * An item is either an atomic value or a node.
+ * <p>An item is a member of a sequence, but it can also be considered as a sequence
+ * (of length one) in its own right. <tt>XdmItem</tt> is a subtype of <tt>XdmValue</tt> because every
+ * Item in the XDM data model is also a value.</p>
+ * <p>It cannot be assumed that every sequence of length one will be represented by
+ * an <tt>XdmItem</tt>. It is quite possible for an <tt>XdmValue</tt> that is not an <tt>XdmItem</tt> to hold
+ * a singleton sequence.</p>
+ * <p>Saxon provides two concrete subclasses of <code>XdmItem</code>, namely
+ * {@link XdmNode} and {@link XdmAtomicValue}. Users must not attempt to create
+ * additional subclasses.</p>
+ */
 class XdmItem : public XdmValue
 {
 
 public:
 
+    //! XdmItem default constructor.
+    /**
+     * Create an empty XdmItem
+     */
      XdmItem();
 
+    //! XdmItem constructor created as a wrapper around an existing Saxon Java object
+    /**
+     * XdmItem constructor created from a JNI Java object. This is for internal use only
+     * @param obj - The internal Java object for the XdmItem is wrapped here in the C++ XdmItem class
+     */
      explicit XdmItem(jobject);
 
+
+    //! Copy constructor.
+    /**
+     * Copy constructor for XdmItem
+     */
     XdmItem(const XdmItem &item);
 
-	
+    //! Destructor.
+    /**
+     * Destructor for XdmItem
+     */
     virtual ~XdmItem();
 
+    //! Increment reference count of this XdmItem - Memory management - Internal use only
+    /**
+     * this method is used for internal memory management.
+     */
     virtual void incrementRefCount();
 
+    //! Decrement reference count of this XdmItem - Memory management - Internal use only
+    /**
+     * this method is used for internal memory management.
+     */
     virtual void decrementRefCount();
 
     /**
@@ -74,7 +112,7 @@ public:
      */
      virtual const char * getStringValue();
 
- /**
+     /**
      * Get the first item in the sequence
      * @return XdmItem or nullptr if sequence is empty
      */
@@ -94,7 +132,7 @@ public:
 
     /**
      * Get the number of items in the sequence
-     *
+     * @return the number of items in the value. For an item (including a map or array) this is always 1 (one).
      */
       int size();
 
@@ -106,7 +144,7 @@ public:
 	virtual XDM_TYPE getType();
 
  protected:  
-	jobject value;
+	jobject value; /*!< The Java XdmItem object as a JNI jobject  */
 	std::string stringValue;  /*!< Cached. String representation of the XdmValue, if available */
 };
 

@@ -20,10 +20,7 @@
 
 
 
-/*! <code>XdmValue</code>. Value in the XDM data model. A value is a sequence of zero or more items,
- * each item being either an atomic value or a node. This class is a wrapper of the the XdmValue object created in Java.
- * <p/>
- */
+
 
 class SaxonProcessor;
 class XdmItem;
@@ -45,49 +42,36 @@ typedef enum saxonTypeEnum
 	enumArrXdmValue
 } PRIMITIVE_TYPE;
 
+
+/*! <code>XdmValue</code>. Value in the XDM data model. A value is a sequence of zero or more items,
+ * each item being either an atomic value or a node. This class is a wrapper of the the XdmValue object created in Java.
+ * <p/>
+ */
 class XdmValue {
 
 
 public:
+
+    //! A default Constructor.
 	/**
-		 * A default Constructor. Create a empty value
+		 * Create a empty value
 		 */
     XdmValue() {
         initialize();
     }
 
-    /*void * operator new(size_t size)
-    {
 
-        void * p = ::new XdmValue();
-        //void * p = malloc(size); will also work fine
-        std::cerr<< "new called on XdmValue size= " << size << " p="<<p<<std::endl;
-        return p;
-    }*/
-
-
+    //! A copy constructor.
     /**
-	 * A copy constructor.
+	 *
 	 * @param other - Xdmvalue
 	 */
 	XdmValue(const XdmValue &other);
 
-	/**
-	* Constructor. Create a value from a collection of items
-	* @param val - Xdmvalue
-	*/
-	//XdmValue(XdmValue * items, int length);
 
-
-
+	//! Add an XdmItem  to the sequence
 	 /**
-	 * Constructor. Create a value from a collection of items
-	 * @param val - Xdmvalue
-	 */
-	 //XdmValue(XdmItem *items, int length);
-
-	 /**
-	  * Add an XdmItem  to the sequence. This method is designed for the primitive types.
+	  * This method is designed for the primitive types.
 	  * @param type - specify target type of the value
 	  * @param val - Value to convert
 	  */
@@ -110,33 +94,43 @@ public:
 
 
 
+	//! A Constructor for handling XdmArray - Internal user only
 	/**
-	 * A Constructor. Handles a sequence of XdmValues given as a  wrapped an Java XdmValue object.
+	 * Handles a sequence of XdmValues given as a  wrapped an Java XdmValue object.
 	 * @param val - Java XdmValue object
 	 * @param arrFlag - Currently not used but allows for overloading of constructor methods
 	 */
 	XdmValue(jobject val, bool arrFlag);
 
+	//! A Constructor
 	/**
-	 * A Constructor. Wrap an Java XdmValue object.
+	 * Wrap a Java XdmValue object.
 	 * @param val - Java XdmValue object
 	 */
 	XdmValue(jobject val);
 
-
+    //! Destructor.
+    /**
+     * Destructor for this XdmValue
+     */
 	virtual ~XdmValue();
 
+	//! Delete the XdmValue object and clean up all items in the sequence. Release the underlying JNI object
+    /*
+     *
+     */
 	void releaseXdmValue();
 
-
+    //! Get the first item in the sequence
 	/**
-	 * Get the first item in the sequence
+	 *
 	 * @return XdmItem or nullptr if sequence is empty
 	 */
 	virtual XdmItem * getHead();
 
+	//! Get the n'th item in the value, counting from zero.
 	/**
-	   * Get the n'th item in the value, counting from zero.
+	   *
 	   *
 	   * @param n the item that is required, counting the first item in the sequence as item zero
 	   * @return the n'th item in the sequence making up the value, counting from zero
@@ -152,28 +146,35 @@ public:
 	virtual int size();
 
 
+	//! Create a string representation of the value.
 	/**
-	 * Create a string representation of the value. The is the result of serializing
+	 * The is the result of serializing
 	 * the value using the adaptive serialization method.
 	 * @return a string representation of the value
 	 */
 	virtual const char * toString();
 
+    //! Get the number of references on this XdmValue
+    /**
+     * This method is used for internal memory management.
+     */
 	int getRefCount() {
 		return refCount;
 	}
 
 
 
+    //! Increment reference count of this XdmValue - Memory management - Internal use only
+    /**
+     * this method is used for internal memory management.
+     */
 	virtual void incrementRefCount();
 
+    //! Decrement reference count of this XdmValue - Memory management - Internal use only
+    /**
+     * this method is used for internal memory management.
+     */
 	virtual void decrementRefCount();
-
-
-    /*const char * getErrorMessage(int i);
-    const char * getErrorCode(int i);
-int exceptionCount();*/
-	const char * checkFailures() { return failure; }
 
 	/**
 	  * Get Java XdmValue object.
@@ -187,6 +188,8 @@ int exceptionCount();*/
 	virtual XDM_TYPE getType();
 
 protected:
+
+    //! initialize this XdmValue with default values
    inline void initialize() {
     jValues   = nullptr;
     refCount  = 0;
@@ -197,12 +200,12 @@ protected:
     char* valueType;  /*!< Cached. The type of the XdmValue */
 
 
-	std::vector<XdmItem*> values;
+	std::vector<XdmItem*> values; /*!< Cached. XdmItems in the XdmValue */
 	int xdmSize; 	/*!< Cached. The count of items in the XdmValue */
-	int refCount;
+	int refCount; /*!< The reference count of this XdmValue. If >1 this object should not be deleted */
 private:
 	std::string toStringValue;  /*!< Cached. String representation of the XdmValue, if available */
-	jobjectArray jValues;
+	jobjectArray jValues; /*!< If this XdmValue is a sequence we store values as a JNI array object  */
 };
 
 #endif /** SAXON_XDMVALUE_H **/

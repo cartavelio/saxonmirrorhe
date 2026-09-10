@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2020 Saxonica Limited.
+// Copyright (c) 2022 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -57,7 +57,7 @@ public:
     SaxonProcessor * getSaxonProcessor(){return proc;}
 
     //!set the current working directory (cwd). This method also applies to the
-    // static base URI for XSLT stylesheets when supplied as lexical string.
+    //! static base URI for XSLT stylesheets when supplied as lexical string.
     /**
       * The cwd is used to set the base URI is part of the static context, and is used to resolve
       * any relative URIs appearing within XSLT.
@@ -67,31 +67,27 @@ public:
 
       //!Set the base output URI.
           /**
-           * <p>This defaults to the base URI of the {@link Destination} for the principal output
-           * of the transformation if a destination is supplied and its base URI is known.</p>
-           * <p>If a base output URI is supplied using this method then it takes precedence
-           * over any base URI defined in the supplied {@code Destination} object, and
-           * it may cause the base URI of the {@code Destination} object to be modified in situ.</p>
            * <p> The base output URI is used for resolving relative URIs in the <code>href</code> attribute
            * of the <code>xsl:result-document</code> instruction; it is accessible to XSLT stylesheet
-           * code using the XPath {@code current-output-uri()} function</p>
+           * code using the XPath current-output-uri() function</p>
            *
-           * @param baseUri - the base output URI
+           * @param baseURI - the base output URI
            */
    void setBaseOutputURI(const char *baseURI);
 
 
 
+   //! Say whether just-in-time compilation of template rules should be used.
     /**
-    * Say whether just-in-time compilation of template rules should be used.
+    *
     * @param jit true if just-in-time compilation is to be enabled. With this option enabled,
     *            static analysis of a template rule is deferred until the first time that the
     *            template is matched. This can improve performance when many template
     *            rules are rarely used during the course of a particular transformation; however,
     *            it means that static errors in the stylesheet will not necessarily cause the
-    *            {@link #compile(Source)} method to throw an exception (errors in code that is
+    *            compile(Source) method to throw an exception (errors in code that is
     *            actually executed will still be notified to the registered <code>ErrorListener</code>
-    *            or <code>ErrorList</code>, but this may happen after the {@link #compile(Source)}
+    *            or <code>ErrorList</code>, but this may happen after the <code>compile(Source)</code>
     *            method returns). This option is enabled by default in Saxon-EE, and is not available
     *            in Saxon-HE or Saxon-PE.
     *            <p><b>Recommendation:</b> disable this option unless you are confident that the
@@ -100,8 +96,9 @@ public:
     void setJustInTimeCompilation(bool jit);
 
 
+    //! Set the value of a stylesheet parameter.
     /**
-     * Set the value of a stylesheet parameter. Static (compile-time) parameters must be provided using
+     * Static (compile-time) parameters must be provided using
      * this method on the XsltCompiler object, prior to stylesheet compilation. Non-static parameters
      * may also be provided using this method if their values will not vary from one transformation
      * to another.
@@ -109,7 +106,7 @@ public:
      * @param name  the name of the stylesheet parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name"
      * @param value the value of the stylesheet parameter, or nullptr to clear a previously set value
      */
-    void setParameter(const char* name, XdmValue*value);
+    void setParameter(const char* name, XdmValue* value);
 
 
 
@@ -162,6 +159,12 @@ public:
 	return (new char*[len]);
     }
 
+    //! Utility method for Python API - internal use only
+    /**
+     * This method deletes a XdmValue pointer array
+     * @param arr - XdmValue pointer array
+     * @param len - length of the array
+     */
     void deleteXdmValueArray(XdmValue ** arr, int len){
 	for(int i =0; i< len; i++) {
 		//delete arr[i];	

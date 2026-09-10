@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Saxonica Limited.
+// Copyright (c) 2022 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,8 +10,6 @@
 
 
 #include "SaxonProcessor.h"
-//#include "XdmValue.h"
-//#include "XdmItem.h"
 
 #include <string>
 
@@ -20,7 +18,7 @@ class XdmValue;
 class XdmNode;
 class XdmItem;
 
-/*! An <code>SchemaValidator</code> represents factory for validating instance documents against a schema.
+/*! The <code>SchemaValidator</code> represents factory for validating instance documents against a schema.
  * <p/>
  */
 class SchemaValidator {
@@ -43,34 +41,41 @@ public:
      //! Set the Current working Directory
     /**
      * Set the current working directory for the Schema Validator
-     * @param cwd Supplied working directory which replaces any set cwd. Ignore if cwd is nullptr.
+     * @param cwd  - Supplied working directory which replaces any set cwd. Ignore if cwd is NULL.
     */
    void setcwd(const char* cwd);
 
-       //! Register the schema from file name 
+    //! Register the schema from file name
     /**
-     * Set the current working directory for the Schema Validator
-    * @param xsd    - File name of the schema relative to the cwd 
+     *
+    * @param xsd - File name of the schema relative to the cwd
     */
   void registerSchemaFromFile(const char * xsd);
 
+  //! Register the schema supplied as a string
+  /**
+   *
+   * @param schemaStr - The schema document supplied as a string
+   */
   void registerSchemaFromString(const char * schemaStr);
 
   //! Export a precompiled Schema Component Model containing all the components (except built-in components) that have been loaded by using the register methods.
   /**
-  *
-  */
+   *
+   * @param fileName - The file name where the exported schema will be stored
+   */
   void exportSchema(const char * fileName);
 
-  /*!
-   Set the name of the output file that will be used by the validator.
+  //! Set the name of the output file that will be used by the validator.
+  /**
   * @param outputFile the output file name for later use
  */
   void setOutputFile(const char * outputFile);
 
 
+  //! Validate an instance document by a registered schema.
     /**
-     * Validate an instance document by a registered schema.
+     *
      * @param sourceFile Name of the file to be validated. Allow nullptr when source document is supplied
      * with other method
      */
@@ -98,56 +103,55 @@ public:
     XdmNode* getValidationReport();
 
 
+    //! Set a parameter value used in the validator
     /**
-     * Set a parameter value used in the validator
-     *s
+     *
+     *
      * @param name  of the parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name"
      * @param value of the query parameter, or nullptr to clear a previously set value
      */
     void setParameter(const char * name, XdmValue*value);
 
 
+    //! Remove a parameter (name, value) pair
     /**
-     * Remove a parameter (name, value) pair
+     *
      *
      * @param name  of the parameter
-     * @return bool - outcome of the romoval
+     * @return bool - outcome of the removal
      */
     bool removeParameter(const char * name);
+
+    //! Set a property.
     /**
-     * Set a property.
+     *
      *
      * @param name of the property
      * @param value of the property
      */
     void setProperty(const char * name, const char * value);
-
+//! Clear parameter values set
     /**
-     * Clear parameter values set
+     *
      *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
      * Default behaviour (false) is to leave XdmValues in memory
      *  true then XdmValues are deleted
      */
     void clearParameters(bool deleteValues=false);
 
-    /**
-     * Clear property values set
-     */
+    //! Clear property values set
     void clearProperties();
 
 
-     /**
-      * Get all parameters as a std::map
-     */
+     //! Get all parameters as a std::map
      std::map<std::string,XdmValue*>& getParameters();
 
-     /**
-      * Get all properties as a std::map 
-     */
+     //! Get all properties as a std::map
      std::map<std::string,std::string>& getProperties();
 
+     //! Checks for pending exceptions without creating a local reference to the exception object
     /**
-     * Checks for pending exceptions without creating a local reference to the exception object
+     *
      * @return bool - true when there is a pending exception; otherwise return false
     */
     bool exceptionOccurred();
@@ -175,7 +179,7 @@ public:
     */
     const char * getErrorMessage(int i);
 
-     //! Get the i'th error code if there are any error
+     //! Get the i'th error code if errors are reported
     /**
      * Validation error are reported as exceptions. All errors can be retrieved.
      * @return char* - The error code of the i'th exception.
@@ -188,7 +192,7 @@ public:
      * to indicate that lax validation is required. With strict validation, validation fails if no element
      * declaration can be located for the outermost element. With lax validation, the absence of an
      * element declaration results in the content being considered valid.
-     * @param lax true if validation is to be lax, false if it is to be strict
+     * @param l -  true if validation is to be lax, false if it is to be strict
     */
     void setLax(bool l){
       lax = l;
@@ -202,19 +206,19 @@ public:
 
 
 private:
-    bool lax;
-	SaxonProcessor * proc;
-	XdmItem * sourceNode;
-	jclass  cppClass;
-	jobject cppV;
+    bool lax; /*!< flag to indicate lax mode for the Schema valdiation */
+	SaxonProcessor * proc; /*!< Saxon Processor Pointer, which created this SchemaValidator */
+	XdmItem * sourceNode; /*!< source node to run against schema validation */
+	jclass  cppClass; /*!< JNI object where the SchemaValidator method will be invoked */
+	jobject cppV; /*!< The underlying SchemaValidator Java object */
 	std::string cwdV; /*!< current working directory */
-	std::string outputFile;
+	std::string outputFile; /*!< The output file name for the exported schema validator */
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
 	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
-    SaxonApiException * exception;
+    SaxonApiException * exception; /*!< Exceptions reported against the SchemaValidator are stored here */
 };
 
 
 
 
-#endif /* SAXON_XPATH_H */
+#endif /* SAXON_SCHEMA_H */

@@ -10,7 +10,7 @@
  * <p/>
  */
 typedef struct {
-		jobject xdmvalue;
+		jobject xdmvalue; /*!< Internal use only. The value given as a Java object. */
 	} sxnc_value;
 
 EXTERN_SAXONC

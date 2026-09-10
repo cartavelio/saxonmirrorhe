@@ -90,9 +90,9 @@ typedef struct {
  * <p/>
  */
 typedef struct {
-		char* name;
-		jobject value;
-		char * namespacei; //not used yet
+		char* name; /*!< Internal use only. The name of the parameter. */
+		jobject value; /*!< Internal use only. The value of the parameter given as a Java object. */
+		char * namespacei; /*!< Internal use only. The namespace string. Not used yet. */
 	} sxnc_parameter;
 
 //===============================================================================================//
@@ -101,8 +101,8 @@ typedef struct {
  * <p/>
  */
 typedef struct {
-		char * name;
-		char * value;
+		char * name; /*!< Internal use only. The name of the property. */
+		char * value; /*!< Internal use only. The string value of the property. */
 	} sxnc_property;
 
 

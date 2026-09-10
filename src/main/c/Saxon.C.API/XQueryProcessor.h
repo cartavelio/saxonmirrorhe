@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2020 Saxonica Limited.
+// Copyright (c) 2022 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -74,17 +74,17 @@ public:
     void setParameter(const char * name, XdmValue*value);
 
 
+    //! Remove a parameter (name, value) pair
     /**
-     * Remove a parameter (name, value) pair
      *
-     * @param namespacei currently not used
      * @param name  of the parameter
-     * @return bool - outcome of the romoval
+     * @return bool - outcome of the removal
      */
     bool removeParameter(const char * name);
 
+    //! Set a property specific to the processor in use.
     /**
-     * Set a property specific to the processor in use. 
+     *
      * XQueryProcessor: set serialization properties (names start with '!' i.e. name "!method" -> "xml")
      * 'o':outfile name, 's': source as file name
      * 'q': query file name, 'q': current by name, 'qs': string form of the query, 'base': set the base URI of the query, 'dtd': set DTD validation 'on' or 'off'
@@ -93,22 +93,22 @@ public:
      */
     void setProperty(const char * name, const char * value);
 
+    //! Clear parameter values set
     /**
-     * Clear parameter values set
+     *
      *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
      * Default behaviour (false) is to leave XdmValues in memory
      *  true then XdmValues are deleted
      */
     void clearParameters(bool deleteValues=false);
 
-    /**
-     * Clear property values set
-     */
+    //! Clear property values set
     void clearProperties();
 
 
+    //! Say whether the query is allowed to be updating.
     /**
-     * Say whether the query is allowed to be updating. XQuery update syntax will be rejected
+     * XQuery update syntax will be rejected
      * during query compilation unless this flag is set. XQuery Update is supported only under Saxon-EE.
      * @param updating - true if the query is allowed to use the XQuery Update facility
      *                 (requires Saxon-EE). If set to false, the query must not be an updating query. If set
