@@ -85,6 +85,52 @@ public class TestXQueryCompiler {
     }
 
     @Test
+    public void testDefaultNamespacePolicy() {
+        String xml = "<doc><a>A</a><a xmlns='a.uri'>B</a><a xmlns='http://www.w3.org/1999/xhtml'>C</a></doc>";
+        try {
+            Processor p = new Processor(false);
+            DocumentBuilder b = p.newDocumentBuilder();
+            XdmNode foo = b.build(new StreamSource(new StringReader(xml)));
+            XQueryCompiler c = p.newXQueryCompiler();
+
+            c.declareNamespace("", "a.uri");
+            c.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE);
+            XQueryEvaluator eval = c.compile("string-join(//a, ',')").load();
+            eval.setContextItem(foo);
+            XdmAtomicValue val = (XdmAtomicValue) eval.evaluate();
+            assertEquals("B", val.getStringValue());
+
+            c.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE);
+            eval = c.compile("string-join(//a, ',')").load();
+            eval.setContextItem(foo);
+            val = (XdmAtomicValue) eval.evaluate();
+            assertEquals("A,B", val.getStringValue());
+
+            c.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
+            eval = c.compile("string-join(//a, ',')").load();
+            eval.setContextItem(foo);
+            val = (XdmAtomicValue) eval.evaluate();
+            assertEquals("A,B,C", val.getStringValue());
+
+            c.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE);
+            eval = c.compile("declare default element namespace 'http://www.w3.org/1999/xhtml'; string-join(//a, ',')").load();
+            eval.setContextItem(foo);
+            val = (XdmAtomicValue) eval.evaluate();
+            assertEquals("C", val.getStringValue());
+
+            c.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE);
+            eval = c.compile("declare default element namespace 'http://www.w3.org/1999/xhtml'; string-join(//a, ',')").load();
+            eval.setContextItem(foo);
+            val = (XdmAtomicValue) eval.evaluate();
+            assertEquals("A,C", val.getStringValue());
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+
+    }
+
+    @Test
     public void testReusability() {
         // Test that the XQuery compiler can compile two queries without interference
         try {

@@ -78,6 +78,7 @@ public class Query {
     private boolean closeTraceDestination = false;
     private boolean allowExit = true;
     protected String languageVersion = "3.1";
+    protected String nsOption;
 
 
     /**
@@ -143,6 +144,8 @@ public class Query {
         options.addRecognizedOption("mr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named ModuleURIResolver class");
         //#endif
+        options.addRecognizedOption("ns", CommandLineOptions.TYPE_STRING | CommandLineOptions.VALUE_REQUIRED,
+                                    "Default namespace for element names (URI, or ##any, or ##html5)");
         options.addRecognizedOption("now", CommandLineOptions.TYPE_DATETIME | CommandLineOptions.VALUE_REQUIRED,
                                     "Run with specified current date/time");
         options.addRecognizedOption("o", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
@@ -314,6 +317,17 @@ public class Query {
                     quit("Installed license does not allow schema-aware query", 2);
                 } else {
                     quit("Schema-aware query requires Saxon Enterprise Edition", 2);
+                }
+            }
+
+            if (nsOption != null) {
+                if (nsOption.equals("##any")) {
+                    compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
+                } else if (nsOption.equals("##html5")) {
+                    compiler.declareNamespace("", NamespaceConstant.XHTML);
+                    compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE);
+                } else {
+                    compiler.declareNamespace("", nsOption);
                 }
             }
 
@@ -561,6 +575,8 @@ public class Query {
         moduleURIResolverClass = options.getOptionValue("mr");
         outputFileName = CommandLineOptions.coerceImplicitOutputURI(options.getOptionValue("o"));
         streaming = "on".equals(options.getOptionValue("stream"));
+
+        nsOption = options.getOptionValue("ns");
 
         String value = options.getOptionValue("p");
         if ("on".equals(value)) {

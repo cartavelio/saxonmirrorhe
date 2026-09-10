@@ -294,7 +294,9 @@
             to generate SEF files for different versions of SaxonJS. The option <code>-target:JS</code> is equivalent
             to <code>-target:JS2</code> for the time being; the option <code>-target:JS3</code> is for future use.</p>
         
-        <p>From </p>
+        <p>From 12.3, the <code>Query</code> command line recognizes the option <code>-ns</code>, with the same values
+        as on the <code>Transform</code> command. There is also API support for setting a default element namespace
+        policy in the s0api <code>XQueryCompiler</code>. </p>
         
     </category>
     
