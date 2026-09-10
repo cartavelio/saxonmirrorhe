@@ -1,73 +1,74 @@
 package net.sf.saxon.trans;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.FeatureData;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.sapling.Saplings;
-import org.junit.jupiter.api.BeforeEach;
+import net.sf.saxon.sapling.dsl.ElementDsl;
+import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.TestFactory;
 
 import javax.xml.transform.Source;
-import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConfigurationReaderTest {
-    public final ConfigurationReader configReader = new ConfigurationReader();
-    public final Configuration configuration = new Configuration();
-    public Configuration readConfiguration;
+    class ReaderTestInstance extends FeatureTest.FeatureTestInstance {
+        public final ConfigurationReader subject = new ConfigurationReader();
+        public final Configuration configuration = new Configuration();
 
-    @BeforeEach
-    void setUp() {
-        configReader.setBaseConfiguration(configuration);
+        ReaderTestInstance() {
+            subject.setBaseConfiguration(configuration);
+        }
     }
 
-    public static AbstractMap.SimpleImmutableEntry<String, FeatureTestLambda> fixture(String featureUri, FeatureTestLambda test) {
-        return new AbstractMap.SimpleImmutableEntry<>(featureUri, test);
+    Source configFile(String section, ElementDsl builder) {
+        return Saplings.doc(doc -> {
+            doc.defaultNs("http://saxon.sf.net/ns/configuration");
+            doc.elem("configuration", conf -> {
+                conf.elem(section, builder);
+            });
+        });
     }
 
-    @FunctionalInterface
-    interface FeatureTestLambda {
-        void test(ConfigurationReader configReader) throws XPathException;
+    Source configFileWithFeature(String section, String feature, String value) {
+        return configFile(section, global -> {
+            global.attr(feature, value);
+        });
     }
 
     @Nested
-    class GlobalSection {
-        private static Stream<Arguments> globalConfigFileOptions() {
-            FeatureData.init();
-            return FeatureData.featureList.stream().filter(feat -> { return feat.configFileDetails.section == "global"; }).map(Arguments::of);
-        }
+    class GlobalSection extends ConfigurationFeatureTesting {
+        public Map<String, FeatureTest> featureConfigFileTests = FeatureTest.tests(ReaderTestInstance::new, features -> {
+            features.add(FeatureKeys.ALLOWED_PROTOCOLS, tests -> {
+                tests.add("Setting allowedProtocols to #none creates the right ProtocolRestrictor", (ft) -> {
+                    ReaderTestInstance t = (ReaderTestInstance) ft;
+                    Source config = configFileWithFeature("global", "allowedProtocols", "#none");
 
-        public Map<String, FeatureTestLambda> featureConfigFileTests = Map.ofEntries(
-            fixture(FeatureKeys.ALLOWED_PROTOCOLS, configReader -> {
-                Source config = Saplings.doc(builder -> {
-                    builder.defaultNs("http://saxon.sf.net/ns/configuration");
-                    builder.elem("configuration", conf -> {
-                        conf.attr("edition", "EE");
-                        conf.elem("global", global -> {
-                            global.attr("allowedProtocols", "");
-                        });
-                    });
+                    Configuration readConfiguration = t.subject.makeConfiguration(config);
+
+                    assertEquals("", readConfiguration.getProtocolRestrictor().toString(), "protocol restrictor should be set to empty string");
                 });
 
-                readConfiguration = configReader.makeConfiguration(config);
+                tests.add("Setting allowedProtocols to '' creates a default ProtocolRestrictor", (ft) -> {
+                    ReaderTestInstance t = (ReaderTestInstance) ft;
+                    Source config = configFileWithFeature("global", "allowedProtocols", "");
 
-                assertEquals("", readConfiguration.getProtocolRestrictor().toString(), "protocol restrictor should be set to empty string");
-            })
-        );
+                    Configuration readConfiguration = t.subject.makeConfiguration(config);
 
-        @ParameterizedTest
-        @MethodSource("globalConfigFileOptions")
-        void configFileOptionCanBeRead(FeatureData feature) throws XPathException {
-            assumeTrue(featureConfigFileTests.containsKey(feature.uri), () -> "No test for " + feature.uri);
+                    assertEquals("all", readConfiguration.getProtocolRestrictor().toString(), "protocol restrictor should be set to all");
+                });
+            });
+        });
 
-            featureConfigFileTests.get(feature.uri).test(configReader);
+        @TestFactory
+        Stream<DynamicNode> tests() {
+            return buildTests("HE", featureConfigFileTests, f -> {
+                return f.configFileDetails.section != null &&
+                        f.configFileDetails.section.equals("global");
+            });
         }
     }
 }

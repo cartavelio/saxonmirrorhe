@@ -12,6 +12,7 @@ import net.sf.saxon.z.IntHashMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 public class FeatureIndex {
 
@@ -43,5 +44,6 @@ public class FeatureIndex {
         return byCode.get(code);
     }
 
+    public static Stream<FeatureData> stream() { return FeatureData.featureList.stream(); }
 }
 

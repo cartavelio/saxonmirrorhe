@@ -2819,7 +2819,7 @@
         <name>ALLOWED_PROTOCOLS</name>
         <type>string</type>
         <uri>http://saxon.sf.net/feature/allowedProtocols</uri>
-        <editions>EE</editions>
+        <editions>HE PE EE</editions>
         <platforms>J</platforms>
         <configfile>global/@allowedProtocols</configfile>
         <configfiledesc>
@@ -2830,9 +2830,11 @@
             <p>The value is a comma-separated list of permitted protocols. A protocol is the 
                 scheme portion of a URI, or in the case of the JAR protocol, "jar" 
                 plus the scheme portion separated by colon. The value "all" gives access
-                to all protocols (which is the default). The value "" (empty string) disallows
-                all external resource access. (The format is thus the same as for 
-                <code>XMLConstants.ACCESS_EXTERNAL_SCHEMA</code> and similar attributes.)
+                to all protocols (which is the default). The format is thus the same as for
+                <code>XMLConstants.ACCESS_EXTERNAL_SCHEMA</code> and similar attributes, with
+                the exception that the special value "#none" disallows all external resource
+                access. Using the empty string ("") is ignored and results in the default value
+                ("all") being set.
             </p>
             <p>The value constrains access by Saxon to resources including the following:</p>
             
@@ -2863,8 +2865,9 @@
             to a location is always under user/application control, so Saxon imposes no restrictions.</p>
             <p>The format is the same as for <code>XMLConstants.ACCESS_EXTERNAL_SCHEMA</code>: either <code>"all"</code> to allow
                 all schemes/protocols, or a comma-separated list of scheme names such as <code>"http"</code>, <code>"file"</code>, <code>"ftp"</code>.
-                For a JAR file scheme, use the format <code>"jar:<i>scheme</i>"</code>, for example <code>"jar:file"</code>. A zero-length
-                string disallows all schemes.</p>
+                For a JAR file scheme, use the format <code>"jar:<i>scheme</i>"</code>, for example <code>"jar:file"</code>.
+                The value <code>"#none"</code> disallows all schemes. Using the empty string (<code>""</code>) is ignored and results in the default value
+                (<code>"all"</code>) being set.</p>
             <p>Setting this property for a Saxon Configuration causes the existing configuration-level <code>ResourceResolver</code>
             to be front-ended with a preprocessing filter that checks the URI, and then passes it on to the existing resolver
             if OK. In consequence, setting the property multiple times is cumulative; a URI is allowed only if it permitted
