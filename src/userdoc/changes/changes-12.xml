@@ -354,6 +354,21 @@
             the fallback action to be taken when no entry is found.</p></li>
         </ul>
         
+
+        <p>From Saxon 12.3:</p>
+        <ul>
+            <li><p>The <code>fn:parse-integer()</code> function is implemented. This allows parsing of integers
+            in bases other than 10, for example <code>parse-integer('ffff', 16)</code> returns 65535.</p></li>
+            <li><p>The <code>fn:format-integer()</code> function has been extended to allow output in bases
+            other than 10, for example <code>fn:format-integer(65534, '16^XXXX_XXXX')</code> outputs
+            <code>0000_FFFE</code>.</p></li>
+            <li><p>The <code>fn:partition()</code> function is implemented. This provides positional
+            grouping as a higher-order function.</p></li>
+            <li><p>The <code>map:of</code> function is implemented. This provides another way of constructing
+            a map from a set of key-value pairs.</p></li>
+            
+        </ul>
+
       
         <h2>Dropped or Changed Extension Functions</h2>
         
