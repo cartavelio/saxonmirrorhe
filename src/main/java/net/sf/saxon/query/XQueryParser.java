@@ -353,7 +353,7 @@ public class XQueryParser extends XPathParser {
 //        }
         language = ParsedLanguage.XQUERY;
         t = new Tokenizer();
-        t.languageLevel = languageVersion;
+        t.languageLevel = languageVersion = env.getXPathVersion();
         t.isXQuery = true;
         try {
             t.tokenize(Objects.requireNonNull(queryString), 0, -1);
@@ -363,7 +363,9 @@ public class XQueryParser extends XPathParser {
         parseVersionDeclaration();
         allowXPath40Syntax =
                 t.allowSaxonExtensions =
-                        allowXPath40Syntax || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
+                        allowXPath40Syntax
+                                || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS)
+                                || languageVersion >= 40;
 
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
                 .withAcceptEQName(true)
