@@ -13,7 +13,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.PortableNamedType;
+import net.sf.saxon.pattern.PortableNamedXNodeType;
 import net.sf.saxon.pattern.qname.NamespaceQNameTest;
 import net.sf.saxon.resource.EncodingDetector;
 import net.sf.saxon.resource.ResourceLoader;
@@ -56,7 +56,7 @@ public class JsonToXMLFn extends SystemFunction {
     }
 
     public static ItemType RESULT_TYPE = new DocumentNodeType(
-            new PortableNamedType(Type.ELEMENT, new NamespaceQNameTest(NamespaceUri.FN)));
+            new PortableNamedXNodeType(Type.ELEMENT, new NamespaceQNameTest(NamespaceUri.FN)));
 
     public static StringValue decodeBinary(XPathContext context, byte[] binaryValue)
             throws XPathException, IOException {
