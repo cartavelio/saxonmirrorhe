@@ -1,6 +1,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
@@ -31,6 +32,7 @@ public class InScopeNamespacesFn extends SystemFunction {
         }
         // Can't use a dictionary map because the prefixes are of type NCName, not string
         HashTrieMap dict = new HashTrieMap();
+        dict.initialPut(new StringValue("xml", BuiltInAtomicType.NCNAME), new StringValue(NamespaceConstant.XML));
         for (NamespaceBinding binding : nsMap) {
             StringValue prefix = new StringValue(binding.getPrefix(),
                                                  binding.getPrefix().isEmpty() ? BuiltInAtomicType.STRING : BuiltInAtomicType.NCNAME);
