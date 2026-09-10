@@ -1281,6 +1281,19 @@ public final class Tokenizer {
             }
             return c;
         } else {
+            inputOffset++; // in case of an unreadChar()
+            return NUL;
+        }
+    }
+
+    /**
+     * Look ahead to see what the next character will be, without changing the current state
+     * @return the next character, or NUL at the end of the input.
+     */
+    public char peekChar() {
+        if (inputOffset < inputLength) {
+            return input.charAt(inputOffset);
+        } else {
             return NUL;
         }
     }
@@ -1317,7 +1330,7 @@ public final class Tokenizer {
      */
 
     public void unreadChar() {
-        if (inputOffset >= inputLength) {
+        if (inputOffset > inputLength) {
             return;
         }
         if (input.charAt(--inputOffset) == '\n') {
