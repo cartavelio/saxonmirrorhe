@@ -133,7 +133,7 @@ public:
    * XPath string() function. <p>For atomic values, the result is the same as
    * the result of calling <code>toString</code>. This is not the case for
    * nodes, where <code>toString</code> returns an XML serialization of the
-   * node. The caller should deallocate memory using `delete`.</p>
+   * node. The caller should deallocate memory using `operator delete`.</p>
    *
    * @return the result of converting the item to a string.
    */
@@ -141,7 +141,7 @@ public:
 
   //! The toString() method returns a simple XML serialization of the node with
   //! defaulted serialization parameters. The caller should deallocate memory
-  //! using `delete`
+  //! using `operator delete`.
   const char *toString();
 
   /**
@@ -151,7 +151,7 @@ public:
   virtual XdmItem *getHead();
 
   /**
-   * Get the n'th item in the value, counting from zero.
+   * Get the n'th item in the value, counting from zero. This is the XmdItem value itself.
    *
    * @param n the item that is required, counting the first item in the sequence
    * as item zero
@@ -159,6 +159,7 @@ public:
    * zero return nullptr  if n is less than zero or greater than or equal to the
    * number of items in the value return nullptr if the value is lazily
    * evaluated and the delayed evaluation fails with a dynamic error.
+   * TThe caller is responsible for memory deallocation
    */
   XdmItem *itemAt(int n);
 

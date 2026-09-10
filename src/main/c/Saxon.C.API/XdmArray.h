@@ -76,7 +76,7 @@ public:
    * @param n the member that is required, counting the first member in the
    * array as member zero
    * @return the n'th member in the sequence making up the array, counting from
-   * zero
+   * zero. The caller is responsible for memory deallocation
    * @remark  if n is less than zero or greater than or equal to the number
    *                                    of members in the array we return null.
    * User should clear any exception thrown
@@ -88,9 +88,10 @@ public:
    *
    * @param n the position of the member that is to be replaced, counting the
    * first member in the array as member zero
-   * @param value - is the new member for the the new array
+   * @param value - is the new member for the new array.
+   * The value itself is not stored internally therefore safe for memory deallocation by the caller.
    * @return a new array, the same length as the original, with one member
-   * replaced by a new value
+   * replaced by a new value. The caller is responsible for memory deallocation
    * @remark if n is less than zero or greater than or equal to the number
    *                                   of members in the array then return null
    */
@@ -98,7 +99,8 @@ public:
 
   /**
    * Append a new member to an array
-   * @param value - the new member
+   * @param value - the new member.
+   * The value itself is not stored internally therefore safe for memory deallocation by the caller.
    * @return a new array, one item longer than the original
    * @remark if the value is lazily evaluated, and evaluation fails then return
    * null
@@ -109,6 +111,7 @@ public:
    * Concatenate another array
    *
    * @param value - the other array
+   * The value itself is not stored internally therefore safe for memory deallocation by the caller.
    * @return a new array, containing the members of this array followed by the
    * members of the other array
    */
@@ -124,13 +127,13 @@ public:
    * Utility method for working with SaxonC on Python
    * Create an array of xdmValue objects
    * @param len - the length of the array to create
-   * @return an empty array of XdmValue of length len
+   * @return an empty array of XdmValue of length len. The caller is responsible for memory deallocation
    */
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
   /**
    * Get the members of the array in the form of an array
-   * @return an array of the members of this XdmArray.
+   * @return an array of the members of this XdmArray. The caller is responsible for memory deallocation
    */
   XdmValue **values();
 
@@ -148,6 +151,7 @@ public:
    * value, so an exception is thrown.
    *
    * @return the string value of the item
+   * @throws SaxonApiException
    */
   const char *getStringValue();
 
@@ -195,8 +199,8 @@ public:
    * <code>getStringValue()</code> instead.</p>
    *
    * @return a simple XML serialization of the node. Under error conditions the
-   * method may return an error message which will always begin with the label
-   * "Error: ".
+   * method may return an error message which will always begin with the label "Error: ".
+   * The caller is responsible for memory deallocation
    */
   const char *toString();
 

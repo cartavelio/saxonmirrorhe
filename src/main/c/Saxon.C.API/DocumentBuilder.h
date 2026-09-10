@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2024 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -11,7 +11,6 @@
 #define DOCUMENT_BUILDER_H
 
 #include "SaxonProcessor.h"
-//#include "XdmValue.h"
 #include <string>
 
 class SaxonProcessor;
@@ -91,7 +90,7 @@ public:
    * Get the SchemaValidator used to validate documents loaded using this
    * <code>DocumentBuilder</code>.
    *
-   * @return the SchemaValidator if one has been set; otherwise null.
+   * @return the SchemaValidator if one has been set; otherwise null. The caller management the deallocation.
    */
   SchemaValidator *getSchemaValidator();
 
@@ -133,7 +132,7 @@ public:
    * Get the base URI of documents loaded using this DocumentBuilder when no
    * other URI is available.
    *
-   * @return the base URI to be used, or null if no value has been set.
+   * @return the base URI to be used, or null if no value has been set. Deallocation is handled internally
    */
 
   const char *getBaseUri();
@@ -147,9 +146,9 @@ public:
    * platform default encoding is used
    * @return An <code>XdmNode</code>. This will be
    *         the document node at the root of the tree of the resulting
-   * in-memory document.
-   * @remark  if any failure occurs retrieving or parsing the document the
-   * exception methods will provide more information
+   * in-memory document. The caller is responsible for deallocation
+ * @throws SaxonApiException if there is a failure in the parsing of the XML
+  * document
    */
 
   XdmNode *parseXmlFromString(const char *content,
@@ -160,8 +159,8 @@ public:
    *
    * @param filename - the supplied file
    * @return the XdmNode representing the root of the document tree
-   * @remark  if any failure occurs retrieving or parsing the document the
-   * exception methods will provide more information
+   * @throws SaxonApiException if there is a failure in the parsing of the XML
+   * document
    */
 
   XdmNode *parseXmlFromFile(const char *filename);
@@ -174,25 +173,30 @@ public:
    * @return An <code>XdmNode</code>. This will be
    *         the document node at the root of the tree of the resulting
    * in-memory document.
-   *         * @remark  if any failure occurs retrieving or parsing the document
-   * the exception methods will provide more information
+   * @throws SaxonApiException if there is a failure in the parsing of the XML
+   * document
    */
   XdmNode *parseXmlFromUri(const char *source);
 
   /**
    * Checks for pending exceptions without creating a local reference to the
    * exception object
+   * @deprecated
    * @return bool - true when there is a pending exception; otherwise return
    * false
    */
   bool exceptionOccurred();
 
   //! Clear any exception thrown
+ /**
+  * @deprecated
+  */
   void exceptionClear();
 
   //! Get the error message if an error has been reported by JNI
   /**
    * A transformation may have a number of errors reported against it.
+   * @deprecated
    * @return char* - The message of the exception
    */
   const char *getErrorMessage();
@@ -201,12 +205,14 @@ public:
   /**
    * After the execution of the XPath expression there may be  a number of
    * errors reported against it.
+   * @deprecated
    * @return char* - The error code of the exception.
    */
   const char *getErrorCode();
 
   //! Get the SaxonApiException object created when we have an error
   /**
+   * @deprecated - exception are now thrown directly
    * After the execution of the processor if there is an error, then a
    * SaxonApiException is created. NULL returned if there is no error.
    * @return SaxonApiException object of the exception thrown.

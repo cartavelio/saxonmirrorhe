@@ -447,7 +447,8 @@ public:
    * @param name - The URI in Clark notation: <code>{uri}local</code> if the
    *                name is in a namespace, or simply <code>local</code> if not.
    * @return the expanded name, as a string using the notation defined by the
-   * EQName production in XPath 3.0. The caller is responsible for deallocation
+   * EQName production in XPath 3.0.
+   * The caller should deallocate memory using `operator delete`.
    */
   const char *clarkNameToEQName(const char *name);
 
@@ -457,14 +458,14 @@ public:
    * @param name - The URI in EQName notation: <code>Q{uri}local</code> if the
    *               name is in a namespace. For a name in no namespace, either of
    * the forms <code>Q{}local</code> or simply <code>local</code> are accepted.
-   * @return the URI in the clark notation. The caller is responsible for deallocation
+   * @return the URI in the clark notation. The caller should deallocate memory using `operator delete`.
    */
   const char *EQNameToClarkName(const char *name);
 
   //! Get the string representation of the XdmValue.
   /**
    * @param item - The XdmItem
-   * @return string value as char pointer array. The caller is responsible for deallocation
+   * @return string value as char pointer array. The caller should deallocate memory using `operator delete`.
    */
   const char *getStringValue(XdmItem *item);
 
@@ -477,7 +478,7 @@ public:
    * specified then platform default encoding is used
    * @param validator can be used to supply a SchemaValidator to validate the
    * document. Default is null
-   * @return Point to an XdmNode. The caller is responsible for deallocation
+   * @return Point to an XdmNode. The caller is responsible for memory deallocation
    * @throws SaxonApiException if there is a failure in the parsing of the XML
    * document
    */
