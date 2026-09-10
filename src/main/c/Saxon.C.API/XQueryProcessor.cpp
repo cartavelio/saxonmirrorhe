@@ -62,8 +62,24 @@ XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
 	proc = other.proc; //TODO check thread safety
 	
 	cppXQ = other.cppXQ;
-	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
-	std::map<std::string,std::string> properties;
+    std::map<std::string, XdmValue*>::const_iterator paramIter = other.parameters.begin();
+    while(paramIter != other.parameters.end())
+    {
+
+        XdmValue * valuei = paramIter->second;
+        if(valuei == nullptr) {
+
+        } else {
+            parameters[paramIter->first] = new XdmValue(*(valuei));
+        }
+        paramIter++;
+    }
+
+    std::map<std::string, std::string>::const_iterator propIter = other.properties.begin();
+    while (propIter != other.properties.end()) {
+        properties[propIter->first] = propIter->second;
+        propIter++;
+    }
 
 
 }
