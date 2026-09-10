@@ -160,6 +160,25 @@
    <nav>
       <ul/>
    </nav>
+   
+   <p>The SaxonC APIs provide a custom-designed interface for all XML processing. The APIs are useful when
+      you want to write your own applications in C/C++, Python or PHP to invoke XSLT transforms, XQuery,
+      XPath evaluation, or XML Schema validation with Saxon. For more information on how to
+      get started using these APIs, see the relevant sections in the main Saxon documentation:</p>
+   
+   <ul>
+      <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation" >XSLT
+         transformations from a C/C++, Python or PHP application</a></li>
+      <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query" >XQuery from a
+         C/C++, Python or PHP application</a></li>
+      <li><a target="_blank" href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath"
+         >Evaluating XPath expressions from a C/C++, Python or PHP application</a></li>
+      <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation"
+         >Validation from C/C++, Python or PHP</a></li>
+   </ul>
 
 
    <section id="saxon_c_cpp_api" title="SaxonC C++ API">
@@ -3154,7 +3173,7 @@
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html"
-               >SaxonCProcessor.h</a>  - consists of functions to compile and execute XSLT 3.0 stylesheets and XQuery 3.1 queries.
+               >SaxonCProcessor.h</a> - consists of functions to compile and execute XSLT 3.0 stylesheets and XQuery 3.1 queries.
          </li>
          <li>
             <a class="bodylink code"

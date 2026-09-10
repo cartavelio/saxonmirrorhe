@@ -46,8 +46,13 @@
                available, but is more limited.)</p></li>
                <li><p>Calls to user-written host language extension functions.</p></li>
             </ul>
-               <p>We hope to restore these features (perhaps in a slightly different form) in the future.</p></li>
-            
+               <p>We hope to restore these features (perhaps in a slightly different form) in the future.</p>
+               
+            </li>
+         </ul>
+         <p>From SaxonC 12.4:</p>
+         <ul>
+            <li><p>Localization using ICU4J is now available.</p></li>
          </ul>
       </category>
 

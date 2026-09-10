@@ -280,10 +280,28 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
 
 
       <h2 class="subtitle">Using SaxonC in applications</h2>
+     
+     <p>The SaxonC APIs provide a custom-designed interface for all XML processing. The APIs are useful when
+       you want to write your own applications in C/C++, Python or PHP to invoke XSLT transforms, XQuery,
+       XPath evaluation, or XML Schema validation with Saxon. For more information on how to
+       get started using these APIs, see the relevant sections in the main Saxon documentation:</p>
+     
+     <ul>
+       <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation" >XSLT
+         transformations from a C/C++, Python or PHP application</a></li>
+       <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query" >XQuery from a
+         C/C++, Python or PHP application</a></li>
+       <li><a target="_blank" href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath"
+         >Evaluating XPath expressions from a C/C++, Python or PHP application</a></li>
+       <li><a target="_blank"
+         href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation"
+         >Validation from C/C++, Python or PHP</a></li>
+     </ul>
 
-      <p>To get started please browse the <a href="/api">SaxonC APIs</a>.
-            <code>SaxonProcessor</code>, which acts as a factory class for generating the
-         processors, is a good place to start.</p>
+      <p>You can also browse the <a href="/api">SaxonC APIs</a>. <code>SaxonProcessor</code>, which acts as a
+        factory class for generating the processors, is a good place to start.</p>
 
       <p>The <code>samples/cppTest</code> directory in the download provides example code in C/C++
          (and PHP and Python) which may also be helpful in learning how to use SaxonC in your
@@ -309,7 +327,7 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <kbd>./validate [options] source.xml</kbd>
 
       <p>The same command line options as in the Java products are available in the SaxonC command
-         line tool. Please see the relevant sections of the Saxon 12 documentation for details:</p>
+         line tool. Please see the relevant sections of the main Saxon documentation for details:</p>
 
       <ul>
          <li>
