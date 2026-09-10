@@ -1474,8 +1474,27 @@ public class Configuration implements SourceResolver, NotationSet {
         return integratedFunctionLibrary;
     }
 
+    /**
+     * Get the function library list for built-in functions other than the functions in the
+     * core FN namespace. This includes for example functions for the math, array, and map
+     * namespaces, extensions in the Saxon namespace, and EXPath extensions for the file and
+     * binary modules. The actual set of libraries varies by Saxon edition. The function library
+     * list is created if it does not already exist. The client can add additional libraries to
+     * the returned library list. However, this should be regarded as a "system programming"
+     * interface, exposing capabilities that might have unpredictable effects.
+     * @param version The configuration can hold different library lists for different
+     *                XPath versions. The version number currently affects the map and array
+     *                libraries, which exist in 3.1 and 4.0 versions. Specifying 40 gives
+     *                the XPath 4.0 version of these libraries, anything else gives the XPath 3.1
+     *                version.
+     * @return the function library list for built-in function libraries other than the core
+     * FN namespace.
+     */
 
     public synchronized FunctionLibraryList getBuiltInExtensionLibraryList(int version) {
+        if (version != 40) {
+            version = 31;
+        }
         FunctionLibraryList result = builtInExtensionLibraryList.get(version);
         if (result == null) {
             result = makeBuiltInExtensionLibraryList(version);
