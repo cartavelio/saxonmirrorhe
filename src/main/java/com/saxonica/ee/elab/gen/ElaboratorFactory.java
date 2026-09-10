@@ -4,15 +4,21 @@ package com.saxonica.ee.elab.gen;
 import com.saxonica.ee.elab.expr.*;
 import com.saxonica.ee.elab.fn.*;
 import com.saxonica.ee.elab.insn.*;
+import net.sf.saxon.expr.Expression;
 
 import java.util.HashMap;
+
+/**
+ * The {@code ElaboratorFactory} is a factory class used to construct an
+ * {@link Elaborator} for a given {@link Expression}.
+ */
 
 public class ElaboratorFactory {
 
     private static final HashMap<String, Elaborator> map = new HashMap<>();
 
     static {
-        //map.put("mergeAdj", new AdjacentTextNodeMergerCompiler());
+        map.put("mergeAdj", new AdjacentTextNodeMergerElaborator());
         //map.put("analyzeString", new AnalyzeStringCompiler());
         map.put("and-expression", new AndElaborator());
         //map.put("xsl:apply-imports", new ApplyImportsCompiler());
@@ -40,8 +46,8 @@ public class ElaboratorFactory {
         map.put("dot", new ContextItemElaborator());
         //map.put("xsl:copy", new CopyCompiler());
         map.put("xsl:document", new DocumentInstrElaborator());
-        //map.put("docOrder", new DocumentSorterCompiler());
-        //map.put("emptyTextNodeRemover", new EmptyTextNodeRemoverCompiler());
+        map.put("docOrder", new DocumentSorterElaborator());
+        map.put("emptyTextNodeRemover", new EmptyTextNodeRemoverElaborator());
         //map.put("equivalent", new EquivalenceComparisonCompiler());
         //map.put("errorExpr", new ErrorExpressionCompiler());
         //map.put("FLWOR", new FLWORExpressionCompiler());
@@ -52,7 +58,7 @@ public class ElaboratorFactory {
         map.put("forEach", new ForEachElaborator());
         //map.put("xsl:for-each-group", new ForEachGroupCompiler());
         map.put("for", new ForExprElaborator());
-        //map.put("namedFunctionRef", new FunctionLiteralCompiler());
+        //map.put("namedFunctionRef", new FunctionLiteralElaborator());
         //map.put("fnCoercer", new FunctionSequenceCoercerCompiler());
         map.put("GeneralComparison", new GeneralComparisonElaborator());
         map.put("gVarRef", new GlobalVariableReferenceElaborator());
@@ -87,10 +93,10 @@ public class ElaboratorFactory {
         map.put("simpleStep", new SimpleStepExprElaborator());
         //map.put("atomizeSingleton", new SingletonAtomizerCompiler());
         map.put("pathExpression", new SlashExprElaborator());
-        //map.put("sort", new SortExpressionCompiler());
+        map.put("sort", new SortExprElaborator());
         //map.put("SquareArrayConstructor", new SquareArrayConstructorCompiler());
         //map.put("staticFunctionCall", new StaticFunctionCallCompiler());
-        //map.put("subscript", new SubscriptExpressionCompiler());
+        map.put("subscript", new SubscriptExprElaborator());
         //map.put("supplied", new SuppliedParameterReferenceCompiler());
         map.put("switch", new SwitchExprElaborator());
         map.put("sysFuncCall", null); // Handle this one specially
@@ -110,6 +116,8 @@ public class ElaboratorFactory {
         //map.put("singleton-intersect", new SingletonIntersectExpressionCompiler());
         map.put("except", new VennElaborator());
 
+        // System functions
+
         map.put("AccessorFnCompiler", new AccessorFnElaborator());
         map.put("BaseURICompiler", new BaseUriFnElaborator());
         map.put("BooleanFnCompiler", new BooleanFnElaborator());
@@ -125,7 +133,7 @@ public class ElaboratorFactory {
         map.put("LocalNameCompiler", new NodePropertyElaborator());
         map.put("MatchesCompiler", new MatchesFnElaborator());
         map.put("NameCompiler", new NodePropertyElaborator());
-        map.put("NamespaceUriFnCompiler", new NodePropertyElaborator());
+        map.put("NamespaceUriFnCompiler", new NamespaceUriFnElaborator());
         map.put("NormalizeSpaceCompiler", new NormalizeSpaceFnElaborator());
         map.put("NodeNameFnCompiler", new NodeNameFnElaborator());
         map.put("NotFnCompiler", new NotFnElaborator());

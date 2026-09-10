@@ -3,6 +3,7 @@ package com.saxonica.ee.elab.gen;
 import com.saxonica.ee.elab.eval.*;
 import com.saxonica.ee.elab.expr.SystemFunctionCallElaborator;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.om.Item;
@@ -10,25 +11,63 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 
-public abstract class Elaborator {
+/**
+ * This class is at the heart of the mechanism for elaborating expressions.
+ *
+ * <p>This mechanism evaluates expressions in two stages. The first stage (the elaboration stage),
+ * converts the expression to a lambda expression, specifically a function of the context that can
+ * be called to produce the expression result. The second stage invokes this function (supplying
+ * the context as an argument) to generate the result.</p>
+ *
+ * <p>The mechanism is complicated by the fact that expressions can be evaluated in different modes.
+ * Specifically: pull evaluation delivers an iterator over the result, item evaluation delivers
+ * the singleton result as an item; push evaluation sends the results to an {@link Outputter},
+ * boolean evaluation returns the effective boolean value, and string evaluation returns the
+ * string value.</p>
+ *
+ * <p>The {@code Evaluator} class is the abstract root of a hierarchy of classes for elaborating
+ * different kinds of expression.</p>
+ */
 
+public abstract class Elaborator {
 
     private Expression expression;
 
+    public Elaborator() {
+    }
+
+    /**
+     * Get the expression being elaborated
+     * @return the expression
+     */
     public Expression getExpression() {
         return expression;
     }
+
+    /**
+     * Set the expression being elaborated
+     * @param expr the expression
+     */
 
     public void setExpression(Expression expr) {
         this.expression = expr;
     }
 
+    /**
+     * Get the Saxon Configuration
+     * @return  the Configuration
+     */
+
     protected Configuration getConfiguration() {
         return expression.getConfiguration();
     }
 
-    public Elaborator() {}
 
+    /**
+     * Factory method to construct an {@code Elaborator} for a specific expression
+     * @param expression the expression to be elaborated
+     * @return an elaborator for the expression
+     */
 
     public static Elaborator makeElaborator(Expression expression) {
         if (expression instanceof SystemFunctionCall) {
@@ -43,7 +82,7 @@ public abstract class Elaborator {
             String label = expression.getExpressionName();
             Elaborator elab = ElaboratorFactory.getElaborator(label);
             if (elab == null) {
-                System.err.println("Using fallback elaborator for " + expression.toShortString());
+                System.err.println("Using fallback elaborator for " + label + ": " + expression.toShortString());
                 return new FallbackElaborator(expression);
             } else {
                 elab.setExpression(expression);

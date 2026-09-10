@@ -48,14 +48,6 @@ public class NodePropertyElaborator extends StringElaborator {
                     }
                     return StringView.of(node.getDisplayName());
                 };
-            case "namespace-uri":
-                return context -> {
-                    NodeInfo node = (NodeInfo) argEval.eval(context);
-                    if (nullable && node == null) {
-                        return EmptyUnicodeString.getInstance();
-                    }
-                    return StringView.of(node.getURI());
-                };
             default:
                 throw new UnsupportedOperationException("Unknown accessor function");
 
