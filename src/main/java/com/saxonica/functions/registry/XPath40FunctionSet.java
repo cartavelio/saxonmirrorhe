@@ -622,6 +622,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                                                            BuiltInAtomicType.DECIMAL, OPT, CARD0)
                 .arg(0, chronoType, OPT, EMPTY));
 
+        register("siblings", 0, e -> e.populate(ContextItemAccessorFunction::new, AnyNodeTest.getInstance(), STAR, CITEM | LATE));
+
+        register("siblings", 1, e -> e.populate(Siblings_1::new, AnyNodeTest.getInstance(), STAR, 0)
+                .arg(0, AnyNodeTest.getInstance(), OPT, null));
+
         register("slice", 1, 4, e -> e.populate(Slice::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
