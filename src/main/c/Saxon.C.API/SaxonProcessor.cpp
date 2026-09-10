@@ -556,7 +556,7 @@ int64_t SaxonProcessor::createParameterJArray(
       addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
                            (void *)processorDataRef,
                            (char *)(iter->first).c_str(),
-                           (void *)(iter->second)->getUnderlyingValue());
+                           ((iter->second)->getUnderlyingValue() == SXN_UNSET ? (void *)nullptr : (void *)(iter->second)->getUnderlyingValue()));
     }
 
     for (std::map<std::string, std::string>::iterator iter = properties.begin();

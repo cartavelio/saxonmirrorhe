@@ -187,6 +187,20 @@ def test_xslt30_processor(data_dir):
     assert 'text1' in output2
 
 
+def testXdmArrayIn_xslt30(saxonproc, data_dir):
+
+    value = saxonproc.make_array([saxonproc.make_integer_value(i) for i in [8,9,10]])
+    xsltproc = saxonproc.new_xslt30_processor()
+    xsltproc.set_cwd(data_dir)
+    executable = xsltproc.compile_stylesheet(stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' version='2.0'> <xsl:param name='values' select='(2, 3, 4, 5)'/><xsl:output method='xml' indent='yes'/><xsl:template match='*'><output><xsl:for-each select='$values'><out><xsl:value-of select='.'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
+
+    executable.set_parameter("values", value)
+
+    result = executable.apply_templates_returning_string(source_file="cat.xml")
+    print(result)
+    assert "<out>8 9 10</out>" in result
+
+
 
 
 def test_Xslt_from_file1(saxonproc, data_dir):
@@ -846,6 +860,27 @@ def test_CallTemplateWithResultValidation(data_dir):
             print(trans.error_message)
     except  Exception as err:
         print("Error: ", err)
+
+def testEmptyXdmValueToString(saxonproc):
+        xdm_value = PyXdmValue()
+
+        print(xdm_value)
+
+        assert str(xdm_value) is ""
+
+def testEmptySequenceXdmValue(saxonproc):
+
+    xp = saxonproc.new_xpath_processor()
+    result = xp.evaluate_single("(1,2,3)[10]")
+    assert result == None
+
+def testEmptySequenceXdmValue2(saxonproc):
+    xp = saxonproc.new_xpath_processor()
+    xp.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
+    xp.declare_variable('p')
+    xdm_value = PyXdmValue()
+    xp.set_parameter('p', xdm_value)
+    assert xp.effective_boolean_value("fn:empty($p)")
 
 
 def testCallTemplateNoParamsRaw(saxonproc):

@@ -1941,6 +1941,8 @@ cdef class PyXsltExecutable:
         cdef PyXdmAtomicValue avalue_
         cdef PyXdmItem ivalue_
         cdef PyXdmNode nvalue_
+        cdef PyXdmArray aavalue_
+        cdef PyXdmMap mvalue_
         cdef PyXdmValue value_
         if value is None:
             return
@@ -1951,11 +1953,19 @@ cdef class PyXsltExecutable:
                 self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *> avalue_.derivedaptr)
             elif  isinstance(value, PyXdmNode):
                 nvalue_ = value
-                nvalue_.derivedaptr.incrementRefCount()
+                nvalue_.derivednptr.incrementRefCount()
                 self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *>  nvalue_.derivednptr)
+            elif  isinstance(value, PyXdmArray):
+                aavalue_ = value
+                aavalue_.derivedaaptr.incrementRefCount()
+                self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *>  aavalue_.derivedaaptr)
+            elif  isinstance(value, PyXdmMap):
+                mvalue_ = value
+                mvalue_.derivedmmptr.incrementRefCount()
+                self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *>  mvalue_.derivedmmptr)
             elif  isinstance(value, PyXdmItem):
                 ivalue_ = value
-                ivalue_.derivedaptr.incrementRefCount()
+                ivalue_.derivedptr.incrementRefCount()
                 self.thisxptr.setParameter(c_str, <saxoncClasses.XdmValue *>  ivalue_.derivedptr)
             elif isinstance(value, PyXdmValue):
                 value_ = value
@@ -4402,6 +4412,8 @@ cdef class PyXdmValue:
         c_string = self.thisvptr.toString()
         py_to_string = make_py_str(c_string)
         saxoncClasses.SaxonProcessor.deleteString(c_string)
+        if py_to_string is None:
+            return ""
         return py_to_string
 
      def __iter__(self):

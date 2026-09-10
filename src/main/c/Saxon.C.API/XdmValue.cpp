@@ -29,7 +29,7 @@ XdmValue::XdmValue(const XdmValue &other) {
 const char *XdmValue::toString() {
   int count = size();
   if (count == 0) {
-    return nullptr;
+    return "";
   }
   char *toStringValuei = nullptr;
   // if (toStringValue == nullptr) {
@@ -60,7 +60,7 @@ XdmValue::XdmValue(int64_t valRef) {
   relinquished_values = new char[values_cap];
   relinquished_values[0] = 0;
   addXdmItem(value);
-  jValues = -1;
+  jValues = SXN_UNSET;
   valueType = nullptr;
   toStringValue = nullptr;
 }
@@ -238,7 +238,8 @@ int64_t XdmValue::getUnderlyingValue() {
 
     int count = xdmSize;
     if (count == 0) {
-      return -1;
+        //Given that count =0 we return empty sequence
+        return j_getXdmEmptySequence(SaxonProcessor::sxn_environ->thread);
     }
 
     if (count == 1) {
