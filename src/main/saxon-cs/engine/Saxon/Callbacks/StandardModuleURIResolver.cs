@@ -5,14 +5,14 @@ using System.IO;
 using System.Xml;
 
 namespace Saxon.Callbacks {
-    public class StandardModuleURIResolver : net.sf.saxon.lib.ModuleURIResolver {
+    public class StandardModuleURIResolver : Saxon.Hej.lib.ModuleURIResolver {
         private XmlResolver resolver;
-        private net.sf.saxon.Configuration config;
+        private Saxon.Hej.Configuration config;
 
         public StandardModuleURIResolver() {
         }
 
-        public StandardModuleURIResolver(net.sf.saxon.Configuration config) {
+        public StandardModuleURIResolver(Saxon.Hej.Configuration config) {
             this.config = config;
         }
 
@@ -20,18 +20,18 @@ namespace Saxon.Callbacks {
             this.resolver = resolver;
         }
 
-        public void setConfiguration(net.sf.saxon.Configuration config) {
+        public void setConfiguration(Saxon.Hej.Configuration config) {
             this.config = config;
         }
 
-        public net.sf.saxon.Configuration getConfiguration() {
+        public Saxon.Hej.Configuration getConfiguration() {
             return config;
         }
 
-        public javax.xml.transform.stream.StreamSource[] resolve(string moduleURI, string baseURI, string[] locations) {
+        public Saxon.Ejavax.xml.transform.stream.StreamSource[] resolve(string moduleURI, string baseURI, string[] locations) {
             if ((locations.Length == 0)) {
-                net.sf.saxon.trans.XPathException err =
-                    new net.sf.saxon.trans.XPathException(("Cannot locate module for namespace " + moduleURI));
+                Saxon.Hej.trans.XPathException err =
+                    new Saxon.Hej.trans.XPathException(("Cannot locate module for namespace " + moduleURI));
                 err.setErrorCode("XQST0059");
                 err.setIsStaticError(true);
                 throw err;
@@ -42,8 +42,8 @@ namespace Saxon.Callbacks {
                 }
 
                 Uri @base = new Uri(baseURI);
-                javax.xml.transform.stream.StreamSource[] sources =
-                    new javax.xml.transform.stream.StreamSource[locations.Length];
+                Saxon.Ejavax.xml.transform.stream.StreamSource[] sources =
+                    new Saxon.Ejavax.xml.transform.stream.StreamSource[locations.Length];
                 for (int m = 0; (m < locations.Length); m++) {
                     string href = locations[m];
                     Uri absoluteURI;
@@ -51,8 +51,8 @@ namespace Saxon.Callbacks {
                         absoluteURI = resolver.ResolveUri(@base, href);
                     }
                     catch (System.Exception err) {
-                        net.sf.saxon.trans.XPathException se =
-                            new net.sf.saxon.trans.XPathException(("Cannot resolve relative URI " + href), err);
+                        Saxon.Hej.trans.XPathException se =
+                            new Saxon.Hej.trans.XPathException(("Cannot resolve relative URI " + href), err);
                         se.setErrorCode("XQST0059");
                         se.setIsStaticError(true);
                         throw se;
@@ -65,38 +65,38 @@ namespace Saxon.Callbacks {
             }
         }
 
-        private javax.xml.transform.stream.StreamSource getQuerySource(Uri abs) {
+        private Saxon.Ejavax.xml.transform.stream.StreamSource getQuerySource(Uri abs) {
             try {
                 System.Object obj = resolver.GetEntity(abs, "application/xquery", Type.GetType("System.IO.Stream"));
                 if ((obj is Stream stream)) {
-                    javax.xml.transform.stream.StreamSource
-                        source = new javax.xml.transform.stream.StreamSource(stream);
+                    Saxon.Ejavax.xml.transform.stream.StreamSource
+                        source = new Saxon.Ejavax.xml.transform.stream.StreamSource(stream);
                     source.setSystemId(abs.ToString());
                     return source;
                 }
                 else {
                     if (obj is TextReader reader) {
-                        javax.xml.transform.stream.StreamSource source =
-                            new javax.xml.transform.stream.StreamSource(reader);
+                        Saxon.Ejavax.xml.transform.stream.StreamSource source =
+                            new Saxon.Ejavax.xml.transform.stream.StreamSource(reader);
                         source.setSystemId(abs.ToString());
                         return source;
                     }
                     else {
-                        if ((obj is javax.xml.transform.stream.StreamSource)) {
-                            return ((javax.xml.transform.stream.StreamSource) (obj));
+                        if ((obj is Saxon.Ejavax.xml.transform.stream.StreamSource)) {
+                            return ((Saxon.Ejavax.xml.transform.stream.StreamSource) (obj));
                         }
                         else {
-                            throw new net.sf.saxon.trans.XPathException(
+                            throw new Saxon.Hej.trans.XPathException(
                                 ("Unrecognized object returned by XmlResolver (type " + obj.GetType().Name));
                         }
                     }
                 }
             }
-            catch (net.sf.saxon.trans.XPathException e) {
+            catch (Saxon.Hej.trans.XPathException e) {
                 throw;
             }
             catch (System.Exception e) {
-                throw new net.sf.saxon.trans.XPathException(e.Message, e);
+                throw new Saxon.Hej.trans.XPathException(e.Message, e);
             }
         }
     }

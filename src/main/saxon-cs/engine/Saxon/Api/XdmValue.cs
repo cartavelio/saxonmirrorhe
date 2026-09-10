@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using java.lang;
-using net.sf.saxon.functions;
-using net.sf.saxon.ma.arrays;
-using net.sf.saxon.ma.map;
-using net.sf.saxon.om;
-using net.sf.saxon.tree.iter;
-using net.sf.saxon.value;
+using Saxon.Ejava.lang;
+using Saxon.Hej.functions;
+using Saxon.Hej.ma.arrays;
+using Saxon.Hej.ma.map;
+using Saxon.Hej.om;
+using Saxon.Hej.tree.iter;
+using Saxon.Hej.value;
 using Saxon.Api.Support;
 using Exception = System.Exception;
 
@@ -308,7 +308,7 @@ namespace Saxon.Api {
         /// <list>
         /// <item>An instance of <c>XdmValue</c> (for example an <c>XdmAtomicValue</c>, 
         /// <c>XdmMap</c>, <c>XdmArray</c> or <c>XdmNode</c>), which is returned unchanged</item>
-        /// <item>An instance of Saxon's Java class <c>net.sf.saxon.om.Sequence</c>, which is wrapped
+        /// <item>An instance of Saxon's Java class <c>Saxon.Hej.om.Sequence</c>, which is wrapped
         /// as an <c>XdmValue</c></item>
         /// <item>An instance of <c>IDictionary</c> (which is wrapped as an <c>XdmMap</c> using the method <see cref="XdmMap.MakeMap"/>)</item>
         /// <item>An array of objects, which are converted by applying these rules recursively,
@@ -346,7 +346,7 @@ namespace Saxon.Api {
         }
 
         private static XdmValue MakeSequence(IEnumerable o) {
-            List<net.sf.saxon.om.Item> list = new List<net.sf.saxon.om.Item>();
+            List<Saxon.Hej.om.Item> list = new List<Saxon.Hej.om.Item>();
 
             if (o is string) {
                 return XdmAtomicValue.MakeAtomicValue((object) o);
@@ -355,7 +355,7 @@ namespace Saxon.Api {
             foreach (object oi in o) {
                 XdmValue v = MakeValue(oi);
                 if (v is XdmItem item) {
-                    list.Add((net.sf.saxon.om.Item)item.Unwrap());
+                    list.Add((Saxon.Hej.om.Item)item.Unwrap());
                 }
                 else {
                     GroundedValue gv = v.Unwrap();
@@ -363,7 +363,7 @@ namespace Saxon.Api {
                 }
             }
 
-            Sequence value = new SequenceExtent.Of<net.sf.saxon.om.Item>(list);
+            Sequence value = new SequenceExtent.Of<Saxon.Hej.om.Item>(list);
             return Wrap(value);
         }
 
@@ -440,7 +440,7 @@ namespace Saxon.Api {
             try {
                 return (XdmItem) Wrap(value.itemAt(i));
             }
-            catch (net.sf.saxon.trans.XPathException e) {
+            catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }
@@ -464,12 +464,12 @@ namespace Saxon.Api {
         public XdmValue DocumentOrder() {
             try {
                 SequenceIterator iter = value.iterate();
-                net.sf.saxon.expr.sort.DocumentOrderIterator sorted = 
-                    new net.sf.saxon.expr.sort.DocumentOrderIterator(iter,
-                        net.sf.saxon.expr.sort.GlobalOrderComparer.getInstance());
+                Saxon.Hej.expr.sort.DocumentOrderIterator sorted = 
+                    new Saxon.Hej.expr.sort.DocumentOrderIterator(iter,
+                        Saxon.Hej.expr.sort.GlobalOrderComparer.getInstance());
                 return XdmValue.Wrap(SequenceTool.toGroundedValue(sorted));
             }
-            catch (net.sf.saxon.trans.XPathException e) {
+            catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }

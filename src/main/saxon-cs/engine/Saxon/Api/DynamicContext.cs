@@ -1,4 +1,4 @@
-using net.sf.saxon.expr;
+using Saxon.Hej.expr;
 
 namespace Saxon.Api {
     /// <summary>
@@ -47,7 +47,7 @@ namespace Saxon.Api {
 
         /// <summary>
         /// The underlying object in the Saxon implementation, an instance of class
-        /// <code>net.sf.saxon.expr.XPathContext</code>
+        /// <code>Saxon.Hej.expr.XPathContext</code>
         /// </summary>
         /// <remarks>
         /// <para>This property provides access to internal methods in the Saxon engine that are
@@ -56,7 +56,7 @@ namespace Saxon.Api {
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
         /// <para>Information about the returned object (and the objects it provides access to)
-        /// is included in the Saxon JavaDoc documentation, see <see cref="net.sf.saxon.expr.XPathContext"/>
+        /// is included in the Saxon JavaDoc documentation, see <see cref="Saxon.Hej.expr.XPathContext"/>
         /// </para>
         /// </remarks>
 

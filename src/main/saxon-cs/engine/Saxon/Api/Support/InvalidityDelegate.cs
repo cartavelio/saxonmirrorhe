@@ -1,4 +1,4 @@
-using java.util.function;
+using Saxon.Ejava.util.function;
 
 namespace Saxon.Api.Support {
     public class InvalidityDelegate : IInvalidityHandler {

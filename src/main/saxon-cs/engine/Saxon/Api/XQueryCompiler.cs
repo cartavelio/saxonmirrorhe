@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using net.sf.saxon;
-using net.sf.saxon.s9api;
+using Saxon.Hej;
+using Saxon.Hej.s9api;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 
@@ -190,7 +190,7 @@ namespace Saxon.Api {
         /// error stream. The exception that is returned from this method is merely a summary indicating the
         /// status, and is not useful for diagnosing the actual error.</exception>
         public XQueryExecutable Compile(Stream query) {
-            net.sf.saxon.s9api.XQueryExecutable exec = Implementation.compile(query);
+            Saxon.Hej.s9api.XQueryExecutable exec = Implementation.compile(query);
             return new XQueryExecutable(exec);
         }
 
@@ -219,7 +219,7 @@ namespace Saxon.Api {
         /// status, and is not useful for diagnosing the actual error.</exception>
          
         public XQueryExecutable Compile(string query) {
-            net.sf.saxon.s9api.XQueryExecutable exec = Implementation.compile(query);
+            Saxon.Hej.s9api.XQueryExecutable exec = Implementation.compile(query);
             return new XQueryExecutable(exec);
         }
 
@@ -228,7 +228,7 @@ namespace Saxon.Api {
         /// methods that are likely to vary from release to release.
         /// </summary>
 
-        public net.sf.saxon.s9api.XQueryCompiler Implementation { get; }
+        private Saxon.Hej.s9api.XQueryCompiler Implementation { get; }
 
 
         /// <summary>

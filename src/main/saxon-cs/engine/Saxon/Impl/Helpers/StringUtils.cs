@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using J2N;
-using net.sf.saxon.trans;
+using Saxon.Hej.trans;
 
 namespace Saxon.Impl.Helpers {
     public class StringUtils {

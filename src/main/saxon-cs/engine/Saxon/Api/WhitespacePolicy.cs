@@ -1,12 +1,12 @@
 using System;
 using System.Runtime.CompilerServices;
-using java.lang;
-using net.sf.saxon.@event;
-using net.sf.saxon.s9api;
-using net.sf.saxon.value;
-using net.sf.saxon.om;
-using net.sf.saxon.trace;
-using net.sf.saxon.type;
+using Saxon.Ejava.lang;
+using Saxon.Hej.@event;
+using Saxon.Hej.s9api;
+using Saxon.Hej.value;
+using Saxon.Hej.om;
+using Saxon.Hej.trace;
+using Saxon.Hej.type;
 
 namespace Saxon.Api {
     /// <summary>
@@ -54,7 +54,7 @@ namespace Saxon.Api {
         
         // For internal use
         // TODO: do this properly
-        public WhitespacePolicy(net.sf.saxon.style.StylesheetPackage pack) {
+        public WhitespacePolicy(Saxon.Hej.style.StylesheetPackage pack) {
             this.policy = Whitespace.XSLT;
             this.stripperRules = pack.getStripperRules();
         }

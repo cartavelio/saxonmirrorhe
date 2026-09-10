@@ -1,14 +1,14 @@
 
-using ErrorReporter = net.sf.saxon.lib.ErrorReporter;
-using XmlProcessingError = net.sf.saxon.s9api.XmlProcessingError;
+using ErrorReporter = Saxon.Hej.lib.ErrorReporter;
+using XmlProcessingError = Saxon.Hej.s9api.XmlProcessingError;
 
 namespace Saxon.Api.Support {
     /// <summary>
     /// <c>ErrorReporter</c> wrapper class for internal use in Saxon. Creates
-    /// an instance of <c>net.sf.saxon.lib.ErrorReporter</c> that delegates
+    /// an instance of <c>Saxon.Hej.lib.ErrorReporter</c> that delegates
     /// to an instance of <c>Saxon.Api.ErrorReporter</c>
     /// </summary>
-    public class ErrorReporterWrapper : net.sf.saxon.lib.ErrorReporter
+    public class ErrorReporterWrapper : Saxon.Hej.lib.ErrorReporter
 
     {
 
@@ -26,7 +26,7 @@ namespace Saxon.Api.Support {
         public Saxon.Api.ErrorReporter ErrorReporter => reporter;
         
 
-        public void report(net.sf.saxon.s9api.XmlProcessingError error) {
+        public void report(Saxon.Hej.s9api.XmlProcessingError error) {
             this.reporter.Invoke(new Saxon.Api.XmlProcessingError(error));
         }
     }

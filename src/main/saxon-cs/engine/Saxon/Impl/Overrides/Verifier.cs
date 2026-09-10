@@ -4,17 +4,17 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using java.lang;
-using net.sf.saxon.trans;
+using Saxon.Ejava.lang;
+using Saxon.Hej.trans;
 
 namespace Saxon.Impl.Overrides {
-    public class Verifier : com.saxonica.config.Verifier {
+    public class Verifier : Saxon.Eej.config.Verifier {
 
         internal Verifier()  {
         }
         
         
-        protected internal override void loadLicense(net.sf.saxon.Configuration config) {
+        protected internal override void loadLicense(Saxon.Hej.Configuration config) {
             String dir = System.Environment.GetEnvironmentVariable("SAXON_LICENSE_DIR");
             String path = dir + "/saxon-license.lic";
             loadLicense(path);

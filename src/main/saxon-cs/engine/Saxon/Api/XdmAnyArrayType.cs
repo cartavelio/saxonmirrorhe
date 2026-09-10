@@ -1,6 +1,6 @@
-using net.sf.saxon.ma.arrays;
-using net.sf.saxon.om;
-using net.sf.saxon.s9api;
+using Saxon.Hej.ma.arrays;
+using Saxon.Hej.om;
+using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>

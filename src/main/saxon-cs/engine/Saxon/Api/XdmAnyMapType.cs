@@ -1,5 +1,5 @@
-using net.sf.saxon.ma.map;
-using net.sf.saxon.om;
+using Saxon.Hej.ma.map;
+using Saxon.Hej.om;
 
 namespace Saxon.Api {
     /// <summary>

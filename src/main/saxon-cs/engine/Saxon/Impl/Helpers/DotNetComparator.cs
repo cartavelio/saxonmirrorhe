@@ -1,11 +1,11 @@
 using System;
 using System.Globalization;
-using net.sf.saxon.expr.sort;
-using net.sf.saxon.lib;
-using net.sf.saxon.str;
-using net.sf.saxon.value;
+using Saxon.Hej.expr.sort;
+using Saxon.Hej.lib;
+using Saxon.Hej.str;
+using Saxon.Hej.value;
 
-namespace SaxonCS3.Saxon.Impl.Helpers {
+namespace Saxon.Impl.Helpers {
     
     public class DotNetComparator : SubstringMatcher {
 

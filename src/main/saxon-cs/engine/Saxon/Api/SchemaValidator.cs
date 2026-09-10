@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
-using java.util.function;
-using javax.xml.transform;
-using javax.xml.transform.stream;
-using net.sf.saxon;
-using net.sf.saxon.@event;
-using net.sf.saxon.lib;
-using net.sf.saxon.om;
-using net.sf.saxon.pull;
-using net.sf.saxon.type;
+using Saxon.Ejava.util.function;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Ejavax.xml.transform.stream;
+using Saxon.Hej;
+using Saxon.Hej.@event;
+using Saxon.Hej.lib;
+using Saxon.Hej.om;
+using Saxon.Hej.pull;
+using Saxon.Hej.type;
 using Saxon.Api.Support;
 
 namespace Saxon.Api {
@@ -48,12 +48,12 @@ namespace Saxon.Api {
     public class SchemaValidator {
         private Configuration config;
         private List<Source> sources = new List<Source>();
-        private net.sf.saxon.s9api.SchemaValidator s9SchemaValidator;
+        private Saxon.Hej.s9api.SchemaValidator s9SchemaValidator;
         private SchemaType documentElementType;
 
         // internal constructor
 
-        internal SchemaValidator(net.sf.saxon.s9api.SchemaValidator validator, Processor processor) {
+        internal SchemaValidator(Saxon.Hej.s9api.SchemaValidator validator, Processor processor) {
             this.s9SchemaValidator = validator;
             this.config = processor.Implementation;
         }
@@ -343,7 +343,7 @@ namespace Saxon.Api {
 
         internal SchemaType DocumentElementType => documentElementType;
 
-        internal net.sf.saxon.s9api.SchemaValidator UnderlyingSchemaValidator => s9SchemaValidator;
+        internal Saxon.Hej.s9api.SchemaValidator UnderlyingSchemaValidator => s9SchemaValidator;
 
 
         /// <summary>

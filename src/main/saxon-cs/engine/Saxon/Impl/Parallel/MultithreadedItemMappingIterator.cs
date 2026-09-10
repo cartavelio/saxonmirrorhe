@@ -1,17 +1,16 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using com.saxonica.ee.config;
-using com.saxonica.ee.trans;
-using net.sf.saxon.expr;
-using net.sf.saxon.om;
-using net.sf.saxon.value;
+using Saxon.Eej.ee.config;
+using Saxon.Eej.ee.trans;
+using Saxon.Hej.expr;
+using Saxon.Hej.om;
+using Saxon.Hej.value;
 
 namespace Saxon.Impl.Parallel {
-    public class MultithreadedItemMappingIterator : net.sf.saxon.expr.ItemMappingIterator {
+    public class MultithreadedItemMappingIterator : Saxon.Hej.expr.ItemMappingIterator {
         private readonly Channel<Outcome<Item>> resultQueue = Channel.CreateBounded<Outcome<Item>>(64);
         private readonly CancellationTokenSource tokenSource = new();
         private bool allDone;
@@ -52,7 +51,7 @@ namespace Saxon.Impl.Parallel {
             return ((maxThreads>0) ? maxThreads : 1);
         }
 
-        public override net.sf.saxon.om.Item next() {
+        public override Saxon.Hej.om.Item next() {
             if (allDone) {
                 return null;
             }
@@ -74,9 +73,9 @@ namespace Saxon.Impl.Parallel {
                     return item == STOPPER ? null : item;
                 }
                 else {
-                    net.sf.saxon.trans.XPathException xpe =
-                        net.sf.saxon.trans.XPathException.makeXPathException(next.getException());
-                    throw new net.sf.saxon.trans.UncheckedXPathException(xpe);
+                    Saxon.Hej.trans.XPathException xpe =
+                        Saxon.Hej.trans.XPathException.makeXPathException(next.getException());
+                    throw new Saxon.Hej.trans.UncheckedXPathException(xpe);
                 }
             }
             catch (ChannelClosedException e) {
@@ -84,8 +83,8 @@ namespace Saxon.Impl.Parallel {
                 return null;
             }
             catch (System.Threading.ThreadInterruptedException e) {
-                net.sf.saxon.trans.XPathException xpie = net.sf.saxon.trans.XPathException.makeXPathException(e);
-                throw new net.sf.saxon.trans.UncheckedXPathException(xpie);
+                Saxon.Hej.trans.XPathException xpie = Saxon.Hej.trans.XPathException.makeXPathException(e);
+                throw new Saxon.Hej.trans.UncheckedXPathException(xpie);
             }
         }
 

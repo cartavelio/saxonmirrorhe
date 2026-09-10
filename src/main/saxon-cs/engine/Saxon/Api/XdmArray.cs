@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using net.sf.saxon.ma.arrays;
-using net.sf.saxon.om;
+using Saxon.Hej.ma.arrays;
+using Saxon.Hej.om;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmFunctionItem">
@@ -121,10 +121,10 @@ namespace Saxon.Api {
             try {
                 GroundedValue member = value.value;
                 ArrayItem newArray =
-                    net.sf.saxon.ma.arrays.ArrayFunctionSet.ArrayAppend.append((ArrayItem) this.value, member);
+                    Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayAppend.append((ArrayItem) this.value, member);
                 return (XdmArray) Wrap(newArray);
             }
-            catch (net.sf.saxon.trans.XPathException e) {
+            catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }
@@ -141,7 +141,7 @@ namespace Saxon.Api {
                 ArrayItem newArray = ((ArrayItem) this.value).concat(other);
                 return (XdmArray) Wrap(newArray);
             }
-            catch (net.sf.saxon.trans.XPathException e) {
+            catch (Saxon.Hej.trans.XPathException e) {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }

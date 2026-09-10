@@ -1,7 +1,7 @@
 using System;
 using System.Xml;
-using net.sf.saxon.om;
-using net.sf.saxon.value;
+using Saxon.Hej.om;
+using Saxon.Hej.value;
 
 namespace Saxon.Api {
     /// <summary>
@@ -147,7 +147,7 @@ namespace Saxon.Api {
                 sqName = StructuredQName.fromLexicalQName(lexicalQName, true, true,
                     node.getAllNamespaces());
             }
-            catch (net.sf.saxon.trans.XPathException err) {
+            catch (Saxon.Hej.trans.XPathException err) {
                 throw new ArgumentException(err.getMessage());
             }
         }
@@ -392,7 +392,7 @@ namespace Saxon.Api {
             return new XmlQualifiedName(LocalName, Uri);
         }
 
-        // internal method: Convert to a net.sf.saxon.value.QNameValue
+        // internal method: Convert to a Saxon.Hej.value.QNameValue
 
         internal QNameValue ToQNameValue() {
             return new QNameValue(sqName.getPrefix(), sqName.getURI(), sqName.getLocalPart(), null);

@@ -1,6 +1,6 @@
 using System.Linq;
-using java.lang;
-using net.sf.saxon.functions;
+using Saxon.Ejava.lang;
+using Saxon.Hej.functions;
 
 namespace Saxon.Impl.Helpers {
     public class SetUtils {

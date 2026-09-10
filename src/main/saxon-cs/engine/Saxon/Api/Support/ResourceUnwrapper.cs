@@ -1,15 +1,15 @@
-using net.sf.saxon.expr;
-using net.sf.saxon.om;
+using Saxon.Hej.expr;
+using Saxon.Hej.om;
 
 namespace Saxon.Api.Support {
-    public class ResourceUnwrapper : net.sf.saxon.lib.Resource {
+    public class ResourceUnwrapper : Saxon.Hej.lib.Resource {
 
         private readonly IResource resource;
         private ResourceUnwrapper(IResource resource) {
             this.resource = resource;
         }
 
-        public static net.sf.saxon.lib.Resource Unwrap(IResource resource) {
+        public static Saxon.Hej.lib.Resource Unwrap(IResource resource) {
             if (resource is ResourceWrapper) {
                 return ((ResourceWrapper) resource).Implementation;
             }

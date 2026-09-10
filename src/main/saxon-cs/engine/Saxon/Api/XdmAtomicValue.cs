@@ -1,9 +1,9 @@
 using System;
-using net.sf.saxon;
-using net.sf.saxon.lib;
-using net.sf.saxon.om;
-using net.sf.saxon.type;
-using net.sf.saxon.value;
+using Saxon.Hej;
+using Saxon.Hej.lib;
+using Saxon.Hej.om;
+using Saxon.Hej.type;
+using Saxon.Hej.value;
 using Singulink.Numerics;
 
 namespace Saxon.Api {
@@ -94,22 +94,22 @@ namespace Saxon.Api {
             switch (dt) {
                 case {Kind: DateTimeKind.Local}: {
                     int offsetMinutes = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).Minutes;
-                    return new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
+                    return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
                         Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
                         Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
                         offsetMinutes);
                 }
                 case {Kind: DateTimeKind.Utc}: {
-                    return new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
+                    return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
                         Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
                         Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
                         0);
                 }
                 case {Kind: DateTimeKind.Unspecified}: {
-                    return new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
+                    return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month),
                         Convert.ToByte(dt.Day), Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute),
                         Convert.ToByte(dt.Second), Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)),
-                        net.sf.saxon.value.CalendarValue.NO_TIMEZONE);
+                        Saxon.Hej.value.CalendarValue.NO_TIMEZONE);
                 }
                 default:
                     return null;
@@ -125,7 +125,7 @@ namespace Saxon.Api {
 
         private static DateTimeValue _initOffset(DateTimeOffset offset) {
             DateTime dt = offset.DateTime;
-            return new net.sf.saxon.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day),
+            return new Saxon.Hej.value.DateTimeValue(dt.Year, Convert.ToByte(dt.Month), Convert.ToByte(dt.Day),
                 Convert.ToByte(dt.Hour), Convert.ToByte(dt.Minute), Convert.ToByte(dt.Second),
                 Convert.ToByte(dt.Ticks * (1000000000 / TimeSpan.TicksPerSecond)), offset.Offset.Minutes);
 
@@ -172,7 +172,7 @@ namespace Saxon.Api {
         
         private static AtomicValue _initGeneric(string lexicalForm, XdmAtomicType type) {
 
-        net.sf.saxon.type.ItemType it = type.Unwrap();
+        Saxon.Hej.type.ItemType it = type.Unwrap();
             if (!it.isPlainType()) {
                 throw new SaxonApiException("Requested type is not atomic");
             }
@@ -182,8 +182,8 @@ namespace Saxon.Api {
             }
 
             try {
-                net.sf.saxon.str.UnicodeString us = net.sf.saxon.str.StringView.of(lexicalForm).tidy();
-                net.sf.saxon.type.StringConverter Converter =
+                Saxon.Hej.str.UnicodeString us = Saxon.Hej.str.StringView.of(lexicalForm).tidy();
+                Saxon.Hej.type.StringConverter Converter =
                     ((AtomicType) it).getStringConverter(ConversionRules.DEFAULT);
                 return Converter.convertString(us).asAtomic();
             }
@@ -199,7 +199,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// The supplied value must be one of the following:
         /// <list>
-        /// <item>An instance of the Saxon Java class <c>net.sf.saxon.value.AtomicValue</c></item>
+        /// <item>An instance of the Saxon Java class <c>Saxon.Hej.value.AtomicValue</c></item>
         /// <item>A <c>Boolean</c> - returns an instance of <c>xs:boolean</c></item>
         /// <item>A (signed) <c>int</c>, <c>long</c>, <c>short</c>, or <c>byte</c> - returns an instance of <c>xs:integer</c></item>
         /// <item>A <c>Char</c> - TODO ???????</item>

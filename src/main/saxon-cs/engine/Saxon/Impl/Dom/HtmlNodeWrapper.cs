@@ -1,16 +1,15 @@
 using System.Collections.Generic;
 using System.Xml;
 using HtmlAgilityPack;
-using java.lang;
-using net.sf.saxon.om;
-using net.sf.saxon.tree.iter;
-using net.sf.saxon.tree.util;
-using net.sf.saxon.tree.wrapper;
-using SaxonCS3.Impl.Dom;
+using Saxon.Ejava.lang;
+using Saxon.Hej.om;
+using Saxon.Hej.tree.iter;
+using Saxon.Hej.tree.util;
+using Saxon.Hej.tree.wrapper;
 
 namespace Saxon.Impl.Dom {
     /// <summary>
-    /// Implements net.sf.saxon.om.NodeInfo as a wrapper over an element, text, or comment node in
+    /// Implements Saxon.Hej.om.NodeInfo as a wrapper over an element, text, or comment node in
     /// the HtmlAgilityPack HTML document tree. The node always has a parent (which may be an element
     /// or document node), and is always part of a tree rooted at a document node.
     /// There are no namespaces, and names comprise a local name only. There are no
@@ -32,11 +31,11 @@ namespace Saxon.Impl.Dom {
 
         protected internal static HtmlNodeWrapper makeWrapper(HtmlNode node, HtmlDocumentWrapper docWrapper) {
             if ((node == null)) {
-                throw new java.lang.NullPointerException("HtmlNodeWrapper#makeWrapper: Node must not be null");
+                throw new Saxon.Ejava.lang.NullPointerException("HtmlNodeWrapper#makeWrapper: Node must not be null");
             }
 
             if ((docWrapper == null)) {
-                throw new java.lang.NullPointerException("HtmlNodeWrapper#makeWrapper: DocumentWrapper must not be null");
+                throw new Saxon.Ejava.lang.NullPointerException("HtmlNodeWrapper#makeWrapper: DocumentWrapper must not be null");
             }
 
             return makeWrapper(node, docWrapper, null, -1);
@@ -49,15 +48,15 @@ namespace Saxon.Impl.Dom {
             switch (node.NodeType) {
                 case HtmlNodeType.Element:
                     wrapper = new HtmlNodeWrapper(node, parent, index);
-                    wrapper.nodeKind = net.sf.saxon.type.Type.ELEMENT;
+                    wrapper.nodeKind = Saxon.Hej.type.Type.ELEMENT;
                     break;
                 case HtmlNodeType.Text:
                     wrapper = new HtmlNodeWrapper(node, parent, index);
-                    wrapper.nodeKind = net.sf.saxon.type.Type.TEXT;
+                    wrapper.nodeKind = Saxon.Hej.type.Type.TEXT;
                     break;
                 case HtmlNodeType.Comment:
                     wrapper = new HtmlNodeWrapper(node, parent, index);
-                    wrapper.nodeKind = net.sf.saxon.type.Type.COMMENT;
+                    wrapper.nodeKind = Saxon.Hej.type.Type.COMMENT;
                     break;
                 default:
                     throw new AssertionError();
@@ -81,7 +80,7 @@ namespace Saxon.Impl.Dom {
         }
 
         public override int GetHashCode() {
-            java.lang.StringBuilder buffer = new java.lang.StringBuilder(64);
+            Saxon.Ejava.lang.StringBuilder buffer = new Saxon.Ejava.lang.StringBuilder(64);
             generateId(buffer);
             return buffer.ToString().GetHashCode();
         }
@@ -99,8 +98,8 @@ namespace Saxon.Impl.Dom {
             return node.InnerText;
         }
 
-        public override net.sf.saxon.str.UnicodeString getUnicodeStringValue() {
-            return net.sf.saxon.str.StringView.tidy(node.InnerText);
+        public override Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
+            return Saxon.Hej.str.StringView.tidy(node.InnerText);
         }
 
         public override string getLocalPart() {
@@ -116,7 +115,7 @@ namespace Saxon.Impl.Dom {
         }
 
         public override string getDisplayName() {
-            return nodeKind == net.sf.saxon.type.Type.ELEMENT ? node.Name : "";
+            return nodeKind == Saxon.Hej.type.Type.ELEMENT ? node.Name : "";
         }
 
         public override NodeInfo getParent() {
@@ -148,7 +147,7 @@ namespace Saxon.Impl.Dom {
             return index;
         }
 
-        protected internal override AxisIterator iterateAttributes(net.sf.saxon.pattern.NodeTest nodeTest) {
+        protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
             List<NodeInfo> attList = new List<NodeInfo>();
             int indexPosition = 0;
             foreach (HtmlAttribute att in node.Attributes) {
@@ -160,7 +159,7 @@ namespace Saxon.Impl.Dom {
             return new NodeListIterator(attList);
         }
 
-        protected internal override AxisIterator iterateChildren(net.sf.saxon.pattern.NodeTest nodeTest) {
+        protected internal override AxisIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
             if (!node.HasChildNodes) {
                 return EmptyIterator.ofNodes();
             }
@@ -176,7 +175,7 @@ namespace Saxon.Impl.Dom {
             return new NodeListIterator(childList);
         }
 
-        protected internal override AxisIterator iterateSiblings(net.sf.saxon.pattern.NodeTest nodeTest, bool forwards) {
+        protected internal override AxisIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
             List<NodeInfo> siblingList = new List<NodeInfo>();
             int ix = getSiblingPosition();
             HtmlNode next = node;
@@ -203,12 +202,12 @@ namespace Saxon.Impl.Dom {
             return node.HasChildNodes;
         }
 
-        public override void generateId(java.lang.StringBuilder buffer) {
+        public override void generateId(Saxon.Ejava.lang.StringBuilder buffer) {
             Navigator.appendSequentialKey(this, buffer, true);
         }
 
-        public override void copy(net.sf.saxon.@event.Receiver @out, int copyOptions, net.sf.saxon.s9api.Location locationId) {
-            net.sf.saxon.@event.Receiver r = new net.sf.saxon.@event.NamespaceReducer(@out);
+        public override void copy(Saxon.Hej.@event.Receiver @out, int copyOptions, Saxon.Hej.s9api.Location locationId) {
+            Saxon.Hej.@event.Receiver r = new Saxon.Hej.@event.NamespaceReducer(@out);
             Navigator.copy(this, r, copyOptions, locationId);
         }
 

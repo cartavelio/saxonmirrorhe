@@ -12,9 +12,9 @@ namespace Saxon.Impl.Helpers {
 
     public class EnumeratorFromIterator<T> : IEnumerator<T>
     {
-        private java.util.Iterator<T> iter;
+        private Saxon.Ejava.util.Iterator<T> iter;
         internal T _Current = default(T);
-        public EnumeratorFromIterator(java.util.Iterator<T> iter) {
+        public EnumeratorFromIterator(Saxon.Ejava.util.Iterator<T> iter) {
             this.iter = iter;
         } 
         public bool MoveNext() {

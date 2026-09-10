@@ -1,6 +1,6 @@
 using System;
-using javax.xml.transform;
-using net.sf.saxon.trans;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Hej.trans;
 
 namespace Saxon.Api {
     /// <summary>
@@ -17,7 +17,7 @@ namespace Saxon.Api {
 
         // internal constructor: Create a new StaticError, wrapping a Saxon XPathException
 
-        internal StaticError(java.lang.Exception err)
+        internal StaticError(Saxon.Ejava.lang.Exception err)
         {
             if (err is XPathException)
             {

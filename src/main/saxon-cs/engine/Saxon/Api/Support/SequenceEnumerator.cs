@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using net.sf.saxon.om;
+using Saxon.Hej.om;
 
 namespace Saxon.Api.Support {
     /// <summary>
@@ -36,7 +36,7 @@ namespace Saxon.Api.Support {
         /// <summary>Move to the next item in the sequence</summary>
         /// <returns>true if there are more items in the sequence</returns>
         public bool MoveNext() {
-            net.sf.saxon.om.Item nextBaseItem = iter.next();
+            Saxon.Hej.om.Item nextBaseItem = iter.next();
             if (nextBaseItem == null) {
                 return false;
             }

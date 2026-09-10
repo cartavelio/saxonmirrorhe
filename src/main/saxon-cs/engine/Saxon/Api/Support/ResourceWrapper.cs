@@ -1,8 +1,8 @@
 namespace Saxon.Api.Support {
     public class ResourceWrapper : IResource {
 
-        private readonly net.sf.saxon.lib.Resource resource;
-        public ResourceWrapper(net.sf.saxon.lib.Resource resource) {
+        private readonly Saxon.Hej.lib.Resource resource;
+        public ResourceWrapper(Saxon.Hej.lib.Resource resource) {
             this.resource = resource;
         }
 
@@ -14,6 +14,6 @@ namespace Saxon.Api.Support {
 
         public string ContentType => resource.getContentType();
 
-        public net.sf.saxon.lib.Resource Implementation => resource;
+        public Saxon.Hej.lib.Resource Implementation => resource;
     }
 }
