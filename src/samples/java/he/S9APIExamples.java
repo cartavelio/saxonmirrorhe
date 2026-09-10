@@ -35,7 +35,11 @@ import static net.sf.saxon.s9api.streams.Steps.child;
 import static net.sf.saxon.s9api.streams.Steps.descendant;
 
 /**
- * Some examples to show how the Saxon S9API API should be used
+ * This class contains some example methods to show how the Saxon S9API API should be used.
+ *
+ * <p>It provides a main method allowing execution of the examples from the command line. The command
+ * expects a single argument giving the name of a test to be run; if omitted, all the tests are run.
+ * The command should be run with "samples" as the working directory.</p>
  */
 public class S9APIExamples {
 

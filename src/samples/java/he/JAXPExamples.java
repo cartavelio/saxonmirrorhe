@@ -69,7 +69,7 @@ import java.util.Properties;
 public class JAXPExamples {
 
     /**
-     * Method main
+     * Main entry point for command line execution. The command should be run in the "samples" directory.
      *
      * @param argv command line arguments.
      *             There is a single argument, the name of the test to be run. The default is "all",
