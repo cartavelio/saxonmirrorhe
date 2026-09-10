@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Base64BinaryValue;
 
 import java.io.BufferedInputStream;
@@ -21,6 +22,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.*;
 
 /**
  * A binary resource that might appear in a resource collection. Currently limited to 2G octets.
@@ -63,6 +67,73 @@ public class BinaryResource implements Resource {
         this.contentType = contentType;
         this.href = href;
         this.data = content;
+    }
+
+    @CSharpReplaceBody(code = "return System.Text.Encoding.GetEncoding(encoding).GetBytes(s);")
+    public static byte[] encode(String s, String encoding) throws XPathException {
+        CharsetEncoder encoder;
+        try {
+            encoder = Charset.forName(encoding).newEncoder();
+        } catch (Exception e) {
+            throw new XPathException("Unsupported encoding " + encoding);
+        }
+        encoder.onMalformedInput(CodingErrorAction.REPORT);
+
+        CharBuffer in = CharBuffer.wrap(s);
+        ByteBuffer out = null;
+        try {
+            out = encoder.encode(in);
+        } catch (MalformedInputException e) {
+            error("Malformed input in encoding:" + e);
+        } catch (UnmappableCharacterException e) {
+            error("Unmappable input in encoding:" + e);
+        } catch (CharacterCodingException e) {
+            error("Character code problem in encoding:" + e);
+        }
+        byte[] data = new byte[out.limit()];
+        System.arraycopy(out.array(), 0, data, 0, out.limit());
+        return data;
+    }
+
+    public static String decode(byte[] value, String encoding) throws XPathException {
+        return decode(value, 0, value.length, encoding);
+    }
+
+    @CSharpReplaceBody(code = "return new String(System.Text.Encoding.GetEncoding(encoding).GetChars(value, offset, len));")
+    public static String decode(byte[] value, int offset, int len, String encoding) throws XPathException {
+        CharsetDecoder decoder;
+        try {
+            decoder = Charset.forName(encoding).newDecoder();
+        } catch (Exception e) {
+            throw new XPathException("Unsupported encoding " + encoding);
+        }
+        decoder.onMalformedInput(CodingErrorAction.REPORT);
+        ByteBuffer in = ByteBuffer.wrap(value, offset, len);
+        char[] outChars = new char[len];
+        CharBuffer out = CharBuffer.wrap(outChars);
+        CoderResult res = decoder.decode(in, out, true);
+        if (res.isError()) {
+            if (res.isMalformed())
+                error("Malformed input found when decoding binary resource");
+            if (res.isUnmappable())
+                error("Unmappable input found when decoding binary resource");
+            error("Other error when decoding binary resource");
+        }
+        char[] resChars = new char[out.position()];
+        System.arraycopy(outChars, 0, resChars, 0, out.position());
+        return new String(resChars);
+    }
+
+    /**
+     * Throw an error
+     *
+     * @param message the error message
+     * @throws XPathException always
+     */
+
+    public static void error(String message)
+            throws XPathException {
+        throw new XPathException(message);
     }
 
     /**
