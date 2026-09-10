@@ -41,10 +41,15 @@ import java.util.function.Supplier;
 
 
 /**
- * A deep lookup expression is an expression of the form A??B.
+ * A deep lookup expression is an expression of the form A??KS. It handles all variants
+ * of the syntax except {@code A??*}, which is handled by a {@link DeepLookupAllExpression}.
+ * The key-specifier KS is treated as a general expression, so in a common case like $map?keyvalue,
+ * the expression will be a string literal "keyvalue".
  */
 
 public class DeepLookupExpression extends BinaryExpression {
+
+    private final LookupExpression.Modifier modifier;
 
     /**
      * Constructor
@@ -53,8 +58,9 @@ public class DeepLookupExpression extends BinaryExpression {
      * @param step  The right hand operand
      */
 
-    public DeepLookupExpression(Expression start, Expression step) {
+    public DeepLookupExpression(Expression start, LookupExpression.Modifier modifier, Expression step) {
         super(start, Token.QMARK_QMARK, step);
+        this.modifier = modifier;
     }
 
     @Override
@@ -163,7 +169,7 @@ public class DeepLookupExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public DeepLookupExpression copy(RebindingMap rebindings) {
-        DeepLookupExpression exp = new DeepLookupExpression(getLhsExpression().copy(rebindings), getRhsExpression().copy(rebindings));
+        DeepLookupExpression exp = new DeepLookupExpression(getLhsExpression().copy(rebindings), modifier, getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }

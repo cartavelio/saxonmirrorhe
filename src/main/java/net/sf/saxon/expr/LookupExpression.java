@@ -16,6 +16,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
@@ -29,6 +30,8 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 
@@ -47,6 +50,14 @@ public class LookupExpression extends BinaryExpression {
     protected boolean isSingleContainer = false;
     protected boolean isSingleEntry = false;
 
+    public enum Modifier {
+        CONTENT,
+        KEY,
+        VALUE,
+        ENTRY
+    }
+
+    protected Modifier modifier;
 
     /**
      * Constructor
@@ -56,8 +67,9 @@ public class LookupExpression extends BinaryExpression {
      *              sequence
      */
 
-    public LookupExpression(Expression start, Expression step) {
+    public LookupExpression(Expression start, Modifier modifier, Expression step) {
         super(start, Token.QMARK, step);
+        this.modifier = modifier;
     }
 
     @Override
@@ -248,7 +260,7 @@ public class LookupExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public LookupExpression copy(RebindingMap rebindings) {
-        LookupExpression exp = new LookupExpression(getLhsExpression().copy(rebindings), getRhsExpression().copy(rebindings));
+        LookupExpression exp = new LookupExpression(getLhsExpression().copy(rebindings), modifier, getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
         exp.isArrayLookup = isArrayLookup;
         exp.isMapLookup = isMapLookup;
@@ -298,7 +310,9 @@ public class LookupExpression extends BinaryExpression {
             return false;
         }
         LookupExpression p = (LookupExpression) other;
-        return getLhsExpression().isEqual(p.getLhsExpression()) && getRhsExpression().isEqual(p.getRhsExpression());
+        return getLhsExpression().isEqual(p.getLhsExpression())
+                && getRhsExpression().isEqual(p.getRhsExpression())
+                && modifier == p.modifier;
     }
 
     /**
@@ -307,7 +321,9 @@ public class LookupExpression extends BinaryExpression {
 
     @Override
     protected int computeHashCode() {
-        return "LookupExpression".hashCode() ^ getLhsExpression().hashCode() ^ getRhsExpression().hashCode();
+        return modifier.hashCode()
+                ^ getLhsExpression().hashCode()
+                ^ getRhsExpression().hashCode();
     }
 
     /**
@@ -346,6 +362,22 @@ public class LookupExpression extends BinaryExpression {
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("lookup", this);
+        String flag;
+        switch (modifier) {
+            case CONTENT:
+                flag = "c";
+                break;
+            case VALUE:
+                flag = "v";
+                break;
+            case KEY:
+                flag = "k";
+                break;
+            case ENTRY:
+                flag = "e";
+                break;
+        }
+        destination.emitAttribute("flags", "flag");
         getLhsExpression().export(destination);
         getRhsExpression().export(destination);
         destination.endElement();
@@ -386,94 +418,162 @@ public class LookupExpression extends BinaryExpression {
         public PullEvaluator elaborateForPull() {
             LookupExpression expr = (LookupExpression) getExpression();
             if (expr.isArrayLookup) {
-                if (expr.isSingleContainer && expr.isSingleEntry) {
-                    ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
-                    ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                switch (expr.modifier) {
+                    case CONTENT:
+                        if (expr.isSingleContainer && expr.isSingleEntry) {
+                            ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
+                            ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
 
-                    return context -> {
-                        ArrayItem array = (ArrayItem) lhs.eval(context);
-                        IntegerValue subscript = (IntegerValue) rhs.eval(context);
-                        int index = ArrayFunctionSet.checkSubscript(subscript, array.arrayLength());
-                        return array.get(index - 1).iterate();
-                    };
-                } else if (expr.isSingleEntry) {
-                    PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
-                    ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                            return context -> {
+                                ArrayItem array = (ArrayItem) lhs.eval(context);
+                                IntegerValue subscript = (IntegerValue) rhs.eval(context);
+                                int index = ArrayFunctionSet.checkSubscript(subscript, array.arrayLength());
+                                return array.get(index - 1).iterate();
+                            };
+                        } else if (expr.isSingleEntry) {
+                            PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                            ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
 
-                    return context -> {
-                        IntegerValue subscriptValue = (IntegerValue) rhs.eval(context);
-                        int subscript = subscriptValue.asSubscript() - 1;
-                        return MappingIterator.map(lhs.iterate(context), baseItem -> {
-                            ArrayItem array = (ArrayItem) baseItem;
-                            if (subscript >= 0 && subscript < array.arrayLength()) {
-                                return array.get(subscript).iterate();
-                            } else {
-                                // reuse the diagnostic logic
-                                ArrayFunctionSet.checkSubscript(subscriptValue, array.arrayLength());
-                                return null; // shouldn't happen
-                            }
-                        });
-                    };
-
-                } else {
-                    PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
-                    PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
-                    return context -> {
-                        SequenceIterator baseIterator = lhs.iterate(context);
-                        GroundedValue rhsValue;
-                        try {
-                            rhsValue = SequenceTool.toGroundedValue(rhs.iterate(context));
-                        } catch (UncheckedXPathException e) {
-                            throw e.getXPathException();
-                        }
-                        return MappingIterator.map(baseIterator, baseItem ->
-                                MappingIterator.map(rhsValue.iterate(), index -> {
+                            return context -> {
+                                IntegerValue subscriptValue = (IntegerValue) rhs.eval(context);
+                                int subscript = subscriptValue.asSubscript() - 1;
+                                return MappingIterator.map(lhs.iterate(context), baseItem -> {
                                     ArrayItem array = (ArrayItem) baseItem;
-                                    int subscript = ArrayFunctionSet.checkSubscript((IntegerValue) index, array.arrayLength()) - 1;
-                                    return array.get(subscript).iterate();
-                                })
-                        );
-                    };
+                                    if (subscript >= 0 && subscript < array.arrayLength()) {
+                                        return array.get(subscript).iterate();
+                                    } else {
+                                        // reuse the diagnostic logic
+                                        ArrayFunctionSet.checkSubscript(subscriptValue, array.arrayLength());
+                                        return null; // shouldn't happen
+                                    }
+                                });
+                            };
 
+                        } else {
+                            PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                            PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                            return context -> {
+                                SequenceIterator baseIterator = lhs.iterate(context);
+                                GroundedValue rhsValue;
+                                try {
+                                    rhsValue = SequenceTool.toGroundedValue(rhs.iterate(context));
+                                } catch (UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
+                                return MappingIterator.map(baseIterator, baseItem ->
+                                        MappingIterator.map(rhsValue.iterate(), index -> {
+                                            ArrayItem array = (ArrayItem) baseItem;
+                                            int subscript = ArrayFunctionSet.checkSubscript((IntegerValue) index, array.arrayLength()) - 1;
+                                            return array.get(subscript).iterate();
+                                        })
+                                );
+                            };
+
+                        }
+                    case KEY:
+                    case VALUE:
+                        if (expr.isSingleContainer && expr.isSingleEntry) {
+                            ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
+                            ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+
+                            return context -> {
+                                ArrayItem array = (ArrayItem) lhs.eval(context);
+                                IntegerValue subscript = (IntegerValue) rhs.eval(context);
+                                int index = ArrayFunctionSet.checkSubscript(subscript, array.arrayLength());
+                                GroundedValue value = array.get(index - 1);
+                                List<GroundedValue> members = new ArrayList<>(1);
+                                members.add(value);
+                                return new SimpleArrayItem(members).iterate();
+                            };
+                        } else if (expr.isSingleEntry) {
+                            PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                            ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+
+                            return context -> {
+                                IntegerValue subscriptValue = (IntegerValue) rhs.eval(context);
+                                int subscript = subscriptValue.asSubscript() - 1;
+                                return MappingIterator.map(lhs.iterate(context), baseItem -> {
+                                    ArrayItem array = (ArrayItem) baseItem;
+                                    if (subscript >= 0 && subscript < array.arrayLength()) {
+                                        return array.get(subscript).iterate();
+                                    } else {
+                                        // reuse the diagnostic logic
+                                        ArrayFunctionSet.checkSubscript(subscriptValue, array.arrayLength());
+                                        return null; // shouldn't happen
+                                    }
+                                });
+                            };
+
+                        } else {
+                            PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                            PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                            return context -> {
+                                SequenceIterator baseIterator = lhs.iterate(context);
+                                GroundedValue rhsValue;
+                                try {
+                                    rhsValue = SequenceTool.toGroundedValue(rhs.iterate(context));
+                                } catch (UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
+                                return MappingIterator.map(baseIterator, baseItem ->
+                                        MappingIterator.map(rhsValue.iterate(), index -> {
+                                            ArrayItem array = (ArrayItem) baseItem;
+                                            int subscript = ArrayFunctionSet.checkSubscript((IntegerValue) index, array.arrayLength()) - 1;
+                                            return array.get(subscript).iterate();
+                                        })
+                                );
+                            };
+
+                        }
+                    case ENTRY:
+                        throw new UnsupportedOperationException();
                 }
             } else if (expr.isMapLookup) {
-                if (expr.isSingleContainer && expr.isSingleEntry) {
-                    ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
-                    ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                switch (expr.modifier) {
+                    case CONTENT:
+                        if (expr.isSingleContainer && expr.isSingleEntry) {
+                            ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
+                            ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
 
-                    return context -> {
-                        MapItem map = (MapItem) lhs.eval(context);
-                        AtomicValue key = (AtomicValue) rhs.eval(context);
-                        return optionalGroundedValueIterator(map.get(key));
-                    };
+                            return context -> {
+                                MapItem map = (MapItem) lhs.eval(context);
+                                AtomicValue key = (AtomicValue) rhs.eval(context);
+                                return optionalGroundedValueIterator(map.get(key));
+                            };
 
-                } else if (expr.isSingleEntry) {
-                    PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
-                    ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
-                    return context -> {
-                        SequenceIterator baseIterator = lhs.iterate(context);
-                        AtomicValue key = (AtomicValue) rhs.eval(context);
-                        return MappingIterator.map(baseIterator, baseItem ->
-                                optionalGroundedValueIterator(((MapItem) baseItem).get(key)));
-                    };
+                        } else if (expr.isSingleEntry) {
+                            PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                            ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
+                            return context -> {
+                                SequenceIterator baseIterator = lhs.iterate(context);
+                                AtomicValue key = (AtomicValue) rhs.eval(context);
+                                return MappingIterator.map(baseIterator, baseItem ->
+                                        optionalGroundedValueIterator(((MapItem) baseItem).get(key)));
+                            };
 
-                } else {
-                    PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
-                    PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
-                    return context -> {
-                        SequenceIterator baseIterator = lhs.iterate(context);
-                        GroundedValue rhsVal;
-                        try {
-                            rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
-                        } catch (UncheckedXPathException e) {
-                            throw e.getXPathException();
+                        } else {
+                            PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+                            PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                            return context -> {
+                                SequenceIterator baseIterator = lhs.iterate(context);
+                                GroundedValue rhsVal;
+                                try {
+                                    rhsVal = SequenceTool.toGroundedValue(rhs.iterate(context));
+                                } catch (UncheckedXPathException e) {
+                                    throw e.getXPathException();
+                                }
+                                return MappingIterator.map(baseIterator, baseItem ->
+                                        MappingIterator.map(rhsVal.iterate(), index ->
+                                                optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) index))
+                                        ));
+                            };
+
                         }
-                        return MappingIterator.map(baseIterator, baseItem ->
-                                MappingIterator.map(rhsVal.iterate(), index ->
-                                        optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) index))
-                                ));
-                    };
-
+                    case KEY:
+                    case VALUE:
+                    case ENTRY:
+                    default:
+                        throw new UnsupportedOperationException();
                 }
 
             } else {
@@ -543,6 +643,7 @@ public class LookupExpression extends BinaryExpression {
                 };
 
             }
+            throw new UnsupportedOperationException();
         }
     }
 

@@ -2591,7 +2591,7 @@ public class XQueryParser extends XPathParser {
                 final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, type);
                 letClause.setRangeVariable(letBinding);
                 LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
-                LookupExpression lookup = new LookupExpression(tempRef, new StringLiteral("value"));
+                LookupExpression lookup = new LookupExpression(tempRef, LookupExpression.Modifier.CONTENT, new StringLiteral("value"));
                 letClause.initSequence(flwor, lookup);
                 declareRangeVariable(letBinding);
                 clauseList.add(letClause);

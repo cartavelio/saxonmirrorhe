@@ -2654,7 +2654,25 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("lookup", (loader, element) -> {
             Expression select = loader.getFirstChildExpression(element);
             Expression key = loader.getSecondChildExpression(element);
-            return new LookupExpression(select, key);
+            String flagsAtt = element.getAttributeValue(NamespaceUri.NULL, "flags");
+            LookupExpression.Modifier modifier = LookupExpression.Modifier.CONTENT;
+            if (flagsAtt != null) {
+                switch (flagsAtt) {
+                    case "c":
+                        modifier = LookupExpression.Modifier.CONTENT;
+                        break;
+                    case "e":
+                        modifier = LookupExpression.Modifier.ENTRY;
+                        break;
+                    case "v":
+                        modifier = LookupExpression.Modifier.VALUE;
+                        break;
+                    case "k":
+                        modifier = LookupExpression.Modifier.KEY;
+                        break;
+                }
+            }
+            return new LookupExpression(select, modifier, key);
         });
 
 

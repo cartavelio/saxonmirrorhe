@@ -1404,7 +1404,8 @@ public class XPathParser {
             result.setRequiredType(SequenceType.SINGLE_ITEM);
             result.setVariableQName(
                     new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "fm" + result.hashCode()));
-            collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
+            collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1)
+                    .makeFunctionCall(collection);
             result.setSequence(collection);
             declareRangeVariable(result);
             if (positionVar != null) {
@@ -1415,7 +1416,9 @@ public class XPathParser {
             temp.setRequiredType(requiredType);
             temp.setVariableQName(varQName);
             LocalVariableReference tempRef = new LocalVariableReference(result);
-            LookupExpression lookup = new LookupExpression(tempRef, new StringLiteral("value"));
+            LookupExpression lookup = new LookupExpression(tempRef,
+                                                           LookupExpression.Modifier.CONTENT,
+                                                           new StringLiteral("value"));
             temp.setSequence(lookup);
             declareRangeVariable(temp);
             result.setAction(temp);
@@ -3442,6 +3445,29 @@ public class XPathParser {
         t.setState(Tokenizer.OPERATOR_STATE);
 
         Expression result;
+        LookupExpression.Modifier modifier = LookupExpression.Modifier.CONTENT;
+        if (token == Token.NAME && t.peekAhead() == Token.COLONCOLON) {
+            switch (t.currentTokenValue) {
+                case "content":
+                    //modifier = LookupExpression.LookupModifier.CONTENT;
+                    break;
+                case "key":
+                    modifier = LookupExpression.Modifier.KEY;
+                    break;
+                case "value":
+                    modifier = LookupExpression.Modifier.VALUE;
+                    break;
+                case "entry":
+                    modifier = LookupExpression.Modifier.ENTRY;
+                    break;
+                default:
+                    grumble("Unknown modifier after '?' operator: " + t.currentTokenValue);
+            }
+
+            nextToken(); // swallow the '::'
+            nextToken();
+        }
+        token = t.currentToken;
         if (token == Token.NAME) {
             String name = t.currentTokenValue;
             if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {
@@ -3456,7 +3482,7 @@ public class XPathParser {
                 // only handle item types for now
                 result = lookupStar(lhs, requiredType.getPrimaryType(), deep);
             } else {
-                result = lookupName(lhs, name, deep);
+                result = lookupName(lhs, modifier, name, deep);
             }
         } else if (token == Token.NUMBER) {
             NumericValue number = NumericValue.parseNumber(t.currentTokenValue);
@@ -3464,7 +3490,7 @@ public class XPathParser {
                 grumble("Number following '" + (deep ? "??" : "?") + "' must be an integer");
             }
             nextToken();
-            result = makeLookupExpression(lhs, Literal.makeLiteral(number), deep);
+            result = makeLookupExpression(lhs, modifier, Literal.makeLiteral(number), deep);
         } else if (token == Token.MULT || token == Token.STAR) {
             nextToken();
             ItemType itemType = AnyItemType.getInstance();
@@ -3478,16 +3504,16 @@ public class XPathParser {
         } else if (token == Token.LPAR) {
             t.setState(Tokenizer.DEFAULT_STATE);
 
-            result = makeLookupExpression(lhs, parseParenthesizedExpression(), deep);
+            result = makeLookupExpression(lhs, modifier, parseParenthesizedExpression(), deep);
         } else if (token == Token.STRING_LITERAL) {
             checkLanguageVersion40();
-            result = lookupName(lhs, t.currentTokenValue, deep);
+            result = lookupName(lhs, modifier, t.currentTokenValue, deep);
             nextToken();
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40();
             offset = t.currentTokenStartOffset;
             StructuredQName varName = parseVariableName();
-            result = makeLookupExpression(lhs, resolveVariableReference(offset, varName), deep);
+            result = makeLookupExpression(lhs, modifier, resolveVariableReference(offset, varName), deep);
         } else {
             grumble("Unexpected " + Token.tokens[token] + " after '?'");
             return null;
@@ -3496,11 +3522,11 @@ public class XPathParser {
         return result;
     }
 
-    private Expression makeLookupExpression(Expression lhs, Expression rhs, boolean deep) {
+    private Expression makeLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep) {
         if (deep) {
-            return new DeepLookupExpression(lhs, rhs);
+            return new DeepLookupExpression(lhs, modifier, rhs);
         } else {
-            return new LookupExpression(lhs, rhs);
+            return new LookupExpression(lhs, modifier, rhs);
         }
     }
 
@@ -3514,11 +3540,11 @@ public class XPathParser {
      * @return the result of parsing the expression
      */
 
-    private Expression lookupName(Expression lhs, String rhs, boolean deep) {
+    private Expression lookupName(Expression lhs, LookupExpression.Modifier modifier, String rhs, boolean deep) {
         if (deep) {
-            return new DeepLookupExpression(lhs, new StringLiteral(rhs));
+            return new DeepLookupExpression(lhs, modifier, new StringLiteral(rhs));
         } else {
-            return new LookupExpression(lhs, new StringLiteral(rhs));
+            return new LookupExpression(lhs, modifier, new StringLiteral(rhs));
         }
     }
 
