@@ -23,7 +23,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
 /**
- * Implements the fn:analyze-string function defined in XPath 3.0.
+ * Implements the fn:analyze-string function first defined in XPath 3.0.
  */
 public class AnalyzeStringFn extends RegexFunction {
 

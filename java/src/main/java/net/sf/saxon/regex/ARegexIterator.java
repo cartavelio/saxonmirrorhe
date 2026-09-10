@@ -231,7 +231,7 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                 if (_matcher.getParenEnd(i) > _matcher.getParenEnd(0)) {
                     // The captured group is beyond the actual matching string, implying it was captured by lookahead.
                     // So we need to output a lookahead-group as the last thing before the end-match
-                    List<GroupAction> e = actions.get(lengthOfMatch - 1);
+                    List<GroupAction> e = actions.get(lengthOfMatch);
                     if (e == null) {
                         e = new ArrayList<>(4);
                         actions.put(lengthOfMatch, e);
