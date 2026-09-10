@@ -3857,9 +3857,9 @@ public class XPathParser {
                     }
                 } else {
                     if (!allowXPath40Syntax) {
-                        grumble("NameTestUnion syntax in item types requires 4.0 to be enabled");
+                        grumble("Union syntax in item types requires 4.0 to be enabled");
                     }
-                    nodeTest = NameTestUnion.withTests(tests);
+                    nodeTest = NameTestUnion.of(tests);
                 }
                 if (t.currentToken == Token.RPAREN) {
                     nextToken();
@@ -3895,13 +3895,8 @@ public class XPathParser {
                                 (nodeKind == Type.ATTRIBUTE && schemaType == AnySimpleType.getInstance())) {
                             result = nodeTest;
                         } else {
-                            NodeTest typeTest = new ContentTypeTest(nodeKind, AnyQNameTest.getInstance(), schemaType, nillable, env.getConfiguration());
-                            if (nodeTest instanceof NodeKindTest) {
-                                // this represents element(*,T) or attribute(*,T)
-                                result = typeTest;
-                            } else {
-                                result = new CombinedNodeTest(nodeTest, OperatorSymbol.INTERSECT, typeTest);
-                            }
+                            result = new ContentTypeTest(
+                                    nodeKind, nodeTest.getQNameTest(), schemaType, nillable, env.getConfiguration());
                         }
                     } else {
                         grumble("Unexpected " + t.currentToken + " after ',' in SequenceType");

@@ -46,7 +46,7 @@ public class NameTestUnion extends NodeTest {
         this.nodeKind = nodeKind;
     }
 
-    public static NameTestUnion withTests(List<NodeTest> tests) {
+    public static NameTestUnion of(List<NodeTest> tests) {
         assert !tests.isEmpty();
         int nodeKind = tests.get(0).getPrimitiveType();
         assert nodeKind == Type.ELEMENT || nodeKind == Type.ATTRIBUTE;
