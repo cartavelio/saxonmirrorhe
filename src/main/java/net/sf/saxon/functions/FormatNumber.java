@@ -8,7 +8,9 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
@@ -428,7 +430,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                                 grumble("Grouping separator cannot be adjacent to decimal separator");
                             }
                             if (fractionalPartPositions == null) {
-                                fractionalPartPositions = new ArrayList<Integer>(3);
+                                fractionalPartPositions = new ArrayList<>(3);
                             }
                             if (fractionalPartPositions.contains(maxFractionPartSize)) {
                                 grumble("Sub-picture cannot contain adjacent grouping separators");
@@ -621,7 +623,6 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                 }
 
             } else if (value instanceof BigDecimalValue) {
-                //noinspection RedundantCast
                 formatDecimal(((BigDecimalValue) value).getDecimalValue(), sb);
             }
 
@@ -864,7 +865,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
 
         if (picture != null) {
             // Decimal format and picture known statically
-            CharSequence result = formatNumber(number, subPictures, decimalSymbols);
+            String result = formatNumber(number, subPictures, decimalSymbols);
             return new StringItem(result);
 
         } else {
@@ -941,7 +942,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             DecimalSymbols dfs = new DecimalSymbols(HostLanguage.XSLT, 31);
             dfs.setInfinity("INF");
             SubPicture[] pics = getSubPictures("0.0##########################e0", dfs);
-            return formatNumber(value, pics, dfs).toString();
+            return formatNumber(value, pics, dfs);
         } catch (XPathException e) {
             return value.getStringValue();
         }
@@ -962,6 +963,18 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         copy.decimalSymbols = decimalSymbols;
         copy.subPictures = subPictures;
         return copy;
+    }
+
+    /**
+     * Get a function to format a double as a string using a supplied picture
+     * @param picture the supplied picture
+     * @return a function that converts a double to a string
+     * @throws XPathException if the picture is invalid
+     */
+    public static java.util.function.Function<Double, String> getFormatter(String picture) throws XPathException {
+        DecimalSymbols symbols = new DecimalSymbols(HostLanguage.XSLT, 30);
+        SubPicture[] subPictures = getSubPictures(picture, symbols);
+        return dbl -> formatNumber(new DoubleValue(dbl), subPictures, symbols);
     }
 
 
