@@ -254,7 +254,11 @@ public class Token {
         }
 
         public String toString() {
-            return ("<?" + super.toString() + "?>");
+            return ("<?" + getContent() + "?>");
+        }
+
+        public String getContent() {
+            return super.toString();
         }
 
     }

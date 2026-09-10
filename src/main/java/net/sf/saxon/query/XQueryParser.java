@@ -3438,7 +3438,7 @@ public class XQueryParser extends XPathParser {
     protected Expression parseDirectPIConstructor() throws XPathException {
 
         Token.DirectProcessingInstructionConstructor token = (Token.DirectProcessingInstructionConstructor)t.currentToken;
-        String body = token.toString();
+        String body = token.getContent();
         int firstSpace = -1;
         for (int i=0; i<body.length(); i++) {
             if (Whitespace.isWhite(body.charAt(i))) {
