@@ -98,6 +98,20 @@ val bundledFilteredSources = tasks.register<Sync>("bundleFilteredSources") {
     from(filteredSourcesDir)
     from(saxonCFilteredSources)
     duplicatesStrategy = DuplicatesStrategy.WARN
+
+    doLast {
+      saxonBuild.patchReleaseInfo(
+          layout.buildDirectory.file("tmp/bundled-filtered-sources/net/sf/saxon/Version.java").get().asFile,
+          "${findProperty("saxonVersion")!!}",
+          "${findProperty("saxonMajorReleaseDate")!!}")
+      val verifier = layout.buildDirectory.file("tmp/bundled-filtered-sources/com/saxonica/config/JavaVerifier.java").get().asFile
+      val dsaPublicKey = findProperty("dsaPublicKey")?.toString()
+      val ed25519PublicKey = findProperty("ed25519PublicKey")?.toString()
+      if (verifier.exists()) {
+        saxonBuild.patchKey(verifier, "dsa", dsaPublicKey)
+        saxonBuild.patchKey(verifier, "ed25519", ed25519PublicKey)
+      }
+    }
 }
 
 val preprocessJava = tasks.register<PreprocessSourcesTask>("preprocessJava") {
