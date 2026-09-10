@@ -6,9 +6,10 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.*;
+import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
@@ -50,6 +51,15 @@ public class Assign extends Instruction implements BindingReference {
         this.binding = (GlobalVariable) binding;
     }
 
+    public Expression typeCheck(ExpressionVisitor visitor,
+                                ContextItemStaticInfo contextInfo) throws XPathException {
+        typeCheckChildren(visitor, contextInfo);
+        TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
+        selectOp.setChildExpression(
+                tc.staticTypeCheck(getSelectExpr(), binding.getRequiredType(), role, visitor));
+        return this;
+    }
 
     @Override
     public int getIntrinsicDependencies() {
