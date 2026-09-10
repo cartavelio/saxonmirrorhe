@@ -831,6 +831,7 @@ public class QT3TestDriverHE extends TestDriver {
             assertXpc.declareNamespace("math", NamespaceConstant.MATH);
             assertXpc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
             assertXpc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
+            assertXpc.declareNamespace("err", NamespaceConstant.ERR);
             assertXpc.declareNamespace("j", NamespaceConstant.FN);
             assertXpc.declareNamespace("file", NamespaceUri.EXPATH_FILE.toString());
             assertXpc.declareNamespace("bin", NamespaceUri.EXPATH_BINARY.toString());
