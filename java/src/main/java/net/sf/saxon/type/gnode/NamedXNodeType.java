@@ -466,24 +466,16 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
      */
     @Override
     public String getBasicAlphaCode() {
-        switch (kind) {
-            case Type.ELEMENT:
-                return "NE";
-            case Type.ATTRIBUTE:
-                return "NA";
-            case Type.TEXT:
-                return "NT";
-            case Type.COMMENT:
-                return "NC";
-            case Type.PROCESSING_INSTRUCTION:
-                return "NP";
-            case Type.DOCUMENT:
-                return "ND";
-            case Type.NAMESPACE:
-                return "NN";
-            default:
-                return "*";
-        }
+        return switch (kind) {
+            case Type.ELEMENT -> "NE";
+            case Type.ATTRIBUTE -> "NA";
+            case Type.TEXT -> "NT";
+            case Type.COMMENT -> "NC";
+            case Type.PROCESSING_INSTRUCTION -> "NP";
+            case Type.DOCUMENT -> "ND";
+            case Type.NAMESPACE -> "NN";
+            default -> "*";
+        };
     }
 
     /**
