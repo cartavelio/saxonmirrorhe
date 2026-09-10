@@ -6,6 +6,9 @@
     to perform simple operations such as examining the content of a document, renaming or deletion of 
     selected elements in the document, or performing simple XSLT transformation and XSD validation.</p>
   
+  <p>The Gizmo tool is available in SaxonJ only.</p>
+  
+  <div class="javaonly">
     <p>The utility can be started from the command line using the Java entry-point class
   <code>net.sf.saxon.Gizmo</code>, and its actions are controlled by sub-commands entered one per line, either
       on the standard input, or in a file named in the <code>-q</code> option.</p>
@@ -54,8 +57,10 @@
    <nav>
       <ul/>
    </nav>
+    
+  </div>
   
-  <section id="call" title="The call command">
+  <section id="call" title="The call command" class="javaonly">
     <h1>The call command</h1>
     
     <p><i>Syntax:</i></p>
@@ -68,7 +73,7 @@
     
   </section>
   
-  <section id="copy" title="The copy command">
+  <section id="copy" title="The copy command" class="javaonly">
     <h1>The copy command</h1>
     
     <p><i>Syntax:</i></p>
@@ -90,7 +95,7 @@
     
   </section>
    
-   <section id="delete" title="The delete command">
+   <section id="delete" title="The delete command" class="javaonly">
      <h1>The delete command</h1>
      
       <p><i>Syntax:</i></p>
@@ -120,7 +125,7 @@
      
    </section>
   
-  <section id="follow" title="The follow command">
+  <section id="follow" title="The follow command" class="javaonly">
     <h1>The follow command</h1>
     
     <p><i>Syntax:</i></p>
@@ -160,7 +165,7 @@
     
   </section>
   
-  <section id="help" title="The help command">
+  <section id="help" title="The help command" class="javaonly">
     <h1>The help command</h1>
     
     <p><i>Syntax:</i></p>
@@ -171,7 +176,7 @@
     
   </section>
    
-  <section id="list" title="The list command">
+  <section id="list" title="The list command" class="javaonly">
     <h1>The list command</h1>
     
     <p><i>Syntax:</i></p>
@@ -201,7 +206,7 @@
     
   </section> 
   
-  <section id="load" title="The load command">
+  <section id="load" title="The load command" class="javaonly">
     <h1>The load command</h1>
     
     <p><i>Syntax:</i></p>
@@ -217,7 +222,7 @@
       
   </section> 
   
-  <section id="namespace" title="The namespace command">
+  <section id="namespace" title="The namespace command" class="javaonly">
     <h1>The namespace command</h1>
     
     <p><i>Syntax:</i></p>
@@ -234,7 +239,7 @@
     
   </section>
   
-  <section id="paths" title="The paths command">
+  <section id="paths" title="The paths command" class="javaonly">
     <h1>The paths command</h1>
     
     <p><i>Syntax:</i></p>
@@ -271,7 +276,7 @@
     
   </section>
   
-  <section id="precede" title="The precede command">
+  <section id="precede" title="The precede command" class="javaonly">
     <h1>The precede command</h1>
     
     <p><i>Syntax:</i></p>
@@ -317,7 +322,7 @@
     
   </section>
   
-  <section id="prefix" title="The prefix command">
+  <section id="prefix" title="The prefix command" class="javaonly">
     <h1>The prefix command</h1>
     
     <p><i>Syntax:</i></p>
@@ -388,7 +393,7 @@
     
   </section>
   
-  <section id="quit" title="The quit command">
+  <section id="quit" title="The quit command" class="javaonly">
     <h1>The quit command</h1>
     
     <p><i>Syntax:</i></p>
@@ -404,7 +409,7 @@
    
    
    
-   <section id="rename" title="The rename command">
+   <section id="rename" title="The rename command" class="javaonly">
       <h1>The rename command</h1>
      
       <p><i>Syntax:</i></p>
@@ -429,7 +434,7 @@
      
    </section>
   
-  <section id="replace" title="The replace command">
+  <section id="replace" title="The replace command" class="javaonly">
     <h1>The replace command</h1>
     
     <p><i>Syntax:</i></p>
@@ -506,7 +511,7 @@
     
   </section>
   
-  <section id="save" title="The save command">
+  <section id="save" title="The save command" class="javaonly">
     <h1>The save command</h1>
     
     <p><i>Syntax:</i></p>
@@ -531,7 +536,7 @@
     
   </section>
   
-  <section id="schema" title="The schema command">
+  <section id="schema" title="The schema command" class="javaonly">
     <h1>The schema command</h1>
     
     <p><i>Syntax:</i></p>
@@ -549,7 +554,7 @@
     
   </section>
    
-  <section id="set" title="The set command">
+  <section id="set" title="The set command" class="javaonly">
     <h1>The set command</h1>
     
     <p><i>Syntax:</i></p>
@@ -576,7 +581,7 @@
     
   </section>
 
-  <section id="show" title="The show command">
+  <section id="show" title="The show command" class="javaonly">
     <h1>The show command</h1>
     
     <p><i>Syntax:</i></p>
@@ -614,7 +619,7 @@
     
   </section> 
    
-   <section id="strip" title="The strip command">
+   <section id="strip" title="The strip command" class="javaonly">
       <h1>The strip command</h1>
      
       <p><i>Syntax:</i></p>
@@ -626,7 +631,7 @@
      
    </section>
  
-  <section id="suffix" title="The suffix command">
+  <section id="suffix" title="The suffix command" class="javaonly">
     <h1>The suffix command</h1>
     
     <p><i>Syntax:</i></p>
@@ -646,7 +651,7 @@
     
   </section>
   
-  <section id="transform" title="The transform command">
+  <section id="transform" title="The transform command" class="javaonly">
     <h1>The transform command</h1>
     
     <p><i>Syntax:</i></p>
@@ -661,7 +666,7 @@
     
   </section> 
   
-  <section id="undo" title="The undo command">
+  <section id="undo" title="The undo command" class="javaonly">
     <h1>The undo command</h1>
     
     <p><i>Syntax:</i></p>
@@ -692,7 +697,7 @@
     
   </section> 
   
-  <section id="update" title="The update command">
+  <section id="update" title="The update command" class="javaonly">
     <h1>The update command</h1>
     
     <p><i>Syntax:</i></p>
@@ -771,7 +776,7 @@
     
   </section>
   
-  <section id="validate" title="The validate command">
+  <section id="validate" title="The validate command" class="javaonly">
     <h1>The validate command</h1>
     
     <p><i>Syntax:</i></p>
