@@ -314,22 +314,24 @@ public class AttributeImpl extends NodeImpl {
     /**
      * Rename this node
      *
-     * @param newNameCode the NamePool code of the new name
+     * @param newName the new name
      * @param inherit true if any new namespace binding is to be inherited
      */
 
     @Override
-    public void rename(NodeName newNameCode, boolean inherit) {
+    public void rename(NodeName newName, boolean inherit) {
         // The attribute node itself is transient; we need to update the attribute collection held in the parent
         ElementImpl owner = (ElementImpl)getRawParent();
         if (owner != null && !isDeleted()) {
             AttributeInfo att = getAttributeInfo();
+            int properties = att.getProperties() & ~(ReceiverOption.IS_ID | ReceiverOption.IS_IDREF);
             owner.setAttributeInfo(getSiblingPosition(),
-                                   new AttributeInfo(newNameCode, BuiltInAtomicType.UNTYPED_ATOMIC, att.getValue(), att.getLocation(), att.getProperties()));
-            NamespaceUri newURI = newNameCode.getNamespaceUri();
+                                   new AttributeInfo(newName, BuiltInAtomicType.UNTYPED_ATOMIC,
+                                                     att.getValue(), att.getLocation(), properties));
+            NamespaceUri newURI = newName.getNamespaceUri();
             if (!newURI.isEmpty()) {
                 // new attribute name is in a namespace
-                String newPrefix = newNameCode.getPrefix();
+                String newPrefix = newName.getPrefix();
                 NamespaceBinding newBinding = new NamespaceBinding(newPrefix, newURI);
                 NamespaceUri oldURI = ((ElementImpl) getRawParent()).getURIForPrefix(newPrefix, false);
                 if (oldURI == null) {

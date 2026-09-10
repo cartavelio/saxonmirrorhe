@@ -219,11 +219,7 @@ public class LinkedTreeBuilder extends Builder {
 
         namespaceStack.push(namespaces);
 
-        boolean isTopWithinEntity = false;
-        //#if CSHARP==false
-        isTopWithinEntity = location instanceof ReceivingContentHandler.LocalLocator &&
-                      ((ReceivingContentHandler.LocalLocator) location).levelInEntity == 0;
-        //#endif
+        boolean isTopWithinEntity = (properties & ReceiverOption.TOP_IN_ENTITY) != 0;
 
         AttributeInfo xmlId = suppliedAttributes.get(NamespaceUri.XML, "id");
         if (xmlId != null && Whitespace.containsWhitespace(StringTool.codePoints(xmlId.getValue()))) {
