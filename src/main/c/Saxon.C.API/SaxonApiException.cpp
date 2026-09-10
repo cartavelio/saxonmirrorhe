@@ -169,7 +169,9 @@ const char *SaxonApiException::getMessage() {
 
 const char *SaxonApiException::getMessageWithErrorCode() {
 
-  if (ec_message.empty() && !cppException) {
+  if(cppException) {
+    return getMessage();
+  } else if (ec_message.empty()) {
     allocFn fn = operator new;
     char *tempm = nullptr;
     if (isStaticError) {
