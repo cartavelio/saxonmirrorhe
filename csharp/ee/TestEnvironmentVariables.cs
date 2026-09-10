@@ -40,7 +40,6 @@ class TestEnvironmentVariables {
     public void TestResolver() {
         try {
             Processor p = new ();
-            p.
             XPathCompiler c = p.NewXPathCompiler();
             XdmAtomicValue v = (XdmAtomicValue)c.EvaluateSingle("environment-variable('HOME')", null);
             Assert.That(v.ToString().StartsWith("/Users"));
