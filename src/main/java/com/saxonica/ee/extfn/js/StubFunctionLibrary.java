@@ -20,6 +20,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.SequenceType;
@@ -173,7 +174,7 @@ public class StubFunctionLibrary implements FunctionLibrary {
     }
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
         return signatures.containsKey(functionName);
     }
 

@@ -178,7 +178,7 @@ public class SchemaManagerImpl extends SchemaManager {
 
     @Override
     public synchronized XsdSchema importComponents(Source source) throws SaxonApiException {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
 //        try {
 //            processor.getUnderlyingConfiguration().importComponents(source);    // TODO: make it local
 //        } catch (XPathException err) {
