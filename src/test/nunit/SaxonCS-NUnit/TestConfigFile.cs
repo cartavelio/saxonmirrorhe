@@ -288,9 +288,10 @@ namespace SaxonCS_NUnit {
         public void TestBaseUriOfAttribute() {
             try {
                 Processor processor = new ();
-                XmlReaderSettings settings = new ();
-                settings.DtdProcessing = DtdProcessing.Parse;
-                var source = File.OpenRead(ConfigTest.DATA_DIR + "book-wrapper.xml");
+                // XmlReaderSettings settings = new () {
+                //     DtdProcessing = DtdProcessing.Parse
+                // };
+                FileStream source = File.OpenRead(ConfigTest.DATA_DIR + "book-wrapper.xml");
                 DocumentBuilder builder = processor.NewDocumentBuilder();
                 builder.BaseUri = new Uri(ConfigTest.DataDirUri, "book-wrapper.xml");
                 XdmNode d = builder.Build(source);

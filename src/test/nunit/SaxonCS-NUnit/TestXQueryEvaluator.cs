@@ -974,7 +974,7 @@ namespace SaxonCS_NUnit {
                 Processor p = new ();
                 XQueryCompiler c = p.NewXQueryCompiler();
                 XQueryEvaluator eval = c.Compile("doc('file:///a.xml')/z").Load();
-                eval.XmlDocumentResolver = (uri, props) => new TextResource("<z>17</z>", uri);
+                eval.XmlDocumentResolver = (request) => new TextResource("<z>17</z>", request.Uri);
 
                 XdmItem result = eval.First();
                 Assert.AreEqual("17", result.StringValue);

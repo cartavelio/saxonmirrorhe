@@ -73,12 +73,12 @@ namespace SaxonCS_NUnit {
                 return this;
             }
 
-            public override StreamSource DereferenceLocation(Uri baseUri, string href, string nature, string purpose) {
-                return resolver.DereferenceLocation(baseUri, href, nature, purpose);
+            public override IResource DereferenceLocation(ResourceRequest request) {
+                return resolver.DereferenceLocation(request);
             }
 
-            public override StreamSource DereferenceNamespace(string namespaceUri, string nature, string purpose) {
-                return resolver.DereferenceNamespace(namespaceUri, nature, purpose);
+            public override IResource DereferenceNamespace(string namespaceUri, ResourceRequest request) {
+                return resolver.DereferenceNamespace(namespaceUri, request);
             }
 
             public override void SetFeature(ResolverFeature feature, object value) {
