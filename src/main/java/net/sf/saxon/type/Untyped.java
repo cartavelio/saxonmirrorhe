@@ -641,7 +641,7 @@ public enum Untyped implements ComplexType {
      */
 
     @Override
-    public net.sf.saxon.om.Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         return UserComplexType.getComponentAsFunction(this);
     }
 

@@ -8,7 +8,7 @@ import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -83,9 +83,9 @@ public class HighestOrLowest extends SystemFunction {
             comparer = new DescendingComparer(comparer);
         }
 
-        Function keyFn;
+        FunctionItem keyFn;
         if (arguments.length >= 3) {
-            keyFn = (Function) arguments[2].head();
+            keyFn = (FunctionItem) arguments[2].head();
         } else {
             keyFn = SystemFunction.makeFunction("data", getRetainedStaticContext(), 1);
         }

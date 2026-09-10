@@ -1469,7 +1469,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * (those with particular context dependencies) may be unsuitable for dynamic calling.
      */
 
-    public Function getSystemFunction(StructuredQName name, int arity)  {
+    public FunctionItem getSystemFunction(StructuredQName name, int arity)  {
         try {
             if (staticContextForSystemFunctions == null) {
                 staticContextForSystemFunctions = new IndependentContext(this);
@@ -3793,7 +3793,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws UnsupportedOperationException except in subclasses
      */
 
-    public Map<String, Function> makeMethodMap(Class<?> javaClass, String required) {
+    public Map<String, FunctionItem> makeMethodMap(Class<?> javaClass, String required) {
         throw new UnsupportedOperationException();
     }
 

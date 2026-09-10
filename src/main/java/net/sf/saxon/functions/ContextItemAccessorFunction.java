@@ -39,7 +39,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
      */
 
     @Override
-    public Function bindContext(XPathContext context) throws XPathException {
+    public FunctionItem bindContext(XPathContext context) throws XPathException {
         final Item ci = context.getContextItem();
         if (ci == null) {
             Callable callable = new CallableDelegate((context1, arguments) -> {

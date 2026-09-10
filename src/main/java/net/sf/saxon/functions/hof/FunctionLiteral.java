@@ -13,7 +13,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.AbstractFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
@@ -35,7 +35,7 @@ public class FunctionLiteral extends Literal {
      * @param value     the value of this literal
      */
 
-    public FunctionLiteral(Function value) {
+    public FunctionLiteral(FunctionItem value) {
         super(value);
     }
 
@@ -46,8 +46,8 @@ public class FunctionLiteral extends Literal {
      */
 
     @Override
-    public Function getGroundedValue() {
-        return (Function) super.getGroundedValue();
+    public FunctionItem getGroundedValue() {
+        return (FunctionItem) super.getGroundedValue();
     }
 
 
@@ -197,7 +197,7 @@ public class FunctionLiteral extends Literal {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        Function f = getGroundedValue();
+        FunctionItem f = getGroundedValue();
         if (f instanceof UserFunction) {
             new UserFunctionReference((UserFunction) f).export(out);
         } else {

@@ -11,7 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
@@ -106,7 +106,7 @@ public class OnDemandFunctionSet implements FunctionLibrary {
     }
 
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         boolean match = load(functionName, null);
         if (match) {
             return library.getFunctionItem(functionName, staticContext);

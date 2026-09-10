@@ -18,7 +18,7 @@ import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.PushableFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UniStringConsumer;
@@ -54,7 +54,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
 
     private static class Options {
         public boolean indent;
-        public Function numberFormatter;
+        public FunctionItem numberFormatter;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
             o.indent = ((BooleanValue) options.get("indent").head()).getBooleanValue();
             Sequence format = options.get("number-formatter");
             if (format != null) {
-                o.numberFormatter = (Function)format.head();
+                o.numberFormatter = (FunctionItem)format.head();
             }
             return o;
         } else {

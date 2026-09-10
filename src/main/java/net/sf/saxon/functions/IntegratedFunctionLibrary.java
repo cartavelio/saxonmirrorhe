@@ -11,7 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.lib.ExtensionFunctionCall;
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -97,7 +97,7 @@ public class IntegratedFunctionLibrary implements FunctionLibrary {
      *          that is private
      */
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         ExtensionFunctionDefinition defn = functions.get(functionName.getComponentName());
         if (defn == null) {
             return null;

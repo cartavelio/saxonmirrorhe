@@ -129,7 +129,7 @@ public abstract class JPConverter {
         itemTypeMap.put(TreeInfo.class, NodeKindTest.DOCUMENT);
         itemTypeMap.put(MapItem.class, MapType.getInstance());
         itemTypeMap.put(ArrayItem.class, ArrayItemType.getInstance());
-        itemTypeMap.put(Function.class, AnyFunctionType.getInstance());
+        itemTypeMap.put(FunctionItem.class, AnyFunctionType.getInstance());
         itemTypeMap.put(AtomicValue.class, BuiltInAtomicType.ANY_ATOMIC);
         //itemTypeMap.put(UntypedAtomicValue.class, BuiltInAtomicType.UNTYPED_ATOMIC);
     }

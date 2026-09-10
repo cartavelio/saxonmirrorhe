@@ -7,6 +7,7 @@
 
 package net.sf.saxon.style;
 
+import net.sf.saxon.expr.DefaultedArgumentExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.SuppliedParameterReference;
@@ -106,7 +107,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
                         }
                         Expression defaultVal = sourceBinding.getSelectExpression();
                         if (defaultVal == null && !sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
-                            defaultVal = Literal.makeEmptySequence();
+                            defaultVal = new DefaultedArgumentExpression();
                         }
                         ufp.setDefaultValueExpression(defaultVal);
                     }
@@ -216,9 +217,13 @@ public class XSLLocalParam extends XSLGeneralVariable {
         if (getParent() instanceof XSLFunction) {
             if (getCompilation().getCompilerInfo().getXsltVersion() >= 40 && !isRequiredParam()) {
                 sourceBinding.handleSequenceConstructor(exec, decl);
+                Expression selectExpression = sourceBinding.getSelectExpression();
+                if (selectExpression == null) {
+                    selectExpression = Literal.makeEmptySequence();
+                }
                 int pos = getParameterPosition();
                 ((XSLFunction)getParent()).getCompiledFunction().getParameterDefinitions()[pos]
-                        .setDefaultValueExpression(sourceBinding.getSelectExpression());
+                        .setDefaultValueExpression(selectExpression);
             }
             return null;
         } else {

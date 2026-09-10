@@ -345,7 +345,7 @@ public class UType {
             return fromTypeCode(((NodeInfo) item).getNodeKind());
         } else if (item instanceof AtomicValue) {
             return ((AtomicValue)item).getUType();
-        } else if (item instanceof Function) {
+        } else if (item instanceof FunctionItem) {
             return UType.FUNCTION;
         } else if (item.getGenre() == Genre.EXTERNAL) {
             return UType.EXTENSION;

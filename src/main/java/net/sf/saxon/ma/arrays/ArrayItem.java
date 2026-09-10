@@ -9,7 +9,7 @@ package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.zeno.ZenoChain;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
@@ -29,7 +29,7 @@ import net.sf.saxon.z.IntSet;
  * are subsequently converted to an {@code ImmutableArrayItem}, then future evaluations of the same
  * expression will produce an {@code ImmutableArrayItem} directly.</p>
  */
-public abstract class ArrayItem implements Function {
+public abstract class ArrayItem implements FunctionItem {
 
     /**
      * Ask whether this function item is an array

@@ -9,7 +9,7 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Sort_2;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -37,7 +37,7 @@ public class Sort_3 extends Sort_2 {
         Sequence input = arguments[0];
         final ArrayList<ItemToBeSorted> inputList = new ArrayList<>();
         int i = 0;
-        Function key = (Function) arguments[2].head();
+        FunctionItem key = (FunctionItem) arguments[2].head();
         SequenceIterator iterator = input.iterate();
         Item item;
         while ((item = iterator.next()) != null) {

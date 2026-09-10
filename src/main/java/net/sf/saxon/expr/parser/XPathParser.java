@@ -3649,9 +3649,8 @@ public class XPathParser {
             while (true) {
                 int peek = t.peekAhead();
                 Expression arg;
-                if (t.currentToken == Token.NAME && (peek == Token.COLON || peek == Token.ASSIGN)) {
+                if (t.currentToken == Token.NAME && peek == Token.ASSIGN) {
                     // keyword argument
-                    // TODO: decide whether to use COLON or ASSIGN, not both...
                     StructuredQName paramName = qNameParser.parse(t.currentTokenValue, NamespaceUri.NULL);
                     nextToken(); // read the operator
                     nextToken(); // position on the expression giving the value
@@ -3774,7 +3773,7 @@ public class XPathParser {
         StaticContext env = parser.getStaticContext();
         FunctionLibrary lib = env.getFunctionLibrary();
         SymbolicName.F sn = new SymbolicName.F(name, args.length);
-        Function target = lib.getFunctionItem(sn, env);
+        FunctionItem target = lib.getFunctionItem(sn, env);
         if (target == null) {
             // This will not happen in XQuery; instead, a dummy function will be created in the
             // UnboundFunctionLibrary in case it's a forward reference to a function not yet compiled
@@ -4024,7 +4023,7 @@ public class XPathParser {
             assert functionName != null;
         }
 
-        Function fcf = null;
+        FunctionItem fcf = null;
         try {
             FunctionLibrary lib = env.getFunctionLibrary();
             SymbolicName.F sn = new SymbolicName.F(functionName, arity);
@@ -4056,7 +4055,7 @@ public class XPathParser {
         return ref;
     }
 
-    private static Expression makeNamedFunctionReference(StructuredQName functionName, Function fcf) {
+    private static Expression makeNamedFunctionReference(StructuredQName functionName, FunctionItem fcf) {
         if (fcf instanceof UserFunction && !functionName.hasURI(NamespaceUri.XSLT)) {
             // This case is treated specially because a UserFunctionReference in XSLT can be redirected
             // at link time to an overriding function. However, this doesn't apply to xsl:original

@@ -68,7 +68,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      * @return the target function, or null if unknown
      */
     @Override
-    public Function getTargetFunction(XPathContext context) {
+    public FunctionItem getTargetFunction(XPathContext context) {
         return null;
     }
 

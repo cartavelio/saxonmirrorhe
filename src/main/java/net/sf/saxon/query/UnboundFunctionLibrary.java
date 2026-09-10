@@ -16,7 +16,7 @@ import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -93,7 +93,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
      *         function item; or null if the function does not exist
      */
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
         if (resolving) {
             return null;
         }

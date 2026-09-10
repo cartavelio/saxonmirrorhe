@@ -45,7 +45,7 @@ public class JsonReceiver implements Receiver {
     private boolean indenting = false;
     private boolean escaped = false;
     private final Stack<Set<String>> keyChecker = new Stack<>();
-    private Function numberFormatter = null;
+    private FunctionItem numberFormatter = null;
     private static final String ERR_INPUT = "FOJS0006";
 
     public JsonReceiver(PipelineConfiguration pipe, XPathContext context, UniStringConsumer output) {
@@ -79,12 +79,12 @@ public class JsonReceiver implements Receiver {
         return indenting;
     }
 
-    public void setNumberFormatter(Function formatter) {
+    public void setNumberFormatter(FunctionItem formatter) {
         assert formatter.getArity() == 1;
         this.numberFormatter = formatter;
     }
 
-    public Function getNumberFormatter() {
+    public FunctionItem getNumberFormatter() {
         return this.numberFormatter;
     }
 

@@ -37,7 +37,7 @@ public class XdmFunctionItem extends XdmItem {
      * @param fi the function value to be wrapped.
      */
     
-    public XdmFunctionItem(Function fi) {
+    public XdmFunctionItem(FunctionItem fi) {
         super(fi);
     }
 
@@ -48,7 +48,7 @@ public class XdmFunctionItem extends XdmItem {
      */
 
     public QName getName() {
-        Function fi = (Function) getUnderlyingValue();
+        FunctionItem fi = (FunctionItem) getUnderlyingValue();
         StructuredQName sq = fi.getFunctionName();
         return sq == null ? null : new QName(sq);
     }
@@ -60,7 +60,7 @@ public class XdmFunctionItem extends XdmItem {
      */
 
     public int getArity() {
-        Function fi = (Function) getUnderlyingValue();
+        FunctionItem fi = (FunctionItem) getUnderlyingValue();
         return fi.getArity();
     }
 
@@ -89,7 +89,7 @@ public class XdmFunctionItem extends XdmItem {
 
     public static XdmFunctionItem getSystemFunction(Processor processor, QName name, int arity) throws SaxonApiException{
         Configuration config = processor.getUnderlyingConfiguration();
-        Function f = config.getSystemFunction(name.getStructuredQName(), arity);
+        FunctionItem f = config.getSystemFunction(name.getStructuredQName(), arity);
         return f==null ? null : new XdmFunctionItem(f);
     }
 
@@ -163,7 +163,7 @@ public class XdmFunctionItem extends XdmItem {
             throw new SaxonApiException("Supplied " + arguments.length + " arguments, required " + getArity());
         }
         try {
-            Function fi = (Function) getUnderlyingValue();
+            FunctionItem fi = (FunctionItem) getUnderlyingValue();
             FunctionItemType type = fi.getFunctionItemType();
             Sequence[] argVals = new Sequence[arguments.length];
             TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();

@@ -338,7 +338,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      *                        that is private
      */
     @Override
-    public Function getFunctionItem(SymbolicName.F symbolicName, StaticContext staticContext) throws XPathException {
+    public FunctionItem getFunctionItem(SymbolicName.F symbolicName, StaticContext staticContext) throws XPathException {
         StructuredQName functionName = symbolicName.getComponentName();
         int arity = symbolicName.getArity();
         if (functionName.hasURI(getNamespace()) && getFunctionDetails(functionName.getLocalPart(), arity) != null) {

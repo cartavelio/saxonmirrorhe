@@ -38,7 +38,7 @@ public class XSLOriginalLibrary implements FunctionLibrary {
     @Override
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
         try {
-            Function target = getFunctionItem(functionName, env);
+            FunctionItem target = getFunctionItem(functionName, env);
             if (target == null) {
                 return null;
             } else {
@@ -62,7 +62,7 @@ public class XSLOriginalLibrary implements FunctionLibrary {
     }
 
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext env) throws XPathException {
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext env) throws XPathException {
         if (functionName.getComponentKind() == StandardNames.XSL_FUNCTION &&
             functionName.getComponentName().hasURI(NamespaceUri.XSLT) &&
             functionName.getComponentName().getLocalPart().equals("original") &&

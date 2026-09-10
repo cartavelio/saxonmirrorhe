@@ -9,7 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.AbstractFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -19,7 +19,7 @@ import net.sf.saxon.type.FunctionItemType;
 /**
  * This class represents a function invoked using xsl:original from within an xs:override element.
  */
-public class OriginalFunction extends AbstractFunction implements Function, ContextOriginator {
+public class OriginalFunction extends AbstractFunction implements FunctionItem, ContextOriginator {
 
     private final UserFunction userFunction;
     private final Component component;

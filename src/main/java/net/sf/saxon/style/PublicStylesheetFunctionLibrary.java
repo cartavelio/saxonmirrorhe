@@ -13,7 +13,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
@@ -94,8 +94,8 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
      *          that is private
      */
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
-        Function baseFunction = base.getFunctionItem(functionName, staticContext);
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
+        FunctionItem baseFunction = base.getFunctionItem(functionName, staticContext);
         if (baseFunction instanceof UserFunction) {
             Visibility v = ((UserFunction)baseFunction).getDeclaredVisibility();
             if (v == Visibility.PUBLIC || v == Visibility.FINAL) {

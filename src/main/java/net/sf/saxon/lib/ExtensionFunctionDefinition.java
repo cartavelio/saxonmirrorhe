@@ -9,7 +9,7 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AbstractFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -150,7 +150,7 @@ public abstract class ExtensionFunctionDefinition {
      * @return a function item corresponding to this extension function
      */
 
-    public final Function asFunction(int arity) {
+    public final FunctionItem asFunction(int arity) {
         return new ExtensionFunction(this, arity);
     }
 

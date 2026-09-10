@@ -9,7 +9,7 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.Sequence;
@@ -50,7 +50,7 @@ public class JsonParser {
     private static final String ERR_OPTIONS = "FOJS0005";
     private static final String ERR_LIMITS = "FOJS0001";  // No specific code in spec
 
-    private Function numberParser = null;
+    private FunctionItem numberParser = null;
     private int nesting;
 
     /**
@@ -679,8 +679,8 @@ public class JsonParser {
         Sequence val = options.get("number-parser");
         if (val != null) {
             Item fn = val.head();
-            if (fn instanceof Function) {
-                numberParser = (Function) fn;
+            if (fn instanceof FunctionItem) {
+                numberParser = (FunctionItem) fn;
                 if (numberParser.getArity() != 1) {
                     throw new XPathException("Number-parser function must have arity=1", "FOJS0005");
                 }

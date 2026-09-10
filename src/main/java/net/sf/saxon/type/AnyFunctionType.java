@@ -10,7 +10,7 @@ package net.sf.saxon.type;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.ItemChecker;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
@@ -150,7 +150,7 @@ public class AnyFunctionType implements FunctionItemType {
      */
     @Override
     public boolean matches(Item item, TypeHierarchy th) {
-        return item instanceof Function;
+        return item instanceof FunctionItem;
     }
 
     /**

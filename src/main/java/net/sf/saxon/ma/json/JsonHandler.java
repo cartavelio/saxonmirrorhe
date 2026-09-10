@@ -9,7 +9,7 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
@@ -31,7 +31,7 @@ public class JsonHandler {
     protected IntPredicateProxy charChecker;
     private XPathContext context;
 
-    private Function fallbackFunction = null;
+    private FunctionItem fallbackFunction = null;
     private static final String REPLACEMENT = "\ufffd";
 
     public void setContext(XPathContext context) {
@@ -241,8 +241,8 @@ public class JsonHandler {
         Sequence val = options.get("fallback");
         if (val != null) {
             Item fn = val.head();
-            if (fn instanceof Function) {
-                fallbackFunction = (Function) fn;
+            if (fn instanceof FunctionItem) {
+                fallbackFunction = (FunctionItem) fn;
                 if (fallbackFunction.getArity() != 1) {
                     throw new XPathException("Fallback function must have arity=1", "FOJS0005");
                 }

@@ -15,7 +15,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -30,9 +30,9 @@ import net.sf.saxon.type.*;
  */
 public class StaticFunctionCall extends FunctionCall implements Callable {
 
-    private final Function target;
+    private final FunctionItem target;
 
-    public StaticFunctionCall(Function target, Expression[] arguments) {
+    public StaticFunctionCall(FunctionItem target, Expression[] arguments) {
         if (target.getArity() != arguments.length) {
             throw new IllegalArgumentException("Function call to " + target.getFunctionName() + " with wrong number of arguments (" + arguments.length + ")");
         }
@@ -46,7 +46,7 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
      * @return the target function
      */
 
-    public Function getTargetFunction() {
+    public FunctionItem getTargetFunction() {
         return target;
     }
 
@@ -58,7 +58,7 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
      * @return the target function
      */
     @Override
-    public Function getTargetFunction(XPathContext context) {
+    public FunctionItem getTargetFunction(XPathContext context) {
         return getTargetFunction();
     }
 

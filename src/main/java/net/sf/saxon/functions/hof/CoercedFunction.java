@@ -14,7 +14,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.AbstractFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -34,7 +34,7 @@ import java.util.function.Supplier;
  */
 public class CoercedFunction extends AbstractFunction {
 
-    private Function targetFunction;
+    private FunctionItem targetFunction;
     private final SpecificFunctionType requiredType;
 
     /**
@@ -46,7 +46,7 @@ public class CoercedFunction extends AbstractFunction {
      * @throws XPathException if the arity of the supplied function does not match the arity of the required type
      */
 
-    public CoercedFunction(Function targetFunction, SpecificFunctionType requiredType) throws XPathException {
+    public CoercedFunction(FunctionItem targetFunction, SpecificFunctionType requiredType) throws XPathException {
         if (targetFunction.getArity() != requiredType.getArity()) {
             throw new XPathException(
                     wrongArityMessage(targetFunction, requiredType.getArity()), "XPTY0004");
@@ -71,7 +71,7 @@ public class CoercedFunction extends AbstractFunction {
      * @throws XPathException if the arity of the supplied function does not match the arity of the required type
      */
 
-    public void setTargetFunction(Function targetFunction) throws XPathException {
+    public void setTargetFunction(FunctionItem targetFunction) throws XPathException {
         if (targetFunction.getArity() != requiredType.getArity()) {
             throw new XPathException(
                     wrongArityMessage(targetFunction, requiredType.getArity()), "XPTY0004");
@@ -198,7 +198,7 @@ public class CoercedFunction extends AbstractFunction {
      * because it has the wrong arity)
      */
 
-    public static CoercedFunction coerce(Function suppliedFunction, SpecificFunctionType requiredType,
+    public static CoercedFunction coerce(FunctionItem suppliedFunction, SpecificFunctionType requiredType,
                                          RoleDiagnostic role)
             throws XPathException {
         // DO NOT DELETE THIS METHOD: IT IS CALLED FROM BYTECODE
@@ -212,7 +212,7 @@ public class CoercedFunction extends AbstractFunction {
         return new CoercedFunction(suppliedFunction, requiredType);
     }
 
-    private static String wrongArityMessage(Function supplied, int expected) {
+    private static String wrongArityMessage(FunctionItem supplied, int expected) {
         return "The supplied function (" + supplied.getDescription() + ") has " + FunctionCall.pluralArguments(supplied.getArity()) +
                 " - expected " + expected;
     }

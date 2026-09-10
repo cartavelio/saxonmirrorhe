@@ -44,7 +44,7 @@ import java.util.function.Supplier;
  * convert the supplied arguments.</p>
  */
 
-public class UserFunction extends Actor implements Function, FunctionDefinition, ContextOriginator, TraceableComponent {
+public class UserFunction extends Actor implements FunctionItem, FunctionDefinition, ContextOriginator, TraceableComponent {
 
 
     @CSharpSimpleEnum
@@ -649,7 +649,7 @@ public class UserFunction extends Actor implements Function, FunctionDefinition,
      * Call this function to return a value.
      *
      * @param context    This provides the run-time context for evaluating the function. This should be created
-     *                   using {@link Function#makeNewContext(XPathContext, ContextOriginator)}. It must be an instance of XPathContextMajor.
+     *                   using {@link FunctionItem#makeNewContext(XPathContext, ContextOriginator)}. It must be an instance of XPathContextMajor.
      * @param actualArgs the arguments supplied to the function. These must have the correct
      *                   types required by the function signature (it is the caller's responsibility to check this).
      *                   It is acceptable to supply a {@link net.sf.saxon.value.Closure} to represent a value whose
@@ -874,7 +874,7 @@ public class UserFunction extends Actor implements Function, FunctionDefinition,
      * @throws net.sf.saxon.trans.XPathException if the comparison cannot be performed
      */
     @Override
-    public boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
+    public boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
         XPathException err = new XPathException("Cannot compare functions using deep-equal", "FOTY0015");
         err.setIsTypeError(true);
         err.setXPathContext(context);
@@ -888,7 +888,7 @@ public class UserFunction extends Actor implements Function, FunctionDefinition,
      * @return the n'th item if it exists, or null otherwise
      */
     @Override
-    public Function itemAt(int n) {
+    public FunctionItem itemAt(int n) {
         return n == 0 ? this : null;
     }
 
@@ -1076,11 +1076,12 @@ public class UserFunction extends Actor implements Function, FunctionDefinition,
                 int paramPos = fd.getPositionOfParameter(key);
                 if (paramPos < 0) {
                     throw new XPathException("Keyword " + key +
-                                                     " does not match the name of any declared parameter of function " + fd.getFunctionName());
+                                                     " does not match the name of any declared parameter of function "
+                                                     + fd.getFunctionName(), "XPST0142");
                 }
                 if (paramPos < positionalArgs) {
                     throw new XPathException("Parameter " + key + " of function " + fd.getFunctionName() +
-                                                     " is supplied both by position and by keyword");
+                                                     " is supplied both by position and by keyword", "XPST0141");
                 }
                 Expression supplied = arguments[argPos];
                 expandedArgs[paramPos] = supplied;
@@ -1090,7 +1091,11 @@ public class UserFunction extends Actor implements Function, FunctionDefinition,
         }
         for (int a = 0; a < maxArity; a++) {
             if (expandedArgs[a] == null) {
-                expandedArgs[a] = fd.getDefaultValueExpression(a);
+                Expression defaultVal = fd.getDefaultValueExpression(a);
+                if (defaultVal == null) {
+                    defaultVal = new DefaultedArgumentExpression(); // to be fixed up later
+                }
+                expandedArgs[a] = defaultVal;
                 //expandedArgs[a] = new ErrorExpression("UseDefault", "UseDefault", false); // for now
             }
         }

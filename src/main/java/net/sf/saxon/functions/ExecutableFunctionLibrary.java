@@ -12,7 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -102,7 +102,7 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
      *          that is private
      */
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         UserFunction fn = functions.get(functionName);
         if (fn != null && fn.isUpdating()) {
             throw new XPathException("Cannot bind a function item to an updating function");

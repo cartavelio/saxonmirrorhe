@@ -12,7 +12,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.AtomicConstructorFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
@@ -61,7 +61,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
      *          that is private
      */
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         if (functionName.getArity() != 1) {
             return null;
         }

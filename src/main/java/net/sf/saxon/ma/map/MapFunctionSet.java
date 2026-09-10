@@ -206,7 +206,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
-            Function fn = (Function) arguments[1].head();
+            FunctionItem fn = (FunctionItem) arguments[1].head();
             MapItem result = new HashTrieMap();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 BooleanValue match = (BooleanValue)dynamicCall(fn, context, new Sequence[]{pair.key, pair.value}).head();
@@ -434,7 +434,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
-            Function fn = (Function) arguments[1].head();
+            FunctionItem fn = (FunctionItem) arguments[1].head();
             ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 Sequence seq = dynamicCall(fn, context, new Sequence[]{pair.key, pair.value});
@@ -493,22 +493,17 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             HashTrieMap map = new HashTrieMap();
-            Function keyFunction = (Function)arguments[1];
-            Function valueFunction = (Function) arguments[2];
-            Function combineFunction = (Function) arguments[3];
+            FunctionItem keyFunction = (FunctionItem)arguments[1].head();
+            FunctionItem valueFunction = (FunctionItem) arguments[2].head();
+            FunctionItem combineFunction = (FunctionItem) arguments[3].head();
             SequenceIterator iter = arguments[0].iterate();
-            Sequence[] args = new Sequence[1];
-            Sequence[] combineArgs = new Sequence[2];
             for (Item item; (item = iter.next()) != null; ) {
-                args[0] = item;
-                AtomicValue key = (AtomicValue)dynamicCall(keyFunction, context, args).head();
+                AtomicValue key = (AtomicValue)dynamicCall(keyFunction, context, item).head();
                 if (key != null) {
-                    GroundedValue value = dynamicCall(valueFunction, context, args).materialize();
+                    GroundedValue value = dynamicCall(valueFunction, context, item).materialize();
                     GroundedValue existing = map.get(key);
                     if (existing != null) {
-                        combineArgs[0] = existing;
-                        combineArgs[1] = value;
-                        value = dynamicCall(combineFunction, context, combineArgs).materialize();
+                        value = dynamicCall(combineFunction, context, existing, value).materialize();
                     }
                     map.initialPut(key, value);
                 }
@@ -545,7 +540,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         private String duplicates = "use-first";
         private String duplicatesErrorCode = "FOJS0003";
-        private Function onDuplicates = null;
+        private FunctionItem onDuplicates = null;
         private boolean allStringKeys = false;
         private boolean treatAsFinal = false;
 
@@ -568,7 +563,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                         options, visitor.getStaticContext().makeEarlyEvaluationContext());
                 String duplicates = ((StringValue) values.get("duplicates")).getStringValue();
                 String duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
-                Function onDuplicates = (Function)values.get(onDuplicatesKey);
+                FunctionItem onDuplicates = (FunctionItem)values.get(onDuplicatesKey);
                 if (onDuplicates != null) {
                     duplicates = "use-callback";
                 }
@@ -629,7 +624,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             String duplicatesErrorCode = this.duplicatesErrorCode;
             boolean allStringKeys = this.allStringKeys;
             boolean treatAsFinal = this.treatAsFinal;
-            Function onDuplicates = this.onDuplicates;
+            FunctionItem onDuplicates = this.onDuplicates;
             if (arguments.length > 1) {
                 MapItem options = (MapItem) arguments[1].head();
                 Map<String, Sequence> values = getDetails().optionDetails.processSuppliedOptions(options, context);
@@ -637,7 +632,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
                 treatAsFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
                 allStringKeys = "string".equals(((StringValue)values.get(keyTypeKey)).getStringValue());
-                onDuplicates = (Function) values.get(onDuplicatesKey);
+                onDuplicates = (FunctionItem) values.get(onDuplicatesKey);
                 if (onDuplicates != null) {
                     duplicates = "use-callback";
                 }
@@ -715,7 +710,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
          * @throws XPathException if any error occurs, including detection of disallowed duplicates
          */
         public static MapItem mergeMaps(SequenceIterator iter, XPathContext context,
-                                        String duplicates, String duplicatesErrorCode, Function onDuplicates)
+                                        String duplicates, String duplicatesErrorCode, FunctionItem onDuplicates)
                 throws XPathException {
             MapItem baseMap = (MapItem) iter.next();
             if (baseMap == null) {

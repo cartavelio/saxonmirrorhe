@@ -11,7 +11,7 @@ import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.AttributeSet;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.NamedTemplate;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -259,7 +259,7 @@ public class Component {
             return StandardNames.XSL_TEMPLATE;
         } else if (actor instanceof GlobalVariable) {
             return StandardNames.XSL_VARIABLE;
-        } else if (actor instanceof Function) {
+        } else if (actor instanceof FunctionItem) {
             return StandardNames.XSL_FUNCTION;
         } else if (actor instanceof AttributeSet) {
             return StandardNames.XSL_ATTRIBUTE_SET;

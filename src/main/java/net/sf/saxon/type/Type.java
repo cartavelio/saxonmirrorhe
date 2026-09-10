@@ -210,7 +210,7 @@ public abstract class Type {
         } else if (item instanceof ArrayItem) {
             return th == null ? ArrayItemType.ANY_ARRAY_TYPE : new ArrayItemType(((ArrayItem) item).getMemberType(th));
         } else { //if (item instanceof FunctionItem) {
-            return ((Function) item).getFunctionItemType();
+            return ((FunctionItem) item).getFunctionItemType();
         }
     }
 
@@ -256,7 +256,7 @@ public abstract class Type {
         //#endif
         } else if (item instanceof AtomicValue) {
             return ((AtomicValue) item).getItemType().toString();
-        } else if (item instanceof Function) {
+        } else if (item instanceof FunctionItem) {
             return "function(*)";
         } else {
             return item.getClass().toString();

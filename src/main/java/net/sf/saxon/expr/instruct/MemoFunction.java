@@ -264,7 +264,7 @@ public class MemoFunction extends UserFunction {
             int initialSize = bucket.size();
             for (Sequence val : args) {
                 GroundedValue gVal = (GroundedValue)val;
-                if (gVal instanceof AtomicValue || gVal instanceof Function || gVal instanceof EmptySequence) {
+                if (gVal instanceof AtomicValue || gVal instanceof FunctionItem || gVal instanceof EmptySequence) {
                     bucket.add(gVal);
                 } else if (gVal instanceof NodeInfo) {
                     Item subs = substitute((NodeInfo)gVal);

@@ -56,7 +56,7 @@ public abstract class ItemsStarting extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence input = arguments[0];
-        Function startCondition = (Function) arguments[1].head();
+        FunctionItem startCondition = (FunctionItem) arguments[1].head();
         return new LazySequence(new StartingIterator(
                 input.iterate(), startCondition, includeMatchingItem(), context));
     }
@@ -64,12 +64,12 @@ public abstract class ItemsStarting extends SystemFunction {
     private static class StartingIterator implements SequenceIterator {
 
         private final SequenceIterator baseIterator;
-        private final Function start;
+        private final FunctionItem start;
         private final boolean inclusive;
         private final XPathContext context;
         private boolean started;
 
-        StartingIterator(SequenceIterator in, Function start, boolean inclusive, XPathContext context) {
+        StartingIterator(SequenceIterator in, FunctionItem start, boolean inclusive, XPathContext context) {
             this.baseIterator = in;
             this.start = start;
             this.inclusive = inclusive;

@@ -184,7 +184,7 @@ public abstract class ContextStackFrame {
                 diag = "map";
             } else if (contextItem instanceof ArrayItem) {
                 diag = "array";
-            } else if (contextItem instanceof Function) {
+            } else if (contextItem instanceof FunctionItem) {
                 diag = "function";
             } else {
                 diag = "item";

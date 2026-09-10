@@ -9,7 +9,7 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -35,7 +35,7 @@ public class FunctionName extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Function f = (Function) arguments[0].head();
+        FunctionItem f = (FunctionItem) arguments[0].head();
         assert f != null;
         StructuredQName name = f.getFunctionName();
         if (name == null) {

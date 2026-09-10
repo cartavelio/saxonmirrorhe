@@ -10,7 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -102,7 +102,7 @@ public interface FunctionLibrary {
      */
 
     /*@Nullable*/
-    Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext)
+    FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext)
             throws XPathException;
 
 

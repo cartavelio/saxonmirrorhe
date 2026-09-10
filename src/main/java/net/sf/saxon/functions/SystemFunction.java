@@ -462,7 +462,7 @@ public abstract class SystemFunction extends AbstractFunction {
      * @throws XPathException if a dynamic error occurs within the function
      */
 
-    public static Sequence dynamicCall(Function f, XPathContext context, Sequence[] args) throws XPathException {
+    public static Sequence dynamicCall(FunctionItem f, XPathContext context, Sequence... args) throws XPathException {
         context = f.makeNewContext(context, null);
         context.setCurrentOutputUri(null);
         if (context instanceof XPathContextMajor) {

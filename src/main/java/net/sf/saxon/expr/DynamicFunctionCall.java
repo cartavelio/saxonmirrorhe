@@ -15,7 +15,7 @@ import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -295,7 +295,7 @@ public class DynamicFunctionCall extends Expression {
             Expression body = expr.targetFunction.getChildExpression();
             ItemEvaluator functionEvaluator = body.makeElaborator().elaborateForItem();
             return context -> {
-                Function fn = (Function)functionEvaluator.eval(context);
+                FunctionItem fn = (FunctionItem)functionEvaluator.eval(context);
                 TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
                 FunctionItemType fit = fn.getFunctionItemType();
                 if (fn.getArity() != argEvaluators.length) {

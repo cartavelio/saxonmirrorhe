@@ -12,7 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.AbstractFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
@@ -30,7 +30,7 @@ import java.util.Arrays;
  */
 public class CurriedFunction extends AbstractFunction {
 
-    private final Function targetFunction;
+    private final FunctionItem targetFunction;
     private final Sequence[] boundValues;
     private FunctionItemType functionType;
 
@@ -42,7 +42,7 @@ public class CurriedFunction extends AbstractFunction {
      *                       unbound values (placeholders) by null
      */
 
-    public CurriedFunction(Function targetFunction, Sequence[] boundValues) {
+    public CurriedFunction(FunctionItem targetFunction, Sequence[] boundValues) {
         this.targetFunction = targetFunction;
         this.boundValues = boundValues;
     }

@@ -1862,7 +1862,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("coercedFn", (loader, element) -> {
             ItemType type = loader.parseItemTypeAttribute(element, "type");
             Expression target = loader.getFirstChildExpression(element);
-            Function targetFn;
+            FunctionItem targetFn;
             CoercedFunction coercedFn;
             if (target instanceof UserFunctionReference) {
                 coercedFn = new CoercedFunction((SpecificFunctionType) type);
@@ -1870,7 +1870,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 final SymbolicName name = ((UserFunctionReference) target).getSymbolicName();
                 loader.addCompletionAction(() -> coercedFn2.setTargetFunction(loader.getUserFunction((SymbolicName.F)name)));
             } else if (target instanceof Literal) {
-                targetFn = (Function) ((Literal) target).getGroundedValue();
+                targetFn = (FunctionItem) ((Literal) target).getGroundedValue();
                 coercedFn = new CoercedFunction(targetFn, (SpecificFunctionType) type);
             } else {
                 throw new AssertionError();
@@ -2040,7 +2040,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("curriedFunc", (loader, element) -> {
             Expression target = loader.getFirstChildExpression(element);
-            Function targetFn = (Function) ((Literal) target).getGroundedValue();
+            FunctionItem targetFn = (FunctionItem) ((Literal) target).getGroundedValue();
             NodeInfo args = loader.getChild(element, 1);
             int count = Count.count(args.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT));
             Sequence[] argValues = new Sequence[count];
@@ -2053,7 +2053,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     argValues[count++] = ((Literal) arg).getGroundedValue();
                 }
             }
-            Function f = new CurriedFunction(targetFn, argValues);
+            FunctionItem f = new CurriedFunction(targetFn, argValues);
             return Literal.makeLiteral(f);
         });
 

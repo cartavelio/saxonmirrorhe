@@ -9,7 +9,7 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -32,8 +32,8 @@ public class WhileFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence input = arguments[0];
-        Function predicate = (Function) arguments[1].head();
-        Function action = (Function) arguments[2].head();
+        FunctionItem predicate = (FunctionItem) arguments[1].head();
+        FunctionItem action = (FunctionItem) arguments[2].head();
         while (true) {
             boolean condition = ((BooleanValue) dynamicCall(predicate, context, new Sequence[]{input}).head()).getBooleanValue();
             if (condition) {

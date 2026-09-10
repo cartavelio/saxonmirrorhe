@@ -7,7 +7,7 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 
 /**
  * This is a marker interface that represents any "schema component" as defined in the XML Schema
@@ -50,7 +50,7 @@ public interface SchemaComponent {
      * @return the schema component represented as a function from property names to property values.
      */
 
-    Function getComponentAsFunction();
+    FunctionItem getComponentAsFunction();
     //#endif
 
 
