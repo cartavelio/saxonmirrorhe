@@ -108,6 +108,11 @@
             <li>The <code>importPackage(const char * filename)</code> method is added to the C++, Python and PHP APIs on the
                <code>Xslt30Processor</code> class. This method supports the <code>xsl:use-package</code> declaration to import a library package before
                compiling a primary stylesheet or package.</li>
+            <li>The <code>PyXdmNode</code> now implements the built-in function <code>len()</code> to return the number of
+               children at a given node. Note this is different to the <code>size()</code> method which on a sequence gives the value 1 for a <code>PyXdmNode</code>.</li>
+            <li>SaxonC Python API now supports for the subscript operator (i.e. square brackets []) on PyXdmValue and PyXdmNode objects. For example, given a node object n and
+               integer i, n[i] returns the ith child node at n or None if ith item does not exist. Also, operator like n[i][j] gives the child node of n[i].
+               For a PyXdmValue object, n[i] gives the ith item in the sequence.</li>
          </ul>
       </category>
       
