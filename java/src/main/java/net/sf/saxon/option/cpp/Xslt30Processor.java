@@ -1796,7 +1796,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
                     }
                     if (entry.getValue() != null) {
-                        System.err.println("DEBUG: key = " + entry.getValue().toString());
+                        System.err.println("DEBUG: value = " + entry.getValue().toString());
                     } else {
                         System.err.println("DEBUG: initialTemplateParameter Found null value");
 

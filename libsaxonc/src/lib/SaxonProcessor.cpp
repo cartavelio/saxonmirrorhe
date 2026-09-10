@@ -569,12 +569,11 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     XdmValue *value = nullptr;
     int typeRef = j_getXdmObjectType(thread, (void *)results);
-#ifdef DEBUG
+//#ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
-      std::cerr << "C++ makeXdmValueFromRef - typeRef= " << typeRef
-                << std::endl;
+      std::cerr << "C++ makeXdmValueFromRef - ref="<<((long)results)<<", typeRef= " << typeRef<< std::endl;
     }
-#endif
+//#endif
     if (typeRef == SXN_EXCEPTION) {
 
       throw SaxonApiException();
@@ -630,6 +629,9 @@ XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
   if (results > 0) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     int typeRef = j_getXdmObjectType(thread, (void *)results);
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "C++ makeXdmItemFromRef - ref="<<((long)results)<<", typeRef= " << typeRef<< std::endl;
+    }
 
     XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
     XdmItem *xdmItem = nullptr;
@@ -1230,7 +1232,6 @@ const char *SaxonProcessor::getStringValue(XdmItem *item) {
 
 
 XdmArray *SaxonProcessor::makeArray(short *input, int length) {
-  SaxonProcessor::attachCurrentThread();
   if (input == nullptr) {
     /*std::cerr << "Error found when converting pointer array of short values to "
                  "XdmArray"; */
@@ -1245,7 +1246,6 @@ XdmArray *SaxonProcessor::makeArray(short *input, int length) {
 }
 
 XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
-  SaxonProcessor::attachCurrentThread();
   int64_t processorDataRef = SXN_UNSET;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (length == 0) {
@@ -1266,6 +1266,10 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
 
   int64_t xdmArrayRef =
       j_makeXdmArray(thread, (void *)processorDataRef);
+
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr<<"DEBUG makeArray ref= "<<((long)xdmArrayRef)<<std::endl;
+  }
 
   j_handles_destroy(thread, (void *)processorDataRef);
 

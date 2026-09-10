@@ -630,7 +630,7 @@ public class XdmUtils {
      * @param keyRef - the key as an XdmAtomicValue reference into the ObjectHnaldes pool
      * @return a map without the specified entry given as a reference in the ObjectHandles pool. The original map is unchanged.
      * Exceptions are handled and returned as -2 indicating exception thrown
-     * @throws SaxonApiException if reference reference to the map or key is null.
+     * @throws SaxonApiException if reference to the map or key is null.
      */
     @CEntryPoint(name = "j_xdmMap_remove", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_xdmMap_put(IsolateThread thread, ObjectHandle mapRef, ObjectHandle keyRef) throws SaxonApiException {
@@ -784,14 +784,19 @@ public class XdmUtils {
      */
     @CEntryPoint(name = "j_makeXdmArray", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long makeXdmArray(IsolateThread thread, ObjectHandle processorDataAccumulatorRef)  throws IllegalArgumentException {
-         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
         XdmArray array = null;
-         if(processorDataAccumulator.size() == 0) {
-             array = new XdmArray();
-         }  else {
-             Object[] objValues = processorDataAccumulator.getValues();
-             array = XdmArray.makeArray(objValues);
-         }
+        if(processorDataAccumulatorRef == WordFactory.nullPointer()) {
+            array = new XdmArray();
+        } else {
+            ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
+
+            if (processorDataAccumulator.size() == 0) {
+                array = new XdmArray();
+            } else {
+                Object[] objValues = processorDataAccumulator.getValues();
+                array = XdmArray.makeArray(objValues);
+            }
+        }
 
          ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
 
@@ -1514,7 +1519,7 @@ public class XdmUtils {
         public  static int getXdmObjectType(IsolateThread thread, ObjectHandle valueRef){
         Object value = SaxonCAPI.objectHandles.get(valueRef);
         if(SaxonCAPI.debug){
-            System.err.println("call j_getXdmObjectType="+value.getClass().getName() + value.getClass());
+            System.err.println("call j_getXdmObjectType= "+value.getClass().getName() /*+ value.getClass()*/);
         }
         if(value instanceof XdmAtomicValue) {
             return XdmType.XDM_ATOMIC_VALUE.value;

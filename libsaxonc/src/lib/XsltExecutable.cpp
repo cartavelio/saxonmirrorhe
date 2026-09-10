@@ -202,6 +202,10 @@ void XsltExecutable::setInitialMode(const char *modeName) {
 
 void XsltExecutable::setParameter(const char *name, XdmValue *value) {
   if (value != nullptr && name != nullptr) {
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "XsltExecutable.setParameter() - XdmValue ref="
+        << ((long)value->getUnderlyingValue()) << std::endl;
+    }
     std::string skey = ("param:" + std::string(name));
     std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
     if (it != parameters.end()) {
@@ -489,6 +493,10 @@ const char *XsltExecutable::applyTemplatesReturningString() {
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
+
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+  std::cerr << "C++: applyTemplateReturningString called "<< std::endl;
+}
   
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -514,7 +522,10 @@ const char *XsltExecutable::applyTemplatesReturningString() {
       (processorDataRef == SXN_UNSET ? (void *)NULL
                                      : (void *)processorDataRef));
 
- 
+
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "C++: applyTemplateReturningString after "<< std::endl;
+  }
   if (processorDataRef > 0) {
     
     j_handles_destroy(thread,

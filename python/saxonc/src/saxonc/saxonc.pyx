@@ -4,6 +4,8 @@ and adding APIs for C/C++, Python, and PHP.
 SaxonC provides processing in XSLT 3.0, XQuery 3.1 and XPath 3.1, and Schema validation 1.0/1.1.
 Main classes in SaxonC Python API: PySaxonProcessor, PyXslt30Processor, PyXsltExecutable, PyXQueryProcessor,
 PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmArray, and PyXdmMap."""
+from logging import NullHandler
+
 # distutils: language = c++
 # distutils: sources = SaxonProcessor.cpp
 # cython: language_level = 3
@@ -603,6 +605,7 @@ cdef class PySaxonProcessor:
         if value_ptr is NULL:
             return None
         map = PyXdmMap(self)
+        del map.derivedmmptr
         map.derivedmmptr = map.derivedfptr = map.derivedptr = map.thisvptr = value_ptr
         value_ptr.incrementRefCount()
 
@@ -619,6 +622,8 @@ cdef class PySaxonProcessor:
         if value_ptr is NULL:
             return None
         array = PyXdmArray(self)
+        '''del array.derivedaaptr
+        array.derivedaaptr = array.derivedfptr = array.derivedptr = array.thisvptr = NULL'''
         array.derivedaaptr = array.derivedfptr = array.derivedptr = array.thisvptr = value_ptr
 
         value_ptr.incrementRefCount()
@@ -4176,8 +4181,9 @@ cdef class PyXdmValue:
             value (PyXdmItem): The PyXdmItem object to add to the sequence
         """
         if value is not None:
+            self.__items[len(self.__items)] = (self.processor.wrap_item(value.derivedptr))
             self.thisvptr.addXdmItem(value.derivedptr)
-            value.derivedptr.incrementRefCount()
+            '''value.derivedptr.incrementRefCount()'''
 
     @property
     def head(self):
@@ -5393,7 +5399,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
 
     def __cinit__(self):
         if type(self) is PyXdmArray:
-            self.derivedaaptr = self.derivedfptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmArray()
+                self.derivedaaptr = self.derivedfptr = self.derivedptr = self.thisvptr = new saxoncClasses.XdmArray()
 
     def __dealloc__(self):
         if type(self) is PyXdmArray and self.derivedaaptr != NULL:

@@ -103,11 +103,11 @@ XdmValue::XdmValue(int64_t val, bool arr) {
 
   for (int p = 1; p <= xdmSizei; ++p) {
     typeRef = j_getXdmObjectType(thread, (void *)results[p]);
-#ifdef DEBUG
+//#ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "C++ XdmValue - typeRef= " << typeRef << std::endl;
     }
-#endif
+//#endif
     if (typeRef == -2) {
       std::cerr << "Exception thrown while creating XdmValue from array"
                 << std::endl;
@@ -333,6 +333,10 @@ int64_t XdmValue::getUnderlyingValue() {
     }
 
     if (count == 1) {
+      if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr << "XdmValue.getUnderlyingValue() - XdmValue ref-values="
+          << ((long)values[0]->getUnderlyingValue()) << std::endl;
+      }
       return values[0]->getUnderlyingValue();
     }
 
@@ -346,6 +350,10 @@ int64_t XdmValue::getUnderlyingValue() {
       addProcessorValue(thread, (void *)jValues,
                         (void *)ivalue);
     }
+  }
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "XdmValue.getUnderlyingValue() - XdmValue ref-jvalues="
+      << ((long)jValues) << std::endl;
   }
   return jValues;
 }

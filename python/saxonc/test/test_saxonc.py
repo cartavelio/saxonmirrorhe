@@ -339,10 +339,13 @@ def testXdmArrayIn_xslt30(saxonproc, data_dir):
     value = saxonproc.make_array([saxonproc.make_integer_value(i) for i in [8, 9, 10]])
     xsltproc = saxonproc.new_xslt30_processor()
     xsltproc.set_cwd(data_dir)
+    sys.stderr.write('cp0\n')
     executable = xsltproc.compile_stylesheet(
         stylesheet_text="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' version='2.0'> <xsl:param name='values' select='(2, 3, 4, 5)'/><xsl:output method='xml' indent='yes'/><xsl:template match='*'><output><xsl:for-each select='$values'><out><xsl:value-of select='.'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>")
 
+    sys.stderr.write('cp1\n')
     executable.set_parameter("values", value)
+    sys.stderr.write('cp2\n')
 
     result = executable.apply_templates_returning_string(source_file="cat.xml")
     print(result)
@@ -1257,10 +1260,14 @@ def testXdmValueToString2(saxonproc):
 
     print(xdm_value)
 
+    assert xdm_value.size == 1
+
     avalue2 = saxonproc.make_string_value('bar')
     xdm_value.add_xdm_item(avalue2)
 
     print(xdm_value)
+
+    assert xdm_value.size == 2
     assert True
 
 
@@ -1822,10 +1829,11 @@ def test_apply():
         assert output2.startswith('<?xml version="1.0" encoding="UTF-8"?>\n<output>text1<out>6</out')
 
 
-def testMapOperations(saxonproc):
+def testMapOperations_1(saxonproc):
     mymap = {saxonproc.make_string_value("a"): saxonproc.make_integer_value(1),
              saxonproc.make_string_value("b"): saxonproc.make_integer_value(2),
              saxonproc.make_string_value("c"): saxonproc.make_integer_value(3)}
+
     map = saxonproc.make_map(mymap)
     assert map is not None
     print(map.values())
@@ -2039,6 +2047,23 @@ def testMap2():
         assert avar is not None
         assert avar.head.integer_value == 4
 
+def testMap3(saxonproc):
+    query = "map{}"
+    query_proc = saxonproc.new_xquery_processor()
+    query_proc.set_query_content(query)
+    result = query_proc.run_query_to_value()
+    assert result is not None
+    print(result)
+    assert isinstance(result, PyXdmValue)
+    mmVar = result.head
+    assert mmVar is not None
+    assert isinstance(mmVar, PyXdmMap)
+    assert mmVar.map_size == 0
+    '''avar = mmVar.string_value
+    print(avar)
+    assert avar is ""'''
+
+
 
 def user_function(saxonproc, values):
     ''' values: PyXdmValue '''
@@ -2141,3 +2166,4 @@ def testXdmArray(saxonproc):
     result_list = [item.head.get_atomic_value() for item in array_result.as_list()]
 
     assert len(result_list) == 3
+

@@ -14,6 +14,7 @@ import net.sf.saxon.s9api.XdmValue;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.word.WordFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,12 +55,22 @@ public class    MapData {
     }
 
 
-
+    /**
+     *  Make a XdmMap from a primitive map. If the MapData is null then create an empty XdmMap
+     * @param thread - GraalVM isolate thread
+     * @param mapDataRef - The ObjectHandle of the MapData. Accepts null
+     * @return an XdmMap object as ObjectHandle reference
+     */
     @CEntryPoint(name = "j_makeXdmMap", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_createXdmMap(IsolateThread thread, ObjectHandle mapDataRef) {
-        MapData mapData = SaxonCAPI.objectHandles.get(mapDataRef);
-        XdmMap xdmMap = XdmMap.makeMap(mapData.primitiveMap);
+        MapData mapData = null;
+        if(mapDataRef == WordFactory.nullPointer()) {
+            mapData = new MapData();
+        } else {
+            mapData = SaxonCAPI.objectHandles.get(mapDataRef);
+        }
 
+        XdmMap xdmMap = XdmMap.makeMap(mapData.primitiveMap);
         ObjectHandle handle = SaxonCAPI.createHandle(xdmMap);
 
         return handle.rawValue();

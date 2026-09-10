@@ -244,6 +244,11 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode *node,
       (char *)filename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
+
+  if (processorDataRef != SXN_UNSET) {
+    j_handles_destroy(thread,(void *)processorDataRef);
+    processorDataRef = SXN_UNSET;
+  }
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException(true);
   }
@@ -261,6 +266,11 @@ void Xslt30Processor::compileFromStringAndSave(const char *stylesheetStr,
       (char *)stylesheetStr, (char *)filename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
+
+  if (processorDataRef != SXN_UNSET) {
+    j_handles_destroy(thread,(void *)processorDataRef);
+    processorDataRef = SXN_UNSET;
+  }
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -296,6 +306,11 @@ void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
       (char *)xslFilename, (char *)filename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
+
+  if (processorDataRef != SXN_UNSET) {
+    j_handles_destroy(thread,(void *)processorDataRef);
+    processorDataRef = SXN_UNSET;
+  }
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException(true);
   }
@@ -328,15 +343,17 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
       (char *)stylesheetStr, (int)jitCompilation,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
+
+  if (processorDataRef != SXN_UNSET) {
+    j_handles_destroy(thread,(void *)processorDataRef);
+    processorDataRef = SXN_UNSET;
+  }
   if (objRef == SXN_EXCEPTION) {
     throw SaxonApiException(true);
   }
   XsltExecutable *executable =
       new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
-  if (processorDataRef != SXN_UNSET) {
-    j_handles_destroy(thread,(void *)processorDataRef);
-    processorDataRef = SXN_UNSET;
-  }
+
   return executable;
 }
 
@@ -365,16 +382,17 @@ XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
       (void *)node->getUnderlyingValue(), (int)jitCompilation,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
+
+  if (processorDataRef != SXN_UNSET) {
+    j_handles_destroy(thread,(void *)processorDataRef);
+    processorDataRef = SXN_UNSET;
+  }
   if (objRef == SXN_EXCEPTION) {
     throw SaxonApiException(true);
   }
   XsltExecutable *executable =
       new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
-  if (processorDataRef > 0) {
-    j_handles_destroy(thread,
-                      (void *)processorDataRef);
-    processorDataRef = SXN_UNSET;
-  }
+
   return executable;
 }
 
@@ -403,6 +421,12 @@ XsltExecutable *Xslt30Processor::compileFromAssociatedFile(const char *source) {
       (char *)source, (int)jitCompilation,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
+
+  if (processorDataRef != SXN_UNSET) {
+    j_handles_destroy(thread,(void *)processorDataRef);
+    processorDataRef = SXN_UNSET;
+  }
+
   if (objRef == SXN_EXCEPTION) {
     throw SaxonApiException(true);
   }
@@ -436,15 +460,18 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
       (char *)stylesheet, (int)jitCompilation,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
+
+  if (processorDataRef != SXN_UNSET) {
+    j_handles_destroy(thread,(void *)processorDataRef);
+    processorDataRef = SXN_UNSET;
+  }
+
   if (objRef == SXN_EXCEPTION) {
     throw SaxonApiException(true);
   }
   XsltExecutable *executable =
       new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
-  if (processorDataRef > 0) {
-    j_handles_destroy(thread,(void *)processorDataRef);
-    processorDataRef = SXN_UNSET;
-  }
+
   return executable;
 }
 
@@ -475,13 +502,15 @@ XdmValue *Xslt30Processor::transformFileToValue(const char *sourcefile,
       (void *)nullptr, (char *)sourcefile, (char *)stylesheetfile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
-  if (processorDataRef > 0) {
+  if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
     return SaxonProcessor::makeXdmValueFromRef(result);
-  } else if (result == SXN_EXCEPTION) {
+  }
+
+  if (result == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
   return nullptr;
@@ -520,12 +549,14 @@ void Xslt30Processor::transformFileToFile(const char *source,
       (void *)nullptr, (char *)source, (char *)stylesheet, (char *)outputfile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
+
   if (processorDataRef > 0) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
+  }
+
+  if (status == SXN_EXCEPTION) {
+    throw SaxonApiException();
   }
 }
 
@@ -563,13 +594,16 @@ const char *Xslt30Processor::transformFileToString(const char *source,
       (void *)cppXT, (void *)nullptr, (char *)source, (char *)stylesheet,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
-  if (result == nullptr) {
-    throw SaxonApiException();
-  }
-  if (processorDataRef > 0) {
+
+  if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
+
+  if (result == nullptr) {
+    throw SaxonApiException();
+  }
+
   return result;
 }
 
