@@ -68,8 +68,8 @@ public class CaseFirstCollator implements StringCollator {
      *
      * @return &lt;0 if a&lt;b, 0 if a=b, &gt;0 if a&gt;b
      * @throws ClassCastException if the objects are of the wrong type for this Comparer
-     * @param a
-     * @param b
+     * @param a the first string
+     * @param b the second string
      */
 
     @Override
@@ -137,10 +137,10 @@ public class CaseFirstCollator implements StringCollator {
     }
 
     /**
-     * Get a collation key for two Strings. The essential property of collation keys
-     * is that if two values are equal under the collation, then the collation keys are
-     * compare correctly under the equals() method.
-     * @param s
+     * Get a collation key for a String. The essential property of collation keys
+     * is that if (and only if) two strings are equal under the collation, then
+     * comparing the collation keys using the equals() method must return true.
+     * @param s the string whose collation key is required
      */
 
     @Override

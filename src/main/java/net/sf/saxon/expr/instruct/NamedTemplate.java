@@ -56,6 +56,8 @@ public class NamedTemplate extends Actor implements TraceableComponent {
 
     /**
      * Create a named template
+     *
+     * @param templateName the name of the template (if any)
      */
 
     public NamedTemplate(StructuredQName templateName) {

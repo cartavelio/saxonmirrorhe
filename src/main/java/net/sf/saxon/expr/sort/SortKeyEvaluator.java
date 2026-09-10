@@ -20,6 +20,10 @@ public interface SortKeyEvaluator {
 
     /**
      * Evaluate the n'th sort key of the context item
+     *
+     * @param n the requested index
+     * @param context the XPath context
+     * @throws XPathException if any error occurs
      */
 
     /*@Nullable*/

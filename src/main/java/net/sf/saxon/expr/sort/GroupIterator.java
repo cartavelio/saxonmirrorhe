@@ -50,6 +50,10 @@ public interface GroupIterator extends SequenceIterator {
 
     /**
      * Get a sequence which is a snapshot of this sequence at the current position
+     *
+     * @param context the XPath context
+     * @return the snapshot sequence
+     * @throws XPathException if any error occurs
      */
     ManualGroupIterator getSnapShot(XPathContext context) throws XPathException;
 

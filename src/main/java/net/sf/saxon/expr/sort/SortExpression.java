@@ -60,7 +60,9 @@ public class SortExpression extends Expression
     }
 
     /**
-     * Get the operand representing the expresion being sorted
+     * Get the operand representing the expression being sorted
+     *
+     * @return the operand representing the expression being sorted
      */
 
     public Operand getBaseOperand() {
@@ -397,6 +399,10 @@ public class SortExpression extends Expression
 
     /**
      * Callback for evaluating the sort keys
+     *
+     * @param n the requested index
+     * @param c the XPath context
+     * @throws XPathException if any error occurs
      */
 
     @Override

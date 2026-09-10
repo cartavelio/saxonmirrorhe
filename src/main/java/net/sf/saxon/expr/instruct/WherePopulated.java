@@ -28,6 +28,8 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
 
     /**
      * Create the instruction
+     *
+     * @param base the base expression
      */
     public WherePopulated(Expression base) {
         super(base);

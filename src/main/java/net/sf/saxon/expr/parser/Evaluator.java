@@ -36,6 +36,8 @@ public abstract class Evaluator {
 
     /**
      * Get the integer code for the evaluator
+     *
+     * @return the integer code for the evaluator
      */
 
     public abstract int getCode();

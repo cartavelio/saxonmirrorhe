@@ -24,7 +24,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
 
     /**
      * Create a RuleBasedSubstringMatcher
-     * @param uri
+     * @param uri      the collation URI
      * @param collator the collation to be used
      */
 
@@ -242,10 +242,10 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
 
 
     /**
-     * Get a collation key for two Strings. The essential property of collation keys
-     * is that if two values are equal under the collation, then the collation keys are
-     * compare correctly under the equals() method.
-     * @param s
+     * Get a collation key for a String. The essential property of collation keys
+     * is that if (and only if) two strings are equal under the collation, then
+     * comparing the collation keys using the equals() method must return true.
+     * @param s the string whose collation key is required
      */
 
     @Override
@@ -258,6 +258,7 @@ public class RuleBasedSubstringMatcher extends SimpleCollation implements Substr
      * Test program to output the sequence of collation element iterators for a given input string
      *
      * @param args command line arguments (collationURI, test-string)
+     * @throws Exception if any error occurs
      */
     public static void main(String[] args) throws Exception {
         String rules = " ='-'='*'< a < b < c < d < e < f < g < h < i < j < k < l < m < n < o < p < q < r < s < t < u < v < w < x < y < z";

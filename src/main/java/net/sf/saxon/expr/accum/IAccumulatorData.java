@@ -32,6 +32,7 @@ public interface IAccumulatorData {
      * @param postDescent false if the pre-descent value of the accumulator is required;
      *                    false if the post-descent value is wanted.
      * @return the value of the accumulator for this node
+     * @throws XPathException if any error occurs
      */
 
     Sequence getValue(NodeInfo node, boolean postDescent) throws XPathException;

@@ -585,7 +585,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings the rebinding map
      */
 
     /*@NotNull*/
@@ -738,7 +738,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
      * inference rules defined in the XSLT 3.0 specification.
      *
      * @return the static item type of the expression according to the XSLT 3.0 defined rules
-     * @param contextItemType
+     * @param contextItemType the static type of the context item
      */
     @Override
     public UType getStaticUType(UType contextItemType) {

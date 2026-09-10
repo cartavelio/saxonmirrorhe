@@ -69,6 +69,8 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
 
     /**
      * Set the separator expression (Saxon extension)
+     *
+     * @param separator the separator expression
      */
 
     public void setSeparatorExpression(Expression separator) {

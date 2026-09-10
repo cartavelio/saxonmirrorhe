@@ -36,8 +36,11 @@ public class LoopLifter {
 
     /**
      * Apply loop-lifting to an expression (typically the body of a template or function)
-     * @param exp the expression to which loop lifting is applied
+     * @param exp         the expression to which loop lifting is applied
+     * @param visitor     the expression visitor
+     * @param contextInfo
      * @return the optimized expression
+     * @throws XPathException if any error occurs
      */
 
     public static Expression process(Expression exp, ExpressionVisitor visitor, ContextItemStaticInfo contextInfo)

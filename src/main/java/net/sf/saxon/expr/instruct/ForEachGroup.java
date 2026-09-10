@@ -747,6 +747,10 @@ public class ForEachGroup extends Instruction
 
     /**
      * Callback for evaluating the sort keys
+     *
+     * @param n the requested index
+     * @param c the XPath context
+     * @throws XPathException if any error occurs
      */
 
     @Override

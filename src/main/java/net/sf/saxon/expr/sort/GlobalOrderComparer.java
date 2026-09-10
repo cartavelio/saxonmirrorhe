@@ -25,6 +25,7 @@ public final class GlobalOrderComparer implements Comparator<NodeInfo> {
     /**
      * Get an instance of a GlobalOrderComparer. The class maintains no state
      * so this returns the same instance every time.
+     * @return an instance of a GlobalOrderComparer
      */
 
     public static GlobalOrderComparer getInstance() {

@@ -641,6 +641,7 @@ public class ExpressionTool {
      * the expression itself offers is a process() method. This builds the entire results of the
      * expression as a sequence in memory and then iterates over it.
      *
+     * @param exp     the expression
      * @param context the dynamic evaluation context
      * @return an iterator over the results of the expression
      * @throws XPathException if a dynamic error occurs
@@ -660,6 +661,7 @@ public class ExpressionTool {
      * Helper method to construct an item representing the results of the expression when all that
      * the expression itself offers is a process() method.
      *
+     * @param exp     the expression
      * @param context the dynamic evaluation context
      * @return an iterator over the results of the expression
      * @throws XPathException if a dynamic error occurs
@@ -881,6 +883,7 @@ public class ExpressionTool {
      * Report an error in computing the effective boolean value of an expression
      *
      * @param reason the nature of the error
+     * @param cause  the failing expression
      * @throws XPathException always
      */
 
@@ -1139,6 +1142,9 @@ public class ExpressionTool {
     /**
      * Compute argument evaluation modes for all calls on user defined functions with
      * a specified expression
+     *
+     * @param exp the expression
+     * @throws XPathException if any error occurs
      */
 
     public static void computeEvaluationModesForUserFunctionCalls(Expression exp) throws XPathException {

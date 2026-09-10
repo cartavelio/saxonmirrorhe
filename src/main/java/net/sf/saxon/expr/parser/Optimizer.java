@@ -154,6 +154,7 @@ public class Optimizer {
      * @param visitor             the expression visitor
      * @param gc                  the GeneralComparison to be simplified
      * @param backwardsCompatible true if in 1.0 compatibility mode
+     * @param contextItemType 
      * @return the simplified expression
      */
 
