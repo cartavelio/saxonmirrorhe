@@ -258,12 +258,12 @@
    
     </category>
 
-    <category name="serialization">
+    <!--<category name="serialization">
         
        <p>From Saxon 12.2, with HTML5 serialization, if indentation is on, a newline is added after
        the <code>DOCTYPE</code> declaration.</p>
  
-    </category>
+    </category>-->
     
     <category name="command-line">
         
