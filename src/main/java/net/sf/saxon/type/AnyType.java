@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.UserComplexType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
@@ -486,7 +485,7 @@ public enum AnyType implements ComplexType {
 
     /*@NotNull*/
     @Override
-    public SchemaType getElementParticleType(int elementName, PreparedSchema schema, boolean considerExtensions) {
+    public SchemaType getElementParticleType(int elementName, Schema schema, boolean considerExtensions) {
         return this;
     }
 
@@ -504,7 +503,7 @@ public enum AnyType implements ComplexType {
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName, PreparedSchema schema, boolean considerExtensions) {
+    public int getElementParticleCardinality(int elementName, Schema schema, boolean considerExtensions) {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
@@ -561,14 +560,16 @@ public enum AnyType implements ComplexType {
      * Get a list of all the names of elements that can appear as children of an element having this
      * complex type, as integer fingerprints. If the list is unbounded (because of wildcards or the use
      * of xs:anyType), return null.
+     *
+     * @param schema
      * @param children        an integer set, initially empty, which on return will hold the fingerprints of all permitted
      *                        child elements; if the result contains the value -1, this indicates that it is not possible to enumerate
      *                        all the children, typically because of wildcards. In this case the other contents of the set should
-     * @param ignoreWildcards  true if wildcards are to be ignored, rather than a wildcard causing the result to be considered
+     * @param ignoreWildcards true if wildcards are to be ignored, rather than a wildcard causing the result to be considered
      */
 
     @Override
-    public void gatherAllPermittedChildren(/*@NotNull*/ IntHashSet children, boolean ignoreWildcards) {
+    public void gatherAllPermittedChildren(/*@NotNull*/ Schema schema, IntHashSet children, boolean ignoreWildcards) {
         children.add(-1);
     }
 
@@ -577,6 +578,7 @@ public enum AnyType implements ComplexType {
      * complex type, as integer fingerprints. If the list is unbounded (because of wildcards or the use
      * of xs:anyType), return null.
      *
+     * @param schema
      * @param descendants an integer set, initially empty, which on return will hold the fingerprints of all permitted
      *                    descendant elements; if the result contains the value -1, this indicates that it is not possible to enumerate
      *                    all the descendants, typically because of wildcards. In this case the other contents of the set should
@@ -584,7 +586,7 @@ public enum AnyType implements ComplexType {
      */
 
     @Override
-    public void gatherAllPermittedDescendants(/*@NotNull*/ IntHashSet descendants) {
+    public void gatherAllPermittedDescendants(/*@NotNull*/ Schema schema, IntHashSet descendants) {
         descendants.add(-1);
     }
 
@@ -593,14 +595,15 @@ public enum AnyType implements ComplexType {
      * the type of the element when it appears as a descendant. If it appears with more than one type,
      * return xs:anyType.
      *
+     * @param schema
      * @param fingerprint the name of the required descendant element
      * @return the type of the descendant element; null if the element cannot appear as a descendant;
-     *         anyType if it can appear with several different types
+     * anyType if it can appear with several different types
      */
 
     /*@NotNull*/
     @Override
-    public SchemaType getDescendantElementType(int fingerprint) {
+    public SchemaType getDescendantElementType(Schema schema, int fingerprint) {
         return this;
     }
 
@@ -608,12 +611,13 @@ public enum AnyType implements ComplexType {
      * Assuming an element is a permitted descendant in the content model of this type, determine
      * the cardinality of the element when it appears as a descendant.
      *
+     * @param schema
      * @param elementFingerprint the name of the required descendant element
      * @return the cardinality of the descendant element within this complex type
      */
 
     @Override
-    public int getDescendantElementCardinality(int elementFingerprint) {
+    public int getDescendantElementCardinality(Schema schema, int elementFingerprint) {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
@@ -644,7 +648,7 @@ public enum AnyType implements ComplexType {
      * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
      */
     @Override
-    public String getPreferredJsonLayout() {
+    public String getPreferredJsonLayout(Schema schema) {
         return "mixed";
     }
 

@@ -8,7 +8,6 @@
 
 package net.sf.saxon.type;
 
-import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.z.IntHashSet;
 
@@ -130,7 +129,7 @@ public interface ComplexType extends SchemaType {
      */
 
     /*@Nullable*/
-    SchemaType getElementParticleType(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException;
+    SchemaType getElementParticleType(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException;
 
     /**
      * Find an element particle within this complex type definition having a given element name
@@ -148,7 +147,7 @@ public interface ComplexType extends SchemaType {
      * @throws MissingComponentException if the schema is incomplete
      */
 
-    int getElementParticleCardinality(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException;
+    int getElementParticleCardinality(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException;
 
     /**
      * Find an attribute use within this complex type definition having a given attribute name
@@ -196,6 +195,8 @@ public interface ComplexType extends SchemaType {
      * Get a list of all the names of elements that can appear as children of an element having this
      * complex type, as integer fingerprints. If the list is unbounded (because of wildcards or the use
      * of xs:anyType), return null.
+     *
+     * @param schema
      * @param children        a set, initially empty, which on return will hold the names of all permitted
      *                        child elements; if the result contains the value -1, this indicates that it
      *                        is not possible to enumerate all the children, typically because of wildcards.
@@ -203,13 +204,14 @@ public interface ComplexType extends SchemaType {
      * @param ignoreWildcards true if wildcards should be ignored
      */
 
-    void gatherAllPermittedChildren(IntHashSet children, boolean ignoreWildcards) throws SchemaException;
+    void gatherAllPermittedChildren(Schema schema, IntHashSet children, boolean ignoreWildcards) throws SchemaException;
 
     /**
      * Get a list of all the names of elements that can appear as descendants of an element having this
      * complex type, as integer fingerprints. If the list is unbounded (because of wildcards or the use
      * of xs:anyType), include a -1 in the result.
      *
+     * @param schema
      * @param descendants a set, initially empty, which on return will hold the names of all permitted
      *                    descendant elements; if the result contains the value -1, this indicates that
      *                    it is not possible to enumerate all the descendants, typically because of
@@ -217,30 +219,32 @@ public interface ComplexType extends SchemaType {
      *                    be ignored.
      */
 
-    void gatherAllPermittedDescendants(IntHashSet descendants) throws SchemaException;
+    void gatherAllPermittedDescendants(Schema schema, IntHashSet descendants) throws SchemaException;
 
     /**
      * Assuming an element is a permitted descendant in the content model of this type, determine
      * the type of the element when it appears as a descendant. If it appears with more than one type,
      * return xs:anyType.
      *
+     * @param schema
      * @param fingerprint the name of the required descendant element
      * @return the type of the descendant element; null if the element cannot appear as a descendant;
-     *         anyType if it can appear with several different types
+     * anyType if it can appear with several different types
      */
 
     /*@Nullable*/
-    SchemaType getDescendantElementType(int fingerprint) throws SchemaException;
+    SchemaType getDescendantElementType(Schema schema, int fingerprint) throws SchemaException;
 
     /**
      * Assuming an element is a permitted descendant in the content model of this type, determine
      * the cardinality of the element when it appears as a descendant.
      *
+     * @param schema
      * @param elementFingerprint the name of the required descendant element
      * @return the cardinality of the descendant element within this complex type
      */
 
-    int getDescendantElementCardinality(int elementFingerprint) throws SchemaException;
+    int getDescendantElementCardinality(Schema schema, int elementFingerprint) throws SchemaException;
 
     /**
      * Ask whether this type (or any known type derived from it by extension) allows the element
@@ -263,6 +267,6 @@ public interface ComplexType extends SchemaType {
      * Decide what kind of layout to use when formatting an element of this type using the
      * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
      */
-    String getPreferredJsonLayout();
+    String getPreferredJsonLayout(Schema schema);
 }
 

@@ -142,7 +142,7 @@ public class NodeTestPattern extends Pattern {
                             "but there is no schema element declaration named " + nodeTest, "XTSE3105");
                 }
             } else {
-                NodeTest schemaNodeTest = decl.makeSchemaNodeTest();
+                NodeTest schemaNodeTest = schema.makeSchemaElementTest(decl.getFingerprint());
                 return new NodeTestPattern(schemaNodeTest);
             }
         } else {

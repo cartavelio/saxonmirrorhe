@@ -1,6 +1,8 @@
 package net.sf.saxon.type;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.NodeTest;
 
 /**
  * A schema is a collection of schema components. It may be derived from a single schema
@@ -12,6 +14,12 @@ import net.sf.saxon.om.StructuredQName;
  */
 
 public interface Schema {
+
+    /**
+     * Get the configuration
+     */
+
+    Configuration getConfiguration();
 
     /**
      * Get a global attribute declaration by fingerprint
@@ -65,5 +73,24 @@ public interface Schema {
 
     /*@Nullable*/
     SchemaType getSchemaType(StructuredQName name);
+
+    /**
+     * Make a {@code schema-element} node test for a given element name
+     * @param fp the integer fingerprint of the element name
+     * @return a node test corresponding to the XPath item type syntax schema-element(E)
+     * @throws SchemaException if there is no element declaration with this name in the schema
+     */
+
+    NodeTest makeSchemaElementTest(int fp) throws SchemaException;
+
+    /**
+     * Make a {@code schema-attribute} node test for a given attribute name
+     *
+     * @param fp the integer fingerprint of the attribute name
+     * @return a node test corresponding to the XPath item type syntax schema-attribute(E)
+     * @throws SchemaException if there is no attribute declaration with this name in the schema
+     */
+
+    NodeTest makeSchemaAttributeTest(int fp) throws SchemaException;
 }
 

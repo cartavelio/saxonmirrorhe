@@ -3374,6 +3374,9 @@ public class XPathParser {
     private NodeTest parseKindTest() throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         String typeName = t.currentTokenValue;
+        oolean schemaDeclaration = typeName.startsWith("schema-");
+        int primaryType = getSystemType(typeName);
+        //int fp = -1;
         boolean empty = false;
         nextToken();
         if (t.currentToken == Token.RPAR) {
@@ -3435,23 +3438,22 @@ public class XPathParser {
                     nextToken();
                     return new DocumentNodeTest(inner);
                 }
+
             case "processing-instruction":
                 int fp = -1;
                 if (empty) {
                     return NodeKindTest.PROCESSING_INSTRUCTION;
                 } else if (t.currentToken == Token.STRING_LITERAL) {
-                    String piName = Whitespace.trim(unescape(t.currentTokenValue));
-                    if (!NameChecker.isValidNCName(StringTool.codePoints(piName))) {
+                    localName = Whitespace.trim(unescape(t.currentTokenValue));
+                    if (!NameChecker.isValidNCName(StringTool.codePoints(localName))) {
                         // Became an error as a result of XPath erratum XP.E7
                         grumble("Processing instruction name must be a valid NCName", "XPTY0004");
-                    } else {
-                        fp = pool.allocateFingerprint(NamespaceUri.NULL, piName);
                     }
                 } else if (t.currentToken == Token.NAME) {
                     try {
                         String[] parts = NameChecker.getQNameParts(t.currentTokenValue);
                         if (parts[0].isEmpty()) {
-                            fp = pool.allocateFingerprint(NamespaceUri.NULL, parts[1]);
+                            localName = parts[1];
                         } else {
                             grumble("Processing instruction name must not contain a colon");
                         }
@@ -3464,9 +3466,10 @@ public class XPathParser {
                 nextToken();
                 expect(Token.RPAR);
                 nextToken();
-                return new NameTest(Type.PROCESSING_INSTRUCTION, fp, pool);
+                return new NameTest(Type.PROCESSING_INSTRUCTION, new NoNamespaceName(localName), pool);
 
             case "schema-attribute":
+
                 if (empty) {
                     grumble(typeName + "schema-attribute() requires a name to be supplied");
                     return null;
@@ -3494,6 +3497,7 @@ public class XPathParser {
                     return null;
                 } else {
                     expect(Token.NAME);
+                } else if (t.currentToken == Token.NAME) {
                     String name = t.currentTokenValue;
                     fp = makeFingerprint(name, true);
                     nextToken();
@@ -3509,6 +3513,20 @@ public class XPathParser {
                     } else {
                         return decl.makeSchemaNodeTest();
                     }
+
+                    nodeName = t.currentTokenValue;
+                    NamespaceUri defaultNS = primaryType == Type.ELEMENT ? env.getDefaultElementNamespace() : NamespaceUri.NULL;
+                    sq = qNameParser.parse(nodeName, defaultNS);
+                    //fp = makeFingerprint(t.currentTokenValue, primaryType == Type.ELEMENT);
+                    nextToken();
+                } else if ((t.currentToken == Token.PREFIX || t.currentToken == Token.SUFFIX) && allowXPath40Syntax) {
+                    nodeTest = parseNodeTest((short)primaryType);
+                } else {
+                    grumble("Unexpected " + Token.tokens[t.currentToken] + " after '(' in SequenceType");
+                }
+                NamespaceUri suri = null;
+                if (sq != null) {
+                    suri = sq.getNamespaceUri();
                 }
 
             case "attribute":
@@ -3592,6 +3610,7 @@ public class XPathParser {
                 grumble("Unknown node kind " + typeName);
                 return null;
         }
+        return null;
     }
 
 

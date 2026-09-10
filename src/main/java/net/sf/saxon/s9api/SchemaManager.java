@@ -114,33 +114,40 @@ public abstract class SchemaManager {
 
     /**
      * Load a schema document from a given Source. The schema components derived from this schema
-     * document are added to the cache of schema components maintained by this SchemaManager
+     * document are retained by this SchemaManager as the current schema, and are also returned
+     * by the method as an {@link XsdSchema} object.
+     *
+     * <p>This method can only be called once on a given {@code SchemaManager} object.</p>
      *
      * @param source the document containing the schema. The getSystemId() method applied to this Source
      *               must return a base URI suitable for resolving <code>xs:include</code> and <code>xs:import</code>
      *               directives. The document may be either a schema document in source XSD format, or a compiled
      *               schema in Saxon-defined SCM format (as produced using the -export option)
-     * @throws SaxonApiException if the schema document is not valid, or if its contents are inconsistent
-     *                           with the schema components already held by this SchemaManager.
+     * @return the resulting schema.
+     * @throws SaxonApiException if the schema document is not valid.
+     * @since 9.1. From Saxon 12.3, the method can only be called once; to load from multiple schema documents,
+     * either supply multiple sources in a single call to the {@link #load(Source...)} method, or use a separate
+     * {@code SchemaManager} for each one and combine the resulting schemas using
      */
 
-    public abstract void load(Source... source) throws SaxonApiException;
+    public abstract XsdSchema load(Source... source) throws SaxonApiException;
 
     /**
      * Load a schema document from a given File. The schema components derived from this schema
-     * document are added to the cache of schema components maintained by this SchemaManager
+     * document are retained by this SchemaManager as the current schema, and are also returned
+     * by the method as an {@link XsdSchema} object.
      *
      * @param file the document containing the schema. The getSystemId() method applied to this Source
      *               must return a base URI suitable for resolving <code>xs:include</code> and <code>xs:import</code>
      *               directives. The document may be either a schema document in source XSD format, or a compiled
      *               schema in Saxon-defined SCM format (as produced using the -export option)
-     * @throws SaxonApiException if the schema document is not valid, or if its contents are inconsistent
-     *                           with the schema components already held by this SchemaManager.
+     * @return the resulting schema.
+     * @throws SaxonApiException if the schema document is not valid.
      * @since 12.0
      */
 
-    public void load(File file) throws SaxonApiException {
-        load(new StreamSource(file));
+    public XsdSchema load(File file) throws SaxonApiException {
+        return load(new StreamSource(file));
     }
 
     /**
@@ -152,7 +159,7 @@ public abstract class SchemaManager {
      * @throws SaxonApiException if a failure occurs loading the schema from the supplied source
      */
 
-    public abstract void importComponents(Source source) throws SaxonApiException;
+    public abstract XsdSchema importComponents(Source source) throws SaxonApiException;
 
     /**
      * Export a precompiled Schema Component Model containing all the components (except built-in components)
@@ -167,7 +174,10 @@ public abstract class SchemaManager {
 
     /**
      * Create a SchemaValidator which can be used to validate instance documents against the schema held by this
-     * SchemaManager
+     * SchemaManager.
+     *
+     * <p>The result of calling <code>schemaManager.newSchemaValidator()</code> is the same as the result of calling
+     * <code>schemaManager.getXsdSchema().newSchemaValidator()</code>.</p>
      *
      * @return a new SchemaValidator
      */

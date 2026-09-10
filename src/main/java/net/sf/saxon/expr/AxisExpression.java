@@ -462,7 +462,7 @@ public final class AxisExpression extends Expression {
                             return this;
                         }
                         IntHashSet children = new IntHashSet();
-                        ((ComplexType) contentType).gatherAllPermittedChildren(children, false);
+                        ((ComplexType) contentType).gatherAllPermittedChildren(schema, children, false);
                         if (children.isEmpty()) {
                             if (warnings) {
                                 visitor.issueWarning(
@@ -484,14 +484,14 @@ public final class AxisExpression extends Expression {
                             return this;
                         }
                     }
-                    SchemaType schemaType = ((ComplexType) contentType).getElementParticleType(childfp, null, true);
+                    SchemaType schemaType = ((ComplexType) contentType).getElementParticleType(childfp, schema, true);
                     if (schemaType == null) {
                         if (warnings) {
                             StructuredQName childElement = getConfiguration().getNamePool().getStructuredQName(childfp);
                             String message = "The complex type " + contentType.getDescription() +
                                     " does not allow a child element named " + getDiagnosticName(childElement, env);
                             IntHashSet permitted = new IntHashSet();
-                            ((ComplexType) contentType).gatherAllPermittedChildren(permitted, false);
+                            ((ComplexType) contentType).gatherAllPermittedChildren(schema, permitted, false);
                             if (!permitted.contains(-1)) {
                                 IntIterator kids = permitted.iterator();
                                 while (kids.hasNext()) {
@@ -513,7 +513,7 @@ public final class AxisExpression extends Expression {
                                 test,
                                 Token.INTERSECT,
                                 new ContentTypeTest(Type.ELEMENT, schemaType, config, true));
-                        int computedCardinality = ((ComplexType) contentType).getElementParticleCardinality(childfp, null, true);
+                        int computedCardinality = ((ComplexType) contentType).getElementParticleCardinality(childfp, schema, true);
                         ExpressionTool.resetStaticProperties(this);
                         if (computedCardinality == StaticProperty.ALLOWS_ZERO) {
                             // this shouldn't happen, because we've already checked for this a different way.
@@ -542,13 +542,13 @@ public final class AxisExpression extends Expression {
                 // specific path that avoids searching branches of the tree where the element cannot occur
                 try {
                     IntHashSet descendants = new IntHashSet();
-                    ((ComplexType) contentType).gatherAllPermittedDescendants(descendants);
+                    ((ComplexType) contentType).gatherAllPermittedDescendants(schema, descendants);
                     if (descendants.contains(-1)) {
                         return this;
                     }
                     if (descendants.contains(targetfp)) {
                         IntHashSet children = new IntHashSet();
-                        ((ComplexType) contentType).gatherAllPermittedChildren(children, false);
+                        ((ComplexType) contentType).gatherAllPermittedChildren(schema, children, false);
                         IntHashSet usefulChildren = new IntHashSet();
                         boolean considerSelf = false;
                         boolean considerDescendants = false;
@@ -559,13 +559,13 @@ public final class AxisExpression extends Expression {
                                 usefulChildren.add(c);
                                 considerSelf = true;
                             }
-                            SchemaType st = ((ComplexType) contentType).getElementParticleType(c, null, true);
+                            SchemaType st = ((ComplexType) contentType).getElementParticleType(c, schema, true);
                             if (st == null) {
                                 throw new AssertionError("Can't find type for child element " + c);
                             }
                             if (st instanceof ComplexType) {
                                 IntHashSet subDescendants = new IntHashSet();
-                                ((ComplexType) st).gatherAllPermittedDescendants(subDescendants);
+                                ((ComplexType) st).gatherAllPermittedDescendants(schema, subDescendants);
                                 if (subDescendants.contains(targetfp)) {
                                     usefulChildren.add(c);
                                     considerDescendants = true;
@@ -574,7 +574,7 @@ public final class AxisExpression extends Expression {
                         }
                         itemType = test;
                         if (considerDescendants) {
-                            SchemaType st = ((ComplexType) contentType).getDescendantElementType(targetfp);
+                            SchemaType st = ((ComplexType) contentType).getDescendantElementType(schema, targetfp);
                             if (st != AnyType.getInstance()) {
                                 itemType = new CombinedNodeTest(
                                         test, Token.INTERSECT,
@@ -919,17 +919,19 @@ public final class AxisExpression extends Expression {
             }
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
         } else if (axis == AxisInfo.CHILD && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
+            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
             SchemaType contentType = originNodeType.getContentType();
             if (contentType instanceof ComplexType) {
-                return ((ComplexType) contentType).getElementParticleCardinality(nodeTest.getFingerprint(), null, true);
+                return ((ComplexType) contentType).getElementParticleCardinality(nodeTest.getFingerprint(), schema, true);
             } else {
                 return StaticProperty.EMPTY;
             }
         } else if (axis == AxisInfo.DESCENDANT && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
+            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
             SchemaType contentType = originNodeType.getContentType();
             if (contentType instanceof ComplexType) {
                 try {
-                    return ((ComplexType) contentType).getDescendantElementCardinality(nodeTest.getFingerprint());
+                    return ((ComplexType) contentType).getDescendantElementCardinality(schema, nodeTest.getFingerprint());
                 } catch (SchemaException err) {
                     // shouldn't happen; play safe
                     return StaticProperty.ALLOWS_ZERO_OR_MORE;

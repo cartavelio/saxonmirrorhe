@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.Token;
@@ -33,9 +34,14 @@ import java.util.Map;
 public class ItemTypeFactory {
 
     private final Configuration config;
+    private PreparedSchema schema;
 
     /**
-     * Create an ItemTypeFactory
+     * Create an ItemTypeFactory.
+     *
+     * <p>Since 13.0, an {@code ItemTypeFactory} created using this constructor is no longer capable
+     * of creating item types that refer to user-defined types in a schema; this is because the
+     * {@link Processor} no longer holds a unique global schema. Instead, </p>
      *
      * @param processor the processor used by this ItemTypeFactory. This must be supplied
      *                  in the case of user-defined types or types that reference element or attribute names;
@@ -104,7 +110,8 @@ public class ItemTypeFactory {
                         (ItemType.BuiltInAtomicItemType) getBuiltInAtomicType(fp), config.getConversionRules());
             }
         } else {
-            SchemaType type = config.getSchema().getSchemaType(name);
+            requireSchema();
+            SchemaType type = schema.getSchemaType(name);
             if (type == null || !type.isAtomicType()) {
                 throw new SaxonApiException("Unknown atomic type " + name.getClarkName());
             }
@@ -323,27 +330,31 @@ public class ItemTypeFactory {
 
     /**
      * Make an ItemType representing an element declaration in the schema. This is the
-     * equivalent of the XPath syntax <code>schema-element(element-name)</code>
+     * equivalent of the XPath syntax <code>schema-element(element-name)</code>. This method
+     * is only available if the {@code ItemTypeFactory} is associated with a specific
+     * {@link XsdSchema}.
      * <p>It is undefined whether two calls supplying the same argument values will
      * return the same ItemType object.</p>
      *
      * @param name the element name
      * @return the ItemType
-     * @throws SaxonApiException if the schema does not contain a global element declaration
+     * @throws SaxonApiException if there is no associated schema, or if the
+     *                           schema does not contain a global element declaration
      *                           for the given name, or if the element declaration contains
      *                           dangling references to other schema components
      */
 
     public ItemType getSchemaElementTest(QName name) throws SaxonApiException {
+        requireSchema();
         StructuredQName qName = name.getStructuredQName();
-        SchemaDeclaration decl = config.getSchema().getElementDecl(qName);
+        SchemaDeclaration decl = schema.getElementDecl(qName);
         if (decl == null) {
             throw new SaxonApiException("No global declaration found for element " + name.getClarkName());
         }
         try {
-            NodeTest test = decl.makeSchemaNodeTest();
+            NodeTest test = schema.makeSchemaElementTest(decl.getFingerprint());
             return new ConstructedItemType(test, config);
-        } catch (MissingComponentException e) {
+        } catch (MissingComponentException|SchemaException e) {
             throw new SaxonApiException(e);
         }
     }
@@ -373,8 +384,9 @@ public class ItemTypeFactory {
             nameTest = new NameTest(Type.ELEMENT, elementFP, config.getNamePool());
         }
         if (schemaType != null) {
+            requireSchema();
             StructuredQName name1 = new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName());
-            SchemaType type = config.getSchema().getSchemaType(name1);
+            SchemaType type = schema.getSchemaType(name1);
             if (type == null) {
                 throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
             }
@@ -413,15 +425,16 @@ public class ItemTypeFactory {
      */
 
     public ItemType getSchemaAttributeTest(QName name) throws SaxonApiException {
+        requireSchema();
         StructuredQName nn = new StructuredQName("", name.getNamespaceUri(), name.getLocalName());
-        SchemaDeclaration decl = config.getSchema().getAttributeDecl(nn);
+        SchemaDeclaration decl = schema.getAttributeDecl(nn);
         if (decl == null) {
             throw new SaxonApiException("No global declaration found for attribute " + name.getClarkName());
         }
         try {
-            NodeTest test = decl.makeSchemaNodeTest();
+            NodeTest test = schema.makeSchemaAttributeTest(decl.getFingerprint());
             return new ConstructedItemType(test, config);
-        } catch (MissingComponentException e) {
+        } catch (MissingComponentException|SchemaException e) {
             throw new SaxonApiException(e);
         }
     }
@@ -449,8 +462,9 @@ public class ItemTypeFactory {
             nameTest = new NameTest(Type.ATTRIBUTE, attributeFP, config.getNamePool());
         }
         if (schemaType != null) {
+            requireSchema();
             StructuredQName name1 = new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName());
-            SchemaType type = config.getSchema().getSchemaType(name1);
+            SchemaType type = schema.getSchemaType(name1);
             if (type == null) {
                 throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
             }
@@ -669,6 +683,12 @@ public class ItemTypeFactory {
 
     public ItemType exposeItemType(net.sf.saxon.type.ItemType it) {
         return new ConstructedItemType(it, config);
+    }
+
+    private void requireSchema() throws SaxonApiException {
+        if (schema == null) {
+            throw new SaxonApiException("To obtain a user-defined type, the ItemTypeFactory must be associated with a specific XsdSchema");
+        }
     }
 
 }

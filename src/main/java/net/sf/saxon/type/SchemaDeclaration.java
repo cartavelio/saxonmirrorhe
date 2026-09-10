@@ -8,7 +8,6 @@
 package net.sf.saxon.type;
 
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeTest;
 
 /**
  * This is a marker interface that acts as a surrogate for an object representing
@@ -41,14 +40,6 @@ public interface SchemaDeclaration {
      */
 
     SchemaType getType() throws MissingComponentException;
-
-    /**
-     * Create a NodeTest that implements the semantics of schema-element(name) or
-     * schema-attribute(name) applied to this element or attribute declaration.
-     * @throws MissingComponentException if the type of the declaration is not present in the schema.
-     */
-
-    NodeTest makeSchemaNodeTest() throws MissingComponentException;
 
     /**
      * Determine, in the case of an Element Declaration, whether it is nillable.

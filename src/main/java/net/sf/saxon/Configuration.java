@@ -3028,7 +3028,7 @@ public class Configuration implements SourceResolver, NotationSet {
     //#endif
 
     public Schema getSchema() {
-        return MinimalSchema.getInstance();
+        return new MinimalSchema();
     }
 
     public Schema getSchemaForNamespace(NamespaceUri uri) {

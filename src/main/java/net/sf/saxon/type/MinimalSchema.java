@@ -1,8 +1,10 @@
 package net.sf.saxon.type;
 
 import com.saxonica.ee.schema.ElementDecl;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.NodeTest;
 
 /**
  * A schema is a collection of schema components. It may be derived from a single schema
@@ -13,19 +15,12 @@ import net.sf.saxon.om.StructuredQName;
  * derived from multiple independent schema documents.
  */
 
-public enum MinimalSchema implements Schema {
+public class MinimalSchema implements Schema {
 
-    INSTANCE;
+    private Configuration config;
 
-    /**
-     * Get the singular instance of this class
-     *
-     * @return the singular object representing xs:anyType
-     */
-
-    /*@NotNull*/
-    public static MinimalSchema getInstance() {
-        return INSTANCE;
+    public Configuration getConfiguration() {
+        return config;
     }
 
     /**
@@ -94,5 +89,28 @@ public enum MinimalSchema implements Schema {
         return null;
     }
 
+    /**
+     * Make a {@code schema-element} node test for a given element name
+     *
+     * @param fp the integer fingerprint of the element name
+     * @return a node test corresponding to the XPath item type syntax schema-element(E)
+     * @throws SchemaException if there is no element declaration with this name in the schema
+     */
+    @Override
+    public NodeTest makeSchemaElementTest(int fp) throws SchemaException {
+        return null;
+    }
+
+    /**
+     * Make a {@code schema-attribute} node test for a given attribute name
+     *
+     * @param fp the integer fingerprint of the attribute name
+     * @return a node test corresponding to the XPath item type syntax schema-attribute(E)
+     * @throws SchemaException if there is no attribute declaration with this name in the schema
+     */
+    @Override
+    public NodeTest makeSchemaAttributeTest(int fp) throws SchemaException {
+        return null;
+    }
 }
 
