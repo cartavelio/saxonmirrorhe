@@ -493,7 +493,7 @@ public:
    * Get the messages written using the xsl:message instruction
    * Return NULL if the user has not enabled of capturing of xsl:messages via
    * setSaveXslMessage
-   * @return XdmValue- the sequence of xsl:messages as an XdmValue
+   * @return XdmValue - the sequence of xsl:messages as an XdmValue
    */
   XdmValue *getXslMessages();
 

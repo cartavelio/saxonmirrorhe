@@ -24,6 +24,23 @@ typedef enum eXdmNodeKind {
   UNKNOWN = 0
 } XDM_NODE_KIND;
 
+
+typedef enum eXdmAxis {
+ANCESTOR = 0,
+ANCESTOR_OR_SELF = 1,
+ATTRIBUTE = 2,
+CHILD = 3,
+DESCENDANT  = 4,
+DESCENDANT_OR_SELF = 5,
+FOLLOWING = 6,
+FOLLOWING_SIBLING = 7,
+NAMESPACE = 8,
+PARENT = 9,
+PRECEDING = 10,
+PRECEDING_SIBLING = 11,
+SELF = 12
+} XDM_AXIS;
+
 class XdmValue;
 
 /**
@@ -235,7 +252,7 @@ public:
          *         axis and in reverse document order for a reverse axis.
 
   */
-  XdmNode **axisNodes(int axis);
+  XdmNode **axisNodes(XDM_AXIS);
 
   //! Get the count of nodes in the nodeAxis array. Cached from the last call to nodeAxis
   int axisNodeCount();

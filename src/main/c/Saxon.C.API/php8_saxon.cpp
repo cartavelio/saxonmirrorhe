@@ -2076,6 +2076,56 @@ PHP_METHOD(XdmNode, getChildNode) {
   RETURN_NULL();
 }
 
+
+PHP_METHOD(XdmNode, axisNode) {
+  long axisValue;
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &axisValue) == FAILURE) {
+    RETURN_NULL();
+  }
+
+  XdmNode *xdmNode;
+  zend_object *zobj = Z_OBJ_P(getThis());
+  xdmNode_object *obj =
+      (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
+  xdmNode = obj->xdmNode;
+
+  if (xdmNode != nullptr) {
+    int count = xdmNode->getChildCount();
+    if (count == 0) {
+      RETURN_NULL();
+      return;
+    }
+    if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
+      RETURN_NULL();
+      return;
+    } else {
+
+      if (axisValue > 0) {
+
+        XdmNode ** nodes = xdmNode->axisNode(axisNode);
+        int axisCount = xdmNode->axisNodeCount();
+
+        if (axisCount > 0 && nodes != nullptr) {
+          XdmValue * resultValue = new XdmValue();
+          for(int i = 0; i< axisCount; i++) {
+            nodes[i]->incrementRefCount();
+            resultValue->addXdmItem(nodes[i]);
+          }
+          zend_object *zobj = Z_OBJ_P(return_value);
+          xdmValue_object *vobj =
+              (xdmNode_object *)((char *)zobj -
+                                 XtOffsetOf(xdmValue_object, std));
+          assert(vobj != nullptr);
+          vobj->xdmValue = resultValue;
+          return;
+        }
+      }
+    }
+  }
+  RETURN_NULL();
+}
+
+
 PHP_METHOD(XdmNode, getParent) {
   XdmNode *xdmNode;
   zend_object *zobj = Z_OBJ_P(getThis());

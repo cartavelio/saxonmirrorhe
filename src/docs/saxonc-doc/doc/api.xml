@@ -1312,6 +1312,17 @@
             </tr>
             <tr>
                <td>
+                  <code><a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a></code>
+               </td>
+               <td>
+                  <span class="signature">getXslMessage()</span>
+                  <div class="fcomment">Get the messages written using the xsl:message instruction
+                     Return NULL if the user has not enabled of capturing of xsl:messages via setSaveXslMessage.
+                  Return the sequence of xsl:messages as an XdmValue</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
                   <code>void</code>
                </td>
                <td>
@@ -2698,6 +2709,23 @@
                   <span class="signature">getChildNode(int $index)</span>
                   <div class="fcomment">Get the n'th child node of this node. If the child node
                      selected does not exist then return null.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
+               </td>
+               <td>
+                  <span class="signature">axisNodes(int $axis)</span>
+                  <div class="fcomment">Get array of nodes reachable from this node via a given axis.
+                     param axis identifies which axis is to be navigated. Axis options are as follows: ANCESTOR = 0,
+                     ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
+                     DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
+                     FOLLOWING_SIBLING = 7, NAMESPACE = 8, PARENT = 9, PRECEDING = 10,
+                     PRECEDING_SIBLING = 11 and SELF = 12<br/>
+                     return: a sequence of Xdm nodes on the specified axis, starting from this node as the
+                     context node. The nodes are returned in axis order, that is, in document order for a forwards
+                     axis and in reverse document order for a reverse axis.</div>
                </td>
             </tr>
             <tr>

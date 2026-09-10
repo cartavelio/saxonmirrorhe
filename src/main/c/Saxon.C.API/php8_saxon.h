@@ -303,6 +303,7 @@ PHP_METHOD(XsltExecutable, checkForException);
 PHP_METHOD(XsltExecutable, getErrorCode);
 PHP_METHOD(XsltExecutable, getErrorMessage);
 PHP_METHOD(XsltExecutable, setSaveXslMessage);
+PHP_METHOD(XsltExecutable, getXslMessages);
 PHP_METHOD(XsltExecutable, setCaptureResultDocuments);
 PHP_METHOD(XsltExecutable, getResultDocuments);
 
@@ -408,6 +409,7 @@ PHP_METHOD(XdmNode, isAtomic);
 PHP_METHOD(XdmNode, getChildCount);
 PHP_METHOD(XdmNode, getAttributeCount);
 PHP_METHOD(XdmNode, getChildNode);
+PHP_METHOD(XdmNode, axisNode);
 PHP_METHOD(XdmNode, getParent);
 PHP_METHOD(XdmNode, getAttributeNode);
 PHP_METHOD(XdmNode, getAttributeValue);
