@@ -1467,7 +1467,8 @@
                     <code>System.err</code>, to this file.</p>
         </configfiledesc>
         <typedesc>A file name</typedesc>
-        <p><code>STANDARD_ERROR_OUTPUT_FILE</code> is the name of a file to which Saxon will
+        <desc>
+            <p><code>STANDARD_ERROR_OUTPUT_FILE</code> is the name of a file to which Saxon will
                 redirect output that would otherwise go to the operating system standard error
                 stream (System.err). This is the fallback destination for various tracing and
                 diagnostic output. In some cases a more specific mechanism exists to select the
@@ -1486,6 +1487,7 @@
                 A more selective approach is to use a different <code>ErrorListener</code> in
                 different processing threads, and arrange for each <code>ErrorListener</code> to
                 write to its own logging destination.</p>
+        </desc>
     </feature>
     <feature>
         <featureCode>68</featureCode>
