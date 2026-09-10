@@ -69,6 +69,9 @@ import java.util.Set;
  * <li>ASNTNCE: xs:ENTITY</li>
  * <li>ASNTNCR: xs:IDREF</li>
  *
+ * <li>ASE s{s1|s2|s3}: enum. The enum values are separated by vertical bars, and special
+ * characters (whitespace, vertical bar, backslash, closing brace) are backslash-escaped.</li>
+ *
  * <li>AQ: xs:QName</li>
  * <li>AU: xs:anyURI</li>
  * <li>AA: xs:date</li>
@@ -193,6 +196,9 @@ import java.util.Set;
  * for expressions; it is probably largely unused at run-time, and can therefore be safely ignored when reading a
  * SEF file.</p></li>
  *
+ * <li><p>s - Enumeration string. Takes the form <code>s{s1|s2|s3} where s1, s2, s3 are the enumeration constants,
+ * with special characters (whitespace, vertical bar, backslash, closing brace) backslash-escaped.</code></p></li>
+ *
  * </ul>
  *
  * <p>Named union types have a basic alphacode of "A", followed by the name of the union type in the form
@@ -291,6 +297,8 @@ public class AlphaCode {
         public void setMultiStringProperty(AlphaCodeTree tree, String key, List<String> value) {
             if (key.equals("f")) { // fields in tuple type
                 tree.fieldNames = value;
+            } else if (key.equals("s")) {
+                tree.enumValues = value;
             } else if (key.equals("optionalFields")) {
                 tree.optionalFieldNames = new HashSet<>();
                 tree.optionalFieldNames.addAll(value);
@@ -475,7 +483,7 @@ public class AlphaCode {
                             }
                         }
                         break;
-                    case 'f':  // tuple field types
+                    case 'f': { // tuple field types
                         position++;
                         expect('[');
                         List<String> fieldNames = new ArrayList<>();
@@ -504,8 +512,44 @@ public class AlphaCode {
                             }
                         }
                         break;
+                    }
+                    case 's': { // enumeration values
+                        position++;
+                        expect('{');
+                        List<String> values = new ArrayList<>();
+                        StringBuilder currentValue = new StringBuilder();
+                        boolean escaped = false;
+                        while (true) {
+                            char ch = input.charAt(position++);
+                            if (escaped) {
+                                escaped = false;
+                                currentValue.append(switch (ch) {
+                                    case 's' -> ' ';
+                                    case 'n' -> '\n';
+                                    case 'r' -> '\r';
+                                    case 't' -> '\t';
+                                    case '|' -> '|';
+                                    case '\\' -> '\\';
+                                    case '}' -> '}';
+                                    default -> throw new IllegalArgumentException("Illegal escape sequence: " + ch);
+                                });
+                            } else if (ch == '\\') {
+                                escaped = true;
+                            } else if (ch == '|') {
+                                values.add(currentValue.toString());
+                                currentValue.setLength(0);
+                            } else if (ch == '}') {
+                                values.add(currentValue.toString());
+                                callBack.setMultiStringProperty(container, "s", values);
+                                break;
+                            } else {
+                                currentValue.append(ch);
+                            }
+                        }
+                        break;
+                    }
                     default:
-                        throw new IllegalStateException("Expected one of n|c|t|k|r|v|a|u, found '" + c + "'");
+                        throw new IllegalStateException("Expected one of n|c|t|k|r|v|a|u|s, found '" + c + "'");
                 }
             }
             return container;
@@ -601,6 +645,7 @@ public class AlphaCode {
         OperatorSymbol vennOperator;
         AlphaCodeTree[] vennOperands;
         List<String> fieldNames;
+        List<String> enumValues;
         Set<String> optionalFieldNames;
         AlphaCodeTree selfReference;
     }
@@ -656,6 +701,9 @@ public class AlphaCode {
         ItemType itemType = null;
         if (principal.isEmpty()) {
             itemType = AnyItemType.INSTANCE;
+        } else if (principal.equals("ASE")) {
+            List<String> values = tree.enumValues;
+            itemType = EnumerationUnionType.of(values.toArray(new String[]{}));
         } else if (principal.startsWith("A")) {
             BuiltInAtomicType builtIn = BuiltInAtomicType.fromAlphaCode(principal);
             if (builtIn == null) {
@@ -952,6 +1000,12 @@ public class AlphaCode {
         result.cardinality = "1";
         if (primary instanceof AtomicType && !((AtomicType) primary).isBuiltInType()) {
             result.name = ((AtomicType) primary).getEQName();
+        } else if (primary instanceof EnumerationUnionType enumType) {
+            result.principal = "ASE";
+            result.enumValues = new ArrayList<>();
+            for (ItemType et : enumType.getMemberTypes()) {
+                result.enumValues.add(((SingletonEnumType)et).getValue().toString());
+            }
         } else if (primary instanceof UnionType) {
             StructuredQName name = ((UnionType) primary).getTypeName();
             if (name.hasURI(NamespaceUri.SCHEMA)) {
@@ -1050,6 +1104,21 @@ public class AlphaCode {
             sb.append(tree.cardinality);
         }
         sb.append(tree.principal);
+
+        if (tree.principal.equals("ASE")) {
+            sb.append(" s{");
+            // enumeration type
+            boolean first = true;
+            for (String s : tree.enumValues) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append('|');
+                }
+                sb.append(escapeEnumValue(s));
+            }
+            sb.append('}');
+        }
         if (tree.name != null) {
             sb.append(" n").append(abbreviateEQName(tree.name));
         }
@@ -1167,6 +1236,47 @@ public class AlphaCode {
             }
             return sb.toString();
         }
+    }
+
+    /**
+     * Escape a supplied enumeration value
+     *
+     * @param value a string
+     * @return the string with special characters escaped.
+     */
+
+    private static String escapeEnumValue(String value) {
+        StringBuilder ub = new StringBuilder();
+        for (int i = 0; i < value.length(); i++) {
+            char cp = value.charAt(i);
+            switch (cp) {
+                case ' ':
+                    ub.append('\\').append('s');
+                    break;
+                case '\t':
+                    ub.append('\\').append('t');
+                    break;
+                case '\r':
+                    ub.append('\\').append('r');
+                    break;
+                case '\n':
+                    ub.append('\\').append('n');
+                    break;
+                case '|':
+                    ub.append('\\').append('|');
+                    break;
+                case '}':
+                    ub.append('\\').append('}');
+                    break;
+                case '\\':
+                    ub.append('\\').append('\\');
+                    break;
+                default:
+                    ub.append(cp);
+                    break;
+            }
+        }
+        return ub.toString();
     }
 
     /**
