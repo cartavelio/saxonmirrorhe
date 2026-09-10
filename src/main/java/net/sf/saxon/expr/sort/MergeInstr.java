@@ -591,7 +591,9 @@ public class MergeInstr extends Instruction {
                     String uri = baseItem.getStringValue();
                     NodeInfo node = DocumentFn.makeDoc(uri, getRetainedStaticContext().getStaticBaseUriString(),
                                                        getPackageData(), options, c1, getLocation(), true);
-                    accumulatorManager.setApplicableAccumulators(node.getTreeInfo(), ms.accumulators);
+                    if (node != null) {
+                        accumulatorManager.setApplicableAccumulators(node.getTreeInfo(), ms.accumulators);
+                    }
                     return node;
                 });
                 XPathContext c2 = c1.newMinorContext();

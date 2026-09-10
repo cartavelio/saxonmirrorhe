@@ -60,29 +60,35 @@ public class ConfigTest {
 
     public static String junitTempDirectory() {
         File dir = null;
-        String envar = "SAXON_TEMP_DATA";
-        String env = System.getenv(envar);
-        if (env == null) {
-            // Assume the current directory is the root of the project
-            dir = new File(System.getProperty("user.dir") + "/build");
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find build in " + dir.getAbsolutePath() + "; set " + envar);
-            }
-            dir = new File(System.getProperty("user.dir") + "/build/temp");
-            if (!dir.exists()) {
-                if (!dir.mkdir()) {
-                    throw new RuntimeException("Failed to create " + dir.getAbsolutePath() + "; set " + envar);
+        try {
+            dir = null;
+            String envar = "SAXON_TEMP_DATA";
+            String env = System.getenv(envar);
+            if (env == null) {
+                // Assume the current directory is the root of the project
+                dir = new File(System.getProperty("user.dir") + "/build");
+                if (!dir.exists() || !dir.isDirectory()) {
+                    throw new RuntimeException("Failed to find build in " + dir.getAbsolutePath() + "; set " + envar);
+                }
+                dir = new File(System.getProperty("user.dir") + "/build/temp");
+                if (!dir.exists()) {
+                    if (!dir.mkdir()) {
+                        throw new RuntimeException("Failed to create " + dir.getAbsolutePath() + "; set " + envar);
+                    }
+                }
+                dir = new File(System.getProperty("user.dir") + "/build/temp");
+                if (!dir.exists() || !dir.isDirectory()) {
+                    throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
+                }
+            } else {
+                dir = new File(env);
+                if (!dir.exists() || !dir.isDirectory()) {
+                    throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
                 }
             }
-            dir = new File(System.getProperty("user.dir") + "/build/temp");
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; set " + envar);
-            }
-        } else {
-            dir = new File(env);
-            if (!dir.exists() || !dir.isDirectory()) {
-                throw new RuntimeException("Failed to find " + dir.getAbsolutePath() + "; bad " + envar);
-            }
+        } catch (RuntimeException e) {
+            System.err.println(e.getMessage()); // otherwise we somehow lose the diagnostics
+            throw e;
         }
         return dir.getAbsolutePath() + "/";
     }

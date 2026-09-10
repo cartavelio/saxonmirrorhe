@@ -1,7 +1,12 @@
 package jaxptest;
 
+import net.sf.saxon.lib.EmptySource;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardURIResolver;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.Xslt30Transformer;
+import net.sf.saxon.s9api.XsltCompiler;
+import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
@@ -15,9 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -128,6 +131,54 @@ public class URIResolverTest {
                 href = href.replace(entry.getKey(), entry.getValue());
             }
             return super.resolve(href, base);
+        }
+    }
+
+    @Test
+    public void testEmptySource() {
+        // Bug 4752 introduces the ability for the URIResolver to return an EmptySource object,
+        // interpreted as "no document": the effect is that the doc() and document() functions
+        // return an empty sequence.
+        try {
+            Processor proc = new Processor(false);
+            XsltCompiler comp = proc.newXsltCompiler();
+            XsltExecutable exec = comp.compile(
+                    new StreamSource(new StringReader(
+                    "<out xsl:version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                    "<xsl:copy-of select='document(\"unknown.xml\")'/></out>")));
+            Xslt30Transformer trans = exec.load30();
+            StringWriter sw = new StringWriter();
+            trans.setURIResolver((href, base) -> EmptySource.getInstance());
+            trans.applyTemplates(new StreamSource(new StringReader("<in/>")),
+                                 proc.newSerializer(sw));
+            assertTrue(sw.toString().endsWith("<out/>"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testEmptyStylesheet() {
+        // Bug 4752 introduces the ability for the URIResolver to return an EmptySource object,
+        // interpreted as "no document": the effect is that the doc() and document() functions
+        // return an empty sequence.
+        try {
+            Processor proc = new Processor(false);
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setURIResolver((href, base) -> EmptySource.getInstance());
+            XsltExecutable exec = comp.compile(
+                    new StreamSource(new StringReader(
+                            "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                                    "<xsl:include href='unknown.xml'/></xsl:transform>")));
+            Xslt30Transformer trans = exec.load30();
+            StringWriter sw = new StringWriter();
+            trans.applyTemplates(new StreamSource(new StringReader("<in>xyz</in>")),
+                                 proc.newSerializer(sw));
+            assertTrue(sw.toString().endsWith("xyz"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
         }
     }
 
