@@ -1,12 +1,23 @@
-# Welcome to Saxon@@edition@@!
+# Welcome to SaxonC @@EDITION@@!
 
-This is the official Saxonica python wheel package for [Saxon](https://www.saxonica.com/saxon-c/documentation/index.html), an XML document processor. SaxonC includes a range of tools for XML transformations, XML queries, and schema validations. 
+This is the official Saxonica Python wheel package for
+[Saxon](https://www.saxonica.com/saxon-c/documentation/index.html), an
+XML document processor. SaxonC includes a range of tools for XML
+transformations, XML queries, and schema validations.
 
-The SaxonC release comes in separate wheels for the three product editions, namely: saxonche (HE: open-source), saxoncpe (PE: professional edition) and saxoncee (EE: enterprise edition). Saxon-PE and Saxon-EE are commercial products that require an activation license. 
+The SaxonC release comes in separate wheels for the three product
+editions, namely: saxonche (HE: open-source), saxoncpe (PE:
+professional edition) and saxoncee (EE: enterprise edition). SaxonC-PE
+and SaxonC-EE are commercial products that require an activation
+license.
 
-## When to choose Saxon@@edition@@
+## When to choose SaxonC
 
-The main reason for using Saxon@@edition@@ in preference to other XML tools available for Python is that it supports all the latest W3C standards: XSLT 3.0, XPath 3.1, XQuery 3.1, and XSD 1.1. It even includes experimental support for the draft 4.0 specifications currently under development.
+The main reason for using SaxonC in preference to other XML
+tools available for Python is that it supports all the latest W3C
+standards: XSLT 3.0, XPath 3.1, XQuery 3.1, and XSD 1.1. It even
+includes experimental support for the draft 4.0 specifications
+currently under development.
 
 ## Installation
 
@@ -44,9 +55,9 @@ Please **note** that `license=False` requests the open-source version of Saxon, 
 ### Example #1
 Let's parse a toy XML.
 ```python
-from  saxonc@@edition@@  import PySaxonProcessor
+from saxonc@@edition@@ import PySaxonProcessor
 
-with PySaxonProcessor(license=False) as  proc:
+with PySaxonProcessor(license=False) as proc:
 	xml = """\
 		<out>
 			<person att1='value1' att2='value2'>text1</person>
@@ -82,9 +93,9 @@ As we can see, we can explore the XML node structure, attributes, and many other
 ### Example #2
 Let's use the XML path processor. 
 ```python
-from  saxonc@@edition@@  import PySaxonProcessor
+from saxonc@@edition@@ import PySaxonProcessor
 
-with PySaxonProcessor(license=False) as  proc:
+with PySaxonProcessor(license=False) as proc:
 	xml = """\
 		<out>
 			<person>text1</person>
@@ -113,9 +124,9 @@ Saxon shows the result given the path.
 ### Example #3
 The XSLT processor, #1
 ```python
-from  saxonc@@edition@@  import PySaxonProcessor
+from saxonc@@edition@@ import PySaxonProcessor
 
-with PySaxonProcessor(license=False) as  proc:
+with PySaxonProcessor(license=False) as proc:
 	xsltproc = proc.new_xslt30_processor()
 	
 	document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
@@ -137,9 +148,9 @@ Here is the output that shows the result of transformation.
 ### Example #4
 Watch out for the not-pythonic way!
 ```python
-from  saxonc@@edition@@  import PySaxonProcessor
+from saxonc@@edition@@ import PySaxonProcessor
 
-with PySaxonProcessor(license=False) as  proc:
+with PySaxonProcessor(license=False) as proc:
 	xsltproc = proc.new_xslt30_processor()
 
 	xml = '<a><b>Text</b></a>'
@@ -169,7 +180,8 @@ Here we use an XSLT/stylesheet parameter. Note that the Python string is not the
 Please check out [Saxonica's documentation](https://www.saxonica.com/saxon-c/documentation/index.html) for `xquery`, schema validation, and others.
 
 ## Why the `with` keyword?
-`with` is good to clear out the underlying processes when the program exits.
+Using `with` assures that the underlying processes are cleared out when
+the block finishes.
 
 ## Source code & Development
 - Source code is available here: [Saxonica's site](https://www.saxonica.com/download/c.xml) 
