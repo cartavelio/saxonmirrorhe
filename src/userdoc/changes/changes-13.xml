@@ -125,7 +125,7 @@
         <p>The function <code>fn:iterate-while</code> is renamed <code>fn:while-do</code>, and the function
         <code>fn:do-until</code> is implemented.</p>
         
-        <p>The function <code>map:values</code> is implemented.</p>
+        <p>The functions <code>map:values</code> and <code>array:values</code> are implemented.</p>
         
         <p>The function <code>map:build</code> allows multiple index entries to be created for a single
         input item.</p>

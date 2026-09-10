@@ -87,9 +87,9 @@ public abstract class CsvRepresentationGenerator {
             if (width == row.arrayLength()) {
                 return row;
             } else if (width > row.arrayLength()) {
-                while (width > row.arrayLength()) {
+                do {
                     row = row.append(StringValue.EMPTY_STRING);
-                }
+                } while (width != row.arrayLength());
                 return row;
             } else {
                 return row.subArray(0, width);

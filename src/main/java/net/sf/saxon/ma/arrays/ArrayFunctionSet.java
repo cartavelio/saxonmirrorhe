@@ -244,6 +244,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("members", 1, e -> e.populate(ArrayMembers::new, Parcel.TYPE, STAR, SEQV)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
+            register("values", 1, e -> e.populate(ArrayValues::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
+
 
 
 
@@ -822,6 +825,33 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             ArrayItem input = (ArrayItem) arguments[0].head();
             return members(input);
+        }
+
+        public static GroundedValue members(ArrayItem input) {
+            List<Parcel> parcels = new ArrayList<>(input.arrayLength());
+            for (GroundedValue member : input.members()) {
+                parcels.add(new Parcel(member));
+            }
+            return SequenceExtent.makeSequenceExtent(parcels);
+        }
+
+    }
+
+    /**
+     * Implementation of the proposed XP40 function array:values(array(*)) =&gt; item()*
+     */
+    public static class ArrayValues extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem input = (ArrayItem) arguments[0].head();
+            List<Item> items = new ArrayList<>();
+            for (GroundedValue member : input.members()) {
+                for (Item item : member.asIterable()) {
+                    items.add(item);
+                }
+            }
+            return SequenceExtent.makeSequenceExtent(items);
         }
 
         public static GroundedValue members(ArrayItem input) {
