@@ -52,23 +52,9 @@ public class DateValue extends GDateValue implements XPathComparable {
      */
 
     public DateValue(int year, int month, int day) {
-        this(new MutableGDateValue(year, month, day, true,NO_TIMEZONE, BuiltInAtomicType.DATE));
+        this(new MutableGDateValue(year, month, day, NO_TIMEZONE, BuiltInAtomicType.DATE));
     }
 
-    /**
-     * Constructor given a year, month, day and xsd10. Performs no validation.
-     *
-     * @param year  The year as held internally (note that the year before 1AD is supplied as 0)
-     * @param month The month, 1-12
-     * @param day   The day, 1-31
-     * @param xsd10 Schema version flag. If set to true, the year before 1AD is displayed as -0001;
-     *              if false, it is displayed as 0000; but in both cases, it is held internally as zero. The flag
-     *              makes no difference to dates later than 1AD.
-     */
-
-    public DateValue(int year, int month, int day, boolean xsd10) {
-        this(new MutableGDateValue(year, month, day, xsd10, NO_TIMEZONE, BuiltInAtomicType.DATE));
-    }
 
     /**
      * Constructor given a year, month, and day, and timezone. Performs no validation.
@@ -78,14 +64,11 @@ public class DateValue extends GDateValue implements XPathComparable {
      * @param day   The day, 1-31
      * @param tz    the timezone displacement in minutes from UTC. Supply the value
      *              {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
-     * @param xsd10 Schema version flag. If set to true, the year before 1AD is displayed as -0001;
-     *              if false, it is displayed as 0000; but in both cases, it is held internally as zero. The flag
-     *              makes no difference to dates later than 1AD.
      */
 
-    public DateValue(int year, int month, int day, int tz, boolean xsd10) {
+    public DateValue(int year, int month, int day, int tz) {
         // Method is called by generated Java code.
-        this(new MutableGDateValue(year, month, day, xsd10, tz, BuiltInAtomicType.DATE));
+        this(new MutableGDateValue(year, month, day, tz, BuiltInAtomicType.DATE));
     }
 
     /**
@@ -102,7 +85,7 @@ public class DateValue extends GDateValue implements XPathComparable {
      */
 
     public DateValue(int year, byte month, byte day, int tz, AtomicType type) {
-        this(new MutableGDateValue(year, month, day, false, tz, type));
+        this(new MutableGDateValue(year, month, day, tz, type));
     }
 
     /**
@@ -206,23 +189,22 @@ public class DateValue extends GDateValue implements XPathComparable {
      * @param month - number of a month within the specified year
      * @param day - number of a day within the specified month
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
      * @return an instance of GYearMonthValue or ValidationFailure
      */
-    public static ConversionResult makeDateValue(int year, int month, int day, int timezoneInMinutes, boolean allowYearZero) {
+    public static ConversionResult makeDateValue(int year, int month, int day, int timezoneInMinutes) {
         DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         g.typeLabel = BuiltInAtomicType.DATE;
         if (g.tzMinutes != timezoneInMinutes) {
-            GDateValue.setValues(g, year, month, day, timezoneInMinutes, allowYearZero);
+            GDateValue.setValues(g, year, month, day, timezoneInMinutes);
         } else {
-            GDateValue.setValues(g, year, month, day, allowYearZero);
+            GDateValue.setValues(g, year, month, day);
         }
         if (g.error != null) return g.error;
         return new DateValue(g);
     }
 
-    public static ConversionResult makeDateValue(int year, int month, int day, boolean allowYearZero) {
-        return DateValue.makeDateValue(year, month, day, CalendarValue.NO_TIMEZONE, allowYearZero);
+    public static ConversionResult makeDateValue(int year, int month, int day) {
+        return DateValue.makeDateValue(year, month, day, CalendarValue.NO_TIMEZONE);
     }
 
     /**
@@ -248,11 +230,11 @@ public class DateValue extends GDateValue implements XPathComparable {
 
     public static DateValue tomorrow(int year, int month, int day) {
         if (DateValue.isValidDate(year, month, day + 1)) {
-            return new DateValue(year, month, (byte) (day + 1), true);
+            return new DateValue(year, month, (byte) (day + 1));
         } else if (month < 12) {
-            return new DateValue(year, (byte) (month + 1), (byte) 1, true);
+            return new DateValue(year, (byte) (month + 1), (byte) 1);
         } else {
-            return new DateValue(year + 1, (byte) 1, (byte) 1, true);
+            return new DateValue(year + 1, (byte) 1, (byte) 1);
         }
     }
 
@@ -267,15 +249,15 @@ public class DateValue extends GDateValue implements XPathComparable {
 
     public static DateValue yesterday(int year, int month, int day) {
         if (day > 1) {
-            return new DateValue(year, month, (day - 1), true);
+            return new DateValue(year, month, (day - 1));
         } else if (month > 1) {
             if (month == 3 && isLeapYear(year)) {
-                return new DateValue(year, 2, 29, true);
+                return new DateValue(year, 2, 29);
             } else {
-                return new DateValue(year, (month - 1), daysPerMonth[month - 2], true);
+                return new DateValue(year, (month - 1), daysPerMonth[month - 2]);
             }
         } else {
-            return new DateValue(year - 1, 12, 31, true);
+            return new DateValue(year - 1, 12, 31);
         }
     }
 
@@ -291,7 +273,7 @@ public class DateValue extends GDateValue implements XPathComparable {
         TwineBuilder tb = TwineBuilder.make(16);
         int yr = year;
         if (year <= 0) {
-            yr = -yr + (hasNoYearZero ? 1 : 0);           // no year zero in lexical space for XSD 1.0
+            yr = -yr;
             if (yr != 0) {
                 tb = tb.append('-');
             }
@@ -357,7 +339,7 @@ public class DateValue extends GDateValue implements XPathComparable {
     @Override
     public DateValue adjustTimezone(int timezone) {
         DateTimeValue dt = toDateTime().adjustTimezone(timezone);
-        return new DateValue(dt.getYear(), dt.getMonth(), dt.getDay(), dt.getTimezoneInMinutes(), hasNoYearZero);
+        return new DateValue(dt.getYear(), dt.getMonth(), dt.getDay(), dt.getTimezoneInMinutes());
     }
 
     /**
@@ -394,7 +376,6 @@ public class DateValue extends GDateValue implements XPathComparable {
                 }
             }
             d.tzMinutes = getTimezoneInMinutes();
-            d.hasNoYearZero = this.hasNoYearZero;
             return new DateValue(d);
         } else if (duration instanceof YearMonthDurationValue) {
             int months = ((YearMonthDurationValue) duration).getLengthInMonths();
@@ -410,7 +391,7 @@ public class DateValue extends GDateValue implements XPathComparable {
             while (!isValidDate(y, m, d)) {
                 d -= 1;
             }
-            return new DateValue(y, (byte) m, (byte) d, getTimezoneInMinutes(), hasNoYearZero);
+            return new DateValue(y, (byte) m, (byte) d, getTimezoneInMinutes());
         } else {
             throw new XPathException("Date arithmetic is not available for xs:duration, only for its subtypes")
                     .asTypeError().withErrorCode("XPTY0004");
@@ -532,7 +513,7 @@ public class DateValue extends GDateValue implements XPathComparable {
             L = j / 11;
             long m = j + 2 - (12 * L);
             long y = 100 * (n - 49) + i + L;
-            return new MutableGDateValue((int)y, (int)m, (int)d, true, NO_TIMEZONE, BuiltInAtomicType.DATE);
+            return new MutableGDateValue((int)y, (int)m, (int)d, NO_TIMEZONE, BuiltInAtomicType.DATE);
         } else {
             // add 12000 years and subtract them again...
             MutableGDateValue dt = mutableDateFromJulianDayNumber(julianDayNumber +

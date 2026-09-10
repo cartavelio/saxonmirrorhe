@@ -590,7 +590,7 @@ public abstract class Converter {
         @Override
         public DateValue convert(AtomicValue input) {
             DateTimeValue dt = (DateTimeValue)input;
-            return new DateValue(dt.getYear(), dt.getMonth(), dt.getDay(), dt.getTimezoneInMinutes(), dt.isXsd10Rules());
+            return new DateValue(dt.getYear(), dt.getMonth(), dt.getDay(), dt.getTimezoneInMinutes());
         }
     }
 
@@ -616,7 +616,7 @@ public abstract class Converter {
         @Override
         public GYearMonthValue convert(AtomicValue input) {
             DateTimeValue dt = (DateTimeValue) input;
-            return new GYearMonthValue(dt.getYear(), dt.getMonth(), dt.getTimezoneInMinutes(), dt.isXsd10Rules());
+            return new GYearMonthValue(dt.getYear(), dt.getMonth(), dt.getTimezoneInMinutes());
         }
     }
 
@@ -629,7 +629,7 @@ public abstract class Converter {
         @Override
         public GYearValue convert(AtomicValue input) {
             DateTimeValue dt = (DateTimeValue) input;
-            return new GYearValue(dt.getYear(), dt.getTimezoneInMinutes(), dt.isXsd10Rules());
+            return new GYearValue(dt.getYear(), dt.getTimezoneInMinutes());
         }
     }
 

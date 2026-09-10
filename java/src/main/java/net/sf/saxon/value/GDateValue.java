@@ -29,31 +29,27 @@ public abstract class GDateValue extends CalendarValue {
     protected final int year;         // unlike the lexical representation, includes a year zero
     protected final int month;
     protected final int day;
-    protected final boolean hasNoYearZero;
 
     public GDateValue(int year, int month, int day, boolean hasNoYearZero, int tzMinutes, AtomicType typeLabel) {
         super(typeLabel, tzMinutes);
         this.year = year;
         this.month = month;
         this.day = day;
-        this.hasNoYearZero = hasNoYearZero;
     }
 
     protected static class MutableGDateValue {
         public int year;       // the year as written, +1 for BC years
         public byte month;     // the month as written, range 1-12
         public byte day;       // the day as written, range 1-31
-        public boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
         public int tzMinutes = NO_TIMEZONE;
         public AtomicType typeLabel = BuiltInAtomicType.DATE_TIME;
         public ValidationFailure error = null;
 
         public MutableGDateValue() {}
-        public MutableGDateValue(int year, int month, int day, boolean hasNoYearZero, int tzMinutes, AtomicType typeLabel) {
+        public MutableGDateValue(int year, int month, int day, int tzMinutes, AtomicType typeLabel) {
             this.year = year;
             this.month = (byte)month;
             this.day = (byte)day;
-            this.hasNoYearZero = hasNoYearZero;
             this.tzMinutes = tzMinutes;
             this.typeLabel = typeLabel;
         }
@@ -64,7 +60,6 @@ public abstract class GDateValue extends CalendarValue {
         m.year = year;
         m.month = (byte)month;
         m.day = (byte)day;
-        m.hasNoYearZero = hasNoYearZero;
         m.tzMinutes = getTimezoneInMinutes();
         m.typeLabel = getItemType();
         return m;
@@ -75,7 +70,6 @@ public abstract class GDateValue extends CalendarValue {
         this.year = m.year;
         this.month = m.month;
         this.day = m.day;
-        this.hasNoYearZero = m.hasNoYearZero;
     }
 
     protected GDateValue(DateTimeValue.MutableDateTimeValue m) {
@@ -83,7 +77,6 @@ public abstract class GDateValue extends CalendarValue {
         this.year = m.year;
         this.month = m.month;
         this.day = m.day;
-        this.hasNoYearZero = m.hasNoYearZero;
     }
 
     protected EnumSet<AccessorFn.Component> getDefinedComponents() {
@@ -143,7 +136,7 @@ public abstract class GDateValue extends CalendarValue {
         calendar.setLenient(false);
         int yr = year;
         if (year <= 0) {
-            yr = hasNoYearZero ? 1 - year : 0 - year;
+            yr = -year;
             calendar.set(Calendar.ERA, GregorianCalendar.BC);
         }
         //noinspection MagicConstant
@@ -167,7 +160,6 @@ public abstract class GDateValue extends CalendarValue {
 
     /*@NotNull*/
     protected static void setLexicalValue(MutableGDateValue m, UnicodeString s, boolean allowYearZero) {
-        m.hasNoYearZero = !allowYearZero;
         StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:+TZ", true);
         try {
             if (!tok.hasMoreTokens()) {
@@ -209,9 +201,6 @@ public abstract class GDateValue extends CalendarValue {
             if (m.year == 0 && !allowYearZero) {
                 m.error = badDate("Year zero is not allowed", s);
                 return;
-            }
-            if (era < 0 && !allowYearZero) {
-                m.year++;      // if year zero not allowed, -0001 is the year before +0001, represented as 0 internally.
             }
             if (!tok.hasMoreTokens()) {
                 m.error = badDate("Too short", s);
@@ -377,16 +366,15 @@ public abstract class GDateValue extends CalendarValue {
      * @param month - number of a month within the specified year
      * @param day - number of a day within the specified month
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
      */
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, int timezoneInMinutes, boolean allowYearZero) {
-        GDateValue.setValues(m, year, month, day, allowYearZero);
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, int timezoneInMinutes) {
+        GDateValue.setValues(m, year, month, day);
         if (m.error != null) return;
         DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
     }
 
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, boolean allowYearZero) {
-        GYearValue.setValues(m, year, allowYearZero);
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day) {
+        GYearValue.setValues(m, year);
         if (m.error != null) return;
 
         GMonthDayValue.setValues(m, month, day); // Includes checks that month is between 1-12 (inc) and  day is between 1-31 (inc)
@@ -526,7 +514,7 @@ public abstract class GDateValue extends CalendarValue {
     /*@NotNull*/
     @Override
     public DateTimeValue toDateTime() {
-        return new DateTimeValue(year, month, day, (byte) 0, (byte) 0, (byte) 0, 0, getTimezoneInMinutes(), hasNoYearZero);
+        return new DateTimeValue(year, month, day, (byte) 0, (byte) 0, (byte) 0, 0, getTimezoneInMinutes());
     }
 
 
@@ -556,7 +544,7 @@ public abstract class GDateValue extends CalendarValue {
                 if (!getDefinedComponents().contains(component)) {
                     return null;
                 }
-                return Int64Value.makeIntegerValue(year > 0 || !hasNoYearZero ? year : year - 1);
+                return Int64Value.makeIntegerValue(year);
             case MONTH:
                 if (!getDefinedComponents().contains(component)) {
                     return null;

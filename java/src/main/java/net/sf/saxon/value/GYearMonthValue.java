@@ -82,23 +82,22 @@ public class GYearMonthValue extends GDateValue {
      * @param year - number of a year in the Gregorian calendar
      * @param month - number of a month within the specified year
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
      * @return an instance of GYearMonthValue or ValidationFailure
      */
-    public static ConversionResult makeGYearMonthValue(int year, int month, int timezoneInMinutes, boolean allowYearZero) {
+    public static ConversionResult makeGYearMonthValue(int year, int month, int timezoneInMinutes) {
         DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         g.typeLabel = BuiltInAtomicType.G_YEAR_MONTH;
         if (g.tzMinutes != timezoneInMinutes) {
-            GYearMonthValue.setValues(g, year, month, timezoneInMinutes, allowYearZero);
+            GYearMonthValue.setValues(g, year, month, timezoneInMinutes);
         } else {
-            GYearMonthValue.setValues(g, year, month, allowYearZero);
+            GYearMonthValue.setValues(g, year, month);
         }
         if (g.error != null) return g.error;
         return new GYearMonthValue(g);
     }
 
-    public static ConversionResult makeGYearMonthValue(int year, int month, boolean allowYearZero) {
-        return GYearMonthValue.makeGYearMonthValue(year, month, CalendarValue.NO_TIMEZONE, allowYearZero);
+    public static ConversionResult makeGYearMonthValue(int year, int month) {
+        return GYearMonthValue.makeGYearMonthValue(year, month, CalendarValue.NO_TIMEZONE);
     }
 
     /**
@@ -114,16 +113,15 @@ public class GYearMonthValue extends GDateValue {
      * @param year - number of a year in the Gregorian calendar
      * @param month - number of a month within the specified year
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
      */
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int timezoneInMinutes, boolean allowYearZero) {
-        GYearMonthValue.setValues(m, year, month, allowYearZero);
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int timezoneInMinutes) {
+        GYearMonthValue.setValues(m, year, month);
         if (m.error != null) return;
         DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
     }
 
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, boolean allowYearZero) {
-        GYearValue.setValues(m, year, allowYearZero);
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month) {
+        GYearValue.setValues(m, year);
         if (m.error != null) return;
         GMonthValue.setValues(m, month); // Includes check that month is between 1-12 (inc)
     }
@@ -135,14 +133,13 @@ public class GYearMonthValue extends GDateValue {
      * @param year - number of a year in the Gregorian calendar
      * @param month - number of a month within the specified year
      * @param tz - number of minutes to adjust by for the timezone
-     * @param xsd10 - false if the year '0000' is allowed (per XSD 1.1), true if it is not (per XSD 1.0)
      */
-    public GYearMonthValue(int year, int month, int tz, boolean xsd10) {
-        this(new MutableGDateValue(year, month, 1, xsd10, tz, BuiltInAtomicType.G_YEAR_MONTH));
+    public GYearMonthValue(int year, int month, int tz) {
+        this(new MutableGDateValue(year, month, 1, tz, BuiltInAtomicType.G_YEAR_MONTH));
     }
 
     public GYearMonthValue(int year, int month, int tz, AtomicType type) {
-        this(new MutableGDateValue(year, month, 1,false, tz, type));
+        this(new MutableGDateValue(year, month, 1, tz, type));
     }
 
     /**
@@ -185,7 +182,7 @@ public class GYearMonthValue extends GDateValue {
         TwineBuilder tb = TwineBuilder.make(16);
         int yr = year;
         if (year <= 0) {
-            yr = -yr + (hasNoYearZero ? 1 : 0);           // no year zero in lexical space for XSD 1.0
+            yr = -yr;
             if (yr != 0) {
                 tb = tb.append('-');
             }
@@ -227,7 +224,7 @@ public class GYearMonthValue extends GDateValue {
     @Override
     public CalendarValue adjustTimezone(int tz) {
         DateTimeValue dt = toDateTime().adjustTimezone(tz);
-        return new GYearMonthValue(dt.getYear(), dt.getMonth(), dt.getTimezoneInMinutes(), hasNoYearZero);
+        return new GYearMonthValue(dt.getYear(), dt.getMonth(), dt.getTimezoneInMinutes());
     }
 }
 

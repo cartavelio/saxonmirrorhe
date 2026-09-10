@@ -124,7 +124,7 @@ public class GMonthValue extends GDateValue {
     }
 
     public GMonthValue(int month, int tz, AtomicType type) {
-        this(new MutableGDateValue(2000, month, 1, false, tz, type));
+        this(new MutableGDateValue(2000, month, 1, tz, type));
     }
 
     /**

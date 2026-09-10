@@ -92,7 +92,12 @@ public class CastExpression extends CastingExpression implements Callable {
             converter = new Converter.UpCastingConverter(getTargetType());
         } else {
 
-            ConversionRules rules = visitor.getConfiguration().getConversionRules();
+            ConversionRules rules;
+            if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40) {
+                rules = ConversionRules.DEFAULT;
+            } else {
+                rules = visitor.getConfiguration().getConversionRules();
+            }
 
             if (sourceItemType.isAtomicType() && sourceItemType != BuiltInAtomicType.ANY_ATOMIC) {
                 //System.err.println("Allocating converter from " + sourceType + " to " + getTargetType());

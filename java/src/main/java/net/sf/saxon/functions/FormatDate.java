@@ -350,10 +350,10 @@ public class FormatDate extends SystemFunction implements Callable {
                     int year = now.getYear();
                     int tzoffset = value.getTimezoneInMinutes();
                     DateTimeValue baseDate =
-                            new DateTimeValue(year, (byte)1, (byte)1, (byte)0, (byte)0, (byte)0, 0, tzoffset, false);
+                            new DateTimeValue(year, (byte)1, (byte)1, (byte)0, (byte)0, (byte)0, 0, tzoffset);
                     Optional<Boolean> b = NamedTimeZone.inSummerTime(baseDate, country);
                     if (b.isPresent() && b.get()) {
-                        baseDate = new DateTimeValue(year, (byte) 7, (byte) 1, (byte) 0, (byte) 0, (byte) 0, 0, tzoffset, false);
+                        baseDate = new DateTimeValue(year, (byte) 7, (byte) 1, (byte) 0, (byte) 0, (byte) 0, 0, tzoffset);
                     }
                     dtv = DateTimeValue.makeDateTimeValue(baseDate.toDateValue(), (TimeValue)value);
                 } else {

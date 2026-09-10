@@ -62,23 +62,22 @@ public class GYearValue extends GDateValue {
      *
      * @param year - number of a year in the Gregorian calendar
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
      * @return an instance of GYearValue or ValidationFailure
      */
-    public static ConversionResult makeGYearValue(int year, int timezoneInMinutes, boolean allowYearZero) {
+    public static ConversionResult makeGYearValue(int year, int timezoneInMinutes) {
         DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         g.typeLabel = BuiltInAtomicType.G_YEAR;
         if (g.tzMinutes != timezoneInMinutes) {
-            GYearValue.setValues(g, year, timezoneInMinutes, allowYearZero);
+            GYearValue.setValues(g, year, timezoneInMinutes);
         } else {
-            GYearValue.setValues(g, year, allowYearZero);
+            GYearValue.setValues(g, year);
         }
         if (g.error != null) return g.error;
         return new GYearValue(g);
     }
 
-    public static ConversionResult makeGYearValue(int year, boolean allowYearZero) {
-        return GYearValue.makeGYearValue(year, CalendarValue.NO_TIMEZONE, allowYearZero);
+    public static ConversionResult makeGYearValue(int year) {
+        return GYearValue.makeGYearValue(year, CalendarValue.NO_TIMEZONE);
     }
 
     /**
@@ -93,25 +92,14 @@ public class GYearValue extends GDateValue {
      * @param m - a mutable placeholder for storing the instance values during validation checks
      * @param year - number of a year in the Gregorian calendar
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
      */
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int timezoneInMinutes, boolean allowYearZero) {
-        GYearValue.setValues(m, year, allowYearZero);
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int timezoneInMinutes) {
+        GYearValue.setValues(m, year);
         if (m.error != null) return;
         DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
     }
 
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, boolean allowYearZero) {
-        m.hasNoYearZero = !allowYearZero;
-
-        // "0000" is an illegal year value per XSD 1.0 (https://www.w3.org/TR/xmlschema-2/#truncatedformats)
-        // but legal per XSD 1.1.
-        if (year == 0 && !allowYearZero ) {
-            m.error = badDateComponent("Year zero is not allowed", year, "FODT0006");
-            return;
-        }
-
-        // Internally, dates are stored per XSD 1.1 and adjusted to match XSD 1.0 on request.
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year) {
         m.year = year;
     }
 
@@ -122,14 +110,13 @@ public class GYearValue extends GDateValue {
      *
      * @param year - number of a year in the Gregorian calendar
      * @param tz - number of minutes to adjust by for the timezone
-     * @param xsd10 - false if the year '0000' is allowed (per XSD 1.1), true if it is not (per XSD 1.0)
      */
-    public GYearValue(int year, int tz, boolean xsd10) {
-        this(new MutableGDateValue(year, 1, 1, xsd10,tz, BuiltInAtomicType.G_YEAR));
+    public GYearValue(int year, int tz) {
+        this(new MutableGDateValue(year, 1, 1, tz, BuiltInAtomicType.G_YEAR));
     }
 
     public GYearValue(int year, int tz, AtomicType type) {
-        this(new MutableGDateValue(year, 1, 1, false, tz, type));
+        this(new MutableGDateValue(year, 1, 1, tz, type));
     }
 
     /**
@@ -176,7 +163,7 @@ public class GYearValue extends GDateValue {
         TwineBuilder tb = TwineBuilder.make(16);
         int yr = year;
         if (year <= 0) {
-            yr = -yr + (hasNoYearZero ? 1 : 0);           // no year zero in lexical space for XSD 1.0
+            yr = -yr;
             if (yr != 0) {
                 tb = tb.append('-');
             }
@@ -217,7 +204,7 @@ public class GYearValue extends GDateValue {
     @Override
     public CalendarValue adjustTimezone(int tz) {
         DateTimeValue dt = toDateTime().adjustTimezone(tz);
-        return new GYearValue(dt.getYear(), dt.getTimezoneInMinutes(), hasNoYearZero);
+        return new GYearValue(dt.getYear(), dt.getTimezoneInMinutes());
     }
 }
 

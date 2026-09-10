@@ -123,7 +123,7 @@ public class GDayValue extends GDateValue {
     }
 
     public GDayValue(int day, int tz, AtomicType type) {
-        this(new MutableGDateValue(2000, 1, day, false, tz, type));
+        this(new MutableGDateValue(2000, 1, day, tz, type));
     }
 
     /**

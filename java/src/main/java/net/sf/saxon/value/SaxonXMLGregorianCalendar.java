@@ -746,18 +746,18 @@ public class SaxonXMLGregorianCalendar extends XMLGregorianCalendar {
                 }
             } else if (day == DatatypeConstants.FIELD_UNDEFINED) {
                 if (month == DatatypeConstants.FIELD_UNDEFINED) {
-                    return new GYearValue(year.intValue(), tzOffset, true);
+                    return new GYearValue(year.intValue(), tzOffset);
                 } else {
-                    return new GYearMonthValue(year.intValue(), (byte) month, tzOffset, true);
+                    return new GYearMonthValue(year.intValue(), (byte) month, tzOffset);
                 }
             }
-            return new DateValue(year.intValue(), (byte) month, (byte) day, tzOffset, true);
+            return new DateValue(year.intValue(), (byte) month, (byte) day, tzOffset);
         } else if (year == null) {
             return new TimeValue((byte) hour, (byte) minute, (byte) second, getMicrosecond()*1000,
                                  tzOffset, BuiltInAtomicType.TIME);
         } else {
             return new DateTimeValue(year.intValue(), (byte) month, (byte) day,
-                    (byte) hour, (byte) minute, (byte) second, getMicrosecond(), tzOffset, true);
+                    (byte) hour, (byte) minute, (byte) second, getMicrosecond(), tzOffset);
         }
     }
 }

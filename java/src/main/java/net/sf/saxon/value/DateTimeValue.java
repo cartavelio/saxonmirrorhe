@@ -72,10 +72,9 @@ public final class DateTimeValue extends CalendarValue
     private final int minute;    // the minutes as written, range 0-59
     private final int second;    // the seconds as written, range 0-59 (no leap seconds)
     private final int nanosecond; // the number of nanoseconds within the current second
-    private final boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
 
     public DateTimeValue(int year, int month, int day, int hour, int minute, int second,
-                         int nanosecond, boolean hasNoYearZero, int tzMinutes, AtomicMetadata typeLabel) {
+                         int nanosecond, int tzMinutes, AtomicMetadata typeLabel) {
         super(typeLabel, tzMinutes);
         this.year = year;
         this.month = month;
@@ -84,7 +83,6 @@ public final class DateTimeValue extends CalendarValue
         this.minute = minute;
         this.second = second;
         this.nanosecond = nanosecond;
-        this.hasNoYearZero = hasNoYearZero;
     }
 
     private DateTimeValue(DateTimeValue.MutableDateTimeValue m) {
@@ -96,7 +94,6 @@ public final class DateTimeValue extends CalendarValue
         this.minute = m.minute;
         this.second = m.second;
         this.nanosecond = m.nanosecond;
-        this.hasNoYearZero = m.hasNoYearZero;
     }
 
     public static class MutableDateTimeValue {
@@ -107,7 +104,6 @@ public final class DateTimeValue extends CalendarValue
         public int minute;    // the minutes as written, range 0-59
         public int second;    // the seconds as written, range 0-59 (no leap seconds)
         public int nanosecond; // the number of nanoseconds within the current second
-        public boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
         public int tzMinutes = NO_TIMEZONE;
         public AtomicMetadata typeLabel = BuiltInAtomicType.DATE_TIME;
         public ValidationFailure error = null;
@@ -122,7 +118,6 @@ public final class DateTimeValue extends CalendarValue
         m.minute = minute;
         m.second = second;
         m.nanosecond = nanosecond;
-        m.hasNoYearZero = hasNoYearZero;
         m.tzMinutes = getTimezoneInMinutes();
         m.typeLabel = getItemType();
         return m;
@@ -130,7 +125,7 @@ public final class DateTimeValue extends CalendarValue
 
     private static DateTimeValue fromMutableCopy(MutableDateTimeValue m) {
         return new DateTimeValue(m.year, m.month, m.day, m.hour, m.minute, m.second,
-                                 m.nanosecond, m.hasNoYearZero, m.tzMinutes, m.typeLabel);
+                                 m.nanosecond, m.tzMinutes, m.typeLabel);
     }
 
     /**
@@ -193,7 +188,6 @@ public final class DateTimeValue extends CalendarValue
                     calendar.get(Calendar.DST_OFFSET)) / 60_000;
         }
         m.typeLabel = BuiltInAtomicType.DATE_TIME;
-        m.hasNoYearZero = true;
         return fromMutableCopy(m);
     }
 
@@ -301,7 +295,7 @@ public final class DateTimeValue extends CalendarValue
         int tz = zo.getTotalSeconds() / 60;
         return new DateTimeValue(ldt.getYear(), (byte) ldt.getMonthValue(), (byte) ldt.getDayOfMonth(),
                                               (byte) ldt.getHour(), (byte) ldt.getMinute(), (byte) ldt.getSecond(),
-                                              ldt.getNano(), false, tz, BuiltInAtomicType.DATE_TIME_STAMP);
+                                              ldt.getNano(), tz, BuiltInAtomicType.DATE_TIME_STAMP);
     }
 
     /**
@@ -317,7 +311,7 @@ public final class DateTimeValue extends CalendarValue
     public static DateTimeValue fromLocalDateTime(LocalDateTime localDateTime) {
         return new DateTimeValue(localDateTime.getYear(), (byte) localDateTime.getMonthValue(), (byte) localDateTime.getDayOfMonth(),
                                  (byte) localDateTime.getHour(), (byte) localDateTime.getMinute(), (byte) localDateTime.getSecond(),
-                                 localDateTime.getNano(), false, NO_TIMEZONE, BuiltInAtomicType.DATE_TIME);
+                                 localDateTime.getNano(), NO_TIMEZONE, BuiltInAtomicType.DATE_TIME);
     }
     //#endif
 
@@ -326,7 +320,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/ public static final DateTimeValue EPOCH =
-            new DateTimeValue(1970, (byte) 1, (byte) 1, (byte) 0, (byte) 0, (byte) 0, 0, 0, true);
+            new DateTimeValue(1970, (byte) 1, (byte) 1, (byte) 0, (byte) 0, (byte) 0, 0, 0);
 
     /**
      * Factory method: create a dateTime value given a date and a time.
@@ -357,7 +351,6 @@ public final class DateTimeValue extends CalendarValue
         v.nanosecond = time.getNanosecond();
         v.tzMinutes = Math.max(tz1, tz2);
         v.typeLabel = BuiltInAtomicType.DATE_TIME;
-        v.hasNoYearZero = date.hasNoYearZero;
         return fromMutableCopy(v);
     }
 
@@ -378,10 +371,9 @@ public final class DateTimeValue extends CalendarValue
      */
 
     /*@NotNull*/
-    public static ConversionResult makeDateTimeValue(UnicodeString s, /*@NotNull*/ ConversionRules rules) {
+    public static ConversionResult makeDateTimeValue(UnicodeString s, ConversionRules rules) {
         // input must have format [-]yyyy-mm-ddThh:mm:ss[.fff*][([+|-]hh:mm | Z)]
         MutableDateTimeValue dt = new MutableDateTimeValue();
-        dt.hasNoYearZero = !rules.isAllowYearZero();
         StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:.+TZ", true);
 
         if (!tok.hasMoreTokens()) {
@@ -414,10 +406,7 @@ public final class DateTimeValue extends CalendarValue
             return badDate("When year exceeds 4 digits, leading zeroes are not allowed", s);
         }
         if (dt.year == 0 && !rules.isAllowYearZero()) {
-            return badDate("Year zero is not allowed", s);
-        }
-        if (era < 0 && !rules.isAllowYearZero()) {
-            dt.year++;     // if year zero not allowed, -0001 is the year before +0001, represented as 0 internally.
+            return badDate("Year zero is not allowed under XSD 1.0", s);
         }
         if (!tok.hasMoreTokens()) {
             return badDate("Too short", s);
@@ -667,7 +656,7 @@ public final class DateTimeValue extends CalendarValue
      * checks.  If a validation error is detected, an instance of
      * ValidationFailure will be returned instead.
      *
-     * @param year - number of a year in the Gregorian calendar
+     * @param year - number of a year in the Gregorian calendar. Year zero is accepted.
      * @param month - number of a month within the specified year
      * @param day - number of a day within the specified month
      * @param hour - hour within the specified day
@@ -675,22 +664,21 @@ public final class DateTimeValue extends CalendarValue
      * @param second - second within the minute specified
      * @param nanosecond - nanosecond within the second specified
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
      * @return - an instance of DateTimeValue or ValidationFailure
      */
-    public static ConversionResult makeDateTimeValue(int year, int month, int day, int hour, int minute, int second, int nanosecond, int timezoneInMinutes, boolean allowYearZero) {
+    public static ConversionResult makeDateTimeValue(int year, int month, int day, int hour, int minute, int second, int nanosecond, int timezoneInMinutes) {
         DateTimeValue.MutableDateTimeValue g = new DateTimeValue.MutableDateTimeValue();
         if (g.tzMinutes != timezoneInMinutes) {
-            DateTimeValue.setValues(g, year, month, day, hour, minute, second, nanosecond, timezoneInMinutes, allowYearZero);
+            DateTimeValue.setValues(g, year, month, day, hour, minute, second, nanosecond, timezoneInMinutes);
         } else {
-            DateTimeValue.setValues(g, year, month, day, hour, minute, second, nanosecond, allowYearZero);
+            DateTimeValue.setValues(g, year, month, day, hour, minute, second, nanosecond);
         }
         if (g.error != null) return g.error;
         return new DateTimeValue(g);
     }
 
-    public static ConversionResult makeDateTimeValue(int year, int month, int day, int hour, int minute, int second, int nanosecond, boolean allowYearZero) {
-        return DateTimeValue.makeDateTimeValue(year, month, day, hour, minute, second, nanosecond, CalendarValue.NO_TIMEZONE, allowYearZero);
+    public static ConversionResult makeDateTimeValue(int year, int month, int day, int hour, int minute, int second, int nanosecond) {
+        return DateTimeValue.makeDateTimeValue(year, month, day, hour, minute, second, nanosecond, CalendarValue.NO_TIMEZONE);
     }
 
     /**
@@ -710,10 +698,9 @@ public final class DateTimeValue extends CalendarValue
      * @param second - second within the minute specified
      * @param nanosecond - nanosecond within the second specified
      * @param timezoneInMinutes - number of minutes to adjust by for the timezone
-     * @param allowYearZero - true if the year '0000' is allowed (per XSD 1.1), false if it is not (per XSD 1.0)
      */
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, int hour, int minute, int second, int nanosecond, int timezoneInMinutes, boolean allowYearZero) {
-        DateTimeValue.setValues(m, year, month, day, hour, minute, second, nanosecond, allowYearZero);
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, int hour, int minute, int second, int nanosecond, int timezoneInMinutes) {
+        DateTimeValue.setValues(m, year, month, day, hour, minute, second, nanosecond);
         DateTimeValue.setTimezoneInMinutes(m, timezoneInMinutes);
 
         // If all eight fields are populated, change the datatype to dateTimeStamp
@@ -722,10 +709,10 @@ public final class DateTimeValue extends CalendarValue
         }
     }
 
-    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, int hour, int minute, int second, int nanosecond, boolean allowYearZero) {
+    protected static void setValues(DateTimeValue.MutableDateTimeValue m, int year, int month, int day, int hour, int minute, int second, int nanosecond) {
 
         // Process the date portion of the DateTime
-        GDateValue.setValues(m, year, month, day, allowYearZero);
+        GDateValue.setValues(m, year, month, day);
         if (m.error != null) return;
 
         // Process the time portion of the DateTime
@@ -806,35 +793,7 @@ public final class DateTimeValue extends CalendarValue
 
     public DateTimeValue(int year, int month, int day,
                          int hour, int minute, int second, int nanosecond, int tz) {
-        this(year, month, day, hour, minute, second, nanosecond, false, tz, BuiltInAtomicType.DATE_TIME);
-    }
-
-    /**
-     * Constructor: construct a DateTimeValue from its components.
-     * This constructor performs no validation.
-     * <p>Note: for historic reasons, this constructor accepts the fractional seconds value
-     * only to microsecond precision. To get nanosecond precision, use the 8-argument constructor
-     * and set the XSD 1.0 option separately</p>
-     *
-     * @param year        The year as held internally (so the year before year 1 is year 0)
-     * @param month       The month, 1-12
-     * @param day         The day 1-31
-     * @param hour        the hour value, 0-23
-     * @param minute      the minutes value, 0-59
-     * @param second      the seconds value, 0-59
-     * @param microsecond the number of microseconds, 0-999999
-     * @param tz          the timezone displacement in minutes from UTC. Supply the value
-     *                    {@link CalendarValue#NO_TIMEZONE} if there is no timezone component.
-     * @param hasNoYearZero  true if the dateTime value should behave under XSD 1.0 rules, that is,
-     *                    negative dates assume there is no year zero. Note that regardless of this
-     *                    setting, the year argument is set on the basis that the year before +1 is
-     *                    supplied as zero; but if the hasNoYearZero flag is set, this value will be displayed
-     *                    with a year of -1, and {@link #getYear() will return -1}
-     */
-
-    public DateTimeValue(int year, int month, int day,
-                         int hour, int minute, int second, int microsecond, int tz, boolean hasNoYearZero) {
-        this(year, month, day, hour, minute, second, microsecond * 1000, hasNoYearZero, tz, BuiltInAtomicType.DATE_TIME);
+        this(year, month, day, hour, minute, second, nanosecond, tz, BuiltInAtomicType.DATE_TIME);
     }
 
     /**
@@ -932,16 +891,6 @@ public final class DateTimeValue extends CalendarValue
     @Override
     public DateTimeValue toDateTime() {
         return this;
-    }
-
-    /**
-     * Ask whether this value uses the XSD 1.0 rules (which don't allow year zero) or the XSD 1.1 rules (which do).
-     *
-     * @return true if the value uses the XSD 1.0 rules
-     */
-
-    public boolean isXsd10Rules() {
-        return hasNoYearZero;
     }
 
     /**
@@ -1065,7 +1014,7 @@ public final class DateTimeValue extends CalendarValue
         calendar.setLenient(false);
         int yr = year;
         if (year <= 0) {
-            yr = hasNoYearZero ? 1 - year : -year;
+            yr = -year;
             calendar.set(Calendar.ERA, GregorianCalendar.BC);
         }
         //noinspection MagicConstant
@@ -1149,7 +1098,7 @@ public final class DateTimeValue extends CalendarValue
         TwineBuilder tb = TwineBuilder.make(32);
         int yr = year;
         if (year <= 0) {
-            yr = -yr + (hasNoYearZero ? 1 : 0);    // no year zero in lexical space for XSD 1.0
+            yr = -yr;
             if (yr != 0) {
                 tb = tb.append('-');
             }
@@ -1189,7 +1138,7 @@ public final class DateTimeValue extends CalendarValue
 
     /*@NotNull*/
     public DateValue toDateValue() {
-        return new DateValue(year, month, day, getTimezoneInMinutes(), hasNoYearZero);
+        return new DateValue(year, month, day, getTimezoneInMinutes());
     }
 
     /**
@@ -1269,7 +1218,7 @@ public final class DateTimeValue extends CalendarValue
         if (h >= 0 && h < 24) {
             return new DateTimeValue(year, month, day,
                                                  (byte) h, (byte) mi, second, nanosecond,
-                                                 hasNoYearZero, timezone, BuiltInAtomicType.DATE_TIME);
+                                                 timezone, BuiltInAtomicType.DATE_TIME);
         }
 
         // Following code is designed to handle the corner case of adjusting from -14:00 to +14:00 or
@@ -1280,14 +1229,14 @@ public final class DateTimeValue extends CalendarValue
             DateValue t = DateValue.yesterday(dt.getYear(), dt.getMonth(), dt.getDay());
             dt = new DateTimeValue(t.getYear(), t.getMonth(), t.getDay(),
                     (byte) h, (byte) mi, second, nanosecond,
-                                   hasNoYearZero, timezone, BuiltInAtomicType.DATE_TIME);
+                                   timezone, BuiltInAtomicType.DATE_TIME);
         }
         if (h > 23) {
             h -= 24;
             DateValue t = DateValue.tomorrow(year, month, day);
             dt = new DateTimeValue(t.getYear(), t.getMonth(), t.getDay(),
                                    (byte) h, (byte) mi, second, nanosecond,
-                                   hasNoYearZero, timezone, BuiltInAtomicType.DATE_TIME);
+                                   timezone, BuiltInAtomicType.DATE_TIME);
         }
         return dt;
     }
@@ -1311,7 +1260,6 @@ public final class DateTimeValue extends CalendarValue
             julian = julian.add(seconds);
             MutableDateTimeValue dt = fromJulianInstant(julian).makeMutableCopy();
             dt.tzMinutes = getTimezoneInMinutes();
-            dt.hasNoYearZero = this.hasNoYearZero;
             return fromMutableCopy(dt);
         } else if (duration instanceof YearMonthDurationValue) {
             int months = ((YearMonthDurationValue) duration).getLengthInMonths();
@@ -1328,7 +1276,7 @@ public final class DateTimeValue extends CalendarValue
                 d -= 1;
             }
             return new DateTimeValue(y, (byte) m, (byte) d,
-                    hour, minute, second, nanosecond, hasNoYearZero, getTimezoneInMinutes(), BuiltInAtomicType.DATE_TIME);
+                    hour, minute, second, nanosecond, getTimezoneInMinutes(), BuiltInAtomicType.DATE_TIME);
         } else {
             throw new XPathException("DateTime arithmetic is not supported on xs:duration, only on its subtypes")
                     .withErrorCode("XPTY0004").asTypeError();
@@ -1374,7 +1322,7 @@ public final class DateTimeValue extends CalendarValue
             case YEAR_ALLOWING_ZERO:
                 return Int64Value.makeIntegerValue(year);
             case YEAR:
-                return Int64Value.makeIntegerValue(year > 0 || !hasNoYearZero ? year : year - 1);
+                return Int64Value.makeIntegerValue(year);
             case MONTH:
                 return Int64Value.makeIntegerValue(month);
             case DAY:
