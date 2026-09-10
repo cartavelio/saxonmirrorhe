@@ -657,8 +657,8 @@ task graal_eec_jar(
         into "${saxoncReleaseDir}/Saxon.C.API/python_saxon"
         include "saxonc.pyx"
         include "saxoncClasses.pxd"
-        include "nodekind.py"
         include "readme.txt"
+        include "*.py"
       }
     }
     doLast {
@@ -810,7 +810,7 @@ task graal_eec_jar(
                        ? "${pypiDir}/libs/darwin"
                        : (systemOs.isLinux()
                           ? "${pypiDir}/libs/nix"
-                          : null))
+                          : "libs/win"))
 
     doLast {
       if (SAXONC_HOME == null) {
@@ -908,14 +908,22 @@ task graal_eec_jar(
     doLast {
       exec {
         workingDir "${buildDir}/${edition}c_pypi"
-        commandLine "python3", "-mpip", "install", "-r", "requirements.txt"
+        if(systemOs.isMacOsX() || systemOs.isLinux()) {
+          commandLine "python3", "-mpip", "install", "-r", "requirements.txt"
+        } else {
+          commandLine "python", "-mpip", "install", "-r", "requirements.txt"
+        }
       }
     }
 
     doLast {
       exec {
         workingDir "${buildDir}/${edition}c_pypi"
-        commandLine "python3", "setup.py", "bdist_wheel"
+        if(systemOs.isMacOsX() || systemOs.isLinux()) {
+          commandLine "python3", "setup.py", "bdist_wheel"
+        } else {
+          commandLine "python", "-mpip", "install", "-r", "requirements.txt"
+        }
       }
     }
   }
@@ -928,7 +936,7 @@ task graal_eec_jar(
                     ? "libs/darwin"
                     : (systemOs.isLinux()
                        ? "libs/nix"
-                       : null))
+                       : "libs/win"))
       if (libdir == null) {
         throw GradleException("Don't know how to create Python wheels on this OS.");
       }
@@ -968,102 +976,5 @@ task saxonc_stage_wheels(
 
   doLast {
     delete "${buildDir}/wheels/${systemOsName}"
-  }
-}
-
-task saxonc_build_wheels(
-) {
-  def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
-
-  def now = new Date()
-  def isodate = "${now.format('yyyy-MM-dd')}T${now.format('HH-mm-ss')}"
-
-  def buildMac     = project.findProperty('macWheels') != null
-  def buildLinux   = project.findProperty('linuxWheels') != null
-  def buildWindows = project.findProperty('windowsWheels') != null
-
-  if (!buildMac && !buildLinux && !buildWindows) {
-    buildMac = systemOs.isMacOsX()
-    buildLinux = systemOs.isLinux()
-    buildWindows = systemOs.isWindows()
-  }
-
-  def arch = []
-  if (buildMac) {
-    arch.add("mac")
-  }
-  if (buildLinux) {
-    arch.add("linux")
-  }
-  if (buildWindows) {
-    arch.add("windows")
-  }
-
-  doFirst {
-    if (scp == null) {
-      throw new GradleException("Did not find 'scp' on path")
-    }
-    delete "${buildDir}/BuildWheels"
-  }
-
-  doLast {
-    println("Cloning BuildWheels")
-    exec {
-      workingDir buildDir
-      commandLine 'git', 'clone', 'git@github.com:Saxonica/BuildWheels.git'
-    }
-  }
-
-  if (project.findProperty("skipWheelUpload") == null) {
-    doLast {
-      println("Copying ${systemOsName} staging files to dev.saxonica.com")
-      exec {
-        workingDir "${buildDir}/distributions"
-        commandLine scp, "${systemOsName}.wheels.tar.gz",
-          "dev.saxonica.com:/var/www/html/dev.saxonica.com/wheel-binaries/${user}/"
-      }
-    }
-  }
-
-  doLast {
-    println("Creating build configuration")
-    def m = new PrintStream(new File("${buildDir}/BuildWheels/config.json"))
-    m.println("{")
-    m.println("  \"user\": \"${user}\",")
-    m.println("  \"mac\": ${buildMac},")
-    m.println("  \"linux\": ${buildLinux},")
-    m.println("  \"windows\": ${buildWindows},")
-
-    if (buildMac) {
-      def path = project.findProperty('macWheels') ?: projectDir
-      m.println("  \"macpath\": \"${path}\",")
-    }
-
-    m.println("  \"date\": \"${isodate}\"")
-    m.println("}")
-    m.close()
-  }
-
-  doLast {
-    def msg = "Triggered by ${user} on ${isodate} for ${arch.join(', ')}"
-
-    exec {
-      workingDir "${buildDir}/BuildWheels"
-      commandLine 'git', 'commit', '-m', msg, 'config.json'
-    }
-  }
-
-  if (project.findProperty('wheelDryRun') == null) {
-    doLast {
-      println("Pushing build trigger")
-      exec {
-        workingDir "${buildDir}/BuildWheels"
-        commandLine 'git', 'push'
-      }
-    }
-  } else {
-    doLast {
-      println("Dry run: trigger not pushed.")
-    }
   }
 }
