@@ -65,20 +65,7 @@
                                         <xsl:variable name="topic-shortName" select="shortName"/>
                                         <xsl:variable name="details" select="details"/>
                                         <xsl:variable name="spec" select="spec"/>
-                                        <xsl:for-each select="products/product[@editions and (not(exists(@level)) or @level ne 'Open')]">
-                                            <xsl:variable name="editions" as="xs:string*">
-                                                <xsl:choose>
-                                                    <xsl:when test="exists(@level)">
-                                                        <xsl:variable name="level" as="xs:string" select="tokenize(@level, '\s')[position() = last()]"/>                                                        
-                                                        <xsl:for-each select="ancestor::products/product[$level = tokenize(@level, '\s')]">
-                                                            <xsl:sequence select="tokenize(@editions, '\s')"/>
-                                                        </xsl:for-each>
-                                                    </xsl:when>
-                                                    <xsl:otherwise>
-                                                        <xsl:sequence select="tokenize(@editions, '\s')"/>
-                                                    </xsl:otherwise>
-                                                </xsl:choose>
-                                            </xsl:variable>
+                                        <xsl:for-each select="products/product[(not(exists(@level)) or @level ne 'Open')]">
                                         <tr>
                                             <td class="topic">
                                                 <xsl:variable name="feature-with-level" as="xs:string" 
