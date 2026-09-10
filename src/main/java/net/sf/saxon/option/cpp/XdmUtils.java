@@ -40,7 +40,7 @@ public class XdmUtils {
     }
 
     private enum XdmType {
-        XDM_VALUE(0), XDM_ATOMIC_VALUE(1), XDM_NODE(2),  XDM_ARRAY_VALUE(3), XDM_MAP_VALUE(4), XDM_FUNCTION_ITEM(5);
+        XDM_VALUE(0), XDM_ATOMIC_VALUE(1), XDM_NODE(2),  XDM_ARRAY_VALUE(3), XDM_MAP_VALUE(4), XDM_FUNCTION_ITEM(5), XDM_EMPTY_SEQUENCE(6);
 
         private final int value;
 
@@ -561,6 +561,9 @@ public class XdmUtils {
     @CEntryPoint(name = "j_getXdmObjectType", exceptionHandler = SaxonCExceptionIntHandler.class)
     public  static int getXdmObjectType(IsolateThread thread, ObjectHandle valueRef){
         Object value = SaxonCAPI.objectHandles.get(valueRef);
+        if(SaxonCAPI.debug){
+            System.err.println("call j_getXdmObjectType="+value.getClass().getName() + value.getClass());
+        }
         if(value instanceof XdmAtomicValue) {
             return XdmType.XDM_ATOMIC_VALUE.value;
         } else if (value instanceof XdmNode) {
@@ -571,6 +574,8 @@ public class XdmUtils {
           return XdmType.XDM_ARRAY_VALUE.value;
         } else if (value instanceof  XdmFunctionItem) {
           return XdmType.XDM_FUNCTION_ITEM.value;
+        }  else if (value instanceof XdmEmptySequence) {
+            return XdmType.XDM_EMPTY_SEQUENCE.value;
         }
         return XdmType.XDM_VALUE.value;
     }

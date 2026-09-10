@@ -330,7 +330,7 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    @CEntryPoint(name = "j_evaluateSingle")
+    @CEntryPoint(name = "j_evaluateSingle", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long evaluateSingle(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         String cwd = null;
@@ -366,8 +366,8 @@ public class XPathProcessor extends SaxonCAPI {
      * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
      * @param values   -  The values for the parameters and properties required by the XPath expression
      **/
-    @CEntryPoint(name = "j_effectiveBooleanValue")
-    public static byte effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_effectiveBooleanValue", exceptionHandler = SaxonCExceptionIntHandler.class)
+    public static int effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         Map<QName, XdmValue> parameters = new HashMap<>();
         Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, false);
@@ -383,23 +383,13 @@ public class XPathProcessor extends SaxonCAPI {
         setupXPathCompiler(compiler, optionsMap);
         XPathSelector selector = compiler.compile(xpathStr).load();
 
-        try {
-
-            applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
-        } catch (SaxonApiException e) {
-            throw e;
-        }
+        applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
 
         /*if (contextItem != null) {
             selector.setContextItem(contextItem);
         }     */
-        boolean result;
-        try {
-            result = selector.effectiveBooleanValue();
-        } catch (SaxonApiException e) {
-            throw e;
-        }
-        return CTypeConversion.toCBoolean(result);
+        boolean result = selector.effectiveBooleanValue();
+        return (int)(result ? 1 : 0);
 
 
     }

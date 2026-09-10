@@ -280,7 +280,7 @@ if(procRef<0) {
 }
 
 #ifdef DEBUG
-    setDebugMode(1);
+    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
 #endif
 
 }
@@ -478,7 +478,7 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
             std::cerr<<"iter->first"<<(iter->first).c_str()<<std::endl;
 #endif
 
-#ifdef DEBUG
+/*#ifdef DEBUG
             std::string s1 = typeid(iter->second).name();
             std::cerr<<"Type of itr:"<<s1<<std::endl;
 
@@ -496,7 +496,7 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
             if((iter->second)->getUnderlyingValue() == -1) {
                 std::cerr<<"(iter->second)->getUnderlyingValue() is nullptr"<<std::endl;
             }}
-#endif
+#endif  */
 
             addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)(iter->first).c_str(), (void *)(iter->second)->getUnderlyingValue());
 
@@ -539,7 +539,7 @@ int64_t SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *>
 #endif
 
             addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)(iter->first).c_str(), (void *)(iter->second)->getUnderlyingValue());
-#ifdef DEBUG
+/*#ifdef DEBUG
             std::string s1 = typeid(iter->second).name();
             std::cerr<<"Type of itr:"<<s1<<std::endl;
 
@@ -557,7 +557,7 @@ int64_t SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *>
             if((iter->second)->getUnderlyingValue() == nullptr) {
                 std::cerr<<"(iter->second)->getUnderlyingValue() is nullptr"<<std::endl;
             }}
-#endif
+#endif*/
 
 
         }
