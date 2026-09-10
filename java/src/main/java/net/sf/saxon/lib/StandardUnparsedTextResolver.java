@@ -133,7 +133,7 @@ public class StandardUnparsedTextResolver
         return detectEncoding(inputStream, encoding, config, debug);
     }
 
-    private static Reader detectEncoding(InputStream inputStream, String encoding, Configuration config, boolean debug) throws XPathException {
+    public static Reader detectEncoding(InputStream inputStream, String encoding, Configuration config, boolean debug) throws XPathException {
         try {
             if (encoding == null) {
                 Logger err = config.getLogger();

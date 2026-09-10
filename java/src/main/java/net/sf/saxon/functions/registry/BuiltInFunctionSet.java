@@ -7,10 +7,16 @@
 
 package net.sf.saxon.functions.registry;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.OperandUsage;
+import net.sf.saxon.expr.StaticContext;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.Concat31;
+import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.functions.OptionsParameter;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
@@ -18,7 +24,9 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.PlainType;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
