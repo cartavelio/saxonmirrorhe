@@ -8,7 +8,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.options.Option
+import org.gradle.process.ExecOperations
 import javax.annotation.Nullable
+import javax.inject.Inject
 
 interface ArgStringifier {
     fun argToString(arg: Any): String {
@@ -103,7 +105,7 @@ class MapArgs(private val args: MutableMap<String, Any> = mutableMapOf()) : ArgS
     }
 }
 
-abstract class PytestRunner : DefaultTask() {
+abstract class PytestRunner  @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     private val baseArguments = ListArgs()
     private val testArguments = ListArgs()
     private val pytestTrailingArguments = ListArgs()
@@ -225,7 +227,7 @@ abstract class PytestRunner : DefaultTask() {
     @TaskAction
     fun execute() {
         val runner = this
-        project.exec {
+        ex.exec {
             if (runner.hasWorkingDir()) {
                 workingDir(runner.workingDir.get())
             }
@@ -241,7 +243,7 @@ abstract class PytestRunner : DefaultTask() {
     }
 }
 
-abstract class TestSuiteTask : DefaultTask() {
+abstract class TestSuiteTask  @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     private val arguments = ListArgs()
     private var environment = MapArgs()
 
@@ -310,32 +312,13 @@ abstract class TestSuiteTask : DefaultTask() {
             arguments.add("-l", language)
         }
         val runner = this
-        project.exec {
+        ex.exec {
             workingDir(runner.workingDir.get())
             executable(runner.python.get())
             args(runner.arguments.get())
             if (runner.hasEnvironment()) {
                 environment(runner.resolvedEnvironment())
             }
-//
-//                    def suitedir
-//                    if (testsuite == "xslt30") {
-//                        suitedir = "${testsuites.w3cXslt30TestSuiteDir}"
-//                    } else if (testsuite == "qt3") {
-//                        suitedir = testsuites.w3cQT3TestSuiteDir
-//                    } else {
-//                        throw new GradleException("Unexpected test suite: ${testsuite}")
-//                    }
-//
-//            executable pythonExe.get()
-//            args "./${testsuite}_test_suite_driver.py",
-//            suitedir, "-c", "catalog.xml",
-//            "-o", file(output_path)
-//            if (testsuite == "qt3") {
-//                args "-l", lang
-//            }
-//            environment SAXONC_HOME: saxonLicenseDir
-            println(commandLine)
         }
     }
 }

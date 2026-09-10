@@ -22,6 +22,11 @@ val javaSources by configurations.resolvable("javaSources") {
     extendsFrom(javaSourcesBucket)
 }
 
+val javaSampleClassesBucket by configurations.dependencyScope("javaSampleClassesBucket")
+val javaSampleClasses by configurations.resolvable("javaSampleClasses") {
+  extendsFrom(javaSampleClassesBucket)
+}
+
 val javadocBucket by configurations.dependencyScope("javadocBucket")
 val javadocSources = configurations.resolvable("javadocSources") {
   extendsFrom(javadocBucket)
@@ -47,9 +52,9 @@ val copySaxoncDoc by configurations.resolvable("copySaxoncDoc") {
   extendsFrom(copySaxoncDocBucket)
 }
 
-val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
+val featureKeysSourcesBucket by configurations.dependencyScope("featureKeysSourcesBucket")
 val featureKeysSources = configurations.resolvable("featureKeysSources") {
-  extendsFrom(featureKeysBucket)
+  extendsFrom(featureKeysSourcesBucket)
 }
 
 val dotnetDocHtmlBucket by configurations.dependencyScope("dotnetDocHtmlBucket")
@@ -65,6 +70,9 @@ val userdocViewerAppJS by configurations.resolvable("userdocViewerAppJS") {
 dependencies {
   javaSourcesBucket(files(layout.projectDirectory.files("../java/src/main/java")))
 
+  javaSampleClassesBucket(project(mapOf("path" to ":java",
+                                        "configuration" to "javaSampleClasses")))
+
   javadocBucket(project(mapOf("path" to ":java",
                               "configuration" to "javadocArtifacts")))
 
@@ -77,8 +85,9 @@ dependencies {
   copySaxoncDocBucket(project(mapOf("path" to ":documentation",
                                    "configuration" to "copySaxoncDoc")))
 
-  featureKeysBucket(project(mapOf("path" to ":java:keys",
-                                  "configuration" to "featureKeys")))
+  featureKeysSourcesBucket(project(mapOf("path" to ":featurekeys",
+                                         "configuration" to "featureKeysSources")))
+
   dotnetDocHtmlBucket(project(mapOf("path" to ":documentation",
                                   "configuration" to "dotnetDocHtmlArtifacts")))
   userdocViewerAppJSBucket(project(mapOf("path" to ":documentation",
@@ -89,7 +98,7 @@ dependencies {
 val resources = tasks.register<Zip>("resources") {
   group = "Internal"
   destinationDirectory = layout.buildDirectory
-  archiveFileName = "saxon-resources.zip"
+  archiveFileName = "saxon-resources-${saxonMajorVersion}.zip"
   from(layout.buildDirectory.dir("stage"))
   into("/")
 }
@@ -135,7 +144,7 @@ resources { dependsOn(stageSourceUserdoc) }
 
 val stageNotices = tasks.register<Copy>("stageNotices") {
   group = "Internal"
-  from(layout.projectDirectory.dir("../READMEs/src/notices"))
+  from(layout.projectDirectory.dir("../src/main/notices"))
   into(layout.buildDirectory.dir("stage/notices"))
   include("JAMESCLARK.txt")
   include("ICU-J.txt")
@@ -147,7 +156,7 @@ resources { dependsOn(stageNotices) }
 val stageSamples = tasks.register<Copy>("stageSamples") {
   group = "Internal"
   into(layout.buildDirectory.dir("stage/samples"))
-  from(layout.projectDirectory.dir("../src/samples"))
+  from(layout.projectDirectory.dir("../samples/src"))
   include("config/config.xml")
   include("config/config-HE.xml")
   include("config/saxon-attributes.xsd")
@@ -178,20 +187,36 @@ val stageSamples = tasks.register<Copy>("stageSamples") {
 }
 resources { dependsOn(stageSamples) }
 
+val stageSampleClasses = tasks.register<Copy>("stageSampleClasses") {
+  group = "Internal"
+  dependsOn(javaSampleClasses)
+  from(zipTree(javaSampleClasses.singleFile)) {
+    exclude("classes/META-INF/**")
+  }
+  into(layout.buildDirectory.dir("stage/samples/java"))
+}
+resources { dependsOn(stageSampleClasses) }
+
+val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
+  group = "Internal"
+  into(layout.buildDirectory.dir("featureKeys"))
+  from(featureKeysSources)
+}
+
 val stageConfigSchema = tasks.register<JavaExec>("stageConfigSchema") {
   group = "Internal"
-  inputs.files(featureKeysSources)
-  inputs.files(layout.projectDirectory.file("../src/samples/config/config-raw.xsd"))
+  inputs.files(copy_feature_keys)
+  inputs.files(layout.projectDirectory.file("../samples/src/config/config-raw.xsd"))
   outputs.files(layout.buildDirectory.file("stage/samples/config/config.xsd"))
 
   classpath = configurations.named("documentation").get()
   mainClass = "com.saxonica.Transform"
-  args("-xsl:${layout.projectDirectory.file("tools/featureKeys/FeatureKeysToSchema.xsl")}",
+  args("-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToSchema.xsl").get()}",
        "-o:${layout.buildDirectory.file("stage/samples/config/config.xsd").get()}",
        "-it:main",
-       "FeatureKeys=${layout.projectDirectory.file("../src/main/xml/FeatureKeys.xml")}",
-       "AdditionalFeatures=${layout.projectDirectory.file("../src/main/xml/AdditionalFeatures.xml")}",
-       "ConfigSchema=file://${layout.projectDirectory.file("../src/samples/config/config-raw.xsd")}")
+       "FeatureKeys=${layout.buildDirectory.file("featureKeys/xml/FeatureKeys.xml").get()}",
+       "AdditionalFeatures=${layout.buildDirectory.file("featureKeys/xml/AdditionalFeatures.xml").get()}",
+       "ConfigSchema=file://${layout.projectDirectory.file("../samples/src/config/config-raw.xsd")}")
 }
 resources { dependsOn(stageConfigSchema) }
 
@@ -199,11 +224,11 @@ val stageSampleSources = tasks.register("stageSampleSources") {
   group = "Internal"
   doLast {
     copy {
-      from(layout.projectDirectory.dir("../src/samples/java"))
+      from(layout.projectDirectory.dir("../samples/src/java"))
       into(layout.buildDirectory.dir("stage/samples/java"))
     }
     copy {
-      from(layout.projectDirectory.dir("../src/samples/cs"))
+      from(layout.projectDirectory.dir("../samples/src/cs"))
       into(layout.buildDirectory.dir("stage/samples/cs"))
     }
   }
@@ -224,12 +249,12 @@ val stageJavadocHtml = tasks.register<Copy>("stageJavadocHtml") {
 }
 resources { dependsOn(stageJavadocHtml) }
 
-val stageDocumentationResources = tasks.register<Copy>("stageDocumentationResources") {
+val stageResourcesDoc = tasks.register<Copy>("stageResourcesDoc") {
   group = "Internal"
-  from(layout.projectDirectory.dir("../documentation/src/main/resources"))
+  from(layout.projectDirectory.dir("src/main/resources/doc"))
   into(layout.buildDirectory.dir("stage/doc"))
 }
-resources { dependsOn(stageDocumentationResources) }
+resources { dependsOn(stageResourcesDoc) }
 
 // FIXME: sample classes
 

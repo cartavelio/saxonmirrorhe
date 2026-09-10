@@ -6,6 +6,7 @@ plugins {
   id("saxon-build")
   id("com.saxonica.build.saxoncs")
   id("com.saxonica.build.testsuites")
+  id("com.saxonica.build.samples")
 }
 
 repositories {
@@ -23,7 +24,7 @@ configure<SaxonCSExtension> {
 }
 
 val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
-val csFeatureKeysBucket by configurations.dependencyScope("csFeatureKeysBucket")
+val csharpFeatureKeysBucket by configurations.dependencyScope("csharpFeatureKeysBucket")
 val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
 val transpilerRuntime by configurations.dependencyScope("transpilerRuntime")
 val javaEeRuntime by configurations.dependencyScope("javaEeRuntime")
@@ -38,12 +39,19 @@ val preprocessorClasspath by configurations.resolvable("preprocessorClasspath") 
     extendsFrom(preprocessor)
 }
 
+val sampleSourcesBucket by configurations.dependencyScope("sampleSourcesBucket")
+val sampleSources = configurations.resolvable("sampleSources") {
+  extendsFrom(sampleSourcesBucket)
+}
+
 dependencies {
   javaSourcesBucket(files(layout.projectDirectory.files("../../java/src/main/java")))
-  csFeatureKeysBucket(project(mapOf("path" to ":csharp:keys",
-                                    "configuration" to "featureKeys")))
-  javaFeatureKeysBucket(project(mapOf("path" to ":java:keys",
-                                      "configuration" to "featureKeys")))
+  csharpFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
+                                    "configuration" to "csharpFeatureKeys")))
+  javaFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
+                                      "configuration" to "javaFeatureKeys")))
+  sampleSourcesBucket(project(mapOf("path" to ":samples",
+                                    "configuration" to "sampleSources")))
 
   transpilerRuntime(project(":csharp:transpiler", "runtimeElements"))
   transpilerRuntime("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
@@ -66,8 +74,8 @@ val javaSources = configurations.resolvable("javaSources") {
   extendsFrom(javaSourcesBucket)
 }
 
-val csFeatureKeysSources = configurations.resolvable("csFeatureKeysSources") {
-  extendsFrom(csFeatureKeysBucket)
+val csharpFeatureKeysSources = configurations.resolvable("csharpFeatureKeysSources") {
+  extendsFrom(csharpFeatureKeysBucket)
 }
 
 val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources") {
@@ -83,17 +91,12 @@ val javaEe = configurations.resolvable("javaEe") {
   extendsFrom(javaEeRuntime)
 }  
 
-val preprocessJava = tasks.register("preprocessJava") {
+val preprocessJava = tasks.register<JavaExec>("preprocessJava") {
   inputs.files(javaSources)
   inputs.files(javaFeatureKeysSources)
   outputs.dir(layout.buildDirectory.dir("src/main/java"))
 
   doFirst {
-    delete(layout.buildDirectory.dir("tmp/java"))
-    mkdir(layout.buildDirectory.dir("tmp/java"))
-  }
-
-  doLast {
     copy {
       from(files(javaSources)
                .asFileTree
@@ -140,8 +143,7 @@ val preprocessJava = tasks.register("preprocessJava") {
                  exclude("net/sf/saxon/lib/SystemLogger.java")
                  exclude("net/sf/saxon/lib/DigestMaker.java")
                  exclude("net/sf/saxon/ma/arrays/ImmutableArrayItem.java")
-                 exclude("net/sf/saxon/ma/map/Vavr.java")
-                 //exclude("net/sf/saxon/ma/map/HashTrieMap.java")
+                 exclude("net/sf/saxon/ma/map/HashTrieMap.java")
                  exclude("net/sf/saxon/ma/trie/**")
                  exclude("net/sf/saxon/om/EnumSetTool.java")
                  exclude("net/sf/saxon/om/One.java")
@@ -299,26 +301,26 @@ val preprocessJava = tasks.register("preprocessJava") {
     }
   }
 
-  doLast {
-    javaexec {
-      classpath = preprocessorClasspath
-      mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
-      args("/c",
-           "/i:${layout.buildDirectory.dir("tmp/java").get()}",
-           "/o:${layout.buildDirectory.dir("src/main/java").get()}",
-           "/p:EE=true", "/p:PE=false",
-           "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true",
-           "/p:STREAM=true", "/p:SCHEMA=true", "/p:CSHARP=true")
-    }
+  doFirst {
+    delete(layout.buildDirectory.dir("tmp/java"))
+    mkdir(layout.buildDirectory.dir("tmp/java"))
   }
+
+  classpath = preprocessorClasspath
+  mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
+  args("/c",
+       "/i:${layout.buildDirectory.dir("tmp/java").get()}",
+       "/o:${layout.buildDirectory.dir("src/main/java").get()}",
+       "/p:EE=true", "/p:PE=false",
+       "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true",
+       "/p:STREAM=true", "/p:SCHEMA=true", "/p:CSHARP=true")
 }
 
 val jarFinder = JarFinder(configurations.named("transpiler").get())
 
-val transpile = tasks.register<JavaExec>("transpile") {
+val transpileToXml = tasks.register<JavaExec>("transpileToXml") {
   group = LifecycleBasePlugin.BUILD_GROUP
   inputs.files(preprocessJava)
-  inputs.dir(layout.projectDirectory.dir("../transpiler/tools/xslt"))
   outputs.dir(layout.buildDirectory.dir("tmp/xml"))
   doFirst {
     mkdir("${layout.buildDirectory.dir("tmp/xml").get()}")
@@ -327,36 +329,50 @@ val transpile = tasks.register<JavaExec>("transpile") {
   classpath = configurations.named("transpiler").get()
   mainClass = "ToXml"
   args("-j:${layout.buildDirectory.dir("src").get()}",
-       "-repo:${layout.projectDirectory}/../transpiler/",
+       "-repo:${layout.projectDirectory.file("../transpiler/")}",
        "-xml:${layout.buildDirectory.dir("tmp/xml").get()}",
        "-h:${layout.buildDirectory.dir("src/main/java").get()}",
        "-src:${layout.buildDirectory.dir("src/main/java").get()}",
        "-ee:${javaEe.get().map { it }.get(0)}",
-       "-vavr:${jarFinder.find("vavr-champ-${findProperty("vavrVersion")}.jar")}",
-       "-vavrMatch:${jarFinder.find("vavr-match-${findProperty("vavrVersion")}.jar")}",
        "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}")
+}
 
-  doLast {
-    javaexec {
-      classpath = preprocessorClasspath
-      mainClass = "net.sf.saxon.Transform"
-      args("-it",
-           "-xsl:${layout.projectDirectory.file("../transpiler/tools/xslt/xml-to-digest.xsl")}",
-           "-o:${layout.buildDirectory.file("tmp/digest.xml").get()}",
-           "xmlDir=${layout.buildDirectory.dir("tmp/xml").get()}")
-    }
-  }
+val transpileToDigest = tasks.register<JavaExec>("transpileToDigest") {
+  group = LifecycleBasePlugin.BUILD_GROUP
+  inputs.dir(layout.projectDirectory.dir("../transpiler/tools/xslt"))
+  inputs.files(transpileToXml)
+  outputs.file(layout.buildDirectory.file("tmp/digest.xml"))
 
-  doLast {
-    javaexec {
-      classpath = preprocessorClasspath
-      mainClass = "net.sf.saxon.Transform"
-      args("-xsl:${layout.projectDirectory.file("../transpiler/tools/xslt/refine-digest.xsl")}",
-           "-s:${layout.buildDirectory.file("tmp/digest.xml").get()}",
-           "-o:${layout.buildDirectory.file("digest.xml").get()}",
-           "xmlDir=${layout.buildDirectory.dir("tmp/xml").get()}")
-    }
-  }
+  // Fix Windows filenames so that Java doesn't get confused
+  val xdigest = saxonBuild.puri("${layout.projectDirectory.file("../transpiler/tools/xslt/xml-to-digest.xsl")}")
+  val xmldir = saxonBuild.puri("${layout.buildDirectory.dir("tmp/xml").get()}")
+  val tmpdigest = saxonBuild.puri("${layout.buildDirectory.file("tmp/digest.xml").get()}")
+
+  classpath = preprocessorClasspath
+  mainClass = "net.sf.saxon.Transform"
+  args("-it",
+       "-xsl:${xdigest}",
+       "-o:${tmpdigest}",
+       "xmlDir=${xmldir}")
+}
+
+val transpile = tasks.register<JavaExec>("transpile") {
+  group = LifecycleBasePlugin.BUILD_GROUP
+  inputs.files(transpileToDigest)
+  outputs.file(layout.buildDirectory.file("digest.xml"))
+
+  // Fix Windows filenames so that Java doesn't get confused
+  val rdigest = saxonBuild.puri("${layout.projectDirectory.file("../transpiler/tools/xslt/refine-digest.xsl")}")
+  val xmldir = saxonBuild.puri("${layout.buildDirectory.dir("tmp/xml").get()}")
+  val tmpdigest = saxonBuild.puri("${layout.buildDirectory.file("tmp/digest.xml").get()}")
+  val digest = saxonBuild.puri("${layout.buildDirectory.file("digest.xml").get()}")
+
+  classpath = preprocessorClasspath
+  mainClass = "net.sf.saxon.Transform"
+  args("-xsl:${rdigest}",
+       "-s:${tmpdigest}",
+       "-o:${digest}",
+       "xmlDir=${xmldir}")
 }
 
 val generateCode = tasks.register<JavaExec>("generateCode") {
@@ -374,8 +390,6 @@ val generateCode = tasks.register<JavaExec>("generateCode") {
        "-repo:${layout.projectDirectory}/../transpiler/",
        "-digest:${layout.buildDirectory.file("digest.xml").get()}",
        "-ee:${javaEe.get().map { it }.get(0)}",
-       "-vavr:${jarFinder.find("vavr-champ-${findProperty("vavrVersion")}.jar")}",
-       "-vavrMatch:${jarFinder.find("vavr-match-${findProperty("vavrVersion")}.jar")}",
        "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}",
        "-debug")
 
@@ -405,11 +419,11 @@ val copyResources = tasks.register("copyResources") {
 // I'm trying to make this build practical to manage and yet flexible enough
 // to handle the complexity of CS builds. For CS, we build for x64 or arm64,
 // depending on the platform and architecture. In addition, for MacOS in a
-// production build, we build *both* of those and make a universal binary.
+// Release build, we build *both* of those and make a universal binary.
 val architectures = if (findProperty("buildArch") != null) {
   listOf(findProperty("buildArch").toString())
 } else if (saxonBuild.systemOsName.get() == "mac"
-               && saxonCS.release.get() == "production") {
+               && saxonCS.release.get() == "Release") {
   listOf("arm64", "x64")
 } else {
   listOf(saxonCS.arch.get())
@@ -422,6 +436,7 @@ val configure_task = tasks.register("dotnetConfigure") {
 
 val build_task = tasks.register("dotnetBuild")
 val publish_task = tasks.register("dotnetPublish")
+val makeapp_task = tasks.register("dotnetMakeApp")
 for (buildArch in architectures) {
   // These tasks run every time because the .nupkg file changes every time.
   // The DotNet tasks use the outputDir as an output directory. This should
@@ -446,29 +461,49 @@ for (buildArch in architectures) {
     inputs.files(preprocessCS)
     inputs.files(generateCode)
     inputs.files(copyResources)
-    inputs.files(csFeatureKeysSources)
+    inputs.files(csharpFeatureKeysSources)
     outputs.dir(layout.buildDirectory.dir("${buildArch}/SaxonCS"))
   }
   build_task { dependsOn(build) }
+
+
+  val platform = saxonCS.platform.get()
+  val csrid = "${platform}-${buildArch}"
+  val release = saxonCS.release.get()
 
   val publish = tasks.register<DotNetPublish>("dotnetPublish_${buildArch}") {
     LifecycleTasks.RELEASE_GROUP
     arch = buildArch
     inputs.files(build)
+    outputs.dir(layout.buildDirectory.dir("${buildArch}/SaxonCS/bin/${release}/net8.0/${csrid}/publish"))
   }
   publish_task { dependsOn(publish) }
+
+  val makeapp = tasks.register<DotNetMakeApp>("dotnetMakeApp_${buildArch}") {
+    LifecycleTasks.RELEASE_GROUP
+    arch = buildArch
+    inputs.files(build)
+  }
+  makeapp_task { dependsOn(makeapp) }
 }
 
 if ((saxonBuild.systemOsName.get() == "mac"
-         && saxonCS.release.get() == "production"
+         && saxonCS.release.get() == "Release"
          && architectures.size == 2)) {
-  val osxApp = tasks.register("osxApp") {
+  val buildOsxApp = tasks.register<Exec>("buildOsxApp") {
     group = LifecycleTasks.RELEASE_GROUP
-    inputs.files(publish_task)
-    outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
+    inputs.files(makeapp_task)
+    outputs.file(layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS"))
 
-    val arm64 = layout.buildDirectory.dir("arm64/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
-    val x64 = layout.buildDirectory.dir("x64/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
+    val arm64 = layout.buildDirectory.dir("arm64/SaxonCS/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
+    val x64 = layout.buildDirectory.dir("x64/SaxonCS/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
+
+    doFirst {
+      // If a previous build put the docs in there, delete them; they aren't
+      // allowed in a signed build
+      delete(layout.buildDirectory.dir("SaxonCS.app/doc"))
+      delete(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
+    }
 
     doFirst {
       copy {
@@ -478,45 +513,38 @@ if ((saxonBuild.systemOsName.get() == "mac"
       }
     }
 
-    doLast {
-      exec {
-        workingDir = layout.buildDirectory.get().asFile
-        commandLine("lipo", "-create", "-output",
-                    "${layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS").get()}",
-                    "${arm64}/osx-arm64/publish/SaxonCS.app/Contents/MacOS/SaxonCS",
-                    "${x64}/osx-x64/publish/SaxonCS.app/Contents/MacOS/SaxonCS")
-      }
-    }
+    workingDir = layout.buildDirectory.get().asFile
+    commandLine("lipo", "-create", "-output",
+                "${layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS").get()}",
+                "${arm64}/osx-arm64/publish/SaxonCS.app/Contents/MacOS/SaxonCS",
+                "${x64}/osx-x64/publish/SaxonCS.app/Contents/MacOS/SaxonCS")
+  }
+
+  val osxApp = tasks.register<Exec>("osxApp") {
+    inputs.files(buildOsxApp)
+    outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
 
     // Putting documentation in the app causes the signature to fail
     // "unsealed content is present in the bundle root"
-    doLast {
-      if (findProperty("macSignWith") != null) {
-        exec {
-          commandLine("codesign", "--force", "--options", "runtime",
-                      "--entitlements",
-                      "${layout.projectDirectory.file("../tools/entitlements.plist")}",
-                      "--deep", "--sign", findProperty("macSignWith"),
-                      "--timestamp",
-                      "${layout.buildDirectory.file("SaxonCS.app").get()}")
-        }
-      } else {
-        println("MacOS application is unsigned.")
-      }
-    }
+    commandLine("codesign", "--force", "--options", "runtime",
+                "--entitlements",
+                "${layout.projectDirectory.file("../tools/entitlements.plist")}",
+                "--deep", "--sign", "Developer ID Application: Saxonica Limited",
+                "--timestamp",
+                "${layout.buildDirectory.file("SaxonCS.app").get()}")
   }
-  publish_task { finalizedBy(osxApp) }
+  makeapp_task { finalizedBy(osxApp) }
 
   // We can't copy the documentation into the distribution because we've
   // signed it
   tasks.register<Zip>("dotnetPublishZip") {
-    archiveFileName = "SaxonCS-${saxonBuild.version.get().replace("\\.", "-")}-MacOS.zip"
+    archiveFileName = "SaxonCS-${saxonBuild.version.get().replace(".", "-")}-MacOS.zip"
     from(osxApp)
     into("/SaxonCS.app/")
   }
 } else {
   val ziparch = if (architectures[0] == "arm64") "aarch64" else "x86_64"
-  val zipver = saxonBuild.version.get().replace("\\.", "-")
+  val zipver = saxonBuild.version.get().replace(".", "-")
   val zipname = if (saxonBuild.systemOs.get().isWindows()) {
     "Windows"
   } else if (saxonBuild.systemOs.get().isMacOsX()) {
@@ -527,7 +555,7 @@ if ((saxonBuild.systemOsName.get() == "mac"
 
   val stageZip = tasks.register("stageZip") {
     inputs.files(publish_task)
-    inputs.files(layout.projectDirectory.dir("../../src/docs/doc"))
+    inputs.files(layout.projectDirectory.dir("../../src/main/zipdoc"))
     outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
 
     doFirst {
@@ -536,20 +564,26 @@ if ((saxonBuild.systemOsName.get() == "mac"
 
     doLast {
       copy {
-        from(publish_task)
-        into(layout.buildDirectory.dir("SaxonCS.app"))
+	from(tasks.named("dotnetPublish_${architectures[0]}").get().outputs)
+        into(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
       }
+      
       copy {
-        from(layout.projectDirectory.dir("../../src/docs/doc"))
+        from(layout.projectDirectory.dir("../../src/main/zipdoc"))
         into(layout.buildDirectory.dir("SaxonCS.app/doc"))
       }
     }
   }
 
   tasks.register<Zip>("dotnetPublishZip") {
+    var dirver = saxonBuild.version.get()
+    if (dirver.endsWith(".0")) {
+       dirver = dirver.substring(0, dirver.length - 2)
+     }
+
     archiveFileName = "SaxonCS-${zipver}-${zipname}-${ziparch}.zip"
     from(stageZip)
-    into("/SaxonCS.app/")
+    into("/SaxonCS-${dirver}/")
   }
 }
 
@@ -605,7 +639,7 @@ val docParse = tasks.register<JavaExec>("docParse") {
   dependsOn("dotnetBuild")
 
   inputs.files(layout.projectDirectory.dir("../src/main/cs/Saxon/Api"))
-  inputs.files(csFeatureKeysSources)
+  inputs.files(csharpFeatureKeysSources)
   inputs.file(layout.projectDirectory.file("../tools/parsecs.xsl"))
   outputs.file(layout.buildDirectory.file("dotnetdoc/names.xml"))
 
@@ -615,7 +649,7 @@ val docParse = tasks.register<JavaExec>("docParse") {
        "-xsl:${layout.projectDirectory.file("../tools/parsecs.xsl")}",
        "-o:${layout.buildDirectory.file("dotnetdoc/names.xml").get().asFile}",
        "inputdir=file://${layout.projectDirectory.file("../src/main/cs/Saxon/Api")}",
-       "featurekeysdir=file://${layout.projectDirectory.file("../keys/build/cs/Saxon/Api")}")
+       "featurekeysdir=file://${layout.projectDirectory.file("../../featurekeys/build/cs/Saxon/Api")}")
 }
 
 tasks.register<JavaExec>("docMerge") {
@@ -625,16 +659,11 @@ tasks.register<JavaExec>("docMerge") {
   val arch = architectures.first()
   val buildtask = tasks.named("dotnetBuild_${arch}")
 
-  val platform = saxonBuild.platform.get()
-  val netver = "net${saxonBuild.dotnetversion.get()}"
-
   dependsOn(buildtask)
   inputs.files(apiDocumentation)
   inputs.files(docParse)
   inputs.file(layout.projectDirectory.file("../tools/merge.xsl"))
   outputs.file(layout.buildDirectory.file("dotnetdoc/merged.xml"))
-
-  val xmlpath = "bin/Release/${netver}/${platform}-${arch}/SaxonCS.xml"
 
   classpath = preprocessorClasspath
   mainClass = "com.saxonica.Transform"
@@ -642,7 +671,7 @@ tasks.register<JavaExec>("docMerge") {
        "-xsl:${layout.projectDirectory.file("../tools/merge.xsl")}",
        "-o:${layout.buildDirectory.file("dotnetdoc/merged.xml").get().asFile}",
        "names-file=${docParse.get().outputs.getFiles().getSingleFile()}",
-       "api-doc-file=${buildtask.get().outputs.getFiles().first()}/${xmlpath}")
+       "api-doc-file=${layout.buildDirectory.file("apidoc/SaxonCS.xml").get().asFile}")
 }
 
 tasks.register<Copy>("docCss") {
@@ -694,15 +723,47 @@ tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
   dependsOn(dotnetDocHtml)
   dependsOn(dotnetDocXml)
 }
+
+// ============================================================
+
+tasks.register<Exec>("eecsTest") {
+  group = "Verification"
+  description = "Run SaxonCS nUnit tests"
+  dependsOn("dotnetBuild")
+
+  val reportDir = layout.buildDirectory.dir("reports/tests/eecsTest")
+  inputs.dir(layout.projectDirectory.dir("../src/test/nunit"))
+  outputs.dir(reportDir)
+
+  workingDir = layout.projectDirectory.dir("../src/test/nunit").asFile
+  commandLine("${saxonBuild.dotnet.get()}", "test", "--nologo", "--", "NUnit.TestOutputXml=${reportDir.get()}")
+}
+
+// ============================================================
+
+samples {
+  // Irrelevant in C#, but must be initialized. :-(
+  runclasspath = sampleSources
+  debugclasspath = sampleSources
+
+  sources = sampleSources
+  product = "csharp"
+  edition = "ee"
+}
+
+samples.csSample("Shakespeare_1", "othello.xml", "play.xsl",
+                 listOf("dir=file:${layout.buildDirectory.file("sample_results/playhtml").get()}"),
+                 layout.buildDirectory.file("sample_results/playhtml/play.html").get().asFile)
+
+
 // ============================================================
 
 tasks.register<DotNetBuild>("dotnetBuildTestDrivers") {
   group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
   dependsOn("dotnetBuild")
   target = "TestDrivers"
-  arch = "arm64"
+  arch = architectures.first()
   inputs.files(copyTestDrivers)
-  //inputs.files(layout.buildDirectory.file("${arch}/bin/Release/${netver}/${archdir}/SaxonCS.dll"))
 }
 
 testSuites {
@@ -712,16 +773,30 @@ testSuites {
   exceptionsDir = layout.projectDirectory.dir("../src/test/exceptions")
 }
 
-tasks.register("all_test_suites") {
-  // Just somewhere to hang dependencies
-}
-
-testSuites.configure(suite = "qt3", language = "XP31")
-
+testSuites.configure("expath", "XP31")
+testSuites.configure("expath", "XQ31")
+testSuites.configure("expath", "XQ40")
+testSuites.configure("qt3", "XP31")
+testSuites.configure("qt3", "XP31", mapOf("linq" to "on"))
+testSuites.configure("qt3", "XP31", mapOf("unfolded" to "on"))
+testSuites.configure("qt3", "XQ31")
+testSuites.configure("qt3", "XQ31", mapOf("unfolded" to "on"))
+testSuites.configure("qt3extra", "XP31")
+testSuites.configure("qt3extra", "XQ31")
+testSuites.configure("qt3extra", "XQ40")
+testSuites.configure("qt4", "XP40")
+testSuites.configure("qt4", "XQ31")
+testSuites.configure("qt4", "XQ31", mapOf("unfolded" to "on"))
+testSuites.configure("qt4", "XQ40")
 testSuites.configure("xsd", "XSD11")
-
-tasks.register("helloWorld") {
-  doLast {
-    println("Hello, world.")
-  }
-}
+testSuites.configure("xslt30", "XT30")
+testSuites.configure("xslt30", "XT30", mapOf("export" to "on"))
+testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
+testSuites.configure("xslt30extra", "XT30")
+testSuites.configure("xslt30extra", "XT30", mapOf("export" to "on"))
+testSuites.configure("xslt30extra", "XT30", mapOf("strict" to "on"))
+testSuites.configure("xslt30extra", "XT40")
+testSuites.configure("xslt30extra", "XT40", mapOf("export" to "on"))
+testSuites.configure("xslt30extra", "XT40", mapOf("strict" to "on"))
+testSuites.configure("xslt40", "XT40")
+testSuites.configure("xslt40", "XT40", mapOf("strict" to "on"))

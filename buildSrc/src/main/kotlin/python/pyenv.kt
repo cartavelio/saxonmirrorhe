@@ -1,5 +1,6 @@
 package com.saxonica.build.python
 
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
@@ -8,9 +9,12 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
+import org.gradle.process.ExecSpec
 import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 
-abstract class PyenvExe : DefaultTask() {
+abstract class PyenvExe @Inject constructor(private val ex: ExecOperations) : DefaultTask() {
     @get:Optional
     @get:Input
     abstract val pyenvExePath: Property<String>
@@ -24,7 +28,7 @@ abstract class PyenvExe : DefaultTask() {
 
     fun execString(exe: String , arguments: List<String>, env: Map<String, String> = mapOf()): String {
         return (ByteArrayOutputStream()).use { out ->
-            project.exec {
+            ex.exec {
                 environment(env)
                 executable(exe)
                 args(arguments)
@@ -44,12 +48,18 @@ abstract class PyenvExe : DefaultTask() {
     }
 }
 
-abstract class PythonPyenv: DefaultTask() {
+abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+    @get:Internal
+    abstract val os: Property<OperatingSystem>
+
     @get:Input
     abstract val pythonVersion: Property<String>
 
     @get:InputFile
     abstract val pyenvExe: RegularFileProperty
+
+    @get:Input
+    abstract val pyenvRoot: Property<String>
 
     @get:InputDirectory
     abstract val pythonBuildDefinitionsDir: DirectoryProperty
@@ -58,9 +68,55 @@ abstract class PythonPyenv: DefaultTask() {
     @get:Input
     abstract val debugVariant: Property<String>
 
+    @get:Optional
+    @get:Input
+    abstract val macosxDeploymentTarget: Property<String>
+
+    @get:OutputFile
+    val pythonExe = pythonVersion.map { project.layout.buildDirectory.file("python-${it}").get() }
+
     @Internal
     val pyenvVersionName: Provider<String> = pythonVersion.map {
         "${it}${if (debugVariant.isPresent()) "-${debugVariant.get()}" else "" }"
+    }
+
+    private fun pythonExePath(pyenv: RegularFile): String {
+        return if (os.get().isWindows) {
+            windowsExePath(pyenv)
+        } else {
+            nonWindowsExePath(pyenv)
+        }
+    }
+
+    private fun execToString(action: ExecSpec.() -> Unit): String {
+        ByteArrayOutputStream().use { out ->
+            ex.exec {
+                action(this)
+                standardOutput = out
+            }
+            return out.toString().trim()
+        }
+    }
+
+    private fun nonWindowsExePath(pyenv: RegularFile): String {
+        return execToString {
+            environment("PYENV_VERSION", pyenvVersionName.get())
+            environment("PYENV_ROOT", pyenvRoot.get())
+            executable(pyenv)
+            args("which", "python")
+        }
+    }
+
+    private fun windowsExePath(pyenv: RegularFile): String {
+        val latestInstalledOfMajorVersion = execToString {
+            executable(pyenv)
+            args("latest", pyenvVersionName.get())
+        }
+        return execToString {
+            executable("cmd.exe")
+            args("/c")
+            args(pyenv, "shell", latestInstalledOfMajorVersion, "&&", pyenv, "which", "python")
+        }
     }
 
     @TaskAction
@@ -72,53 +128,34 @@ abstract class PythonPyenv: DefaultTask() {
         //   else
         //      pyenv install version
         val pyenv = pyenvExe.get()
-        val pyenvVersions = ByteArrayOutputStream().use { out ->
-            project.exec {
-                executable(pyenv)
-                args("versions", "--bare")
-                standardOutput = out
-            }
-            out.toString().trim()
-        }.lines()
-
         var pythonBuildVersionName = pyenvVersionName.get()
-        if (!pyenvVersions.contains(pythonBuildVersionName)) {
+        val execResult = ex.exec {
+            if (!os.get().isWindows) {
+                environment("PYENV_ROOT", pyenvRoot.get())
+            }
+            executable(pyenv)
+            args("latest", pythonBuildVersionName)
+            setIgnoreExitValue(true)
+        }
+        val notInstalled = execResult.exitValue != 0
+
+        if (notInstalled) {
             val definitionFile = pythonBuildDefinitionsDir.get().file(pythonBuildVersionName)
             if (definitionFile.asFile.exists()) {
                 pythonBuildVersionName = definitionFile.asFile.toString()
             }
-            project.exec {
+            ex.exec {
+                if (!os.get().isWindows) {
+                    environment("PYENV_ROOT", pyenvRoot.get())
+                }
                 executable(pyenv)
+                if (macosxDeploymentTarget.isPresent) {
+                    environment("MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get())
+                }
                 args("install", pythonBuildVersionName)
             }
         }
-    }
-}
 
-abstract class PythonPyenvPythonExe: DefaultTask() {
-    @get:Input
-    abstract val pyenvVersionName: Property<String>
-
-    @get:InputFile
-    abstract val pyenvExe: RegularFileProperty
-
-    @Internal
-    val pythonExePath: Provider<String> = pyenvExe.map { pyenvPath ->
-        ByteArrayOutputStream().use { out ->
-            project.exec {
-                environment("PYENV_VERSION", pyenvVersionName.get())
-                executable(pyenvPath.asFile)
-                args("which", "python")
-                standardOutput = out
-            }
-            out.toString().trim()
-        }
-    }
-
-    @OutputFile
-    val pythonExe: Provider<RegularFile> = pythonExePath.flatMap {
-        val fileProp = project.objects.fileProperty()
-        fileProp.set(project.file(it))
-        fileProp
+        pythonExe.get().asFile.writeText(pythonExePath(pyenv))
     }
 }

@@ -1,63 +1,53 @@
 package com.saxonica.build.python
 
+import SaxonBuildExtension
+import SaxonCPythonExtension
 import com.saxonica.build.PyprojectToml
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Project
 import org.gradle.api.file.*
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.filter
+import org.gradle.kotlin.dsl.register
+import org.gradle.language.base.plugins.LifecycleBasePlugin
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
-
 /**
  * Task for providing the Wheel platform tag, which we need in a couple of places
  */
-abstract class WheelCompatibilityTags : DefaultTask() {
-    @get:InputFile
-    abstract val pyenvExe: RegularFileProperty
-
+abstract class WheelCompatibilityTags @Inject constructor(private val ex: ExecOperations) : DefaultTask() {
     @get:InputFile
     abstract val pythonExe: RegularFileProperty
 
     @get:Input
-    abstract val pythonVersion: Property<String>
+    abstract val manylinuxTarget: Property<String>
 
     @get:Input
-    abstract val manylinuxTarget: Property<String>
+    @get:Optional
+    abstract val macosxDeploymentTarget: Property<String>
 
     @Internal
     val systemOs = OperatingSystem.current()
 
     @Internal
-    val pythonVersionPath: Provider<RegularFile> = pyenvExe.flatMap { pyenv ->
-        val versionPath = project.objects.fileProperty()
-        versionPath.set(project.file(execString(pyenv, listOf("which", "pip"), mapOf("PYENV_VERSION" to pythonVersion.get()))).parentFile.parentFile)
-        versionPath
+    val platform: Provider<String> = pythonExe.map { pyExe ->
+        execString(pyExe,
+            listOf("-c", "import sys; from setuptools.command.bdist_wheel import get_platform; print(get_platform(sys.base_prefix))"))
     }
 
     @Internal
-    val macosxDeploymentTarget: Provider<String> = pythonExe.map { python ->
-        if (systemOs.isMacOsX()) {
-            execString(python, listOf("-c", "import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version]))"))
-        } else {
-            ""
-        }
+    val wheelSuffix: Provider<String> = platform.map {
+        generateWheelSuffix(it)
     }
-
-    @Internal
-    val platform: Provider<String> = pythonVersionPath.map { path ->
-        execString(pythonExe.get(),
-            listOf("-c", "import os; from setuptools.command.bdist_wheel import get_platform; print(get_platform(os.environ['PYTHON_VERSION_PREFIX']))"),
-            mapOf("PYTHON_VERSION_PREFIX" to path.asFile.toString()))
-    }
-
-    @Internal
-    val wheelSuffix: Provider<String> = platform.map { generateWheelSuffix(it) }
 
     @Internal
     val repairedWheelSuffix: Provider<String> = manylinuxTarget.map { manylinux ->
@@ -68,13 +58,13 @@ abstract class WheelCompatibilityTags : DefaultTask() {
 
     fun generateWheelSuffix(platform: String): String {
         return execString(pythonExe.get(),
-            listOf("-c", "import os; from setuptools.command.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['PLATFORM_TAG']))"),
+            listOf("-c", "import os; from packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['PLATFORM_TAG']))"),
             mapOf("PLATFORM_TAG" to platform))
     }
 
     fun execString(exe: RegularFile, arguments: List<String>, env: Map<String, String> = mapOf()): String {
         return (ByteArrayOutputStream()).use { out ->
-            project.exec {
+            ex.exec {
                 environment(env)
                 executable(exe)
                 args(arguments)
@@ -88,7 +78,7 @@ abstract class WheelCompatibilityTags : DefaultTask() {
 /**
  * Task for building a wheel and fixing it up with repairwheel
  */
-abstract class BuildWheel : DefaultTask() {
+abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:InputFile
     abstract val pythonExe: RegularFileProperty
 
@@ -115,7 +105,7 @@ abstract class BuildWheel : DefaultTask() {
     }
 
     @get:InputDirectory
-    abstract val saxoncCoreDir: DirectoryProperty
+    abstract val libsaxoncDir: DirectoryProperty
 
     @get:Internal
     abstract val outputDir: DirectoryProperty
@@ -150,22 +140,35 @@ abstract class BuildWheel : DefaultTask() {
             from(sourceDir)
             into(srcCopyDir)
 
-            exclude("pyproject.toml")
+            exclude("pyproject.toml", "README.md", "src/saxonc/saxonc.pyx")
+        }
+
+        project.copy {
+            into(srcCopyDir)
+
+            from(sourceDir) {
+                include("README.md", "src/saxonc/saxonc.pyx")
+                filter<ReplaceTokens>("tokens" to mapOf(
+                    "EDITION" to productEdition.get().uppercase(),
+                    "edition" to productEdition.get(),
+                    "VERSION" to  productVersion.get()
+                ))
+            }
         }
 
         val pyproject = PyprojectToml(sourceDir, productVersion, productEdition)
         pyproject.process(srcCopyDir)
 
-        val buildResult = project.exec {
+        val buildResult = ex.exec {
             workingDir = srcCopyDir.get().asFile
             setIgnoreExitValue(true)
             executable(pythonExe.get())
             environment("BUILD_DEBUG", debug.getOrElse(false).toString())
-            if (systemOs.isMacOsX()) {
+            if (macosxDeploymentTarget.isPresent) {
                 environment("MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get())
             }
 
-            environment("SAXONC_CORE_PATH", saxoncCoreDir.get())
+            environment("LIBSAXONC_PATH", libsaxoncDir.get())
             environment("SAXONC_BUILD_EDITION", productEdition.get())
             environment("SAXONC_BUILD_VERSION", productVersion.get())
             args("-m", "build", "--wheel", "--outdir", outputDir.get().asFile.toString())
@@ -176,7 +179,7 @@ abstract class BuildWheel : DefaultTask() {
     }
 }
 
-abstract class RepairLocalWheel : DefaultTask() {
+abstract class RepairLocalWheel  @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:Input
     abstract val systemOsArch: Property<String>
 
@@ -213,7 +216,7 @@ abstract class RepairLocalWheel : DefaultTask() {
 
     // Linux - auditwheel
     fun repairLinux(): ExecResult {
-        return project.exec {
+        return ex.exec {
             workingDir(outputDir.get())
             executable(pythonVenvTask.flatMap { it.venvBinHostedExe("auditwheel") }.get())
             environment("LD_LIBRARY_PATH", libraryDirs.toList().map { it.toString() }.joinToString(separator = ":"))
@@ -228,7 +231,7 @@ abstract class RepairLocalWheel : DefaultTask() {
 
     // MacOS - delocate
     fun repairMacos(): ExecResult {
-        return project.exec {
+        return ex.exec {
             workingDir(outputDir.get())
             environment("LD_LIBRARY_PATH", libraryDirs.toList().map { it.toString() }.joinToString(separator = ":"))
             environment("DYLD_LIBRARY_PATH", libraryDirs.toList().map { it.toString() }.joinToString(separator = ":"))
@@ -240,7 +243,7 @@ abstract class RepairLocalWheel : DefaultTask() {
 
     // Windows - delvewheel
     fun repairWindows(): ExecResult {
-        return project.exec {
+        return ex.exec {
             workingDir(outputDir.get())
             executable(pythonExe.get())
             args("-m", "delvewheel")
@@ -279,7 +282,7 @@ abstract class RepairLocalWheel : DefaultTask() {
 /**
  * Task to install a wheel from a local file
  */
-abstract class InstallLocalWheel : DefaultTask() {
+abstract class InstallLocalWheel  @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:InputFile
     abstract val pipExe: RegularFileProperty
 
@@ -288,9 +291,91 @@ abstract class InstallLocalWheel : DefaultTask() {
 
     @TaskAction
     fun install() {
-        project.exec {
+        ex.exec {
             executable(pipExe.get())
             args("install", "--force-reinstall", wheel.map { it.asFile }.get())
         }
+    }
+}
+
+class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: SaxonBuildExtension, val project: Project, ) {
+    companion object {
+        fun create(
+            project: Project,
+            extension: SaxonCPythonExtension,
+            saxonBuild: SaxonBuildExtension
+        ): (WheelTasksBuilder.() -> Unit) -> TaskProvider<RepairLocalWheel> {
+            return { configuration ->
+                val builder = WheelTasksBuilder(extension, saxonBuild, project)
+                builder.configuration()
+                builder.invoke()
+            }
+        }
+    }
+
+    val sourceDir = project.objects.directoryProperty()
+    val buildDir = project.objects.directoryProperty()
+
+    private var venvVal: TaskProvider<PythonVenv>? = null
+    var venvTask: TaskProvider<PythonVenv>
+        get() = venvVal!!
+        set(value) {
+            venvVal = value
+        }
+
+    private var platformTagTaskVal: TaskProvider<WheelCompatibilityTags>?  = null
+    var platformTagTask: TaskProvider<WheelCompatibilityTags>
+        get() = platformTagTaskVal!!
+        set(value) {
+            platformTagTaskVal = value
+        }
+    private var libsaxoncDirVal: Provider<Set<FileSystemLocation>>?  = null
+    var libsaxoncDir: Provider<Set<FileSystemLocation>>
+        get() = libsaxoncDirVal!!
+        set(value) {
+            libsaxoncDirVal = value
+        }
+
+    var prefix: String? = null
+    protected fun invoke():  TaskProvider<RepairLocalWheel> {
+        val builder = this
+        val name_suffix = prefix?.let { "${it}_wheel" } ?: "wheel"
+        val buildWheel = project.tasks.register<BuildWheel>("build_${name_suffix}") {
+            group = LifecycleBasePlugin.BUILD_GROUP
+            description = "Build the release wheel"
+            pythonExe = venvTask.map { it.pythonExe.get() }
+            productEdition = extension.edition
+            productVersion = saxonBuild.version
+            wheelSuffix = platformTagTask.flatMap { it.wheelSuffix }
+            macosxDeploymentTarget = platformTagTask.flatMap { it.macosxDeploymentTarget }
+            sourceDir = builder.sourceDir
+            libsaxoncDir = project.layout.dir(builder.libsaxoncDir.map { it.first().asFile })
+            outputDir = builder.buildDir.dir("wheel")
+        }
+
+        val libLocations: Provider<List<String>> = saxonBuild.systemOsName.map { os -> if (os == "windows") listOf("lib", "bin") else listOf("lib") }
+        val libDirs = libsaxoncDir.map { dirs ->
+            val dirPath = dirs.first().asFile.toString()
+            libLocations.map { dirnames ->
+                dirnames.map { dirname ->
+                    project.layout.projectDirectory.dir(dirPath).dir(dirname)
+                }
+            }.get()
+        }
+
+        val repairWheel = project.tasks.register<RepairLocalWheel>("repair_${name_suffix}") {
+            description = "Fix up the shared libs within the release wheel"
+            outputDir = buildDir.dir("repaired-wheel")
+            wheel = buildWheel.map { it.wheel.get() }
+            manylinuxTarget = platformTagTask.flatMap { it.manylinuxTarget }
+            pythonExe = venvTask.map { it.pythonExe.get() }
+            pythonVenvTask = venvTask
+            productEdition = extension.edition
+            systemOsArch = saxonBuild.systemOsArch
+            repairedWheelFilePlatformSuffix = platformTagTask.flatMap { it.repairedWheelSuffix }
+            libraryDirs.from(libDirs)
+        }
+
+        return repairWheel
     }
 }

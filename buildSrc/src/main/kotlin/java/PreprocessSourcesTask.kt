@@ -9,9 +9,10 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.assign
+import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
-abstract class PreprocessSourcesTask @Inject constructor(private val layout: ProjectLayout) : DefaultTask() {
+abstract class PreprocessSourcesTask @Inject constructor(private val layout: ProjectLayout, private val ex: ExecOperations) : DefaultTask() {
     @get:InputFiles
     abstract val classpath: ConfigurableFileCollection
 
@@ -54,7 +55,7 @@ abstract class PreprocessSourcesTask @Inject constructor(private val layout: Pro
     fun preprocess() {
         val cls = classpath
         println("Preprocessing ${sources.get().asFile}")
-        project.javaexec {
+        ex.javaexec {
             classpath = cls
             mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
             args("/c",

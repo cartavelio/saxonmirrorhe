@@ -21,6 +21,8 @@ dependencies {
   implementation(platform("org.apache.logging.log4j:log4j-bom:2.20.0"))
   implementation("org.apache.logging.log4j:log4j-slf4j2-impl")
   implementation("org.apache.logging.log4j:log4j-1.2-api")
+  implementation("net.sf.saxon:Saxon-HE:12.6")
+  implementation("nu.validator:htmlparser:1.4.16")
 }
 
 gradlePlugin {
@@ -40,6 +42,10 @@ gradlePlugin {
     create("testsuites") {
       id = "com.saxonica.build.testsuites"
       implementationClass = "com.saxonica.build.TestSuitesPlugin"
+    }
+    create("samples") {
+      id = "com.saxonica.build.samples"
+      implementationClass = "com.saxonica.build.SamplesPlugin"
     }
   }
 }

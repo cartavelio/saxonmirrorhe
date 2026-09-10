@@ -1,4 +1,5 @@
 import com.saxonica.build.python.*
+import com.saxonica.build.xslt.XsltOnHtmlTask
 
 plugins {
     id("saxon-build")
@@ -8,29 +9,36 @@ plugins {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
-val doxygenArtifact by configurations.consumable("doxygenArtifact")
+val pydocArtifact by configurations.consumable("pydocArtifact")
 
 saxoncPython {
     edition = "ee"
-    version = "3.9.19"
+    version = "3.9"
 }
 
-val venv = tasks.named<PythonVenv>("venv")
+val devPythonExe by configurations.named<ResolvableConfiguration>(saxoncPython.version.map { v -> "python${v}" }.get())
+
+val venv = tasks.named<PythonVenv>("venv") {
+    pyenvPythonExe = devPythonExe.elements.map { project.file(it.single().asFile.readText()) }
+}
 val installWheelTask = tasks.named<InstallLocalWheel>("install_wheel")
 
-val pydocTask = tasks.register("pydoc") {
+val pydocTask = tasks.register<Exec>("raw_pydoc") {
     dependsOn(installWheelTask)
     inputs.file(venv.map { it.pythonExe.get() })
     inputs.dir(layout.projectDirectory.dir("../saxonc"))
     outputs.file(layout.buildDirectory.file("saxoncee.html"))
 
-    doLast {
-        exec {
-            workingDir(layout.buildDirectory.get())
-            executable(venv.flatMap { it.pythonExe }.get())
-            args("-m", "pydoc", "-w", "saxoncee")
-        }
-    }
+    workingDir(layout.buildDirectory.get())
+    executable(venv.flatMap { it.pythonExe }.get())
+    args("-m", "pydoc", "-w", "saxoncee")
 }
 
-doxygenArtifact.outgoing.artifact(pydocTask)
+val cleanedPydocTask = tasks.register<XsltOnHtmlTask>("pydoc") {
+    xslt = layout.projectDirectory.dir("xslt").file("clean-pydoc.xsl")
+
+    input = pydocTask.map { it.outputs.files.singleFile }
+    output = input.map { f -> layout.buildDirectory.file("cleaned-pydoc/${f.asFile.name}").get() }
+}
+
+pydocArtifact.outgoing.artifact(cleanedPydocTask) { builtBy(cleanedPydocTask) }

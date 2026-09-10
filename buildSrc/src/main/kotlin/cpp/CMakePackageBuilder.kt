@@ -1,5 +1,6 @@
 package com.saxonica.build.cpp
 
+import com.saxonica.build.TargetHost
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
@@ -7,10 +8,11 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
-import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
 
-abstract class CMakePackageBuilder : DefaultTask() {
-  private val systemOs: OperatingSystem = OperatingSystem.current()
+abstract class CMakePackageBuilder @Inject constructor(private val ex: ExecOperations) : DefaultTask() {
+  private val targetHost = TargetHost.current()
 
   @get:Internal
   abstract val packageDir: DirectoryProperty
@@ -20,6 +22,9 @@ abstract class CMakePackageBuilder : DefaultTask() {
 
   @get:Input
   abstract val version: Property<String>
+
+  @get:Input
+  abstract val cmakePackageName: Property<String>
 
   @get:Input
   abstract val majorVersion: Property<String>
@@ -36,11 +41,14 @@ abstract class CMakePackageBuilder : DefaultTask() {
   @get:InputFiles
   abstract val packageCMakeFiles: ConfigurableFileCollection
 
-  @get:Internal
-  val sharedLibDir: Provider<Directory> = packageDir.map { it.dir(if (systemOs.isWindows) "bin" else "lib") }
+  @get:Input
+  abstract val debugConfig: Property<Boolean>
 
   @get:Internal
-  val libFilenameWithoutExtension: Provider<String> = libName.map { "lib${it}" }
+  val sharedLibDir: Provider<Directory> = packageDir.map { it.dir(if (targetHost.isWindows) "bin" else "lib") }
+
+  @get:Internal
+  val libFilenameWithoutExtension: Provider<String> = libName.map { "${if (targetHost.isWindows) "" else "lib"}${it}" }
 
   @get:Internal
   val importLibDir = packageDir.map { it.dir("lib") }
@@ -49,7 +57,7 @@ abstract class CMakePackageBuilder : DefaultTask() {
   val includeDir = packageDir.map { it.dir("include") }
 
   @get:Internal
-  val cmakeDir = packageDir.map { it.dir("lib/cmake") }
+  val cmakeDir = packageDir.map { packageDir -> cmakePackageName.map { name -> packageDir.dir("lib/cmake/${name}") }.get() }
 
   @get:OutputDirectory
   val outputDir: Provider<Directory> = packageDir
@@ -63,12 +71,33 @@ abstract class CMakePackageBuilder : DefaultTask() {
     buildCMakeDir()
   }
 
+  private fun debugPostfix(): String {
+    if (!debugConfig.get()) {
+      return ""
+    }
+    if (targetHost.isMacOS) {
+      return "_debug"
+    } else {
+      return "d"
+    }
+  }
+
   private fun platformSharedLibFilename(base: String, libversion: String): (String) -> String  {
+    return { _ ->
+      if (targetHost.isMacOS) {
+        "${base}${debugPostfix()}.${libversion}.dylib"
+      } else if (targetHost.isLinux) {
+        "${base}${debugPostfix()}.so.${libversion}"
+      } else {
+        "${base}${debugPostfix()}.dll"
+      }
+    }
+  }
+
+  private fun importLibFilename(base: String, libversion: String): (String) -> String  {
     return { filename ->
-      if (systemOs.isMacOsX) {
-        "${base}.${libversion}.dylib"
-      } else if (systemOs.isLinux) {
-        "${base}.so.${libversion}"
+      if (targetHost.isWindows) {
+        "${base}${debugPostfix()}.lib"
       } else {
         filename
       }
@@ -77,13 +106,13 @@ abstract class CMakePackageBuilder : DefaultTask() {
 
   private fun platformLinkerNameFilename(base: String): (String) -> String {
     return { _ ->
-      val ext = if (systemOs.isMacOsX) "dylib" else "so"
-      "${base}.${ext}"
+      val ext = if (targetHost.isMacOS) "dylib" else "so"
+      "${base}${debugPostfix()}.${ext}"
     }
   }
 
   private fun symlinkLibrary(source: (String) -> String, target: (String) -> String) {
-    project.exec {
+    ex.exec {
       workingDir = sharedLibDir.get().asFile
       executable = "ln"
       args("-nsf", source.invoke(""), target.invoke(""))
@@ -93,11 +122,11 @@ abstract class CMakePackageBuilder : DefaultTask() {
   private fun buildSharedLibDir() {
     val baseLibFilename = libFilenameWithoutExtension.get()
     val realName = platformSharedLibFilename(baseLibFilename, version.get())
-    if (!systemOs.isWindows) {
+    if (!targetHost.isWindows) {
       // project.sync gets itself in a mess because of symlinks pointed at symlinks in the lib dir.
       // This is a bug in Gradle, hence this nasty workaround. It's mac/linux only because there
       // are no symlinks involved on Windows.
-      project.exec {
+      ex.exec {
         executable = "rm"
         args("-rf", sharedLibDir.get().asFile)
       }
@@ -107,7 +136,7 @@ abstract class CMakePackageBuilder : DefaultTask() {
       into(sharedLibDir)
       rename(realName)
     }
-    if (!systemOs.isWindows) {
+    if (!targetHost.isWindows) {
       val soName = platformSharedLibFilename(baseLibFilename, majorVersion.get())
       val linkName = platformLinkerNameFilename(baseLibFilename)
       symlinkLibrary(realName, soName)
@@ -116,12 +145,14 @@ abstract class CMakePackageBuilder : DefaultTask() {
   }
 
   private fun buildImportLibDir() {
+    val importLibRenamer = importLibFilename(libFilenameWithoutExtension.get(), version.get())
     // Cannot use project.sync here because it just nukes the lib dir on Unices
     // and then causes broken symlinks which causes the sync task to explode in
     // a little fireball
     project.copy {
       from(importLibFiles)
       into(importLibDir)
+      rename(importLibRenamer)
     }
   }
 
@@ -132,6 +163,7 @@ abstract class CMakePackageBuilder : DefaultTask() {
     }
   }
   private fun buildCMakeDir() {
+    // We need the task to remove release files when debug is present and vice versa
     project.copy {
       from(packageCMakeFiles)
       into(cmakeDir)
