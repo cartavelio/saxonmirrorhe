@@ -559,6 +559,14 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></code></pre>
         <p>A public field in a class is treated as if it were a zero-argument method, so public
           static fields can be accessed in the same way as public static methods, and public
           instance-level fields in the same way as instance-level methods.</p>
+        
+        <p>A Java method defined using <code>varArgs</code> (where the last argument
+        is declared with <code>"..."</code> after the class name) can be called provided
+        that the <code>varArgs</code> argument in the method declaration matches a single
+        argument in the XPath function call. This argument may be either a single value of the required
+        type, or a sequence of values of the required type. For example, a method such
+        as <code>max(Integer... x)</code> can be called as <code>prefix:max(3)</code> or
+        <code>prefix:max((3, 4))</code> but not as <code>prefix:max(3, 4)</code>.</p>
       </li>
       <li>
         <p>If there are several matching methods, the one that is chosen is determined by comparing
@@ -587,7 +595,8 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></code></pre>
         correct number of arguments, then the system attempts to find the one that is the best fit
         to the types of the supplied arguments: for example if the call is <code>f(1,2)</code> then
         a method with two <code>int</code> arguments will be preferred to one with two
-          <code>float</code> arguments. This decision is typically made during static type analysis.
+          <code>float</code> arguments. In the general case this decision is deferred 
+        until run-time, when the actual types of the arguments are known.
         The rules for deciding between methods are quite complex.
         Essentially, for each candidate method, Saxon calculates the "distance" between the types of
         the supplied arguments and the Java class of the corresponding method in the method's
@@ -602,9 +611,10 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></code></pre>
         none is preferable to the others under these rules, an error is reported: the message
         indicates that there is more than one method that matches the function call.</p>
 
-      <p>This <dfn>binding</dfn> is carried out statically, using the static types of the supplied
-        arguments, not the dynamic types obtained when the arguments are evaluated. If there is
-        insufficient static type information to distinguish the candidate methods, an error is
+      <p>This <dfn>binding</dfn> is carried out statically where possible, using the static types of the supplied
+        arguments, and if this fails, it is carried out again at run-time using the dynamic types 
+        obtained when the arguments are evaluated. If there is
+        insufficient type information to distinguish the candidate methods, an error is
         reported. You can supply additional type information using the <code>treat as</code>
         expression, or by casting. Often it is enough simply to declare the types of the variables
         used as arguments to the function call.</p>
