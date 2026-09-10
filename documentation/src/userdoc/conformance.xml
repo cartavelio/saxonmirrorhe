@@ -1951,11 +1951,11 @@
       <h1>XQuery Update 1.0</h1>
 
 
-      <p>Saxon implements XQuery Update Facility 1.0, which reached Recommendation status on
+      <p>Saxon-EE implements XQuery Update Facility 1.0, which reached Recommendation status on
          17 March 2011. All features, including optional features, are implemented.</p>
       
-      <p>The XQuery Update specification defines a number of extensions to the XQuery 1.0 grammar. Saxon
-      implements these as extensions to the XQuery 3.1 grammar.</p>
+      <p>The XQuery Update specification defines a number of extensions to the XQuery 1.0 grammar.
+         Saxon-EE implements these as extensions to the XQuery 3.1 grammar.</p>
 
       <p>Update is currently supported only on documents built using the <code>linked</code> tree
          model.</p>

@@ -5743,7 +5743,7 @@
                             </td>
                             <td>
                                 <p>The expanded character content of all <code>TITLE</code> child
-                                    elements of the enclosing <code>SECTION</code> element, if there
+                                    elements of all enclosing <code>SECTION</code> elements, if there
                                     are any</p>
                             </td>
                         </tr>
@@ -5755,8 +5755,8 @@
                             </td>
                             <td>
                                 <p>The expanded character content of all <code>TITLE</code> child
-                                    elements of the nearest enclosing element that has a child
-                                    element named <code>TITLE</code></p>
+                                    elements of all enclosing elements that have a child element
+                                    named <code>TITLE</code></p>
                             </td>
                         </tr>
                         <tr>

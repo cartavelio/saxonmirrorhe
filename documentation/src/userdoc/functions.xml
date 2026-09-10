@@ -4923,7 +4923,8 @@
         <p>The trace output is directed to <code>System.err</code>, this may be redirected by using
             <code>2&gt;log.txt</code> on the command line. If a <code>TraceListener</code> has been
           nominated, then instead of writing the output to <code>System.err</code>, the information
-          instead results in events being notified to the <code>TraceListener</code>.</p>
+          instead results in events being notified to the <code>TraceListener</code>. Note that the
+          trace is only output by the <code>TraceListener</code> if the level is 'high'.</p>
         <p>The single-argument form of this function specified in XPath 3.1 is available since Saxon
           9.7.</p>
       </status>

@@ -40,12 +40,13 @@
      </xsl:template>
 
      <xsl:template match="nav[ul]" mode="secondary">
+          <xsl:variable name="except" select="tokenize(@except, ' ')"/>
           <div>
                <xsl:if test="@columns">
                     <xsl:attribute name="class" select="'columns'"/>
                </xsl:if>
                <ul>
-                    <xsl:for-each select="../(article|section)">
+                    <xsl:for-each select="(ancestor::article|ancestor::section)[last()]/(article|section)[not($except = @id)]">
                          <xsl:variable name="href"
                               select="f:index-fix(
                               if (article|section) then
