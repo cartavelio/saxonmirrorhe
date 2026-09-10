@@ -2111,9 +2111,9 @@
          transformation.</p>
 
       <p>The s9api interface (Java) and Saxon.Api (C#) have a similar design: a compiled stylesheet is
-         represented by a <code>XsltExecutable</code>
+         represented by an <code>XsltExecutable</code>
          object, and the instantiation of a stylesheet performing a single transformation by an
-            <code>XsltTransformer</code> or <code>Xslt30Transformer</code>object. These APIs
+            <code>XsltTransformer</code> or <code>Xslt30Transformer</code> object. These APIs
          also add a third class to the design, namely the <code>XsltCompiler</code>, which holds compile-time
          options such as the base URI of the stylesheet, values of static parameters, and
          compile-time options such as whether to defer compilation of template rules until they are used, how to resolve references to
@@ -2125,14 +2125,17 @@
             <code>XsltCompiler</code> instances with different option settings can run concurrently
          with each other.</p>
          
-         <p class="conly">The SaxonC APIs (such as C++, PHP and Python) also represents a compiled stylesheet by a
-            <code>XsltExecutable</code> object. The performing of a single transformation happens on the
-            <code>XsltExecutable</code>. To create this compiled stylesheet object you would begin with the
-            <code>Xslt30Processor</code> object which like the Java API holds compile-time options such as the output base URI
-            for the stylesheet, values of static parameters, amongst other options. Then you use one of the methods:
-            <code>compileFromString()</code>, <code>compileFromFile()</code>, or (in PHP) <code>compileFromValue()</code>
-            or (in C++) <code>compileFromXdmNode()</code>; or <code>compile_stylesheet()</code> in Python to create a
-            <code>XsltExecutable</code>. Compile-time errors are thrown as exceptions in C++, PHP and Python.</p>
+         <p class="conly">In the SaxonC API (for C++, PHP and Python), a compiled stylesheet is also
+            represented by an <code>XsltExecutable</code> object, but the API design differs to Java
+            and C#. Methods to perform of a single transformation are provided directly on the
+            <code>XsltExecutable</code>. A stylesheet is compiled to an <code>XsltExecutable</code>
+            using methods on the <code>Xslt30Processor</code> object:
+            <code>compileFromString()</code>, <code>compileFromFile()</code> and
+            <code>compileFromXdmNode()</code> in C++; <code>compileFromString()</code>,
+            <code>compileFromFile()</code> and <code>compileFromValue()</code> in PHP; and
+            <code>compile_stylesheet()</code> in Python. The <code>Xslt30Processor</code> holds
+            compile-time options such as the output base URI for the stylesheet, values of static
+            parameters, etc. Compile-time errors are thrown as exceptions in C++, PHP and Python.</p>
 
       <p>XSLT 3.0 packages have been supported since Saxon 9.6. A package may consist of a single module,
          or of a number of modules connected using <code>xsl:include</code>/<code>xsl:import</code>;
@@ -2180,7 +2183,7 @@
             also <a class="bodylink" href="../packages">Using packages</a>). The
                <code>Xslt30Processor</code> has methods <code>compileFromStringAndSave</code>,
                            <code>compileFromFileAndSave</code> and <code>compileFromXdmNodeAndSave</code> which exports the
-               <code>xsl:package</code> to file store if successful. The package may be made available for use by
+               <code>xsl:package</code> to file store if successful. From 12.4, the package may be made available for use by
             other packages being compiled, in the same or in a different <code>Xslt30Processor</code>, by
             the <code>Xslt30Processor</code>'s <code>importPackage</code> method which takes the SEF file name as argument. When an
                <code>xsl:use-package</code> declaration is found while compiling one package, the
@@ -2237,26 +2240,10 @@
          diagnostics, it preserves information such as variable names and line numbers that are not
          strictly needed at execution time.</p>
          
-         <p class="conly">SaxonC supports the saving and importing of a <code>XsltPackage</code> from a SEF file.
-            The <code>XsltPackage</code> class is not available in SaxonC, but
-            you will find support in the <code>Xslt30Processor</code> class. In this class, packages may
-            be made available for use by other packages being compiled, in the same or in a different
-            <code>Xslt30Processor</code>. See also
-            <a class="bodylink" href="../caching">Caching compiled stylesheets</a>.</p>
-
-         <!---<p class="conly">There is no object corresponding to <code>XsltPackage</code> in the SaxonC API. But
-                     a package can be exported as an stylesheet export file (SEF) which can then we imported again (see
-                     also <a class="bodylink" href="../packages">Using packages</a>). The
-                        <code>Xslt30Processor</code> has methods <code>compileFromStringAndSave</code>,
-                                    <code>compileFromFileAndSave</code> and <code>compileFromXdmNodeAndSave</code> which exports the
-                        <code>xsl:package</code> to file store if successful. The package may be made available for use by
-                     other packages being compiled, in the same or in a different <code>Xslt30Processor</code>, by
-                     the <code>Xslt30Processor</code>'s <code>importPackage</code> method which takes the SEF file name as argument. When an
-                        <code>xsl:use-package</code> declaration is found while compiling one package, the
-                     compiler searches for a matching package among those that have been imported by the
-                        <code>Xslt30Processor</code> in this way. It is possible to import several different
-                     versions of the same package, and the <code>package-version</code> attribute of
-                        <code>xsl:use-package</code> determines which of them is loaded. </p> -->
+         <p class="conly">There is no object corresponding to <code>XsltPackage</code> in the SaxonC
+            API, but a package can be exported and saved as a stylesheet export file (SEF) using
+            methods on <code>Xslt30Processor</code> (e.g. <code>compileFromStringAndSave</code>,
+            <code>compileFromFileAndSave</code> and <code>compileFromXdmNodeAndSave</code> in C++).</p>
       
       <p>The simplest way to generate an export file is from the command line, for example with
          Saxon-EE 12.0:</p>
@@ -2307,12 +2294,9 @@
       Another option, probably the best option if many library packages are used, is to list
       them in a <a class="bodylink" href="/configuration/configuration-file">configuration file</a>.</p>
 
-         <p class="conly">In SaxonC, packages can be imported to the <code>Xslt30Processor</code> API using
-            the methods <code>importPackage()</code>, <code>compileFromString()</code>,
-            <code>compileFromFile()</code>, or (in PHP) <code>compileFromValue()</code> or (in C++)
-            <code>compileFromXdmNode()</code>; or <code>compile_stylesheet()</code> in Python.</p>
-         <!-- TODO check importPackage is really on Xslt30Processor. I can't see it in the API docs -->
-         <!-- TODO importPackage is available in SaxonC 12.4 -->
+         <p class="conly">From SaxonC 12.4, packages can be imported to the
+            <code>Xslt30Processor</code> API using the <code>importPackage</code> method
+            (<code>import_package</code> in Python).</p>
 
       <p>In the case of schema-aware stylesheets, the schema components needed by a stylesheet are
          not exported along with the stylesheet code. The user of the stylesheet needs to import the
