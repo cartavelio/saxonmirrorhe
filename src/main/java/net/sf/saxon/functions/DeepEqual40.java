@@ -71,7 +71,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         o.addAllowedOption("typed-values", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
 
         o.addAllowedOption("normalization-form", SequenceType.OPTIONAL_STRING, EmptySequence.getInstance());
-        o.setAllowedValues("normalization-form", "XPTY0004", "NFC", "NFD", "NFKC", "NFKD");
+        o.setAllowedValues("normalization-form", "FOJS0005", "NFC", "NFD", "NFKC", "NFKD");
 
         o.addAllowedOption("unordered-elements", BuiltInAtomicType.QNAME.zeroOrMore(), EmptySequence.getInstance());
 
