@@ -60,7 +60,7 @@ public class XdmToJsonFn extends SystemFunction {
         public JSONEmitter emitter;
         public IntToIntHashMap uniformityData = null;
         public IntHashMap<String> layoutMap = new IntHashMap<>();
-        private Stack<StructuredQName> elementNameStack = new Stack<>();
+        public Stack<StructuredQName> elementNameStack = new Stack<>();
     }
 
 
@@ -80,7 +80,7 @@ public class XdmToJsonFn extends SystemFunction {
         JsonConversionContext jcc = new JsonConversionContext();
         jcc.config = context.getConfiguration();
         // Initialise the element name stack with a dummy no-namespace name
-        jcc.elementNameStack.add(new StructuredQName("", NamespaceUri.NULL, "dummy"));
+        jcc.elementNameStack.push(new StructuredQName("", NamespaceUri.NULL, "dummy"));
         // Process the supplied options
         Map<String, Sequence> checkedOptions = new HashMap<>();
         boolean indent = false;
@@ -288,7 +288,7 @@ public class XdmToJsonFn extends SystemFunction {
      * @param forceArray if an array is to be used even if the size is zero or one
      * @throws XPathException if anything goes wrong
      */
-    public void emitSequence(GroundedValue val,
+    private void emitSequence(GroundedValue val,
                              JsonConversionContext jcc,
                              boolean forceArray) throws XPathException {
         if (val.getLength() == 0 && !forceArray) {
@@ -619,7 +619,7 @@ public class XdmToJsonFn extends SystemFunction {
      * @param jcc the conversion context
      * @throws XPathException if anything goes wrong
      */
-    public void emitEmptyElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+    private void emitEmptyElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
         jcc.emitter.writeStringValue("");
     }
 
@@ -631,7 +631,7 @@ public class XdmToJsonFn extends SystemFunction {
      * @param jcc     the conversion context
      * @throws XPathException if anything goes wrong
      */
-    public void emitEmptyPlusElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+    private void emitEmptyPlusElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
         jcc.emitter.startMap(false);
         emitAttributes(element, jcc, false);
         jcc.emitter.endMap();
@@ -646,7 +646,7 @@ public class XdmToJsonFn extends SystemFunction {
      * @throws XPathException if anything goes wrong
      */
 
-    public void emitSimpleElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+    private void emitSimpleElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
         SchemaType type = element.getSchemaType();
         boolean asList = type instanceof SimpleType && ((SimpleType)type).isListType();
         emitSequence(element.atomize(), jcc, asList);
@@ -661,7 +661,7 @@ public class XdmToJsonFn extends SystemFunction {
      * @throws XPathException if anything goes wrong
      */
 
-    public void emitSimplePlusElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+    private void emitSimplePlusElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
         jcc.emitter.startMap(false);
         emitAttributes(element, jcc, false);
         jcc.emitter.writeKey("#content");
@@ -682,7 +682,7 @@ public class XdmToJsonFn extends SystemFunction {
      * @throws XPathException if anything goes wrong
      */
 
-    public void emitListElementContent(NodeInfo element,
+    private void emitListElementContent(NodeInfo element,
                                        JsonConversionContext jcc) throws XPathException {
 
         jcc.emitter.startArray(false);
@@ -702,7 +702,7 @@ public class XdmToJsonFn extends SystemFunction {
      * @param jcc     the conversion context
      * @throws XPathException if anything goes wrong
      */
-    public void emitListPlusElementContent(NodeInfo element,
+    private void emitListPlusElementContent(NodeInfo element,
                                            JsonConversionContext jcc,
                                            int childFingerprint) throws XPathException {
 
@@ -748,7 +748,7 @@ public class XdmToJsonFn extends SystemFunction {
      * @param jcc     the conversion context
      * @throws XPathException if anything goes wrong
      */
-    public void emitRecordElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+    private void emitRecordElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
         JSONEmitter emitter = jcc.emitter;
         emitter.startMap(false);
         emitAttributes(element, jcc, false);
@@ -794,10 +794,10 @@ public class XdmToJsonFn extends SystemFunction {
         emitter.endMap();
     }
 
-    public void emitSequenceElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+    private void emitSequenceElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
         emitMixedElementContent(element, jcc, true);
     }
-    public void emitMixedElementContent(NodeInfo element, JsonConversionContext jcc, boolean stripSpace) throws XPathException {
+    private void emitMixedElementContent(NodeInfo element, JsonConversionContext jcc, boolean stripSpace) throws XPathException {
 
         JSONEmitter emitter = jcc.emitter;
         emitter.startArray(false);
@@ -840,7 +840,7 @@ public class XdmToJsonFn extends SystemFunction {
         emitter.endArray();
     }
 
-    public void emitAttributes(NodeInfo element, JsonConversionContext jcc, boolean individual) throws XPathException {
+    private void emitAttributes(NodeInfo element, JsonConversionContext jcc, boolean individual) throws XPathException {
         NodeInfo att;
         SequenceIterator iter = element.iterateAxis(AxisInfo.ATTRIBUTE);
         while ((att = (NodeInfo)iter.next()) != null) {

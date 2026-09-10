@@ -61,7 +61,7 @@ public class TransitiveClosure extends SystemFunction {
             foundMoreNodes = nextResult.size() > size;
         } while (foundMoreNodes);
 
-        SequenceIterator resultIter = new ListIterator.Of<>(new ArrayList<>(result));
+        SequenceIterator resultIter = new ListIterator.Of<NodeInfo>(new ArrayList<NodeInfo>(result));
         DocumentOrderIterator sortedIter = new DocumentOrderIterator(resultIter, new GlobalOrderComparer());
         return SequenceExtent.from(sortedIter);
     }
