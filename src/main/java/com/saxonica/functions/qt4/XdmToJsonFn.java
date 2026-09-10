@@ -117,7 +117,8 @@ public class XdmToJsonFn extends SystemFunction {
      * @param checkedOptions the supplied options to the function, after validation and expansion of defaults
      * @param config the Saxon configuration
      */
-    private void initLayoutMap(JsonConversionContext jcc, Map<String, Sequence> checkedOptions, Configuration config) {
+    private void initLayoutMap(JsonConversionContext jcc, Map<String, Sequence> checkedOptions, Configuration config)
+            throws XPathException {
         MapItem val = (MapItem)checkedOptions.get("layouts").materialize();
         for (KeyValuePair pair : val.keyValuePairs()) {
              StructuredQName qn = ((QNameValue)pair.key).getStructuredQName();

@@ -18,7 +18,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.QuitParsingException;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -382,7 +381,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
     public void setParameter(QName name, XdmValue value) {
         try {
             suppliedParams.put(name.getStructuredQName(), value == null ? null : ((Sequence) value.getUnderlyingValue()).materialize());
-        } catch (UncheckedXPathException e) {
+        } catch (XPathException e) {
             throw new SaxonApiUncheckedException(e);
         }
     }
