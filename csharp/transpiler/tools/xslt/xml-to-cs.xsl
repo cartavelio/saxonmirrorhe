@@ -54,6 +54,10 @@
    </xsl:template>
    
    <xsl:template match="root">
+      <xsl:text>// This file is produced by transpiling a Java module of the same name.{$NL}</xsl:text>
+      <xsl:text>// The Java module may contain notices concerning licensing and copyright.{$NL}</xsl:text>
+      <xsl:text>// Any such notices may apply to this file as a "derived work".{$NL}</xsl:text>
+      <xsl:text>// Transpiled on {format-date(current-date(), "[D] [MNn] [Y0001]")}.{$NL}</xsl:text>
       <xsl:text>using System;{$NL}</xsl:text>
       <xsl:text>using System.Collections.Generic;{$NL}</xsl:text>
       <xsl:text>using System.Linq;{$NL}</xsl:text>
