@@ -13,10 +13,20 @@ namespace Saxon.Api {
     public class CommandExitException : Exception
     {
         private readonly int code;
+
+        /// <summary>
+        /// Get the exit status code for this exception.
+        /// </summary>
+        /// <returns>The status code</returns>
         public int getCode() {
             return code;
         }
 
+        /// <summary>
+        /// Create a <c>CommandExitException</c>.
+        /// </summary>
+        /// <param name="code">The exit status code</param>
+        /// <param name="message">The error message</param>
         public CommandExitException(int code, string message) : base (message) {
             this.code = code;
         }

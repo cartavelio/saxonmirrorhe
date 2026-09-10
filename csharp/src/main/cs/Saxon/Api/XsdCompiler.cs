@@ -42,6 +42,8 @@ namespace Saxon.Api {
 
         public abstract ErrorReporter ErrorReporter { get; set; }
 
+        /// <summary>The <c>SchemaResolver</c> to be used when resolving references to schema documents.</summary>
+
         public abstract SchemaResolver SchemaResolver { set; }
 
         ///<summary>
@@ -49,6 +51,8 @@ namespace Saxon.Api {
         /// The schema components are  returned
         /// by the method as an <c>XsdSchema</c> object.
         ///</summary>
+        /// <param name="sources">A set of SchemaSources.</param>
+        /// <returns>The schema constructed from the supplied SchemaSources.</returns>
         public abstract XsdSchema Compile(params SchemaSource[] sources);
         
         /// <summary>
@@ -229,6 +233,7 @@ namespace Saxon.Api {
             /// <summary>
             /// A schema document supplied in the form of a <c>FileInfo</c>
             /// </summary>
+            /// <param name="file">The input file</param>
 
             public SchemaSource(System.IO.FileInfo file) {
                 jSource = new StreamSource(file.OpenRead(), new System.Uri(file.FullName).AbsoluteUri);
@@ -237,6 +242,7 @@ namespace Saxon.Api {
             /// <summary>
             /// A schema document supplied in the form of an <c>XdmNode</c>
             /// </summary>
+            /// <param name="node">The input node</param>
 
             public SchemaSource(XdmNode node) {
                 jSource = node.Implementation.asActiveSource();
@@ -245,6 +251,7 @@ namespace Saxon.Api {
             /// <summary>
             /// A schema document supplied in the form of an <c>XmlReader</c>
             /// </summary>
+            /// <param name="node">The XML reader</param>
 
             public SchemaSource(XmlReader parser) {
                 throw new UnsupportedOperationException(); // TODO

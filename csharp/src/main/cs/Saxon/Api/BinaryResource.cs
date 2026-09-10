@@ -27,6 +27,10 @@ namespace Saxon.Api {
             this.ResourceUri = systemId;
         }
 
+        /// <summary>
+        /// A URI that identifies this resource
+        /// </summary>
+
         public Uri ResourceUri { get; }
 
 

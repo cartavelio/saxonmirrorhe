@@ -7,7 +7,7 @@ namespace Saxon.Api {
     /// </summary>
     /// <remarks>
     /// <para>The abstract <c>XsdSchema</c> class is included in all Saxon editions,
-    /// but the concrete subclass that reprsents a real schema is available
+    /// but the concrete subclass that represents a real schema is available
     /// only in Saxon-EE.</para>
     /// </remarks>
     public abstract class XsdSchema {
@@ -23,8 +23,9 @@ namespace Saxon.Api {
         /// Combine this schema with another to create a new <c>XsdSchema</c>
         /// Neither of the input schemas is modified. The two schemas must be
         /// compatible, for example they must not contain conflicting definitions
-        /// with the same name,
+        /// with the same name.
         /// </summary>
+        /// <param name="other">The other schema</param>
 
         public abstract XsdSchema Combine(XsdSchema other);
         
@@ -32,8 +33,9 @@ namespace Saxon.Api {
         /// Export the contents of this schema to an SCM file.
         /// The destination will typically be a <c>Serializer</c>.
         /// The resulting SCM file can be used to reconstitute the compiled
-        /// schema by calling <c>XsdCompiler.ImportComponents</c>
+        /// schema by calling <c>XsdCompiler.ImportComponents</c>.
         /// </summary>
+        /// <param name="destination">The destination for the SCM file</param>
 
         public abstract void ExportComponents(IDestination destination);
 
