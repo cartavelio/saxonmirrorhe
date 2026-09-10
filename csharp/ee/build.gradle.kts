@@ -144,6 +144,7 @@ val preprocessJava = tasks.register<JavaExec>("preprocessJava") {
                  exclude("net/sf/saxon/lib/DigestMaker.java")
                  exclude("net/sf/saxon/ma/arrays/ImmutableArrayItem.java")
                  exclude("net/sf/saxon/ma/map/HashTrieMap.java")
+                 exclude("net/sf/saxon/ma/map/Vavr.java")
                  exclude("net/sf/saxon/ma/trie/**")
                  exclude("net/sf/saxon/om/EnumSetTool.java")
                  exclude("net/sf/saxon/om/One.java")
@@ -334,6 +335,8 @@ val transpileToXml = tasks.register<JavaExec>("transpileToXml") {
        "-h:${layout.buildDirectory.dir("src/main/java").get()}",
        "-src:${layout.buildDirectory.dir("src/main/java").get()}",
        "-ee:${javaEe.get().map { it }.get(0)}",
+       "-vavr:${jarFinder.find("vavr-champ-${findProperty("vavrVersion")}.jar")}",
+       "-vavrMatch:${jarFinder.find("vavr-match-${findProperty("vavrVersion")}.jar")}",
        "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}")
 }
 
@@ -390,6 +393,8 @@ val generateCode = tasks.register<JavaExec>("generateCode") {
        "-repo:${layout.projectDirectory}/../transpiler/",
        "-digest:${layout.buildDirectory.file("digest.xml").get()}",
        "-ee:${javaEe.get().map { it }.get(0)}",
+       "-vavr:${jarFinder.find("vavr-champ-${findProperty("vavrVersion")}.jar")}",
+       "-vavrMatch:${jarFinder.find("vavr-match-${findProperty("vavrVersion")}.jar")}",
        "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}",
        "-debug")
 

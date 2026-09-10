@@ -206,7 +206,7 @@
       (:'net.sf.saxon.s9api.XmlProcessingError': 'Saxon.Api.XmlProcessingError':)
       'net.sf.saxon.tree.util.ProcInstParser': 'Saxon.Impl.Helpers.ProcInstParser',
       'net.sf.saxon.tree.jiter.MappingJavaIterator': 'Saxon.Impl.Overrides.MappingEnumerator',
-      'org.xmlresolver.ResolverFeature': 'Org.XmlResolver.Features.ResolverFeature',
+      'org.xmlresolver.ResolverFeature': 'XmlResolver.Features',
       'net.sf.saxon.lib.DigestMaker': 'Saxon.Impl.Helpers.DigestMaker'
       }"/>
    

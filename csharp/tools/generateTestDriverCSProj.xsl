@@ -83,8 +83,8 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="9.0.4" />
       <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.4" />
-      <PackageReference Include="XmlResolver" Version="2.1.1" />
-      <PackageReference Include="XmlResolverData" Version="1.2.4" />
+      <PackageReference Include="XmlResolver" Version="6.0.3" />
+      <PackageReference Include="XmlResolverData" Version="6.0.3" />
     </ItemGroup>
   </Project>
 </xsl:template>
