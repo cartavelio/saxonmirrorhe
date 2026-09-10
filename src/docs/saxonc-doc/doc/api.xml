@@ -1202,12 +1202,12 @@
                </td>
                <td>
                   <span class="signature">setCaptureResultDocuments(bool $flag)</span>
-                  <div class="fcomment">Enable the capture of the result-document output into an <a class="bodylink code" href="../saxon_c_php_xdmmap">Saxon\XdmMap</a>.
+                  <div class="fcomment">Enable the capture of the result-document output into an <a class="bodylink code" href="../saxon_c_php_xdmmap">XdmMap</a>.
                      If this option is enabled, then any document created using xsl:result-document is saved (as an <a
                         class="bodylink code" href="../saxon_c_php_xdmnode">XdmNode</a>) in a <a
                            class="bodylink code" href="../saxon_c_php_xdmmap">XdmMap</a> object where it
                      is accessible using the URI as a key. After the execution of the transformation a call on
-                     the <code>getResultDocuments</code> method is required to get access to the result-documents in the map.
+                     the <code>getResultDocuments()</code> method is required to get access to the result-documents in the map.
                      Supplying true for the $flag parameter causes secondary result documents from the
                      transformation to be saved in a map; false disables this option.</div>
                </td>
