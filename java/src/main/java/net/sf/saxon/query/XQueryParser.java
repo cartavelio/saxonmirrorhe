@@ -397,7 +397,7 @@ public class XQueryParser extends XPathParser {
         env.setXPathVersion(languageVersion);
         env.initializeFunctionLibraries();
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
-                .withAcceptEQName(true)
+                .withAcceptEQName(true, languageVersion)
                 .withUnescaper(new Unescaper(env.getConfiguration().getValidCharacterChecker()));
 
         setQNameParser(qp);
@@ -461,7 +461,7 @@ public class XQueryParser extends XPathParser {
         t.languageLevel = languageVersion;
         t.isXQuery = true;
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
-                .withAcceptEQName(true)
+                .withAcceptEQName(true, languageVersion)
                 .withUnescaper(new Unescaper(config.getValidCharacterChecker()));
         setQNameParser(qp);
         try {
@@ -2240,7 +2240,7 @@ public class XQueryParser extends XPathParser {
                 SortKeyDefinition[] keys = new SortKeyDefinition[sortSpecList.size()];
                 for (int i = 0; i < keys.length; i++) {
                     SortSpec spec = sortSpecList.get(i);
-                    SortKeyDefinition key = new SortKeyDefinition();
+                    SortKeyDefinition key = new SortKeyDefinition(languageVersion);
                     key.setSortKey(sortSpecList.get(i).sortKey, false);
                     String str = spec.ascending ? "ascending" : "descending";
                     key.setOrder(new StringLiteral(BMPString.of(str)));

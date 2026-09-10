@@ -633,7 +633,7 @@ public class QT3TestDriverHE extends TestDriver {
                         }
                         case "XQ": {
                             XQueryCompiler testXqc = env.xqueryCompiler;
-                            //testXqc.setLanguageVersion(langVersion);
+                            testXqc.setLanguageVersion(langVersion);
                             testXqc.declareNamespace("fn", NamespaceConstant.FN);
                             testXqc.declareNamespace("xs", NamespaceConstant.SCHEMA);
                             //testXqc.declareNamespace("math", NamespaceConstant.MATH);

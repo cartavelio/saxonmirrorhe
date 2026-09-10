@@ -606,7 +606,7 @@ public class XPathParser {
         if (exp == null) {
 
             qNameParser = new QNameParser(env.getNamespaceResolver())
-                .withAcceptEQName(allowXPath30Syntax)
+                .withAcceptEQName(allowXPath30Syntax, languageVersion)
                 .withErrorOnBadSyntax(language == ParsedLanguage.XSLT_PATTERN ? "XTSE0340" : "XPST0003")
                 .withErrorOnUnresolvedPrefix("XPST0081");
 
@@ -689,7 +689,7 @@ public class XPathParser {
         if (qNameParser == null) {
             qNameParser = new QNameParser(env.getNamespaceResolver());
             if (languageVersion >= 30) {
-                qNameParser = qNameParser.withAcceptEQName(true);
+                qNameParser = qNameParser.withAcceptEQName(true, languageVersion);
             }
         }
         language = ParsedLanguage.SEQUENCE_TYPE;
@@ -3417,7 +3417,7 @@ public class XPathParser {
 
         } else if (token == Token.HASH && isAllowXPath40Syntax()) {
             StructuredQName qn = parseEQName();
-            return Literal.makeLiteral(new QNameValue(qn,BuiltInAtomicType.QNAME));
+            return Literal.makeLiteral(new QNameValue(qn, BuiltInAtomicType.QNAME));
 
         } else if (token instanceof Token.StringTemplate) {
             checkLanguageVersion40("a string template");
@@ -4338,7 +4338,6 @@ public class XPathParser {
     /*@NotNull*/
     protected Expression parseMapConstructor() throws XPathException {
         checkMapExtensions();
-        int version = env.getXPathVersion();
 
         // have read the "map {" or bare "{"
         int offset = t.currentTokenStartOffset;
@@ -4364,7 +4363,7 @@ public class XPathParser {
                     nextToken();
                     Expression value = parseExprSingle();
                     operands.add(
-                            MapFunctionSet.getInstance(version).makeFunction("entry", 2).makeFunctionCall(key, value));
+                            MapFunctionSet.getInstance(languageVersion).makeFunction("entry", 2).makeFunctionCall(key, value));
                     if (!(value instanceof Literal)) {
                         allLiteralValues = false;
                     }
@@ -4391,7 +4390,7 @@ public class XPathParser {
         Expression result;
         switch (operands.size()) {
             case 0:
-                result = Literal.makeLiteral(EmptyMap.getInstance());
+                result = Literal.makeLiteral(EmptyMap.getInstance(languageVersion));
                 break;
             case 1:
                 if (allLiteralKeys && allLiteralValues) {
@@ -4400,14 +4399,15 @@ public class XPathParser {
                     Literal value = (Literal) operand.getArguments()[1];
                     SingleEntryMap sem = new SingleEntryMap(
                             (AtomicValue)(key.getGroundedValue()),
-                            value.getGroundedValue());
+                            value.getGroundedValue(),
+                            languageVersion);
                     result = Literal.makeLiteral(sem);
                 } else {
-                    GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder();
+                    GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
                     optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
                     optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.FALSE);
                     MapItem optionsMap = optionsBuilder.getCompletedMap();
-                    result = MapFunctionSet.getInstance(version).makeFunction("merge", 2)
+                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
                             .makeFunctionCall(operands.get(0), Literal.makeLiteral(optionsMap));
                     result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
@@ -4423,7 +4423,7 @@ public class XPathParser {
                             final AtomicValue keyValue =
                                     (AtomicValue) ((Literal) ((FunctionCall) operand).getArg(0)).getGroundedValue();
 
-                            AtomicMatchKey key = keyValue.asMapKey();
+                            AtomicMatchKey key = keyValue.asMapKey(languageVersion);
                             boolean ok = matchKeys.add(key);
                             if (!ok) {
                                 grumble("Duplicate key + " + Err.depict(keyValue) + " in map constructor", "XQDY0137");
@@ -4446,7 +4446,7 @@ public class XPathParser {
                         }
                         result = Literal.makeLiteral(mapBuilder.getCompletedMap());
                     } else {
-                        GeneralMapBuilder builder = FixedMap.getBuilder();
+                        GeneralMapBuilder builder = FixedMap.getBuilder(languageVersion);
                         for (Expression expression : operands) {
                             FunctionCall operand = (FunctionCall) expression;
                             Literal keyExp = (Literal) operand.getArguments()[0];
@@ -4465,14 +4465,14 @@ public class XPathParser {
                     Block block = new Block(entriesArray);
                     MapItem optionsMap;
                     if (allLiteralKeys) {
-                        optionsMap = EmptyMap.getInstance();
+                        optionsMap = EmptyMap.getInstance(languageVersion);
                     } else {
-                        GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder();
+                        GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
                         optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
                         optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
                         optionsMap = optionsBuilder.getCompletedMap();
                     }
-                    result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
+                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
                         .makeFunctionCall(block, Literal.makeLiteral(optionsMap));
                     result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
