@@ -89,70 +89,8 @@ public class XSLPreserveSpace extends StyleElement {
         try {
             while (st.hasMoreTokens()) {
                 String s = st.nextToken();
-                if (s.equals("*")) {
-                    rules.addRule(AnyQNameTest.getInstance(), preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
-                } else if (s.startsWith("Q{")) {
-                    int brace = s.indexOf('}');
-                    if (brace < 0) {
-                        compileError("No closing '}' in EQName");
-                    } else if (brace == s.length() - 1) {
-                        compileError("Missing local part in EQName");
-                    } else {
-                        QNameTest qTest;
-                        NamespaceUri uri = NamespaceUri.of(s.substring(2, brace));
-                        String local = s.substring(brace+1);
-                        if (local.equals("*")) {
-                            qTest = new NamespaceQNameTest(uri);
-                        } else {
-                            qTest = new SpecificQNameTest(new StructuredQName("", uri, local), getConfiguration().getNamePool());
-                        }
-                        rules.addRule(qTest, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
-                    }
-                } else if (s.endsWith(":*")) {
-                    if (s.length() == 2) {
-                        compileError("No prefix before ':*'");
-                    }
-                    String prefix = s.substring(0, s.length() - 2);
-                    NamespaceUri uri = getURIForPrefix(prefix, false);
-                    if (uri == null) {
-                        undeclaredNamespaceError(prefix, "XTSE0280", "elements");
-                    }
-                    QNameTest nt = new NamespaceQNameTest(uri);
-                    rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
-
-                } else if (s.startsWith("*:")) {
-                    if (s.length() == 2) {
-                        compileErrorInAttribute("No local name after '*:'", "XTSE0010", "elements");
-                    }
-                    String localname = s.substring(2);
-                    QNameTest nt = new LocalQNameTest(localname);
-                    rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
-
-                } else {
-                    String prefix;
-                    String localName;
-                    NamespaceUri uri;
-                    try {
-                        String[] parts = NameChecker.getQNameParts(s);
-                        prefix = parts[0];
-                        if (parts[0].equals("")) {
-                            uri = getDefaultXPathNamespace();
-                        } else {
-                            uri = getURIForPrefix(prefix, false);
-                            if (uri == null) {
-                                undeclaredNamespaceError(prefix, "XTSE0280", "elements");
-                            }
-                        }
-                        localName = parts[1];
-                    } catch (QNameException err) {
-                        compileError("Element name " + s + " is not a valid QName", "XTSE0280");
-                        return;
-                    }
-                    NamePool target = getNamePool();
-                    QNameTest nt = new SpecificQNameTest(new StructuredQName("", uri, localName), getConfiguration().getNamePool());
-                    rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
-                }
-
+                QNameTest test = makeQNameTest(s, true, "elements");
+                rules.addRule(test, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
             }
         } catch (XPathException e) {
             compileError(e.maybeWithLocation(allocateLocation()));

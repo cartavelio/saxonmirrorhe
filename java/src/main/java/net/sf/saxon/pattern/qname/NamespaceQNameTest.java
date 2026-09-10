@@ -5,11 +5,14 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.type.Affinity;
 
+import java.util.Objects;
+
 public class NamespaceQNameTest implements QNameTest {
 
     private final NamespaceUri namespace;
 
     public NamespaceQNameTest(NamespaceUri namespace) {
+        Objects.requireNonNull(namespace);
         this.namespace = namespace;
     }
 

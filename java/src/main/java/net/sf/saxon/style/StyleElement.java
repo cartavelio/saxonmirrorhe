@@ -20,7 +20,11 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.BasePatternWithPredicate;
+import net.sf.saxon.pattern.ItemTypePattern;
+import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.pattern.PatternThatSetsCurrent;
+import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.XmlProcessingError;
@@ -399,6 +403,79 @@ public abstract class StyleElement extends ElementImpl {
             qName = new StructuredQName("saxon", NamespaceUri.SAXON, "error-name");
         }
         return qName;
+    }
+
+    /**
+     * Parse a NameTest (allowing EQNames and wildcards)
+     * @param s the input to be parsed, after stripping whitespace
+     * @param useDefault true if the default namespace for elements and types applies
+     * @param attributeName the attribute in the XSLT source in which the test appears (for diagnostics)
+     * @return the parsed {@link QNameTest}
+     */
+    protected QNameTest makeQNameTest(String s, boolean useDefault, String attributeName) {
+        if (s.equals("*")) {
+            return AnyQNameTest.getInstance();
+        } else if (s.startsWith("Q{")) {
+            int brace = s.indexOf('}');
+            if (brace < 0) {
+                compileErrorInAttribute("No closing '}' in EQName", "XTSE0010", attributeName);
+                return AnyQNameTest.getInstance();
+            } else if (brace == s.length() - 1) {
+                compileErrorInAttribute("Missing local part in EQName", "XTSE0010", attributeName);
+                return AnyQNameTest.getInstance();
+            } else {
+                NamespaceUri uri = NamespaceUri.of(s.substring(2, brace));
+                String local = s.substring(brace + 1);
+                if (local.equals("*")) {
+                    return new NamespaceQNameTest(uri);
+                } else {
+                    return new SpecificQNameTest(new StructuredQName("", uri, local), getConfiguration().getNamePool());
+                }
+            }
+        } else if (s.endsWith(":*")) {
+            if (s.length() == 2) {
+                compileError("No prefix before ':*'");
+                return AnyQNameTest.getInstance();
+            }
+            String prefix = s.substring(0, s.length() - 2);
+            NamespaceUri uri = getURIForPrefix(prefix, false);
+            if (uri == null) {
+                undeclaredNamespaceError(prefix, "XTSE0280", attributeName);
+                return AnyQNameTest.getInstance();
+            }
+            return new NamespaceQNameTest(uri);
+
+        } else if (s.startsWith("*:")) {
+            if (s.length() == 2) {
+                compileErrorInAttribute("No local name after '*:'", "XTSE0010", attributeName);
+                return AnyQNameTest.getInstance();
+            }
+            String localname = s.substring(2);
+            return new LocalQNameTest(localname);
+
+        } else {
+            String prefix;
+            String localName;
+            NamespaceUri uri;
+            try {
+                String[] parts = NameChecker.getQNameParts(s);
+                prefix = parts[0];
+                if (parts[0].equals("") && useDefault) {
+                    uri = getDefaultXPathNamespace();
+                } else {
+                    uri = getURIForPrefix(prefix, false);
+                    if (uri == null) {
+                        undeclaredNamespaceError(prefix, "XTSE0280", attributeName);
+                    }
+                }
+                localName = parts[1];
+            } catch (QNameException err) {
+                compileErrorInAttribute("Name " + s + " is not a valid QName", "XTSE0020", attributeName);
+                return AnyQNameTest.getInstance();
+            }
+            return new SpecificQNameTest(new StructuredQName("", uri, localName), getConfiguration().getNamePool());
+        }
+
     }
 
     /**

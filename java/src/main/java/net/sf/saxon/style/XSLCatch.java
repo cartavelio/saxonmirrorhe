@@ -106,60 +106,10 @@ public class XSLCatch extends StyleElement {
      */
 
     private List<QNameTest> parseNameTests(String elements) {
-        List<QNameTest> result = new ArrayList<QNameTest>();
+        List<QNameTest> result = new ArrayList<>();
         StringTokenizer st = new StringTokenizer(elements, " \t\n\r", false);
         while (st.hasMoreTokens()) {
-            String s = st.nextToken();
-            QNameTest nt;
-            if (s.equals("*")) {
-                nt = AnyQNameTest.getInstance();
-                result.add(nt);
-
-            } else if (s.endsWith(":*")) {
-                if (s.length() == 2) {
-                    compileError("No prefix before ':*'");
-                    result.add(AnyQNameTest.getInstance());
-                }
-                String prefix = s.substring(0, s.length() - 2);
-                NamespaceUri uri = getURIForPrefix(prefix, false);
-                nt = new NamespaceQNameTest(uri);
-                result.add(nt);
-            } else if (s.startsWith("*:")) {
-                if (s.length() == 2) {
-                    compileErrorInAttribute("No local name after '*:'", "XTSE0010", "errors");
-                    result.add(AnyQNameTest.getInstance());
-                }
-                String localname = s.substring(2);
-                nt = new LocalQNameTest(localname);
-                result.add(nt);
-            } else {
-                String prefix;
-                String localName;
-                NamespaceUri uri;
-                try {
-                    String[] parts = NameChecker.getQNameParts(s);
-                    prefix = parts[0];
-                    if (parts[0].equals("")) {
-                        uri = NamespaceUri.NULL;
-                    } else {
-                        uri = getURIForPrefix(prefix, false);
-                        if (uri == null) {
-                            undeclaredNamespaceError(prefix, "XTSE0280", "errors");
-                            result.add(AnyQNameTest.getInstance());
-                            break;
-                        }
-                    }
-                    localName = parts[1];
-                } catch (QNameException err) {
-                    compileErrorInAttribute("Error code " + s + " is not a valid QName", "XTSE0280", "errors");
-                    result.add(AnyQNameTest.getInstance());
-                    break;
-                }
-                NamePool target = getNamePool();
-                int nameCode = target.allocateFingerprint(uri, localName);
-                nt = new SpecificQNameTest(getNamePool(), nameCode);
-                result.add(nt);
-            }
+            result.add(makeQNameTest(st.nextToken(), false, "errors"));
         }
         return result;
     }

@@ -444,7 +444,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 outcome.setErrorsReported(collector.getErrorCodes());
             }
 
-            sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
+            if (sheet != null) {
+                sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
+            }
 
         }
         if (runWithJS && !outcome.isException()) {

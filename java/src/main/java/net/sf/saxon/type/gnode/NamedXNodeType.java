@@ -226,17 +226,32 @@ public class NamedXNodeType extends XNodeType {
 
     @Override
     public final double getDefaultPriority() {
-        if (nameTest instanceof AnyQNameTest) {
-            return 0;
-        } else if (nameTest instanceof SpecificQNameTest) {
-            return 0.25;
-        } else if (nameTest instanceof UnionQNameTest) {
-            return 0.125;
-        } else if (nameTest instanceof LocalQNameTest || nameTest instanceof NamespaceQNameTest) {
-            return 0.125;
+        if (schemaType == null || schemaType == AnyType.getInstance()) {
+            if (nameTest instanceof AnyQNameTest) {
+                return -0.5;
+            } else if (nameTest instanceof SpecificQNameTest) {
+                return 0;
+            } else if (nameTest instanceof UnionQNameTest) {
+                return -0.25;
+            } else if (nameTest instanceof LocalQNameTest || nameTest instanceof NamespaceQNameTest) {
+                return -0.25;
+            } else {
+                // Not sure what this covers...
+                return 0;
+            }
         } else {
-            // Not sure what this covers...
-            return 0;
+            if (nameTest instanceof AnyQNameTest) {
+                return 0;
+            } else if (nameTest instanceof SpecificQNameTest) {
+                return 0.25;
+            } else if (nameTest instanceof UnionQNameTest) {
+                return 0.125;
+            } else if (nameTest instanceof LocalQNameTest || nameTest instanceof NamespaceQNameTest) {
+                return 0.125;
+            } else {
+                // Not sure what this covers...
+                return 0;
+            }
         }
     }
 
