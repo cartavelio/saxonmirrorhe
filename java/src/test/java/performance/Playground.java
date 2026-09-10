@@ -26,7 +26,7 @@ public class Playground extends PerformanceTestCase {
     @Tag("performance")
     public void testInstanceOf() {
         final List<AtomicValue> values = new ArrayList<>();
-        for (int i=0; i<5000000; i++) {
+        for (int i=0; i<100000; i++) {
             values.add(new Int64Value(i));
             values.add(StringValue.makeUntypedAtomic(StringView.wrap("" + i)));
         }
@@ -43,7 +43,7 @@ public class Playground extends PerformanceTestCase {
 
             @Override
             public int expectedTimeMicroseconds() {
-                return 50000;
+                return 500;
             }
 
             @Override
@@ -57,7 +57,7 @@ public class Playground extends PerformanceTestCase {
     @Tag("performance")
     public void testPrimitiveType() {
         final List<AtomicValue> values = new ArrayList<>();
-        for (int i = 0; i < 5000000; i++) {
+        for (int i = 0; i < 100000; i++) {
             values.add(new Int64Value(i));
             values.add(StringValue.makeUntypedAtomic(StringView.wrap ("" + i)));
         }
@@ -74,7 +74,7 @@ public class Playground extends PerformanceTestCase {
 
             @Override
             public int expectedTimeMicroseconds() {
-                return 50000;
+                return 500;
             }
 
             @Override
@@ -88,7 +88,7 @@ public class Playground extends PerformanceTestCase {
     @Tag("performance")
     public void testActualType() {
         final List<AtomicValue> values = new ArrayList<>();
-        for (int i = 0; i < 5000000; i++) {
+        for (int i = 0; i < 100000; i++) {
             values.add(new Int64Value(i));
             values.add(StringValue.makeUntypedAtomic(StringView.wrap ("" + i)));
         }
@@ -105,7 +105,7 @@ public class Playground extends PerformanceTestCase {
 
             @Override
             public int expectedTimeMicroseconds() {
-                return 50000;
+                return 400;
             }
 
             @Override
@@ -119,7 +119,7 @@ public class Playground extends PerformanceTestCase {
     @Tag("performance")
     public void testFingerprint() {
         final List<AtomicValue> values = new ArrayList<>();
-        for (int i = 0; i < 5000000; i++) {
+        for (int i = 0; i < 100000; i++) {
             values.add(new Int64Value(i));
             values.add(StringValue.makeUntypedAtomic(StringView.wrap("" + i)));
         }
@@ -136,7 +136,7 @@ public class Playground extends PerformanceTestCase {
 
             @Override
             public int expectedTimeMicroseconds() {
-                return 50000;
+                return 300;
             }
 
             @Override
