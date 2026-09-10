@@ -79,6 +79,9 @@ public class XdmUtils {
         }
         XdmNode node = SaxonCAPI.objectHandles.get(value);
         URI uri = node.getBaseURI();
+        if(SaxonCAPI.debug) {
+            System.err.println("XdmNode baseuri="+ uri.toString());
+        }
         return SaxonCAPI.stringToNative2(fn, uri.toString());
 
     }

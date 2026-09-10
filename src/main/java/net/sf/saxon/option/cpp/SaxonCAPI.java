@@ -1148,9 +1148,22 @@ public class SaxonCAPI {
         String ccwd = null;
         String ffilename = filename;
 
-        if(File.separatorChar != '/' && cwd != null) {
+        if(debug && cwd != null) {
+            System.err.println("Setting xmlresolver property file = " + cwd + "/xmlresolver.properties");
+             Properties props = System.getProperties();
+             props.setProperty("xmlresolver.properties", cwd + "/xmlresolver.properties");
+
+             //System.setProperty("xml.catalog.logging","*:debug");
+            //System.setProperty("xml.catalog.defaultLoggerLogLevel","debug");
+
+         }
+
+        //if(File.separatorChar != '/' && cwd != null) {
             ccwd = new File(cwd).toURI().toString();
-        }
+        /*} else {
+
+            ccwd = cwd;
+        } */
 
         char separatorChar = '/';
         if (File.separatorChar != '/') {
@@ -1174,12 +1187,18 @@ public class SaxonCAPI {
         request.nature = nature;
 
         try {
-            source = resolver.resolve(request);
-
+            //source = resolver.resolve(request);
+            Configuration config = processor.getUnderlyingConfiguration();
+            source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
             if (source == null) {
+                if(debug) {
+                    System.err.println("USING resolver fallback");
+                }
                 source = resolveFileToSource_fallback(cwd, filename);
 
-            }
+            } /*else if(debug){
+                System.err.println("USING XML resolver - ZZZZZZYYYY");
+            } */
 
             return source;
         } catch (XPathException exception) {

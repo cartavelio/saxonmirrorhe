@@ -1073,12 +1073,9 @@ void exampleSimple3aError(SaxonProcessor *saxonProc, Xslt30Processor *proc, sRes
     } catch(SaxonApiException &e) {
           cout << "Expected failure of test exampleSimple3aError:" << endl;
           const char * message = e.getMessage();
-          cout << "cp0" << endl;
           if(message!= nullptr) {
-          cout << "cp0-1" << endl;
-              cout << message << endl;
+              cout <<"Exception success = " <<message << endl;
           }
-          cout << "cp1" << endl;
           sresult->success++;
           return;
 
@@ -2280,7 +2277,6 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
       }
     cout<<sw<<endl;
     cout << "testPipeline = " << sw << endl;
-    cerr<<"testPipeline cp0-0"<<endl;
     sresult->success++;
     delete stage1;
     stage1 = nullptr;
@@ -2318,7 +2314,6 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
 
     delete inn;
     inn = nullptr;
-cerr<<"testPipeline cp0"<<endl;
 }
 
 
@@ -2429,6 +2424,7 @@ void testSaxSourceNoSystemId(SaxonProcessor * proc, DocumentBuilder * builder, s
          DocumentBuilder * builder = proc->newDocumentBuilder();
          builder->setBaseUri("https://www.example.com");
          XdmNode * d = builder->parseXmlFromString("<doc/>");
+         fflush(stdout);
          if(d != nullptr) {
                     if(d->getBaseUri() != nullptr) {
                         std::cout<<"BaseUri:"<<d->getBaseUri()<<endl;
@@ -2766,13 +2762,9 @@ int main(int argc, char* argv[]) {
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
-    cout<<"cp 2 -xx"<<endl;
     try {
-    DocumentBuilder * builder = processor->newDocumentBuilder();
-
-    cout<<"cp 3 -xx"<<endl;
-    testSaxSourceNoSystemId(processor, builder, sresult);
-    cout<<"cp 4 -xx"<<endl;
+        DocumentBuilder * builder = processor->newDocumentBuilder();
+        testSaxSourceNoSystemId(processor, builder, sresult);
     } catch(SaxonApiException &e) {
         cerr<<e.what()<<endl;
 
