@@ -111,7 +111,6 @@ public class SaxonParam extends AnnotationParent {
             throws SchemaException {
         try {
             XPathParser parser = new XPathParser();
-            parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
             return parser.parseSequenceType(sequenceType, env);
         } catch (XPathException err) {
             error(err.getMessage());

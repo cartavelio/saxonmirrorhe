@@ -45,7 +45,6 @@ public class SelectionParser extends XPathParser {
                                  boolean isField) throws XPathException {
         //System.err.println("Parse expression: " + expression);
 
-        setLanguage(XPathParser.ParsedLanguage.XPATH, 20);
         this.env = env;
         this.charChecker = env.getConfiguration().getValidCharacterChecker();
         this.isFieldSubset = isField;

@@ -285,13 +285,11 @@ public class ExperimentalXPathCompiler {
     private static Expression make(String expression, StaticContext env,
                                    boolean inCatch, boolean allowEmpty) throws XPathException {
         try {
-            int languageLevel = env.getXPathVersion();
-            XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, languageLevel);
+            XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
             if (inCatch) {
                 parser.setCatchDepth(1);
             }
             parser.setAllowAbsentExpression(allowEmpty);
-            //System.err.println("EXPR: " + expression);
             Expression exp = parser.parse(expression, 0, Token.EOF, env);
             ExpressionTool.setDeepRetainedStaticContext(exp, env.makeRetainedStaticContext());
             exp = exp.simplify();
@@ -696,8 +694,8 @@ public class ExperimentalXPathCompiler {
                     return supplied.iteratePrefixes();
                 }
             });
+            env.setXPathLanguageLevel(31);
             XPathParser parser = new XPathParser();
-            parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
             SequenceType st = parser.parseSequenceType(input, env);
             return makeMap(st);
 

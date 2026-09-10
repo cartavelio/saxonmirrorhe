@@ -584,34 +584,25 @@ public class ProfessionalConfiguration extends Configuration {
      * @param language        set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
      * @param updating        indicates whether or not XQuery update syntax may be used. Note that XQuery Update
      *                        is supported only in Saxon-EE
-     * @param languageVersion the required version (e.g 10 for "1.0", 30 for "3.0", 31 for "3.1").
-     *                        A request for XQuery 1.0 or 3.0 delivers an XQuery 3.1 parser. The values
-     *                        supported for XPath are 20 (=2.0), 30 (=3.0), 31 (=3.1), and 305 (=XPath 3.0
-     *                        plus the syntax extensions defined in XSLT 3.0).
      * @return the XPath or Query Parser
      * @throws net.sf.saxon.trans.XPathException if this version of Saxon does not support the
      *                                           requested options
      */
 
     @Override
-    public XPathParser newExpressionParser(String language, boolean updating, int languageVersion) throws XPathException {
+    public XPathParser newExpressionParser(String language, boolean updating) throws XPathException {
         if (updating) {
             throw new IllegalArgumentException("XQuery Update requires Saxon-EE");
         }
         if ("XQ".equals(language)) {
-            if (languageVersion == 40 || languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
-                XQueryParser parser = new XQueryParser(Math.max(languageVersion, 31));
-                parser.setLanguage(XPathParser.ParsedLanguage.XQUERY, Math.max(languageVersion, 31));
-                if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-                    parser.setParserExtension(new XQueryParserExtensionPE());
-                }
-                return parser;
-            } else {
-                throw new IllegalArgumentException("Unknown XQuery version " + languageVersion);
+            XQueryParser parser = new XQueryParser();
+            if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
+                parser.setParserExtension(new XQueryParserExtensionPE());
             }
+            return parser;
         } else if ("XP".equals(language)) {
-            XPathParser parser = super.newExpressionParser(language, updating, languageVersion);
-            if (languageVersion > 20 && isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
+            XPathParser parser = super.newExpressionParser(language, updating);
+            if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                 parser.setParserExtension(new SaxonSyntaxExtension());
             }
             return parser;
@@ -622,7 +613,7 @@ public class ProfessionalConfiguration extends Configuration {
             }
             return parser;
         } else {
-            return super.newExpressionParser(language, updating, languageVersion);
+            return super.newExpressionParser(language, updating);
         }
     }
 

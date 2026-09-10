@@ -19,6 +19,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
@@ -100,6 +101,7 @@ public class CompileXPath extends SystemFunction {
 
         BooleanValue backwards = (BooleanValue) options.get(StringValue.bmp("backwardCompatibility"));
         env.setBackwardsCompatibilityMode(backwards != null && backwards.getBooleanValue());
+        env.setXPathLanguageLevel(configuration.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT));
 
         boolean inCatch;
 
@@ -186,7 +188,7 @@ public class CompileXPath extends SystemFunction {
 
         MapItem globalFunctions = (MapItem) options.get(StringValue.bmp("globalFunctions"));
 
-        XPathParser parser = configuration.newExpressionParser("XP", false, 31);// Used for parsing sequence type
+        XPathParser parser = configuration.newExpressionParser("XP", false);// Used for parsing sequence type
         /* This is a hack at present - really we should use parts of the retained static context,
            specifically namespace bindings in case xs: has been re-prefixed */
         StaticContext parseContext = new IndependentContext(configuration);
@@ -371,7 +373,7 @@ public class CompileXPath extends SystemFunction {
                                   int start, int terminator,
                                   CodeInjector codeInjector, boolean inCatch) throws XPathException {
         int languageLevel = env.getXPathVersion();
-        XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, languageLevel);
+        XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
         if (inCatch) {
             parser.setCatchDepth(1);
         }

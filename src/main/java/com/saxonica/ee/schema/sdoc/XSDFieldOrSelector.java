@@ -78,6 +78,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
 
         XPathStaticContext env = new XPathStaticContext(this);
         env.setDefaultElementNamespace(defaultNS);
+        env.setXPathLanguageLevel(20);
         Pattern selector;
         Expression exp;
         try {

@@ -602,7 +602,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             IndependentContext env = new IndependentContext(loader.config);
             env.setNamespaceResolver(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
             env.setDefaultElementNamespace(defaultNamespace);
-            //env.setBaseURI(xmlBase);
+            env.setXPathLanguageLevel(20);
             Pattern selector;
             try {
                 selector = new SelectionParser().parseSelector(xpath, env, isField);
