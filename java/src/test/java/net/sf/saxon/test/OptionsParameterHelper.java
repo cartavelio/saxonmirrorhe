@@ -4,6 +4,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
@@ -22,7 +23,7 @@ public class OptionsParameterHelper {
      * @return the default options for the provider OptionsParameter
      * @throws XPathException
      */
-    public static Map<String, GroundedValue> defaultOptionParameters(OptionsParameter params) throws XPathException {
+    public static ProcessedOptions defaultOptionParameters(OptionsParameter params) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
         return params.processSuppliedOptions(EmptyMap.INSTANCE_40, ctxt, 40);
     }
@@ -34,7 +35,7 @@ public class OptionsParameterHelper {
      * @return the parsed options
      * @throws XPathException
      */
-    public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options) throws XPathException {
+    public static ProcessedOptions parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
         return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt, 40);
     }
@@ -46,7 +47,7 @@ public class OptionsParameterHelper {
      * @return the parsed options
      * @throws XPathException
      */
-    public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, MapItem options) throws XPathException {
+    public static ProcessedOptions parsedOptionParameters(OptionsParameter params, MapItem options) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
         return params.processSuppliedOptions(options, ctxt, 40);
     }
@@ -59,7 +60,7 @@ public class OptionsParameterHelper {
      * @return the parsed options
      * @throws XPathException
      */
-    public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options, XPathContext ctxt) throws XPathException {
+    public static ProcessedOptions parsedOptionParameters(OptionsParameter params, Map<String, GroundedValue> options, XPathContext ctxt) throws XPathException {
         return params.processSuppliedOptions(TestXdmHelpers.buildXdmMap(options), ctxt, 40);
     }
 
@@ -71,11 +72,11 @@ public class OptionsParameterHelper {
      * @return the parsed options
      * @throws XPathException
      */
-    public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, MapItem options, XPathContext ctxt) throws XPathException {
+    public static ProcessedOptions parsedOptionParameters(OptionsParameter params, MapItem options, XPathContext ctxt) throws XPathException {
         return params.processSuppliedOptions(options, ctxt, 40);
     }
 
-    public static Map<String, GroundedValue> parsedOptionParameters(OptionsParameter params, DslLambda<TestMapBuilder> definition) throws XPathException {
+    public static ProcessedOptions parsedOptionParameters(OptionsParameter params, DslLambda<TestMapBuilder> definition) throws XPathException {
         TestMapBuilder builder = new TestMapBuilder();
         definition.buildWith(builder);
         return parsedOptionParameters(params, builder.getValue());
