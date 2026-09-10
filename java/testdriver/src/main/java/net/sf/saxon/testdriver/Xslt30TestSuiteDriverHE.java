@@ -373,8 +373,13 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 xpack = exportImportPackage(testName, testSetName, outcome, compiler, xpack, collector);
                 compiler.importPackage(xpack);
                 // Following needed for dynamic loading of packages using fn:transform()
-                env.processor.getUnderlyingConfiguration().getDefaultXsltCompilerInfo()
-                        .getPackageLibrary().addPackage(xpack.getUnderlyingPreparedPackage());
+                try {
+                    env.processor.getUnderlyingConfiguration().getDefaultXsltCompilerInfo()
+                            .getPackageLibrary().addPackage(xpack.getUnderlyingPreparedPackage());
+                } catch (XPathException e) {
+                    System.err.println("Failed to add library to package: " + e.getMessage());
+                    throw new RuntimeException(e);
+                }
             }
             sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
 

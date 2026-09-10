@@ -909,7 +909,11 @@ public class XsltCompiler {
             throw new SaxonApiException(
                     "The imported package and the XsltCompiler must belong to the same Processor");
         }
-        compilerInfo.getPackageLibrary().addPackage(thePackage.getUnderlyingPreparedPackage());
+        try {
+            compilerInfo.getPackageLibrary().addPackage(thePackage.getUnderlyingPreparedPackage());
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
     }
 
     /**
