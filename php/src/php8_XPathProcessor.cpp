@@ -231,6 +231,40 @@ PHP_METHOD(XPathProcessor, isSchemaAware) {
 }
 
 
+PHP_METHOD(XPathProcessor, useSchema) {
+  XPathProcessor *xpathProcessor;
+  zval *oth;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &oth, xsdSchema_ce) ==
+      FAILURE) {
+    RETURN_NULL();
+  }
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xpathProcessor_object *obj =
+      (xpathProcessor_object *)((char *)pobj -
+                                 XtOffsetOf(xpathProcessor_object, std));
+  xpathProcessor = obj->xpathProcessor;
+  if (xpathProcessor != nullptr) {
+    zend_object *vvobj = Z_OBJ_P(oth);
+    xsdSchema_object *ooth =
+        (xsdSchema_object *)((char *)vvobj - XtOffsetOf(xsdSchema_object, std));
+    if (ooth != nullptr) {
+      XsdSchema *value = ooth->xsdSchema;
+      if (value != nullptr) {
+        try {
+          xpathProcessor->useSchema(value);
+
+        } catch (SaxonApiException &e) {
+          zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(),0);
+        }
+      } else {
+        zend_throw_exception(zend_ce_exception, "Argument must contain an XsdSchema object",0);
+      }
+    }
+  }
+}
+
+
 PHP_METHOD(XPathProcessor, setBackwardsCompatible) {
 
   XPathProcessor *xpathProcessor;
@@ -696,6 +730,7 @@ zend_function_entry XPathProcessor_methods[] = {
                     PHP_ME(XPathProcessor,setBackwardsCompatible,arginfo_saxonc_xpath_setBackwardsCompatible,ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor,setSchemaAware,arginfo_saxonc_xpath_setSchemaAware,ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor,isSchemaAware,arginfo_saxonc_xpath_isSchemaAware,ZEND_ACC_PUBLIC)
+                    PHP_ME(XPathProcessor,useSchema,arginfo_saxonc_xpath_useSchema,ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor, setCaching,arginfo_saxonc_xpath_setCaching,ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor,
                                                         importSchemaNamespace,

@@ -118,7 +118,7 @@ PHP_METHOD(XsdSchema, combine) {
                                0);
         }
       } else {
-        zend_throw_exception(zend_ce_exception, "Argument must contain array of XdmNode objects",
+        zend_throw_exception(zend_ce_exception, "Argument must contain XdmSchema object",
                              0);
       }
     }

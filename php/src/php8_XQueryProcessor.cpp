@@ -294,6 +294,39 @@ PHP_METHOD(XQueryProcessor, isSchemaAware) {
   }
 }
 
+PHP_METHOD(XQueryProcessor, useSchema) {
+  XQueryProcessor *xqueryProcessor;
+  zval *oth;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &oth, xsdSchema_ce) ==
+      FAILURE) {
+    RETURN_NULL();
+  }
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xqueryProcessor_object *obj =
+      (xqueryProcessor_object *)((char *)pobj -
+                                 XtOffsetOf(xqueryProcessor_object, std));
+  xqueryProcessor = obj->xqueryProcessor;
+  if (xqueryProcessor != nullptr) {
+    zend_object *vvobj = Z_OBJ_P(oth);
+    xsdSchema_object *ooth =
+        (xsdSchema_object *)((char *)vvobj - XtOffsetOf(xsdSchema_object, std));
+    if (ooth != nullptr) {
+      XsdSchema *value = ooth->xsdSchema;
+      if (value != nullptr) {
+        try {
+          xqueryProcessor->useSchema(value);
+
+        } catch (SaxonApiException &e) {
+          zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(),0);
+        }
+      } else {
+        zend_throw_exception(zend_ce_exception, "Argument must contain an XsdSchema object",0);
+      }
+    }
+  }
+}
+
 
 PHP_METHOD(XQueryProcessor, setStreaming) {
   XQueryProcessor *xqueryProcessor;
@@ -574,6 +607,7 @@ zend_function_entry XQueryProcessor_methods[] = {
     PHP_ME(XQueryProcessor, setSchemaAware,arginfo_saxonc_XQueryProcessor_setSchemaAware,ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor, isSchemaAware,arginfo_saxonc_XQueryProcessor_isSchemaAware,ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor, setStreaming,arginfo_saxonc_XQueryProcessor_setStreaming,ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor, useSchema,arginfo_saxonc_XQueryProcessor_useSchema,ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor, isStreaming,arginfo_saxonc_XQueryProcessor_isStreaming,ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor, setLanguageVersion,arginfo_saxonc_XQueryProcessor_setLanguageVersion,ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor, setContextItem,arginfo_saxonc_XQueryProcessor_setContextItem,ZEND_ACC_PUBLIC)

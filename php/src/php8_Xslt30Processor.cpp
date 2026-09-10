@@ -492,6 +492,39 @@ PHP_METHOD(Xslt30Processor, isSchemaAware) {
   RETURN_BOOL(false);
 }
 
+PHP_METHOD(Xslt30Processor, useSchema) {
+  Xslt30Processor *xslt30Processor;
+  zval *oth;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &oth, xsdSchema_ce) ==
+      FAILURE) {
+    RETURN_NULL();
+  }
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xslt30Processor_object *obj =
+      (xslt30Processor_object *)((char *)pobj -
+                                 XtOffsetOf(xslt30Processor_object, std));
+  xslt30Processor = obj->xslt30Processor;
+  if (xslt30Processor != nullptr) {
+    zend_object *vvobj = Z_OBJ_P(oth);
+    xsdSchema_object *ooth =
+        (xsdSchema_object *)((char *)vvobj - XtOffsetOf(xsdSchema_object, std));
+    if (ooth != nullptr) {
+      XsdSchema *value = ooth->xsdSchema;
+      if (value != nullptr) {
+        try {
+          xslt30Processor->useSchema(value);
+
+        } catch (SaxonApiException &e) {
+          zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(),0);
+        }
+      } else {
+        zend_throw_exception(zend_ce_exception, "Argument must contain an XsdSchema object",0);
+      }
+    }
+  }
+}
+
 
 
 PHP_METHOD(Xslt30Processor, setJustInTimeCompilation) {
@@ -706,6 +739,7 @@ zend_function_entry Xslt30Processor_methods[] = {
   PHP_ME(Xslt30Processor,compileFromAssociatedFile,arginfo_saxonc_xp_compileFromAssociatedFile,ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor, setSchemaAware,arginfo_saxonc_xp_setSchemaAware,ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor, isSchemaAware,arginfo_saxonc_xp_isSchemaAware,ZEND_ACC_PUBLIC)
+  PHP_ME(Xslt30Processor, useSchema,arginfo_saxonc_xp_useSchema,ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor, setJustInTimeCompilation,arginfo_saxonc_xp_setJustInTimeCompilation,ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor, getJustInTimeCompilation,arginfo_saxonc_xp_getJustInTimeCompilation,ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor, setcwd,arginfo_saxonc_xp_setcwd,ZEND_ACC_PUBLIC)
