@@ -2121,7 +2121,8 @@ documentBuilder.build(as);]]></code></pre>
           tiny tree, <code>-tree:linked</code> for the linked tree). There is also a variant of the tiny
           tree called a "condensed tiny tree" which saves space (at the expense of build time) by
           recognizing text nodes and attribute nodes whose values appear more than once in the input
-          document. The tree model can also be selected from the Java or C# API. The default is to use the
+          document: this is selected by the option <code>-tree:tinyc</code>. 
+          The tree model can also be selected from the Java or C# API. The default is to use the
           tiny tree model. The choice should make no difference to the results of a transformation
           (except the order of attributes and namespace declarations) but only affects performance.</p>
         
@@ -2135,14 +2136,8 @@ documentBuilder.build(as);]]></code></pre>
         
         <p>The tiny tree model gives most benefit when you are processing a large document. It uses a
           lot less memory, so it can prevent thrashing when the size of document is such that the linked
-          tree doesn't fit in real memory. Use the "condensed" variant if you need to save memory, and
+          tree doesn't fit in real memory. Use the "tinyc" (condensed) variant if you need to save memory, and
           if your source data contains many text or attribute nodes with repeated values.</p>
-        
-        <p>Saxon also offers the option <code>-tree:condensed</code>. This delivers a TinyTree with
-          additional compression. Specifically, when a document contains multiple text nodes or
-          attribute nodes with the same string value, the condensed tree will "common up" the storage
-          for these nodes. This option gives a further reduction in memory usage, at the cost of slower
-          tree construction.</p>
         
         <p>The linked tree is used internally to represent stylesheet and schema modules because of the
           programming convenience it offers: it allows element nodes on the tree to be represented by

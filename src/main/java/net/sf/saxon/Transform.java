@@ -10,6 +10,7 @@ package net.sf.saxon;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.style.Compilation;
@@ -1371,6 +1372,7 @@ public class Transform {
                     DocumentBuilder builder = processor.newDocumentBuilder();
                     builder.setDTDValidation(getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION));
                     builder.setWhitespaceStrippingPolicy(sheet.getWhitespaceStrippingPolicy());
+                    builder.setTreeModel(TreeModel.getTreeModel(getConfiguration().getTreeModel()));
                     if (getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE)) {
                         source = new AugmentedSource(source, getConfiguration().getParseOptions());
                     }
