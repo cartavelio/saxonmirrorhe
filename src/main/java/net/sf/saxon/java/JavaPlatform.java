@@ -340,9 +340,6 @@ public class JavaPlatform implements Platform {
         if (source instanceof SAXSource) {
             if (((SAXSource)source).getXMLReader() == null) {
                 final XMLReader sourceParser = config.getSourceParser();
-                if (sourceParser.getEntityResolver() == null) {
-                    sourceParser.setEntityResolver(new StandardEntityResolver(config));
-                }
                 ((SAXSource) source).setXMLReader(sourceParser);
                 ActiveSAXSource activeSource = new ActiveSAXSource((SAXSource) source);
                 activeSource.setParserPool(config::reuseSourceParser);

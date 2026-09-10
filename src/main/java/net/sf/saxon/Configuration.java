@@ -386,11 +386,6 @@ public class Configuration implements SourceResolver, NotationSet {
 
         Version.platform.initialize(this);
 
-        //#if CSHARP==false
-        StandardEntityResolver resolver = new StandardEntityResolver(this);
-        defaultParseOptions.setEntityResolver(resolver);
-        //#endif
-
         // If the call to makeStandardModuleURIResolver during initialization, created
         // a StandardModuleURIResolver without a config, make sure it gets this config.
         if (standardModuleURIResolver instanceof StandardModuleURIResolver) {
