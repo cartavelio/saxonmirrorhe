@@ -253,9 +253,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("empty", 1, e -> e.populate(ArrayEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-            register("exists", 1, e -> e.populate(ArrayExists::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
-
             register("foot", 1, e -> {
                 return e.populate(ArrayFoot::new, AnyItemType.INSTANCE, STAR, 0)
                         .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
@@ -549,21 +546,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             }
             return zero;
         }
-    }
-
-    /**
-     * Implementation of the proposed 4.0 function array:exists(array)
-     */
-    public static class ArrayExists extends SystemFunction {
-
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            ArrayItem array = (ArrayItem) arguments[0].head();
-            assert array != null;
-            int len = array.arrayLength();
-            return BooleanValue.get(len > 0);
-        }
-
     }
 
     /**
