@@ -11,6 +11,7 @@
       Currently only check fully qualified links (i.e. containing '.') i.e. non-local
       
    -->
+   <xsl:param name="base-dir" select="''" as="xs:string"/>
    
    <!-- Choose whether or not to apply post processing filtering of results,
       e.g. to only show internal Saxon links which are not found -->
@@ -23,12 +24,12 @@
    <xsl:template match="tag[@found eq 'no'][not(contains(@href, 'saxon'))]" mode="filter"/>
    
    
-   <xsl:variable name="javadoc-types" select="doc('../build/javadoc-xml/javadoc-types.xml')"/>
+   <xsl:variable name="javadoc-types" select="doc(concat($base-dir, 'javadoc-types.xml'))"/>
    
    <xsl:template match="/" name="main">
       <xsl:variable name="out1">
          <out>
-            <xsl:for-each select="collection('../build/javadoc-xml/packages/')//package">
+            <xsl:for-each select="collection(concat($base-dir, 'packages/'))//package">
                <package>
                   <xsl:attribute name="id" select="@id"/>
                   <xsl:apply-templates select="*" mode="tag-only"/>
@@ -53,7 +54,6 @@
       <xsl:for-each select="$out2//tag">
          <xsl:message><xsl:value-of select="@to"/> not found: <xsl:value-of select="@href"/></xsl:message>
       </xsl:for-each>
-      
    </xsl:template>
    
    <xsl:template match="*" mode="tag-only">
