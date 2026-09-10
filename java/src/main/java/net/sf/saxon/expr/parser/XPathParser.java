@@ -16,8 +16,8 @@ import net.sf.saxon.expr.flwor.LocalVariableBinding;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.functions.*;
-import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.hof.DynamicPartialApply;
+import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
@@ -55,7 +55,6 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.*;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.util.IndexedStack;
@@ -2162,7 +2161,9 @@ public class XPathParser {
     }
 
     /**
-     * Parse an ItemType within a SequenceType
+     * Parse an ItemType within a SequenceType. On entry, the current token
+     * is the first token of the item type. On exit, it is the first token
+     * after the item type.
      *
      * @return the ItemType after parsing
      * @throws XPathException if a static error is found
@@ -2198,7 +2199,8 @@ public class XPathParser {
     /**
      * Parse an item type designated in the form NAME(ARGS) where name is the
      * current token value. On entry we are positioned on a keyword (such as "item")
-     * and we know it is followed by a left paren.
+     * and we know it is followed by a left paren. On exit we are positioned on the
+     * next token after the closing parenthesis.
      * @return the item type
      * @throws XPathException if invalid
      */
@@ -2230,37 +2232,26 @@ public class XPathParser {
             case "jnode":
                 checkLanguageVersion40("jnode() item type");
                 return parseJNodeType();
-//                nextToken();
-//                readToken(Token.LPAREN);
-//                if (t.currentToken == Token.RPAREN) {
-//                    nextToken();
-//                    return AnyJNodeType.getInstance();
-//                } else {
-//                    SequenceType valueType = parseSequenceType();
-//                    readToken(Token.RPAREN);
-//                    return new SpecificJNodeType(valueType);
-//                }
             case "map":
                 return parseMapItemType();
             case "array":
                 return parseArrayItemType();
             case "fn":
                 checkLanguageVersion40();
-                CSharp.emitCode("goto case \"function\";"); // drop through
+                return parseFunctionItemType(AnnotationList.EMPTY);
             case "function":
                 checkLanguageVersion30();
-                AnnotationList annotations = AnnotationList.EMPTY;
-                return parseFunctionItemType(annotations);
+                return parseFunctionItemType(AnnotationList.EMPTY);
             case "record":
                 return parseRecordTest(this);
             case "enum":
                 return parseEnumType();
-            case "type":
-                checkLanguageVersion40("the syntax type(T)");
-                if (language != ParsedLanguage.XSLT_PATTERN) {
-                    grumble("The syntax type(N) is allowed only in XSLT patterns, not in XPath expressions");
-                }
-                return parseTypeQualifier();
+//            case "type":
+//                checkLanguageVersion40("the syntax type(T)");
+//                if (language != ParsedLanguage.XSLT_PATTERN) {
+//                    grumble("The syntax type(N) is allowed only in XSLT patterns, not in XPath expressions");
+//                }
+//                return parseTypeQualifier();
             default:
                 grumble("Unknown item kind " + kindName);
                 return null;
@@ -2337,89 +2328,32 @@ public class XPathParser {
     }
 
 //    /**
-//     * Parse a union type (Saxon 9.8 extension, no longer in XPath 4.0).
-//     * Syntax: "union" "(" qname ("," qname)* ")"
+//     * Parse a type pattern (XSLT 4.0 extension).
+//     * Syntax: "type" "(" itemType ("|" itemType)* ")"
+//     *
 //     * @return the item type
 //     * @throws XPathException if a syntax error is found
 //     */
 //
-//    public ItemType parseUnionType() throws XPathException {
-//        // The initial "union(" has been read
-//        checkLanguageVersion40();
+//    public ItemType parseTypeQualifier() throws XPathException {
+//        checkLanguageVersion40("the syntax type(T)");
 //        nextToken();
+//        readToken(Token.LPAREN);
 //        List<ItemType> memberTypes = new ArrayList<>(6);
-//
 //        while (true) {
-//            if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
-//                EnumerationUnionType type = parseEnumType();
-//                for (ItemType it : type.getAlternatives()) {
-//                    memberTypes.add((SingletonEnumType) it);
-//                }
-//            } else {
-//                expectName();
-//                if (scanOnly) {
-//                    memberTypes.add(BuiltInAtomicType.STRING);
-//                } else {
-//                    StructuredQName member = getQNameParser().parse(
-//                            t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
-//                    ItemType type = getPlainType(member);
-//                    if (type instanceof AtomicType) {
-//                        memberTypes.add(type);
-//                    } else if (type instanceof PlainType) {
-//                        for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
-//                            if (pt instanceof AtomicType) {
-//                                memberTypes.add(pt);
-//                            } else {
-//                                grumble("Union type " + type + " has a non-atomic member type " + pt);
-//                            }
-//                        }
-//                    } else {
-//                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
-//                    }
-//                }
+//            memberTypes.add(parseItemType());
+//            if (t.currentToken == Token.VBAR) {
 //                nextToken();
-//            }
-//            if (t.currentToken == Token.RPAREN) {
+//            } else {
 //                break;
-//            } else if (t.currentToken == Token.COMMA) {
-//                nextToken();
-//            } else {
-//                grumble("Expected ',' or ')' after member name in union type, found '" +
-//                                  Token.tokens[t.currentToken] + '\'');
 //            }
 //        }
-//        nextToken();
-//        return new LocalUnionType(memberTypes);
-//
+//        readToken(Token.RPAREN);
+//        if (memberTypes.size() == 1) {
+//            return memberTypes.get(0);
+//        }
+//        return ChoiceItemType.makeChoiceItemType(memberTypes);
 //    }
-
-    /**
-     * Parse a type pattern (XSLT 4.0 extension).
-     * Syntax: "type" "(" itemType ("|" itemType)* ")"
-     *
-     * @return the item type
-     * @throws XPathException if a syntax error is found
-     */
-
-    public ItemType parseTypeQualifier() throws XPathException {
-        checkLanguageVersion40("the syntax type(T)");
-        nextToken();
-        readToken(Token.LPAREN);
-        List<ItemType> memberTypes = new ArrayList<>(6);
-        while (true) {
-            memberTypes.add(parseItemType());
-            if (t.currentToken == Token.VBAR) {
-                nextToken();
-            } else {
-                break;
-            }
-        }
-        readToken(Token.RPAREN);
-        if (memberTypes.size() == 1) {
-            return memberTypes.get(0);
-        }
-        return ChoiceItemType.makeChoiceItemType(memberTypes);
-    }
 
     /**
      * Parse an enum type (XPath 4.0 proposal).
@@ -2457,9 +2391,8 @@ public class XPathParser {
 
     /**
      * Parse the item type used for function items (for higher order functions)
-     * Syntax (changed by WG decision on 2009-09-22):
-     * function '(' '*' ') |
-     * function '(' (SeqType (',' SeqType)*)? ')' 'as' SeqType
+     * function|fn '(' '*' ') |
+     * function|fn '(' (SeqType (',' SeqType)*)? ')' 'as' SeqType
      * The "function(" has already been read
      *
      * @param annotations the list of annotation assertions for this function item type
@@ -2475,7 +2408,6 @@ public class XPathParser {
         SequenceType resultType;
 
         if (t.currentToken == Token.STAR) {
-            // Allow both to be safe
             nextToken();
             readToken(Token.RPAREN);
             if (annotations.isEmpty()) {
@@ -2520,19 +2452,17 @@ public class XPathParser {
             } else {
                 grumble("function() is no longer allowed for a general function type: must be function(*)");
                 return null;
-                // in the new syntax adopted on 2009-09-22, this case is an error
-                // return AnyFunctionType.getInstance();
             }
         }
     }
 
 
     /**
-     * Parse the item type used for maps (XSLT extension to XPath 3.0)
+     * Parse the item type used for maps
      * Syntax:
      * map '(' '*' ') |
      * map '(' ItemType ',' SeqType ')' 'as' SeqType
-     * The "map(" has already been read
+     * The "map" has already been read, and we know it is followed by "("
      * @return the item type of the map
      * @throws XPathException if a parsing error occurs or if the map syntax
      *                        is not available
@@ -2591,7 +2521,8 @@ public class XPathParser {
     }
 
     /**
-     * Parse a parenthesized item type (allowed in XQuery 3.0 and XPath 3.0 only)
+     * Parse a parenthesized item type (allowed from 3.0). In 4.0 this
+     * also allows a choice of item types separated by "|"
      *
      * @return the item type
      * @throws XPathException in the event of a syntax error (or if 3.0 is not enabled)
@@ -3362,7 +3293,7 @@ public class XPathParser {
             return resultExpr;
 
         } else if (token instanceof Token.Wildcard) {
-            QNameTest test = getQNameTestForWildcard((Token.Wildcard) token, Type.ELEMENT);
+            QNameTest test = getQNameTestForWildcard((Token.Wildcard) token);
             NodeTest nodeTest = new NamedXNodeType(Type.ELEMENT, test, env.getConfiguration());
             AxisExpression ae = new AxisExpression(AxisInfo.CHILD, nodeTest);
             setLocation(ae);
@@ -3474,12 +3405,12 @@ public class XPathParser {
 
     /**
      * Construct a QNameTest corresponding to a Wildcard token (prefix:*, *:local, or Q{uri}*)
+     *
      * @param token the wildcard token
-     * @param kind the node kind if known
      * @return the corresponding NodeTest
      * @throws XPathException for example if the local name is invalid
      */
-    private QNameTest getQNameTestForWildcard(Token.Wildcard token, short kind) throws XPathException {
+    private QNameTest getQNameTestForWildcard(Token.Wildcard token) throws XPathException {
         String prefix = token.getPrefix();
         String suffix = token.getSuffix();
         if (prefix.equals("*")) {
@@ -3914,7 +3845,7 @@ public class XPathParser {
             return new NodeTestStar(nodeKind);
         } else if (tok instanceof Token.Wildcard) {
             nextToken();
-            QNameTest test = getQNameTestForWildcard(((Token.Wildcard) tok), nodeKind);
+            QNameTest test = getQNameTestForWildcard(((Token.Wildcard) tok));
             return new NamedXNodeType(nodeKind, test, env.getConfiguration());
         } else {
             grumble("Unrecognized node test");
@@ -3934,8 +3865,16 @@ public class XPathParser {
         return test;
     }
 
+    /**
+     * Parse a JNode item type: jnode(selector, contentType) where
+     * selector is typically "*" or an NCName or a Constant, and contentType
+     * is a sequence type
+     * @return the parsed jnode item type
+     * @throws XPathException on failure
+     */
+
     private JNodeType parseJNodeType() throws XPathException {
-        Token firstArg = null;
+        Token firstArg;
         AtomicValue selector = null;
         expectKeyword("jnode");
         nextToken();
@@ -4169,20 +4108,8 @@ public class XPathParser {
             case "gnode":
                 checkLanguageVersion40("NodeTest gnode()");
                 expectEmptyParens();
-                // TODO: why create a JNodeType here????
-                return new SpecificJNodeType(AnyGNodeType.getInstance().one()
-                );
+                return AnyGNodeType.getInstance();
 
-//            case "type": {
-//                checkLanguageVersion40("nodeTest type()");
-//                nextToken();
-//                readToken(Token.LPAREN);
-//                SequenceType type = parseSequenceType();
-//                readToken(Token.RPAREN);
-//                return new SpecificJNodeType(type
-//                );
-//
-//            }
             case "record": {
                 checkLanguageVersion40("nodeTest record(...)");
                 ItemType type = parseRecordTest(this);
@@ -4273,7 +4200,7 @@ public class XPathParser {
                 nextToken();
             } else if (tok instanceof Token.Wildcard) {
                 nextToken();
-                QNameTest test = getQNameTestForWildcard((Token.Wildcard) tok, nodeKind);
+                QNameTest test = getQNameTestForWildcard((Token.Wildcard) tok);
                 tests.add(test);
             } else if (tok == Token.STAR) {
                 nextToken();
@@ -4396,7 +4323,6 @@ public class XPathParser {
         boolean allLiteralKeys = true;
         boolean allStringKeys = true;
         boolean allLiteralValues = true;
-        boolean includesSubExpressions = false;
         nextToken();
         if (t.currentToken != Token.RCURLY) {
             while (true) {
@@ -4420,7 +4346,6 @@ public class XPathParser {
                     }
                 } else {
                     checkSyntaxExtensions("nested expressions in map constructors");
-                    includesSubExpressions = true;
                     allLiteralKeys = false;
                     allLiteralValues = false;
                     allStringKeys = false;
@@ -4830,30 +4755,30 @@ public class XPathParser {
 
     protected void checkAllowedFunctionArgument(Expression arg) throws XPathException {}
 
-    /**
-     * Process a static function call in which one or more of the argument positions are
-     * represented as "?" placemarkers (indicating partial application or currying)
-     *
-     * @param parser           the XPath parser
-     * @param offset           offset in the query source of the start of the expression
-     * @param name             the function call (as if there were no currying)
-     * @param args             the arguments (with EmptySequence in the placemarker positions)
-     * @return the curried function
-     * @throws XPathException if a dynamic error occurs
-     */
-
-    public Expression makeStaticPartialApply(
-            XPathParser parser, int offset,
-            StructuredQName name, Expression[] args, Map<StructuredQName, Integer> keywordArgs) throws XPathException {
-        StaticContext env = parser.getStaticContext();
-        if (env.getConfiguration().isDisabledFunction(name)) {
-            grumble("Function " + name + " has been disabled", "XPST0018");
-        }
-        FunctionLibrary lib = env.getFunctionLibrary();
-        SymbolicName.F sn = new SymbolicName.F(name, args.length);
-        List<String> reasons = new ArrayList<>();
-        Expression call = lib.bind(sn,args, keywordArgs, env, reasons);
-        return call;
+//    /**
+//     * Process a static function call in which one or more of the argument positions are
+//     * represented as "?" placemarkers (indicating partial application or currying)
+//     *
+//     * @param parser           the XPath parser
+//     * @param offset           offset in the query source of the start of the expression
+//     * @param name             the function call (as if there were no currying)
+//     * @param args             the arguments (with EmptySequence in the placemarker positions)
+//     * @return the curried function
+//     * @throws XPathException if a dynamic error occurs
+//     */
+//
+//    public Expression makeStaticPartialApply(
+//            XPathParser parser, int offset,
+//            StructuredQName name, Expression[] args, Map<StructuredQName, Integer> keywordArgs) throws XPathException {
+//        StaticContext env = parser.getStaticContext();
+//        if (env.getConfiguration().isDisabledFunction(name)) {
+//            grumble("Function " + name + " has been disabled", "XPST0018");
+//        }
+//        FunctionLibrary lib = env.getFunctionLibrary();
+//        SymbolicName.F sn = new SymbolicName.F(name, args.length);
+//        List<String> reasons = new ArrayList<>();
+//        Expression call = lib.bind(sn,args, keywordArgs, env, reasons);
+//        return call;
 //        FunctionItem target = lib.getFunctionItem(sn, env);
 //        if (target == null) {
 //            // This will not happen in XQuery; instead, a dummy function will be created in the
@@ -4872,7 +4797,7 @@ public class XPathParser {
 //        Expression targetExp = makeNamedFunctionReference(name, target);
 //        parser.setLocation(targetExp, offset);
 //        return makePartialApplication(targetExp, args, keywordArgs);
-    }
+//    }
 
 
     public void handleExternalFunctionDeclaration(XQueryParser p, XQueryFunction func) throws XPathException {
@@ -5054,7 +4979,7 @@ public class XPathParser {
 
         if (!(t.currentToken instanceof Token.NumericLiteral)) {
             grumble("Expected number following '#'");
-        };
+        }
         NumericValue number = ((Token.NumericLiteral)t.currentToken).getValue();
         if (!(number instanceof IntegerValue)) {
             grumble("Number following '#' must be an integer");
