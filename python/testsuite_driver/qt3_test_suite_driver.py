@@ -702,6 +702,7 @@ def main(argv):
 
     print("W3 QT3 Test Suite")
     print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
+    print("Licensed PySaxonProcessor = ", driver_proc.is_schema_aware)
 
     diri = None
     spec = None
