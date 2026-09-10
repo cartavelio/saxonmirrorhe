@@ -8,20 +8,23 @@
 package s9apitest;
 
 import jaxptest.ConfigTest;
+import net.sf.saxon.Controller;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trace.TraceLevel;
-import net.sf.saxon.trace.XSLTTraceCodeInjector;
-import net.sf.saxon.trace.XSLTTraceListener;
+import net.sf.saxon.trace.*;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -260,6 +263,104 @@ public class TestXsltTracing {
         }
     }
 
+
+    /**
+     * Test that open and close are called once each per transformation. Bug 6688.
+     */
+
+    @Test
+    public void testOpenClose() {
+        try {
+            String xml = "<a/>";
+            String xsl = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                    + "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0' "
+                    + "       xmlns:local='local' xmlns:xs='http://www.w3.org/2001/XMLSchema'>\n"
+                    + "   <xsl:template match=\"/\">\n"
+                    + "      <out x=\"#{count(//*)}\" y=\"{current-date() + xs:dayTimeDuration('P1D')}\"/>\n"
+                    + "   </xsl:template>\n"
+                    + "   <xsl:template name='t' visibility='public'><out/></xsl:template>\n"
+                    + "   <xsl:function visibility='public' name='local:f'><out/></xsl:function>\n"
+                    + "</xsl:transform>";
+            Processor processor = new Processor(true);
+            processor.setConfigurationProperty(Feature.TIMING, true);
+            XdmNode doc = processor.newDocumentBuilder().build(new StreamSource(new StringReader(xml)));
+            // Create a transformer for the stylesheet.
+            final XsltCompiler compiler = processor.newXsltCompiler();
+            compiler.setCompileWithTracing(true);
+            XsltExecutable exec = compiler.compile(
+                    new StreamSource(new StringReader(xsl), "dummy.xsl"));
+            OpenCloseTraceListener tracer = new OpenCloseTraceListener();
+
+            Xslt30Transformer trans = exec.load30();
+            trans.setTraceListener(tracer);
+            trans.applyTemplates(doc);
+            System.err.println("opens " + tracer.opens + " closes " + tracer.closes);
+            trans.applyTemplates(doc);
+            System.err.println("opens " + tracer.opens + " closes " + tracer.closes);
+            assertEquals(2, tracer.opens);
+            assertEquals(2, tracer.closes);
+            assertEquals(tracer.enters, tracer.leaves);
+            assertEquals(tracer.starts, tracer.ends);
+
+            trans.callTemplate(new QName("", "t"));
+            System.err.println("opens " + tracer.opens + " closes " + tracer.closes);
+            trans.callTemplate(new QName("", "t"));
+            System.err.println("opens " + tracer.opens + " closes " + tracer.closes);
+            assertEquals(4, tracer.opens);
+            assertEquals(4, tracer.closes);
+            assertEquals(tracer.enters, tracer.leaves);
+            assertEquals(tracer.starts, tracer.ends);
+
+            trans.callFunction(new QName("local", "f"), new XdmValue[]{});
+            System.err.println("opens " + tracer.opens + " closes " + tracer.closes);
+            trans.callFunction(new QName("local", "f"), new XdmValue[]{});
+            System.err.println("opens " + tracer.opens + " closes " + tracer.closes);
+            assertEquals(6, tracer.opens);
+            assertEquals(6, tracer.closes);
+            assertEquals(tracer.enters, tracer.leaves);
+            assertEquals(tracer.starts, tracer.ends);
+
+
+        } catch (SaxonApiException err) {
+            err.printStackTrace();
+            fail();
+        }
+    }
+
+    private static class OpenCloseTraceListener extends AbstractTraceListener {
+
+        public int opens, closes, enters, leaves, starts, ends;
+
+        @Override
+        public void open(Controller controller) {
+            opens++;
+        }
+
+        @Override
+        public void startCurrentItem(Item item) {
+            starts++;
+        }
+
+        @Override
+        public void endCurrentItem(Item item) {
+            ends++;
+        }
+
+        @Override
+        public void enter(Traceable info, Map<String, Object> properties, XPathContext context) {
+            enters++;
+        }
+
+        @Override
+        public void leave(Traceable info) {
+            leaves++;
+        }
+
+        @Override
+        public void close() {
+            closes++;
+        }
+    }
 
 
 }
