@@ -16,9 +16,9 @@ namespace Saxon.Impl.Dom {
     /// Implements Saxon.Hej.om.NodeInfo as a wrapper over an element, text, or comment node in
     /// the AngleSharp HTML document tree. The node always has a parent (which may be an element
     /// or document node), and is always part of a tree rooted at a document node.
-    /// There are namespaces for specific vocabularies that are part of HTML5,
-    /// such as SVG and MathML. There are no processing instructions. It is assumed that there are
-    /// no adjacent text nodes (if this is not the case, we make no attempt to merge them).
+    /// There are no namespaces, and names comprise a local name only. There are no
+    /// processing instructions. It is assumed that there are no adjacent text nodes (if this
+    /// is not the case, we make no attempt to merge them).
     /// </summary>
     public class HtmlNodeWrapper : AbstractNodeWrapper, HtmlContainerNodeWrapper, SteppingNode, SiblingCountingNode {
         private readonly AngleSharp.Dom.INode node;
