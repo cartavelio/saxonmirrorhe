@@ -2806,6 +2806,7 @@ public class Configuration implements SourceResolver, NotationSet {
         return Version.platform.loadParser();
     }
 
+    //#if CSHARP==false
     /**
      * Get the parser for stylesheet documents. This parser is also used for schema documents.
      * <p>This method is intended for internal use only.</p>
