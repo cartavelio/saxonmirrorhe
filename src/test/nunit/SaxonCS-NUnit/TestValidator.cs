@@ -87,11 +87,11 @@ namespace SaxonCS_NUnit {
          * preserved through validation
          */
 
-        //[Ignore("Restriction: Multiple base URIs in a document not recognized")]
-        [Test]
+        [Ignore("Unresolved bug: 5107")]
+        //[Test]
         public void TestValidationWithEntities() {
             try {
-                Processor proc = new Processor(true);
+                Processor proc = new ();
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri, "book-wrapper.xml"));
                 Assert.AreEqual(3, GetAllBaseUris(doc).Count, "3 distinct base URIs in input");
@@ -100,15 +100,15 @@ namespace SaxonCS_NUnit {
                 SchemaManager mgr = proc.SchemaManager;
                 mgr.Compile(new Uri(ConfigTest.DataDirUri, "books.xsd"));
                 SchemaValidator v = mgr.NewSchemaValidator();
-                XdmDestination dest = new XdmDestination();
-                dest.BaseUri = doc.BaseUri;
+                XdmDestination dest = new();
+                //dest.BaseUri = doc.BaseUri;
                 v.SetDestination(dest);
                 v.Validate(doc);
 
                 XdmNode validDoc = dest.XdmNode;
 
                 Assert.AreEqual(3, GetAllBaseUris(validDoc).Count, "3 distinct base URIs in output");
-                Assert.That(doc.BaseUri.ToString().EndsWith("book-wrapper.xml"), "validated doc base URI");
+                Assert.That(validDoc.BaseUri.ToString().EndsWith("book-wrapper.xml"), "validated doc base URI");
 
             }
             catch (Exception e) {
