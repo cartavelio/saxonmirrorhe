@@ -12,7 +12,6 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
@@ -128,10 +127,9 @@ public class SerializationParamsHandler {
                 } catch (XPathException err) {
                     if (err.hasErrorCode("XQST0109", "SEPM0016")) {
                         if (uri.isEmpty()) {
-                            throw new XPathException("Unknown serialization parameter " +
-                                Err.depict(child), "SEPM0017", locator);
+                            throw err.withErrorCode("SEPM0017").maybeWithLocation(locator);
                         }
-                        // Unknown serialization parameter - no action, ignore the error
+                        // Unknown serialization parameter in a namespace - no action, ignore the error
                     } else {
                         throw err;
                     }
