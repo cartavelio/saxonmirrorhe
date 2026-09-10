@@ -23,7 +23,8 @@ XdmFunctionItem::XdmFunctionItem(int64_t obj)
 XdmValue *XdmFunctionItem::getXdmValueSubClass(int64_t results) {
   if (results > 0) {
     XdmValue *value = nullptr;
-    int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    int typeRef = j_getXdmObjectType(thread,
                                      (void *)results);
     XdmItem *xdmItem = nullptr;
     if (typeRef == -2) {
@@ -57,7 +58,7 @@ XdmValue *XdmFunctionItem::getXdmValueSubClass(int64_t results) {
     } else if (typeRef == XDM_EMPTY) {
       // Empty Sequence detected.
       // TODO Maybe we should create an EmptySequence object
-      j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)results);
+      j_handles_destroy(thread, (void *)results);
       results = SXN_UNSET;
       return nullptr;
 
@@ -76,7 +77,8 @@ XdmValue *XdmFunctionItem::getXdmValueSubClass(int64_t results) {
 const char *XdmFunctionItem::getName() {
   if (fname == nullptr) {
     allocFn fn = operator new;
-    fname = j_getFunctionName(SaxonProcessor::sxn_environ->thread, (void *)fn,
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    fname = j_getFunctionName(thread, (void *)fn,
                               (void *)value);
     return fname;
   } else {
@@ -89,7 +91,8 @@ int XdmFunctionItem::getArity() {
     if (value <= 0) {
       return -1;
     }
-    arity = j_xdmFunctionItem_getArity(SaxonProcessor::sxn_environ->thread,
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    arity = j_xdmFunctionItem_getArity(thread,
                                        (void *)value);
     return arity;
   } else {
@@ -105,9 +108,9 @@ XdmFunctionItem *XdmFunctionItem::getSystemFunction(SaxonProcessor *processor,
         "Error in getSystemFunction. Please make sure processor and "
         "name are not nullptr.");
   }
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t result =
-      j_getSystemFunction(SaxonProcessor::sxn_environ->thread,
+      j_getSystemFunction(thread,
                           (void *)processor->procRef, (char *)name, arity);
   if (result >= 0) {
     XdmFunctionItem *functionItem = new XdmFunctionItem(result);
@@ -135,14 +138,14 @@ XdmValue *XdmFunctionItem::call(SaxonProcessor *processor, XdmValue **arguments,
     throw SaxonApiException("Error in XdmFunctionItem.call when converting "
                             "arguments -   nullptr arguments found.\"");
   }
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t results = j_xdmFunctionItem_call(
-      SaxonProcessor::sxn_environ->thread, (void *)processor->procRef,
+      thread, (void *)processor->procRef,
       (void *)value,
       (argumentJArrayRef == SXN_UNSET ? (void *)nullptr
                                       : (void *)argumentJArrayRef));
   if (argumentJArrayRef != SXN_UNSET) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)argumentJArrayRef);
+    j_handles_destroy(thread,(void *)argumentJArrayRef);
     argumentJArrayRef = -1;
   }
   if (results == SXN_EXCEPTION) {

@@ -35,50 +35,47 @@ XsltExecutable::XsltExecutable(SaxonProcessor *proci, int64_t exRef,
   resources_dir = resources;
   exceptionFound = false;
   selectionStringFlag = false;
-  sxn_environ =
-       new sxnc_environment;
-
-  sxn_environ->isolate = SaxonProcessor::sxn_environ->isolate;
-  sxn_environ->thread = SaxonProcessor::sxn_environ->thread;
-  SaxonProcessor::attachCurrentThread(sxn_environ);
 }
 
 XsltExecutable::~XsltExecutable() {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   
   clearProperties();
   clearParameters();
   resources_dir.clear();
 
   if (saxonMessageListenerRef != SXN_UNSET) {
-    j_handles_destroy(sxn_environ->thread,
+    j_handles_destroy(thread,
                       (void *)saxonMessageListenerRef);
     saxonMessageListenerRef = SXN_UNSET;
   }
   if (saxonResultDocRef != SXN_UNSET) {
-    j_handles_destroy(sxn_environ->thread,
+    j_handles_destroy(thread,
                       (void *)saxonResultDocRef);
     saxonResultDocRef = SXN_UNSET;
   }
   if (executableRef != SXN_UNSET) {
-    j_handles_destroy(sxn_environ->thread,
+    j_handles_destroy(thread,
                       (void *)executableRef);
     executableRef = SXN_UNSET;
   }
-  SaxonProcessor::detachCurrentThread(sxn_environ);
-  delete sxn_environ;
+
 }
 
 XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "XsltExecutable. copy constructor" << std::endl;
   }
-  sxn_environ =
+
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+
+  /*sxn_environ =
          new sxnc_environment;
   sxn_environ->isolate = other.sxn_environ->isolate;
-  sxn_environ->thread =  other.sxn_environ->thread;
-  SaxonProcessor::attachCurrentThread(sxn_environ);
+  thread =  other.thread;
+  SaxonProcessor::attachCurrentThread(sxn_environ); */
 
-  executableRef = j_copy_handles(sxn_environ->thread, (void *)other.executableRef);
+  executableRef = j_copy_handles(thread, (void *)other.executableRef);
   if(executableRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -169,13 +166,13 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
     /*
 
     else if (selectionRef != SXN_UNSET && selectionStringFlag) {
-    j_handles_destroy(sxn_environ->thread,
+    j_handles_destroy(thread,
                       (void *)selectionRef);
   }
   selectionRef = SXN_UNSET;
 
   if (filename != nullptr) {
-    selectionRef = j_createStringObject(sxn_environ->thread,
+    selectionRef = j_createStringObject(thread,
                                         (char *)filename);
     selectionStringFlag = true;
     if (selectionRef == SXN_EXCEPTION) {
@@ -244,7 +241,7 @@ void XsltExecutable::setInitialTemplateParameters(
 }
 
 void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
-  
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (flag) {
     resultDocumentMap.clear();
     if (saxonResultDocRef != SXN_UNSET) {
@@ -254,7 +251,7 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
     rawResultsFlag = rawResults || rawResultsFlag;
 
     saxonResultDocRef = createSaxonCResultDocumentHandler(
-        sxn_environ->thread, (int)rawResultsFlag);
+        thread, (int)rawResultsFlag);
 
     if (saxonResultDocRef == SXN_EXCEPTION) {
       throw SaxonApiException();
@@ -263,8 +260,7 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
     setProperty("rd", "off");
 
     if (saxonResultDocRef > 0) {
-      j_handles_destroy(sxn_environ->thread,
-                        (void *)saxonResultDocRef);
+      j_handles_destroy(thread,(void *)saxonResultDocRef);
       saxonResultDocRef = SXN_UNSET;
     }
 
@@ -279,18 +275,17 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
   
   if (saxonResultDocRef > 0) {
     allocFn fn = operator new;
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     long long *results =
-        j_getResultDocuments(sxn_environ->thread, (void *)fn,
+        j_getResultDocuments(thread, (void *)fn,
                              (void *)saxonResultDocRef);
-    int64_t resultUrisRef = j_getResultDocumentURIs(
-        sxn_environ->thread, (void *)saxonResultDocRef);
+    int64_t resultUrisRef = j_getResultDocumentURIs(thread, (void *)saxonResultDocRef);
     if (results != nullptr) {
       int sizex = (int) results[0];
       // std::cerr<<"getResultDocuments cp0 size= "<<sizex<<std::endl;
       for (int i = 1; i <= sizex; i++) {
         XdmValue *value = nullptr;
-        char *str = j_getProcessorDataProperty(
-            sxn_environ->thread, (void *)fn,
+        char *str = j_getProcessorDataProperty(thread, (void *)fn,
             (void *)resultUrisRef, i - 1);
 
         value = SaxonProcessor::makeXdmValueFromRef(results[i]);
@@ -303,7 +298,7 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
         }
       }
       operator delete(results);
-      j_handles_destroy(sxn_environ->thread,
+      j_handles_destroy(thread,
                         (void *)resultUrisRef);
     } /*else {
       exceptionFound = true;
@@ -395,7 +390,7 @@ void XsltExecutable::clearProperties() {
   
   properties.clear();
   /*if (selectionRef != SXN_UNSET && selectionStringFlag) {
-    j_handles_destroy(sxn_environ->thread,
+    j_handles_destroy(thread,
                       (void *)selectionRef);
     selectionRef = SXN_UNSET;
   } */
@@ -412,7 +407,8 @@ std::map<std::string, std::string> &XsltExecutable::getProperties() {
 }
 
 void XsltExecutable::exceptionClear() {
-  j_clearException(sxn_environ->thread);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  j_clearException(thread);
   exceptionFound = false;
 }
 
@@ -427,9 +423,9 @@ const char * XsltExecutable::getcwd() {
 }
 
 void XsltExecutable::exportStylesheet(const char *filename) {
-  
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   long status =
-      j_save(sxn_environ->thread, (char *)cwdXE.c_str(),
+      j_save(thread, (char *)cwdXE.c_str(),
              (void *)executableRef, (char *)filename);
   if (status == SXN_EXCEPTION) {
     exceptionFound = true;
@@ -438,8 +434,7 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 }
 
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
-  
-  SaxonProcessor::attachCurrentThread(sxn_environ);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
@@ -450,26 +445,26 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
       additions++;
   }*/
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ, parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
 
   long status = j_applyTemplatesReturningFile(
-      sxn_environ->thread, (char *)cwdXE.c_str(),
+      thread, (char *)cwdXE.c_str(),
       (void *)executableRef,
       (void *)(selectionRef == SXN_UNSET ? (void *)nullptr
                                          : (void *)selectionRef),
@@ -478,7 +473,7 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (status == SXN_EXCEPTION) {
@@ -490,30 +485,30 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 }
 
 const char *XsltExecutable::applyTemplatesReturningString() {
-  SaxonProcessor::attachCurrentThread(sxn_environ);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);//get_or_attach_thread(SaxonProcessor::sxn_environ);
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
   
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
   std::string optionStr;
   if (saxonMessageListenerRef != SXN_UNSET ) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
   allocFn fn = operator new;
 
   char *result = j_applyTemplatesReturningString(
-      sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(),
+      thread, (void *)fn, (char *)cwdXE.c_str(),
       (void *)executableRef,
       (selectionRef == SXN_UNSET ? (void *)NULL : (void *)selectionRef),
       (processorDataRef == SXN_UNSET ? (void *)NULL
@@ -522,7 +517,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
  
   if (processorDataRef > 0) {
     
-    j_handles_destroy(sxn_environ->thread,
+    j_handles_destroy(thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
@@ -546,33 +541,34 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
   if(saxonResultDocRef != SXN_UNSET) {
       additions++;
   }*/
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   std::string optionStr;
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
 
   int64_t result = j_applyTemplatesReturningValue(
-      sxn_environ->thread, (char *)cwdXE.c_str(),
+      thread, (char *)cwdXE.c_str(),
       (void *)executableRef,
       (void *)(selectionRef == SXN_UNSET ? (void *)NULL : (void *)selectionRef),
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
@@ -599,43 +595,43 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
 
-  int64_t argumentValuesRef = createProcessorDataWithCapacity(
-      sxn_environ->thread, argument_length);
+  int64_t argumentValuesRef = createProcessorDataWithCapacity(thread, argument_length);
 
   for (int i = 0; i < argument_length; i++) {
-    addProcessorValue(sxn_environ->thread,
+    addProcessorValue(thread,
                       (void *)argumentValuesRef,
                       (void *)arguments[i]->getUnderlyingValue());
   }
 
   long status = j_callFunctionReturningFile(
-      sxn_environ->thread, (char *)cwdXE.c_str(),
+      thread, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)functionName, (char *)outfile,
       (argumentValuesRef == SXN_UNSET ? (void *)NULL
                                       : (void *)argumentValuesRef),
       (processorDataRef == SXN_UNSET ? (void *)NULL
                                      : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (status == SXN_EXCEPTION) {
@@ -658,48 +654,48 @@ const char *XsltExecutable::callFunctionReturningString(
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef != SXN_UNSET) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
 
-  int64_t argumentValuesRef = createProcessorDataWithCapacity(
-      sxn_environ->thread, argument_length);
+  int64_t argumentValuesRef = createProcessorDataWithCapacity(thread, argument_length);
 
   for (int i = 0; i < argument_length; i++) {
-    addProcessorValue(sxn_environ->thread,
+    addProcessorValue(thread,
                       (void *)argumentValuesRef,
                       (void *)arguments[i]->getUnderlyingValue());
   }
   allocFn fn = operator new;
   char *result = j_callFunctionReturningString(
-      sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(),
+      thread, (void *)fn, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)functionName,
       (void *)(argumentValuesRef == SXN_UNSET ? (void *)nullptr
                                               : (void *)argumentValuesRef),
       (void *)(processorDataRef == SXN_UNSET ? (void *)nullptr
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 
   if (argumentValuesRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)argumentValuesRef);
+    j_handles_destroy(thread,(void *)argumentValuesRef);
     argumentValuesRef = SXN_UNSET;
   }
 
@@ -725,46 +721,47 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
 
   int64_t argumentValuesRef = createProcessorDataWithCapacity(
-      sxn_environ->thread, argument_length);
+      thread, argument_length);
 
   for (int i = 0; i < argument_length; i++) {
-    addProcessorValue(sxn_environ->thread,
+    addProcessorValue(thread,
                       (void *)argumentValuesRef,
                       (void *)arguments[i]->getUnderlyingValue());
   }
 
   int64_t result = j_callFunctionReturningValue(
-      sxn_environ->thread, (char *)cwdXE.c_str(),
+      thread, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)functionName, (void *)argumentValuesRef,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 
   if (argumentValuesRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)argumentValuesRef);
+    j_handles_destroy(thread,(void *)argumentValuesRef);
     argumentValuesRef = SXN_UNSET;
   }
 
@@ -792,32 +789,33 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
   if (saxonResultDocRef > 0) {
     additions++;
   }
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   std::string optionStr;
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
 
   long status = j_callTemplateReturningFile(
-      sxn_environ->thread, (char *)cwdXE.c_str(),
+      thread, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)templateName, (char *)outfile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (status == SXN_EXCEPTION) {
@@ -839,31 +837,32 @@ XsltExecutable::callTemplateReturningString(const char *templateName) {
       additions++;
   } */
   std::string optionStr;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
   allocFn fn = operator new;
   char *result = j_callTemplateReturningString(
-      sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(),
+      thread, (void *)fn, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)templateName,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result == nullptr) {
@@ -884,33 +883,33 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
 
   int64_t result = j_callTemplateReturningValue(
-      sxn_environ->thread, (char *)cwdXE.c_str(),
+      thread, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)templateName,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
@@ -935,39 +934,40 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
     if(selectionStringFlag == true && selectionRef != SXN_UNSET) {
         optionStr = "s";
-        addProcessorDataPair(sxn_environ->thread,
+        addProcessorDataPair(thread,
                              (char *)processorDataRef, (char *)optionStr.c_str(),
                              (void *)selectionRef);
     }
   char *cstylesheet = nullptr;
   int64_t result = j_transformToValue(
-      sxn_environ->thread, (char *)cwdXE.c_str(),
+      thread, (char *)cwdXE.c_str(),
       (void *)nullptr, (void *)executableRef, (char *)sourcefile, cstylesheet,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
@@ -992,34 +992,34 @@ void XsltExecutable::transformFileToFile(const char *source,
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
     if(selectionStringFlag == true && selectionRef != SXN_UNSET) {
         optionStr = "s";
-        addProcessorDataPair(sxn_environ->thread,
+        addProcessorDataPair(thread,
                              (char *)processorDataRef, (char *)optionStr.c_str(),
                              (void *)selectionRef);
     }
   char *cstylesheet = nullptr;
   long status = j_transformToFile(
-      sxn_environ->thread, (char *)cwdXE.c_str(),
+      thread, (char *)cwdXE.c_str(),
       (void *)nullptr, (void *)executableRef, (char *)source, cstylesheet,
       (char *)outputfile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
@@ -1028,25 +1028,24 @@ void XsltExecutable::transformFileToFile(const char *source,
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 }
 
 void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (create) {
-
     if (filename == nullptr) {
       std::string optionStr = "-:on";
       saxonMessageListenerRef = createSaxonCMessageListener(
-          sxn_environ->thread, (void *)procRef,
+          thread, (void *)procRef,
           (char *)cwdXE.c_str(), (char *)optionStr.c_str());
 
       setProperty("m", "on");
     } else {
       saxonMessageListenerRef = createSaxonCMessageListener(
-          sxn_environ->thread, (void *)procRef,
+          thread, (void *)procRef,
           (char *)cwdXE.c_str(), (char *)filename);
     }
     if (saxonMessageListenerRef == SXN_EXCEPTION) {
@@ -1060,7 +1059,7 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
     }*/
   } else {
     if (saxonMessageListenerRef > 0) {
-      j_handles_destroy(sxn_environ->thread,
+      j_handles_destroy(thread,
                         (void *)saxonMessageListenerRef);
     }
     saxonMessageListenerRef = SXN_UNSET;
@@ -1070,9 +1069,10 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
 
 XdmValue *XsltExecutable::getXslMessages() {
   if (saxonMessageListenerRef > 0) {
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     allocFn fn = operator new;
     long long *results =
-        j_getXslMessages(sxn_environ->thread, (void *)fn,
+        j_getXslMessages(thread, (void *)fn,
                          (void *)saxonMessageListenerRef);
 
     if (results != nullptr) {
@@ -1097,7 +1097,8 @@ XdmValue *XsltExecutable::getXslMessages() {
 
 void XsltExecutable::clearXslMessages() {
   if (saxonMessageListenerRef > 0) {
-        j_clearXslMessages(sxn_environ->thread,
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+        j_clearXslMessages(thread,
                          (void *)saxonMessageListenerRef);
 
   }
@@ -1115,27 +1116,28 @@ const char *XsltExecutable::transformFileToString(const char *source) {
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(sxn_environ,parameters, properties, additions);
+      SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   std::string optionStr;
   if (saxonMessageListenerRef > 0) {
     optionStr = "m";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonMessageListenerRef);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
-    addProcessorDataPair(sxn_environ->thread,
+    addProcessorDataPair(thread,
                          (char *)processorDataRef, (char *)optionStr.c_str(),
                          (void *)saxonResultDocRef);
   }
   if(selectionStringFlag == true && selectionRef != SXN_UNSET) {
       optionStr = "s";
-      addProcessorDataPair(sxn_environ->thread,
+      addProcessorDataPair(thread,
                            (char *)processorDataRef, (char *)optionStr.c_str(),
                            (void *)selectionRef);
   }
@@ -1144,13 +1146,13 @@ const char *XsltExecutable::transformFileToString(const char *source) {
   allocFn fn = operator new;
 
   char *result = j_transformToString(
-      sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(),
+      thread, (void *)fn, (char *)cwdXE.c_str(),
       (void *)nullptr, (void *)executableRef, (char *)source, cstylesheet,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
-    j_handles_destroy(sxn_environ->thread,(void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result == nullptr) {

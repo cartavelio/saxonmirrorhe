@@ -584,6 +584,11 @@ public:
    */
   static void attachCurrentThread();
 
+    /**
+     * Get or attaches a current graalvm isolate thread
+     */
+  static graal_isolatethread_t * getOrAttachCurrentThread(sxnc_environment * sxn);
+
   /**
    * Detach JVM from the current thread
    */
@@ -805,7 +810,6 @@ protected:
   SaxonApiException
       *exception; /*!< SaxonApiException object to capture exceptions thrown
                      from the underlying Java code via JNI */
-
 private:
   // void createException(const char *message = nullptr);
 
@@ -815,18 +819,18 @@ private:
 
   // SaxonC method for internal use
   static int64_t
-    createParameterJArray(sxnc_environment *sxn_environ, std::map<std::string, XdmValue *> parameters,
+    createParameterJArray(std::map<std::string, XdmValue *> parameters,
                         std::map<std::string, std::string> properties,
                         int additions = 0);
 
   static int64_t
-  createParameterJArray2(sxnc_environment *sxn_environ, std::map<std::string, XdmValue *> parameters);
+  createParameterJArray2(std::map<std::string, XdmValue *> parameters);
 
   static int64_t createJArray(XdmValue **values, int length);
 
-  static XdmValue *makeXdmValueFromRef(int64_t valueRef, sxnc_environment *sxn_environ = nullptr);
+  static XdmValue *makeXdmValueFromRef(int64_t valueRef);
 
-  static XdmItem *makeXdmItemFromRef(int64_t valueRef, sxnc_environment *sxn_environ= nullptr);
+  static XdmItem *makeXdmItemFromRef(int64_t valueRef);
 
   static const char *checkException();
 

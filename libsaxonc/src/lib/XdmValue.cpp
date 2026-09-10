@@ -16,7 +16,8 @@ XdmValue::XdmValue(const XdmValue &other) {
   refCount = 0;
   xdmSize = other.xdmSize;
   if(other.jValues != SXN_UNSET) {
-    jValues = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.jValues);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    jValues = j_copy_handles(thread, (void *)other.jValues);
     if(jValues == SXN_EXCEPTION) {
       throw SaxonApiException();
     }
@@ -43,25 +44,25 @@ const char *XdmValue::toString(const char *encoding) {
   int count = size();
   allocFn fn = operator new;
   char *toStringValuei = nullptr;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
   if (count == 0) {
     toStringValuei =
-        xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn,
+        xdmItemToString(thread, (void *)fn,
                         nullptr, nullptr);
   } else if (count == 1) {
     toStringValuei =
-        xdmItemToString(SaxonProcessor::sxn_environ->thread, (void *)fn,
+        xdmItemToString(thread, (void *)fn,
                         (void *)(values[0]->getUnderlyingValue()), (char *) encoding);
   } else {
     if (jValues == -1) {
       jValues = getUnderlyingValue();
     }
 
-    toStringValuei = xdmValueArrayToString(SaxonProcessor::sxn_environ->thread,
-                                           (void *)fn, (void *)jValues, (char *) encoding);
+    toStringValuei = xdmValueArrayToString(thread,(void *)fn, (void *)jValues, (char *) encoding);
   }
 
-  if(toStringValuei == nullptr && (bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+  if(toStringValuei == nullptr && (bool)j_checkForException(thread)) {
     throw SaxonApiException();
   }
 
@@ -88,8 +89,9 @@ XdmValue::XdmValue(int64_t valRef) {
 XdmValue::XdmValue(int64_t val, bool arr) {
   initialize();
   allocFn fn = operator new;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   long long *results = makeArrayFromXdmValue2(
-      SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)val);
+      thread, (void *)fn, (void *)val);
   if (results == nullptr) {
     return;
   }
@@ -102,7 +104,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
   int typeRef = 0;
 
   for (int p = 1; p <= xdmSizei; ++p) {
-    typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
+    typeRef = j_getXdmObjectType(thread,
                                  (void *)results[p]);
 #ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -191,7 +193,8 @@ XdmValue::~XdmValue() {
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr << "XdmValue on jValues j_handles_destroy" << std::endl;
         }
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    j_handles_destroy(thread, (void *)jValues);
     jValues = SXN_UNSET;
   }
 
@@ -242,7 +245,8 @@ int XdmValue::addXdmItemToValue(XdmItem *val) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
           std::cerr << "XdmValue j_handles_destroy" << std::endl;
         }
-        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
+        graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+        j_handles_destroy(thread, (void *)jValues);
         jValues = SXN_UNSET;
     }
     if (toStringValue != nullptr) {
@@ -324,11 +328,11 @@ int64_t XdmValue::getUnderlyingValue() {
 
   if (jValues == SXN_UNSET) {
     int i;
-
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     int count = xdmSize;
     if (count == 0) {
         //Given that count =0 we return empty sequence
-        return j_getXdmEmptySequence(SaxonProcessor::sxn_environ->thread);
+        return j_getXdmEmptySequence(thread);
     }
 
     if (count == 1) {
@@ -338,12 +342,11 @@ int64_t XdmValue::getUnderlyingValue() {
     if(values == nullptr) {
       return SXN_UNSET;
     }
-    jValues = createProcessorDataWithCapacity(
-        SaxonProcessor::sxn_environ->thread, count);
+    jValues = createProcessorDataWithCapacity(thread, count);
 
     for (i = 0; i < count; i++) {
       int64_t ivalue = values[i]->getUnderlyingValue();
-      addProcessorValue(SaxonProcessor::sxn_environ->thread, (void *)jValues,
+      addProcessorValue(thread, (void *)jValues,
                         (void *)ivalue);
     }
   }

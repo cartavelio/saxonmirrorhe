@@ -3106,12 +3106,7 @@ static int NUM_THREADS = 10;
 
 void RunThread(XsltExecutable *executable, int tid,
                const std::string filename, int *threadFailures) {
-  /*JavaVMAttachArgs att_arg;
-  att_arg.version = JNI_VERSION_1_2;
-  att_arg.name = NULL;
-  att_arg.group = NULL;*/
 
-  //SaxonProcessor::attachCurrentThread();
   cerr << endl << "RunThread started,  THEAD ID=" << tid << endl;
   fflush(stderr);
   fflush(stdout);
@@ -3143,7 +3138,55 @@ void RunThread(XsltExecutable *executable, int tid,
   } else {
     cerr << "XsltExecutable is nullptr" << endl;
   }
-  //SaxonProcessor::detachCurrentThread();
+  SaxonProcessor::detachCurrentThread();
+}
+
+void RunThread2(XsltExecutable *executable, int tid,
+               XdmValue * value, XdmNode * node, int *threadFailures) {
+
+
+  cerr << endl << "RunThread2 started,  THEAD ID=" << tid << endl;
+  fflush(stderr);
+  fflush(stdout);
+
+  if (executable != nullptr) {
+    try {
+      executable->setInitialMatchSelection(value);
+
+      const char *result = nullptr;
+      result = executable->applyTemplatesReturningString();
+      if (result != nullptr) {
+        cout << " RuntThread2 Result from THREAD ID: " << tid << ", " << result << endl;
+        operator delete((char *)result);
+      } else {
+        cerr << " ===== Failed in THREAD ID: " << tid << endl;
+        threadFailures++;
+      }
+      cerr << endl << "RunThread2 before node->getStringValue call"  << endl;
+      fflush(stderr);
+      fflush(stdout);
+      const char * nodeStr = node->getStringValue();
+      if (nodeStr != nullptr) {
+        cout << " Result from THREAD ID: " << tid << ", nodeStr has a value!! " << endl;
+        operator delete((char *)nodeStr);
+      }
+
+      delete executable;
+      delete value;
+    } catch (SaxonApiException &e) {
+      const char *emessage = e.getMessage();
+      threadFailures++;
+      if (emessage != nullptr) {
+        cerr << "exception=" << emessage << endl;
+      } else {
+        cerr << "exception is nullptr" << endl;
+        return;
+      }
+    }
+  } else {
+    cerr << "XsltExecutable is nullptr" << endl;
+  }
+  SaxonProcessor::detachCurrentThread();
 }
 
 void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
@@ -3194,6 +3237,58 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
   } else {
     sresult->failure++;
     sresult->failureList.push_back("testThreads");
+  }
+}
+
+void testThreads2(SaxonProcessor *processor, Xslt30Processor *trans,
+                 const std::string *const dataDir,
+                 sResultCount *sresult) {
+
+  cerr << endl << "testThreads2 test" << endl;
+
+  std::vector<std::string> s = {CppTestUtils::concat(2, dataDir->c_str(), "/xmark100k.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str(),
+                                CppTestUtils::concat(2, dataDir->c_str(), "/example.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str()};
+
+  /*std::vector<std::string> stylesheets = {CppTestUtils::concat(2, dataDir->c_str(), "/q12_1.xsl").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/test.xsl").c_str(),
+                                CppTestUtils::concat(2, dataDir->c_str(), "/example.xsl").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/test2.xsl").c_str()};*/
+
+  std::vector<std::thread> threads;
+  XsltExecutable *executable = nullptr;
+  int threadFailures = 0;
+  try {
+    executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/q12_1.xsl").c_str());
+    XdmNode * node = processor->parseXmlFromFile(s[0].c_str());
+    for (int i = 0; i < s.size(); i++) {
+
+      XsltExecutable *copyExecutable = executable->clone();//new XsltExecutable(* executable);
+      threads.push_back(std::thread(RunThread2, copyExecutable, i, processor->parseXmlFromFile(s[i].c_str()), node, &threadFailures));
+    }
+
+  } catch (SaxonApiException &e) {
+    const char *emessage = e.getMessage();
+    if (emessage != nullptr) {
+      cerr << "exception=" << emessage << endl;
+    } else {
+      cerr << "exception is nullptr" << endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testThreads2");
+      return;
+
+    }
+  }
+
+  for (auto &th : threads) {
+    th.join();
+  }
+  if (executable != nullptr) {
+    delete executable;
+    executable = nullptr;
+  }
+  if (threadFailures == 0) {
+    sresult->success++;
+  } else {
+    sresult->failure++;
+    sresult->failureList.push_back("testThreads2");
   }
 }
 
@@ -3588,6 +3683,13 @@ int main(int argc, char *argv[]) {
        << endl;
 
    testThreads (processor, trans2, &dataDir, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testThreads2 (processor, trans2, &dataDir, sresult);
 
   delete trans;
   delete trans2;

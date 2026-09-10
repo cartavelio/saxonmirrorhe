@@ -251,10 +251,10 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
-  int64_t status = j_executeQueryToFile(
-      SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
+      SaxonProcessor::createParameterJArray(parameters, properties);
+  int64_t status = j_executeQueryToFile(thread, (void *)proc->procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)ofilename, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
@@ -263,8 +263,8 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)processorDataRef);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 }
@@ -277,17 +277,15 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
-  int64_t result = j_executeQueryToValue(
-      SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
+      SaxonProcessor::createParameterJArray(parameters, properties);
+  int64_t result = j_executeQueryToValue(thread, (void *)proc->procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef != SXN_UNSET) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
@@ -308,10 +306,10 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
     setProperty("s", infilename);
   }
   allocFn fn = operator new;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
-  char *result = j_executeQueryToString(
-      SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)proc->procRef,
+      SaxonProcessor::createParameterJArray(parameters, properties);
+  char *result = j_executeQueryToString(thread, (void *)fn, (void *)proc->procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
@@ -320,7 +318,7 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+    j_handles_destroy(thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
