@@ -9366,44 +9366,6 @@ StreamSource:new() =&gt; saxon:object-map() =&gt; map:keys() =&gt; sort()</code>
     </function>
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">path</name>
-      <description>
-        <p>Returns an XPath expression that identifies a node.</p>
-      </description>
-      <signatures>
-        <proto return-type="xs:string"/>
-        <proto return-type="xs:string">
-          <arg name="node" type="node()" desc="The node whose path is required"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since before Saxon 8.0. This function is dropped in Saxon 11; applications
-          should use the XPath 3.0 <a href="/functions/fn/path" class="bodylink code">fn:path()</a>
-          function in preference.</p>
-      </status>
-      <saxon-edition>PE/EE REMOVED_SINCE_11</saxon-edition>
-      <details>
-        <div>
-          <p>The first version of the function (with no arguments) is equivalent to supplying
-              <code>"."</code> as the argument. In this case there must be a context item and it
-            must be a node.</p>
-
-          <p>The function returns a string whose value is an XPath expression identifying the
-            selected node in the source tree. This can be useful for diagnostics, or to create an
-            XPointer value, or when generating another stylesheet to process the same document. The
-            resulting string can be used as input to the <code>evaluate()</code> function, provided
-            that any namespace prefixes it uses are declared.</p>
-
-          <p>The generated path will use lexical QNames as written in the original source document.
-            In documents that use multiple namespaces, this may not be the most suitable
-            representation if there is a requirement to evaluate the XPath expression later, as any
-            prefixes it uses will need to be declared.</p>
-        </div>
-      </details>
-      <see-also namespace="http://www.w3.org/2005/xpath-functions" name="path"/>
-    </function>
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">print-stack</name>
       <description>
         <p>Returns a formatted string giving information about the current calling stack.</p>

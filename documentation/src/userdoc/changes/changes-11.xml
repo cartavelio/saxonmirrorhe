@@ -414,7 +414,7 @@
 
         <h2>Dropped Extension Functions</h2>
 
-        <p>The <a  class="bodylink code" href="/functions/saxon/path">saxon:path()</a> function is dropped: use the standard <a
+        <p>The <code>saxon:path()</code> function is dropped: use the standard <a
             class="bodylink code" href="/functions/fn/path">fn:path()</a> function instead.</p>
 
         <p>The undocumented and untested functions <code>saxon:pause-tracing()</code> and <code>saxon:resume-tracing()</code> have
