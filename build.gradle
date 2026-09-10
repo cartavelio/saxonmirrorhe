@@ -227,6 +227,7 @@ ext {
   mailJar = null
   resolverJar = null
   resolverDataJar = null
+  loggerFactoryJar = null
   jlineJar = null
   version_h = saxonVersion.replace(".", "-")
   fileSeparator = System.getProperty("file.separator")
@@ -301,6 +302,7 @@ mailJar = "${fileSeparator}javax.mail-${mailVersion}.jar"
 jlineJar = "${fileSeparator}jline-${jlineVersion}.jar"
 resolverJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}.jar"
 resolverDataJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}-data.jar"
+loggerFactoryJar = "${fileSeparator}slf4j-api-1.7.30.jar"
 configurations.compileClasspath.each { cp ->
   if (cp.toString().endsWith(icu4jJar)) {
     icu4jJar = cp.toString()
@@ -316,6 +318,9 @@ configurations.compileClasspath.each { cp ->
   }
   if (cp.toString().endsWith(resolverDataJar)) {
     resolverDataJar = cp.toString()
+  }
+  if (cp.toString().endsWith(loggerFactoryJar)) {
+    loggerFactoryJar = cp.toString()
   }
   if (cp.toString().endsWith(jlineJar)) {
     jlineJar = cp.toString()
