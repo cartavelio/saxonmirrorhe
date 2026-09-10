@@ -318,7 +318,16 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
                 if (nullable && baseValue == null) {
                     return null;
                 }
-                return converter.convert(baseValue).asAtomic();
+                ConversionResult result = converter.convert(baseValue);
+                if (result instanceof ValidationFailure) {
+                    if (expr.getRoleSupplier() != null) {
+                        String errorCode = expr.getRoleSupplier().get().getErrorCode();
+                        throw new XPathException(((ValidationFailure) result).getMessage(), errorCode);
+                    } else {
+                        throw ((ValidationFailure)result).makeException();
+                    }
+                }
+                return result.asAtomic();
             };
         }
     }
