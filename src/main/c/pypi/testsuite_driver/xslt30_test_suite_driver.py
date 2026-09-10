@@ -1,6 +1,7 @@
 from saxoncee import *
 import os
 from Environment import Environment
+from test_outcome import PyTestOutcome
 import sys, getopt
 from os.path import isfile
 from datetime import datetime as date
@@ -25,9 +26,8 @@ xpathProcForCompareNodes.declare_namespace("fn", "http://www.w3.org/2005/xpath-f
 
 schemaValidator = driver_proc.new_schema_validator()
 
-globalEnvironment = {}
-localEnvironment = {}
-environments = {}
+globalEnvironments = {}
+localEnvironments = {}
 xpathProcForEnv.declare_namespace("", "http://www.w3.org/2012/10/xslt-test-catalog")
 edition = "EE"
 passVar = 0
@@ -87,7 +87,8 @@ def process_catalog(catalogi):
 def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, test_set_file: str):
 
     global total_tests
-
+    global localEnvironments
+    localEnvironments.clear()
     if os.path.exists(test_set_file):
 
 
@@ -101,9 +102,10 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
             if envs is not None:
                 for i in range(envs.size):
                     env = envs.item_at(i)
-                    process_environment(xpathProcForEnv, env.get_node_value(), "spec", localEnvironment, localEnvironment['default'])
+                    process_environment(xpathProcForEnv, env.get_node_value(), "spec", localEnvironments, localEnvironments['default'])
             if child0 is None:
                 print("Cannot find child node of test " + test_set_file)
+
                 return None
             else:
                 test_set_name = child0.get_attribute_value("name")
@@ -146,16 +148,14 @@ def process_test_set(doc_builderi: PyDocumentBuilder, proci: PySaxonProcessor, t
 ''', catalog_xpath_proci'''
 
 
-def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, environment: dict, default_environment: Environment):
-
-    global environments
+def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, environments_i: dict, default_environment: Environment):
 
     environment = Environment()
     xpc.set_context(xdm_item=env)
     name = env.get_attribute_value("name")
     if name is not None:
         print("Loading environment " + name)
-        environments[name] = environment
+        environments_i[name] = environment
     else:
         print("Loading environment without name")
 
@@ -261,7 +261,6 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
 
 def load_source_documents(xpc: PyXPathProcessor, env: PyXdmNode, environment: Environment, builder: PyDocumentBuilder, schema_validator: PySchemaValidator, validate_sources: bool):
     sources = xpc.evaluate("source")
-
     if sources is not None:
         for i in range(sources.size):
 
@@ -296,14 +295,25 @@ def load_source_documents(xpc: PyXPathProcessor, env: PyXdmNode, environment: En
                     content = builder.parse_xml(xml_file_name=href)
                     environment.source_docs[href] = content
                 else:
-                    print(source)
+                    '''print(source)'''
+                    builder.set_base_uri(source.base_uri)
                     xpc.set_context(xdm_item=source)
                     contenti = xpc.evaluate_single("string(content)")
                     content = builder.parse_xml(xml_text=contenti.string_value)
+
                     if href is None:
                         environment.source_docs["default"] = content
                     else:
                         environment.source_docs[href] = content
+                if role is not None:
+                    if "." == role:
+                        if href is None:
+                            environment.context_item = environment.source_docs["default"]
+                        else:
+                            environment.context_item = environment.source_docs[href]
+
+                    '''else:'''
+
             except PySaxonApiError as ex:
                 print("*** failed to build source document " + str(ex))
 
@@ -317,16 +327,16 @@ def create_global_environment(catalog: PyXdmNode, xpath_proc: PyXPathProcessor):
     nodes = xpath_proc.evaluate("//environment")
     if nodes is not None:
         for env in nodes:
-            process_environment(xpath_proc, env, globalEnvironment, localEnvironment['default'])
+            process_environment(xpath_proc, env, globalEnvironments, localEnvironments['default'])
 
 def create_local_environments(test_set_node: PyXdmNode, xpath_proc: PyXPathProcessor):
-    localEnvironment.clear()
+    localEnvironments.clear()
     environmenti = Environment()
-    localEnvironment.update({"default" : environmenti})
+    localEnvironments.update({"default" : environmenti})
 
 def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
-    global environments
+    global localEnvironments
     xpath_proc.set_context(xdm_item=test_case_node)
     test_name  = xpath_proc.evaluate_single("@name")
     dependencies = xpath_proc.evaluate_single("//dependencies")
@@ -348,13 +358,17 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         environment = None
         env_node_i = env_node.get_node_value()
         if env_ref is None:
-            environment = process_environment(xpath_proc, env_node_i, "spec", globalEnvironment, localEnvironment['default'])
+            print('Creating new environment')
+            environment = process_environment(xpath_proc, env_node_i, "spec", globalEnvironments, localEnvironments['default'])
         else:
             print('env_Ref = ' + env_ref)
-            environment = environments[env_ref]
+            environment = localEnvironments[env_ref]
         print("environment found !!!!")
-        print(environment.source_docs)
-        print("checkpoint xx1")
+        print(environment.source_docs.keys())
+
+    else:
+        return "Not run"
+
     xpath_proc.set_context(xdm_item=test_case_node)
     print(test_case_node)
 
@@ -363,14 +377,31 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     xpath_proc.set_context(xdm_item=test_input_node)
 
     stylesheet = xpath_proc.evaluate_single("stylesheet[not(@role = 'secondary')]")
-    print("checkpoint xx3")
+    print(test_case_node.base_uri)
 
     if stylesheet is not None:
+        file_name = stylesheet.get_node_value().get_attribute_value("file")
+        'TODO - the base_uri contains file:/// the resolving of stylesheet does not work with file:'
+        environment.xslt_proc.set_cwd(test_case_node.base_uri[5:])
+        sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name)
         print('stylesheet found XXX')
-        print(str(stylesheet))
+        if environment.context_item is not None:
+            print(environment.context_item)
+            result = sheet.apply_templates_returning_value(xdm_value=environment.context_item)
+            print(environment.context_item)
+            print('Result = ' + str(result))
+            xpath_proc.set_context(xdm_item=test_case_node)
+            assertion = xpath_proc.evaluate_single("result/*")
+            print(assertion)
+            if result is not None:
+                result_str = PyTestOutcome.test_assertion(result, assertion, environment.proc.new_xpath_processor(), xpath_proc)
+
+
     print("checkpoint xx4")
 
     return "Not run"
+
+
 
 def main(argv):
 
