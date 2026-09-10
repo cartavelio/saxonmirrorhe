@@ -306,16 +306,15 @@ public class JsonReceiver implements Receiver {
                 if (negative) {
                     uContent = new UnicodeChar('-').concat(uContent);
                 }
-                if (uContent.codePointAt(uContent.length()-1) == '.') {
-                    uContent = uContent.concat(new UnicodeChar('0'));
-                    // TODO hande 1.e-6, allowed in XSD and not in JSON
+                long point = uContent.indexOf('.');
+                if (point >= 0) {
+                    if (point == uContent.length() - 1) {
+                        uContent = uContent.concat(new UnicodeChar('0'));
+                    } else if (uContent.codePointAt(point + 1) == 'e' || uContent.codePointAt(point + 1) == 'E') {
+                        uContent = uContent.substring(0, point + 1).concat(new UnicodeChar('0').concat(uContent.substring(point + 1)));
+                    }
                 }
                 output.accept(uContent);
-//                if (uContent.codePointAt(0) == '-' || uContent.hasSubstring(MINUS_ZERO, 0)) {
-//                    output.accept(stripLeadingZeros(uContent));
-//                } else {
-//                    output.accept(uContent);
-//                }
             } else {
                 // 3.1 path
                 try {
