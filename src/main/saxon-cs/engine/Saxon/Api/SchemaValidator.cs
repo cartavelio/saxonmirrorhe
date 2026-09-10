@@ -98,7 +98,7 @@ namespace Saxon.Api {
         /// in a user-supplied list. This effect can be achieved by declaring <c>List&lt;ValidationFailure> ErrorList</c>
         /// and setting the <c>InvalidityListener</c> property to <c>ErrorList.Add</c>.</remarks> 
         
-        public Consumer<ValidationFailure> InvalidityListener {
+        public Action<ValidationFailure> InvalidityListener {
             set => InvalidityHandler = new InvalidityDelegate(value);
         }
 

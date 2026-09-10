@@ -1,11 +1,12 @@
+using System;
 using Saxon.Ejava.util.function;
 
 namespace Saxon.Api.Support {
     public class InvalidityDelegate : IInvalidityHandler {
 
-        private readonly Consumer<ValidationFailure> listener;
+        private readonly Action<ValidationFailure> listener;
 
-        public InvalidityDelegate(Consumer<ValidationFailure> listener) {
+        public InvalidityDelegate(Action<ValidationFailure> listener) {
             this.listener = listener;
         }
 
