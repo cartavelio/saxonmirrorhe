@@ -7,11 +7,9 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
-
 import net.sf.saxon.value.ObjectValue;
 
 /**
@@ -21,7 +19,6 @@ import net.sf.saxon.value.ObjectValue;
 
 public class JavaExternalObjectType extends ExternalObjectType {
 
-    protected Configuration config;
     protected Class<?> javaClass;
 
     /**
@@ -30,13 +27,8 @@ public class JavaExternalObjectType extends ExternalObjectType {
      * @param javaClass the Java class to which this type corresponds
      */
 
-    public JavaExternalObjectType(Configuration config, Class<?> javaClass) {
-        this.config = config;
+    public JavaExternalObjectType(Class<?> javaClass) {
         this.javaClass = javaClass;
-    }
-
-    public Configuration getConfiguration() {
-        return config;
     }
 
     /**
@@ -86,7 +78,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
     /*@NotNull*/
     @Override
     public ItemType getPrimitiveItemType() {
-        return config.getJavaExternalObjectType(Object.class);
+        return new JavaExternalObjectType(Object.class);
     }
 
     /**
@@ -131,7 +123,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
     @Override
     public boolean matches(/*@NotNull*/ Item item, /*@NotNull*/TypeHierarchy th) {
         if (item instanceof ObjectValue) {
-            Object obj = ((ObjectValue) item).getObject();
+            Object obj = ((ObjectValue<?>) item).getObject();
             return javaClass.isAssignableFrom(obj.getClass());
         }
         return false;
