@@ -1,4 +1,4 @@
-using System.Numerics;
+using java.math;
 
 namespace com.saxonica.glue {
     public class BigDecimalUtils {
@@ -15,7 +15,7 @@ namespace com.saxonica.glue {
         }
 
         public static int Signum(BigDecimal val) {
-            return val.CompareTo(BigDecimal.Zero);
+            return val.compareTo(BigDecimal.Zero);
         }
     }
 }

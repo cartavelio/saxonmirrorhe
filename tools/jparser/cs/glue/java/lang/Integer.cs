@@ -35,8 +35,8 @@ namespace java.lang {
             throw new NotImplementedException();
         }
 
-        public static int valueOf(int v) {
-            return v;
+        public static int valueOf(String str) {
+            return parseInt(str, 10);
         }
     }
 }

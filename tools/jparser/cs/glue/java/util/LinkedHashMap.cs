@@ -44,6 +44,22 @@ namespace java.util {
             Add(item.Key, item.Value);
         }
 
+        public TValue put(TKey key, TValue value) {
+            throw new NotImplementedException();
+        }
+        
+        public TValue get(TKey key) {
+            throw new NotImplementedException();
+        }
+
+        public int size() {
+            return Count;
+        }
+
+        public java.util.Set<java.util.Map_Entry<TKey, TValue>> entrySet() {
+            throw new NotImplementedException();
+        }
+
         public void Add(TKey key, TValue value)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
@@ -144,6 +160,10 @@ namespace java.util {
 
         public LinkedHashMap()
         {
+            Init();
+        }
+
+        public LinkedHashMap(int size) {
             Init();
         }
     }

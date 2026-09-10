@@ -48,6 +48,11 @@ namespace java.lang {
             return this;
         }
 
+        public StringBuilder append(object obj) {
+            this._builder.Append(obj);
+            return this;
+        }
+
         public StringBuilder appendCodePoint(int cp) {
             this._builder.Append(Char.ConvertFromUtf32(cp));
             return this;
@@ -60,6 +65,11 @@ namespace java.lang {
         
         public StringBuilder insert(int index, char ch) {
             this._builder.Insert(index, ch);
+            return this;
+        }
+        
+        public StringBuilder insert(int index, char[] chars) {
+            this._builder.Insert(index, chars);
             return this;
         }
 

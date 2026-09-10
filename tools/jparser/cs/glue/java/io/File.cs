@@ -1,11 +1,25 @@
+using System;
+
 namespace java.io {
     public class File {
         public File(string name) {
             
         }
 
+        public File(java.net.URI uri) {
+            
+        }
+        
+        public File(File dir, string name) {
+            
+        }
+
         public java.net.URI toURI() {
             return null;
+        }
+
+        public File getAbsoluteFile() {
+            throw new NotImplementedException();
         }
 
         public string getName() {
@@ -32,5 +46,9 @@ namespace java.io {
         }
         
         public void createNewFile() {}
+
+        public bool renameTo(File file) {
+            return false;
+        }
     }
 }

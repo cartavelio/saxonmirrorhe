@@ -57,28 +57,7 @@
       <xsl:value-of select="if ($fieldType) then f:extract-type-arguments($fieldType) else '/*UNIDENTIFIED FIELD*/'"/>
    </xsl:template>
    
-  <!-- <statement nodeType="ExpressionStmt">
-      <expression nodeType="AssignExpr"
-         operator="ASSIGN">
-         <target nodeType="FieldAccessExpr"
-            RESOLVED_TYPE="net.sf.saxon.expr.flwor.WindowClause.Window">
-            <name nodeType="SimpleName" identifier="contents"/>
-            <scope nodeType="NameExpr"
-               RESOLVED_TYPE="net.sf.saxon.expr.flwor.WindowClause.Window">
-               <name nodeType="SimpleName" identifier="window"/>
-            </scope>
-         </target>
-         <value nodeType="ObjectCreationExpr">
-            <type nodeType="ClassOrInterfaceType"
-               RESOLVED_TYPE="java.util.ArrayList">
-               <name nodeType="SimpleName" identifier="ArrayList"/>
-               <typeArguments/>
-            </type>
-         </value>
-      </expression>
-   </statement>
-   
-   -->
+
    <!-- constructor call on RHS of variable declaration -->
    <!-- XXX<T,U> var = new YYY<>() -->
    <!-- An example is in SingletonAttributeMap.put() -->
@@ -88,9 +67,6 @@
       <!--<xsl:message>VariableDeclarator: Resolved type {../type/@RESOLVED_TYPE} ==> |{f:extract-type-arguments($type)}|</xsl:message>-->
       <xsl:value-of select="if ($type) then f:extract-type-arguments($type) else '/*CANNOT RESOLVE TYPE OF VARIABLE*/'"/>
    </xsl:template>
-   
-   
- 
    
    <!-- constructor call in "return" statement -->
    <!-- return new XXX<>() -->
@@ -114,20 +90,79 @@
    </xsl:template>
    
    
-   <!-- constructor call in an argument of a method, generally List.add(new XXX<>()) or Stack.push(new XXX<>())-->
+   <!-- Call appearing in an argument of a method in a system-defined class, 
+        generally List.add(new XXX<>()) or Stack.push(new XXX<>())-->
    <!-- We don't try to handle the general case because it requires too much analysis -->
    
    <xsl:template match="*[@nodeType='MethodCallExpr']
                   [starts-with(@RESOLVED_TYPE, 'java.util.')]
                   [name/@identifier=('add', 'push')]
-                  /arguments/argument">
+                  /arguments/argument" priority="30">
       <xsl:variable name="fieldRef" select="../target"/>
       <xsl:variable name="fieldDecl" 
          select="ancestor::members/*[@nodeType='FieldDeclaration'][variables/variable/name/@identifier = $fieldRef/name/@identifier]"/>
       <xsl:variable name="type" select="f:extract-type-arguments(../../@RESOLVED_TYPE)"/>
-      <xsl:message>Method Argument: Resolved type {../target/@RESOLVED_TYPE} ==> |{f:extract-type-arguments($type)}|</xsl:message>
+      <xsl:message>Method Argument: Resolved type {$type} ==> |{f:extract-type-arguments($type)}|</xsl:message>
       <xsl:value-of select="f:extract-type-arguments($type)"/>
-   </xsl:template>  
+   </xsl:template> 
+   
+   <!-- Call appearing in an argument of a method in a user-defined class, 
+        for example FuncLibList.bind(x, y, x, new ArrayList<>()) -->
+   
+   <xsl:template match="*[@nodeType='MethodCallExpr']/arguments/argument">
+      <xsl:variable name="targetTypeOfCall" select="../../(@RESOLVED_TYPE,@DECLARING_TYPE)[1]" as="xs:string?"/>
+      <xsl:variable name="methodName" select="../../name/@identifier"/>
+      <xsl:variable name="arity" select="count(parent::arguments/child::argument)"/>
+      <xsl:variable name="targetClassDigest" select="key('digestClassKey', $targetTypeOfCall, $digest)"/>
+      <xsl:variable name="selectedMethods" select="f:candidateMethods($targetTypeOfCall, $methodName, $arity)"/>
+      <xsl:choose>
+         <xsl:when test="count($selectedMethods)=1">
+            <xsl:variable name="argPosition" select="count(preceding-sibling::argument)+1" as="xs:integer"/>
+            <xsl:variable name="targetClass" select="tokenize($selectedMethods[1]/@params, '\|')[$argPosition]"/>
+            <xsl:value-of select="f:extract-type-arguments($targetClass)"/>
+         </xsl:when>
+         <xsl:otherwise>/*NO UNIQUE METHOD {$targetTypeOfCall}.{$methodName}#{$arity} (FOUND {count($selectedMethods)})*/</xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <xsl:function name="f:candidateMethods" as="element(method)*">
+      <xsl:param name="targetTypeOfCall" as="xs:string?"/>
+      <xsl:param name="methodName" as="xs:string"/>
+      <xsl:param name="arity" as="xs:integer"/>
+      <xsl:variable name="targetClassDigest" select="key('digestClassKey', $targetTypeOfCall, $digest)"/>
+      <xsl:choose>
+         <xsl:when test="empty($targetClassDigest)"/>
+         <xsl:when test="$targetClassDigest/method[@name=$methodName and count(tokenize(@params, '\|')) = $arity]">
+            <xsl:sequence select="$targetClassDigest/method[@name=$methodName and count(tokenize(@params, '\|')) = $arity]"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:variable name="superclass" select="($targetClassDigest/extends)[1]/@name"/>
+            <xsl:sequence select="f:candidateMethods($superclass, $methodName, $arity)"/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:function>
+
+   
+   <!-- argument to a constructor for a user-defined class, as in `new MyClass(new ArrayList<>())`.
+        We only solve this if there is a single constructor of the right arity -->
+   <xsl:template match="*[@nodeType='ObjectCreationExpr']/arguments/argument">
+      <xsl:variable name="typeBeingCreated" select="../../type/@RESOLVED_TYPE" as="xs:string"/>
+      <xsl:variable name="constructorArity" select="count(parent::arguments/child::argument)"/>
+      <xsl:variable name="targetClassDigest" select="key('digestClassKey', $typeBeingCreated, $digest)"/>
+      <xsl:variable name="constructors" select="$targetClassDigest/constructor[count(tokenize(@params, '\|')) = $constructorArity]" 
+         as="element(constructor)*"/>
+      <xsl:choose>
+         <xsl:when test="count($constructors)=1">
+            <xsl:variable name="argPosition" select="count(preceding-sibling::argument)+1" as="xs:integer"/>
+            <xsl:variable name="targetClass" select="tokenize($constructors[1]/@params, '\|')[$argPosition]"/>
+            <xsl:value-of select="f:extract-type-arguments($targetClass)"/>
+         </xsl:when>
+         <xsl:otherwise>/*NO UNIQUE CONSTRUCTOR FOUND*/</xsl:otherwise>
+      </xsl:choose>
+   </xsl:template> 
+   
+
+   
    
  
  

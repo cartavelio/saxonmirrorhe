@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Remoting.Messaging;
 
 namespace java.util {
     public class LinkedList<E> : List<E> {
@@ -39,8 +40,18 @@ namespace java.util {
             throw new Exception("not implemented");
         }
 
-        public void remove(int index) {
-            _list.RemoveAt(index);
+        public void addFirst(E entry) {
+            _list.AddFirst(entry);
+        }
+
+        public E removeAt(int index) {
+            return _list.RemoveAt(index);
+        }
+
+        public E removeFirst() {
+            E temp = _list.First;
+            _list.RemoveFirst();
+            return temp;
         }
 
         public void set(int index, E entry) {
@@ -81,6 +92,18 @@ namespace java.util {
 
         public void trimToSize() {
             _list.TrimExcess();
+        }
+
+        public E peek() {
+            throw new NotImplementedException();
+        }
+
+        public void offer(E) {
+            throw new NotImplementedException();
+        }
+
+        public void remove() {
+            throw new NotImplementedException();
         }
     }
 }

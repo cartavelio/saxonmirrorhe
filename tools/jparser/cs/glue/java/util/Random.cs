@@ -15,5 +15,9 @@ namespace java.util {
         public long nextLong() {
             return (long)(_rand.Next()<<32 | (long)(_rand.Next()));
         }
+
+        public int nextInt(int bound) {
+            throw new NotImplementedException();
+        }
     }
 }
