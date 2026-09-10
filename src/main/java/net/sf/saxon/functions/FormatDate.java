@@ -596,7 +596,7 @@ public class FormatDate extends SystemFunction implements Callable {
         // deal with grouping separators, decimal digit family, etc. for numeric values
         NumericGroupFormatter picGroupFormat;
         try {
-            picGroupFormat = FormatInteger.getPicSeparators(primary);
+            picGroupFormat = FormatInteger.getPicSeparators(primary, false);
         } catch (XPathException e) {
             throw e.replacingErrorCode("FODF1310", "FOFD1340");
         }
