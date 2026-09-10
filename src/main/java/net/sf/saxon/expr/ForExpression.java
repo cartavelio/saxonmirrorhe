@@ -84,8 +84,14 @@ public class ForExpression extends Assignation {
                     decl.getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE);
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, variableName.getDisplayName(), 0);
-            setSequence(TypeChecker.strictTypeCheck(
-                    getSequence(), sequenceType, role, visitor.getStaticContext()));
+            if (visitor.getStaticContext().getXPathVersion() < 40) {
+                setSequence(TypeChecker.strictTypeCheck(
+                        getSequence(), sequenceType, role, visitor.getStaticContext()));
+            } else {
+                TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+                setSequence(tc.staticTypeCheck(getSequence(), sequenceType, role, visitor));
+
+            }
             ItemType actualItemType = getSequence().getItemType();
             refineTypeInformation(actualItemType,
                                   getRangeVariableCardinality(),

@@ -71,9 +71,8 @@ public class ForMemberClause extends ForClause {
         SequenceType sequenceType = SequenceType.makeSequenceType(new ArrayItemType(decl), StaticProperty.EXACTLY_ONE);
         Supplier<RoleDiagnostic> role =
                 () -> new RoleDiagnostic(RoleDiagnostic.FOR_MEMBER, rangeVariable.getVariableQName().getDisplayName(), 0);
-        setSequence(
-                TypeChecker.strictTypeCheck(
-                        getSequence(), sequenceType, role, visitor.getStaticContext()));
+        TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+        setSequence(tc.staticTypeCheck(getSequence(), sequenceType, role, visitor));
     }
 
     /**
