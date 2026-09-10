@@ -1102,17 +1102,14 @@ cdef class PyXslt30Processor:
      def transform_to_string(self, **kwds):
         """
         transform_to_string(self, **kwds)
-        Execute a transformation and return the result as a string.
+        Execute a transformation and return the result as a string.  For a more elaborate API for transformation
+                recommend using the PyXsltExecutable class by compiling the stylesheeet first.
         Args:
-            **kwds: Possible keyword arguments: source_file (str), xdm_node (PyXdmNode), stylesheet_file (str),
+            **kwds: Possible keyword arguments: source_file (str), stylesheet_file (str),
                 and base_output_uri (str) which is used for resolving relative URIs in the href
                 attribute of the xsl:result-document instruction.
         Example:
-            1) result = xsltproc.transform_to_string(source_file="cat.xml", stylesheet_file="test1.xsl")
-            2) xsltproc.set_source("cat.xml")\r
-               result = xsltproc.transform_to_string(stylesheet_file="test1.xsl")
-            3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
-               result = xsltproc.transform_to_string(stylesheet_file="test1.xsl", xdm_node= node)
+            result = xsltproc.transform_to_string(source_file="cat.xml", stylesheet_file="test1.xsl")
         """
         cdef char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
@@ -1120,7 +1117,7 @@ cdef class PyXslt30Processor:
         cdef py_value = None
         cdef py_value2 = None
         if len(kwds) == 0:
-            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file|xdm_node, stylesheet_file)")
+            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (base_output_uri, source_file, stylesheet_file)")
 
         if "source_file" in kwds:
             py_value2 = kwds["source_file"]
@@ -1150,19 +1147,14 @@ cdef class PyXslt30Processor:
      def transform_to_file(self, **kwds):
         """
         transform_to_file(self, **kwds)
-        Execute a transformation with the result saved to file. It is possible to specify the output file as an
-        argument or using the set_output_file method.
+        A one shot method to execute a transformation with the result saved to file. For a more elaborate API for transformation
+        recommend using the PyXsltExecutable class by compiling the stylesheeet first.
         Args:
             **kwds: Possible keyword arguments: source_file (str), stylesheet_file (str), output_file (str),
                 and base_output_uri (str) which is used for resolving relative URIs in the href attribute of
-                the xsl:result-document instruction.
+                the xsl:result-document instruction.   The leyword output_file is required
         Example:
             1) xsltproc.transform_to_file(source_file="cat.xml", stylesheet_file="test1.xsl", output_file="result.xml")
-            2) xsltproc.set_source("cat.xml")\r
-               xsltproc.set_output_file("result.xml")\r
-               xsltproc.transform_to_file(stylesheet_file="test1.xsl")
-            3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
-               xsltproc.transform_to_file(output_file="result.xml", stylesheet_file="test1.xsl", xdm_node= node)
         """
         cdef char * c_sourcefile = NULL
         cdef char * c_outputfile = NULL
@@ -1192,7 +1184,8 @@ cdef class PyXslt30Processor:
      def transform_to_value(self, **kwds):
         """
         transform_to_value(self, **kwds)
-        Execute a transformation and return the result as a PyXdmValue object.
+        Execute a transformation and return the result as a PyXdmValue object.  For a more elaborate API for transformation
+                recommend using the PyXsltExecutable class by compiling the stylesheeet first.
         Args:
             **kwds: Possible keyword arguments: source_file (str), stylesheet_file (str),
                 and base_output_uri (str) which is used for resolving relative URIs in the href attribute
@@ -1201,8 +1194,6 @@ cdef class PyXslt30Processor:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
             1) node = xsltproc.transform_to_value(source_file="cat.xml", stylesheet_file="test1.xsl")
-            2) xsltproc.set_source("cat.xml")\r
-               node = xsltproc.transform_to_value(stylesheet_file="test1.xsl")
         """
         cdef const char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
