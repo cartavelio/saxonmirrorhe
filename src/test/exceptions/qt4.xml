@@ -53,18 +53,21 @@
  
 
    <exception test-set="misc-BuiltInKeywords" 
-      test-case="Keywords-array-subarray-1
-      Keywords-fn-resolve-uri-1
-      Keywords-fn-subsequence-1
-      Keywords-fn-substring-1
-      Keywords-fn-tokenize-1
-      Keywords-fn-trace-1
-      Keywords-fn-unparsed-text-1
-      Keywords-fn-unparsed-text-available-1
-      Keywords-fn-unparsed-text-lines-1
+      test-case=" Keywords-array-deep-update-1
+      Keywords-array-of-members-1
+      Keywords-fn-build-uri-1
+      Keywords-fn-csv-fetch-field-by-column-1
+      Keywords-fn-csv-to-xdm-1
+      Keywords-fn-csv-to-xml-1
+      Keywords-fn-log-1
+      Keywords-fn-parse-csv-1
+      Keywords-fn-partition-1
+      Keywords-fn-void-1
+      Keywords-map-deep-update-1
+      Keywords-map-of-pairs-1
        " run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>See bug #6102</reason>
+      <created by="Michael Kay" on="2023-11-17"/>
+      <reason>Functions not implemented</reason>
    </exception>
    
    <exception test-set="misc-BuiltInKeywords" 
@@ -73,6 +76,16 @@
       Keywords-map-values-1
       Keywords-fn-replace-1
       Keywords-array-values-1
+      Keywords-array-fold-left-1
+      Keywords-array-sort-1
+      Keywords-fn-chain-1
+      Keywords-fn-csv-to-simple-rows-1
+      Keywords-fn-fold-left-1
+      Keywords-fn-function-annotations-1
+      Keywords-fn-invisible-xml-1
+      Keywords-fn-message-1
+      Keywords-fn-sort-1
+      Keywords-fn-transitive-closure-1
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Function not implemented yet</reason>
@@ -165,7 +178,13 @@
       <reason>Context value declaration not yet implemented</reason>
    </exception>
    
-   <exception test-set="prod-DefaultNamespaceDecl" test-case="default-namespace-40-01" run="false" report="n/a">
+   <exception test-set="prod-DefaultNamespaceDecl" test-case="default-namespace-40-01 
+      default-namespace-40-04" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-20"/>
+      <reason>Fixed default namespace declaration not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="prod-SchemaImport" test-case="qischema017" run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-20"/>
       <reason>Fixed default namespace declaration not yet implemented</reason>
    </exception>

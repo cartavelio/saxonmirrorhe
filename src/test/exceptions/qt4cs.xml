@@ -159,7 +159,8 @@
    
 
    
-   <exception test-set="prod-DefaultNamespaceDecl" test-case="default-namespace-40-01" run="false" report="n/a">
+   <exception test-set="prod-DefaultNamespaceDecl" test-case="default-namespace-40-01
+      default-namespace-40-04" run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-20"/>
       <reason>Fixed default namespace declaration not yet implemented</reason>
    </exception>
@@ -181,7 +182,16 @@
       <reason>Exceeds Saxon limit on max length of a sequence</reason>
    </exception>
    
-   
+   <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
+      try-catch-map2
+      try-catch-map3
+      try-catch-map4
+      try-catch-map5
+      try-catch-map6
+      try-catch-map7" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Try/Catch binding a map of error information - not yet implemented</reason>
+   </exception>
  
    <exception test-set="prod-CastExpr" test-case=" K-SeqExprCast-76a
       K-SeqExprCast-81a"  run="false" report="n/a">
