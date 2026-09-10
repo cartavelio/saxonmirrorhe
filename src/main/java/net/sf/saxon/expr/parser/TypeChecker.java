@@ -107,15 +107,19 @@ public class TypeChecker {
         // but it's not needed if the supplied expression is already a function coercer.
         boolean forceCoercion = (reqItemType instanceof SpecificFunctionType && !(supplied instanceof SequenceCoercer));
 
-        if (th.isSubType(supplied.getItemType(), reqItemType) && !forceCoercion) {
-            // The item type is OK
-            if (Cardinality.subsumes(reqCardinality, supplied.getCardinality())) {
-                // The cardinality is OK
+        if (!forceCoercion) {
+            if (supplied instanceof Literal && ((Literal)supplied).isInstance(req, th)) {
                 return supplied;
             }
-            else {
-                // return a CardinalityChecker
-                return CardinalityChecker.makeCardinalityChecker(supplied, reqCardinality, roleSupplier);
+            if (th.isSubType(supplied.getItemType(), reqItemType)) {
+                // The item type is OK
+                if (Cardinality.subsumes(reqCardinality, supplied.getCardinality())) {
+                    // The cardinality is OK
+                    return supplied;
+                } else {
+                    // return a CardinalityChecker
+                    return CardinalityChecker.makeCardinalityChecker(supplied, reqCardinality, roleSupplier);
+                }
             }
         }
 
@@ -457,7 +461,7 @@ public class TypeChecker {
      * value.
      *
      * @param exp the given expression
-     * @param th  the type hierarchy cache
+     * @param visitor  the expression visitor
      * @return null if the expression is OK (optimistically), an exception object if not
      */
 

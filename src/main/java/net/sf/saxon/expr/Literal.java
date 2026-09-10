@@ -123,6 +123,27 @@ public class Literal extends Expression {
         }
     }
 
+    /**
+     * Test whether the value is an instance of a supplied type
+     * @param req the required type
+     * @param th the type hierarchy cache
+     * @return true if the value is (strictly) an instance of the type, in the sense of the "instance of" operator
+     */
+    public boolean isInstance(SequenceType req, TypeHierarchy th) {
+        int requiredCardinality = req.getCardinality();
+        int count = value.getLength();
+        if (!Cardinality.allows(requiredCardinality, count)) {
+            return false;
+        }
+        ItemType requiredType = req.getPrimaryType();
+        for (Item item : value.asIterable()) {
+            if (!requiredType.matches(item, th)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * Get the static type of the expression as a UType, following precisely the type

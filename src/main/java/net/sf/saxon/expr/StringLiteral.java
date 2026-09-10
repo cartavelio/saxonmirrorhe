@@ -11,6 +11,8 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -84,6 +86,22 @@ public class StringLiteral extends Literal {
         StringLiteral stringLiteral = new StringLiteral(getGroundedValue());
         ExpressionTool.copyLocationInfo(this, stringLiteral);
         return stringLiteral;
+    }
+
+    /**
+     * Test whether the value is an instance of a supplied type
+     *
+     * @param req the required type
+     * @param th  the type hierarchy cache
+     * @return true if the value is (strictly) an instance of the type, in the sense of the "instance of" operator
+     */
+    @Override
+    public boolean isInstance(SequenceType req, TypeHierarchy th) {
+        int requiredCardinality = req.getCardinality();
+        if ((requiredCardinality & StaticProperty.ALLOWS_ONE) == 0) {
+            return false;
+        }
+        return req.getPrimaryType().matches(getGroundedValue(), th);
     }
 }
 

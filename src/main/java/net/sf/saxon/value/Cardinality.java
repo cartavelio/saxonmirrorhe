@@ -78,6 +78,24 @@ public final class Cardinality {
     }
 
     /**
+     * Determine whether a given cardinality allows a specific number of items
+     *
+     * @param cardinality the cardinality
+     * @param count       the number of items in a value
+     * @return true if the cardinality allows a value with this number of items
+     */
+
+    public static boolean allows(int cardinality, int count) {
+        if (count == 0) {
+            return allowsZero(cardinality);
+        } else if (count == 1) {
+            return (cardinality & StaticProperty.ALLOWS_ONE) != 0;
+        } else {
+            return allowsMany(cardinality);
+        }
+    }
+
+    /**
      * Form the union of two cardinalities. The cardinality of the expression "if (c) then e1 else e2"
      * is the union of the cardinalities of e1 and e2.
      *
