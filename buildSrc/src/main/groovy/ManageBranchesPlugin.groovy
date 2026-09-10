@@ -9,17 +9,19 @@ public class ManageBranchesPlugin implements Plugin<Project> {
     proc.waitFor()
 
     BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()))
-    String currentBranch = reader.readLine().trim()
+    String currentBranch = reader.readLine()
     reader.close()
 
     String builtBranch = null
     try {
       String fn = "${project.buildDir}/built-branch"
       BufferedReader xbranch = new BufferedReader(new FileReader(new File(fn)))
-      builtBranch = xbranch.readLine().trim()
+      builtBranch = xbranch.readLine()
     } catch (FileNotFoundException foe) {
       // nop
     }
+
+    println("Manage branches: current=${currentBranch}, built=${builtBranch}")
 
     if (currentBranch != builtBranch) {
       if (builtBranch != null) {
