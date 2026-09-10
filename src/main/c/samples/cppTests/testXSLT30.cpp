@@ -342,6 +342,7 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, s
         cout << "Source document is null. ====== FAIL ====== " << endl;
         sresult->failure++;
         sresult->failureList.push_back("testTransformToString4");
+        return;
     }
 
 
@@ -356,8 +357,17 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, s
     values->addXdmItem(a4);
 
 
-    XdmNode *sheet = processor->parseXmlFromFile("test2.xsl");
+    XdmNode *sheet = processor->parseXmlFromFile("../data/test2.xsl");
+    if(sheet == nullptr) {
+        sresult->failure++;
+        sresult->failureList.push_back("testTransformToString4");
+        if (processor->exceptionOccurred()) {
+            cerr <<"testTransformToString4 error in compiling test2.xsl: "<< processor->getErrorMessage() << endl;
+        }
+        delete input;
+        delete values;
 
+    }
     XsltExecutable *executable = trans->compileFromXdmNode(sheet);
 
     if(executable== nullptr) {
@@ -1098,7 +1108,7 @@ void xmarkTest1(Xslt30Processor *proc, sResultCount *sresult) {
 
     proc->setJustInTimeCompilation(true);
 
-    XdmValue *result = proc->transformFileToValue("xmark100k.xml", "q12.xsl");
+    XdmValue *result = proc->transformFileToValue("../data/xmark100k.xml", "../data/q12.xsl");
     if (result != nullptr && !proc->exceptionOccurred()) {
         cout << "XdmNode returned" << endl;
         sresult->success++;
