@@ -15,8 +15,9 @@ import java.util.function.IntPredicate;
 
 
 /**
- * {@code Twine24} is Unicode string that accommodates any codepoint value up to 24 bits.
- * It never includes any surrogates. The length of the string is limited to 2^31-1 codepoints.
+ * A {@code Twine24} is a Unicode string that accommodates any codepoint value up to 24 bits.
+ * It never includes any surrogates. The length of the string is limited to 2^31-1 bytes, with
+ * a fixed allocation of 3 bytes per codepoint.
  */
 
 public class Twine24 extends UnicodeString {
@@ -62,7 +63,7 @@ public class Twine24 extends UnicodeString {
     }
 
     /**
-     * Construct a {@code Twine} from an array of codepoints.
+     * Construct a {@code Twine24} from an array of codepoints.
      *
      * @param codePoints the codepoints making up the string: must not contain any surrogates
      *                   (that is, codepoints higher than 65535 must be supplied as a single unit)
@@ -72,6 +73,11 @@ public class Twine24 extends UnicodeString {
         this(codePoints, codePoints.length);
     }
 
+    /**
+     * Get the underlying byte array
+     * @return the underlying byte array, with each codepoint occupying three consecutive
+     * bytes (most significant first).
+     */
     public byte[] getByteArray() {
         return bytes;
     }
