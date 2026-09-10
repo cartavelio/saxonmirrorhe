@@ -2,7 +2,6 @@ package resolvers;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.CatalogResourceResolver;
-import net.sf.saxon.lib.CommonResourceResolver;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.trans.XPathException;
@@ -40,7 +39,7 @@ public class ResolverConfigurationTest {
     public void explicitCatalogResourceResolver() {
         Configuration config = new Configuration();
 
-        CommonResourceResolver underlyingResolver = new CatalogResourceResolver();
+        CatalogResourceResolver underlyingResolver = new CatalogResourceResolver();
 
         MyResolver resolver = new MyResolver(underlyingResolver);
 
@@ -63,15 +62,15 @@ public class ResolverConfigurationTest {
         }
     }
 
-    private class MyResolver extends CommonResourceResolver {
-        private final CommonResourceResolver resolver;
+    private class MyResolver extends CatalogResourceResolver {
+        private final CatalogResourceResolver resolver;
 
-        public MyResolver(CommonResourceResolver resolver) {
+        public MyResolver(CatalogResourceResolver resolver) {
             this.resolver = resolver;
         }
 
-        @Override
-        public CommonResourceResolver newInstance() {
+        //@Override
+        public CatalogResourceResolver newInstance() {
             return this;
         }
 
@@ -81,7 +80,7 @@ public class ResolverConfigurationTest {
         }
 
         @Override
-        public <T> void setFeature(ResolverFeature<T> feature, T value) throws XPathException {
+        public <T> void setFeature(ResolverFeature<T> feature, T value)  {
             resolver.setFeature(feature, value);
         }
 

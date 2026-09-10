@@ -64,7 +64,7 @@ public class StandardModuleURIResolverTest {
         Processor proc = new Processor(false);
         Configuration config = proc.getUnderlyingConfiguration();
         try {
-            proc.setCatalogFile(cwd + "src/test/testdata/resolvers/catalog.xml");
+            proc.setCatalogFiles(cwd + "src/test/testdata/resolvers/catalog.xml");
 
             StandardModuleURIResolver resolver = new StandardModuleURIResolver(config);
 
@@ -80,7 +80,7 @@ public class StandardModuleURIResolverTest {
         Processor proc = new Processor(false);
         Configuration config = proc.getUnderlyingConfiguration();
         try {
-            proc.setCatalogFile(cwd + "src/test/testdata/resolvers/catalog.xml");
+            proc.setCatalogFiles(cwd + "src/test/testdata/resolvers/catalog.xml");
             
             StandardModuleURIResolver resolver = new StandardModuleURIResolver(config);
 
