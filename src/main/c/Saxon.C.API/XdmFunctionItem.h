@@ -124,6 +124,15 @@ public:
         return XDM_FUNCTION_ITEM;
     }
 
+    //! Determine whether the item is a function or some other type of item
+    /**
+     *
+     * @return true if the item is a Xdm function item, false if it is an atomic value or a function (including maps and arrays)
+     */
+    bool isFunction(){
+        return true;
+    }
+
 protected:
     std::string fname; /*!< The name of the function item */
 

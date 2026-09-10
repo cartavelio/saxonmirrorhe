@@ -157,6 +157,15 @@ public:
 		return XDM_ARRAY;
 	}
 
+    //! Determine whether the item is an array or some other type of item
+    /**
+     *
+     * @return true if the item is a Xdm array item, false if it is some other type
+     */
+    bool isArray(){
+        return true;
+    }
+
 
 private:
     int arrayLen;

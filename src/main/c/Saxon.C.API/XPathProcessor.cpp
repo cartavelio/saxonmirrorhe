@@ -155,13 +155,15 @@ if (!mID) {
 			} else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, nodeClass)           == JNI_TRUE) {
 				xdmItem = new XdmNode(resulti);
 
-			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, functionItemClass)           == JNI_TRUE) {
-				xdmItem =  new XdmFunctionItem(resulti);
-			} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapClass)           == JNI_TRUE) {
+			}  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapClass)           == JNI_TRUE) {
                 xdmItem =  new XdmMap(resulti);
             } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayClass)           == JNI_TRUE) {
                 xdmItem =  new XdmArray(resulti);
-            }
+            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, functionItemClass)           == JNI_TRUE) {
+                xdmItem =  new XdmFunctionItem(resulti);
+            } else {
+			    continue;
+			}
   
 
 			value->addXdmItem(xdmItem);
@@ -251,6 +253,8 @@ if (!mID) {
 		jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
 		jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
+        jclass mapClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmMap");
+        jclass arrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmArray");
 		XdmItem * xdmItem = nullptr;
 		if(SaxonProcessor::sxn_environ->env->IsInstanceOf(result, atomicValueClass)           == JNI_TRUE) {
 			xdmItem = new XdmAtomicValue(result);
@@ -259,8 +263,11 @@ if (!mID) {
 
 			xdmItem = new XdmNode(result);
 
-		} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
-		    std::cerr<<"XdmFunctionItem found"<<std::endl;
+		} else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapClass)           == JNI_TRUE) {
+            xdmItem =  new XdmMap(result);
+        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayClass)           == JNI_TRUE) {
+            xdmItem =  new XdmArray(result);
+        } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass)           == JNI_TRUE) {
 		    xdmItem = new XdmFunctionItem(result);
 			return xdmItem;
 		}

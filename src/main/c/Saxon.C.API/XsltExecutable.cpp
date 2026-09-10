@@ -673,18 +673,18 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
-                xdmItem = new XdmFunctionItem(result);
-                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                value->addXdmItem(xdmItem);
-                return value;
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayClass) == JNI_TRUE) {
+            }  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayClass) == JNI_TRUE) {
                 xdmItem = new XdmArray(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;
             } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapClass) == JNI_TRUE) {
                 xdmItem = new XdmMap(result);
+                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                value->addXdmItem(xdmItem);
+                return value;
+            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
+                xdmItem = new XdmFunctionItem(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;
@@ -929,18 +929,18 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
-                xdmItem = new XdmFunctionItem(result);
-                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                value->addXdmItem(xdmItem);
-                return value;
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayClass) == JNI_TRUE) {
+            }  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayClass) == JNI_TRUE) {
                 xdmItem = new XdmArray(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;
             } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapClass) == JNI_TRUE) {
                 xdmItem = new XdmMap(result);
+                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                value->addXdmItem(xdmItem);
+                return value;
+            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
+                xdmItem = new XdmFunctionItem(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;
@@ -1187,13 +1187,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
-                xdmItem = new XdmFunctionItem(result);
-                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                value->addXdmItem(xdmItem);
-                return value;
-
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapItemClass) == JNI_TRUE) {
+            }  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapItemClass) == JNI_TRUE) {
                 xdmItem = new XdmMap(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
@@ -1203,6 +1197,12 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 value->addXdmItem(xdmItem);
                 return value;
+            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
+                xdmItem = new XdmFunctionItem(result);
+                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                value->addXdmItem(xdmItem);
+                return value;
+
             } else {
                 value = new XdmValue(result, true);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
@@ -1295,16 +1295,16 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 return xdmItem;
 
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
-                xdmItem = new XdmFunctionItem(result);
-                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
-                return xdmItem;
-            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapItemClass) == JNI_TRUE) {
+            }  else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, mapItemClass) == JNI_TRUE) {
                 xdmItem = new XdmMap(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 return xdmItem;
             } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, arrayItemClass) == JNI_TRUE) {
                 xdmItem = new XdmArray(result);
+                SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
+                return xdmItem;
+            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(result, functionItemClass) == JNI_TRUE) {
+                xdmItem = new XdmFunctionItem(result);
                 SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
                 return xdmItem;
             } else {

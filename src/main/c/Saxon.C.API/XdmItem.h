@@ -91,6 +91,20 @@ public:
     virtual bool isFunction();
 
     /**
+     * Determine whether the item is a map or some other type of item
+     *
+     * @return true if the item is a Xdm map item, false if it is some other value
+     */
+    virtual bool isMap();
+
+    /**
+     * Determine whether the item is an Array or some other type of item
+     *
+     * @return true if the item is a Xdm Array item, false if it is some other value
+     */
+    virtual bool isArray();
+
+    /**
      * Get Java XdmValue object.
      * @return jobject - The Java object of the XdmValue in its JNI representation
      */
