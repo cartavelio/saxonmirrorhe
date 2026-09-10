@@ -2,11 +2,13 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
+import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -28,18 +30,18 @@ import java.util.NoSuchElementException;
  * entries.</p>
  */
 
-public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
+public class ExtensibleMap extends MapWithTypeCache implements Iterable<KeyValuePair> {
 
     private final ZenoChain<AtomicValue> keyList;
     private final ZenoChain<GroundedValue> valueList;
     private final ImmutableHashTrieMap<AtomicMatchKey, Integer> index;
-    private final ImmutableIntSet removals;
+    private final RemovalsList removals;
 
     public ExtensibleMap(int specVersion) {
         this.keyList = new ZenoChain<>();
         this.valueList = new ZenoChain<>();
         this.index = makeEmptyIndex();
-        this.removals = new ImmutableIntSet();
+        this.removals = RemovalsList.empty;
         setSpecVersion(specVersion);
     }
 
@@ -47,8 +49,8 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
                           ZenoChain<GroundedValue> values,
                           int specVersion,
                           ImmutableHashTrieMap<AtomicMatchKey, Integer> index,
-                          ImmutableIntSet removals
-                          ) {
+                          RemovalsList removals
+    ) {
         this.keyList = keys;
         this.valueList = values;
         this.index = index;
@@ -56,7 +58,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
         setSpecVersion(specVersion);
     }
 
-    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary.Create<Saxon.Hej.expr.sort.AtomicMatchKey,int>();")
+    @CSharpReplaceBody(code = "return System.Collections.Immutable.ImmutableDictionary.Create<Saxon.Hej.expr.sort.AtomicMatchKey,int>();")
     private static ImmutableHashTrieMap<AtomicMatchKey, Integer> makeEmptyIndex() {
         return ImmutableHashTrieMap.empty();
     }
@@ -72,14 +74,13 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
         ZenoChain<GroundedValue> values = new ZenoChain<>();
         int specVersion = map.getSpecVersion();
         ImmutableHashTrieMap<AtomicMatchKey, Integer> index = makeEmptyIndex();
-        ImmutableIntSet removals = new ImmutableIntSet();
         int offset = 0;
         for (KeyValuePair pair : map.keyValuePairs()) {
             keys = keys.add(pair.key);
             values = values.add(pair.value);
             index = index.put(pair.key.asMapKey(specVersion), offset++);
         }
-        return new ExtensibleMap(keys, values, specVersion, index, removals);
+        return new ExtensibleMap(keys, values, specVersion, index, RemovalsList.empty);
     }
 
     /**
@@ -109,6 +110,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
 
     /**
      * Get the content as an iterable collection of key value pairs
+     *
      * @return an iterable collection of key value pairs
      */
 
@@ -119,6 +121,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
 
     /**
      * Return an iterator of key-value pairs.
+     *
      * @return an Iterator of key-value pairs.
      */
     @Override
@@ -133,19 +136,19 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
 
     private static class KeyValuePairIterator implements Iterator<KeyValuePair> {
 
-        private final ImmutableIntSet removals;
+        private final RemovalsList removals;
         private final Iterator<AtomicValue> keyIter;
         private final Iterator<GroundedValue> valueIter;
         private int offset = 0;
 
         public KeyValuePairIterator(ZenoChain<AtomicValue> keyList,
                                     ZenoChain<GroundedValue> valueList,
-                                    ImmutableIntSet removals) {
+                                    RemovalsList removals) {
             this.removals = removals;
             this.keyIter = keyList.iterator();
             this.valueIter = valueList.iterator();
         }
-        
+
 
         /**
          * Returns {@code true} if the iteration has more elements.
@@ -154,7 +157,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
          *
          * @return {@code true} if the iteration has more elements
          */
-        
+
         @Override
         @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public boolean hasNext() {
@@ -195,21 +198,33 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
+
         AtomicMatchKey matchKey = key.asMapKey(getSpecVersion());
         int offset = getOffset(index, matchKey);
-        if (offset >= 0) {
+        ExtensibleMap newMap;
+        if (offset >= 0 && !removals.contains(offset)) {
             // Key is already present. Modify the values array, leave the keys and the index
             // unchanged.
             ZenoChain<GroundedValue> values2 = valueList.replace(offset, value);
-            return new ExtensibleMap(keyList, values2, getSpecVersion(), index, removals);
+            newMap = new ExtensibleMap(keyList, values2, getSpecVersion(), index, removals);
         } else {
             // New key, add it at the end after all existing entries
             int last = keyList.size();
             ZenoChain<AtomicValue> keys2 = keyList.add(key);
             ZenoChain<GroundedValue> values2 = valueList.add(value);
             ImmutableHashTrieMap<AtomicMatchKey, Integer> index2 = index.put(key.asMapKey(31), last);
-            return new ExtensibleMap(keys2, values2, getSpecVersion(), index2, removals);
+            newMap = new ExtensibleMap(keys2, values2, getSpecVersion(), index2, removals);
         }
+        if(knownKeyType != null) {
+            if ((!knownKeyType.matches(key) || !knownValueType.matches(value))) {
+                newMap.knownKeyType = null;
+                newMap.knownValueType = null;
+            } else {
+                newMap.knownKeyType = knownKeyType;
+                newMap.knownValueType = knownValueType;
+            }
+        }
+        return newMap;
 
     }
 

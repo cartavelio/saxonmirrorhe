@@ -33,7 +33,7 @@ import java.util.*;
  * and in some cases is simply a wrapper with a different <code>equals()</code> method.</p>
  */
 
-public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyValuePair> {
+public abstract class AbstractFixedMap extends MapWithTypeCache implements Iterable<KeyValuePair> {
 
     protected GroundedValue[] values;
     protected HashMap<AtomicMatchKey, Integer> index;
@@ -307,11 +307,9 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        if (get(key) != null) {
-            return new MapReplacingOne(this, key, value);
-        } else {
-            return new MapPlusOne(this, key, value);
-        }
+        ExtensibleMap newMap = ExtensibleMap.copyOf(this);
+        newMap.setKnownType(knownKeyType, knownValueType);
+        return newMap.put(key, value);
     }
 
     /**
@@ -324,7 +322,9 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
     @Override
     public MapItem remove(AtomicValue key) {
         if (get(key) != null) {
-            return new MapMinusOne(this, key.asMapKey(getSpecVersion()));
+            ExtensibleMap newMap = ExtensibleMap.copyOf(this);
+            newMap.setKnownType(knownKeyType, knownValueType);
+            return newMap.remove(key);
         } else {
             return this;
         }
