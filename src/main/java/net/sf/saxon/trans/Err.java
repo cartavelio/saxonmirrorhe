@@ -12,6 +12,7 @@ import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -171,6 +172,14 @@ public class Err {
             }
         } else {
             return item.toShortString();
+        }
+    }
+
+    public static String depictCodepoint(int cp) {
+        if (cp >= 20 && cp <= UTF16CharacterSet.SURROGATE1_MIN) {
+            return "'" + (char)cp + "' (#x" + Integer.toString(cp, 16) + ")";
+        } else {
+            return "#x" + Integer.toString(cp, 16);
         }
     }
 
