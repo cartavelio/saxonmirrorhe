@@ -98,8 +98,15 @@ public final class SimpleStepExpression extends SlashExpression {
      */
     /*@NotNull*/
     @Override
-    public SimpleStepExpression copy(RebindingMap rebindings) {
-        SimpleStepExpression exp = new SimpleStepExpression(getStart().copy(rebindings), getStep().copy(rebindings));
+    public Expression copy(RebindingMap rebindings) {
+        Expression lhs = getStart().copy(rebindings);
+        Expression rhs = getStep().copy(rebindings);
+        if (!(rhs instanceof AxisExpression)) {  // bug 6698
+            SlashExpression se = new SlashExpression(getStart(), getStep());
+            ExpressionTool.copyLocationInfo(this, se);
+            return se;
+        }
+        SimpleStepExpression exp = new SimpleStepExpression(lhs, rhs);
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
