@@ -2750,7 +2750,7 @@ cdef class PyXsltExecutable:
           if isinstance(args[x], PyXdmValue):
             value_ = args[x]
             argumentV[x] = value_.thisvptr
-            value_.thisvptr.incrementRefCount()
+            argumentV[x].incrementRefCount()
           else:
             raise Exception("Argument value at position " , x , " is not a PyXdmValue. The following object found: ", type(args[x]))
         '''c_functionName = make_c_str(function_name)'''
