@@ -100,12 +100,17 @@ public class IndependentContext extends AbstractStaticContext
         if (libList != null) {
             setFunctionLibrary((FunctionLibraryList) libList.copy());
         }
+        setDefaultCollationName(ic.getDefaultCollationName());
         setImportedSchemaNamespaces(ic.importedSchemaNamespaces);
         externalResolver = ic.externalResolver;
         autoDeclare = ic.autoDeclare;
+        setUnprefixedElementMatchingPolicy(ic.getUnprefixedElementMatchingPolicy());
         setXPathLanguageLevel(ic.getXPathVersion());
         requiredContextItemType = ic.requiredContextItemType;
         setExecutable(ic.getExecutable());
+        setOptimizerOptions(ic.getOptimizerOptions());
+        retainedStaticContext = null;
+        parentlessContextItem = ic.parentlessContextItem
     }
 
     /**
@@ -572,6 +577,15 @@ public class IndependentContext extends AbstractStaticContext
     public boolean isContextItemParentless() {
         return parentlessContextItem;
     }
+
+    /**
+     * Say whether the context item is known to be parentless. This is used for XSD Assertions;
+     * it allows a static warning if an XSD assertion attempts to look outside the element being
+     * validated.
+     *
+     * @param parentless true if it is known that the context item for evaluating the expression
+     *                  will have no parent
+     */
 
     public void setContextItemParentless(boolean parentless) {
         parentlessContextItem = parentless;
