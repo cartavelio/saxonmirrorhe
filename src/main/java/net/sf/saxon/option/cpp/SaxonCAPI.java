@@ -169,6 +169,15 @@ public class SaxonCAPI {
             args = processorDataAccumulator.getParameterNames();
         }
 
+        if(SaxonCAPI.debug) {
+            System.err.println("Gizmo argument length: "+args.length);
+            for(String arg: args){
+                System.err.println("arg="+arg);
+
+            }
+
+        }
+
         new Gizmo(args);
 
 
