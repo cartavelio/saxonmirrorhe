@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns:xs="http://www.w3.org/2001/XMLSchema"
+      xmlns="http://www.w3.org/2012/10/xslt-test-catalog">
+          
+      <!-- Expressions -->
+
+      <test-set name="axes" file="tests/expr/axes/_axes-test-set.xml"/>
+      <test-set name="castable" file="tests/expr/castable/_castable-test-set.xml"/>
+      <test-set name="data-manipulation" file="tests/expr/data-manipulation/_data-manipulation-test-set.xml"/>
+      <test-set name="expression" file="tests/expr/expression/_expression-test-set.xml"/>
+      <test-set name="for" file="tests/expr/for/_for-test-set.xml"/>
+      <test-set name="higher-order-functions" file="tests/expr/higher-order-functions/_higher-order-functions-test-set.xml"/>
+      <test-set name="nodetest" file="tests/expr/nodetest/_nodetest-test-set.xml"/>
+      <test-set name="path" file="tests/expr/path/_path-test-set.xml"/>
+      <test-set name="predicate" file="tests/expr/predicate/_predicate-test-set.xml"/>
+
+   </catalog>

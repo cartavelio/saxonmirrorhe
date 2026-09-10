@@ -1,0 +1,4 @@
+This directory contains alternate test suite catalogs to run when different tree
+models are used. The idea is to limit the tests to ones that demonstrate that
+the model works, without exercising uninteresting constraints in the model (like
+the fact that XOM is especially pedantic about URIs).

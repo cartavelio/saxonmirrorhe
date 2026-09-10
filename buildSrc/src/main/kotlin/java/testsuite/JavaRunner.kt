@@ -68,10 +68,27 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
 
   @get:Internal
   val catalog: String
-    get() = when (suite.get()) {
-      "qt3extra" -> "j-catalog.xml"
-      else -> "catalog.xml"
-    }
+    get() {
+      // This is ugly. I'm threading a need to allow the tree model tests
+      // to run with different catalogs. But because I don't want to check
+      // those catalogs into the submodule repositories directly, I have 
+      // to do ... gestures wildly ... this
+      var tree = "none"
+      for (arg in testargs.get()) {
+        if (arg.startsWith("-tree:")) {
+          tree = arg.substring(6).lowercase()
+        }
+      }
+
+      if (tree != "none") {
+        return "../../java/src/test/catalogs/${suite.get()}-tree-catalog.xml"
+      }
+
+      return when (suite.get()) {
+        "qt3extra" -> "j-catalog.xml"
+        else -> "catalog.xml"
+      }
+    } 
 
   @OutputDirectory
   val reportDir = reportingRootDir.map { it.dir("${suite.get()}/${dateStamp}") }
