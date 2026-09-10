@@ -317,6 +317,9 @@ TODO: rethink redefines and override
         <p>In XQuery, the syntax of item type declarations is now <code>declare type</code> rather than
         <code>declare item-type</code>.</p>
         
+        <p>Named item types can now be referenced directly by name, rather than using the syntax
+            <code>type(alias)</code>.</p>
+        
         <p>Choice item types are implemented, for example the required type of a parameter in a function
         signature can be <code>(map(*) | array(*))</code>. The local union type syntax 
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
@@ -470,6 +473,10 @@ TODO: rethink redefines and override
         the same module is included more than once at the same stylesheet (import) level. all but the first
         <code>xsl:include</code> declarations are ignored.</p>
         
+        <p>The experimental attribute <code>break-when</code> for <code>xsl:for-each-group</code> is
+            renamed <code>split-when</code> in XSLT 4.0; for now <code>break-when</code> is retained
+        as a synonym.</p>
+        
         <h2>Dropped experimental features</h2>
         
         <p>Some proposed enhancements that didn't survive into the current 4.0 draft specifications
@@ -519,7 +526,7 @@ TODO: rethink redefines and override
         in favour of their XSLT 4.0 counterparts, <code>xsl:array</code> and <code>xsl:array-member</code>.</p>
         
         <p>The <code>xsl:map/saxon:on-duplicates</code> extension attribute is no longer supported, it is 
-        replaced by the regular XSLT 4.0 attribute <code>xsl:map/on-duplicates.</code></p>
+        replaced by the regular XSLT 4.0 attribute <code>xsl:map/duplicates.</code></p>
         
         <p>A new vendor option has been added to the <code>fn:transform</code> function. Setting
         the option <code>saxon:write-result-documents</code> to <code>true()</code> changes the
@@ -580,6 +587,7 @@ TODO: rethink redefines and override
             <li><p>PR1622 - XSLT map-for-key function</p></li>
             <!--<li><p>JSON-Lines input and output</p></li>-->
             <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
+            <li><p>merge-when attribute for xsl:for-each-group</p></li>
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>

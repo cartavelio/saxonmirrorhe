@@ -397,6 +397,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <section id="type-aliases" title="Type aliases">
          <h1>Type aliases</h1>
+         
+         <p>TODO FIXME: these are now called named item types, and the syntax has changed in the current
+            4.0 specs...</p>
 
          <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon
         9.8; revised in 10 and 11.</aside>
@@ -916,6 +919,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <section id="simple-inline-functions" title="Simple inline functions">
          <h1>Simple inline functions</h1>
+         
+         <p>TODO FIXME: Syntax for inline functions is different in XPath 4.0...</p>
 
          <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available (in various forms) since Saxon 9.8.</aside>
 
@@ -1312,18 +1317,6 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
          <ul/>
       </nav>
 
-      <section id="xsl-item-type" title="The xsl:item-type declaration">
-         <h1>The <code>xsl:item-type</code> declaration</h1>
-
-         <p>The <a class="bodylink code" href="/xsl-elements/item-type"
-               >xsl:item-type</a> declaration declares a type alias for
-            use within a stylesheet.
-            See <a class="bodylink" href="/v4extensions/new-types/type-aliases"
-               >Type aliases</a> for an overview. For example:</p>
-
-         <pre><code class="language-xml"><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>]]></code></pre>
-      </section>
-
       <section id="match-patterns" title="Match patterns">
          <h1>Match patterns</h1>
 
@@ -1396,63 +1389,6 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
       used if there is any risk of ambiguity.</p>
 
       </section>
-      <section id="xslt-conditionals" title="Conditional instructions">
-         <h1>Conditional instructions</h1>
-
-
-
-         <p>If syntax extensions are enabled, then the <a class="bodylink code"
-               href="/xsl-elements/choose">xsl:choose</a> and <a class="bodylink code"
-               href="/xsl-elements/if">xsl:if</a>
-    instructions are enhanced as follows:</p>
-
-         <ul>
-            <li>
-               <p>Within <code>xsl:choose</code>, the <code>xsl:when</code> and <code>xsl:otherwise</code>
-        instructions can define the returned value using a <code class="bold"
-                     >select</code> attribute in place
-      of a sequence constructor. For example:</p>
-               <pre><code class="language-xml"><![CDATA[<xsl:choose>
-  <xsl:when test="$day = 'Monday'" select="1"/>
-  <xsl:when test="$day = 'Tuesday'" select="2"/>
-  <xsl:when test="$day = 'Wednesday'" select="3"/>
-  <xsl:when test="$day = 'Thursday'" select="4"/>
-  <xsl:when test="$day = 'Friday'" select="5"/>
-  <xsl:otherwise select="-1"/>
-</xsl:choose>]]></code></pre>
-            </li>
-            <li>
-               <p>The <code>xsl:if</code> instruction can deliver its results using <code
-                     class="bold">then</code>
-        and <code class="bold"
-                  >else</code> attributes in place of a contained sequence constructor. For example:</p>
-               <pre><code class="language-xml"><![CDATA[<xsl:if test="$day = 'Monday'" then="1" else="0"/>]]></code></pre>
-               <p>If the <code>then</code> attribute is present, the <code>xsl:if</code> instruction must
-          be empty (have no children). Either attribute can be used independently; there is no
-        requirement for both to be present.</p>
-            </li>
-         </ul>
-
-         <p>These new forms of <code>xsl:choose</code> and <code>xsl:if</code> are particularly useful
-      to compute the return value of a function, replacing <code>xsl:sequence</code>.</p>
-
-         <p>The new <a class="bodylink code" href="/xsl-elements/switch"
-               >xsl:switch</a> instruction provides
-            an alternative to <code>xsl:choose</code>. It is best illustrated by example:</p>
-
-         <pre><code class="language-xml"><![CDATA[<xsl:function name="f:days-in-month" as="xs:integer?">
-  <xsl:param name="month-number" as="xs:integer"/>
-  <xsl:param name="leap-year" as="xs:boolean"/>
-  <xsl:switch select="$month-number">
-    <xsl:when test="1, 3, 5, 7, 8, 10, 12" select="31"/>
-    <xsl:when test="4, 6, 9, 11" select="30"/>
-    <xsl:when test="2">
-      <xsl:if test="$leap-year" then="29" else="28"/>
-    </xsl:when>
-  </xsl:switch>
-</xsl:function>]]></code></pre>
-
-      </section>
       <section id="ext-ins-call-template" title="Extension instructions calling templates">
          <h1>Extension instructions calling named templates</h1>
 
@@ -1496,40 +1432,6 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
          <p>The extension instruction must have no children other than <code>xsl:fallback</code>.</p>
          <p>There is no way to supply tunnel parameters.</p>
       </section>
-      <section id="separator-attribute" title="Separator attribute">
-
-         <h1>Separator attribute on <code>xsl:for-each</code> and <code>xsl:apply-templates</code></h1>
-
-         <p>If syntax extensions are enabled, then the <a class="bodylink code"
-               href="/xsl-elements/for-each">xsl:for-each</a> and <a class="bodylink code"
-               href="/xsl-elements/apply-templates">xsl:apply-templates</a>
-         instructions allow a <code class="bold"
-               >separator</code> attribute, similar to the <code>separator</code> attribute on <code>xsl:value-of</code>.</p>
-
-         <p>The effect of the attribute is as follows. The attribute value template is expanded, once, using the outer context. The resulting
-      string is converted to a text node. This text node is added to the result sequence after processing every item in the (sorted) input
-      sequence, except the last.</p>
-
-         <p>For example, <code>&lt;xsl:apply-templates select="item" separator=", "/></code> inserts a comma and space into the output after
-      processing every item element in the input sequence, except the last</p>
-
-      </section>
-      <section id="xsl-match" title="The xsl:match instruction">
-         <h1>The <code>xsl:match</code> instruction</h1>
-
-         <p>The experimental <code>xsl:match</code> instruction was introduced in Saxon 11, but dropped in Saxon 12.</p>
-
-         <!--<p>The new <a class="bodylink code" href="/xsl-elements/match">xsl:match</a> instruction is most
-            useful if wrapped in a stylesheet function. For example:</p>
-         <pre><code class="language-xml"><![CDATA[  <xsl:function name="f:in-appendix" as="xs:boolean">
-    <xsl:param name="content" as="element(*)"/>
-    <xsl:match select="$content" pattern="chapter[@class='appendix']//* | addendum//*"/>
-  </xsl:function>
-  
-  ...
-  
-  <xsl:if test="f:in-appendix(.)">...</xsl:if>]]></code></pre>-->
-      </section>
       <section id="iteration-maps-arrays" title="Iterating over maps and arrays">
          <h1>Iterating over maps and arrays</h1>
 
@@ -1541,34 +1443,6 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
             To iterate over maps, use <code>&lt;xsl:for-each select="map:entries($map)"></code>.</p>
 
 
-      </section>
-
-      <section id="break-when" title="Grouping using break-when">
-         <h1>Grouping using <code>break-when</code></h1>
-
-         <p>The <code>break-when</code> attribute can be specified on <a class="bodylink code"
-               href="/xsl-elements/for-each-group">xsl:for-each-group</a> in 
-            place of <code>group-by</code>, <code>group-adjacent</code>, <code>group-starting-with</code>, or 
-            <code>group-ending-with</code>. This allows a new group to be started conditionally based on the contents
-         of the current group so far. For example, <code>break-when="@date lt $group[last()]/@date</code>
-         causes a new group to be started whenever the date on the current item is earlier than the date on the
-         last item in the previous group.</p>
-      </section>
-
-      <section id="xsl-map-duplicates" title="Controlling duplicates on xsl:map">
-         <h1>Controlling duplicates on <code>xsl:map</code></h1>
-
-         <p>The <code>on-duplicates</code> attribute can be specified on <a class="bodylink code"
-               href="/xsl-elements/map">xsl:map</a> to control what happens
-         when two entries in the map would have the same key (in XSLT 3.0 this is always an error). The value
-         of the attribute is an expression, which must evaluate to a function. The function is called when an entry
-         in the map would conflict with an existing entry. It is supplied with two arguments, the value of the existing
-         entry and the value of the new entry, and it returns a new value to be associated with the duplicate key (or it can
-         throw an error, to replicate the default behavior). For example <code>on-duplicates="->($old, $new){$old, $new}"</code>
-            causes the new value to be the sequence-concatenation of the supplied values, while 
-            <code>on-duplicates="->($old, $new){$old || ',' || $new}"</code> concatenates the values with comma as
-            a separator. Specifying <code>on-duplicates="->($old, $new){$old}"</code> takes the first of the duplicates, while 
-            <code>on-duplicates="->($old, $new){$new}"</code> takes the last.</p>
       </section>
 
       <section id="creating-arrays" title="Creating arrays">

@@ -508,21 +508,16 @@
             <li>
                 <p><a class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a></p>
                 <p>Used to declare a name (or alias) for an item type; replaces the previously available <a class="bodylink code"
-                    href="/extensions/instructions/item-type">saxon:item-type</a>. For more details see <a class="bodylink"
-                        href="/v4extensions/xslt-syntax-extensions/xsl-item-type">The <code>xsl:item-type</code>
-                        declaration</a>.</p>
+                    href="/extensions/instructions/item-type">saxon:item-type</a>.</p>
             </li>
             <li>
                 <p><code>xsl:match</code></p>
-                <p>Used to match selected items against an XSLT pattern; see <a class="bodylink"
-                    href="/v4extensions/xslt-syntax-extensions/xsl-match">The <code>xsl:match</code>
-                    instruction</a>.)</p>
+                <p>Used to match selected items against an XSLT pattern.</p>
             </li>
             <li>
                 <p><a class="bodylink code" href="/xsl-elements/switch">xsl:switch</a></p>
                 <p>Used to choose one of a number of alternative outputs, based on the value of a supplied
-                    expression; see <a class="bodylink" 
-                        href="/v4extensions/xslt-syntax-extensions/xslt-conditionals">Conditional instructions</a>.</p>
+                    expression.</p>
             </li>
         </ul>
         
@@ -534,10 +529,7 @@
                     href="/xsl-elements/map">xsl:for-each-group</a>. For example,
                     <code>&lt;xsl:for-each-group break-when="sum($group!@length) + $next!@length) gt 30"
                         ...&gt;</code> starts a new group when the total of the <code>@length</code>
-                    attributes of the elements in a group would otherwise exceed 30. For more details see <a
-                        class="bodylink" 
-                        href="/v4extensions/xslt-syntax-extensions/break-when">Grouping using
-                        <code>break-when</code></a>.</p>
+                    attributes of the elements in a group would otherwise exceed 30.</p>
             </li>
             <li>
                 <p>The proposed <code>array</code> and <code>map</code> attributes are implemented as alternatives
@@ -551,18 +543,13 @@
             </li>
             <li>
                 <p>The <code>on-duplicates</code> attribute is now available on a <a class="bodylink code"
-                    href="/xsl-elements/map">xsl:map</a> instruction; see <a class="bodylink"
-                        href="/v4extensions/xslt-syntax-extensions/xsl-map-duplicates">Controlling duplicates
-                        on <code>xsl:map</code></a>.</p>
+                    href="/xsl-elements/map">xsl:map</a> instruction.</p>
             </li>
             <li>
                 <p>The <code>separator</code> attribute is now available on <a class="bodylink code"
                     href="/xsl-elements/for-each">xsl:for-each</a> and <a class="bodylink code"
                         href="/xsl-elements/apply-templates">xsl:apply-templates</a>, similar to the
-                    <code>separator</code> attribute on <code>xsl:value-of</code>. For more details see <a
-                        class="bodylink"
-                        href="/v4extensions/xslt-syntax-extensions/separator-attribute">Separator 
-                        attribute</a>.</p>
+                    <code>separator</code> attribute on <code>xsl:value-of</code>.</p>
             </li>
         </ul>
         

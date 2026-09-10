@@ -460,6 +460,9 @@ saxon:evaluate($expression)
       
       <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9.</aside>
       
+      <p>This Saxon extension attribute is now a synonym for the XSLT 4.0 attribute
+        <code>capture</code> on <code>xsl:accumulator-rule</code>.</p>
+      
       <p>This attribute may be set on an <a class="bodylink code"
         href="/xsl-elements/accumulator-rule">xsl:accumulator-rule</a> element. It has no effect
       unless the accumulator is declared streamable and the rule has <code>phase="end"</code>. It is intended
@@ -613,25 +616,6 @@ saxon:evaluate($expression)
       <p>From Saxon 9.6, when XSLT 3.0 is enabled, the same effect can be achieved by setting the
         attributes <code>cache="full"</code> and <code>identity-sensitive="no"</code> on the
           <code>xsl:function</code> element.</p>
-    </section>
-    
-    <section id="on-duplicates" title="saxon:on-duplicates">
-      <h1>saxon:on-duplicates</h1>
-      
-      <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 10.</aside>
-      
-      <p>The extension attribute <code>saxon:on-duplicates</code> is available on the <a class="bodylink
-        code" href="/xsl-elements/map">xsl:map</a> instruction to define how duplicate keys are to be handled.
-        (From Saxon 11, this is alternatively available with XSLT 4.0 enabled as the synonym
-        <code>on-duplicates</code>, see <a class="bodylink"
-          href="/v4extensions/xslt-syntax-extensions/xsl-map-duplicates">Controlling duplicates on
-          xsl:map</a>.) The value is an XPath expression that evaluates
-      to a function. If the constructed map has duplicate keys, this function is called to determine how they
-      are to be handled. The function takes two arguments, being two values for the key, and it returns a combined
-      value to be used in the map with that key. For example if the function is <code>function($a, $b) { return max(($a, $b)) }</code>
-      then the value in the final map will be the maximum of the values in the input.</p>
-      
-      <p>The function can also throw an error, reproducing the default behaviour if no function is specified.</p>
     </section>
       
     
