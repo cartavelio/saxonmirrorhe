@@ -431,7 +431,26 @@
                      href="../saxon_c_php_xdmnode">XdmNode</a> object by parsing an XML document,
                      as available by URI.</div>
                </td>
-            </tr>            
+            </tr>
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
+               </td>
+               <td>
+                  <span class="signature">parseJsonFromString(string $value, string $encoding=NULL)</span>
+                  <div class="fcomment">Parse a lexical representation of the JSON and return it as
+                     an <code>XdmValue</code>.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmvalue">Saxon\XdmValue</a>
+               </td>
+               <td>
+                  <span class="signature">parseJsonFromFile(string $fileName)</span>
+                  <div class="fcomment">Parse a source JSON file and return it as an <code>XdmValue</code>.</div>
+               </td>
+            </tr>
             <tr>
                <td>
                   <code>void</code>
@@ -470,7 +489,7 @@
                      $value)</span>
                   <div class="fcomment">Set a configuration property specific to the processor in
                      use. Properties specified here are common across all the processors. See <a target="_blank"
-                        href="http://www.saxonica.com/documentation12/index.html#!configuration/config-features"
+                        href="https://www.saxonica.com/documentation12/index.html#!configuration/config-features"
                         >Configuration features</a> for more details.</div>
                </td>
             </tr>
@@ -813,8 +832,8 @@
                <td>
                   <span class="signature">compileFromAssociatedFile(string $xmlFileName)</span>
                   <div class="fcomment">Get the stylesheet associated via the xml-stylesheet
-                     processing instruction (see <a href="http://www.w3.org/TR/xml-stylesheet/"
-                        target="_blank">http://www.w3.org/TR/xml-stylesheet/</a>) in the document
+                     processing instruction (see <a href="https://www.w3.org/TR/xml-stylesheet/"
+                        target="_blank">https://www.w3.org/TR/xml-stylesheet/</a>) in the document
                      specified in the $xmlFileName argument, and that match the given criteria. If
                      there are several suitable xml-stylesheet processing instructions, then the
                      returned source will identify a synthesized stylesheet module that imports all
@@ -1372,6 +1391,17 @@
                      <code>xsl:message</code> outputs via <code>setSaveXslMessage()</code>.
                      Returns the sequence of <code>xsl:messages</code> as an <a class="bodylink code"
                         href="../saxon_c_php_xdmvalue">XdmValue</a>.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">clearXslMessages()</span>
+                  <div class="fcomment">Clear <code>xsl:message</code> data held in the Processor.
+                     If the save to file feature has been enabled then
+                     <code>clearXslMessages()</code> has no effect.</div>
                </td>
             </tr>
             <tr>
@@ -2761,6 +2791,24 @@
                   <span class="signature">isAtomic()</span>
                   <div class="fcomment">Determine whether or not the item is an atomic value. This
                      method will return FALSE as the item is not atomic.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>int</code>
+               </td>
+               <td>
+                  <span class="signature">getLineNumber()</span>
+                  <div class="fcomment">Get the line number of the node in a source document.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>int</code>
+               </td>
+               <td>
+                  <span class="signature">getColumnNumber()</span>
+                  <div class="fcomment">Get the column number of the node in a source document.</div>
                </td>
             </tr>
             <tr>

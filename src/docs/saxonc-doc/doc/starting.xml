@@ -318,8 +318,9 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       <p>SaxonC can be run from the command line in a similar way to its Java counterpart. See the
             <code>Transform.c</code> and <code>Query.c</code> files (and <code>Validate.c</code> for
         SaxonC-EE) in the <code>command</code> directory. To build the command line programs, execute the
-        <code>build-saxonc-commands.sh</code> script for Linux and MacOS, or the
-        <code>build-saxonc-commands.bat</code> script for Windows.</p>
+        <code>build64-linux.sh</code> script for Linux,
+        <code>build64-mac.sh</code> for MacOS, or the
+        <code>build-windows.bat</code> script for Windows.</p>
 
       <p>To run SaxonC from the command line, the commands look like the following:</p>
 
