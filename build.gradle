@@ -72,7 +72,11 @@ dependencies {
     // PE and EE
     [group: 'javax.mail', name: 'javax.mail-api', version: mailVersion ],
     [group: 'com.sun.mail', name: 'javax.mail', version: mailVersion ],
-    [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion]
+    [group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: tagsoupVersion],
+    fileTree(dir: "extra/MyDotNet/classpath"),
+    fileTree(dir: "extra/MyDotNet/stubs"),
+    fileTree(dir: "lib/asm-${asmVersion}"),
+    files("lib/Tidy.jar"),
   )
   jarjarAsm (
     fileTree(dir: "${buildDir}/lib/asm")
@@ -105,14 +109,6 @@ dependencies {
     [group: 'org.apache.ant', name: 'ant', version: '1.10.9' ],
     files("${buildDir}/classes/${saxonEdition}j")
   )
-}
-
-sourceSets {
-  main {
-    java {
-      exclude "**/*.java"
-    }
-  }
 }
 
 test {
@@ -1218,9 +1214,6 @@ task docker_setupJet(
 
 // ============================================================
 
-assemble.dependsOn "${saxonEdition}j_sources"
-compileJava.dependsOn "${saxonEdition}jCompile"
-jar.dependsOn "${saxonEdition}jJar"
 compileTestDrivers.dependsOn "${saxonEdition}j_compileTestDrivers"
 runQT3TestDriver.dependsOn "${saxonEdition}j_runQT3TestDriver"
 runXslt30TestSuiteDriver.dependsOn "${saxonEdition}j_runXslt30TestSuiteDriver"
