@@ -781,6 +781,33 @@
                
                <tr>
                   <td>
+                     <p><span class="nowrap">coffeefilter-3.3.8.jar</span></p>
+                  </td>
+                  <td>
+                     <p>232Kb</p>
+                  </td>
+                  <td>
+                     <p>CoffeeFilter: this package provides an implementation of an Invisible XML
+                        parser. This is used to support the <code>fn:invisible-xml</code> function.</p>
+                  </td>
+                  <td><p>PE, EE</p></td>
+               </tr>
+               <tr>
+                  <td>
+                     <p><span class="nowrap">coffeegrinder-3.3.8.jar</span></p>
+                  </td>
+                  <td>
+                     <p>476Kb</p>
+                  </td>
+                  <td>
+                     <p>CoffeeGrinder, an Earley parser in Java, as used by CoffeeFilter. This is
+                        used to support the <code>fn:invisible-xml</code> function.</p>
+                  </td>
+                  <td><p>PE, EE</p></td>
+               </tr>
+               
+               <tr>
+                  <td>
                      <p><span class="nowrap">icu4j-72.1.jar</span></p>
                   </td>
                   <td>
