@@ -13,6 +13,7 @@ import net.sf.saxon.trans.XPathException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The JSFunctionLibrary is a FunctionLibrary that binds XPath function calls to
@@ -27,7 +28,7 @@ public class JSFunctionLibrary implements FunctionLibrary {
     }
 
     @Override
-    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
+    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
         StructuredQName fName = functionName.getComponentName();
         if (NamespaceUri.GLOBAL_JS.equals(fName.getNamespaceUri())) {
             try {

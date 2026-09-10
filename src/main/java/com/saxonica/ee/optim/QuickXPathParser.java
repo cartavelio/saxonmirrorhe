@@ -274,7 +274,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     StructuredQName name = verifyFunctionQName(values.get(0), env);
                     List<String> reasons = new ArrayList<>();
                     return env.getFunctionLibrary().bind(
-                            new SymbolicName.F(name, 0), new Expression[]{}, env, reasons);
+                            new SymbolicName.F(name, 0), new Expression[]{}, null, env, reasons);
                 });
 
         // fn(.) - function with "." as single argument
@@ -286,7 +286,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     Expression cie = new ContextItemExpression();
                     cie.setLocation(env.getContainingLocation());
                     return env.getFunctionLibrary().bind(
-                            new SymbolicName.F(name, 1), new Expression[]{cie}, env, reasons);
+                            new SymbolicName.F(name, 1), new Expression[]{cie}, null, env, reasons);
                 });
 
         // fn(name) - function with child element reference as single argument
@@ -301,7 +301,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                             new NameTest(Type.ELEMENT, elName.getNamespaceUri(), elName.getLocalPart(), env.getConfiguration().getNamePool()));
                     child.setLocation(env.getContainingLocation());
                     return env.getFunctionLibrary().bind(
-                            new SymbolicName.F(fnName, 1), new Expression[]{child}, env, reasons);
+                            new SymbolicName.F(fnName, 1), new Expression[]{child}, null, env, reasons);
                 });
 
         // fn($var) - function with variable reference as single argument
@@ -314,7 +314,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     StructuredQName name = verifyFunctionQName(values.get(0), env);
                     List<String> reasons = new ArrayList<>();
                     return env.getFunctionLibrary().bind(
-                            new SymbolicName.F(name, 1), new Expression[]{varRef}, env, reasons);
+                            new SymbolicName.F(name, 1), new Expression[]{varRef}, null, env, reasons);
                 });
 
         // fn(@att) - function with attribute reference as single argument
@@ -329,7 +329,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     StructuredQName name = verifyFunctionQName(values.get(0), env);
                     List<String> reasons = new ArrayList<>();
                     return env.getFunctionLibrary().bind(
-                            new SymbolicName.F(name, 1), new Expression[]{arg}, env, reasons);
+                            new SymbolicName.F(name, 1), new Expression[]{arg}, null, env, reasons);
                 });
 
         // fn('string') - function with string literal as single argument
@@ -341,7 +341,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
                     StructuredQName name = verifyFunctionQName(values.get(0), env);
                     List<String> reasons = new ArrayList<>();
                     return env.getFunctionLibrary().bind(
-                            new SymbolicName.F(name, 1), new Expression[]{arg}, env, reasons);
+                            new SymbolicName.F(name, 1), new Expression[]{arg}, null, env, reasons);
                 });
 
         // name/name - simple path expression selecting grandchildren

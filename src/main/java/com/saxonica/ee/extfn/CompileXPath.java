@@ -46,6 +46,7 @@ import net.sf.saxon.value.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -301,7 +302,7 @@ public class CompileXPath extends SystemFunction {
         }
 
         @Override
-        public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext
+        public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext
                 env, List<String> reasons) {
             UserFunction fn = lib.get(functionName);
             UserFunctionParameter[] params = new UserFunctionParameter[staticArgs.length];

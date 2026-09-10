@@ -145,7 +145,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         int arity = functionName.getArity();
         SuppliedParameterReference[] params = new SuppliedParameterReference[arity];
         Arrays.fill(params, new SuppliedParameterReference(-1));
-        Expression call = bind(functionName, params, staticContext, new ArrayList<>());
+        Expression call = bind(functionName, params, null, staticContext, new ArrayList<>());
         if (call instanceof JavaExtensionFunctionCall) {
             SequenceType[] argTypes = new SequenceType[arity];
             Arrays.fill(argTypes, SequenceType.ANY_SEQUENCE);
@@ -176,7 +176,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         SuppliedParameterReference[] params = new SuppliedParameterReference[functionName.getArity()];
         Arrays.fill(params, new SuppliedParameterReference(-1));
         StaticContext staticContext = new IndependentContext(config);
-        Expression call = bind(functionName, params, staticContext, new ArrayList<>());
+        Expression call = bind(functionName, params, null, staticContext, new ArrayList<>());
         return call != null;
     }
 
@@ -189,6 +189,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
      * @param staticArgs   The expressions supplied statically in the function call. The intention is
      *                     that the static type of the arguments (obtainable via getItemType() and getCardinality()) may
      *                     be used as part of the binding algorithm.
+     * @param keywords
      * @param env          the static context
      * @param reasons      If no matching function is found by the function library, it may add
      *                     a diagnostic explanation to this list explaining why none of the available
@@ -198,7 +199,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
      */
 
     @Override
-    public Expression bind(SymbolicName.F symbolicName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
+    public Expression bind(SymbolicName.F symbolicName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
         boolean debug = config.getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
         StructuredQName functionName = symbolicName.getComponentName();
         String uri = functionName.getNamespaceUri().toString();
@@ -1085,7 +1086,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
             details.arity = staticArgs.length;
             //details.implementationClass = theClass;
 
-            details.argumentTypes = new SequenceType[staticArgs.length];
+            details.paramTypes = new SequenceType[staticArgs.length];
             details.itemType = AnyItemType.getInstance();
             details.cardinality = StaticProperty.ALLOWS_ZERO_OR_MORE;
             details.usage = new OperandUsage[staticArgs.length];

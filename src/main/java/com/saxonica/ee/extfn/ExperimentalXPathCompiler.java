@@ -151,7 +151,7 @@ public class ExperimentalXPathCompiler {
 
 
             @Override
-            public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
+            public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
                 if (isAvailable(functionName, env.getXPathVersion())) {
                     UserFunction fn = library.get(functionName);
                     fn.setFunctionName(functionName.getComponentName());
