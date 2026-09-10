@@ -66,7 +66,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), OPT, null);
 
         register("get", 2, Stub.class, AnyItemType.getInstance(), STAR, SIDE|LATE)
-                .arg(0, AnyItemType.getInstance(), OPT, null)
+                .arg(0, AnyItemType.getInstance(), ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
         register("call", 3, Call.class, AnyItemType.getInstance(), STAR, SIDE|LATE)
