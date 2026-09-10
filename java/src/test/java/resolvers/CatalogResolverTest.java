@@ -255,7 +255,7 @@ public class CatalogResolverTest {
             XsltCompiler compiler = processor.newXsltCompiler();
 
             Path fn = Testdata.path("bug5950/identity.xsl");
-            Source xsl = new SAXSource(new InputSource(Files.newInputStream(new File(fn).toPath())));
+            Source xsl = new SAXSource(new InputSource(Files.newInputStream(fn)));
             XsltExecutable exec = compiler.compile(xsl);
 
             Xslt30Transformer transformer = exec.load30();

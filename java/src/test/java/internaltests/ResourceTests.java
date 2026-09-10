@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import static com.ibm.icu.impl.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * A number of tests to ensure that certain constructs require a valid license,
@@ -74,11 +75,11 @@ public class ResourceTests {
 
     private void readFilePartly(LineNumberReader reader, XPathContext context) {
         try {
-            URI uri = new URI(Testdata.file("books.xml"));
+            URI uri = Testdata.fileUri("books.xml");
             UnparsedTextIterator iter = new UnparsedTextIterator(reader, uri, context, "UTF-8", false);
             iter.next();
             iter.next();
-        } catch (URISyntaxException | XPathException e) {
+        } catch (XPathException e) {
             throw new RuntimeException(e);
         }
     }

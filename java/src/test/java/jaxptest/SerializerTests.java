@@ -587,7 +587,7 @@ public class SerializerTests {
                         "</xsl:stylesheet>";
         String xslPath = "test.xsl";
         String xmlPath = "test.xml";
-        String outPath = Testdata.file("output.xml");
+        File outFile = Testdata.file("output.xml");
         // Create transformer
         File xslFile = new File(xslPath);
         InputSource inputSource = new InputSource(xslFile.toURI().toString());
@@ -598,7 +598,6 @@ public class SerializerTests {
         // Create XML SAX source
         StreamSource input = new StreamSource(new StringReader(stylesheet));
         // Output stream result
-        File outFile = new File(outPath);
         Result outputTarget = new StreamResult(outFile);
 
         // Run transformation
