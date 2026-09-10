@@ -1,8 +1,8 @@
 package net.sf.saxon.type;
 
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.Stack;
@@ -20,9 +20,9 @@ import java.util.Stack;
 public class DraftItemType extends ErrorType {
 
     private final StructuredQName name;
-    private final QueryModule queryModule;
+    private final StaticContext queryModule;
 
-    public DraftItemType(StructuredQName name, QueryModule queryModule) {
+    public DraftItemType(StructuredQName name, StaticContext queryModule) {
         this.name = name;
         this.queryModule = queryModule;
     }

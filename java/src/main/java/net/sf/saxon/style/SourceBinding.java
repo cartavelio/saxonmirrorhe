@@ -112,6 +112,7 @@ public class SourceBinding {
                     if (attName.getLocalPart().equals("assignable") && permittedAttributes.contains(BindingProperty.ASSIGNABLE)) {
                         assignableAtt = Whitespace.trim(att.getValue());
                     } else if (attName.getLocalPart().equals("as")) {
+                        sourceElement.compileWarning("saxon:as is deprecated", SaxonErrorCode.SXWN9053);
                         extraAsAtt = att.getValue();
                     } else {
                         sourceElement.checkUnknownAttribute(att.getNodeName());

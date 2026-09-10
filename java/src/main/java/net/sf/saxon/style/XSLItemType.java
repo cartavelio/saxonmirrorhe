@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.DraftItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
 
@@ -28,6 +29,7 @@ import net.sf.saxon.value.SequenceType;
 public class XSLItemType extends StyleElement {
 
     private StructuredQName itemTypeName;
+    private ItemType itemType;
     private boolean resolved = false;
 
     @Override
@@ -86,9 +88,8 @@ public class XSLItemType extends StyleElement {
         return itemTypeName;
     }
 
-    public void indexTypeAlias(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
-        prepareAttributes();
-        top.getTypeAliasManager().processDeclaration(decl);
+    public ItemType getItemType() {
+        return itemType;
     }
 
     @Override
@@ -100,18 +101,8 @@ public class XSLItemType extends StyleElement {
                                                 getPackageData().getLocalLicenseId());
     }
 
-    public ItemType tryToResolve() throws XPathException {
+    public ItemType makeItemType()  {
         StaticContext env = new TypeAliasContext(this);
-        resolved = true;
-        ItemType type = makeItemType(env);
-        return resolved ? type : null;
-    }
-
-    private void markUnresolved() {
-        resolved = false;
-    }
-
-    private ItemType makeItemType(StaticContext env) throws XPathException {
         try {
             XPathParser parser =
                     getConfiguration().newExpressionParser("XP", false, env);
@@ -139,7 +130,7 @@ public class XSLItemType extends StyleElement {
 
 
     /**
-     * Compile this XSLT declaration. This always fails for this class.
+     * Compile this XSLT declaration. No action in this case.
      *
      * @param exec the Executable
      * @param decl the containing top-level declaration, for example xsl:function or xsl:template
@@ -181,8 +172,9 @@ public class XSLItemType extends StyleElement {
         public ItemType resolveTypeAlias(StructuredQName typeName) {
             ItemType resolved = super.resolveTypeAlias(typeName);
             if (resolved == null) {
-                ((XSLItemType)getStyleElement()).markUnresolved();
-                return AnyItemType.INSTANCE;
+                // If one type alias contains a reference to another, then for the time being
+                // we represent it using a DraftItemType
+                return new DraftItemType(typeName, this);
             } else {
                 return resolved;
             }

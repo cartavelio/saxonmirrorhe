@@ -432,14 +432,8 @@ public class ExpressionContext implements StaticContext {
         ) {
             return 40;
         }
-//        if ((element.getEffectiveVersion() == 40
-//                || element.getCompilation().getCompilerInfo().getXsltVersion() == 40
-//                || (attributeName != null && attributeName.hasURI(NamespaceUri.SAXON)))
-//            && element.getCompilation().getCompilerInfo().getXsltVersion() == 40) {
-//            return 40;
-//        } else {
-            return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
-//        }
+
+        return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
     }
 
     /**
@@ -465,9 +459,9 @@ public class ExpressionContext implements StaticContext {
     }
 
     /**
-     * Get type alias. This is a Saxon extension. A type alias is a QName which can
-     * be used as a shorthand for an itemtype, using the syntax ~typename anywhere that
-     * an item type is permitted.
+     * Get type alias. A type alias is a QName which can
+     * be used as a shorthand for an item-type, created using xsl:item-type in XSLT or
+     * declare type in XQuery.
      *
      * @param typeName the name of the type alias
      * @return the corresponding item type, if the name is recognised; otherwise null.
