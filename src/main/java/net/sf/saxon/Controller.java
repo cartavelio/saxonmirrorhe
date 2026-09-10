@@ -120,6 +120,7 @@ public class Controller implements ContextOriginator {
     private boolean stripSourceTrees = true;
     //protected boolean buildTree = true;
     private CollectionFinder collectionFinder = null;
+    private IElaborationService elaborationService;
 
     public final static String ANONYMOUS_PRINCIPAL_OUTPUT_URI = "dummy:/anonymous/principal/result";
     private StylesheetCache stylesheetCache = null;
@@ -143,6 +144,7 @@ public class Controller implements ContextOriginator {
         // create a dummy executable
         executable = new Executable(config);
         sourceDocumentPool = new DocumentPool();
+        elaborationService = config.makeElaborationService();
         reset();
     }
 
@@ -1619,6 +1621,10 @@ public class Controller implements ContextOriginator {
             }
             return fti;
         });
+    }
+
+    public IElaborationService getElaborationService() {
+        return elaborationService;
     }
 
 }

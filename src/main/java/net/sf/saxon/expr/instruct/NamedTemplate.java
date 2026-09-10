@@ -17,6 +17,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceableComponent;
+import net.sf.saxon.trans.IElaborationService;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
@@ -262,10 +263,16 @@ public class NamedTemplate extends Actor implements TraceableComponent {
                 context.setCurrentIterator(null);
             }
         }
-        if (bodyIsTailCallReturner) {
-            return ((TailCallReturner) body).processLeavingTail(output, context);
-        } else if (body != null) {
-            body.process(output, context);
+
+        IElaborationService service = context.getController().getElaborationService();
+        if (service != null) {
+            service.push(context.getCurrentComponent(), output, context);
+        } else {
+            if (bodyIsTailCallReturner) {
+                return ((TailCallReturner) body).processLeavingTail(output, context);
+            } else if (body != null) {
+                body.process(output, context);
+            }
         }
         return null;
     }
