@@ -309,62 +309,96 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
      * @return a new map, the result of the merge
      */
 
-    public NamespaceMap putAll(NamespaceMap delta) {
-        if (this == delta) {
+    public NamespaceMap putAll(NamespaceMap delta)
+    {
+        if (this == delta)
+        {
             return this;
-        } else if (isEmpty()) {
+        }
+        else if (isEmpty())
+        {
             return delta;
-        } else if (delta.isEmpty()) {
+        }
+        else if (delta.isEmpty())
+        {
             return this;
-        } else {
-            // Merge of two sorted arrays to produce a sorted array
-            String[] p1 = prefixes;
-            NamespaceUri[] u1 = uris;
-            String[] p2 = delta.prefixes;
-            NamespaceUri[] u2 = delta.uris;
-            List<String> p3 = new ArrayList<>(p1.length + p2.length);
-            List<NamespaceUri> u3 = new ArrayList<>(p1.length + p2.length);
-            int i1 = 0;
-            int i2 = 0;
-            while (true) {
-                int c = p1[i1].compareTo(p2[i2]);
-                if (c < 0) {
-                    p3.add(p1[i1]);
-                    u3.add(u1[i1]);
-                    if (++i1 >= p1.length) {
-                        break;
-                    }
-                } else if (c > 0) {
-                    p3.add(p2[i2]);
-                    u3.add(u2[i2]);
-                    if (++i2 >= p2.length) {
-                        break;
-                    }
-                } else { // c == 0
-                    p3.add(p2[i2]);
-                    u3.add(u2[i2]);
-                    i1++;
-                    i2++;
-                    if (i1 >= p1.length || i2 >= p2.length) {
-                        break;
-                    }
+        }
+        else
+        {
+            return mergePutAll(delta);
+        }
+    }
+
+    private NamespaceMap mergePutAll(NamespaceMap delta)
+    {
+        // Merge of two sorted arrays to produce a sorted array
+        String[] p1 = prefixes;
+        NamespaceUri[] u1 = uris;
+        String[] p2 = delta.prefixes;
+        NamespaceUri[] u2 = delta.uris;
+
+        int lengthSum = p1.length + p2.length;
+
+        String[] p3 = new String[lengthSum];
+        NamespaceUri[] u3 = new NamespaceUri[lengthSum];
+        int i1 = 0;
+        int i2 = 0;
+        int writePos = 0;
+        while (true)
+        {
+            int c = p1[i1].compareTo(p2[i2]);
+            if (c < 0)
+            {
+                p3[writePos] = p1[i1];
+                u3[writePos++] = u1[i1];
+                if (++i1 >= p1.length)
+                {
+                    break;
                 }
             }
-            while (i1 < p1.length) {
-                p3.add(p1[i1]);
-                u3.add(u1[i1]);
+            else if (c > 0)
+            {
+                p3[writePos] = p2[i2];
+                u3[writePos++] = u2[i2];
+                if (++i2 >= p2.length)
+                {
+                    break;
+                }
+            }
+            else
+            { // c == 0
+                p3[writePos] = p2[i2];
+                u3[writePos++] = u2[i2];
                 i1++;
-            }
-            while (i2 < p2.length) {
-                p3.add(p2[i2]);
-                u3.add(u2[i2]);
                 i2++;
+                if (i1 >= p1.length || i2 >= p2.length)
+                {
+                    break;
+                }
             }
-            NamespaceMap n2 = new NamespaceMap();
-            n2.prefixes = p3.toArray(new String[]{});
-            n2.uris = u3.toArray(new NamespaceUri[]{});
-            return n2;
         }
+        while (i1 < p1.length)
+        {
+            p3[writePos] = p1[i1];
+            u3[writePos++] = u1[i1];
+            i1++;
+        }
+        while (i2 < p2.length)
+        {
+            p3[writePos] = p2[i2];
+            u3[writePos++] = u2[i2];
+            i2++;
+        }
+
+        return createNewNamespaceMap(p3, u3, lengthSum, writePos);
+    }
+
+    private NamespaceMap createNewNamespaceMap(String[] p3, NamespaceUri[] u3, int lengthSum, int writePos)
+    {
+        NamespaceMap n2 = new NamespaceMap();
+        n2.prefixes = writePos == lengthSum ? p3 : Arrays.copyOf(p3, writePos);
+        n2.uris = writePos == lengthSum ? u3 : Arrays.copyOf(u3, writePos);
+        return n2;
     }
 
     public NamespaceMap addAll(NamespaceBindingSet namespaces) {
