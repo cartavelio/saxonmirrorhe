@@ -12,6 +12,7 @@
         <description>Error - The transform option xslt-version is higher than the version of XSLT
             supported by this processor</description>
         <created by="Debbie Lockett" on="2015-03-03"/>
+        <modified by="Michael Kay" on="2021-11-06" change="Set requested version to something much higher"/>
         <dependency type="spec" value="XQ31+"/>
         <test><![CDATA[
             declare variable $xsl as xs:string :="<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>
@@ -21,7 +22,7 @@
                     </out>
                 </xsl:template> 
             </xsl:stylesheet>";
-            transform(map{"stylesheet-text":$xsl, "source-node":parse-xml("<doc>this</doc>"), "xslt-version":4.0 })
+            transform(map{"stylesheet-text":$xsl, "source-node":parse-xml("<doc>this</doc>"), "xslt-version":17.0 })
         ]]></test>
         <result>
             <error code="FOXT0002"/>

@@ -498,9 +498,10 @@
    <test-case name="reflex-035">
       <description>static method using XPath context</description>
       <created by="Michael Kay" on="2012-04-30"/>
+      <modified by="Michael Kay" on="2021-11-05" change="use canonical spelling of function name"/>
       <test><![CDATA[
       	declare namespace c = "java:net.sf.saxon.expr.XPathContext";
-      	<a/> / c:getContextItem(saxon:getContext()) / local-name()   
+      	<a/> / c:getContextItem(saxon:get-context()) / local-name()   
       ]]></test>
       <result>
             <assert-string-value>a</assert-string-value>
@@ -795,10 +796,11 @@
    <test-case name="reflex-056">
       <description>Enumerate keys after converting external object to a map.</description>
       <created by="Michael Kay" on="2018-07-05"/>
+      <modified by="Michael Kay" on="2021-11-05" change="ignore isEmpty() method added in recent JDK versions"/>
       <test><![CDATA[
       	declare namespace StreamSource = "java:javax.xml.transform.stream.StreamSource";
       	declare namespace map = "http://www.w3.org/2005/xpath-functions/map";
-      	StreamSource:new() => saxon:object-map() => map:keys() => sort()
+      	StreamSource:new() => saxon:object-map() => map:remove(("isEmpty", "isEmpty_0")) => map:keys()  => sort()
       ]]></test>
       <result>
          <assert-deep-eq>"equals",
