@@ -29,10 +29,8 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// A subclass must implement this method if it retains any local data at the instance level. On some occasions
-        /// (for example, when XSLT or XQuery code is inlined), Saxon will make a copy of an <c>ExtensionFunction</c> object.
-        /// It will then call this method on the old object, supplying the new object as the value of the argument, and the
-        /// method must copy all local data items from the old object to the new.
+        /// This method is defined in the interface for backwards compatibility. It is never called, and will be
+        /// dropped in a future release.
         /// </summary>
         /// <param name="destination">The new extension function object. This will always be an instance of the same
         /// class as the existing object.</param>
