@@ -265,6 +265,9 @@ public class Transform {
                                     "Load schemas named in xsi:schemaLocation (default on)");
         options.addRecognizedOption("xsl", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Main stylesheet file");
+        options.addRecognizedOption("xsltversion", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
+                                    "XSLT version: '3.0' or '4.0'");
+        options.setPermittedValues("xsltversion", new String[]{"3.0", "4.0"}, null);
         //#if CSHARP==false
         options.addRecognizedOption("y", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named XMLReader class for parsing stylesheet and schema documents");
@@ -671,6 +674,11 @@ public class Transform {
             value = options.getOptionValue("xsl");
             if (value != null) {
                 styleFileName = value;
+            }
+
+            value = options.getOptionValue("xsltversion");
+            if (value != null) {
+                compiler.setXsltLanguageVersion(value);
             }
 
             value = options.getOptionValue("y");
