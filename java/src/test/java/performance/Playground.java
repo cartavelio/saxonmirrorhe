@@ -3,6 +3,7 @@ package performance;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.serialize.HTMLURIEscaper;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class Playground extends PerformanceTestCase {
 
@@ -183,12 +186,47 @@ public class Playground extends PerformanceTestCase {
         measure(new Measurable() {
             @Override
             public void run() {
-                UnicodeBuilder qb = new UnicodeBuilder(2048);
+                UnicodeBuilder qb = new UnicodeBuilder(32);
                 for (int i = 256; i < 48000; i++) {
                     String uri = "http://my.example.uri/path/" + (char) (i);
                     qb.append(uri);
                 }
-                //result.add(qb.toUnicodeString());
+                if (qb.toUnicodeString().length() < 1000) {
+                    fail();
+                }
+                //System.err.println("len = " + qb.toUnicodeString().length());
+            }
+
+            @Override
+            public int expectedTimeMicroseconds() {
+                return 30000;
+            }
+
+            @Override
+            public String name() {
+                return "testEscapeURI";
+            }
+        });
+    }
+
+    @Test
+    @Tag("performance")
+    public void testStringJoinFromTwine8() {
+
+        //List<UnicodeString> result = new ArrayList<>();
+
+        measure(new Measurable() {
+            @Override
+            public void run() {
+                UnicodeBuilder qb = new UnicodeBuilder(32);
+                Twine8 base = new Twine8("http://my.example.uri/path/");
+                for (int i = 256; i < 48000; i++) {
+                    qb.append(base).append(""+ i);
+                }
+                if (qb.toUnicodeString().length() < 1000) {
+                    fail();
+                }
+                //System.err.println("len = " + qb.toUnicodeString().length());
             }
 
             @Override

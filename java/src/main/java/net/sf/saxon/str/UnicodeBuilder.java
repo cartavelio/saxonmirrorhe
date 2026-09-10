@@ -22,7 +22,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     // The data held by the UnicodeBuilder is in two parts: an archive part
     // of arbitrary length, held as a ZenoString, and an active part which
-    // is typically up to 65535 characters. For short strings the archive part
+    // is typically up to 1m characters. For short strings the archive part
     // is always empty. The active part is held as an integer array, 32 bits per
     // character.
 
@@ -35,11 +35,15 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     private int bitMask;
     private ZenoString archive = ZenoString.EMPTY;
 
+    private final static int MAX_ACTIVE_SIZE = 1_000_000;
+    // See https://saxonica.plan.io/boards/2/topics/10002
+
     /**
-     * Create a Unicode builder with an initial allocation of 256 codepoints
+     * Create a Unicode builder with an initial allocation of 16 codepoints
      */
     public UnicodeBuilder() {
-        this(256);
+        // See https://saxonica.plan.io/boards/2/topics/10002
+        this(16);
     }
 
     /**
@@ -166,7 +170,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
 
     private void ensureCapacity(int required) {
         // For very long strings, archive what we've already accumulated as a ZenoString
-        if (activePartUsed > 65535 || required > 65535) {
+        if (activePartUsed > MAX_ACTIVE_SIZE || required > MAX_ACTIVE_SIZE) {
             archive = archive.concat(getActivePart());
             activePartUsed = 0;
             bitMask = 0xff;
