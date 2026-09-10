@@ -80,7 +80,7 @@ public class StandardObjectConverter implements ObjectConverter {
             int t = p.getItemType().getPrimitiveType();
             switch (t) {
                 case StandardNames.XS_ANY_URI:
-                    return p.getUnicodeStringValue();
+                    return p.getUnicodeStringValue().toString();
                 case StandardNames.XS_BASE64_BINARY:
                     return ((Base64BinaryValue) p).getBinaryValue();
                 case StandardNames.XS_BOOLEAN:
@@ -137,7 +137,7 @@ public class StandardObjectConverter implements ObjectConverter {
                     return ((QualifiedNameValue) p).toJaxpQName();
                 case StandardNames.XS_STRING:
                 case StandardNames.XS_UNTYPED_ATOMIC:
-                    return p.getUnicodeStringValue();
+                    return p.getUnicodeStringValue().toString();
                 case StandardNames.XS_TIME:
                     return new SaxonXMLGregorianCalendar((CalendarValue) p);
                 case StandardNames.XS_DAY_TIME_DURATION:
