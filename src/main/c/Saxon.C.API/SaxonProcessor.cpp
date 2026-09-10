@@ -1121,35 +1121,40 @@ XdmArray *SaxonProcessor::makeArray(short *input, int length) {
 
 
 XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
-    if (input == nullptr || length <= 0) {
-        std::cerr << "Error found when converting array of XdmValue to XdmArray";
-        return nullptr;
-    }
-    jobject obj = nullptr;
     jclass xdmArrayClass = lookForClass(SaxonProcessor::sxn_environ->env, "Lnet/sf/saxon/s9api/XdmArray;");
 
-	jclass xdmValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmValue");
+    jclass xdmValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmValue");
+    jobject xdmArrayi = nullptr;
+    if (input == nullptr || length <= 0) {
+        std::cerr << "Warning: Empty XdmArray";
+        //Empty array
+        jmethodID mID_arrayEmpty = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmArrayClass, "<init>",
+                                                                                               "()V"));
+        xdmArrayi = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmArrayClass, mID_arrayEmpty));
+    } else {
 
-    jmethodID mID_arrayConstr = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmArrayClass, "<init>",
-                                                                                      "([Lnet/sf/saxon/s9api/XdmValue;)V"));
-    jobjectArray valueArray = nullptr;
-    jobject obj2 = nullptr;
-    valueArray = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) length, xdmValueClass, 0);
-    for (int i = 0; i < length; i++) {
-        if (input[i] == nullptr || !input[i]->getUnderlyingValue()) {
-            std::cerr << "Error found when converting array of XdmValue to XdmArray";
+
+        jmethodID mID_arrayConstr = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmArrayClass, "<init>",
+                                                                                               "([Lnet/sf/saxon/s9api/XdmValue;)V"));
+        jobjectArray valueArray = nullptr;
+        jobject obj2 = nullptr;
+        valueArray = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) length, xdmValueClass, 0);
+        for (int i = 0; i < length; i++) {
+            if (input[i] == nullptr || !input[i]->getUnderlyingValue()) {
+                std::cerr << "Error found when converting array of XdmValue to XdmArray";
+                return nullptr;
+            }
+            //obj = getJavaStringValue(SaxonProcessor::sxn_environ, input[i]);
+            //obj2 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mID_atomic, obj));
+            SaxonProcessor::sxn_environ->env->SetObjectArrayElement(valueArray, i, input[i]->getUnderlyingValue());
+        }
+
+        xdmArrayi = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmArrayClass, mID_arrayConstr, valueArray));
+
+        if (!xdmArrayi) {
+            std::cerr << "Error found when converting string to XdmArray" << std::endl;
             return nullptr;
         }
-        //obj = getJavaStringValue(SaxonProcessor::sxn_environ, input[i]);
-        //obj2 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mID_atomic, obj));
-        SaxonProcessor::sxn_environ->env->SetObjectArrayElement(valueArray, i, input[i]->getUnderlyingValue());
-    }
-
-    jobject xdmArrayi = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmArrayClass, mID_arrayConstr, valueArray));
-
-    if (!xdmArrayi) {
-        std::cerr << "Error found when converting string to XdmArray"<<std::endl;
-        return nullptr;
     }
 
     if (exceptionOccurred()) {
@@ -1158,6 +1163,7 @@ XdmArray *SaxonProcessor::makeArray(XdmValue **input, int length) {
         XdmArray *value = new XdmArray(xdmArrayi, length);
         return value;
     }
+    std::cerr << "Error found when converting string to XdmArray - cp1" << std::endl;
     return nullptr;
 
 
