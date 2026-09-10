@@ -131,7 +131,12 @@ public:
     void setParameter(const char* name, XdmValue * value);
 
 
-
+    /**
+    *   Return the result-documents resulting from the execution of the stylesheet.
+    *   Null is returned if the user has not enabled this feature via the method setCaptureResultDocuments()
+    *   @return std::map of result-document as the key value pair document uri string and XdmNode.
+    */
+    std::map<std::string,XdmNode*>& getResultDocuments();
 
 
 
