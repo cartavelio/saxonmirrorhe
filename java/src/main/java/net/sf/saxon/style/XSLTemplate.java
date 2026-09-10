@@ -588,9 +588,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             compileError("A template with visibility='abstract' must have no body");
         }
 
-        // If the pattern matches both XNodes and JNodes, split it into two separate
-        // patterns, one for each case. This enables the template body to be optimized
-        // separately for each case, which is especially important when streaming
+        // If the pattern matches both XNodes and JNodes, then for the time being,
+        // treat it as if it only matched XNodes. See spec issue 2444.
 
         boolean splitGNode = false;
         if (match instanceof NodeTestPattern ntp && ntp.getNodeTest() instanceof SelectorTest st) {
@@ -600,12 +599,14 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             Pattern p1 = new NodeTestPattern(st.asXNodeTest(config));
             p1.setPriority(priority);
             ExpressionTool.copyLocationInfo(match, p1);
-            Pattern p2 = st.asJNodePattern();
-            p2.setPriority(priority);
-            ExpressionTool.copyLocationInfo(match, p2);
-            Pattern unionPattern = new UnionPattern(p1, p2);
-            ExpressionTool.copyLocationInfo(match, unionPattern);
-            match = unionPattern;
+            match = p1;
+//            ExpressionTool.copyLocationInfo(match, p1);
+//            Pattern p2 = st.asJNodePattern();
+//            p2.setPriority(priority);
+//            ExpressionTool.copyLocationInfo(match, p2);
+//            Pattern unionPattern = new UnionPattern(p1, p2);
+//            ExpressionTool.copyLocationInfo(match, unionPattern);
+//            match = unionPattern;
             match.setPriority(priority);
             splitGNode = true;
         }
@@ -953,6 +954,25 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
                     TemplateRule rule = getConfiguration().makeTemplateRule();
                     rule.setMode(mode);
+
+                    // Adapt the pattern if the mode has @typed=strict|lax
+                    String typed = (String)mode.getActivePart().getPropertyValue("typed");
+                    if ("strict".equals(typed) || "lax".equals(typed)) {
+                        Pattern localPattern2;
+                        try {
+                            localPattern2 = subPattern.convertToTypedPattern(typed);
+                        } catch (XPathException e) {
+                            throw e.maybeWithLocation(this);
+                        }
+                        if (localPattern2 != subPattern) {
+                            ExpressionTool.copyLocationInfo(match, localPattern2);
+                            localPattern2.setOriginalText(match.toString());
+                            //localPattern2 = localPattern2.typeCheck(visitor, info);
+                            subPattern = localPattern2;
+                        }
+                    }
+
+
                     // Copy the match pattern: in the case where a template rule belongs to multiple modes,
                     // the binding vector for any references to external functions or variables belongs
                     // to the mode, and the slot numbers for these references will vary from one mode to another.
