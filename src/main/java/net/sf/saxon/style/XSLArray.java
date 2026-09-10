@@ -1,8 +1,10 @@
 package net.sf.saxon.style;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
@@ -38,6 +40,11 @@ public class XSLArray extends XSLSequence {
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
+        if (getURI().equals(NamespaceConstant.XSLT)) {
+            requireXslt40(null);
+        } else if (!getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+            compileError("saxon:array requires a Saxon-PE or -EE license");
+        }
         if (getSelectExpression() == null) {
             setSelectExpression(compileSequenceConstructor(exec, decl, false));
         }
