@@ -163,24 +163,24 @@
         <xsl:variable name="spec-address">
             <xsl:choose>
                 <xsl:when test="$p = 'xpath30'"
-                    >http://www.w3.org/TR/xpath-functions-30/#func-</xsl:when>
+                    >https://www.w3.org/TR/xpath-functions-30/#func-</xsl:when>
                 <xsl:when test="$p = 'xpath31'"
-                    >http://www.w3.org/TR/xpath-functions-31/#func-</xsl:when>
-                <xsl:when test="$p = 'xslt20'">http://www.w3.org/TR/xslt20/#function-</xsl:when>
-                <xsl:when test="$p = 'xslt30'">http://www.w3.org/TR/xslt-30/#func-</xsl:when>
+                    >https://www.w3.org/TR/xpath-functions-31/#func-</xsl:when>
+                <xsl:when test="$p = 'xslt20'">https://www.w3.org/TR/xslt20/#function-</xsl:when>
+                <xsl:when test="$p = 'xslt30'">https://www.w3.org/TR/xslt-30/#func-</xsl:when>
                 <xsl:when test="$p = 'xquery-update10'"
-                    >http://www.w3.org/TR/xquery-update-10/#id-func-</xsl:when>
+                    >https://www.w3.org/TR/xquery-update-10/#id-func-</xsl:when>
                 <xsl:when test="$p = 'expath-archive'"
                     >http://www.expath.org/spec/archive/editor#fn.</xsl:when>
                 <xsl:when test="$p = 'expath-binary'">http://www.expath.org/spec/binary#</xsl:when>
                 <xsl:when test="$p = 'expath-file'">http://www.expath.org/spec/file#</xsl:when>
-                <xsl:when test="$p = 'exslt-common'">http://exslt.github.io/exsl/functions/</xsl:when>
-                <xsl:when test="$p = 'exslt-math'">http://exslt.github.io/math/functions/</xsl:when>
+                <xsl:when test="$p = 'exslt-common'">https://exslt.github.io/exsl/functions/</xsl:when>
+                <xsl:when test="$p = 'exslt-math'">https://exslt.github.io/math/functions/</xsl:when>
                 <xsl:when test="$p = 'exslt-random'"
-                    >http://exslt.github.io/random/functions/</xsl:when>
-                <xsl:when test="$p = 'exslt-sets'">http://exslt.github.io/set/functions/</xsl:when>
+                    >https://exslt.github.io/random/functions/</xsl:when>
+                <xsl:when test="$p = 'exslt-sets'">https://exslt.github.io/set/functions/</xsl:when>
                 <xsl:when test="$p = 'exslt-dates-and-times'"
-                    >http://exslt.github.io/date/functions/</xsl:when>
+                    >https://exslt.github.io/date/functions/</xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="$p"/>
                 </xsl:otherwise>

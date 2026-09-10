@@ -831,9 +831,9 @@
         <xsl:param name="hash-parts" as="xs:string*"/>
         <xsl:param name="doc" as="node()?"/>
         <xsl:result-document href="#trail" method="ixsl:replace-content">
-            <li id="trail1"><a href="http://saxonica.com">Saxonica ▷</a></li>
+            <li id="trail1"><a href="https://saxonica.com">Saxonica ▷</a></li>
             <li id="trail2"><a
-                href="http://www.saxonica.com/documentation/documentation.xml">Saxon ▷</a></li>
+                href="https://www.saxonica.com/documentation/documentation.xml">Saxon ▷</a></li>
             <xsl:call-template name="get-trail">
                 <xsl:with-param name="parent" select="$doc"/>
                 <xsl:with-param name="hash-parts" select="$hash-parts"/>
