@@ -425,6 +425,15 @@ def testContextNotRoot(saxonproc):
     assert result is not None
     assert "[" in result
 
+def test_equals(saxonproc):
+    node = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
+    assert node is not None
+    assert isinstance(node, PyXdmNode)
+    assert len(node.children)>0
+    eNode1 = node.children[0]
+    eNode2 = node.children[0]
+    assert eNode1.equals(eNode2)
+
 def testResolveUri(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri('notice trailing space /out.xml')\"/> <xsl:message select='$uri'/><xsl:result-document href='{$uri}'><out/></xsl:result-document><xsl:catch><xsl:sequence select=\"'$err:code: ' || $err:code  || ', $err:description: ' || $err:description\"/></xsl:catch></xsl:try></xsl:template></xsl:stylesheet>")

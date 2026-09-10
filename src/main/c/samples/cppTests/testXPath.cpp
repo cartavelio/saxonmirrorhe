@@ -1041,7 +1041,7 @@ void testXdmNodeEquals(XPathProcessor *xpath, sResultCount *sresult) {
   xpath->setContextFile("../data/cat.xml");
   try {
     XdmNode *result = (XdmNode *)xpath->evaluateSingle("//person[1]");
-    XdmNode *result2 = (XdmNode *)xpath->evaluateSingle("//person[1]");
+    XdmNode *result2 = new XdmNode(* result);
 
     if (result == nullptr) {
       printf("result is null \n");
@@ -1052,13 +1052,58 @@ void testXdmNodeEquals(XPathProcessor *xpath, sResultCount *sresult) {
     } else {
       cout << "Number of items=" << result->size() << endl;
 
-      if (result == result2) {
+      if (*result == *result2) {
         cout << "Results are equal" << endl;
         sresult->success++;
       } else {
         cout << "Results are not equal" << endl;
         sresult->failure++;
         sresult->failureList.push_back("testXdmNodeEquals");
+      }
+
+
+    }
+    delete result;
+
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testXdmNodeEquals2");
+  }
+}
+
+
+
+// Test case on the evaluate method in XPathProcessor. Here we test that we have
+// morethan one XdmItem.
+void testXdmNodeEquals2(XPathProcessor *xpath, sResultCount *sresult) {
+  cout << endl << "Test testXdmNodeEquals2:" << endl;
+  xpath->clearParameters();
+  xpath->clearProperties();
+  xpath->setContextFile("../data/cat.xml");
+  try {
+    XdmNode *result = (XdmNode *)xpath->evaluateSingle("//person[1]");
+    XdmNode *result2 = new XdmNode(* result);
+
+    if (result == nullptr) {
+      printf("result is null \n");
+
+      sresult->failure++;
+      sresult->failureList.push_back("testXdmNodeEquals2");
+      return;
+    } else {
+      cout << "Number of items=" << result->size() << endl;
+
+      if (result->equals(result2)) {
+        cout << "Results are equal" << endl;
+        sresult->success++;
+      } else {
+        cout << "Results are not equal" << endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testXdmNodeEquals2");
       }
 
 
@@ -1235,6 +1280,12 @@ int main() {
        << endl
        << endl;
   testXdmNodeEquals(xpathProc, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+  testXdmNodeEquals2(xpathProc, sresult);
 
   cout << endl
      << "============================================================="

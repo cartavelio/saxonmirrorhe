@@ -659,6 +659,8 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
 
         const char * getLocalName()
 
+        bool equals(XdmNode * other)  except +raise_py_error
+
         XdmValue * getTypedValue()
 
         int getLineNumber()

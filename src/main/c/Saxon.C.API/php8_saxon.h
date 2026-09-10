@@ -390,8 +390,8 @@ PHP_METHOD(SchemaValidator, exportSchema);
 PHP_METHOD(SchemaValidator, registerSchemaFromFile);
 PHP_METHOD(SchemaValidator, registerSchemaFromString);
 PHP_METHOD(SchemaValidator, validate);
-PHP_METHOD(SchemaValidator, validateToNode);  //check increment refCount
-PHP_METHOD(SchemaValidator, getValidationReport);  //check increment refCount
+PHP_METHOD(SchemaValidator, validateToNode);
+PHP_METHOD(SchemaValidator, getValidationReport);
 PHP_METHOD(SchemaValidator, setLax);
 PHP_METHOD(SchemaValidator, registerSchemaFromNode);
 PHP_METHOD(SchemaValidator, setParameter);         // checks for old values, then add new one, increment refCount
@@ -443,16 +443,17 @@ PHP_METHOD(XdmNode, getNodeKind);
 PHP_METHOD(XdmNode, getLocalName);
 PHP_METHOD(XdmNode, getNodeName);
 PHP_METHOD(XdmNode, isAtomic);
+PHP_METHOD(XdmNode, equals);
 PHP_METHOD(XdmNode, getChildCount);
 PHP_METHOD(XdmNode, getAttributeCount);
-PHP_METHOD(XdmNode, getChildNode);    //check increment refCount
-PHP_METHOD(XdmNode, getChildren);    //check increment refCount
-PHP_METHOD(XdmNode, axisNodes);   //check increment refCount
-PHP_METHOD(XdmNode, getParent);    //check increment refCount
-PHP_METHOD(XdmNode, getAttributeNode);  //check increment refCount
-PHP_METHOD(XdmNode, getAttributeNodes); //check increment refCount
+PHP_METHOD(XdmNode, getChildNode);
+PHP_METHOD(XdmNode, getChildren);
+PHP_METHOD(XdmNode, axisNodes);
+PHP_METHOD(XdmNode, getParent);
+PHP_METHOD(XdmNode, getAttributeNode);
+PHP_METHOD(XdmNode, getAttributeNodes);
 PHP_METHOD(XdmNode, getAttributeValue);
-PHP_METHOD(XdmNode, getTypedValue);   //check increment refCount
+PHP_METHOD(XdmNode, getTypedValue);
 PHP_METHOD(XdmNode, getLineNumber);
 PHP_METHOD(XdmNode, getColumnNumber);
 
@@ -481,8 +482,8 @@ PHP_METHOD(XdmFunctionItem, call);   //check increment refCount
 PHP_METHOD(XdmMap, __construct);
 PHP_METHOD(XdmMap, __destruct);
 PHP_METHOD(XdmMap, mapSize);
-PHP_METHOD(XdmMap, get);    //check increment refCount
-PHP_METHOD(XdmMap, put);    //check increment refCount
+PHP_METHOD(XdmMap, get);
+PHP_METHOD(XdmMap, put);
 PHP_METHOD(XdmMap, remove);
 PHP_METHOD(XdmMap, isEmpty);
 PHP_METHOD(XdmMap, containsKey);
@@ -494,9 +495,9 @@ PHP_METHOD(XdmMap, keys);
 
 PHP_METHOD(XdmArray, __construct);
 PHP_METHOD(XdmArray, __destruct);
-PHP_METHOD(XdmArray, get);   //check increment refCount
-PHP_METHOD(XdmArray, put);   //check increment refCount
-PHP_METHOD(XdmArray, addMember);  //check increment refCount
+PHP_METHOD(XdmArray, get);
+PHP_METHOD(XdmArray, put);
+PHP_METHOD(XdmArray, addMember);
 PHP_METHOD(XdmArray, concat);
 // PHP_METHOD(XdmArray,  values);
 PHP_METHOD(XdmArray, getArity);

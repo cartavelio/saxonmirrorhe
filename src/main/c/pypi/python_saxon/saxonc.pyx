@@ -4619,6 +4619,24 @@ cdef class PyXdmNode(PyXdmItem):
         py_node_string_value = make_py_str(c_string)
         return py_node_string_value
 
+    def equals(self, PyXdmNode other):
+        """
+        equals(self, other)
+        The equals() relation between two XdmNode objects is true if they both represent the same
+        node. That is, it corresponds to the "is" operator in XPath.
+        Args:
+            other (PyXdmNode): other the object to be compared
+        Returns:
+            bool: true if and only if the other object is an XdmNode instance representing the same node
+        """
+        if other is None:
+            return False
+
+        if self is other:
+            return True
+        else:
+            return self.derivednptr.equals(<saxoncClasses.XdmNode*> other._get_underlying_item())
+
     def get_string_value(self, encoding=None):
         """
         get_string_value(self, encoding=None)

@@ -787,6 +787,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_getNodeKind, 0, 0, 0)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_getNodeName, 0, 0, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_equals, 0, 0, 1)
+ZEND_ARG_INFO(0, other)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_getLocalName, 0, 0, 0)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xdmnode_isAtomic, 0, 0, 0)

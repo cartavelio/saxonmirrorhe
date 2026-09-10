@@ -2770,9 +2770,7 @@ PHP_METHOD(XdmNode, __destruct) {
           xdmNode->resetRelinquishedChildren();
           delete xdmNode;
           xdmNode = nullptr;
-      } /*else {
-          xdmNode->decrementRefCount();
-          }*/
+      }
     }
   }
 }
@@ -2791,7 +2789,34 @@ PHP_METHOD(XdmNode, getLineNumber){
     RETURN_LONG(linenumber);
 }
 
+PHP_METHOD(XdmNode, equals) {
+  XdmNode * xdmNode;
+  zval *oth = nullptr;
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &oth) == FAILURE) {
+    RETURN_FALSE;
+  }
+  zend_object *zobj = Z_OBJ_P(getThis());
+  xdmNode_object *obj =
+      (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
+  xdmNode = obj->xdmNode;
 
+  const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
+  if (xdmNode != nullptr) {
+    if (strcmp(objName, "Saxon\\XdmNode") == 0) {
+      zend_object *vvobj = Z_OBJ_P(oth);
+      xdmNode_object *ooth =
+        (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
+      if (ooth != nullptr) {
+        XdmNode * other = ooth->xdmNode;
+        if (other != nullptr) {
+          xdmNode->equals(other);
+          RETURN_TRUE;
+        }
+      }
+    }
+  }
+  RETURN_FALSE;
+}
 
 
 PHP_METHOD(XdmNode, getColumnNumber){
@@ -4432,70 +4457,28 @@ zend_function_entry xdmItem_methods[] = {
     {nullptr, nullptr, nullptr}};
 
 zend_function_entry xdmNode_methods[] = {
-    PHP_ME(XdmNode, __construct, arginfo_saxonc_xdmnode_construct,
-           ZEND_ACC_PUBLIC |
-               ZEND_ACC_CTOR) PHP_ME(XdmNode, __destruct,
-                                     arginfo_saxonc_xdmnode_destruct,
-                                     ZEND_ACC_PUBLIC)
-        PHP_ME(XdmNode, __toString, arginfo_saxonc_xdmnode_toString,
-               ZEND_ACC_PUBLIC) PHP_ME(XdmNode, getBaseURI,
-                                       arginfo_saxonc_xdmnode_getBaseURI,
-                                       ZEND_ACC_PUBLIC)
-            PHP_ME(XdmNode, getStringValue,
-                   arginfo_saxonc_xdmnode_getStringValue,
-                   ZEND_ACC_PUBLIC) PHP_ME(XdmNode, getNodeKind,
-                                           arginfo_saxonc_xdmnode_getNodeKind,
-                                           ZEND_ACC_PUBLIC)
-                PHP_ME(
-                    XdmNode, getNodeName, arginfo_saxonc_xdmnode_getNodeName,
-                    ZEND_ACC_PUBLIC)
-                PHP_ME(XdmNode, getLocalName,
-                                            arginfo_saxonc_xdmnode_getLocalName,
-                                            ZEND_ACC_PUBLIC)
-
-        PHP_ME(XdmNode, getColumnNumber, arginfo_saxonc_xdmnode_getColumnNumber,ZEND_ACC_PUBLIC)
-        PHP_ME(XdmNode, getLineNumber,arginfo_saxonc_xdmnode_getLineNumber,ZEND_ACC_PUBLIC)
-
-
-
-                    PHP_ME(
-                        XdmNode, isAtomic, arginfo_saxonc_xdmnode_isAtomic,
-                        ZEND_ACC_PUBLIC) PHP_ME(XdmNode, getChildCount,
-                                                arginfo_saxonc_xdmnode_getChildCount,
-                                                ZEND_ACC_PUBLIC)
-
-                        PHP_ME(XdmNode, axisNodes,
-                               arginfo_saxonc_xdmnode_axisNodes,
-                               ZEND_ACC_PUBLIC)
-
-                            PHP_ME(
-                                XdmNode, getAttributeCount,
-                                arginfo_saxonc_xdmnode_getAttributeCount,
-                                ZEND_ACC_PUBLIC) PHP_ME(XdmNode, getChildNode,
-                                                        arginfo_saxonc_xdmnode_getChildNode,
-                                                        ZEND_ACC_PUBLIC)
-                                PHP_ME(XdmNode, getChildren,
-                                       arginfo_saxonc_xdmnode_getChildren,
-                                       ZEND_ACC_PUBLIC)
-                                    PHP_ME(XdmNode, getParent,
-                                           arginfo_saxonc_xdmnode_getParent,
-                                           ZEND_ACC_PUBLIC)
-                                        PHP_ME(
-                                            XdmNode, getAttributeNode,
-                                            arginfo_saxonc_xdmnode_getAttributeNode,
-                                            ZEND_ACC_PUBLIC)
-                                            PHP_ME(
-                                                XdmNode, getAttributeNodes,
-                                                arginfo_saxonc_xdmnode_getAttributeNodes,
-                                                ZEND_ACC_PUBLIC)
-                                                PHP_ME(
-                                                    XdmNode, getAttributeValue,
-                                                    arginfo_saxonc_xdmnode_getAttributeValue,
-                                                    ZEND_ACC_PUBLIC)
-                                                    PHP_ME(
-                                                        XdmNode, getTypedValue,
-                                                        arginfo_saxonc_xdmnode_getTypedValue,
-                                                        ZEND_ACC_PUBLIC){
+    PHP_ME(XdmNode, __construct, arginfo_saxonc_xdmnode_construct,ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+      PHP_ME(XdmNode, __destruct,arginfo_saxonc_xdmnode_destruct,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, __toString, arginfo_saxonc_xdmnode_toString,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getBaseURI,arginfo_saxonc_xdmnode_getBaseURI,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getStringValue,arginfo_saxonc_xdmnode_getStringValue, ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getNodeKind, arginfo_saxonc_xdmnode_getNodeKind,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getNodeName, arginfo_saxonc_xdmnode_getNodeName,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, equals, arginfo_saxonc_xdmnode_equals,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getLocalName,arginfo_saxonc_xdmnode_getLocalName,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getColumnNumber, arginfo_saxonc_xdmnode_getColumnNumber,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getLineNumber,arginfo_saxonc_xdmnode_getLineNumber,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, isAtomic, arginfo_saxonc_xdmnode_isAtomic,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getChildCount,arginfo_saxonc_xdmnode_getChildCount,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, axisNodes,arginfo_saxonc_xdmnode_axisNodes,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getAttributeCount,arginfo_saxonc_xdmnode_getAttributeCount,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getChildNode,arginfo_saxonc_xdmnode_getChildNode,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getChildren,arginfo_saxonc_xdmnode_getChildren,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getParent,arginfo_saxonc_xdmnode_getParent,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getAttributeNode,arginfo_saxonc_xdmnode_getAttributeNode,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getAttributeNodes,arginfo_saxonc_xdmnode_getAttributeNodes,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getAttributeValue,arginfo_saxonc_xdmnode_getAttributeValue,ZEND_ACC_PUBLIC)
+      PHP_ME(XdmNode, getTypedValue,arginfo_saxonc_xdmnode_getTypedValue,ZEND_ACC_PUBLIC){
                                                         nullptr, nullptr,
                                                         nullptr}};
 
