@@ -10,10 +10,7 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.functions.InsertBefore;
-import net.sf.saxon.functions.OptionsParameter;
-import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -160,17 +157,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                     SequenceType.ANY_SEQUENCE);
 
-//            register("index", 2, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
-//                    // TODO: deprecate/drop this
-//                    .arg(0, AnyItemType.getInstance(), STAR, null)
-//                    .arg(1, mapBuildKeyArg, ONE, null));
-
-//            Expression identityFunction;
-//            try {
-//                identityFunction = new FunctionLiteral(XPath40FunctionSet.getInstance().makeFunction("identity", 1));
-//            } catch (XPathException e) {
-//                throw new AssertionError(e);
-//            }
             FunctionItemType opFnType = new SpecificFunctionType(
                     SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
                     SequenceType.ANY_SEQUENCE);
@@ -265,7 +251,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             FunctionItem fn = (FunctionItem) arguments[1].head();
             MapItem result = new HashTrieMap();
             for (KeyValuePair pair : map.keyValuePairs()) {
-                BooleanValue match = (BooleanValue)dynamicCall(fn, context, new Sequence[]{pair.key, pair.value}).head();
+                BooleanValue match = (BooleanValue)dynamicCall(fn, context, pair.key, pair.value).head();
                 if (match != null && match.getBooleanValue()) {
                     result = result.addEntry(pair.key, pair.value);
                 }
@@ -496,7 +482,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             FunctionItem fn = (FunctionItem) arguments[1].head();
             ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
-                Sequence seq = dynamicCall(fn, context, new Sequence[]{pair.key, pair.value});
+                Sequence seq = dynamicCall(fn, context, pair.key, pair.value);
                 GroundedValue val = seq.materialize();
                 if (val.getLength() > 0) {
                     results = results.appendSequence(val);
@@ -600,14 +586,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             }
             if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
                 newArgs[3] = FunctionLiteral.makeLiteral(
-                        new CallableFunction(2,
-                                             new CallableDelegate((context, args) -> SequenceExtent.from(
-                                                     new InsertBefore.InsertIterator(args[1].iterate(), args[0].iterate(), 1)
-                                             )),
-                                             new SpecificFunctionType(
-                                                     SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
-                                                     SequenceType.ANY_SEQUENCE) {
-                                             }));
+                        new SimpleBinaryFunction(
+                                (a0, a1) -> SequenceExtent.from(
+                                                    new InsertBefore.InsertIterator(a0.iterate(), a1.iterate(), 1)
+                                            ),
+                                SequenceType.ANY_SEQUENCE,
+                                SequenceType.ANY_SEQUENCE,
+                                SequenceType.ANY_SEQUENCE));
             } else {
                 newArgs[3] = arguments[3];
             }
@@ -1021,14 +1006,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 GroundedValue suppliedValue = ((MapItem) item).get(valueKey);
                 GroundedValue existingValue = result.get(key);
                 if (existingValue != null) {
+                    GroundedValue newValue;
                     if (onDuplicates == null) {
-                        GroundedValue newValue = existingValue.concatenate(suppliedValue);
-                        result = result.addEntry(key, newValue);
+                        newValue = existingValue.concatenate(suppliedValue);
                     } else {
-                        GroundedValue newValue =
-                                onDuplicates.call(context, new Sequence[]{existingValue, suppliedValue}).materialize();
-                        result = result.addEntry(key, newValue);
+                        newValue = onDuplicates.call(context, new Sequence[]{existingValue, suppliedValue}).materialize();
                     }
+                    result = result.addEntry(key, newValue);
                 } else {
                     result = result.addEntry(key, suppliedValue);
                 }

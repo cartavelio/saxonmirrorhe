@@ -18,24 +18,34 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
 /**
- * A simple function item that takes a single argument and that does not require access to the dynamic context
+ * A simple anonymous function item that takes two arguments
+ * and that does not require access to the dynamic context
  */
 
-public class SimpleUnaryFunction extends AbstractFunction {
+public class SimpleBinaryFunction extends AbstractFunction {
+
+    String description;
 
     @FunctionalInterface
     public interface Lambda {
-        Sequence call(Sequence argument) throws XPathException;
+        Sequence call(Sequence arg1, Sequence arg2) throws XPathException;
     }
 
     private final Lambda lambda;
-    private final SequenceType argumentType;
+    private final SequenceType argumentType1;
+    private final SequenceType argumentType2;
     private final SequenceType resultType;
 
-    public SimpleUnaryFunction(Lambda lambda, SequenceType argumentType, SequenceType resultType) {
+    public SimpleBinaryFunction(Lambda lambda, SequenceType argumentType1, SequenceType argumentType2, SequenceType resultType) {
         this.lambda = lambda;
-        this.argumentType = argumentType;
+        this.argumentType1 = argumentType1;
+        this.argumentType2 = argumentType2;
         this.resultType = resultType;
+    }
+
+    public SimpleBinaryFunction withDescription(String description) {
+        this.description = description;
+        return this;
     }
 
     /**
@@ -45,7 +55,7 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public FunctionItemType getFunctionItemType() {
-        return new SpecificFunctionType(argumentType, resultType);
+        return new SpecificFunctionType(argumentType1, argumentType2, resultType);
     }
 
     /**
@@ -67,7 +77,9 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public String getDescription() {
-        return "simple anonymous " + getFunctionItemType();
+        return description == null
+                ? "simple anonymous " + getFunctionItemType()
+                : description;
     }
 
     /**
@@ -77,7 +89,7 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public int getArity() {
-        return 1;
+        return 2;
     }
 
     @Override
@@ -96,7 +108,7 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-        return lambda.call(args[0]);
+        return lambda.call(args[0], args[2]);
     }
 
 
@@ -107,6 +119,6 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public void export(ExpressionPresenter out) {
-        throw new UnsupportedOperationException("A SimpleUnaryFunction is a transient value that cannot be exported");
+        throw new UnsupportedOperationException("A SimpleBinaryFunction is a transient value that cannot be exported");
     }
 }
