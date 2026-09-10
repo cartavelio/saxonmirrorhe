@@ -140,7 +140,7 @@ public class GeneralMapBuilder {
                         throw new XPathException("Duplicate key " + Err.depict(key)
                                                          + " in map. First value: "
                                 + Err.depictSequence(existing) + "; second value: "
-                                + Err.depictSequence(value), e);
+                                + Err.depictSequence(value), e).withErrorCode(e.getXPathException().getErrorCodeQName());
                     }
                     map = map.put(key, newVal);
                 }
