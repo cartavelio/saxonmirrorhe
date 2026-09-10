@@ -618,7 +618,7 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
   return nullptr;
 }
 
- void SaxonProcessor::destroyHandle(sxnc_environment *sxn_environ, int64_t handleRef){
+ void SaxonProcessor::destroyHandle(int64_t handleRef){
 
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
    j_handles_destroy(thread,(void *)handleRef);

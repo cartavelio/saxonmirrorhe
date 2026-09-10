@@ -565,8 +565,7 @@ public:
   * Deprecated. Checks for pending exceptions and creates a SaxonApiException object.
   * @deprecated From 12.1 this method is no longer used, since exceptions are now thrown.
   */
-  static SaxonApiException *checkForExceptionCPP(
-      /*JNIEnv *env, jclass callingClass, jobject callingObject*/);
+  static SaxonApiException *checkForExceptionCPP();
 
 
  /**
@@ -782,14 +781,10 @@ public:
   void createHeapDump(bool live);
 
 
-  /*static JavaVM *jvm;*/
   static XdmValue *makeXdmValueFromRef(int64_t valueRef);
 
 protected:
-  // jclass xdmAtomicClass; /*!< The XdmAtomicValue instance */
-  // jclass versionClass; /*!< The Version instance */
-  // jclass procClass; /*!< The Saxon Processor instance */
-  // jclass saxonCAPIClass; /*!< The SaxonCAPI instance */
+
   std::string cwdV; /*!< Current working directory */
   // std::string resources_dir; /*!< Saxon resources directory */
   std::string versionStr; /*!< The Saxon version string */
@@ -804,9 +799,6 @@ protected:
                     Processor is created  */
   int64_t procRef; /*!< ObjectHandle reference to the underlying processor */
 
-  // JNINativeMethod *nativeMethods; /*!< native methods variable used in
-  // extension methods */ std::vector<JNINativeMethod> nativeMethodVect; /*!<
-  // Vector of native methods defined by user */
   SaxonApiException
       *exception; /*!< SaxonApiException object to capture exceptions thrown
                      from the underlying Java code via JNI */
@@ -837,7 +829,7 @@ private:
  /**
  * Remove ObjectHandle from the pool. Free for the GC.
  */
-  static void destroyHandle(sxnc_environment *sxn_environ, int64_t handleRef);
+  static void destroyHandle(int64_t handleRef);
 
    /**
    * Get info on objects allocated and still in memory
