@@ -111,6 +111,12 @@ public class IXSL3FunctionSet extends BuiltInFunctionSet {
         register("race", 1, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
                 .arg(0, ArrayItemType.getInstance(), ONE, null));
 
+        register("set-property", 4, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), OPT, SIDE|FOCUS|LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, AnyItemType.getInstance(), OPT, null)
+                .arg(2, AnyItemType.getInstance(), ONE, null)
+                .arg(3, BuiltInAtomicType.BOOLEAN, ONE, null));
+
         register("sleep", 1, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null));
 
