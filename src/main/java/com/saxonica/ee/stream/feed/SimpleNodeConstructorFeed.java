@@ -7,7 +7,11 @@ import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.str.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.AbstractUniStringConsumer;
+import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -65,14 +69,14 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
     }
 
     @Override
-    public UniStringConsumer getStringReceiver(boolean asTextNode) {
+    public UniStringConsumer getStringReceiver(boolean asTextNode, Location loc) {
         if (isSimpleText) {
             return new AbstractUniStringConsumer() {
                 @Override
                 @CSharpModifiers(code={"public", "override"})
                 public UniStringConsumer accept(UnicodeString chars) throws XPathException {
                     try {
-                        getNextOutputter().characters(chars, Loc.NONE, ReceiverOption.NONE);
+                        getNextOutputter().characters(chars, loc, ReceiverOption.NONE);
                     } catch (XPathException e) {
                         dynamicError(e);
                     }
@@ -80,7 +84,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
                 }
             };
         } else {
-            return super.getStringReceiver(asTextNode);
+            return super.getStringReceiver(asTextNode, loc);
         }
     }
 
