@@ -3,6 +3,7 @@ package com.saxonica.config;
 import com.saxonica.ee.config.*;
 import com.saxonica.ee.extfn.VendorFunctionSetEE;
 import com.saxonica.ee.extfn.js.IXSLElementFactory;
+import com.saxonica.ee.extfn.js.StubFunctionLibrary;
 import com.saxonica.ee.optim.*;
 import com.saxonica.ee.parallel.ThreadManagerEE;
 import com.saxonica.ee.schema.*;
@@ -36,6 +37,7 @@ import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.GroupIterator;
+import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
@@ -907,6 +909,14 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         } catch (SchemaException e) {
             throw new XPathException(e);
         }
+    }
+
+
+    @Override
+    public FunctionLibrary loadStubFunctionLibrary(StreamSource jsonSignatures) throws XPathException {
+        StubFunctionLibrary lib = new StubFunctionLibrary(this);
+        lib.loadSignatures(jsonSignatures);
+        return lib;
     }
 
     /**

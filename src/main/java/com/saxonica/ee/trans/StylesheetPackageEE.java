@@ -7,6 +7,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.accum.Accumulator;
+import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
@@ -122,6 +123,10 @@ public class StylesheetPackageEE extends StylesheetPackage {
     protected void addIxsl3FunctionLibrary(FunctionLibraryList functionLibrary) {
         functionLibrary.addFunctionLibrary(IXSL3FunctionSet.getInstance());
         functionLibrary.addFunctionLibrary(new JSFunctionLibrary());
+    }
+
+    protected void addStubFunctionLibrary(FunctionLibrary stubFunctions) {
+        getFunctionLibrary().addFunctionLibrary(stubFunctions);
     }
 
     private void export(ExpressionPresenter presenter, boolean topLevel) throws XPathException {
