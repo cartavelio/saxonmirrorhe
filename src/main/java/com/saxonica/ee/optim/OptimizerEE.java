@@ -509,6 +509,9 @@ public class OptimizerEE extends Optimizer {
                         if (((AtomicValue)item).isUntypedAtomic()) {
                             return null;
                         }
+                        if (item instanceof QualifiedNameValue) {
+                            return null;
+                        }
                         trie.initialPut((AtomicValue) item, BooleanValue.TRUE);
                     } else {
                         return null;
