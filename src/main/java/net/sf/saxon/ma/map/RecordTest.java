@@ -47,6 +47,14 @@ public class RecordTest extends AnyFunctionType implements TupleType {
     private final Set<String> optionalFields = new HashSet<>();
     private boolean _extensible;
 
+    public static RecordTest VALUE_RECORD = nonExtensible(
+            new Field("value", SequenceType.ANY_SEQUENCE, false)
+    );
+    public static RecordTest KEY_VALUE_RECORD = nonExtensible(
+            new Field("key", SequenceType.ATOMIC_SEQUENCE, false),
+            new Field("value", SequenceType.ANY_SEQUENCE, false)
+    );
+
     /**
      * Class representing one field definition within a record type definition,
      * used only while constructing a record definition

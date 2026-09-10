@@ -15,13 +15,14 @@ import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +85,7 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
 
             List<GroundedValue> members = new ArrayList<>();
             for (Item it : collector.getList()) {
-                members.add(((Parcel)it).value);
+                members.add(((MapItem)it).get(new StringValue("value")));
             }
             SimpleArrayItem newArray = new SimpleArrayItem(members);
             out.append(newArray, locationId, 0);
@@ -92,39 +93,74 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
         } else if (item instanceof MapItem) {
 
             int size = ((MapItem)item).size();
-            if (size <= 1) {
+            if (size == 1) {
                 // If it's a singleton map, we can't break it down any further
-                out.append(item);
-                return;
+                AtomicValue key = null;
+                GroundedValue singletonValue = null;
+                for (KeyValuePair pair : ((MapItem)item).keyValuePairs()) {
+                    key = pair.key;
+                    singletonValue = pair.value;
+                    break;
+                }
+                SequenceCollector collector = context.getController().allocateSequenceOutputter();
+                ComplexContentOutputter cco = new ComplexContentOutputter(collector);
+
+                collector.setSystemId(out.getSystemId());
+                SequenceIterator iter = singletonValue.iterate();
+
+                PipelineConfiguration pipe = out.getPipelineConfiguration();
+                XPathContextMajor c2 = context.newContext();
+                c2.setOrigin(this);
+                c2.trackFocus(iter);
+                c2.setCurrentComponent(c2.getCurrentMode());
+                pipe.setXPathContext(c2);
+                TailCall tc = context.getCurrentMode().getActor().applyTemplates(
+                        parameters, tunnelParams, null, cco, c2, locationId);
+                while (tc != null) {
+                    tc = tc.processLeavingTail();
+                }
+                pipe.setXPathContext(context);
+                MapItem singletonMap = new SingleEntryMap(key, collector.getSequence());
+                out.append(singletonMap, locationId, 0);
+
+            } else if (size > 1) {
+
+                SequenceCollector collector = context.getController().allocateSequenceOutputter();
+                ComplexContentOutputter cco = new ComplexContentOutputter(collector);
+                ProxyOutputter checker = new ShallowCopyProxyOutputterForMaps(cco, locationId);
+
+                collector.setSystemId(out.getSystemId());
+                SequenceIterator iter = ((MapItem) item).entries();
+
+                PipelineConfiguration pipe = out.getPipelineConfiguration();
+                XPathContextMajor c2 = context.newContext();
+                c2.setOrigin(this);
+                c2.trackFocus(iter);
+                c2.setCurrentComponent(c2.getCurrentMode());
+                pipe.setXPathContext(c2);
+                TailCall tc = context.getCurrentMode().getActor().applyTemplates(
+                        parameters, tunnelParams, null, checker, c2, locationId);
+                while (tc != null) {
+                    tc = tc.processLeavingTail();
+                }
+                pipe.setXPathContext(context);
+
+                MapItem mergedMap = MapFunctionSet.MapMerge.mergeMaps(
+                        collector.iterate(), context, "use-last", null, null);
+                out.append(mergedMap, locationId, 0);
             }
-
-            SequenceCollector collector = context.getController().allocateSequenceOutputter();
-            ComplexContentOutputter cco = new ComplexContentOutputter(collector);
-            ProxyOutputter checker = new ShallowCopyProxyOutputterForMaps(cco, locationId);
-
-            collector.setSystemId(out.getSystemId());
-            SequenceIterator iter = ((MapItem) item).entries();
-
-            PipelineConfiguration pipe = out.getPipelineConfiguration();
-            XPathContextMajor c2 = context.newContext();
-            c2.setOrigin(this);
-            c2.trackFocus(iter);
-            c2.setCurrentComponent(c2.getCurrentMode());
-            pipe.setXPathContext(c2);
-            TailCall tc = context.getCurrentMode().getActor().applyTemplates(
-                    parameters, tunnelParams, null, checker, c2, locationId);
-            while (tc != null) {
-                tc = tc.processLeavingTail();
-            }
-            pipe.setXPathContext(context);
-            
-            MapItem mergedMap = MapFunctionSet.MapMerge.mergeMaps(
-                    collector.iterate(), context, "use-last", null, null);
-            out.append(mergedMap, locationId, 0);
 
 
         } else {
-            super.process(item, parameters, tunnelParams, out, context, locationId);
+            SequenceCollector collector = context.getController().allocateSequenceOutputter();
+            ComplexContentOutputter cco = new ComplexContentOutputter(collector);
+            collector.setSystemId(out.getSystemId());
+            super.process(item, parameters, tunnelParams, cco, context, locationId);
+            SequenceIterator resultIter = collector.iterate();
+            Item resultItem;
+            while ((resultItem = resultIter.next()) != null) {
+                out.append(resultItem);
+            }
         }
 
     }
@@ -188,23 +224,23 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
             if (item instanceof Parcel) {
                 super.append(item);
             } else {
-                mustBeParcel(locationId);
+                mustBeValueRecord(locationId);
             }
         }
 
         @Override
         public void append(Item item, Location locationId, int properties) throws XPathException {
-            if (item instanceof Parcel) {
+            if (RecordTest.VALUE_RECORD.matches(item, getConfiguration().getTypeHierarchy())) {
                 super.append(item, locationId, properties);
             } else {
-                mustBeParcel(locationId);
+                mustBeValueRecord(locationId);
             }
         }
 
 
-        private void mustBeParcel(Location locationId) throws XPathException {
+        private void mustBeValueRecord(Location locationId) throws XPathException {
             throw new XPathException("Template rule invoked when processing an array using the "
-                                             + "shallow-copy-all rule must return a sequence of parcels", "XPTY0004", locationId);
+                                             + "shallow-copy-all rule must return a sequence of value records", "XPTY0004", locationId);
         }
     }
 

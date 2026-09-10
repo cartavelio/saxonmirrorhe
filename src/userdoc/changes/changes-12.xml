@@ -568,22 +568,7 @@
             namely <code>shallow-copy-all</code> and <code>shallow-skip-all</code>. These have the same effect as <code>shallow-copy</code>
             and <code>shallow-skip</code> respectively, except when processing maps and arrays.</p>
         
-        <p>For <code>shallow-skip-all</code>:</p>
-        
-        <ul>
-            <li>When processing an array that does not match any template rule, the array
-                is split into a set of parcels, one for each member of the array, and each parcel is processed by making
-                an implicit call on <code>xsl:apply-templates</code>. A parcel is represented as a single-entry map with the key
-                <code>"value"</code>, and can be matched using the pattern <code>match="record(value)"</code>. The value of the array
-                member can be extracted from the parcel using the function <code>fn:unparcel()</code>. If a parcel does not match any
-                template rule, then it will not be processed.
-            </li>
-            <li>When processing a map that does not match any template rule, the map
-                is split into a set of map entries, one for each key-value pair in the map. These entries are represented
-                as singleton maps, and they are processed by making an implicit call on <code>xsl:apply-templates</code>. However,
-                if a singleton map does not match any template rule, then to prevent infinite recursion 
-                it is not processed at all.</li>
-        </ul>
+        <p>The <code>shallow-skip-all</code> option has been dropped from the spec, and is removed in Saxon 12.4.</p>
         
         <p>For <code>shallow-copy-all</code>:</p>
         
@@ -634,7 +619,7 @@
         defaults to the enclosing mode.</p>
         
         <p>From 12.4 the <code>xsl:accumulator-rule/@saxon:capture</code> extension has now been incorporated
-                as a standard XSLT 4.0 feature under the name <code>xsl:accumulator-rule/@saxon:capture</code>.
+                as a standard XSLT 4.0 feature under the name <code>xsl:accumulator-rule/@capture</code>.
                 The Saxon attribute name remains available for the time being as a synonym.</p>
         
         <aside>Our general policy on implementation of new features in the draft 4.0 specifications is that

@@ -493,7 +493,7 @@ public abstract class Mode extends Actor {
             if (mustBeTyped) {
                 checkMustBeTyped(item);
             } else if (mustBeUntyped) {
-               checkMustByUntyped(item);
+                checkMustByUntyped(item);
             }
 
             // find the template rule for this node
@@ -623,8 +623,6 @@ public abstract class Mode extends Actor {
     public String getCodeForBuiltInRuleSet(BuiltInRuleSet builtInRuleSet) {
         if (builtInRuleSet instanceof ShallowCopyAllRuleSet) {
             return "CA";
-        } else if (builtInRuleSet instanceof ShallowSkipAllRuleSet) {
-            return "SA";
         } else if (builtInRuleSet instanceof ShallowCopyRuleSet) {
             return "SC";
         } else if (builtInRuleSet instanceof ShallowSkipRuleSet) {
@@ -666,8 +664,6 @@ public abstract class Mode extends Actor {
             base = TextOnlyCopyRuleSet.getInstance();
         } else if (code.startsWith("CA")) {
             base = ShallowCopyAllRuleSet.getInstance();
-        } else if (code.startsWith("SA")) {
-            base = ShallowSkipAllRuleSet.getInstance();
         } else {
             throw new IllegalArgumentException(code);
         }
