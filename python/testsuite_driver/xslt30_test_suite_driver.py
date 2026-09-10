@@ -19,6 +19,7 @@ start_memory = process.memory_info().rss
 path = None
 results_path = None
 catalog = None
+jit = False
 saxon_version = "@@VERSION@@"
 
 assert_set = set()
@@ -540,6 +541,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
     global test_report
     global wrong_error_results
     global path
+    global jit
 
     xpath_proc.set_context(xdm_item=test_case_node)
     test_name = test_case_node.get_attribute_value("name")
@@ -646,7 +648,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
 
     'TODO - the base_uri contains file:/// the resolving of stylesheet does not work with file:'
     environment.xslt_proc.set_cwd(cwd_from_base_uri(test_case_node.base_uri))
-    environment.xslt_proc.set_jit_compilation(False)
+    environment.xslt_proc.set_jit_compilation(jit)
     errorResult = None
     result = None
     result_documents = {}
@@ -851,6 +853,7 @@ def main(argv):
     global schemaValidator
     global saxon_version
     global driver_proc
+    global jit
 
     saxon_version = driver_proc.version
 
@@ -866,14 +869,14 @@ def main(argv):
         argvv = argv[1:]
 
         try:
-            opts, args = getopt.getopt(argvv, "ht:s:o:", ["testpattern", "testset", "resultdir"])
+            opts, args = getopt.getopt(argvv, "ht:s:o:", ["testpattern", "testset", "resultdir", "jit="])
         except getopt.GetoptError:
-            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
+            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off')
             sys.exit(2)
 
         for opt, arg in opts:
             if opt == '-h':
-                print('HELP: xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
+                print('HELP: xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off')
                 sys.exit()
             elif opt in ("-t", "--testpattern"):
                 test_case_name_pattern = re.compile(arg)
@@ -883,6 +886,13 @@ def main(argv):
 
             elif opt in ("-o", "--resultdir"):
                 results_path = arg
+            elif opt in ("-jit", "--jit"):
+                if arg == 'off' or arg == 'false':
+                    jit = False
+                else:
+                    jit = True
+                if "HE" in driver_proc.version:
+                    jit = False
 
     '''dir = os.getcwd()'''
     path = pathlib.Path(diri)
