@@ -300,6 +300,10 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
           resultDocumentMap[docUriString] = value;
           operator delete(str);
         } else {
+          if (resultUrisRef != SXN_UNSET) {
+            j_handles_destroy(thread,
+                  (void *)resultUrisRef);
+          }
           throw SaxonApiException("getResultDocuments failed to create value");
         }
       }
