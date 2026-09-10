@@ -135,6 +135,11 @@
         <p>The functions <code>fn:csv-to-arrays</code>, <code>fn:parse-csv</code>, and <code>fn:csv-to-xml</code>
         are implemented.</p>
         
+        <p>The function <code>fn:compare</code>, previously used only to compare strings, is extended
+        to compare any comparable atomic values.</p>
+        
+        <p>The new function <code>fn:sort-with</code> is implemented.</p>
+        
         <p>The deep-lookup operator <code>??</code> is implemented.</p>
         
         <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
@@ -143,6 +148,9 @@
         <p>The <code>fn:parse-json</code> and <code>fn:json-doc</code> functions accept an option
         to allow JSON null to be represented by something other than an empty sequence, for example
             <code>map{'null':[]}</code> maps null to an empty array while <code>map{'null':[]}</code>.</p>
+        
+        <p>The rules for the <code>number-parser</code> callback in <code>fn:parse-json</code> and 
+            <code>fn:json-doc</code> have been changed to reflect changes in the specification.</p>
         
         <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
         as a representation of the JSON null value.</p>

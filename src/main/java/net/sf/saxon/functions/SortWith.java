@@ -8,27 +8,21 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.expr.sort.AtomicSortComparer;
-import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.ma.arrays.ArraySort;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
- * This class implements the function fn:sort#1, which is a standard function in XPath 3.1
+ * This class implements the function fn:sort-with#2, introduced in XPath 4.0
  */
 
-public class Sort_1 extends SystemFunction {
-
-    public static class ItemToBeSorted {
-        public Item value;
-        public GroundedValue sortKey;
-        public int originalPosition;
-    }
+public class SortWith extends SystemFunction {
 
     /**
      * Evaluate the expression
@@ -40,49 +34,43 @@ public class Sort_1 extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        final ArrayList<ItemToBeSorted> inputList = getItemsToBeSorted(arguments[0]);
-        StringCollator collation = context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
-        return doSort(inputList, collation, context);
-    }
-
-    protected ArrayList<ItemToBeSorted> getItemsToBeSorted(Sequence input) throws XPathException {
-        final ArrayList<ItemToBeSorted> inputList = new ArrayList<>();
-        int i = 0;
-        SequenceIterator iterator = input.iterate();
-        Item item;
-        while ((item = iterator.next()) != null) {
-            ItemToBeSorted member = new ItemToBeSorted();
-            member.value = item;
-            member.originalPosition = i++;
-            member.sortKey = item.atomize();
-            inputList.add(member);
+        SequenceIterator inputIter = arguments[0].iterate();
+        ArrayList<Item> inputList = new ArrayList<>();
+        Item it;
+        while ((it = inputIter.next()) != null) {
+            inputList.add(it);
         }
-        return inputList;
-    }
-
-    protected Sequence doSort(final ArrayList<ItemToBeSorted> inputList, StringCollator collation, XPathContext context) throws XPathException {
-        final AtomicComparer atomicComparer = AtomicSortComparer.makeSortComparer(
-                collation, StandardNames.XS_ANY_ATOMIC_TYPE, context);
-        try {
-            inputList.sort((a, b) -> {
-                int result = ArraySort.compareSortKeys(a.sortKey, b.sortKey, atomicComparer);
-                if (result == 0) {
-                    // TODO: unnecessary, we are now using a stable sort routine
-                    return a.originalPosition - b.originalPosition;
-                } else {
-                    return result;
+        GroundedValue comparatorFunctions = arguments[1].materialize();
+        List<Comparator<Item>> javaComparators = new ArrayList<>(comparatorFunctions.getLength());
+        for (Item item : comparatorFunctions.asIterable()) {
+            javaComparators.add((a, b) -> {
+                try {
+                    Sequence result = ((FunctionItem)item).call(context, new Sequence[]{a, b});
+                    return Long.signum(((IntegerValue)result.head()).longValue());
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e);
                 }
             });
-            //GenericSorter.quickSort(0, inputList.size(), sortable);
-        } catch (ClassCastException e) {
-            throw new XPathException("Non-comparable types found while sorting: " + e.getMessage(), "XPTY0004")
-                    .asTypeError();
         }
-        ArrayList<Item> outputList = new ArrayList<>(inputList.size());
-        for (ItemToBeSorted member : inputList) {
-            outputList.add(member.value);
-        }
-        return new SequenceExtent.Of<>(outputList);
+        sort(inputList, javaComparators);
+        return SequenceExtent.makeSequenceExtent(inputList);
+    }
+
+
+    private static void sort(List<Item> input, List<Comparator<Item>> comparators) {
+        input.sort(multiComparator(comparators));
+    }
+
+    private static Comparator<Item> multiComparator(List<Comparator<Item>> comparators) {
+        return (a,b) -> {
+            for (Comparator<? super Item> comparator : comparators) {
+                int c = comparator.compare(a, b);
+                if (c != 0) {
+                    return c;
+                }
+            }
+            return 0;
+        };
     }
 
 

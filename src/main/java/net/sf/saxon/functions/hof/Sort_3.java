@@ -18,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
 import java.util.ArrayList;
 
 /**
- * This class implements the function fn:sort#2, which is a higher-order function in XPath 3.1
+ * This class implements the function fn:sort#3, which is a higher-order function in XPath 3.1
  * available only in Saxon-PE and above
  */
 
