@@ -145,7 +145,7 @@ public class ResourceRequest {
         // resolve fragment identifiers in URI references passed to the document()
         // function: the code of the document() function handles these itself.
 
-        ResourceRequest adjustedRequest = this;
+        ResourceRequest adjustedRequest;
         int hash = requestedUri.indexOf('#');
         if (hash >= 0) {
             adjustedRequest = copy();
@@ -162,8 +162,7 @@ public class ResourceRequest {
                     s = resolver.resolve(this);
                 } catch (XPathException e) {
                     Throwable cause = e.getCause();
-                    if (cause instanceof IllegalArgumentException) {
-                        IllegalArgumentException iae = (IllegalArgumentException)cause;
+                    if (cause instanceof IllegalArgumentException iae) {
                         if (iae.getCause() instanceof URISyntaxException) {
                             throw new XPathException("Invalid URI " + uri, iae.getCause());
                         }
