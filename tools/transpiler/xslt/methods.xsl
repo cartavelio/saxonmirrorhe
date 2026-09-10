@@ -518,7 +518,7 @@
       <xsl:sequence select="f:applyFormat(., map{
          'create#1':                  'new System.Uri(%args%, System.UriKind.RelativeOrAbsolute)',
          'getAuthority#0':            '%scope%.Authority',
-         'getFragment#0':             'Saxon.Impl.Helpers.StringUtils.nullIfEmpty(%scope%.Fragment)',
+         'getFragment#0':             'Saxon.Impl.Helpers.UriUtils.GetFragment(%scope%)',
          'getHost#0':                 '%scope%.Host',
          'getPath#0':                 '%scope%.LocalPath',
          'getPort#0':                 '%scope%.Port',
