@@ -1,26 +1,15 @@
 package com.saxonica.functions.qt4;
 
 
-import com.ibm.icu.util.ValueIterator;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.GroundedValue;
-
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
-
-import java.util.ArrayList;
 
 /**
  * Supports the fn:build-uri function.
@@ -116,9 +105,9 @@ public class BuildURI extends URIFunctions {
             uri.append(parts.get(PATH).getStringValue());
         }
 
-        if (parts.get(QUERY_SEGMENTS) != null) {
+        if (parts.get(QUERY_PARAMETERS) != null) {
             String sep = "?";
-            ArrayItem value = (ArrayItem) parts.get(QUERY_SEGMENTS);
+            ArrayItem value = (ArrayItem) parts.get(QUERY_PARAMETERS);
             for (int pos = 0; pos < value.arrayLength(); pos++) {
                 MapItem param = (MapItem) value.get(pos);
                 if (param.get(KEY) != null || param.get(VALUE) != null) {
