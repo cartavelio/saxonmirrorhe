@@ -45,6 +45,7 @@ public class Doc extends SystemFunction implements Callable {
         OptionsParameter docOptions = new OptionsParameter(version);
         docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        docOptions.addAllowedOption("retain-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("strip-space", SequenceType.one(EnumerationUnionType.of("all", "none", "conditional")), new StringValue("conditional"));
         docOptions.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -176,7 +177,7 @@ public class Doc extends SystemFunction implements Callable {
             // to ensure we get the default JDK parser implementation, rather than picking a parser
             // off the classpath.
 
-            ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
+            ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
             parseOptions = processOptions(checkedOptions, getRetainedStaticContext());
 
         } else {
@@ -264,7 +265,7 @@ public class Doc extends SystemFunction implements Callable {
         }
 
         parseOptions = parseOptions.withUseXsiSchemaLocation(checkedOptions.asBoolean("use-xsi-schema-location", false));
-
+        parseOptions = parseOptions.withLineNumbering(checkedOptions.asBoolean("retain-location", false));
 
         String val = checkedOptions.asString("xsd-validation");
         boolean xsdValidating;

@@ -137,7 +137,7 @@ public class RecordType implements FunctionItemType {
     }
 
     /**
-     * Make a (non-extensible) record type
+     * Make a record type
      * @param fields the fields of the record type
      * @return the record type
      */
@@ -160,11 +160,12 @@ public class RecordType implements FunctionItemType {
      * it is needed so that a RecordTest can refer to itself. Apart from this, the RecordTest
      * is immutable.
      */
-    public void setDetails(Field... fields) {
+    public RecordType setDetails(Field... fields) {
         for (Field field : fields) {
             fieldNamesInOrder.add(field.name);
             fieldTypes.put(field.name, field.type);
         }
+        return this;
     }
 
     /**

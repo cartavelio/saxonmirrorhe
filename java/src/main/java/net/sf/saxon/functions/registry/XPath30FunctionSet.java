@@ -209,6 +209,8 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                                                  STAR, 0)
                 .arg(0, AnyXNodeType.getInstance(), STAR | NAV, null));
 
+        register("location", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.QNAME, OPT, CITEM | LATE));
+
         register("nilled", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.BOOLEAN, OPT, CITEM | LATE));
 
         register("node-name", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.QNAME, OPT, CITEM | LATE));

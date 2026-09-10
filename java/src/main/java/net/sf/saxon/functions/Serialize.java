@@ -105,67 +105,10 @@ public class Serialize extends SystemFunction implements Callable {
         return "Q{" + NamespaceConstant.SAXON + "}" + s;
     }
 
-//    private final static Map<String, SequenceType> requiredTypes = new HashMap<>(40);
-//
-//    static {
-//        requiredTypes.put("allow-duplicate-names", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-//        requiredTypes.put("byte-order-mark", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-//        requiredTypes.put("cdata-section-elements", BuiltInAtomicType.QNAME.zeroOrMore());
-//        //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
-//        requiredTypes.put("canonical", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-//        requiredTypes.put("doctype-public", SequenceType.SINGLE_STRING); //doctype-public-param-type pubid-char-string-type
-//        requiredTypes.put("doctype-system", SequenceType.SINGLE_STRING); //doctype-system-param-type system-id-string-type
-//        requiredTypes.put("encoding", SequenceType.SINGLE_STRING); //encoding-param-type encoding-string-type
-//        requiredTypes.put("escape-solidus", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-//        requiredTypes.put("escape-uri-attributes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-//        requiredTypes.put("html-version", SequenceType.SINGLE_DECIMAL); //decimal-param-type
-//        requiredTypes.put("include-content-type", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-//        requiredTypes.put("indent", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-//        requiredTypes.put("item-separator", SequenceType.SINGLE_STRING); //string-param-type
-//        requiredTypes.put("json-lines", SequenceType.SINGLE_BOOLEAN);
-//        requiredTypes.put("json-node-output-method", SequenceType.SINGLE_STRING);
-//        //json-node-output-method-param-type  json-node-output-method-type - xs:string or xs:QName
-//        requiredTypes.put("media-type", SequenceType.SINGLE_STRING); //string-param-type
-//        requiredTypes.put("method", SequenceType.SINGLE_STRING);
-//        //method-param-type method-type - xs:string or xs:QName
-//        requiredTypes.put("normalization-form", SequenceType.SINGLE_STRING);
-//        //NMTOKEN-param-type  BuiltInAtomicType.NMTOKEN
-//        requiredTypes.put("omit-xml-declaration", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-//        requiredTypes.put("standalone", SequenceType.OPTIONAL_BOOLEAN); //yes-no-omit-type
-//        requiredTypes.put("suppress-indentation", BuiltInAtomicType.QNAME.zeroOrMore());
-//        //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
-//        requiredTypes.put("undeclare-prefixes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-//        requiredTypes.put("use-character-maps", SequenceType.one(new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_STRING)));
-//        //use-character-maps-param-type
-//        requiredTypes.put("version", SequenceType.SINGLE_STRING); //string-param-type
-//    }
-
-//    private final static Map<String, SequenceType> requiredTypesSaxon = new HashMap<>(20);
-//
-//    static {
-//        requiredTypesSaxon.put("attribute-order", BuiltInAtomicType.QNAME.zeroOrMore());
-//        requiredTypesSaxon.put("canonical", SequenceType.SINGLE_BOOLEAN);
-//        //eqnames
-//        requiredTypesSaxon.put("character-representation", SequenceType.SINGLE_STRING); //string
-//        requiredTypesSaxon.put("double-space", BuiltInAtomicType.QNAME.zeroOrMore());
-//        //eqnames
-//        requiredTypesSaxon.put("indent-spaces", SequenceType.SINGLE_INTEGER); //integer
-//        requiredTypesSaxon.put("line-length", SequenceType.SINGLE_INTEGER); //integer
-//        requiredTypesSaxon.put("newline", SequenceType.SINGLE_STRING);
-//        //requiredTypes.put("next-in-chain", SequenceType.SINGLE_STRING); //uri
-//        requiredTypesSaxon.put("recognize-binary", SequenceType.SINGLE_BOOLEAN); //boolean
-//        requiredTypesSaxon.put("require-well-formed", SequenceType.SINGLE_BOOLEAN); //boolean
-//        requiredTypesSaxon.put("single-quotes", SequenceType.SINGLE_BOOLEAN);
-//        requiredTypesSaxon.put("spec-version", SequenceType.SINGLE_STRING);//boolean
-//        requiredTypesSaxon.put("supply-source-locator", SequenceType.SINGLE_BOOLEAN); //boolean
-//        requiredTypesSaxon.put("suppress-indentation", BuiltInAtomicType.QNAME.zeroOrMore());
-//        //eqnames
-//    }
-
 
     // Convert a boolean value to a yes-no-type string.
 
-    private String toYesNoTypeString(Sequence seqVal) throws XPathException {
+    private static String toYesNoTypeString(Sequence seqVal) throws XPathException {
         String s;
         boolean booleanValue = ((BooleanValue) seqVal.head()).getBooleanValue();
         if (booleanValue) {
@@ -178,7 +121,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     // Convert a value to a yes-no-omit-type string.
 
-    private String toYesNoOmitTypeString(Sequence seqVal) throws XPathException {
+    private static String toYesNoOmitTypeString(Sequence seqVal) throws XPathException {
         String stringVal = "";
         if (seqVal instanceof EmptySequence) {
             stringVal = "omit";
@@ -191,7 +134,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     // Convert a sequence of QNames to a qnames-type string (containing a space-separated list of the QNames).
 
-    private String toQNamesTypeString(Sequence seqVal, boolean allowStar) throws XPathException {
+    private static String toQNamesTypeString(Sequence seqVal, boolean allowStar) throws XPathException {
         SequenceIterator iterator = seqVal.iterate();
         Item item;
         StringBuilder stringVal = new StringBuilder();
@@ -214,7 +157,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     // Convert a sequence of strings to a single space-separated string.
 
-    private String toSpaceSeparatedString(Sequence seqVal) throws XPathException {
+    private static String toSpaceSeparatedString(Sequence seqVal) throws XPathException {
         SequenceIterator iterator = seqVal.iterate();
         Item item;
         StringBuilder stringVal = new StringBuilder();
@@ -226,7 +169,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     // Convert a QName or string value to a method-type (or json-node-output-method-type) string.
 
-    private String toMethodTypeString(Sequence seqVal) throws XPathException {
+    private static String toMethodTypeString(Sequence seqVal) throws XPathException {
         String stringVal;
         if (seqVal.head() instanceof QNameValue qNameValue) {
             stringVal = '{' + qNameValue.getComponent(AccessorFn.Component.NAMESPACE).toString() + '}' + qNameValue.getComponent(AccessorFn.Component.LOCALNAME);
@@ -262,7 +205,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     // Convert a map defining a character map to a CharacterMap
 
-    private CharacterMap toCharacterMap(Sequence seqVal, XPathContext context) throws XPathException {
+    private static CharacterMap toCharacterMap(Sequence seqVal, XPathContext context) throws XPathException {
         MapItem charMap = checkCharacterMapOptions((MapItem) seqVal.head(), context);
         return toCharacterMap(charMap);
     }
@@ -288,7 +231,7 @@ public class Serialize extends SystemFunction implements Callable {
         return new CharacterMap(name, intHashMap);
     }
 
-    private SerializationProperties serializationParamsFromMap(
+    private static SerializationProperties serializationParamsFromMap(
             ProcessedOptions map, XPathContext context) throws XPathException {
         Sequence seqVal;
         Properties props = new Properties();
@@ -455,18 +398,8 @@ public class Serialize extends SystemFunction implements Callable {
                 params = sph.getSerializationProperties();
 
             } else if (param instanceof MapItem paramMap) {
-                // If any parameters are supplied as QNames in the Saxon namespace, convert them to EQName strings
-                for (KeyValuePair kvp : paramMap.keyValuePairs()) {
-                    AtomicValue k = kvp.key();
-                    if (k instanceof QNameValue && ((QNameValue)k).getStructuredQName().hasURI(NamespaceUri.SAXON)) {
-                        String s = ((QNameValue) k).getStructuredQName().getEQName();
-                        paramMap = paramMap.put(new StringValue(s), kvp.value());
-                    }
-                }
-                int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-                ProcessedOptions checkedOptions =
-                        getDetails().optionDetails.processSuppliedOptions(paramMap, context, version);
-                params = serializationParamsFromMap(checkedOptions, context);
+                params = serializationOptionsAsProperties(context, paramMap, getDetails().optionDetails);
+
             } else {
                 throw new XPathException("Second argument to fn:serialize() must either be an element named {"
                     + NamespaceConstant.OUTPUT + "}serialization-parameters, or a map (if using XPath 3.1)", "XPTY0004");
@@ -506,6 +439,21 @@ public class Serialize extends SystemFunction implements Callable {
         }
 
 
+    }
+
+    public static SerializationProperties serializationOptionsAsProperties(XPathContext context, MapItem paramMap, OptionsParameter optionDetails) throws XPathException {
+        SerializationProperties params;
+        // If any parameters are supplied as QNames in the Saxon namespace, convert them to EQName strings
+        for (KeyValuePair kvp : paramMap.keyValuePairs()) {
+            AtomicValue k = kvp.key();
+            if (k instanceof QNameValue && ((QNameValue)k).getStructuredQName().hasURI(NamespaceUri.SAXON)) {
+                String s = ((QNameValue) k).getStructuredQName().getEQName();
+                paramMap = paramMap.put(new StringValue(s), kvp.value());
+            }
+        }
+        ProcessedOptions checkedOptions = optionDetails.processSuppliedOptions(paramMap, context);
+        params = serializationParamsFromMap(checkedOptions, context);
+        return params;
     }
 
 }

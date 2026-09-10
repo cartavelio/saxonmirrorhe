@@ -21,7 +21,7 @@ import java.util.Optional;
 
 /**
  * This class represents the results of processing an options parameter, delivered as the result
- * of {@link OptionsParameter#processSuppliedOptions(MapItem, XPathContext, int)}
+ * of {@link OptionsParameter#processSuppliedOptions(MapItem, XPathContext)}
  */
 public class ProcessedOptions {
 
@@ -111,6 +111,19 @@ public class ProcessedOptions {
             return Optional.empty();
         }
         return Optional.of(value.head().getStringValue());
+    }
+
+    /**
+     * Get the value of an option as an integer, returning null if the option
+     * was absent and has no default
+     */
+
+    public Optional<Long> asOptionalLong(String option) {
+        GroundedValue value = optionValues.get(option);
+        if (value == null || value.head() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(Long.parseLong(value.head().getStringValue()));
     }
 
     /**

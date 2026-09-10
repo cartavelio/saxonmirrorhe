@@ -108,7 +108,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         int hostVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         ProcessedOptions checkedOptions =
-                getDetails().optionDetails.processSuppliedOptions(args, 1, context, hostVersion);
+                getDetails().optionDetails.processSuppliedOptions(args, 1, context);
 
         //Sequence variablesOption = null;
         //Sequence contextItemOption = null;

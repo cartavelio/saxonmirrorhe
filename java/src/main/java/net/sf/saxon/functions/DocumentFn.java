@@ -50,6 +50,7 @@ public class DocumentFn extends SystemFunction implements Callable {
         OptionsParameter docOptions = new OptionsParameter(40);
         docOptions.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
         docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        docOptions.addAllowedOption("retain-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("schema", SequenceType.SINGLE_STRING);
         docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         docOptions.addAllowedOption("strip-space", SequenceType.one(EnumerationUnionType.of("all", "none", "conditional")), new StringValue("conditional"));
@@ -155,7 +156,7 @@ public class DocumentFn extends SystemFunction implements Callable {
             // to ensure we get the default JDK parser implementation, rather than picking a parser
             // off the classpath.
 
-            ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
+            ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
             parseOptions = Doc.processOptions(checkedOptions, getRetainedStaticContext());
             GroundedValue b = checkedOptions.get("base-uri");
             if (b != null) {

@@ -44,6 +44,7 @@ public class ParseXml extends SystemFunction implements Callable {
         OptionsParameter options = new OptionsParameter(version);
         options.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
         options.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        options.addAllowedOption("retain-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -71,7 +72,7 @@ public class ParseXml extends SystemFunction implements Callable {
         }
 
         ProcessedOptions checkedOptions =
-                is40 ? getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, 40) : ProcessedOptions.EMPTY_OPTIONS;
+                is40 ? getDetails().optionDetails.processSuppliedOptions(arguments, 1, context) : ProcessedOptions.EMPTY_OPTIONS;
         
         ParseOptions parseOptions = context.getConfiguration().getParseOptions();
 

@@ -44,6 +44,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
     public static OptionsParameter makeOptionsParameter(int version) {
         OptionsParameter parseOptions = new OptionsParameter(version);
         parseOptions.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
+        parseOptions.addAllowedOption("retain-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         return parseOptions;
     }
@@ -63,7 +64,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         if (input == null) {
             return EmptySequence.INSTANCE;
         } else {
-            ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, 40);
+            ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(arguments, 1, context);
             String baseUri = getStaticBaseUriString();
             if (checkedOptions.containsKey("base-uri")) {
                 baseUri = checkedOptions.asString("base-uri");

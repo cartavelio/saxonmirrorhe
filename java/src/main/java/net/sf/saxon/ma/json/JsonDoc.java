@@ -85,7 +85,7 @@ public class JsonDoc extends SystemFunction  {
 
         int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         ProcessedOptions checkedOptions =
-                getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, version);
+                getDetails().optionDetails.processSuppliedOptions(arguments, 1, context);
 
         Item result = ParseJsonFn.parse(content, checkedOptions, context);
         return SequenceTool.itemOrEmpty(result);

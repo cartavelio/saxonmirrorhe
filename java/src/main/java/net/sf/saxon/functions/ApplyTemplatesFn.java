@@ -67,7 +67,7 @@ public class ApplyTemplatesFn extends SystemFunction {
         }
         RuleManager ruleManager = controller.getRuleManager();
         Mode mode;
-        ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, 40);
+        ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(arguments, 1, context);
         AtomicValue modeVal = (AtomicValue) checkedOptions.asItem("mode");
         if (modeVal instanceof QNameValue) {
             StructuredQName modeName = ((QNameValue) modeVal).getStructuredQName();

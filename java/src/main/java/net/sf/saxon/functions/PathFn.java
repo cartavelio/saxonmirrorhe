@@ -104,7 +104,7 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
         GNode origin = null;
         Map<NamespaceUri, String> namespaces = Collections.emptyMap();
 
-        ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, 40);
+        ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(arguments, 1, context);
 
         withIndexes = checkedOptions.asBoolean("indexes", true);
         lexical = checkedOptions.asBoolean("lexical", false);

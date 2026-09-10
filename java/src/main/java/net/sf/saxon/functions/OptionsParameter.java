@@ -105,18 +105,26 @@ public class OptionsParameter {
     }
 
     /**
+     * Get the XPath language version
+     * @return the language version (for example 31 or 40)
+     */
+
+    public int getLanguageVersion() {
+        return languageVersion;
+    }
+
+    /**
      * Process the options supplied on a function call, if any.
      *
-     * @param arguments the arguments to the function call
+     * @param arguments  the arguments to the function call
      * @param optionsArg the zero-based index of the options argument
-     * @param context  the dynamic evaluation context
-     * @param version  the XPath language version (times 10)
+     * @param context    the dynamic evaluation context
      * @return the options, after validation and expansion of defaults
      * @throws XPathException if any supplied options are invalid
      */
 
     public ProcessedOptions processSuppliedOptions(
-            Sequence[] arguments, int optionsArg, XPathContext context, int version) throws XPathException {
+            Sequence[] arguments, int optionsArg, XPathContext context) throws XPathException {
         MapItem options = null;
         if (arguments.length > optionsArg) {
             options = (MapItem) arguments[optionsArg].head();
@@ -124,7 +132,7 @@ public class OptionsParameter {
         if (options == null) {
             return getDefaultOptions();
         }
-        return processSuppliedOptions(options, context, version);
+        return processSuppliedOptions(options, context);
     }
 
 
@@ -135,12 +143,11 @@ public class OptionsParameter {
      *
      * @param supplied the supplied options as an XPath map object
      * @param context  the dynamic evaluation context
-     * @param version the XPath language version (times 10)
      * @return the validated options as a Java map
      * @throws XPathException if any supplied options are invalid
      */
 
-    public ProcessedOptions processSuppliedOptions(MapItem supplied, XPathContext context, int version) throws XPathException {
+    public ProcessedOptions processSuppliedOptions(MapItem supplied, XPathContext context) throws XPathException {
         Map<String, GroundedValue> result = new HashMap<>();
         Configuration config = context.getConfiguration();
         CoercionRules coercionRules = CoercionRules.forVersion(config, languageVersion);
@@ -152,7 +159,7 @@ public class OptionsParameter {
         }
 
         // A 4.0 rule: reject mis-spelt option names
-        if (version >= 40) {
+        if (getLanguageVersion() >= 40) {
             for (KeyValuePair kvp : supplied.keyValuePairs()) {
                 if (!(kvp.key() instanceof StringValue && allowedOptions.containsKey(kvp.key().getStringValue())) &&
                         !(kvp.key() instanceof QNameValue && !((QNameValue) kvp.key()).getNamespaceURI().isEmpty())) {

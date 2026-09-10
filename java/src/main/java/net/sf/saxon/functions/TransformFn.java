@@ -551,7 +551,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
         int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         ProcessedOptions options =
-                getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context, version);
+                getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context);
 
         Sequence vendorOptionsValue = options.get("vendor-options");
         MapItem vendorOptions = vendorOptionsValue == null ? null : (MapItem) vendorOptionsValue.head();

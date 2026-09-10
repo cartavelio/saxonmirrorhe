@@ -134,25 +134,6 @@ public class PortableNamedXNodeType extends XNodeType {
     }
 
 
-
-//    /**
-//     * Get the fingerprint required
-//     */
-//
-//    @Override
-//    public int getFingerprint() {
-//        return -1;
-//    }
-
-//    /**
-//     * Get the name of the nodes matched by this nodetest, if it matches a specific name.
-//     * Return null if the node test matches nodes of more than one name
-//     */
-//    @Override
-//    public StructuredQName getMatchingNodeName() {
-//        return new StructuredQName("", uri, localName);
-//    }
-
     /**
      * Determine the types of nodes to which this pattern applies. Used for optimisation.
      * For patterns that match nodes of several types, return Type.NODE
@@ -168,18 +149,13 @@ public class PortableNamedXNodeType extends XNodeType {
 
     public String toString() {
         String n = qNameTest.toString();
-        switch (nodeKind) {
-            case Type.ELEMENT:
-                return "element(" + n + ")";
-            case Type.ATTRIBUTE:
-                return "attribute(" + n + ")";
-            case Type.PROCESSING_INSTRUCTION:
-                return "processing-instruction(" + n + ')';
-            case Type.NAMESPACE:
-                return "namespace-node(" + n + ')';
-            default:
-                return "???(" + n + ")";
-        }
+        return switch (nodeKind) {
+            case Type.ELEMENT -> "element(" + n + ")";
+            case Type.ATTRIBUTE -> "attribute(" + n + ")";
+            case Type.PROCESSING_INSTRUCTION -> "processing-instruction(" + n + ')';
+            case Type.NAMESPACE -> "namespace-node(" + n + ')';
+            default -> "???(" + n + ")";
+        };
     }
 
     /**

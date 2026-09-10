@@ -68,7 +68,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
 
         int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         ProcessedOptions options =
-                getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, version);
+                getDetails().optionDetails.processSuppliedOptions(arguments, 1, context);
         o.indent = options.asBoolean("indent", false);
         o.escapeSolidus = options.asBoolean("escape-solidus", true);
         return o;

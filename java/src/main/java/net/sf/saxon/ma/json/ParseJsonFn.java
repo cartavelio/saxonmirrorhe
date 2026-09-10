@@ -62,7 +62,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         ProcessedOptions checkedOptions = null;
         if (options != null) {
             int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-            checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, version);
+            checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
         }
         return parse(input.codePoints(), checkedOptions, context);
     }

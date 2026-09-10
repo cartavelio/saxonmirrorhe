@@ -74,7 +74,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
             if (arg1 instanceof StringValue) {
                 encoding = arg1.getStringValue();
             } else if (arg1 instanceof MapItem) {
-                ProcessedOptions options = OPTION_DETAILS.processSuppliedOptions(((MapItem)arg1), context, 40);
+                ProcessedOptions options = OPTION_DETAILS.processSuppliedOptions(((MapItem)arg1), context);
                 Optional<String> encodingOption = options.asOptionalString("encoding");
                 if (encodingOption.isPresent()) {
                     encoding = encodingOption.get();
@@ -123,7 +123,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                     if (arg1 instanceof StringValue) {
                         encoding = arg1.getStringValue();
                     } else if (arg1 instanceof MapItem) {
-                        ProcessedOptions options = OPTION_DETAILS.processSuppliedOptions(((MapItem)arg1), context, 40);
+                        ProcessedOptions options = OPTION_DETAILS.processSuppliedOptions(((MapItem)arg1), context);
                         GroundedValue encodingOption = options.get("encoding");
                         if (encodingOption != null) {
                             encoding = encodingOption.getStringValue();

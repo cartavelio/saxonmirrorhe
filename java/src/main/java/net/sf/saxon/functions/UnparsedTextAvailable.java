@@ -44,7 +44,7 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
             if (arg1 instanceof StringValue) {
                 encoding = arg1.getStringValue();
             } else if (arg1 instanceof MapItem) {
-                ProcessedOptions options = UnparsedText.OPTION_DETAILS.processSuppliedOptions(((MapItem) arg1), context, 40);
+                ProcessedOptions options = UnparsedText.OPTION_DETAILS.processSuppliedOptions(((MapItem) arg1), context);
                 String encodingOption = options.asString("encoding");
                 if (encodingOption != null) {
                     encoding = encodingOption;
