@@ -21,6 +21,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
@@ -42,7 +43,7 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
             new RecordType.Field("next",
                                  SequenceType.one(
                                          // TODO: the precise type is recursive
-                                         new SpecificFunctionType(SequenceType.one(MapType.ANY_MAP_TYPE))),
+                                         new SpecificFunctionType(SequenceType.one(new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_ITEM)))),
                                  false),
             new RecordType.Field("permute",
                                  SequenceType.one(
