@@ -7,8 +7,6 @@
 
 package net.sf.saxon;
 
-import com.saxonica.config.NativePlatformPE;
-
 /**
  * The Version class holds the SAXON version information.
  */
