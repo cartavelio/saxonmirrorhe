@@ -31,7 +31,8 @@ public class CharacterMap {
     /**
      * Create a CharacterMap from a raw map of integers to strings
      *
-     * @param map the mapping of integer Unicode character codes to strings. This must not be subsequently changed.
+     * @param name the name of the CharacterMap
+     * @param map  the mapping of integer Unicode character codes to strings. This must not be subsequently changed.
      */
 
     public CharacterMap(StructuredQName name, IntHashMap<String> map) {
@@ -108,6 +109,7 @@ public class CharacterMap {
      *                    and after replacement characters. This is done to signal
      *                    that output escaping of these characters is disabled. The flag is set to true when writing
      *                    XML or HTML, but to false when writing TEXT.
+     * @return a string with all characters expanded
      */
 
     /*@NotNull*/

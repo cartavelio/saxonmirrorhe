@@ -86,7 +86,7 @@ public class LetClause extends Clause {
      * input from another tuple stream which this clause modifies
      *
      * @param base    the input tuple stream
-     * @param context
+     * @param context the XPath context
      * @return the output tuple stream
      */
 
@@ -100,8 +100,8 @@ public class LetClause extends Clause {
      * output to another tuple stream
      *
      * @param destination the output tuple stream
-     * @param output the destination for the result
-     * @param context
+     * @param output      the destination for the result
+     * @param context     the XPath context
      * @return the push tuple stream that implements the functionality of this clause of the FLWOR
      *         expression
      */

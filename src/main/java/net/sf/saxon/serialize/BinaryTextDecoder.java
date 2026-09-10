@@ -42,6 +42,7 @@ public class BinaryTextDecoder extends ProxyReceiver {
      * Set output properties
      *
      * @param details the output serialization properties
+     * @throws XPathException if any error occurs
      */
 
     public void setOutputProperties(Properties details) throws XPathException {

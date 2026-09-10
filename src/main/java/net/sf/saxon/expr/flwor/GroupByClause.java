@@ -314,6 +314,7 @@ public class GroupByClause extends Clause {
      * Callback to get the comparison key for a tuple. Two tuples are equal if their comparison
      * keys compare equal using the equals() method.
      * @param t the tuple whose comparison key is required
+     * @param comparers
      * @return a comparison key suitable for comparing with other tuples
      */
 

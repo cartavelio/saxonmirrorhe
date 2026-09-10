@@ -152,8 +152,8 @@ public class JavaPlatform implements Platform {
      * On Java we create namespace information from the JAXP XPath static context.
      * On the .NET platform we do nothing.
      *
-     * @param retainedStaticContext
-     * @param sc
+     * @param retainedStaticContext the retained static context
+     * @param sc                    the supplied static context
      * @return boolean
      * @since 9.7.0.5
      */

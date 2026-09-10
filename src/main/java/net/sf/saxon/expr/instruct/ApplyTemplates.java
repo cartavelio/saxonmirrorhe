@@ -58,7 +58,9 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
      * @param useTailRecursion true if this instruction is the last in its template
      * @param implicitSelect   true if the select expression is implicit, that is, if there was no explicit
      *                         select expression in the call. This information is used only to make error messages more meaningful.
+     * @param inStreamableConstruct
      * @param mode             the mode specified on apply-templates
+     * @param ruleManager      the rule manager
      */
 
     public ApplyTemplates(  Expression select,
@@ -99,6 +101,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
 
     /**
      * Set the separator expression (Saxon extension)
+     * @param separator the separator expression
      */
 
     public void setSeparatorExpression(Expression separator) {

@@ -49,6 +49,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      *                           where this is established dynamically
      * @param useTailRecursion true if the call is potentially tail recursive
      *                         where the name of the called template is to be calculated dynamically
+     * @param inStreamable
      */
 
     public CallTemplate(NamedTemplate template, StructuredQName calledTemplateName, boolean useTailRecursion, boolean inStreamable) {
@@ -506,6 +507,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
          * @param params            the parameters to be supplied to the called template
          * @param tunnelParams      the tunnel parameter supplied to the called template
          * @param instruction       the xsl:call-template instruction
+         * @param output            the destination for the result
          * @param evaluationContext saved context information from the Controller (current mode, etc)
          *                          which must be reset to ensure that the template is called with all the context information
          *                          intact

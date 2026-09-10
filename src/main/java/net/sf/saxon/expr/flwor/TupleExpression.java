@@ -159,7 +159,7 @@ public class TupleExpression extends Expression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings the rebinding map
      */
 
     /*@NotNull*/
@@ -219,6 +219,7 @@ public class TupleExpression extends Expression {
      *
      * @param context identifies the stack frame to be modified
      * @param tuple   the tuple containing the current values
+     * @throws XPathException if any error occurs
      */
 
     public void setCurrentTuple(XPathContext context, Tuple tuple) throws XPathException {

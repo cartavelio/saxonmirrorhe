@@ -64,7 +64,7 @@ public class OuterForExpression extends ForExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings the rebinding map
      */
 
     /*@NotNull*/

@@ -155,7 +155,10 @@ public class ParserExtension {
      * For backwards compatibility with Saxon 9.2 we allow the "*" to be omitted for the time being
      * The "function(" has already been read
      *
+     * @param p           the XPath parser
      * @param annotations the list of annotation assertions for this function item type
+     * @return the ItemType after parsing
+     * @throws XPathException if a static error is found
      */
 
     public ItemType parseFunctionItemType(XPathParser p, AnnotationList annotations) throws XPathException {
@@ -209,6 +212,7 @@ public class ParserExtension {
     /**
      * Parse an ItemType within a SequenceType
      *
+     * @param p the XPath parser
      * @return the ItemType after parsing
      * @throws XPathException if a static error is found
      */
@@ -220,7 +224,10 @@ public class ParserExtension {
 
     /**
      * Parse an extended XSLT pattern in the form ~itemType (predicate)*
+     *
+     * @param p the XPath parser
      * @return the equivalent expression in the form .[. instance of type] (predicate)*
+     * @throws XPathException if a static error is found
      */
 
     public Expression parseTypePattern(XPathParser p) throws XPathException {
@@ -306,10 +313,12 @@ public class ParserExtension {
      * Process a function call in which one or more of the argument positions are
      * represented as "?" placemarkers (indicating partial application or currying)
      *
+     * @param parser       the XPath parser
      * @param offset       offset in the query source of the start of the expression
      * @param name         the function call (as if there were no currying)
      * @param args         the arguments (with EmptySequence in the placemarker positions)
      * @param placeMarkers the positions of the placemarkers    @return the curried function
+     * @return the curried function
      * @throws XPathException if a dynamic error occurs
      */
 
@@ -367,6 +376,7 @@ public class ParserExtension {
     /**
      * Parse a type alias declaration. Allowed only in Saxon-PE and higher
      *
+     * @param p the XPath parser
      * @throws XPathException if parsing fails
      */
 
@@ -378,6 +388,7 @@ public class ParserExtension {
      * Parse the "declare revalidation" declaration.
      * Syntax: not allowed unless XQuery update is in use
      *
+     * @param p the XPath parser
      * @throws XPathException if the syntax is incorrect, or is not allowed in this XQuery processor
      */
 
@@ -388,7 +399,8 @@ public class ParserExtension {
     /**
      * Parse an updating function declaration (allowed in XQuery Update only)
      *
-     * @throws XPathException if parsing fails or if updating functions are not allowed
+     * @param p the XPath parser
+     * @throws XPathException if parsing fails PathMapor if updating functions are not allowed
      */
 
     public void parseUpdatingFunctionDeclaration(XQueryParser p) throws XPathException {
@@ -403,6 +415,7 @@ public class ParserExtension {
      * Parse a for-member expression (Saxon extension):
      * for member $x in expr return expr
      *
+     * @param p the XPath parser
      * @return the resulting subexpression
      * @throws XPathException if any error is encountered
      */
