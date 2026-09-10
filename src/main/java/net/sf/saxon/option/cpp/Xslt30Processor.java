@@ -1065,7 +1065,7 @@ public class Xslt30Processor extends SaxonCAPI {
             transformer.applyTemplates(valueSeq, serializer);
         } else {
             if (SaxonCAPI.debug) {
-                System.err.println("DEBUG applyTemplatesReturningFile sourceObj: " + (sourceObj == null ? "null found" : sourceObji.getClass().getName()));
+                System.err.println("DEBUG applyTemplatesReturningFile sourceObj: " + (sourceObj == null ? "null found" : sourceObj.getClass().getName()));
             }
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
         }
