@@ -21,10 +21,6 @@ import net.sf.saxon.z.IntHashMap;
  */
 public interface RegexIterator extends SequenceIterator {
 
-    public record Group (int index, int startPosition, UnicodeString content) {
-
-    }
-
     /**
      * Get the next item in the sequence. This method changes the state of the
      * iterator.
@@ -68,7 +64,7 @@ public interface RegexIterator extends SequenceIterator {
      * Get all the groups associated with the current match
      */
 
-    IntHashMap<Group> getCurrentRegexGroups();
+    IntHashMap<RegexGroupInfo> getCurrentRegexGroups();
 
     /**
      * Process a matching substring, performing specified actions at the start and end of each matching

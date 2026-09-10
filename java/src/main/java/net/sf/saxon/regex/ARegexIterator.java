@@ -212,14 +212,14 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public IntHashMap<Group> getCurrentRegexGroups() {
+    public IntHashMap<RegexGroupInfo> getCurrentRegexGroups() {
         int c = _matcher.getParenCount() - 1;
-        IntHashMap<Group> groups = new IntHashMap<>(c);
+        IntHashMap<RegexGroupInfo> groups = new IntHashMap<>(c);
         for (int i = 1; i <= c; i++) {
             final int position = _matcher.getParenStart(i);
             if (position >= 0) {
                 final UnicodeString value = _matcher.search.substring(position, _matcher.getParenEnd(i));
-                groups.put(i, new Group(i, position, value));
+                groups.put(i, new RegexGroupInfo(i, position, value));
             }
         }
         return groups;

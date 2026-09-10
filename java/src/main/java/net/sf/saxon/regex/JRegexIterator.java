@@ -168,7 +168,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
     }
 
     @Override
-    public IntHashMap<Group> getCurrentRegexGroups() {
+    public IntHashMap<RegexGroupInfo> getCurrentRegexGroups() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
