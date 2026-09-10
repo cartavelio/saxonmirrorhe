@@ -11,6 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -194,6 +195,8 @@ public class JsonParser {
                 Item d = parseNumericLiteral(lexical, flags, tokenizer.lineNumber, context);
                 if (d != null) {
                     handler.writeNumeric(lexical, d);
+                } else {
+                    handler.writeNull();
                 }
                 break;
 
@@ -360,9 +363,8 @@ public class JsonParser {
             }
             if (numberParser != null) {
                 Sequence[] args = new Sequence[1];
-                args[0] = new StringValue(token);
-                Sequence result = SystemFunction.dynamicCall(numberParser, context, args).head();
-                return result.head();
+                args[0] = StringValue.makeUntypedAtomic(StringTool.fromCharSequence(token));
+                return SystemFunction.dynamicCall(numberParser, context, args).head();
             } else {
                 return new DoubleValue(StringToDouble.getInstance().stringToNumber(StringView.tidy(token)));
             }

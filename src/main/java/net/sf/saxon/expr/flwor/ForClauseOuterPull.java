@@ -11,6 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 
@@ -18,6 +19,8 @@ import net.sf.saxon.value.Int64Value;
  * This class represents the tuple stream returned by a "for" clause in a FLWOR expression
  */
 public class ForClauseOuterPull extends ForClausePull {
+
+    final static Int64Value TYPED_ZERO = new Int64Value(0, BuiltInAtomicType.NON_NEGATIVE_INTEGER);
 
     public ForClauseOuterPull(TuplePull base, ForClause forClause) {
         super(base, forClause);
@@ -49,7 +52,7 @@ public class ForClauseOuterPull extends ForClausePull {
                     if (forClause.getPositionVariable() != null) {
                         context.setLocalVariable(
                                 forClause.getPositionVariable().getLocalSlotNumber(),
-                                Int64Value.ZERO);
+                                TYPED_ZERO);
                     }
                     currentIteration = null;
                     return true;
@@ -62,7 +65,7 @@ public class ForClauseOuterPull extends ForClausePull {
                 if (forClause.getPositionVariable() != null) {
                     context.setLocalVariable(
                             forClause.getPositionVariable().getLocalSlotNumber(),
-                            new Int64Value(currentIteration.position()));
+                            new Int64Value(currentIteration.position(), BuiltInAtomicType.NON_NEGATIVE_INTEGER));
                 }
                 return true;
             } else {

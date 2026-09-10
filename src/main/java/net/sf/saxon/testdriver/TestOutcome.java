@@ -940,6 +940,7 @@ public class TestOutcome {
 
     private boolean assertNonAtomicPermutation(XPathSelector expected, SingleResultDoc result, XPathCompiler assertXpc) throws SaxonApiException {
         // For assert-permutation involving non-atomic values, we compare the adaptive-serialization representation of the items
+        // TODO: this isn't good enough for comparing maps, where the serialization outputs entries in random order
         try {
             int expectedItems = 0;
             PipelineConfiguration pipe = assertXpc.getProcessor().getUnderlyingConfiguration().makePipelineConfiguration();

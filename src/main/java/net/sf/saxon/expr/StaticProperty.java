@@ -184,7 +184,7 @@ public abstract class StaticProperty {
     public static final int EXACTLY_ONE = ALLOWS_ONE;
 
     /**
-     * Occurence indicator when an empty sequence is required
+     * Occurrence indicator when an empty sequence is required
      */
 
     public static final int EMPTY = ALLOWS_ZERO;

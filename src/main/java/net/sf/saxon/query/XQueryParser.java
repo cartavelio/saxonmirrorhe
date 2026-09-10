@@ -2561,7 +2561,10 @@ public class XQueryParser extends XPathParser {
                 if (!scanOnly && posQName.equals(explicitQName)) {
                     grumble("The two variables declared in a single 'for' clause must have different names", "XQST0089");
                 }
-                LocalVariableBinding pos = new LocalVariableBinding(posQName, SequenceType.SINGLE_INTEGER);
+                SequenceType positionVarType = allowingEmpty
+                        ? BuiltInAtomicType.NON_NEGATIVE_INTEGER.one()
+                        : BuiltInAtomicType.POSITIVE_INTEGER.one();
+                LocalVariableBinding pos = new LocalVariableBinding(posQName, positionVarType);
                 clause.setPositionVariable(pos);
                 nextToken();
             }
@@ -2890,7 +2893,7 @@ public class XQueryParser extends XPathParser {
             }
             if (isKeyword("at")) {
                 nextToken();
-                LocalVariableBinding startPositionVar = new LocalVariableBinding(readVariableName(), SequenceType.SINGLE_INTEGER);
+                LocalVariableBinding startPositionVar = new LocalVariableBinding(readVariableName(), BuiltInAtomicType.POSITIVE_INTEGER.one());
                 clause.setVariableBinding(WindowClause.START_ITEM_POSITION, startPositionVar);
                 declareRangeVariable(startPositionVar);
             }
@@ -2935,7 +2938,7 @@ public class XQueryParser extends XPathParser {
             }
             if (isKeyword("at")) {
                 nextToken();
-                LocalVariableBinding endPositionVar = new LocalVariableBinding(readVariableName(), SequenceType.SINGLE_INTEGER);
+                LocalVariableBinding endPositionVar = new LocalVariableBinding(readVariableName(), BuiltInAtomicType.POSITIVE_INTEGER.one());
                 clause.setVariableBinding(WindowClause.END_ITEM_POSITION, endPositionVar);
                 declareRangeVariable(endPositionVar);
             }

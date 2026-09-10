@@ -13,6 +13,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -22,6 +23,8 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static net.sf.saxon.type.Affinity.DISJOINT;
@@ -82,6 +85,49 @@ public class TypeChecker {
 
         if (supplied.implementsStaticTypeCheck()) {
             return supplied.staticTypeCheck(req, false, roleSupplier, visitor);
+        }
+
+        // If the required type is empty-sequence(), simply add a cardinality check
+
+        if (req.getCardinality() == StaticProperty.ALLOWS_ZERO) {
+            return CardinalityChecker.makeCardinalityChecker(supplied, req.getCardinality(), roleSupplier);
+        }
+
+        // If the required type is a choice type, check (recursively) against each choice in turn;
+        // generate a try/catch expression that tries all the alternatives
+
+        if (req.getPrimaryType() instanceof ChoiceItemType) {
+            NamePool namePool = visitor.getConfiguration().getNamePool();
+            List<XPathException> errors = new ArrayList<>();
+            Expression result =  null;
+            for (Object o : ((ChoiceItemType)req.getPrimaryType()).getMemberTypes()) {
+                ItemType it = ((ItemType)o);
+                SequenceType st = SequenceType.makeSequenceType(it, req.getCardinality());
+                try {
+                    Expression checked = staticTypeCheck(supplied, st, roleSupplier, visitor);
+                    if (result == null) {
+                        result = checked;
+                    } else {
+                        result = new TryCatch(result);
+                        ((TryCatch)result).addCatchExpression(
+                                new NameTest(Type.ELEMENT, NamespaceUri.ERR, "XPTY0004", namePool),
+                                checked);
+                    }
+                } catch (XPathException err) {
+                    if (err.isTypeError()) {
+                        errors.add(err);
+                    }
+                }
+            }
+            if (result == null) {
+                // TODO: better error message
+                throw errors.get(0);
+            }
+            // Finally add a cardinality checker
+            if (req.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
+                result = CardinalityChecker.makeCardinalityChecker(result, req.getCardinality(), roleSupplier);
+            }
+            return result;
         }
 
         Expression exp = supplied;
@@ -471,6 +517,7 @@ public class TypeChecker {
 
         return exp;
     }
+
 
     /**
      * Make an expression that performs type promotion on a supplied sequence

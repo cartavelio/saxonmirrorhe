@@ -914,10 +914,19 @@ public class XPathParser {
                     CastingTarget at;
                     if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("union")) {
                         // Saxon 9.8 / XPath 4.0 proposed extension
+                        // TODO: this syntax is obsolete; drop it
                         at = (CastingTarget) parseItemType();
-                    } else if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")){
-                        //XPath 4.0 proposed extension
+                    } else if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
+                        //XPath 4.0 extension
                         at = (CastingTarget) parseItemType();
+                    } else if (allowXPath40Syntax && t.currentToken == Token.LPAR) {
+                        ItemType target = parseItemType();
+                        if (target instanceof CastingTarget) {
+                            at = (CastingTarget)target;
+                        } else {
+                            grumble("Item type " + target + " cannot be used as the target of a cast/castable expression");
+                            return null;
+                        }
                     } else {
                         expect(Token.NAME);
                         if (scanOnly) {
@@ -1380,7 +1389,7 @@ public class XPathParser {
             if (positionVarQName.equals(varQName)) {
                 grumble("Position variable in 'for' expression has the same name as the range variable", "XQST0089");
             }
-            positionBinding = new LocalVariableBinding(positionVarQName, SequenceType.SINGLE_INTEGER);
+            positionBinding = new LocalVariableBinding(positionVarQName, BuiltInAtomicType.POSITIVE_INTEGER.one());
             result.setPositionVariable(positionBinding);
             nextToken();
         }
@@ -1991,6 +2000,7 @@ public class XPathParser {
                     nextToken();
                     break;
                 case "union":
+                    warning("The syntax 'union(a,b)' has been dropped from the 4.0 specification: use '(a|b)' instead.", SaxonErrorCode.SXWN9000);
                     primaryType = parseUnionType();
                     break;
                 case "enum":
@@ -2007,22 +2017,23 @@ public class XPathParser {
                     if (language != ParsedLanguage.XSLT_PATTERN) {
                         grumble("The syntax type(N) is allowed only in XSLT patterns, not in XPath expressions");
                     }
-                    nextToken();
-                    if (t.currentToken == Token.NAME) {
-                        StructuredQName qName = getQNameParser().parse(t.currentTokenValue, NamespaceUri.NULL);
-                        ItemType realType = getStaticContext().resolveTypeAlias(qName);
-                        if (realType != null) {
-                            nextToken();
-                            expect(Token.RPAR);
-                            nextToken();
-                            return realType;
-                        }
-                    }
-
-                    ItemType it = parseItemType();
-                    expect(Token.RPAR);
-                    nextToken();
-                    return it;
+                    return parseTypePattern();
+//                    nextToken();
+//                    if (t.currentToken == Token.NAME) {
+//                        StructuredQName qName = getQNameParser().parse(t.currentTokenValue, NamespaceUri.NULL);
+//                        ItemType realType = getStaticContext().resolveTypeAlias(qName);
+//                        if (realType != null) {
+//                            nextToken();
+//                            expect(Token.RPAR);
+//                            nextToken();
+//                            return realType;
+//                        }
+//                    }
+//
+//                    ItemType it = parseItemType();
+//                    expect(Token.RPAR);
+//                    nextToken();
+//                    return it;
 
                 default:
                     primaryType = parseKindTest();
@@ -2194,8 +2205,34 @@ public class XPathParser {
             }
         }
         nextToken();
-        return new LocalUnionType(memberTypes);
+        return new LocalUnionType<>(memberTypes);
 
+    }
+
+    /**
+     * Parse a type pattern (XSLT 4.0 extension).
+     * Syntax: "type" "(" itemType ("|" itemType)* ")"
+     *
+     * @return the item type
+     * @throws XPathException if a syntax error is found
+     */
+
+    public ItemType parseTypePattern() throws XPathException {
+        // The initial "type(" has been read
+        checkLanguageVersion40();
+        nextToken();
+        List<ItemType> memberTypes = new ArrayList<>(6);
+        while (true) {
+            memberTypes.add(parseItemType());
+            if (t.currentToken == Token.UNION && !t.currentTokenValue.equals("union")) {
+                nextToken();
+            } else {
+                break;
+            }
+        }
+        expect(Token.RPAR);
+        nextToken();
+        return ChoiceItemType.makeChoiceItemType(memberTypes);
     }
 
     /**
@@ -2209,7 +2246,7 @@ public class XPathParser {
         // The initial "enum(" has been read
         checkLanguageVersion40();
         nextToken();
-        List<AtomicType> singletonEnums = new ArrayList<>();
+        List<SingletonEnumType> singletonEnums = new ArrayList<>();
 
         while (true) {
             expect(Token.STRING_LITERAL);
@@ -2372,22 +2409,22 @@ public class XPathParser {
             grumble("Parenthesized item types require 3.0 to be enabled");
         }
         nextToken();
-        ItemType primaryType = parseItemType();
-        while (primaryType instanceof NodeTest && language == ParsedLanguage.EXTENDED_ITEM_TYPE
-                && t.currentToken != Token.RPAR) {
-            switch (t.currentToken) {
-                case Token.UNION:
-                case Token.EXCEPT:
-                case Token.INTERSECT:
-                    int op = t.currentToken;
-                    nextToken();
-                    primaryType = new CombinedNodeTest((NodeTest) primaryType, op, (NodeTest) parseItemType());
-                    break;
+        List<ItemType> alternatives = new ArrayList<>();
+        alternatives.add(parseItemType());
+        while (allowXPath40Syntax && t.currentToken == Token.UNION) {
+            if (t.currentTokenValue.equals("union")) {
+                grumble("In an ItemType, the union operator must be written as '|'");
             }
+            nextToken();
+            alternatives.add(parseItemType());
         }
         expect(Token.RPAR);
         nextToken();
-        return primaryType;
+        if (alternatives.size() == 1) {
+            return alternatives.get(0);
+        } else {
+            return ChoiceItemType.makeChoiceItemType(alternatives);
+        }
     }
 
 

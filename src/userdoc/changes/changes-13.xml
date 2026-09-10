@@ -103,6 +103,18 @@
             <code>@price otherwise @cost * 2</code> now parses as <code>@price otherwise (@cost * 2)</code>,
             not as <code>(@price otherwise @cost) * 2</code>.</p>
         
+        <p>In XPath, the <code>for</code> and <code>let</code> expressions now accept a larger subset
+        of XQuery <code>FLWOR</code> syntax. Specifically:</p>
+        
+        <ul>
+            <li><p>Both <code>for</code> and <code>let</code> allow an <code>as</code> clause to
+            declare the variable's type.</p></li>
+            <li><p>The <code>for</code> expression allows an <code>at</code> clause to declare
+            a position variable.</p></li>
+            <li><p><code>for</code> and <code>let</code> clauses can be mixed without an intervening
+            <code>return</code>, for example <code>for $x in $X let $y := $x + 1 return f($y)</code>.</p></li>
+        </ul>
+        
         <p>The second <code>$position</code> argument is available on function callbacks made by the functions
             <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-of</code>, <code>some</code>.</p>
         
@@ -140,6 +152,8 @@
         
         <p>The new function <code>fn:sort-with</code> is implemented.</p>
         
+        <p>The new function <code>fn:collation</code> is implemented.</p>
+        
         <p>The deep-lookup operator <code>??</code> is implemented.</p>
         
         <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
@@ -159,12 +173,20 @@
         Most practical use cases are unaffected, but:</p>
         
         <ul>
-            <li><p>Casting a string to an enumeration type is now allowed</p></li>
+            <li><p>Casting a string to an enumeration type is now allowed.</p></li>
             <li><p>The test <code>"A" instance of enum("A", "B")</code> now returns false;
             for an <code>instance of</code> test to work, the string must be converted to the
             enumeration type; this can be done with an explicit cast, or it can be done
             implicitly by applying the coercion rules.</p></li>
         </ul>
+        
+        <p>The ItemType syntax <code>union(a, b)</code> has been dropped from the 4.0 specification,
+        but remains supported in Saxon for the time being. The replacement syntax is <code>(a|b)</code>
+        (the parentheses are mandatory). The new syntax is currently supported only for atomic types
+        or NodeTests.</p>
+        
+        <p>The adaptive serialization method has changed to output maps as <code>{...}</code>
+        rather than <code>map{...}</code>.</p>
         
         <h2>Dropped experimental features</h2>
         

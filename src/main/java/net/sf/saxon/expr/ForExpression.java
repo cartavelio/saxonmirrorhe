@@ -619,6 +619,7 @@ public class ForExpression extends Assignation {
             final int actionCardinality = expr.getAction().getCardinality();
             final int slot = expr.getLocalSlotNumber();
             final int positionSlot = expr.positionVariable == null ? -1 : expr.positionVariable.getLocalSlotNumber();
+            final AtomicType positionLabel = BuiltInAtomicType.POSITIVE_INTEGER;
 
             if (Cardinality.allowsMany(actionCardinality)) {
                 final PullEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPull();
@@ -636,7 +637,7 @@ public class ForExpression extends Assignation {
                         FocusTrackingIterator fti = new FocusTrackingIterator(base);
                         return new MappingIterator(fti, item -> {
                             context.setLocalVariable(slot, item);
-                            context.setLocalVariable(positionSlot, Int64Value.makeIntegerValue(fti.position()));
+                            context.setLocalVariable(positionSlot, new Int64Value(fti.position(), positionLabel));
                             return actionEval.iterate(context);
                         });
                     };
@@ -657,7 +658,7 @@ public class ForExpression extends Assignation {
                         FocusTrackingIterator fti = new FocusTrackingIterator(base);
                         return new ItemMappingIterator(fti, item -> {
                             context.setLocalVariable(slot, item);
-                            context.setLocalVariable(positionSlot, Int64Value.makeIntegerValue(fti.position()));
+                            context.setLocalVariable(positionSlot, new Int64Value(fti.position(), positionLabel));
                             return actionEval.eval(context);
                         });
                     };
@@ -683,12 +684,13 @@ public class ForExpression extends Assignation {
                 };
             } else {
                 final int positionSlot = expr.positionVariable.getLocalSlotNumber();
+                final AtomicType label = BuiltInAtomicType.POSITIVE_INTEGER;
                 return (out, context) -> {
                     SequenceIterator base = selectEval.iterate(context);
                     FocusTrackingIterator fti = new FocusTrackingIterator(base);
                     for (Item item; (item = fti.next()) != null; ) {
                         context.setLocalVariable(slot, item);
-                        context.setLocalVariable(positionSlot, Int64Value.makeIntegerValue(fti.position()));
+                        context.setLocalVariable(positionSlot, new Int64Value(fti.position(), label));
                         TailCall tc = actionEval.processLeavingTail(out, context);
                         dispatchTailCall(tc);
                     }

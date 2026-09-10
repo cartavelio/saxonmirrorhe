@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -179,7 +180,7 @@ public class WindowClausePush extends TuplePush {
                 }
                 binding = clause.getVariableBinding(WindowClause.START_ITEM_POSITION);
                 if (binding != null) {
-                    context.setLocalVariable(binding.getLocalSlotNumber(), new Int64Value(earliestWindow.startPosition));
+                    context.setLocalVariable(binding.getLocalSlotNumber(), new Int64Value(earliestWindow.startPosition, BuiltInAtomicType.POSITIVE_INTEGER));
                 }
                 binding = clause.getVariableBinding(WindowClause.START_NEXT_ITEM);
                 if (binding != null) {
@@ -195,7 +196,7 @@ public class WindowClausePush extends TuplePush {
                 }
                 binding = clause.getVariableBinding(WindowClause.END_ITEM_POSITION);
                 if (binding != null) {
-                    context.setLocalVariable(binding.getLocalSlotNumber(), new Int64Value(earliestWindow.endPosition));
+                    context.setLocalVariable(binding.getLocalSlotNumber(), new Int64Value(earliestWindow.endPosition, BuiltInAtomicType.POSITIVE_INTEGER));
                 }
                 binding = clause.getVariableBinding(WindowClause.END_NEXT_ITEM);
                 if (binding != null) {

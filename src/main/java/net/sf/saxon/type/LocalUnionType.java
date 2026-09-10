@@ -19,18 +19,15 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * A class that represents a union type declared locally, for example using
  * the (Saxon-extension) item-type syntax union(a,b,c), or internally in Java code.
  */
 
-public class LocalUnionType implements PlainType, UnionType {
-
-    private List<AtomicType> memberTypes;
+public class LocalUnionType<T extends AtomicType> extends ChoiceItemType<T> implements PlainType, UnionType {
 
     /**
      * Get the genre of this item
@@ -47,35 +44,20 @@ public class LocalUnionType implements PlainType, UnionType {
         return new StructuredQName("", NamespaceUri.ANONYMOUS, "U" + hashCode());
     }
 
-    @Override
-    public String getDescription() {
-        StringBuilder builder = new StringBuilder("union(");
-        for (AtomicType at : memberTypes) {
-            builder.append(at.getDescription());
-            builder.append(", ");
-        }
-        builder.setLength(builder.length() - 2);
-        builder.append(")");
-        return builder.toString();
-    }
-
     /**
      * Creates a new Union type.
      *
      * @param memberTypes the atomic member types of the union
      */
 
-    public LocalUnionType(List<AtomicType> memberTypes) {
-        this.memberTypes = memberTypes;
+    public LocalUnionType(List<T> memberTypes) {
+        super(memberTypes);
     }
 
-    public LocalUnionType(AtomicType... memberTypes) {
-        this.memberTypes = new ArrayList<AtomicType>();
-        this.memberTypes.addAll(Arrays.asList(memberTypes));
-    }
-
-    public List<? extends AtomicType> getMemberTypes() {
-        return memberTypes;
+    public static LocalUnionType<AtomicType> of(AtomicType... memberTypes) {
+        List<AtomicType> members = new ArrayList<>(memberTypes.length);
+        Collections.addAll(members, memberTypes);
+        return new LocalUnionType<>(members);
     }
 
     /**
@@ -122,14 +104,6 @@ public class LocalUnionType implements PlainType, UnionType {
         return SequenceType.makeSequenceType(this, StaticProperty.ALLOWS_ZERO_OR_ONE);
     }
 
-    private boolean someMemberTypeSatisfies(Predicate<AtomicType> condition) {
-        for (AtomicType member : memberTypes) {
-            if (condition.test(member)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Ask whether this type is an ID type. This is defined to be any simple type
@@ -140,7 +114,7 @@ public class LocalUnionType implements PlainType, UnionType {
      */
 
     public boolean isIdType() {
-        return someMemberTypeSatisfies(AtomicType::isIdType);
+        return someMemberTypeSatisfies(t -> t instanceof AtomicType && ((AtomicType)t).isIdType());
     }
 
     /**
@@ -150,7 +124,7 @@ public class LocalUnionType implements PlainType, UnionType {
      */
 
     public boolean isIdRefType() {
-        return someMemberTypeSatisfies(AtomicType::isIdRefType);
+        return someMemberTypeSatisfies(t -> t instanceof AtomicType && ((AtomicType) t).isIdRefType());
     }
 
     /**
@@ -179,34 +153,6 @@ public class LocalUnionType implements PlainType, UnionType {
         return true;
     }
 
-    /**
-     * Get the corresponding {@link UType}. A UType is a union of primitive item
-     * types.
-     *
-     * @return the smallest UType that subsumes this item type
-     */
-    @Override
-    public UType getUType() {
-        UType u = UType.VOID;
-        for (AtomicType at : memberTypes) {
-            u = u.union(at.getUType());
-        }
-        return u;
-    }
-
-
-
-    /**
-     * Get an alphabetic code representing the type, or at any rate, the nearest built-in type
-     * from which this type is derived. The codes are designed so that for any two built-in types
-     * A and B, alphaCode(A) is a prefix of alphaCode(B) if and only if A is a supertype of B.
-     *
-     * @return the alphacode for the nearest containing built-in type
-     */
-    @Override
-    public String getBasicAlphaCode() {
-        return "A";
-    }
 
     /**
      * Test whether this type is namespace sensitive, that is, if a namespace context is needed
@@ -219,7 +165,7 @@ public class LocalUnionType implements PlainType, UnionType {
 
     @Override
     public boolean isNamespaceSensitive() {
-        return someMemberTypeSatisfies(AtomicType::isNamespaceSensitive);
+        return someMemberTypeSatisfies(t -> t instanceof AtomicType && ((AtomicType)t).isNamespaceSensitive());
     }
 
     /**
@@ -238,8 +184,8 @@ public class LocalUnionType implements PlainType, UnionType {
 
     /*@Nullable*/
     public ValidationFailure validateContent(UnicodeString value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
-        for (AtomicType at : memberTypes) {
-            ValidationFailure err = at.validateContent(value, nsResolver, rules);
+        for (ItemType at : memberTypes) {
+            ValidationFailure err = ((AtomicType)at).validateContent(value, nsResolver, rules);
             if (err == null) {
                 return null;
             }
@@ -268,8 +214,8 @@ public class LocalUnionType implements PlainType, UnionType {
     @Override
     public AtomicValue getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
-        for (AtomicType type : memberTypes) {
-            StringConverter converter = rules.makeStringConverter(type);
+        for (ItemType type : memberTypes) {
+            StringConverter converter = rules.makeStringConverter((AtomicType)type);
             converter.setNamespaceResolver(resolver);
             ConversionResult outcome = converter.convertString(value);
             if (outcome instanceof AtomicValue) {
@@ -341,57 +287,11 @@ public class LocalUnionType implements PlainType, UnionType {
     @Override
     @CSharpReplaceBody(code="return new System.Collections.Generic.List<Saxon.Hej.type.PlainType>(memberTypes);")
     public List<? extends PlainType> getPlainMemberTypes()  {
-        return memberTypes;
-    }
-
-    /**
-     * Get the default priority when this ItemType is used as an XSLT pattern
-     *
-     * @return the default priority. For a union type this is defined as the product
-     * of the default priorities of the member types. Because the priorities of member
-     * types are in the range 0 to 1, their product is also in the range 0 to 1.
-     */
-    @Override
-    public double getDefaultPriority() {
-        double result = 1;
-        for (AtomicType t : memberTypes) {
-             result *= t.getDefaultPriority();
+        List<AtomicType> members = new ArrayList<>(memberTypes.size());
+        for (ItemType it : memberTypes) {
+            members.add((AtomicType)it);
         }
-        return result;
-
-    }
-
-    /**
-     * Produce a string representation of the type name. If the type is anonymous, an internally-allocated
-     * type name will be returned.
-     *
-     * @return the name of the atomic type in the form Q{uri}local
-     */
-
-    public String toString() {
-        StringBuilder fsb = new StringBuilder(256);
-        fsb.append("union(");
-        for (AtomicType at : memberTypes) {
-            String member = at.getDisplayName();
-            fsb.append(member);
-            fsb.append(", ");
-        }
-        fsb.setLength(fsb.length() - 2);
-        fsb.append(")");
-        return fsb.toString();
-    }
-
-    @Override
-    public String toExportString() {
-        StringBuilder fsb = new StringBuilder(256);
-        fsb.append("union(");
-        for (AtomicType at : memberTypes) {
-            fsb.append(at.toExportString());
-            fsb.append(", ");
-        }
-        fsb.setLength(fsb.length() - 2);
-        fsb.append(")");
-        return fsb.toString();
+        return members;
     }
 
     /**

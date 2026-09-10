@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 
@@ -41,7 +42,7 @@ public class ForClauseOuterPush extends TuplePush {
         if (next == null) {
             context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(), EmptySequence.getInstance());
             if (forClause.getPositionVariable() != null) {
-                context.setLocalVariable(forClause.getPositionVariable().getLocalSlotNumber(), Int64Value.ZERO);
+                context.setLocalVariable(forClause.getPositionVariable().getLocalSlotNumber(), ForClauseOuterPull.TYPED_ZERO);
             }
             destination.processTuple(context);
         } else {
@@ -50,7 +51,7 @@ public class ForClauseOuterPush extends TuplePush {
                 if (forClause.getPositionVariable() != null) {
                     context.setLocalVariable(
                             forClause.getPositionVariable().getLocalSlotNumber(),
-                            new Int64Value(++pos));
+                            new Int64Value(++pos, BuiltInAtomicType.NON_NEGATIVE_INTEGER));
                 }
                 destination.processTuple(context);
                 next = iter.next();

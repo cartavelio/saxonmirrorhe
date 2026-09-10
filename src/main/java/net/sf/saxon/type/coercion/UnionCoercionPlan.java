@@ -11,21 +11,19 @@ import net.sf.saxon.value.StringValue;
 
 import java.util.List;
 
-import static net.sf.saxon.type.Affinity.DISJOINT;
-
 /**
  * Coercion plan for use with 4.0 when the required item type is an enumeration type
  */
 public class UnionCoercionPlan extends AtomicCoercionPlan {
 
     public final static UnionCoercionPlan INSTANCE = new UnionCoercionPlan();
-    protected ItemMappingFunction getUntypedAtomicPromoter(CoercionRequest request, UType atomizedtype) {
+    protected ItemMappingFunction getUntypedAtomicPromoter(CoercionRequest request, UType atomizedType) {
 
         Configuration config = request.config;
         TypeHierarchy th = config.getTypeHierarchy();
         ItemType requiredItemType = request.requiredType.getPrimaryType();
-        if (th.relationship(request.knownType.getPrimaryType(), BuiltInAtomicType.UNTYPED_ATOMIC) != DISJOINT &&
-                !th.isSubType(BuiltInAtomicType.UNTYPED_ATOMIC, requiredItemType)) {
+//        if (!atomizedType.overlaps(UType.UNTYPED_ATOMIC) &&
+//                !th.isSubType(BuiltInAtomicType.UNTYPED_ATOMIC, requiredItemType)) {
             final boolean nsSensitive = ((PlainType) requiredItemType).isNamespaceSensitive();
             if (nsSensitive) {
                 return ItemMapper.of(item -> {
@@ -52,7 +50,7 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
                 return ItemMapper.of(item -> {
                     if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
                         try {
-                            return ((SimpleType) requiredItemType).getTypedValue(
+                            return ((UnionType) requiredItemType).getTypedValue(
                                     item.getUnicodeStringValue(), null, rules).head();
                         } catch (ValidationException ve) {
                             throw ve.withErrorCode("XPTY0004");
@@ -62,8 +60,8 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
                     }
                 });
             } 
-        }
-        return null;
+//        }
+//        return null;
     }
 
 

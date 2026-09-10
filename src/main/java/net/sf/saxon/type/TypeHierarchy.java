@@ -241,6 +241,30 @@ public class TypeHierarchy {
                 }
             } else if (t2 instanceof AnyItemType) {
                 return SUBSUMED_BY;
+            } else if (t2 instanceof ChoiceItemType) {
+                boolean allSubsumes = true;
+                boolean allDisjoint = true;
+                for (ItemType it : ((ChoiceItemType<? extends ItemType>)t2).getMemberTypes()) {
+                    Affinity a0 = relationship(t1, it);
+                    if (a0 == SAME_TYPE || a0 == SUBSUMED_BY) {
+                        return SUBSUMED_BY;
+                    }
+                    if (a0 != DISJOINT) {
+                        allDisjoint = false;
+                    }
+                    if (a0 != SUBSUMES) {
+                        allSubsumes = false;
+                    }
+                }
+                if (allDisjoint) {
+                    return DISJOINT;
+                }
+                if (allSubsumes) {
+                    return SUBSUMES;
+                }
+                return OVERLAPS;
+            } else if (t1 instanceof ChoiceItemType) {
+                return inverseRelationship(relationship(t2, t1));
             } else if (t1.isPlainType()) {
                 if (t2 instanceof NodeTest || t2 instanceof FunctionItemType || t2 instanceof JavaExternalObjectType) {
                     return DISJOINT;

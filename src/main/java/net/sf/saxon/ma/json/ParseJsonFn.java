@@ -31,7 +31,7 @@ public class ParseJsonFn extends JsonToXMLFn {
 
     public static OptionsParameter makeOptionsParameter(int version) {
         SpecificFunctionType fallbackType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING);
+                new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
         SpecificFunctionType parserType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_UNTYPED_ATOMIC}, SequenceType.OPTIONAL_ITEM);
         OptionsParameter parseJsonOptions = new OptionsParameter(version);

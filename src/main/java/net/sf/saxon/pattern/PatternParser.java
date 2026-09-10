@@ -243,7 +243,6 @@ public class PatternParser extends XPathParser {
             return super.parseExpression();
         } else if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA &&
                 (t.currentTokenValue.equals("record")  || t.currentTokenValue.equals("type") || t.currentTokenValue.equals("map") || t.currentTokenValue.equals("array"))) {
-            //ItemType type = parserExtension.parseExtendedItemType(this);
             ItemType type = parseItemType();
             Expression expr = new ItemTypePattern(type);
             expr.setRetainedStaticContext(env.makeRetainedStaticContext());
@@ -264,8 +263,7 @@ public class PatternParser extends XPathParser {
             nextToken();
             expect(Token.RPAR);
             nextToken();
-            Schema schema = env.getPackageData().getImportedSchema();
-            SchemaType type = schema.getSchemaType(typeName);
+            SchemaType type = env.getConfiguration().getSchemaType(typeName);
             if (type == null || !type.isAtomicType()) {
                 grumble("Unknown atomic type " + typeName);
             }

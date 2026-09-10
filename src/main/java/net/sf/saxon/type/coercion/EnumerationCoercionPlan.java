@@ -2,14 +2,14 @@ package net.sf.saxon.type.coercion;
 
 import net.sf.saxon.expr.ItemMapper;
 import net.sf.saxon.expr.ItemMappingFunction;
-import net.sf.saxon.type.EnumerationType;
+import net.sf.saxon.type.SingletonEnumType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
 /**
- * Coercion plan for use with 4.0 when the required item type is an enumeration type
+ * Coercion plan for use with 4.0 when the required item type is a singleton enumeration type
  */
 public class EnumerationCoercionPlan extends AtomicCoercionPlan {
 
@@ -17,13 +17,13 @@ public class EnumerationCoercionPlan extends AtomicCoercionPlan {
 
     @Override
     protected ItemMappingFunction getUntypedAtomicPromoter(CoercionRequest request, UType atomizedtype) {
-        EnumerationType enumType = (EnumerationType) request.requiredType.getPrimaryType();
+        SingletonEnumType enumType = (SingletonEnumType) request.requiredType.getPrimaryType();
         TypeHierarchy th = request.config.getTypeHierarchy();
         return ItemMapper.of(item -> {
             if (enumType.matches(item, th)) {
                 return item;
             } else if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
-                if (enumType.allowsValue(item.getStringValue())) {
+                if (enumType.allowsValue(item.getUnicodeStringValue())) {
                     return new StringValue(item.getStringValue());
                 } else {
                     throw coercionError(request, item);
@@ -36,13 +36,13 @@ public class EnumerationCoercionPlan extends AtomicCoercionPlan {
 
     @Override
     public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {
-        EnumerationType enumType = (EnumerationType) request.requiredType.getPrimaryType();
+        SingletonEnumType enumType = (SingletonEnumType) request.requiredType.getPrimaryType();
         TypeHierarchy th = request.config.getTypeHierarchy();
         return ItemMapper.of(item -> {
             if (enumType.matches(item, th)) {
                 return item;
             } else if (item instanceof AtomicValue && ((AtomicValue) item).isUntypedAtomic()) {
-                if (enumType.allowsValue(item.getStringValue())) {
+                if (enumType.allowsValue(item.getUnicodeStringValue())) {
                     return new StringValue(item.getStringValue());
                 } else {
                     throw coercionError(request, item);

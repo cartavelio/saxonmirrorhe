@@ -15,12 +15,10 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceMethod;
 import net.sf.saxon.value.*;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
@@ -95,17 +93,17 @@ public class NumericType extends LocalUnionType implements SimpleType {
         return false;
     }
 
-    /**
-     * Get the "plain" types in the transitive membership. Plain types are atomic types and union types that
-     * are defined directly in terms of other plain types, without adding any restriction facets.
-     *
-     * @return the atomic types and plain union types in the transitive membership of the union type.
-     */
-    @Override
-    @CSharpReplaceBody(code = "return new System.Collections.Generic.List<Saxon.Hej.type.PlainType>(getMemberTypes());")
-    public List<? extends PlainType> getPlainMemberTypes() {
-        return getMemberTypes();
-    }
+//    /**
+//     * Get the "plain" types in the transitive membership. Plain types are atomic types and union types that
+//     * are defined directly in terms of other plain types, without adding any restriction facets.
+//     *
+//     * @return the atomic types and plain union types in the transitive membership of the union type.
+//     */
+//    @Override
+//    @CSharpReplaceBody(code = "return new System.Collections.Generic.List<Saxon.Hej.type.PlainType>(getMemberTypes());")
+//    public List<? extends PlainType> getPlainMemberTypes() {
+//        return getMemberTypes();
+//    }
 
     /**
      * Ask whether a given atomic type is numeric, that is, whether it is a subtype
