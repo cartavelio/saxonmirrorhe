@@ -989,7 +989,7 @@ public class SaxonCAPI {
      *
      * @param thread
      * @param xdmvalueRef
-     * @return CCharPointer object
+     * @return C Pointer to the string value in the C memory space
      */
     @CEntryPoint(name = "j_getStringValue")
     public static CCharPointer getStringValue(IsolateThread thread, ObjectHandle xdmvalueRef) {

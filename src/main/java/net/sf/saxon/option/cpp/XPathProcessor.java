@@ -66,6 +66,11 @@ public class XPathProcessor extends SaxonCAPI {
 //#endif
     }
 
+    /**
+     * Create XPathProcessor and add to the ObjectHandle's pool
+     * @param thread
+     * @return
+     */
     @CEntryPoint(name = "createXPathProcessor")
     public static long createXPathProcessor(IsolateThread thread) {
             ObjectHandle handle = objectHandles.create(new net.sf.saxon.option.cpp.XPathProcessor(false));
@@ -98,6 +103,8 @@ public class XPathProcessor extends SaxonCAPI {
      * Declare a namespace binding as part of the static context for XPath expressions compiled using this
      * XPathCompiler
      *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param c_prefix The namespace prefix. If the value is a zero-length string, this method sets the default
      *               namespace for elements and types.
      * @param c_uri    The namespace URI. It is possible to specify a zero-length string to "undeclare" a namespace;
@@ -122,6 +129,8 @@ public class XPathProcessor extends SaxonCAPI {
      * bind any value to the variable; that is done later, when the XPath expression is evaluated.
      * The variable is allowed to have any type (that is, the required type is <code>item()*</code>).
      *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param c_qname The name of the variable, expressions as a clark name string
      */
     @CEntryPoint(name = "j_xp_declareVariable")
@@ -145,6 +154,8 @@ public class XPathProcessor extends SaxonCAPI {
      * <p>This method does not bind a prefix to the namespace. That must be done separately, using the
      * {@link #declareNamespace(String, String)} method.</p>
      *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param c_uri The schema namespace to be imported. To import declarations in a no-namespace schema,
      *            supply a zero-length string.
      */
@@ -158,6 +169,16 @@ public class XPathProcessor extends SaxonCAPI {
         }
     }
 
+    /**
+     * Say whether undeclared variables are allowed. By default, they are not allowed. When
+     * undeclared variables are allowed, it is not necessary to predeclare the variables that
+     * may be used in the XPath expression; instead, a variable is automatically declared when a reference
+     * to the variable is encountered within the expression.
+     *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
+     * @param c_allow true if undeclared variables are allowed, false if they are not allowed.
+     */
     @CEntryPoint(name = "j_xp_setAllowUndeclaredVariables")
     public static void setAllowUndeclaredVariables(IsolateThread thread, ObjectHandle xpathProcessorRef, int c_allow) {
         boolean allow = CTypeConversion.toBoolean(c_allow);
@@ -174,6 +195,8 @@ public class XPathProcessor extends SaxonCAPI {
      * is possible to compare a number with a string. The default is false (backwards compatibility
      * mode is off).
      *
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param c_option true if XPath 1.0 backwards compatibility is to be enabled, false if it is to
      *               be disabled.
      */
@@ -191,11 +214,17 @@ public class XPathProcessor extends SaxonCAPI {
      * expression, for example a relative URI passed as an argument to the doc() function. If no
      * static base URI is supplied, then the current working directory is used.
      *
-     * @param c_uriStr
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
+     * @param c_uriStr - A string for the uri represented as a C pointer to a char array
+     * @return long value for the status of setting the base URI
      * @throws SaxonApiException
      */
-    @CEntryPoint(name = "j_xp_setBaseURI")
-    public static void setBaseURI(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_uriStr) throws SaxonApiException {
+    @CEntryPoint(name = "j_xp_setBaseURI", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long setBaseURI(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_uriStr) throws SaxonApiException {
+        if(c_uriStr == WordFactory.nullPointer()) {
+            throw new SaxonApiException("URI string is null");
+        }
         String uriStr = CTypeConversion.toJavaString(c_uriStr);
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
@@ -203,6 +232,7 @@ public class XPathProcessor extends SaxonCAPI {
         try {
             uri = new URI(uriStr);
             compiler.setBaseURI(uri);
+            return SaxonCAPI.STATUS_OK;
         } catch (URISyntaxException e) {
             SaxonApiException ex = new SaxonApiException(e);
             throw ex;
@@ -238,10 +268,14 @@ public class XPathProcessor extends SaxonCAPI {
      * Compile and evaluate an XPath expression, supplied as a character string, with properties and parameters required
      * by the XPath expression
      *
-     * @param cwd      - Current working directory
-     * @param xpathStr - A string containing the source text of the XPath expression
-     * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
-     * @param values   -  The values for the parameters and properties required by the XPath expression
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
+     * @param ccwd      - Current working directory
+     * @param c_xpathStr - A string containing the source text of the XPath expression represented as a C pointer to a char array
+     * @param processorDataAccumulatorRef   - Parameters and properties names required by the XPath expression along with their values in a ProcessorDataAccumulator.
+     *                                      This could contain the context node , source as string or file name, etc
+     *                                      The values for the parameters and properties required by the XPath expression
+     * @return long value reference to the XdmItem in the ObjectHandle's pool
      **/
     @CEntryPoint(name = "j_evaluate", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
@@ -323,10 +357,14 @@ public class XPathProcessor extends SaxonCAPI {
      * a single item, with a given context item. The expression is supplied as
      * a character string.
      *
-     * @param cwd      - Current working directory
-     * @param xpathStr - A string containing the source text of the XPath expression
-     * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
-     * @param values   -  The values for the parameters and properties required by the XPath expression
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
+     * @param ccwd      - Current working directory
+     * @param c_xpathStr - A string containing the source text of the XPath expression represented as a C pointer to a char array
+     * @param processorDataAccumulatorRef   - Parameters and properties names required by the XPath expression along with their values in a ProcessorDataAccumulator.
+     *                                      This could contain the context node , source as string or file name, etc
+     *                                      The values for the parameters and properties required by the XPath expression
+     * @return long value reference to the XdmItem in the ObjectHandle's pool
      **/
     @CEntryPoint(name = "j_evaluateSingle", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long evaluateSingle(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
@@ -359,10 +397,15 @@ public class XPathProcessor extends SaxonCAPI {
     /**
      * Evaluate the XPath expression, returning the effective boolean value of the result.
      *
-     * @param cwd      - Current working directory
-     * @param xpathStr - A string containing the source text of the XPath expression
-     * @param params   - Parameters and properties names required by the XPath expression. This could contain the context node , source as string or file name, etc
-     * @param values   -  The values for the parameters and properties required by the XPath expression
+     * @param thread - Graalvm runtime data structure for the thread
+     * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
+     * @param c_cwd      - Current working directory
+     * @param c_xpathStr - A string containing the source text of the XPath expression represented as a C pointer to a char array
+     * @param processorDataAccumulatorRef   - Parameters and properties names required by the XPath expression along with their values in a ProcessorDataAccumulator.
+     *                                      This could contain the context node , source as string or file name, etc
+     *                                      The values for the parameters and properties required by the XPath expression
+     * @return a <code>boolean</code> as int value representing the effective boolean value of the result of evaluating
+     *         the expression, as defined by the rules for the fn:boolean() function.
      **/
     @CEntryPoint(name = "j_effectiveBooleanValue", exceptionHandler = SaxonCExceptionIntHandler.class)
     public static int effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
