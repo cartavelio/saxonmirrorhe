@@ -14,10 +14,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
@@ -25,7 +22,7 @@ import net.sf.saxon.tree.util.Navigator;
 import java.util.Properties;
 
 /**
- * This class implements the function fn:has-children(), which is a standard function in XPath 3.0
+ * This class implements the function fn:innermost(), which is a standard function in XPath 3.0
  */
 
 public class Innermost extends SystemFunction {
@@ -110,10 +107,10 @@ public class Innermost extends SystemFunction {
      * include attributes and namespaces.)</p>
      */
 
-    private class InnermostIterator implements SequenceIterator {
+    private static class InnermostIterator implements SequenceIterator {
 
         SequenceIterator in;
-        NodeInfo pending = null;
+        GNode pending = null;
         int position = 0;
 
         /**
@@ -121,25 +118,24 @@ public class Innermost extends SystemFunction {
          * that have no ancestor in the sequence
          *
          * @param in the input sequence, which must be a sequence of nodes in document order with no duplicates
-         * @throws XPathException if an error occurs evaluating the input iterator
          */
 
-        public InnermostIterator(SequenceIterator in) throws XPathException {
+        public InnermostIterator(SequenceIterator in)  {
             this.in = in;
-            pending = (NodeInfo)in.next();
+            pending = (GNode)in.next();
         }
 
         @Override
-        public NodeInfo next() {
+        public GNode next() {
             if (pending == null) {
                 // we're done
                 position = -1;
                 return null;
             } else {
                 while (true) {
-                    NodeInfo next = (NodeInfo)in.next();
+                    GNode next = (GNode)in.next();
                     if (next == null) {
-                        NodeInfo current = pending;
+                        GNode current = pending;
                         position++;
                         pending = null;
                         return current;
@@ -150,7 +146,7 @@ public class Innermost extends SystemFunction {
                     } else {
                         // emit the pending node
                         position++;
-                        NodeInfo current = pending;
+                        GNode current = pending;
                         pending = next;
                         return current;
                     }

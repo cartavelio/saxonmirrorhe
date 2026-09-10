@@ -14,11 +14,13 @@ import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
@@ -263,11 +265,17 @@ public class ContextValueSetter extends BinaryExpression
                 XPathContext c2 = context.newMinorContext();
                 Sequence lhs = select.evaluate(context);
                 if (lhs instanceof Item) {
-                    ManualIterator iter = new ManualIterator((Item)lhs);
+                    ManualIterator iter = new ManualIterator((Item) lhs);
                     c2.setCurrentIterator(iter);
                     return action.iterate(c2);
                 } else {
-                    ManualIterator iter = new ManualIterator(new Parcel(lhs.materialize()));
+                    GroundedValue val = lhs.materialize();
+                    if (val.getLength() == 0) {
+                        // context value is an empty sequence. Return an empty iterator. This works
+                        // in most cases but is not quite right
+                        return EmptyIterator.getInstance();
+                    }
+                    ManualIterator iter = new ManualIterator(new Parcel(val));
                     c2.setCurrentIterator(iter);
                     return action.iterate(c2);
                 }

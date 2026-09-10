@@ -8,7 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
@@ -30,7 +30,7 @@ public class HasChildren_1 extends SystemFunction {
      */
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        NodeInfo arg = (NodeInfo) arguments[0].head();
+        GNode arg = (GNode) arguments[0].head();
         if (arg == null) {
             return BooleanValue.FALSE;
         }

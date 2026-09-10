@@ -90,15 +90,15 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         register("has-children", 1, e -> e.populate( HasChildren_1::new, BuiltInAtomicType.BOOLEAN,
                  ONE, 0)
-                .arg(0, AnyXNodeType.getInstance(), OPT | INS, null));
+                .arg(0, AnyGNodeType.getInstance(), OPT | INS, null));
 
         register("head", 1, e -> e.populate( HeadFn::new, AnyItemType.getInstance(),
                  OPT, FILTER)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, null));
 
-        register("innermost", 1, e -> e.populate(Innermost::new, AnyXNodeType.getInstance(),
+        register("innermost", 1, e -> e.populate(Innermost::new, AnyGNodeType.getInstance(),
                                                  STAR, 0)
-                .arg(0, AnyXNodeType.getInstance(), STAR | NAV, null));
+                .arg(0, AnyGNodeType.getInstance(), STAR | NAV, null));
 
         register("json-doc", 1, e -> e.populate( JsonDoc::new, AnyItemType.getInstance(),
                  OPT, LATE)

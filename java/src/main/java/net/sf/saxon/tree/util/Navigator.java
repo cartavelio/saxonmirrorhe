@@ -1103,7 +1103,7 @@ public final class Navigator {
      * @return true if a is an ancestor-or-self of d
      */
 
-    public static boolean isAncestorOrSelf(/*@NotNull*/ NodeInfo a, /*@NotNull*/ NodeInfo d) {
+    public static boolean isAncestorOrSelf(GNode a, GNode d) {
         int k = a.getNodeKind();
         if (k != Type.ELEMENT && k != Type.DOCUMENT) {
             return a.equals(d);
@@ -1123,7 +1123,7 @@ public final class Navigator {
             }
         }
         // Generic implementation
-        NodeInfo p = d;
+        GNode p = d;
         while (p != null) {
             if (a.equals(p)) {
                 return true;

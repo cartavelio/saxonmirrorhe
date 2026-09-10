@@ -9,20 +9,21 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.LocalUnionType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ public class Path_1 extends SystemFunction {
         OptionsParameter pathOptions = new OptionsParameter(40);
         pathOptions.addAllowedOption("indexes", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         pathOptions.addAllowedOption("lexical", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        pathOptions.addAllowedOption("origin", SequenceType.OPTIONAL_NODE, EmptySequence.getInstance());
+        pathOptions.addAllowedOption("origin", SequenceType.OPTIONAL_GNODE, EmptySequence.getInstance());
         pathOptions.addAllowedOption("namespaces", SequenceType.optional(inScopeNamespacesResult), EmptySequence.getInstance());
         return pathOptions;
     }
@@ -54,7 +55,7 @@ public class Path_1 extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        NodeInfo node;
+        GNode node;
         if (arguments.length == 0) {
             Item item = context.getContextItem();
             if (item instanceof Parcel) {
@@ -72,19 +73,19 @@ public class Path_1 extends SystemFunction {
             if (item == null) {
                 throw new XPathException("In call to fn:path(), the context item is absent", "XPDY0002");
             }
-            if (!(item instanceof NodeInfo)) {
+            if (!(item instanceof GNode)) {
                 throw new XPathException("In call to fn:path(), the context item is not a node", "XPTY0004");
             }
-            node = (NodeInfo)item;
+            node = (GNode)item;
         } else {
-            node = (NodeInfo)arguments[0].head();
+            node = (GNode)arguments[0].head();
             if (node == null) {
                 return EmptySequence.getInstance();
             }
         }
         boolean withIndexes = true;
         boolean lexical = false;
-        NodeInfo origin = null;
+        GNode origin = null;
         Map<NamespaceUri, String> namespaces = Collections.emptyMap();
         if (arguments.length > 1) {
             MapItem options = (MapItem)arguments[1].head();
@@ -107,17 +108,25 @@ public class Path_1 extends SystemFunction {
                     }
                 }
                 if (checkedOptions.containsKey("origin")) {
-                    origin = (NodeInfo)checkedOptions.get("origin").head();
+                    origin = (GNode)checkedOptions.get("origin").head();
                 }
             }
 
         }
-        return makePath(node, withIndexes, lexical, namespaces, origin, context);
+        if (origin != null && (node instanceof NodeInfo) != (origin instanceof NodeInfo)) {
+            throw new XPathException(
+                    "In fn:path, the origin node must be in the same tree as the target node", "FOPA0001");
+        }
+        if (node instanceof NodeInfo) {
+            return makePath((NodeInfo)node, withIndexes, lexical, namespaces, (NodeInfo)origin, context);
+        } else {
+            return makeJPath((JNode)node, (JNode)origin);
+        }
 
     }
 
     /**
-     * Get the path to a node
+     * Get the path to an XNode
      * @param node the node whose path is required
      * @param withIndex true if index positions are to be included (in square brackets, after each element name)
      * @param lexical true if element and attribute names are to be output in lexical QName form
@@ -243,6 +252,85 @@ public class Path_1 extends SystemFunction {
             return "Q{" + uri.toString() + "}";
         }
     }
+
+    private final static UnicodeChar SLASH = new UnicodeChar('/');
+    private final static UnicodeChar QUOT = new UnicodeChar('"');
+
+    /**
+     * Get the path to an XNode
+     *
+     * @param node       the node whose path is required
+     * @return the path, as a StringValue.
+     */
+    public static StringValue makeJPath(JNode node, JNode origin)
+            throws XPathException {
+        if (node instanceof RootJNode) {
+            return StringValue.makeStringValue("/");
+        }
+        UnicodeString buffer = ZenoString.EMPTY;
+        SequenceIterator iter = node.iterateAncestorOrSelfAxis(null);
+        JNode n;
+        boolean first = true;
+        boolean foundOrigin = origin == null;
+        while ((n = (JNode) iter.next()) != null) {
+            if (n.equals(origin)) {
+                foundOrigin = true;
+                if (!first) {
+                    if (buffer.codePointAt(0) == '/') {
+                        buffer = buffer.substring(1);
+                    }
+                    return new StringValue(buffer);
+                }
+            }
+            first = false;
+            if (n instanceof RootJNode) {
+                if (!foundOrigin) {
+                    throw new XPathException(
+                            "In fn:path, the origin node must be an ancestor of the target node", "FOAP0001");
+                }
+                return new StringValue(buffer);
+            }
+            if (n.getParent().getContent() instanceof ArrayItem) {
+                UnicodeString step = new Twine8("/*[").concat(n.getSelector().getUnicodeStringValue()).concat(new UnicodeChar(']'));
+                buffer = step.concat(buffer);
+            } else {
+                AtomicValue selector = n.getSelector();
+                UnicodeString selectorStr = selector.getUnicodeStringValue();
+                if (selector instanceof StringValue && NameChecker.isValidNCName(selectorStr.codePoints())) {
+                    buffer = buffer.concat(SLASH).concat(selectorStr);
+                } else if (selector instanceof StringValue) {
+                    buffer = buffer.concat(SLASH).concat(new Twine8("get(\"")).concat(selectorStr).concat(new Twine8("\")"));
+                } else if (selector instanceof NumericValue) {
+                    buffer = buffer.concat(SLASH).concat(new Twine8("get(")).concat(selectorStr).concat(new UnicodeChar(')'));
+                } else if (selector instanceof QNameValue) {
+                    buffer = buffer.concat(SLASH)
+                                   .concat(StringView.of(((QNameValue)selector).getStructuredQName().getEQName()));
+                } else if (selector instanceof BooleanValue) {
+                    if (((BooleanValue) selector).getBooleanValue()) {
+                        buffer = buffer.concat(new Twine8("/get(true())"));
+                    } else {
+                        buffer = buffer.concat(new Twine8("/get(false())"));
+                    }
+                } else {
+                    buffer = buffer.concat(SLASH)
+                            .concat(new Twine8("get("))
+                            .concat(StringView.of(selector.getPrimitiveType().getDisplayName()))
+                            .concat(new Twine8("(\""))
+                            .concat(selectorStr)
+                            .concat(new Twine8("\"))"));
+                }
+            }
+        }
+        if (n.getParent() == null) {
+            if (origin != null) {
+                throw new XPathException(
+                        "In fn:path, the origin node must be an ancestor of the target node", "FOAP0001");
+            }
+        }
+        return new StringValue(buffer);
+
+    }
+
 
 }
 
