@@ -251,14 +251,12 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
                 throw (XPathException) nested;
             } else if (nested instanceof RuntimeException) {
                 throw (RuntimeException) nested;
-            } else if (errorHandler instanceof StandardErrorHandler) {
+            } else if (errorHandler instanceof StandardErrorHandler seh) {
                 // Bug 6257. The information notified by the XML parser to the ErrorHandler
                 // is much more usable than what we can get by wrapping the SAXException that
                 // is thrown on completion of a failed parse, so we use the former if available
-                StandardErrorHandler seh = (StandardErrorHandler) errorHandler;
                 ErrorReporter er = seh.getErrorReporter();
-                if (er instanceof StandardErrorReporter) {
-                    StandardErrorReporter ser = (StandardErrorReporter) er;
+                if (er instanceof StandardErrorReporter ser) {
                     XmlProcessingError latestError = ser.getLatestError();
                     if (latestError != null) {
                         XPathException exception = new XPathException(ser.getExpandedMessage(latestError))
@@ -275,6 +273,8 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
         } catch (java.io.IOException err) {
             throw new XPathException("I/O error reported by XML parser processing " +
                                              getSystemId(), err).withErrorCode(SaxonErrorCode.SXXP0003);
+        } catch (Exception ex) {
+            throw ex;
         }
     }
 
