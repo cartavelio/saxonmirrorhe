@@ -8,24 +8,15 @@
 #include "../../Saxon.C.API/XdmValue.h"
 #include "../../Saxon.C.API/XdmItem.h"
 #include "../../Saxon.C.API/XdmNode.h"
-#include "cppExtensionFunction.cpp"
+#include "CppTestUtils.h"
+
 #include <string>
 
 // TODO: write test case for checking parameters which are null
 
 
 using namespace std;
-char fname[] = "_nativeCall";
-char funcParameters[] = "(Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;)Ljava/lang/Object;";
 
-JNINativeMethod cppMethods[] =
-{
-    {
-         fname,
-         funcParameters,
-         (void *)&cppNativeCall
-    }
-};
 
 
 /*
@@ -48,33 +39,6 @@ void testTransformToString1(XsltProcessor * trans){
 
 }
 
-/*
-* Test transform to String. Source and stylesheet supplied as arguments
-*/
-void testTransformToStringExtensionFunc(SaxonProcessor * processor, XsltProcessor * trans){
-	
-  cout<<endl<<"Test: TransformToStringExtensionFunc:"<<endl;
-trans->setProperty("extc", "home/ond1/work/svn/latest9.9-saxonc/samples/cppTests/cppExtensionFunction");
-
-bool nativeFound = processor->registerNativeMethods(SaxonProcessor::sxn_environ->env, "com/saxonica/functions/extfn/cpp/NativeCall",
-    cppMethods, sizeof(cppMethods) / sizeof(cppMethods[0]));
-if(nativeFound) {
-    const char * output = trans->transformFileToString("cat.xml", "testExtension.xsl");
-//XdmValue* output = trans->transformFileToValue("cat.xml", "testExtension.xsl");
-   if(output == NULL) {
-	SaxonProcessor::sxn_environ->env->ExceptionDescribe();
-      printf("result is null \n");
-
-    }else {
-      //printf("%s", output);
-      printf("result is OK \n");
-    }
-      fflush(stdout);
-	delete output;
-} else{
-    printf("native Class not foun");
-}
-}
 
 
 
@@ -158,8 +122,8 @@ void testTransformToString2b(SaxonProcessor * processor, XsltProcessor * trans){
     const char * output = trans->transformFileToString(NULL, "test-error.xsl");
    if(output == NULL) {
       printf("result is null \nCheck For errors:");
-      if(trans->exceptionCount()>0) {
-	cout<<trans->getErrorMessage(0)<<endl;
+      if(trans->exceptionOccurred()) {
+	cout<<trans->getErrorMessage()<<endl;
       }	
     }else {
       printf("%s", output);
@@ -216,10 +180,10 @@ void testTransformToString4(SaxonProcessor * processor, XsltProcessor * trans){
   cout<<endl<<"Test: TransformToString4:"<<endl;
   trans->clearParameters(true);
   trans->clearProperties();
-    XdmNode * input = processor->parseXmlFromString("<out><person>text1</person><person>text2</person><person>text3</person></out>");
+  XdmNode * input = processor->parseXmlFromString("<out><person>text1</person><person>text2</person><person>text3</person></out>");
 
-   XdmValue * values = new XdmValue(processor);
-   values->addXdmItem((XdmItem*)processor->makeIntegerValue(10));
+  XdmValue * values = new XdmValue();
+  values->addXdmItem((XdmItem*)processor->makeIntegerValue(10));
   values->addXdmItem((XdmItem*)processor->makeIntegerValue(5));
   values->addXdmItem((XdmItem*)processor->makeIntegerValue(6));
   values->addXdmItem((XdmItem*)processor->makeIntegerValue(7));
@@ -280,8 +244,8 @@ trans->setSourceFromXdmNode((XdmNode*)input);
  const char * output = trans->transformToString();
   if(output == NULL) {
       printf("result is null \nCheck For errors:\n");
-      if(trans->exceptionCount()>0) {
-	cout<<"Error count="<<trans->exceptionCount()<<", "<<trans->getErrorMessage(0)<<endl;
+      if(trans->exceptionOccurred()) {
+	cout<<"Error count="<<trans->exceptionOccurred()<<", "<<trans->getErrorMessage()<<endl;
      }	
     }else {
       printf("%s", output);
@@ -431,18 +395,6 @@ void exampleSimple1Err(XsltProcessor  *proc){
 		proc->clearProperties();            
             }
 
-int exists(const char *fname)
-{
-    FILE *file;
-    file = fopen(fname, "r");
-    if (file)
-    {
-        fclose(file);
-        return 1;
-    }
-    return 0;
-}
-
 
   void exampleSimple2(XsltProcessor  *proc){
 		cout<<"<b>exampleSimple2:</b><br/>"<<endl;
@@ -452,7 +404,7 @@ int exists(const char *fname)
 		proc->setOutputFile(filename);
                 proc->transformToFile();
 				
-		if (exists(filename)) {
+		if (CppTestUtils::exists(filename)) {
 		    cout<<"The file $filename exists"<<endl;;
 		} else {
 		    cout<<"The file $filename does not exist"<<endl;
@@ -586,8 +538,8 @@ void xmarkTest1(XsltProcessor  *proc){
 			cout<<"XdmNode returned"<<endl;
 		} else {
 			 printf("result is null \nCheck For errors:");
-             if(proc->exceptionCount()>0) {
-            	cout<<proc->getErrorMessage(0)<<endl;
+             if(proc->exceptionOccurred()) {
+            	cout<<proc->getErrorMessage()<<endl;
              }
 		}
 		proc->clearParameters(true);
@@ -607,8 +559,8 @@ void xmarkTest1(XsltProcessor  *proc){
  			cout<<"XdmNode returned"<<endl;
  		} else {
  			 printf("result is null \nCheck For errors:");
-              if(proc->exceptionCount()>0) {
-             	cout<<proc->getErrorMessage(0)<<endl;
+              if(proc->exceptionOccurred()) {
+             	cout<<proc->getErrorMessage()<<endl;
               }
  		}
  		proc->clearParameters(true);
@@ -627,8 +579,8 @@ void exampleSimple_xmark(XsltProcessor  *proc){
 			cout<<"XdmNode returned"<<endl;
 		} else {
 			 printf("result is null \nCheck For errors:");
-             if(proc->exceptionCount()>0) {
-            	cout<<proc->getErrorMessage(0)<<endl;
+             if(proc->exceptionOccurred()) {
+            	cout<<proc->getErrorMessage()<<endl;
              }
 		}
 		proc->clearParameters(true);
@@ -691,69 +643,6 @@ void testPackage2(XsltProcessor * trans){
     delete output;
 }
 
-void testCatalog(SaxonProcessor * proc) {
-
-Xslt30Processor * trans = proc->newXslt30Processor();
-  bool trace = false;
-    
- proc->setCatalog("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/catalog.xml", trace); 
-
-
- //trans->setSourceFromFile("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/example.xml");
-trans->setInitialMatchSelectionAsFile("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/example.xml"); 
-//trans->compileFromFile("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/test1.xsl");
- const char *result = trans->applyTemplatesReturningString("/home/ond1/work/svn/latest9.9-saxonc/samples/php/catalog-test/test1.xsl");//transformToString();
-
-if(result != NULL)
-std::cerr<<"testCatalog result= "<<result<<std::endl;
-
-}
-
-
-void *RunThread(void *args) {
-
-    struct arg_struct *argsi = (struct arg_struct *)args;
-    int threadid = argsi->id;
-    Xslt30Processor * trans = argsi->trans;
-    long tid;
-    tid = (long)threadid;
-
-    trans->attachThread();
-
-   trans->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
-
-    const char *result = trans->applyTemplatesReturningString();
-    cout<<" Result from THREAD ID: "<< tid << ", " << result<<endl;
-    delete result;
-    //pthread_exit(NULL);
-    trans->detachThread();
-}
-
-void testThreads (SaxonProcessor * processor) {
-    pthread_t threads[NUM_THREADS];
-    int rc;
-    int i;
-
-    Xslt30Processor *  trans = processor->newXslt30Processor();
-
-    trans->compileFromFile("../php/xsl/foo.xsl");
-    struct arg_struct args;
-    args.trans = trans;
-
-    for( i = 0; i < NUM_THREADS; i++ ) {
-        cout << "main() : creating thread, " << i << endl;
-        args.id = i;
-        rc = pthread_create(&threads[i], NULL, RunThread, (void *)&args);
-
-        if (rc) {
-            cout << "Error:unable to create thread," << rc << endl;
-            exit(-1);
-        }
-	(void) pthread_join(threads[i], NULL);
-    }
-  //  pthread_exit(NULL);
-}
-
 
 
 int main()
@@ -764,7 +653,7 @@ SaxonProcessor::jvmCreatedCPP = 1;
     cout<<"Test: XsltProcessor with Saxon version="<<processor->version()<<endl<<endl; 
     //processor->setcwd("/home");
    processor->setConfigurationProperty("http://saxon.sf.net/feature/generateByteCode","false");
-testCatalog(processor);
+
   
     XsltProcessor * trans = processor->newXsltProcessor();
    exampleSimple1Err(trans);
@@ -807,8 +696,6 @@ testCatalog(processor);
 
     xmarkTest2(trans);
 
-   //Available in PE and EE
-   //testTransformToStringExtensionFunc(processor, trans);
 
     delete trans;
 delete processor;

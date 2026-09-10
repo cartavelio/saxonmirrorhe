@@ -19,6 +19,7 @@
 #include "SaxonCXPath.h"
 
 
+
 /*! <code>XdmValue</code>. Value in the XDM data model. A value is a sequence of zero or more items,
  * each item being either an atomic value or a node. This class is a wrapper of the the XdmValue object created in Java.
  * <p/>
@@ -28,6 +29,7 @@ class SaxonProcessor;
 class XdmItem;
 class XdmAtomicValue;
 class XdmNode;
+
 
 
 typedef enum eXdmType { XDM_VALUE = 1, XDM_ITEM = 2, XDM_NODE = 3, XDM_ATOMIC_VALUE = 4, XDM_FUNCTION_ITEM = 5 } XDM_TYPE;
@@ -54,13 +56,17 @@ public:
         initialize();
     }
 
-  XdmValue(SaxonProcessor * p) {
-    initialize();
-    proc = p;
-  }
+    /*void * operator new(size_t size)
+    {
+
+        void * p = ::new XdmValue();
+        //void * p = malloc(size); will also work fine
+        std::cerr<< "new called on XdmValue size= " << size << " p="<<p<<std::endl;
+        return p;
+    }*/
 
 
-	/**
+    /**
 	 * A copy constructor.
 	 * @param other - Xdmvalue
 	 */
@@ -125,7 +131,7 @@ public:
 
 	/**
 	 * Get the first item in the sequence
-	 * @return XdmItem or null if sequence is empty
+	 * @return XdmItem or nullptr if sequence is empty
 	 */
 	virtual XdmItem * getHead();
 
@@ -134,7 +140,7 @@ public:
 	   *
 	   * @param n the item that is required, counting the first item in the sequence as item zero
 	   * @return the n'th item in the sequence making up the value, counting from zero
-	   * return NULL  if n is less than zero or greater than or equal to the number
+	   * return nullptr  if n is less than zero or greater than or equal to the number
 	   *                                    of items in the value
 	   */
 	virtual XdmItem * itemAt(int n);
@@ -163,11 +169,9 @@ public:
 
 	virtual void decrementRefCount();
 
-	void setProcessor(SaxonProcessor *p);
 
-
-	/*const char * getErrorMessage(int i);
-	const char * getErrorCode(int i);
+    /*const char * getErrorMessage(int i);
+    const char * getErrorCode(int i);
 int exceptionCount();*/
 	const char * checkFailures() { return failure; }
 
@@ -183,15 +187,14 @@ int exceptionCount();*/
 	virtual XDM_TYPE getType();
 
 protected:
-   inline void initialize() noexcept {
+   inline void initialize() {
     jValues   = nullptr;
-    proc      = nullptr;
-    refCount  = 1;
+    refCount  = 0;
     valueType = nullptr;
     xdmSize   = 0;
   }
-	SaxonProcessor *proc;
-	char* valueType;  /*!< Cached. The type of the XdmValue */
+
+    char* valueType;  /*!< Cached. The type of the XdmValue */
 
 
 	std::vector<XdmItem*> values;

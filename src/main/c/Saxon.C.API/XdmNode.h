@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Saxonica Limited.
+// Copyright (c) 2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -10,7 +10,6 @@
 
 #include "XdmItem.h"
 #include <string.h>
-//#include "XdmValue.h"
 
 typedef enum eXdmNodeKind { DOCUMENT = 9, ELEMENT = 1, ATTRIBUTE = 2, TEXT = 3, COMMENT = 8, PROCESSING_INSTRUCTION = 7, NAMESPACE = 13, UNKNOWN = 0 } XDM_NODE_KIND;
 
@@ -36,15 +35,7 @@ public:
 
 	XdmNode(XdmNode *parent, jobject, XDM_NODE_KIND);
 
-	virtual ~XdmNode() {
-		if (getRefCount() <1){
-				delete baseURI;
-			delete nodeName;
-		}
-
-		//There might be potential issues with children and attribute node not being deleted when the parent node has been deleted
-		//we need to track this kind of problem.
-	}
+	virtual ~XdmNode();
 
 	virtual bool isAtomic();
 
@@ -55,9 +46,19 @@ public:
 	 * Get the name of the node, as a string in the form of a EQName
 	 *
 	 * @return the name of the node. In the case of unnamed nodes (for example, text and comment nodes)
-	 *         return null.
+	 *         return nullptr.
 	 */
 	const char * getNodeName();
+
+
+
+	/**
+	 * Get the local name of the node
+	 *
+	 * @return the name of the node. In the case of unnamed nodes (for example, text and comment nodes)
+	 *         return nullptr.
+	 */
+	const char * getLocalName();
 
 	/**
 	 * Get the typed value of this node, as defined in XDM
@@ -93,7 +94,7 @@ public:
 
 	int getAttributeCount();
 
-	XdmNode** getAttributeNodes();
+	XdmNode** getAttributeNodes(bool cache=false);
 
 	jobject getUnderlyingValue() {
 
@@ -101,8 +102,35 @@ public:
 
 	}
 
+    /**
+     * Determine whether the item is a node or some other type of item
+     *
+     * @return true if the item is a node, false if it is an atomic value or a function (including maps and arrays)
+     */
+    bool isNode(){
+        return true;
+    }
 
-	XdmNode** getChildren();
+
+
+    /**
+    * Get all the child nodes from the current parent node
+    * @return pointer array of XdmNode objects
+    */
+
+	XdmNode** getChildren(bool cache = false);
+
+
+
+    /**
+    * Get the ith child nodes from the current parent node
+    * @return a pointer to the ith child node
+    */
+
+    XdmNode* getChild(int i, bool cache = false);
+
+
+
 
 	int getChildCount();
 
@@ -120,6 +148,7 @@ public:
 private:
 	const char * baseURI;
 	const char * nodeName;
+	const char * localName;
 	XdmNode ** children; //caches child nodes when getChildren method is first called;
 	int childCount;
 	XdmNode * parent;

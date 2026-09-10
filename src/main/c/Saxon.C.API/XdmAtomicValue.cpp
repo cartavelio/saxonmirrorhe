@@ -17,7 +17,15 @@
     }
 
     XdmAtomicValue::XdmAtomicValue(jobject obj, const char* ty):XdmItem(obj){
-	valType = std::string(ty);
+	    valType = std::string(ty);
+    }
+
+    XdmAtomicValue::~XdmAtomicValue(){
+        if(getRefCount() < 1) {
+            if (!valType.empty()) {
+                valType.clear();
+            }
+        }
     }
 
     void XdmAtomicValue::setType(const char * ty){
@@ -28,8 +36,7 @@
 	if(!valType.empty()) {
 		return valType.c_str();	
 	}
-	
-	if(proc != NULL) {
+
 		jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
 		jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass,"getPrimitiveTypeName",
 					"(Lnet/sf/saxon/s9api/XdmAtomicValue;)Ljava/lang/String;");
@@ -38,19 +45,17 @@
 				<< " not found\n" << std::endl;
 			return "";
 		}
-		jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID,value->xdmvalue));
+		jstring result = (jstring)(SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID,value));
 		if(result) {
 			const char * stri = SaxonProcessor::sxn_environ->env->GetStringUTFChars(result,
-					NULL);
+					nullptr);
 		
 		//SaxonProcessor::sxn_environ->env->DeleteLocalRef(result);
 			valType = std::string(stri);
 			return stri;
 		}
 
-	} 
-	return "Q{http://www.w3.org/2001/XMLSchema}anyAtomicType";	
-	
+	    return "Q{http://www.w3.org/2001/XMLSchema}anyAtomicType";
     }
 
     bool XdmAtomicValue::getBooleanValue(){
@@ -63,7 +68,7 @@
 				<< " not found\n" << std::endl;
 			return false;
 		} else {
-			jboolean result = (jboolean)(SaxonProcessor::sxn_environ->env->CallBooleanMethod(value->xdmvalue, bmID));
+			jboolean result = (jboolean)(SaxonProcessor::sxn_environ->env->CallBooleanMethod(value, bmID));
 			if(result) {
 				return (bool)result;
 			}
@@ -81,11 +86,11 @@
 				<< " not found\n" << std::endl;
 			return 0;
 		} else {
-			jdouble result = (jdouble)(SaxonProcessor::sxn_environ->env->CallDoubleMethod(value->xdmvalue, bmID));
+			jdouble result = (jdouble)(SaxonProcessor::sxn_environ->env->CallDoubleMethod(value, bmID));
 			if(result) {
 				return (double)result;
 			}
-//checkForException(*(SaxonProcessor::sxn_environ), NULL);
+//checkForException(*(SaxonProcessor::sxn_environ), nullptr);
 		}
 
 	return 0;
@@ -107,7 +112,7 @@
 				<< " not found\n" << std::endl;
 			return 0;
 		} else {
-			jlong result = (jlong)(SaxonProcessor::sxn_environ->env->CallObjectMethod(value->xdmvalue, bmID));
+			jlong result = (jlong)(SaxonProcessor::sxn_environ->env->CallObjectMethod(value, bmID));
 			if(result) {
 				return (long)result;
 			}

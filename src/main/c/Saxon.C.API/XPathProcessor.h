@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2015 Saxonica Limited.
+// Copyright (c) 2020 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -33,11 +33,7 @@ public:
     */
     XPathProcessor();
 
-    ~XPathProcessor(){
-	clearProperties();
-	clearParameters(false);
-	//delete contextItem;
-    }
+    ~XPathProcessor();
 
     //! Constructor with the SaxonProcessor supplied.
     /*!
@@ -63,10 +59,11 @@ public:
    XdmValue * evaluate(const char * xpathStr);
    
 
-    //! Compile and evaluate an XPath expression. The result is expected to be a single XdmItem
+    //! Compile and evaluate an XPath expression. The result is expected to be a single XdmItem or nullptr
    /**
      * @param xpathStr - supplied as a character string
-	@return XdmItem
+	@return XdmItem - XdmItem object or nullptr if the expression returns an empty sequence.
+    * If the expression returns a sequence of more than one item, any items after the first are ignored.
    */
    XdmItem * evaluateSingle(const char * xpathStr);
 
@@ -90,7 +87,7 @@ public:
      * Set a parameter value used in the query
      *s
      * @param name  of the parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name"
-     * @param value of the query parameter, or null to clear a previously set value
+     * @param value of the query parameter, or nullptr to clear a previously set value
      */
     void setParameter(const char * name, XdmValue*value);
 
@@ -121,9 +118,13 @@ public:
      *               in this case the prefix will not be available for use, except in the case where the prefix
      *               is also a zero length string, in which case the absence of a prefix implies that the name
      *               is in no namespace.
-     * Assume the prefix or uri is null.
+     * Assume the prefix or uri is nullptr.
      */
     void declareNamespace(const char *prefix, const char * uri);
+
+
+
+    void declareVariable(const char * name);
 
 #if CVERSION_API_NO >= 121
 
@@ -226,16 +227,22 @@ public:
     */
     const char * getErrorCode();
 
-     //! Check for exception thrown.
-	/**
-	* @return cha*. Returns the exception message if thrown otherwise return NULL
-	*/
-    const char* checkException();
 
+    //! Get the SaxonApiException object created when we have an error
+    /**
+     * After the execution of the processor if there is an error, then a SaxonApiException is created.
+     * NULL returned if there is no error.
+     * @return SaxomApiException object of the exception thrown.
+     */
+    SaxonApiException * getException();
 
 private:
+
+    void createException(const char * message=nullptr);
+
+    void setParameter(const char * name, XdmValue*value, bool withParam);
+
 	SaxonProcessor * proc;
-	XdmItem * contextItem;
         std::string cwdXP; /*!< current working directory */
 	jclass  cppClass;
 	jobject cppXP;

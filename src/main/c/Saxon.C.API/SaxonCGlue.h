@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2016 Saxonica Limited.
+// Copyright (c) 2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -198,20 +198,20 @@ jmethodID findConstructor (JNIEnv* penv, jclass myClassInDll, char* arguments);
 
 /*
  * Create the Java SaxonProcessor
- * This can be used to pass the sub-classes of SaxonAPI, there the argument1  should can be null or Processor object
+ * This can be used to pass the sub-classes of SaxonAPI, there the argument1  should can be nullptr or Processor object
  */
 jobject createSaxonProcessor (JNIEnv* penv, jclass myClassInDll, const char * arguments, jobject argument1, jboolean licensei);
 
 /*
  * Create the Java SaxonProcessor
- * This can be used to pass the sub-classes of SaxonAPI, there the argument1  should can be null or Processor object
+ * This can be used to pass the sub-classes of SaxonAPI, there the argument1  should can be nullptr or Processor object
  */
 jobject createSaxonProcessor2 (JNIEnv* penv, jclass myClassInDll, const char * arguments, jobject argument1);
 
 /*
  * Callback to check for exceptions. When called it returns the exception as a string 
  */
-const char * checkForException(sxnc_environment *environi, jobject callingObject);
+const char * checkForException(sxnc_environment *environi);
 
 /*
  * Clean up and destroy Java VM to release memory used. 

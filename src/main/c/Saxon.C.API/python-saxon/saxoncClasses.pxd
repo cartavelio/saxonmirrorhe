@@ -1,6 +1,9 @@
+# cython: language_level = 3
+
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.map cimport map
+
 
 
 
@@ -18,12 +21,6 @@ cdef extern from "../SaxonProcessor.h":
 
         #SaxonProcessor * getProcessor()
 
-        #set saxon resources directory
-        void setResourcesDirectory(const char* dir)
-        
-        #get saxon resources directory
-        const char * getResourcesDirectory()
-
         #Set a configuration property specific to the processor in use. 
         #Properties specified here are common across all the processors.
         void setConfigurationProperty(char * name, char * value)
@@ -32,6 +29,10 @@ cdef extern from "../SaxonProcessor.h":
         void clearConfigurationProperties()
 
         bool isSchemaAware()
+
+        const char * getResourcesDirectory()
+
+        void setResourcesDirectory(const char* dir)
 
         XsltProcessor * newXsltProcessor()
 
@@ -42,6 +43,8 @@ cdef extern from "../SaxonProcessor.h":
         XPathProcessor * newXPathProcessor()
 
         SchemaValidator * newSchemaValidator()
+
+        DocumentBuilder * newDocumentBuilder();
 
         XdmAtomicValue * makeStringValue(const char* str1)
 
@@ -61,6 +64,8 @@ cdef extern from "../SaxonProcessor.h":
 
         XdmAtomicValue * makeAtomicValue(const char* type, const char* value)
 
+        void setCatalog(const char * filename, bool isTracing)
+
         const char * getStringValue(XdmItem * item)
 
         XdmNode * parseXmlFromString(const char* source)
@@ -74,6 +79,35 @@ cdef extern from "../SaxonProcessor.h":
         bool exceptionOccurred()
 
         void exceptionClear()
+
+
+    cdef cppclass DocumentBuilder:
+        DocumentBuilder() except +
+
+        void setLineNumbering(bool option);
+
+        bool isLineNumbering();
+
+        void setSchemaValidator(SchemaValidator * validator);
+
+        SchemaValidator * getSchemaValidator();
+
+
+        void setDTDValidation(bool option);
+
+        bool isDTDValidation();
+
+        void setBaseUri(const char* uri);
+
+        const char * getBaseUri();
+
+
+        XdmNode* parseXmlFromString(const char * content);
+
+        XdmNode* parseXmlFromFile(const char * filename);
+
+        XdmNode * parseXmlFromUri(const char* source)
+
 
 
     cdef cppclass XsltProcessor:
@@ -107,7 +141,7 @@ cdef extern from "../SaxonProcessor.h":
 
         void clearProperties()
 
-        void setupXslMessage(bool show, const char* filename=NULL)
+        void setSaveXslMessage(bool show, const char* filename)
 
         void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile)
         
@@ -127,8 +161,6 @@ cdef extern from "../SaxonProcessor.h":
 
         void compileFromXdmNode(XdmNode * node)
 
-        void releaseStylesheet()
-
         char * transformToString()
 
         XdmValue * transformToValue()
@@ -140,16 +172,98 @@ cdef extern from "../SaxonProcessor.h":
         const char* checkException()
 
         void exceptionClear()
-    
-        int exceptionCount()
 
-        const char * getErrorMessage(int)
+        const char * getErrorMessage()
 
-        const char * getErrorCode(int)
+        const char * getErrorCode()
+
 
 
     cdef cppclass Xslt30Processor:
         Xslt30Processor() except +
+        # set the current working directory
+        void setcwd(const char* cwd)
+
+        # Set the output file of where the transformation result is sent
+        void setOutputFile(const char* outfile)
+
+        # Say whether just-in-time compilation of template rules should be used.
+        void setJustInTimeCompilation(bool jit)
+
+        void setResultAsRawValue(bool option)
+
+        # Set the value of a stylesheet parameter
+        void setParameter(const char* name, XdmValue*value)
+
+        # Get a parameter value by name
+        XdmValue* getParameter(const char* name)
+
+        # Remove a parameter (name, value) pair from a stylesheet
+        bool removeParameter(const char* name)
+
+        XdmValue ** createXdmValueArray(int len)
+
+        void deleteXdmValueArray(XdmValue** arr, int len)
+
+        # Clear parameter values set
+        void clearParameters(bool deleteValues=false)
+
+        # Get the messages written using the xsl:message instruction
+        void setupXslMessage(bool show, const char* filename=nullptr)
+
+
+        # Perform a one shot transformation. The result is returned as a string
+        const char * transformFileToString(const char* sourcefile, const char* stylesheetfile)
+
+        # Perform a one shot transformation. The result is returned as an XdmValue
+        XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile)
+
+        # compile a stylesheet file.
+        XsltExecutable * compileFromFile(const char* stylesheet)
+
+        # compile a stylesheet received as a string.
+        XsltExecutable * compileFromString(const char* stylesheet)
+
+        # Get the stylesheet associated via the xml-stylesheet processing instruction
+        XsltExecutable * compileFromAssociatedFile(const char* sourceFile)
+
+        # Compile a stylesheet received as a string and save to an exported file (SEF).
+        void compileFromStringAndSave(const char* stylesheet, const char* filename)
+
+        # Compile a stylesheet received as a file and save to an exported file (SEF).
+        void compileFromFileAndSave(const char* xslFilename, const char* filename)
+
+        # Compile a stylesheet received as an XdmNode. The compiled stylesheet is cached
+        # and available for execution later.
+        void compileFromXdmNodeAndSave(XdmNode * node, const char* filename)
+
+        # compile a stylesheet received as an XdmNode.
+        XsltExecutable * compileFromXdmNode(XdmNode * node)
+
+
+        # Checks for pending exceptions without creating a local reference to the exception object
+        bool exceptionOccurred()
+
+        # Check for exception thrown.
+        const char* checkException()
+
+        # Clear any exception thrown
+        void exceptionClear()
+
+        # Get number of errors reported during execution or evaluate of stylesheet
+        int exceptionCount()
+
+        # Get the ith error message if there are any error
+        const char * getErrorMessage()
+
+        # Get the ith error code if there are any error
+        const char * getErrorCode()
+
+
+
+
+    cdef cppclass XsltExecutable:
+        XsltExecutable() except +
         # set the current working directory
         void setcwd(const char* cwd)
 
@@ -161,6 +275,10 @@ cdef extern from "../SaxonProcessor.h":
         # Set the source from file for the transformation.
         void setGlobalContextFromFile(const char * filename)
 
+        void setInitialMode(const char * modeName)
+
+        void setSaveResultDocument(bool flag)
+
         # The initial value to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>)
         void setInitialMatchSelection(XdmValue * selection)
 
@@ -170,13 +288,19 @@ cdef extern from "../SaxonProcessor.h":
         # Set the output file of where the transformation result is sent
         void setOutputFile(const char* outfile)
 
-        # Say whether just-in-time compilation of template rules should be used.
-        void setJustInTimeCompilation(bool jit)
 
         void setResultAsRawValue(bool option)
 
+        map[string,XdmNode*]& getResultDocuments()
+
+        XsltExecutable *clone()
+
+        # Produce a representation of the compiled stylesheet, in XML form, suitable for
+        # distribution and reloading.
+        void exportStylesheet(const char * filename);
+
         # Set the value of a stylesheet parameter
-        void setParameter(const char* name, XdmValue*value, bool _static)
+        void setParameter(const char* name, XdmValue*value)
 
         # Get a parameter value by name
         XdmValue* getParameter(const char* name)
@@ -209,71 +333,49 @@ cdef extern from "../SaxonProcessor.h":
         void clearProperties()
 
         # Get the messages written using the <code>xsl:message</code> instruction
-        void setupXslMessage(bool show, const char* filename=NULL)
+        void setSaveXslMessage(bool show, const char* filename)
+
+        # Get the messages written using the xsl:message instruction
+        #XdmValue * getXslMessages();
 
         # Perform a one shot transformation. The result is stored in the supplied outputfile.
-        void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile)
+        void transformFileToFile(const char* sourcefile, const char* outputfile)
 
         # Perform a one shot transformation. The result is returned as a string
-        const char * transformFileToString(const char* sourcefile, const char* stylesheetfile)
+        const char * transformFileToString(const char* sourcefile)
 
         # Perform a one shot transformation. The result is returned as an XdmValue
-        XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile)
-
-        # compile a stylesheet file.
-        void compileFromFile(const char* stylesheet)
-
-        # compile a stylesheet received as a string.
-        void compileFromString(const char* stylesheet)
-
-        # Get the stylesheet associated via the xml-stylesheet processing instruction
-        void compileFromAssociatedFile(const char* sourceFile)
-
-        # Compile a stylesheet received as a string and save to an exported file (SEF).
-        void compileFromStringAndSave(const char* stylesheet, const char* filename)
-
-        # Compile a stylesheet received as a file and save to an exported file (SEF).
-        void compileFromFileAndSave(const char* xslFilename, const char* filename)
-
-        # Compile a stylesheet received as an XdmNode. The compiled stylesheet is cached
-        # and available for execution later.
-        void compileFromXdmNodeAndSave(XdmNode * node, const char* filename)
-
-        # compile a stylesheet received as an XdmNode.
-        void compileFromXdmNode(XdmNode * node)
+        XdmValue * transformFileToValue(const char* sourcefile)
 
         # Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results to file.
-        void applyTemplatesReturningFile(const char * stylesheetFilename, const char* outfile)
+        void applyTemplatesReturningFile(const char* outfile)
 
         # Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results as serialized string.
-        const char* applyTemplatesReturningString(const char * stylesheetFilename)
+        const char* applyTemplatesReturningString()
 
         # Invoke the stylesheet by applying templates to a supplied input sequence, Saving the results as an XdmValue.
-        XdmValue * applyTemplatesReturningValue(const char * stylesheetFilename)
+        XdmValue * applyTemplatesReturningValue()
 
         # Invoke a transformation by calling a named template and save result to file.
-        void callTemplateReturningFile(const char * stylesheetFilename, const char* templateName, const char* outfile)
+        void callTemplateReturningFile(const char* templateName, const char* outfile)
 
         # Invoke a transformation by calling a named template and return result as a string.
-        const char* callTemplateReturningString(const char * stylesheetFilename, const char* templateName)
+        const char* callTemplateReturningString(const char* templateName)
 
         # Invoke a transformation by calling a named template and return result as an XdmValue.
-        XdmValue* callTemplateReturningValue(const char * stylesheetFilename, const char* templateName)
+        XdmValue* callTemplateReturningValue(const char* templateName)
 
         # Call a public user-defined function in the stylesheet
         # Here we wrap the result in an XML document, and sending this document to a specified file
-        void callFunctionReturningFile(const char * stylesheetFilename, const char* functionName, XdmValue ** arguments, int argument_length, const char* outfile)
+        void callFunctionReturningFile(const char* functionName, XdmValue ** arguments, int argument_length, const char* outfile)
 
         # Call a public user-defined function in the stylesheet
         # Here we wrap the result in an XML document, and serialized this document to string value
-        const char * callFunctionReturningString(const char * stylesheetFilename, const char* functionName, XdmValue ** arguments, int argument_length)
+        const char * callFunctionReturningString(const char* functionName, XdmValue ** arguments, int argument_length)
 
         # Call a public user-defined function in the stylesheet
         # Here we wrap the result in an XML document, and return the document as an XdmVale
-        XdmValue * callFunctionReturningValue(const char * stylesheetFilename, const char* functionName, XdmValue ** arguments, int argument_length)
-
-        # Internal method to release cached stylesheet
-        void releaseStylesheet()
+        XdmValue * callFunctionReturningValue(const char* functionName, XdmValue ** arguments, int argument_length)
 
         # Execute transformation to string. Properties supplied in advance.
         const char * transformToString(XdmNode * source)
@@ -288,7 +390,7 @@ cdef extern from "../SaxonProcessor.h":
         bool exceptionOccurred()
 
         # Check for exception thrown.
-        const char* checkException()
+        SaxonApiException* getException();
 
         # Clear any exception thrown
         void exceptionClear()
@@ -296,11 +398,9 @@ cdef extern from "../SaxonProcessor.h":
         # Get number of errors reported during execution or evaluate of stylesheet
         int exceptionCount()
 
-        # Get the ith error message if there are any error
-        const char * getErrorMessage(int i)
 
-        # Get the ith error code if there are any error
-        const char * getErrorCode(int i)
+    cdef cppclass SaxonApiException:
+        SaxonApiException() except +
 
 
     cdef cppclass SchemaValidator:
@@ -390,11 +490,9 @@ cdef extern from "../SaxonProcessor.h":
 
         int exceptionCount()
 
-        const char * getErrorMessage(int i)
+        const char * getErrorMessage()
 
-        const char * getErrorCode(int i)
-
-        const char* checkException()
+        const char * getErrorCode()
 
     cdef cppclass XQueryProcessor:
         XQueryProcessor() except +
@@ -440,9 +538,9 @@ cdef extern from "../SaxonProcessor.h":
 
         int exceptionCount()
 
-        const char * getErrorMessage(int i)
+        const char * getErrorMessage()
 
-        const char * getErrorCode(int i)
+        const char * getErrorCode()
 
 
 cdef extern from "../XdmValue.h":
