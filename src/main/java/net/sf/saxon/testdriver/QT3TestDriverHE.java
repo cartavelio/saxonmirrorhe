@@ -125,7 +125,7 @@ public class QT3TestDriverHE extends TestDriver {
     }
 
     public static boolean isSlow(String test) {
-        return test.equals("RangeExpr-409d");
+        return false; //test.equals("RangeExpr-409d");
     }
 
 
