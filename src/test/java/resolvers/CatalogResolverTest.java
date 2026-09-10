@@ -10,6 +10,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.Files;
 import java.util.Iterator;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -185,6 +186,53 @@ public class CatalogResolverTest {
             XdmValue val = s.evaluate();
             assertTrue(val instanceof XdmAtomicValue);
             assertTrue(((XdmAtomicValue)val).getBooleanValue());
+        } catch (Exception ex) {
+            fail();
+        }
+    }
+
+    @Test
+    public void resolveWithFileURI() {
+        // This stylesheet contains a doc() call that loads a file directly. That means it
+        // goes through the DirectResourceResolver, gets a different kind of source,
+        // gets different options, and succeeds.
+        resolveWith("style-file.xsl");
+    }
+
+    @Test
+    public void resolveWithHttpURI() {
+        // This stylesheet contains a doc() call that loads a URI. The URI is resolved
+        // by the catalog to the same document as the resolveWithFileURI test, but it
+        // gets a different kind of source, different options, and fails.
+        //
+        // Basically, in this case, the parser options include the configured DTD
+        // validation setting which won't work if you're loading a stylesheet.
+        resolveWith("style-http.xsl");
+    }
+
+    private void resolveWith(String xslFile) {
+        Processor processor = new Processor(false);
+        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
+        try {
+            XsltCompiler compiler = processor.newXsltCompiler();
+
+            String fn = "src/test/testdata/resolvers/" + xslFile;
+            Source xsl = new SAXSource(new InputSource(Files.newInputStream(new File(fn).toPath())));
+            XsltExecutable exec = compiler.compile(xsl);
+
+            Xslt30Transformer transformer = exec.load30();
+
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            builder.setDTDValidation(true);
+            XdmNode doc = builder.build(new File("src/test/testdata/resolvers/input.xml"));
+
+            transformer.setGlobalContextItem(doc);
+
+            XdmDestination destination = new XdmDestination();
+            transformer.applyTemplates(doc, destination);
+
+            System.out.println(destination.getXdmNode());
+
         } catch (Exception ex) {
             fail();
         }
