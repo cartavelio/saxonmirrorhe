@@ -781,7 +781,7 @@
             </li>
             <li>
                <p>Call the <code cs="Saxon.Api.Processor#NewXsdCompiler">NewSchemaCompiler()</code>
-                  method to get a <code cs="Saxon.Api.XsdCompiler"
+                  method to get an <code cs="Saxon.Api.XsdCompiler"
                      >XsdCompiler</code>. It is possible to get multiple schema compilers, or to use
                a single schema compiler to compile multiple schemas.</p>
             </li>
@@ -875,20 +875,13 @@
       <section id="cpp-api-validation" title="Validation from C++" class="conly">
          <h1>Validation from C++</h1>
 
-         <p>The SaxonC C++ interface allows Schemas to be loaded into a <a class="bodylink code"
+         <p>The SaxonC C++ interface allows schemas to be loaded into a <a class="bodylink code"
             href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonProcessor.html">SaxonProcessor</a>, and
             then to be used for validating instances, or for schema-aware XSLT and XQuery processing.</p>
 
-         <!--<p>Schema validation can be controlled using the SaxonC C++ interface. The SaxonC C++ API is
-            integrated across the range of Saxon XML processing interfaces, and provides the internal
-            interface upon which the Python and PHP APIs are built.</p> -->
-
-
-
          <aside>
-            <p>The API has changed in SaxonC 13, as a consequence of allowing multiple schemas
-               to be loaded independently into a single <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonProcessor.html">SaxonProcessor</a>.
+            <p>As in the underlying SaxonJ 13 s9api interface, the API has changed in SaxonC 13, as a consequence
+               of allowing multiple schemas to be loaded independently into a single <code>SaxonProcessor</code>.
                Although some methods have been retained, the changes are not 100% backwards compatible.</p>
          </aside>
          
@@ -898,52 +891,55 @@
             <li>
                <p>Create a <a class="bodylink code"
                   href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonProcessor.html"
-                  >SaxonProcessor</a> using the constructor <code>new SaxonProcessor(true)</code> (schema
-                  processing requires SaxonC-EE).</p>
+                  >SaxonProcessor</a> using the constructor <code>new SaxonProcessor(true)</code>. (Note that
+                  schema processing requires SaxonC-EE).</p>
             </li>
             <li>
-               <p>Call the <a class="bodylink code" href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonProcessor.html#a6692d2c60fdb15e6c1928e829f5b2ce2">newXsdCompiler()</a>
-                  method to create a new <a class="bodylink code"
-                                     href="https://www.saxonica.com/saxon-c/doc13/html/classSXsdCompiler.html">XsdCompiler</a>.
+               <p>Call the <code>newXsdCompiler()</code> method to get an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/classXsdCompiler.html">XsdCompiler</a>. 
                   It is possible to get multiple schema compilers, or to use a single schema
                   compiler to compile multiple schemas.</p>
             </li>
-            <li>If required, set options on the XsdCompiler to control the way in which schema documents will be loaded.
-               It is possible to set the XSD version (to 1.0 or 1.1).</li>
-            <li><p>Construct an PyXsdSchema object, representing a compiled schema, by calling the compile() method, using one of the
-               keywords xsd_text, xsd_node or xsd_file to compile a schema from lexical string, XdmNode object or file, respectively. to compile a schema from lexical string.
-               It is also possible to compile a XSF file from a Saxon-defined SCM format
-               (as produced using the export_schema() method). The resulting
-               schema document is available to all applications run within the containing Processor.</p>
-            </li>
-            <li>To validate an instance document, first call the <a class="bodylink code" href="https://www.saxonica.com/saxon-c/doc13/html/classXsdSchema.html">newValidator()</a> method on the XsdSchema object.
-               This returns a <a class="bodylink code"
-                                 href="https://www.saxonica.com/saxon-c/doc13/html/classSchemaValidator.html">SchemaValidator</a>.
+            <li>
+               <p>If required, set options on the <code>XsdCompiler</code> to control the way in which schema
+                  documents will be loaded. It is possible to set the XSD version (to 1.0 or 1.1).</p>
             </li>
             <li>
-               <p>Set any options required on the <a class="bodylink code"
-                                                     href="https://www.saxonica.com/saxon-c/doc13/html/classSchemaValidator.html">SchemaValidator</a> to control the way in which
-                  schema documents will be loaded, and the way a validation episode is invoked and performed
-                  (for example, the source document, current working directory and schema parameters).</p>
+               <p>Construct an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/classXsdSchema.html">XsdSchema</a>
+                  object, representing a compiled schema, by calling one of the <code>compile</code>
+                  methods (which enable compiling from lexical string, <code>XdmNode</code> object or file).
+                  The resulting schema document is available to all applications run within the containing
+                  <code>SaxonProcessor</code>.</p>
             </li>
             <li>
-               Then invoke validate an instance document, by calling
-               the <code>validate()</code> or <code>validateToNode()</code>
-               method on the <code>SchemaValidator</code> object.
-               Options available include the ability to control whether additional schema components can be referenced from the
-               instance document using xsi:schemaLocation attributes, and control over the reporting of errors encountered.
+               <p>To validate an instance document, first call the <code>newValidator()</code> method on the
+                  <code>XsdSchema</code> object. This returns a <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc13/html/classSchemaValidator.html"
+                     >SchemaValidator</a>.</p>
             </li>
             <li>
-               It is possible to save a compiled schema in an SCM (schema component model) file using the method exportComponents() on
-               the XsdSchema object (typically supplying a Serializer as the destination), and to import a previously-saved schema by
-               calling XsdCompiler.importComponents().
+               <p>Set options on the <code>SchemaValidator</code> to control the way in which a
+                  particular validation episode is performed, and then invoke its <code>validate()</code> or
+                  <code>validateToNode()</code> method to validate an instance document. Options available
+                  include the ability to control whether additional schema components can be referenced from
+                  the instance document using <code>xsi:schemaLocation</code> attributes.</p>
             </li>
-            <li>If the schema is to be imported into a schema-aware XSLT stylesheet, XQuery, or XPath expression, it can be supplied to the relevant
-               XsltCompiler, XQueryCompiler, or XPathCompiler via its useSchema() method.</li>
             <li>
                <p>Validation errors are returned to the standard error listener. It is also possible to call
                   the method <code>getValidationReport()</code> to return a validator report as an
                   <code>XdmNode</code> object.</p>
+            </li>
+            <li>
+               <p>It is possible to save a compiled schema in an SCM (schema component model) file
+                  using the <code>exportComponents()</code> method on the <code>XsdSchema</code> object, and
+                  to import a previously-saved schema by calling <code>importComponents()</code> on the
+                  <code>XsdCompiler</code> object.</p>
+            </li>
+            <li>
+               <p>If the schema is to be imported into a schema-aware XSLT stylesheet, XQuery, or XPath expression,
+                  it can be supplied to the relevant <code>Xslt30Processor</code>, <code>XQueryProcessor</code>,
+                  or <code>XPathProcessor</code> via its <code>useSchema()</code> method.</p>
             </li>
          </ol>
          
@@ -954,36 +950,37 @@
             consistency. This behaviour can be changed using the configuration option <a
                class="feature" href="MULTIPLE_SCHEMA_IMPORTS"/>.</p>
          
-         <p>Although the API is defined in such a way that a <code>SchemaValidator</code> is created for a
-            particular schema, in the Saxon implementation the schema components that are available to the
-            validator are not only the components within that schema, but all the components that form part of
-            any schema registered with the <code>SaxonProcessor</code>.</p>
+         <p>Unlike Saxon versions prior to Saxon 13, compiling a schema does not make it globally
+            available to all applications using a given <code>SaxonProcessor</code>. Each compiled schema is
+            distinct and can be used individually without interfering with other schemas. However, all
+            the schemas used within a <code>SaxonProcessor</code> must be <i>consistent</i>. Consistency
+            is defined in the version 4.0 language specifications: in simplified terms, it means that
+            the same name must not be used in different schemas to refer to different element or type
+            declarations.</p>
          
          <p>The <code>SchemaValidator</code> can be used with the <code>DocumentBuilder</code> class to parse
             and validate XML documents.</p>
-
-         <p>We recommend using the new Schema API, but to maintain backward compatibility we have kept the
-            newSchemaValidator() method on the SaxonProcessor to creat the SchemaValidator. Although this method is now
-            deprecated along with the method <code>registerSchemaFromString()</code>, <code>registerSchemaFromNode</code>,
-            <code>registerSchemaFromFile()</code> and <code>registerSchemaFromFile</code> on the SchemaValdiator.</p>
+         
+         <aside>From SaxonC 13, we recommend using the new schema API, as above.
+            To retain some backwards compatibility, parts of the old schema API have been retained in SaxonC
+            13, but these are now deprecated. For instance <code>SaxonProcessor.newSchemaValidator()</code>,
+            and the <code>registerSchemaFromString()</code>, <code>registerSchemaFromNode()</code> and
+            <code>registerSchemaFromFile()</code> methods on <code>SchemaValidator</code>.</aside>
          
       </section>
       
       <section id="python-api-validation" title="Validation from Python" class="conly">
          <h1>Validation from Python</h1>
          
-         <p>Schema validation can be controlled using the SaxonC Python interface. To use XML Schema
-            validation you will need to install saxoncee.</p>
-
+         <p>The SaxonC Python interface allows schemas to be loaded into a <a class="bodylink code"
+            href="https://www.saxonica.com/saxon-c/doc13/python/processor.html">PySaxonProcessor</a>, and
+            then to be used for validating instances, or for schema-aware XSLT and XQuery processing.</p>
+         
          <aside>
-            <p>The API has changed in SaxonC 13, as a consequence of allowing multiple schemas
-               to be loaded independently into a single <code>PySaxonProcessor</code>.
+            <p>As in the underlying SaxonJ 13 s9api interface, the API has changed in SaxonC 13, as a consequence
+               of allowing multiple schemas to be loaded independently into a single <code>PySaxonProcessor</code>.
                Although some methods have been retained, the changes are not 100% backwards compatible.</p>
          </aside>
-         
-         <p>The Python interface allows schemas to o be loaded into a SaxonProcessor, and then to be used
-            for validating instances, and then to be used for validating instances, or for schema-aware XSLT and
-            XQuery processing.</p>
          
          <p>The main steps are:</p>
          
@@ -992,28 +989,55 @@
                <p>Create a <a class="bodylink code"
                   href="https://www.saxonica.com/saxon-c/doc13/python/processor.html"
                   >PySaxonProcessor</a> using the constructor <code>proc =
-                     PySaxonProcessor(license=True)</code> (schema processing requires SaxonC-EE).</p>
+                     PySaxonProcessor(license=True)</code>. (Note that schema processing requires SaxonC-EE).</p>
             </li>
             <li>
-               <p>Call the new_xsd_compiler() method to create a new PyXsdCompiler. It is possible to get multiple
-                  schema compilers, or to use a single schema compiler to compile multiple schemas.</p>
+               <p>Call the <code>new_xsd_compiler()</code> method to get a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc13/python/xsd/compiler.html">PyXsdCompiler</a>. 
+                  It is possible to get multiple schema compilers, or to use a single schema
+                  compiler to compile multiple schemas.</p>
             </li>
             <li>
-               <p>Set any options required on the <code>PySchemaValidator</code> to control the way in which
-                  schema documents will be loaded, and the way a validation episode is invoked and performed
-                  (for example, the source document, current working directory and schema parameters).</p>
+               <p>If required, set options on the <code>XsdCompiler</code> to control the way in which schema
+                  documents will be loaded. It is possible to set the XSD version (to 1.0 or 1.1).</p>
             </li>
-            <li>If required, set options on the PyXsdCompiler to control the way in which schema documents will be loaded.
-               It is possible to set the XSD version (to 1.0 or 1.1).</li>
-
             <li>
-               <p>To validate an instance document, call the <code>validate()</code> or
-                  <code>validate_to_node()</code> methods on the <code>PySchemaValidator</code> object.</p>
+               <p>Construct a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc13/python/xsd/schema.html">PyXsdSchema</a>
+                  object, representing a compiled schema, by calling the <code>compile()</code> method (using
+                  one of the keywords <code>xsd_text</code>, <code>xsd_node</code> or <code>xsd_file</code> to
+                  compile a schema from lexical string, <code>PyXdmNode</code> object or file, respectively).
+                  The resulting schema document is available to all applications run within the containing
+                  <code>PySaxonProcessor</code>.</p>
+            </li>
+            <li>
+               <p>To validate an instance document, first call the <code>new_schema_validator()</code> method on the
+                  <code>PyXsdSchema</code> object. This returns a <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc13/python/xsd/schema_validator.html"
+                     >PySchemaValidator</a>.</p>
+            </li>
+            <li>
+               <p>Set options on the <code>PySchemaValidator</code> to control the way in which a
+                  particular validation episode is performed, and then invoke its <code>validate()</code> or
+                  <code>validate_to_node()</code> method to validate an instance document. Options available
+                  include the ability to control whether additional schema components can be referenced from
+                  the instance document using <code>xsi:schemaLocation</code> attributes.</p>
             </li>
             <li>
                <p>Validation errors are returned to the standard error listener. It is also possible to call
                   the class property <code>validation_report</code> to return a validator report as a
                   <code>PyXdmNode</code> object.</p>
+            </li>
+            <li>
+               <p>It is possible to save a compiled schema in an SCM (schema component model) file
+                  using the <code>export_components()</code> method on the <code>PyXsdSchema</code> object, and
+                  to import a previously-saved schema by calling <code>import_components()</code> on the
+                  <code>PyXsdCompiler</code> object.</p>
+            </li>
+            <li>
+               <p>If the schema is to be imported into a schema-aware XSLT stylesheet, XQuery, or XPath expression,
+                  it can be supplied to the relevant <code>PyXslt30Processor</code>, <code>PyXQueryProcessor</code>,
+                  or <code>PyXPathProcessor</code> via its <code>useSchema()</code> method.</p>
             </li>
          </ol>
          
@@ -1024,32 +1048,38 @@
             consistency. This behaviour can be changed using the configuration option <a
                class="feature" href="MULTIPLE_SCHEMA_IMPORTS"/>.</p>
          
-         <p>Although the API is defined in such a way that a <code>PySchemaValidator</code> is created for a
-            particular schema, in the Saxon implementation the schema components that are available to the
-            validator are not only the components within that schema, but all the components that form part of
-            any schema registered with the <code>PySaxonProcessor</code>.</p>
+         <p>Unlike Saxon versions prior to Saxon 13, compiling a schema does not make it globally
+            available to all applications using a given <code>PySaxonProcessor</code>. Each compiled schema is
+            distinct and can be used individually without interfering with other schemas. However, all
+            the schemas used within a <code>PySaxonProcessor</code> must be <i>consistent</i>. Consistency
+            is defined in the version 4.0 language specifications: in simplified terms, it means that
+            the same name must not be used in different schemas to refer to different element or type
+            declarations.</p>
          
          <p>The <code>PySchemaValidator</code> can be used with the <code>PyDocumentBuilder</code> class to parse
             and validate XML documents.</p>
-
-         <p>Register and load a schema document by calling the<code>register_schema()</code> method,
-            using the keywords <code>xsd_text</code>, <code>xsd_node</code> or <code>xsd_file</code> to
-            load a schema from lexical string, <code>XdmNode</code> object or file, respectively. When
-            loading from file on disk, the file can either be a schema document in source XSD format, or
-            a compiled schema in Saxon-defined SCM format (as produced using the
-            <code>export_schema()</code> method).</p>
+         
+         <aside>From SaxonC 13, we recommend using the new schema API, as above.
+            To retain some backwards compatibility, parts of the old schema API have been retained in SaxonC
+            13, but these are now deprecated. For instance the <code>new_schema_validator()</code> method on
+            <code>PySaxonProcessor</code>, and the <code>register_schema()</code> method on
+            <code>PySchemaValidator</code>.</aside>
          
       </section>
       
       <section id="php-api-validation" title="Validation from PHP" class="conly">
          <h1>Validation from PHP</h1>
          
-         <p>Schema validation can be controlled using the SaxonC PHP interface.</p>
-         
-         <p>The PHP interface allows schemas to be loaded into a <a class="bodylink code"
-            href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_schemavalidator"
-            >SchemaValidator</a>, and then to be used for validating instances, or for schema-aware XSLT and
+         <p>The SaxonC PHP interface allows schemas to be loaded into a <a class="bodylink code"
+            href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_saxonprocessor"
+            >SaxonProcessor</a>, and then to be used for validating instances, or for schema-aware XSLT and
             XQuery processing.</p>
+         
+         <aside>
+            <p>As in the underlying SaxonJ 13 s9api interface, the API has changed in SaxonC 13, as a consequence
+               of allowing multiple schemas to be loaded independently into a single <code>SaxonProcessor</code>.
+               Although some methods have been retained, the changes are not 100% backwards compatible.</p>
+         </aside>
          
          <p>The main steps are:</p>
          
@@ -1057,34 +1087,55 @@
             <li>
                <p>Create a <a class="bodylink code"
                   href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_saxonprocessor"
-                  >SaxonProcessor</a> using the constructor <code>new SaxonProcessor(true)</code> (schema
-                  processing requires SaxonC-EE). Then call the method <code>newSchemaValidator()</code>
-                  to create a new <a class="bodylink code"
+                  >SaxonProcessor</a> using the constructor <code>new SaxonProcessor(true)</code>. (Note that
+                  schema processing requires SaxonC-EE).</p>
+            </li>
+            <li>
+               <p>Call the <code>newXsdCompiler()</code> method to get an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_schemavalidator"
+                  >XsdCompiler</a>. It is possible to get multiple schema compilers, or to use a single schema
+                  compiler to compile multiple schemas.</p>
+            </li>
+            <li>
+               <p>If required, set options on the <code>XsdCompiler</code> to control the way in which schema
+                  documents will be loaded. It is possible to set the XSD version (to 1.0 or 1.1).</p>
+            </li>
+            <li>
+               <p>Construct an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_xsdschema"
+                  >XsdSchema</a> object, representing a compiled schema, by calling one of the <code>compile</code>
+                  methods (which enable compiling from lexical string, <code>XdmNode</code> object or file).
+                  The resulting schema document is available to all applications run within the containing
+                  <code>SaxonProcessor</code>.</p>
+            </li>
+            <li>
+               <p>To validate an instance document, first call the <code>newValidator()</code> method on the
+                  <code>XsdSchema</code> object. This returns a <a class="bodylink code"
                      href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_schemavalidator"
                      >SchemaValidator</a>.</p>
             </li>
             <li>
-               <p>Set any options required on the <code>SchemaValidator</code> to control the way in which
-                  schema documents will be loaded, and the way a validation episode is invoked and performed
-                  (for example, the source document, current working directory and schema parameters).</p>
-            </li>
-            <li>
-               <p>Register and load a schema document by calling one of the methods
-                  <code>registerSchemaFromString()</code>, <code>registerSchemaFromNode</code> or
-                  <code>registerSchemaFromFile</code>, to load a schema from lexical string,
-                  <code>XdmNode</code> object or file, respectively. For the
-                  <code>registerSchemaFromFile()</code> method the file on disk can either be a schema
-                  document in source XSD format, or a compiled schema in Saxon-defined SCM format (as produced
-                  using the <code>exportSchema()</code> method).</p>
-            </li>
-            <li>
-               <p>To validate an instance document, call the <code>validate()</code> or <code>validateToNode()</code>
-                  method on the <code>SchemaValidator</code> object.</p>
+               <p>Set options on the <code>SchemaValidator</code> to control the way in which a
+                  particular validation episode is performed, and then invoke its <code>validate()</code> or
+                  <code>validateToNode()</code> method to validate an instance document. Options available
+                  include the ability to control whether additional schema components can be referenced from
+                  the instance document using <code>xsi:schemaLocation</code> attributes.</p>
             </li>
             <li>
                <p>Validation errors are returned to the standard error listener. It is also possible to call
                   the method <code>getValidationReport()</code> to return a validator report as an
                   <code>XdmNode</code> object.</p>
+            </li>
+            <li>
+               <p>It is possible to save a compiled schema in an SCM (schema component model) file
+                  using the <code>exportComponents()</code> method on the <code>XsdSchema</code> object, and
+                  to import a previously-saved schema by calling <code>importComponents()</code> on the
+                  <code>XsdCompiler</code> object.</p>
+            </li>
+            <li>
+               <p>If the schema is to be imported into a schema-aware XSLT stylesheet, XQuery, or XPath expression,
+                  it can be supplied to the relevant <code>Xslt30Processor</code>, <code>XQueryProcessor</code>,
+                  or <code>XPathProcessor</code> via its <code>useSchema()</code> method.</p>
             </li>
          </ol>
          
@@ -1095,13 +1146,22 @@
             consistency. This behaviour can be changed using the configuration option <a
                class="feature" href="MULTIPLE_SCHEMA_IMPORTS"/>.</p>
          
-         <p>Although the API is defined in such a way that a <code>SchemaValidator</code> is created for a
-            particular schema, in the Saxon implementation the schema components that are available to the
-            validator are not only the components within that schema, but all the components that form part of
-            any schema registered with the <code>SaxonProcessor</code>.</p>
+         <p>Unlike Saxon versions prior to Saxon 13, compiling a schema does not make it globally
+            available to all applications using a given <code>SaxonProcessor</code>. Each compiled schema is
+            distinct and can be used individually without interfering with other schemas. However, all
+            the schemas used within a <code>SaxonProcessor</code> must be <i>consistent</i>. Consistency
+            is defined in the version 4.0 language specifications: in simplified terms, it means that
+            the same name must not be used in different schemas to refer to different element or type
+            declarations.</p>
          
          <p>The <code>SchemaValidator</code> can be used with the <code>DocumentBuilder</code> class to parse
             and validate XML documents.</p>
+         
+         <aside>From SaxonC 13, we recommend using the new schema API, as above.
+            To retain some backwards compatibility, parts of the old schema API have been retained in SaxonC
+            13, but these are now deprecated. For instance <code>SaxonProcessor.newSchemaValidator()</code>,
+            and the <code>registerSchemaFromString()</code>, <code>registerSchemaFromNode()</code> and
+            <code>registerSchemaFromFile()</code> methods on <code>SchemaValidator</code>.</aside>
          
       </section>
    </section>
