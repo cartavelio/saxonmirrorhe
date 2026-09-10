@@ -682,13 +682,13 @@
         words in some other European languages: Danish (da), German (de), French (fr), Belgium French (fr-BE),
         Italian (it), Dutch (nl), Belgium Flemish (nl-BE), and Swedish (sv).</p>
     </alt-description>
-    <alt-description C="PE">
+    <!--<alt-description C="PE">
       <p>A set of numberers provide support for formatting numbers and dates as words in some other European
         languages: Danish (da), German (de), French (fr), Belgium French (fr-BE), Italian (it), Dutch (nl),
         Belgium Flemish (nl-BE), and Swedish (sv).</p>
-    </alt-description>
+    </alt-description>-->
     <products>
-      <product J="HE" C="PE"/>
+      <product J="HE"/><!-- C="PE" -->
     </products>
   </feature>
   
@@ -697,11 +697,10 @@
     <details link="localization/ICU-numbers-and-dates" name="Numbers and Dates from ICU" subpages="has-subpages"/>
     <description>
       <p>Full support for formatting numbers as words in different languages is provided using the <a
-        href="http://site.icu-project.org/" class="bodylink">ICU4J library</a> (provided this JAR is available
-        on the classpath).</p>
+        href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p>
     </description>
     <products>
-      <product J="PE"/>
+      <product J="PE" C="PE"/>
     </products>
   </feature>
   
@@ -711,19 +710,18 @@
     <description>
       <p>Full support for formatting dates as words in different languages is provided using the <a
         href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the relevant platform (ICU4J
-        for SaxonJ, and ICU4N for SaxonCS).</p>
+        for SaxonJ and SaxonC, and ICU4N for SaxonCS).</p>
     </description>
-    <alt-description J="PE">
+    <alt-description J="PE" C="PE">
       <p>Full support for formatting dates as words in different languages is provided using the <a
-        href="http://site.icu-project.org/" class="bodylink">ICU4J library</a> (provided this JAR is available
-        on the classpath).</p>
+        href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p>
     </alt-description>
     <alt-description CS="PE">
       <p>Full support for formatting dates as words in different languages is provided using the ICU4N
         library.</p>
     </alt-description>
     <products>
-      <product J="PE" CS="PE"/>
+      <product J="PE" CS="PE" C="PE"/>
     </products>
   </feature>
   
@@ -745,9 +743,9 @@
     <description>
       <p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
         collation facilities available from the <a href="http://site.icu-project.org/" class="bodylink">ICU
-          library</a> for the relevant platform (ICU4J for SaxonJ, and ICU4N for SaxonCS).</p>
+          library</a> for the relevant platform (ICU4J for SaxonJ and SaxonC, and ICU4N for SaxonCS).</p>
     </description>
-    <alt-description J="PE">
+    <alt-description J="PE" C="PE">
       <p>Support for sorting and comparison of strings using the Unicode Collation Algorithm uses the
         collation facilities available from the <a href="http://site.icu-project.org/" class="bodylink">ICU4J
           library</a>.</p>
@@ -757,7 +755,7 @@
         collation facilities available from the ICU4N library.</p>
     </alt-description>
     <products>
-      <product J="PE" CS="PE"/>
+      <product J="PE" CS="PE" C="PE"/>
     </products>
   </feature>
   
