@@ -865,51 +865,55 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                     }
                 case NODE:
                 default:
-                    NodeInfo node = (NodeInfo) item;
-                    switch (node.getNodeKind()) {
-
-                        case Type.TEXT:
-                            int options = ReceiverOption.NONE;
-                            if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
-                                options = ReceiverOption.DISABLE_ESCAPING;
-                            }
-                            characters(item.getUnicodeStringValue(), locationId, options);
-                            break;
-
-                        case Type.ATTRIBUTE:
-                            if (((SimpleType) node.getSchemaType()).isNamespaceSensitive()) {
-                                XPathException err = new XPathException("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): " +
-                                                                                Err.wrap(node.getDisplayName(), Err.ATTRIBUTE));
-                                err.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
-                                throw err;
-                            }
-                            attribute(NameOfNode.makeName(node), (SimpleType) node.getSchemaType(), node.getStringValue(), locationId, ReceiverOption.NONE);
-                            break;
-
-                        case Type.NAMESPACE:
-                            namespace(node.getLocalPart(), NamespaceUri.of(node.getStringValue()), ReceiverOption.NONE);
-                            break;
-
-                        case Type.DOCUMENT:
-                            startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
-                            for (NodeInfo child : node.children()) {
-                                append(child, locationId, copyNamespaces);
-                            }
-                            endDocument();
-                            break;
-
-                        default:
-                            int copyOptions = CopyOptions.TYPE_ANNOTATIONS;
-                            if (ReceiverOption.contains(copyNamespaces, ReceiverOption.ALL_NAMESPACES)) {
-                                copyOptions |= CopyOptions.ALL_NAMESPACES;
-                            }
-                            ((NodeInfo) item).copy(this, copyOptions, locationId);
-                            break;
-                    }
-                    previousAtomic = false;
-                    break;
+                    decomposeNodeOrDefault(item, locationId, copyNamespaces);
             }
         }
+    }
+
+    private void decomposeNodeOrDefault(Item item, Location locationId, int copyNamespaces) throws XPathException
+    {
+        NodeInfo node = (NodeInfo) item;
+        switch (node.getNodeKind()) {
+
+        case Type.TEXT:
+            int options = ReceiverOption.NONE;
+            if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
+                options = ReceiverOption.DISABLE_ESCAPING;
+            }
+            characters(item.getUnicodeStringValue(), locationId, options);
+            break;
+
+        case Type.ATTRIBUTE:
+            if (((SimpleType) node.getSchemaType()).isNamespaceSensitive()) {
+                XPathException err = new XPathException("Cannot copy attributes whose type is namespace-sensitive (QName or NOTATION): " +
+                        Err.wrap(node.getDisplayName(), Err.ATTRIBUTE));
+                err.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE0950" : "XQTY0086");
+                throw err;
+            }
+            attribute(NameOfNode.makeName(node), (SimpleType) node.getSchemaType(), node.getStringValue(), locationId, ReceiverOption.NONE);
+            break;
+
+        case Type.NAMESPACE:
+            namespace(node.getLocalPart(), NamespaceUri.of(node.getStringValue()), ReceiverOption.NONE);
+            break;
+
+        case Type.DOCUMENT:
+            startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
+            for (NodeInfo child : node.children()) {
+                append(child, locationId, copyNamespaces);
+            }
+            endDocument();
+            break;
+
+        default:
+            int copyOptions = CopyOptions.TYPE_ANNOTATIONS;
+            if (ReceiverOption.contains(copyNamespaces, ReceiverOption.ALL_NAMESPACES)) {
+                copyOptions |= CopyOptions.ALL_NAMESPACES;
+            }
+            ((NodeInfo) item).copy(this, copyOptions, locationId);
+            break;
+        }
+        previousAtomic = false;
     }
 
 
