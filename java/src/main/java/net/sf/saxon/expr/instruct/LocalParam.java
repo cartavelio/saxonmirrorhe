@@ -18,7 +18,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
@@ -459,16 +458,6 @@ public final class LocalParam extends Instruction implements LocalBinding {
     @Override
     public Iterable<Operand> operands() {
         return operandSparseList(selectOp, conversionOp);
-    }
-
-    /**
-     * If the variable is bound to an integer, get the minimum and maximum possible values.
-     * Return null if unknown or not applicable
-     */
-
-    @Override
-    public IntegerValue[] getIntegerBoundsForVariable() {
-        return null;
     }
 
     /**

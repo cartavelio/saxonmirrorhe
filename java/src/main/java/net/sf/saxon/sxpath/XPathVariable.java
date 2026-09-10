@@ -12,7 +12,6 @@ import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
 
@@ -102,16 +101,6 @@ public final class XPathVariable implements LocalBinding {
     @Override
     public SequenceType getRequiredType() {
         return requiredType;
-    }
-
-    /**
-     * If the variable is bound to an integer, get the minimum and maximum possible values.
-     * Return null if unknown or not applicable
-     */
-    /*@Nullable*/
-    @Override
-    public IntegerValue[] getIntegerBoundsForVariable() {
-        return null;
     }
 
     /**

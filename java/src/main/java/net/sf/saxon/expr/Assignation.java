@@ -11,7 +11,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -101,15 +100,6 @@ public abstract class Assignation extends Expression implements LocalBinding {
     @Override
     public SequenceType getRequiredType() {
         return requiredType;
-    }
-
-    /**
-     * If the variable is bound to an integer, get the minimum and maximum possible values.
-     * Return null if unknown or not applicable
-     */
-    @Override
-    public IntegerValue[] getIntegerBoundsForVariable() {
-        return getSequence().getIntegerBounds();
     }
 
     /**

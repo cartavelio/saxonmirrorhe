@@ -299,29 +299,6 @@ public class CastExpression extends CastingExpression implements Callable {
     }
 
     /**
-     * For an expression that returns an integer or a sequence of integers, get
-     * a lower and upper bound on the values of the integers that may be returned, from
-     * static analysis. The default implementation returns null, meaning "unknown" or
-     * "not applicable". Other implementations return an array of two IntegerValue objects,
-     * representing the lower and upper bounds respectively. The values
-     * UNBOUNDED_LOWER and UNBOUNDED_UPPER are used by convention to indicate that
-     * the value may be arbitrarily large. The values MAX_STRING_LENGTH and MAX_SEQUENCE_LENGTH
-     * are used to indicate values limited by the size of a string or the size of a sequence.
-     *
-     * @return the lower and upper bounds of integer values in the result, or null to indicate
-     *         unknown or not applicable.
-     */
-    /*@Nullable*/
-    @Override
-    public IntegerValue[] getIntegerBounds() {
-        if (converter == Converter.BooleanToInteger.INSTANCE) {
-            return new IntegerValue[]{Int64Value.ZERO, Int64Value.PLUS_ONE};
-        } else {
-            return null;
-        }
-    }
-
-    /**
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression

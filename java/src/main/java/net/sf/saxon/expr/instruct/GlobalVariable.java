@@ -28,7 +28,6 @@ import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -813,18 +812,6 @@ public class GlobalVariable extends Actor
             caller = caller.getCaller();
         }
         return (XPathContextMajor) caller;
-    }
-
-    /**
-     * If the variable is bound to an integer, get the minimum and maximum possible values.
-     * Return null if unknown or not applicable
-     *
-     * @return a pair of integers containing the minimum and maximum values for the integer value;
-     *         or null if the value is not an integer or the range is unknown
-     */
-    @Override
-    public IntegerValue[] getIntegerBoundsForVariable() {
-        return getBody()==null ? null : getBody().getIntegerBounds();
     }
 
     /**

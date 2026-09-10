@@ -225,68 +225,6 @@ public class ArithmeticExpression extends BinaryExpression {
     }
 
     /**
-     * For an expression that returns an integer or a sequence of integers, get
-     * a lower and upper bound on the values of the integers that may be returned, from
-     * static analysis. The default implementation returns null, meaning "unknown" or
-     * "not applicable". Other implementations return an array of two IntegerValue objects,
-     * representing the lower and upper bounds respectively. The values
-     * UNBOUNDED_LOWER and UNBOUNDED_UPPER are used by convention to indicate that
-     * the value may be arbitrarily large. The values MAX_STRING_LENGTH and MAX_SEQUENCE_LENGTH
-     * are used to indicate values limited by the size of a string or the size of a sequence.
-     *
-     * @return the lower and upper bounds of integer values in the result, or null to indicate
-     *         unknown or not applicable.
-     */
-    /*@Nullable*/
-    @Override
-    public IntegerValue[] getIntegerBounds() {
-        IntegerValue[] bounds0 = getLhsExpression().getIntegerBounds();
-        IntegerValue[] bounds1 = getRhsExpression().getIntegerBounds();
-        if (bounds0 == null || bounds1 == null) {
-            return null;
-        } else {
-            switch (operator) {
-                case PLUS:
-                    return new IntegerValue[]{bounds0[0].plus(bounds1[0]), bounds0[1].plus(bounds1[1])};
-                case MINUS:
-                    return new IntegerValue[]{bounds0[0].minus(bounds1[1]), bounds0[1].minus(bounds1[0])};
-                case TIMES:
-                    if (getRhsExpression() instanceof Literal) {
-                        IntegerValue val1 = bounds1[0];
-                        if (val1.signum() > 0) {
-                            return new IntegerValue[]{bounds0[0].times(val1), bounds0[1].times(val1)};
-                        } else {
-                            return null;
-                        }
-                    } else if (getLhsExpression() instanceof Literal) {
-                        IntegerValue val0 = bounds1[0];
-                        if (val0.signum() > 0) {
-                            return new IntegerValue[]{bounds1[0].times(val0), bounds1[1].times(val0)};
-                        } else {
-                            return null;
-                        }
-                    }
-                    return null; 
-                case DIV:
-                case IDIV:
-                    if (getRhsExpression() instanceof Literal) {
-                        IntegerValue val1 = bounds1[0];
-                        if (val1.signum() > 0) {
-                            try {
-                                return new IntegerValue[]{bounds0[0].idiv(val1), bounds0[1].idiv(val1)};
-                            } catch (XPathException e) {
-                                return null;
-                            }
-                        }
-                    }
-                    return null;
-                default:
-                    return null;
-            }
-        }
-    }
-
-    /**
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression

@@ -27,7 +27,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.IntegerValue;
 
 /**
  * A call to a system-defined function (specifically, a function implemented as an instance
@@ -311,28 +310,6 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         Expression e = target.makeFunctionCall(args);
         ExpressionTool.copyLocationInfo(this, e);
         return e;
-    }
-    /**
-     * For an expression that returns an integer or a sequence of integers, get
-     * a lower and upper bound on the values of the integers that may be returned, from
-     * static analysis. The default implementation returns null, meaning "unknown" or
-     * "not applicable". Other implementations return an array of two IntegerValue objects,
-     * representing the lower and upper bounds respectively. The values
-     * UNBOUNDED_LOWER and UNBOUNDED_UPPER are used by convention to indicate that
-     * the value may be arbitrarily large. The values MAX_STRING_LENGTH and MAX_SEQUENCE_LENGTH
-     * are used to indicate values limited by the size of a string or the size of a sequence.
-     *
-     * @return the lower and upper bounds of integer values in the result, or null to indicate
-     * unknown or not applicable.
-     */
-    //@Override
-    @Override
-    public IntegerValue[] getIntegerBounds() {
-        SystemFunction fn = getTargetFunction();
-        if ((fn.getDetails().properties & BuiltInFunctionSet.FILTER) != 0) {
-            return getArg(0).getIntegerBounds();
-        }
-        return fn.getIntegerBounds();
     }
 
     /**

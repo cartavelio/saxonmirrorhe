@@ -16,7 +16,6 @@ import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.style.SourceBinding;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.List;
@@ -133,11 +132,6 @@ public class ParserExtension {
         @Override
         public void addReference(VariableReference ref, boolean isLoopingReference) {
 
-        }
-
-        @Override
-        public IntegerValue[] getIntegerBoundsForVariable() {
-            return null;
         }
 
         @Override
