@@ -3339,20 +3339,8 @@ public class PackageLoaderHE implements IPackageLoader {
 //            AtomicComparer comp = loader.makeAtomicComparer(compAtt, element);
 //            vc.setAtomicComparer(comp);
             String onEmptyAtt = element.getAttributeValue(NamespaceUri.NULL,"onEmpty");
-            if (onEmptyAtt != null) {     // legacy, pre-12.x
+            if (onEmptyAtt != null) {
                 vc.setResultWhenEmpty(BooleanValue.get("1".equals(onEmptyAtt)));
-            }
-            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
-            if (flags != null) {
-                if (flags.contains("1")) {
-                    vc.setResultWhenEmpty(BooleanValue.TRUE);
-                }
-                if (flags.contains("0")) {
-                    vc.setResultWhenEmpty(BooleanValue.FALSE);
-                }
-                if (flags.contains("u")) {
-                    vc.setCompareUntypedToNumeric(true);
-                }
             }
             return vc;
         });

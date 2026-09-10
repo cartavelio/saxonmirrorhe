@@ -16,13 +16,14 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.ComparisonException;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.expr.sort.UntypedNumericComparer;
-import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
 
@@ -36,7 +37,6 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
     /*@Nullable*/ private BooleanValue resultWhenEmpty = null;
     private boolean needsRuntimeCheck;
-    private boolean compareUntypedToNumeric;
 
     /**
      * Create a comparison expression identifying the two operands and the operator
@@ -61,20 +61,6 @@ public final class ValueComparison extends BinaryExpression implements Compariso
     @Override
     public String getExpressionName() {
         return "ValueComparison";
-    }
-
-    /**
-     * Set whether this is a comparison of an untyped value to a numeric, in which case
-     * the untyped atomic value is converted to xs:double for the comparison
-     *
-     * @param compareUntypedToNumeric true if the LHS is untyped atomic and the RHS is numeric,
-     *                                and the comparison semantics are to convert the untyped atomic
-     *                                value to xs:double before doing the comparison.
-     */
-
-
-    public void setCompareUntypedToNumeric(boolean compareUntypedToNumeric) {
-        this.compareUntypedToNumeric = compareUntypedToNumeric;
     }
 
     /**
@@ -127,7 +113,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
     @Override
     public boolean convertsUntypedToOther() {
-        return compareUntypedToNumeric;
+        return false;
     }
 
     /**
@@ -332,7 +318,6 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         } else {
             vc.resultWhenEmpty = BooleanValue.FALSE;
         }
-        vc.compareUntypedToNumeric = compareUntypedToNumeric;
         vc.needsRuntimeCheck = needsRuntimeCheck;
         ExpressionTool.copyLocationInfo(this, vc);
         return vc;
@@ -369,7 +354,6 @@ public final class ValueComparison extends BinaryExpression implements Compariso
     public Expression copy(RebindingMap rebindings) {
         ValueComparison vc = new ValueComparison(getLhsExpression().copy(rebindings), operator, getRhsExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, vc);
-        vc.compareUntypedToNumeric = compareUntypedToNumeric;
         vc.resultWhenEmpty = resultWhenEmpty;
         vc.needsRuntimeCheck = needsRuntimeCheck;
         return vc;
@@ -500,16 +484,8 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
     @Override
     protected void explainExtraAttributes(ExpressionPresenter out) {
-        String flags = "";
         if (resultWhenEmpty != null) {
-            //out.emitAttribute("onEmpty", resultWhenEmpty.getBooleanValue() ? "1" : "0");
-            flags = resultWhenEmpty.getBooleanValue() ? "1" : "0";
-        }
-        if (compareUntypedToNumeric) {
-            flags += "u";
-        }
-        if (!flags.isEmpty()) {
-            out.emitAttribute("flags", flags);
+            out.emitAttribute("onEmpty", resultWhenEmpty.getBooleanValue() ? "1" : "0");
         }
         //out.emitAttribute("comp", comparer.save());
     }
@@ -552,18 +528,13 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             if (card0 == StaticProperty.ALLOWS_ZERO || card1 == StaticProperty.ALLOWS_ZERO) {
                 return context -> resultWhenEmpty;
             }
-            if (expr.compareUntypedToNumeric) {
-                ConversionRules rules = expr.getConfiguration().getConversionRules();
-                comparer0 = (a, b, context) ->
-                        UntypedNumericComparer.quickCompare((StringValue) a, (NumericValue) b, operator, rules);
-            } else {
-                comparer0 = GenericAtomicComparer.makeAtomicComparisonFunction(
+
+            GenericAtomicComparer.AtomicComparisonFunction comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
                         (BuiltInAtomicType) expr.getLhsExpression().getItemType().getPrimitiveItemType(),
                         (BuiltInAtomicType) expr.getRhsExpression().getItemType().getPrimitiveItemType(),
                         defaultCollation,
                         operator, true);
-            }
-            final GenericAtomicComparer.AtomicComparisonFunction comparer = comparer0;
+
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
             final boolean nullable1 = Cardinality.allowsZero(card1);
@@ -606,26 +577,18 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 return context -> resultWhenEmpty;
             }
 
-            GenericAtomicComparer.AtomicComparisonFunction comparer0;
-            if (expr.compareUntypedToNumeric) {
-                ConversionRules rules = expr.getConfiguration().getConversionRules();
-                comparer0 = (a, b, context) ->
-                        UntypedNumericComparer.quickCompare((StringValue) a, (NumericValue) b, operator, rules);
-            } else {
-                ItemType t0 = expr.getLhsExpression().getItemType().getPrimitiveItemType();
-                if (!(t0 instanceof BuiltInAtomicType)) {
-                    // This can happen after loading from a SEF file; the static type information is not always available
-                    t0 = BuiltInAtomicType.ANY_ATOMIC;
-                }
-                ItemType t1 = expr.getRhsExpression().getItemType().getPrimitiveItemType();
-                if (!(t1 instanceof BuiltInAtomicType)) {
-                    // This can happen after loading from a SEF file; the static type information is not always available
-                    t1 = BuiltInAtomicType.ANY_ATOMIC;
-                }
-                comparer0 = GenericAtomicComparer.makeAtomicComparisonFunction(
-                        (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true);
+            ItemType t0 = expr.getLhsExpression().getItemType().getPrimitiveItemType();
+            if (!(t0 instanceof BuiltInAtomicType)) {
+                // This can happen after loading from a SEF file; the static type information is not always available
+                t0 = BuiltInAtomicType.ANY_ATOMIC;
             }
-            final GenericAtomicComparer.AtomicComparisonFunction comparer = comparer0;
+            ItemType t1 = expr.getRhsExpression().getItemType().getPrimitiveItemType();
+            if (!(t1 instanceof BuiltInAtomicType)) {
+                // This can happen after loading from a SEF file; the static type information is not always available
+                t1 = BuiltInAtomicType.ANY_ATOMIC;
+            }
+            final GenericAtomicComparer.AtomicComparisonFunction comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
+                        (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true);
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
             final boolean nullable1 = Cardinality.allowsZero(card1);

@@ -29,6 +29,8 @@ import java.nio.charset.StandardCharsets;
 
 public final class AnyURIValue extends StringValue {
 
+    public static final AnyURIValue EMPTY_URI = new AnyURIValue("");  // Used in bytecode
+
     /**
      * Constructor
      *
