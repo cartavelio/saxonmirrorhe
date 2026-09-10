@@ -9,6 +9,7 @@ using System.Collections;
 using System.Net;
 using System.Text;
 using System.Xml.Linq;
+using Saxon.Api.Support;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.functions;
 
@@ -486,21 +487,26 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void TestWhitespacePolicySchemaTyped() {
-            string s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripIgnorable);
+            string s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripIgnorable, true);
             Assert.That(s.Contains("<BOOKS><ITEM"));
-            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.PreserveAll);
+            Assert.That(s.Contains("TAX=\"V\""));
+            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripIgnorable, false);
+            Assert.That(s.Contains("<BOOKS><ITEM"));
+            Assert.That(!s.Contains("TAX=\"V\""));
+            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.PreserveAll, true);
             Assert.That(s.StartsWith("rejected"));
-            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripAll);
+            s = buildWithWhitespacePolicyTyped(WhitespacePolicy.StripAll, true);
             Assert.That(s.StartsWith("rejected"));
         }
 
-        private string buildWithWhitespacePolicyTyped(WhitespacePolicy policy) {
+        private string buildWithWhitespacePolicyTyped(WhitespacePolicy policy, bool expandDefaults) {
             try {
                 Processor proc = new Processor(true);
 
                 SchemaManager mgr = proc.SchemaManager;
                 mgr.Compile(new XmlTextReader(ConfigTest.DATA_DIR + "books.xsd"));
                 SchemaValidator v = mgr.NewSchemaValidator();
+                v.ExpendAttributeDefaults = expandDefaults;
 
                 Serializer serializer = proc.NewSerializer();
                 serializer.SetOutputProperty(Serializer.METHOD, "xml");
@@ -606,6 +612,29 @@ namespace SaxonCS_NUnit {
             catch (Exception ex) {
                 Console.WriteLine(ex.Message + ex.StackTrace);
                 Assert.Fail(ex.Message);
+            }
+        }
+
+        
+        [Test]
+        public void TestValidationErrors() {
+            List<ValidationFailure> report = new ();
+            try {
+                Processor proc = new (true);
+                SchemaManager mgr = proc.SchemaManager;
+                mgr.Compile(new XmlTextReader(ConfigTest.DATA_DIR + "books.xsd"));
+                SchemaValidator v = mgr.NewSchemaValidator();
+
+                v.InvalidityHandler = new InvalidityDelegate(failure => report.Add(failure));
+                DocumentBuilder builder = proc.NewDocumentBuilder();
+                builder.SchemaValidator = v;
+
+                builder.Build(new XmlTextReader(ConfigTest.DATA_DIR + "books-invalid.xml"));
+                Assert.Fail("unexpected success");
+
+            } catch (SaxonApiException e) {
+                Assert.That(e.Message.Contains("validation errors were reported"));
+                Assert.That(report.Count >= 3);
             }
         }
 
