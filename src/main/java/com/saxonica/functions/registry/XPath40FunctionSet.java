@@ -128,6 +128,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("collation", 1, e -> e.populate(CollationFn::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
 
+        register("collation-available", 1, 2, e -> e.populate(CollationAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, EnumerationUnionType.of("equality", "sort", "substring"), STAR, null));
+
         register("collation-key", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BASE64_BINARY,
                                                      ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
