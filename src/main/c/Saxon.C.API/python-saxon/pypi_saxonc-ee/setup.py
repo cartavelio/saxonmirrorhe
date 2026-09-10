@@ -15,9 +15,10 @@ extra_link_args = []
 
 if system() == 'Darwin':
     saxon_home = 'libs/darwin'
+    #extra_link_args.append('-Wl,-rpath,' + saxon_home)
 else:
     saxon_home = 'libs/nix'
-    extra_link_args.append('-Wl,-rpath,' + saxon_home)
+    #extra_link_args.append('-Wl,-rpath,' + saxon_home)
 
 
 
@@ -108,7 +109,6 @@ setup(
     # packages=find_packages(),
     package_dir={'saxoncee':'src'},
     packages=['saxoncee'],
-    #package_data={'lib/nix': ['libsaxon-eec-12.1.so']},
     python_requires='>=3.6',                # Minimum version requirement of the package
     ext_modules=cythonize(ext_modules,
                           compiler_directives={'language_level': 3},
