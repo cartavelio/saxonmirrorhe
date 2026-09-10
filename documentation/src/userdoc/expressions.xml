@@ -2409,81 +2409,64 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
 		<section id="named-item-types" title="Named item types" class="qt4">
 			<h1>Named item types</h1>
-
-			<p>A named item type is an <code>ItemType</code> identified by an expanded
-				<code>QName</code>: namespace-uri, namespace-prefix and local name.</p>
 			
-			<p>TODO the syntax has changed for Saxon 13. The content here needs to be updated accordingly.</p>
-			
-			<p>TODO The syntax <code>type(T)</code> is dropped. A type alias <code>T</code> is now referenced simply
-				as <code>T</code>, not <code>type(T)</code>. In XSLT patterns, a match for items
-				of type <code>T</code> is written <code>match="~T"</code> rather than
-				<code>match="type(T)"</code>.</p>
-
 			<aside>Prior to XPath 4.0, named item types were available as a Saxon extension and known
 				as type aliases. During the development of this feature, the syntax and Saxon
 				implementation have gone through numerous changes. Early versions of the feature have
-				been available since Saxon 9.8; but the syntax was revised in 10 and 11. From Saxon 13
-				the implementation matches the syntax which is now stable in XPath 4.0.</aside>
+				been available since Saxon 9.8; but the syntax has been revised multiple times since then.
+				From Saxon 13 the implementation matches the syntax which is now stable in XPath 4.0.</aside>
+			
+			<p>A named item type is an item type identified by an expanded <code>QName</code>:
+				namespace-uri, namespace-prefix and local name. These can be defined in XSLT or XQuery, and
+				used wherever an item type may appear (for example in a function signature or variable
+				declaration, or in <code>instance of</code> or <code>cast as</code> expressions).</p>
+			
+			<p>Named item types are useful because they abstract away from the detail of how a type is
+				implemented: for example <code>cx:complex</code> is more meaningful than
+				<code>record(r as xs:double, i as xs:double)</code>, and it creates more scope for
+				changing the way types are represented as the software evolves.</p>
+			
+			<aside>Note that the syntax for referencing named item types has changed in Saxon 13, to
+				align with changes in the 4.0 specifications. The syntax <code>type(T)</code> is dropped. A
+				named item type <code>T</code> is now referenced simply as <code>T</code>, not
+				<code>type(T)</code>. In XSLT patterns, a match for items of type <code>T</code> is written
+				<code>match="~T"</code> rather than <code>match="type(T)"</code>.</aside>
 
-			<p>Wherever an <code>ItemType</code> may appear (for example in a function signature or
-				variable declaration, or in <code>instance of</code> or <code>cast as</code>
-				expressions), the syntax <code class="bold">type(alias)</code> is permitted, where
-					<code>alias</code> is a name for an item type declared elsewhere. Type aliases are
-				QNames, and prefixes are resolved in the usual way (using the default namespace for
-				elements and types).</p>
-
-			<p>Type aliases are useful because they abstract away from the detail of how a type is
-				implemented: for example <code>type(cx:complex)</code> is more meaningful than
-					<code>record(r as xs:double, i as xs:double)</code>, and it creates more scope for
-				changing the way types are represented as the software evolves. However, type aliases do
+			<!--<p>However, type aliases do
 				not provide any real encapsulation or information hiding. Type aliases cannot be used
-				within their own definition, and the definition of a type alias cannot be circular.</p>
+				within their own definition, and the definition of a type alias cannot be circular.</p>-->
 
-			<p>The mapping of type aliases to item types is an extension to the static context of an
-				expression.</p>
-
-			<p>In XSLT, type aliases can be defined using the top-level declaration <a
-					class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a>:</p>
+			<p>In XSLT, named item types can be defined using the top-level declaration <a
+					class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a>. For example:</p>
 			<pre><code class="language-xml"><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>
 
-<xsl:function name="cx:complex" as="type(cx:complex)">
+<xsl:function name="cx:complex" as="cx:complex">
   <xsl:param name="r" as="xs:double"/>
   <xsl:param name="i" as="xs:double"/>
   <xsl:sequence select="map{'r':$r, 'i':$i}"/>
 </xsl:function>
 
-<xsl:function name="cx:add" as="type(cx:complex)">
-  <xsl:param name="x" as="type(cx:complex)"/>
-  <xsl:param name="y" as="type(cx:complex)"/>
+<xsl:function name="cx:add" as="cx:complex">
+  <xsl:param name="x" as="cx:complex"/>
+  <xsl:param name="y" as="cx:complex"/>
   <xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/>
 </xsl:function>
 ]]></code></pre>
 
-			<p>XSLT-defined type aliases are scoped to a package. The usual rules for import precedence
+			<p>XSLT-defined named item types are scoped to a package. The usual rules for import precedence
 				apply.</p>
 
-			<aside>If you want to use the same type aliases in multiple packages, define them in a
+			<aside>If you want to use the same named item types in multiple packages, define them in a
 				module of their own, and include that module in each package using
 					<code>xsl:include</code>.</aside>
 
-			<p>Type aliases can be used in XSLT 4.0 match patterns (see <a class="bodylink"
-					href="/xsl-elements/patterns/patterns-30">Patterns in XSLT 4.0</a>). For example:</p>
-			<pre><code class="language-xml"><![CDATA[<xsl:template match="type(cx:complex)[?i=0]">{?r}</xsl:template>]]></code></pre>
-			<pre><code class="language-xml"><![CDATA[<xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i</xsl:template>]]></code></pre>
+			<p>Named item types can be used in <a class="bodylink"
+				href="/xsl-elements/patterns/patterns-40">XSLT 4.0 match patterns</a>, for example:</p>
+			<pre><code class="language-xml"><![CDATA[<xsl:template match="~cx:complex[?i=0]">{?r}</xsl:template>]]></code></pre>
+			<pre><code class="language-xml"><![CDATA[<xsl:template match="~cx:complex">{?r}{if (?i ge 0) then '+' else ''}{?i}i</xsl:template>]]></code></pre>
 
-			<p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an
-				abbreviation for <code>.[. instance of T]</code>.</p>
-
-			<p>In XQuery, type aliases can be declared in the query prolog. From Saxon 12.4, the syntax
-				is <code>declare item-type QName as ItemType;</code>, for example: <code>declare
-					item-type cx:complex as record(r as xs:double, i as xs:double);</code>. For Saxon
-				12.3 and earlier, the syntax was <code>declare type QName = ItemType;</code>, for
-				example: <code>declare type cx:complex = record(r as xs:double, i as
-				xs:double);</code>.</p>
-
-			<p>For further details see <a class="bodylink" href="/xsl-elements/item-type"
-					>xsl:item-type</a>.</p>
+			<p>In XQuery, named item types can be declared in the query prolog. For example:</p>
+			<pre><code class="language-xquery"><![CDATA[declare type cx:complex as record(r as xs:double, i as xs:double);]]></code></pre>
 		</section>
 
 		<section id="coercion" title="Coercion rules" class="qt4">

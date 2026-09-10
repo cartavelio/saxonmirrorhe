@@ -2436,7 +2436,7 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>item-type</name>
             <description>
-                <p>New in XSLT 4.0. Used to declare a name (or alias) for an item type.</p>
+                <p>New in XSLT 4.0. Used to declare a name for an item type.</p>
             </description>
             <attributes>
                 <attribute name="as" use="mandatory">The definition of the item type.</attribute>
@@ -6486,23 +6486,32 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
         </section>
         <section id="patterns-40" title="Patterns in XSLT 4.0" class="qt4">
             <h1>Patterns in XSLT 4.0</h1>
+            
+            <p>In XSLT 4.0, patterns can match any kind of item: atomic items and function
+                items, as well as nodes. There are different kinds of pattern: predicate
+                patterns, type patterns, and GNode patterns.</p>
+            
+            <h2>Type patterns</h2>
 
             <p>In XSLT 4.0, the syntax of match patterns is extended to make it easier to match maps
-                and arrays. These extensions are available from Saxon 13 in XSLT 4.0;
-                and available in Saxon 11 and 12 provided that syntax extensions are enabled.</p>
+                and arrays. These extensions are available from Saxon 13 in XSLT 4.0.</p>
+            
+            <aside>Note that the syntax has changed from earlier drafts of the 4.0
+                specification, which was available in Saxon 11 and 12 provided that syntax
+                extensions are enabled.</aside>
 
-            <p>In particular the syntax <code>ma-type predicate*</code> is allowed in a pattern,
-                where <code>ma-type</code> is any of:</p>
+            <p>In particular the syntax <code>~item-type predicate*</code> is allowed in a pattern,
+                where <code>item-type</code> is any item type, for instance:</p>
 
             <ul>
+                <li>a <a class="bodylink" href="/expressions/types/named-item-types">named item type</a></li>
                 <li>
-                    <code>type(...)</code>
+                    <code>(type1 | type2 | type3)</code>, a <a class="bodylink"
+                        href="/expressions/types/choice">choice type</a>
                 </li>
                 <li>
-                    <code>union(...)</code>
-                </li>
-                <li>
-                    <code>record(...)</code>
+                    <code>record(...)</code>, a <a class="bodylink"
+                        href="/expressions/types/record">record type</a>
                 </li>
                 <li>
                     <code>map(...)</code>
@@ -6511,21 +6520,21 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
                     <code>array(...)</code>
                 </li>
             </ul>
+            
+            <p>A type pattern matches an item if the item can be successfully coerced to the
+                given item type by applying the coercion rules; and the item (after such
+                coercion) satisfies each of the predicates.</p>
 
-            <p>For example if a <a class="bodylink" href="/xsl-elements/item-type">named item
-                    type</a> has been declared:</p>
+            <p>For example if a named item type has been declared:</p>
 
             <pre><code class="language-xml">&lt;xsl:item-type name="cx:complex" type="record(r as xs:double, i as xs:double)"/></code></pre>
 
             <p>Then it can be used in a match pattern to match instances of the type, with or
                 without predicates:</p>
 
-            <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></code></pre>
+            <pre><code class="language-xml">&lt;xsl:template match="~cx:complex[?i=0]">{?r}&lt;/xsl:template></code></pre>
 
-            <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
-
-            <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an
-                abbreviation for <code>.[. instance of type(T)]</code>.</p>
+            <pre><code class="language-xml">&lt;xsl:template match="~cx:complex">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
 
             <p>Patterns for record types are particularly useful when JSON is processed using XSLT
                 template rules. For example, a JSON object such as the following: </p>
@@ -6538,20 +6547,25 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
   "weight": 67
 }]]></code></pre>
 
-            <p>can be matched with a pattern such as <code>match="record(firstName, lastName, email,
-                    *)"</code>. Naming a few of the properties that characterize the object is
-                sufficient (but remember to make the record type extensible by including <code>",
-                    *"</code> at the end). There's generally no need to include all the properties,
-                or to give their data types, because a test like this is generally sufficient to be
-                unambiguous. The order of properties, of course, is immaterial.</p>
+            <p>can be matched with a pattern such as <code>match="~record(firstName, lastName,
+                email)"</code>. The coercion rules cause undefined map entries to be discarded,
+                so the type pattern should include all properties that should be retained.
+                There is generally no need to give their data types, because a test like this
+                is generally sufficient to be unambiguous. The order of properties, of course,
+                is immaterial.</p>
+            
+            <aside>Note that in earlier drafts of the 4.0 specification, and in earlier Saxon
+                versions, extensible record types were allowed, but this is dropped in Saxon 13.</aside>
 
             <p>Predicates can be added as with any other pattern, for example
-                    <code>match="record(firstName, lastName, *)[?department='sales']"</code>.</p>
-
-            <p>The rules for calculating the default priority of these patterns are not yet stable;
-                explicit priorities should be used if there is any risk of ambiguity.</p>
+                <code>match="~record(firstName, lastName, department)[?department='sales']"</code>.</p>
             
-            <p>TODO [the following was moved from expressions/types/node-types]: In match patterns, union node tests work like union patterns, so <code>match="@(code,
+            <p>For information on the rules for calculating the default priority of these
+                patterns, see the specification.</p>
+            
+            <h2>GNode patterns</h2>
+            
+            <p>In match patterns, union node tests work like union patterns, so <code>match="@(code,
                 ns:*)"</code> is equivalent to having two separate template rules, matching the two
                 node tests, with different default priority.</p>
 
