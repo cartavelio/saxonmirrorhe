@@ -51,10 +51,12 @@ public class RoleDiagnostic {
     public static final int OPTION = 15;
     public static final int CHARACTER_MAP_EXPANSION = 16;
     public static final int FOR_MEMBER = 17;
+
     //public static final int DOCUMENT_ORDER = 17;  // 9.8 and earlier
     //public static final int MAP_CONSTRUCTOR = 18;  // 9.8 and earlier
     public static final int MATCH_PATTERN = 19;
     public static final int MISC = 20;
+    public static final int DYNAMIC_FUNCTION = 21;
 
 
     /**
@@ -184,6 +186,8 @@ public class RoleDiagnostic {
                 return "'for member $" + name + "' expression";
             case MATCH_PATTERN:
                 return "match pattern";
+            case DYNAMIC_FUNCTION:
+                return "target of a dynamic function call {" + name + "}";
             case MISC:
                 return operation;
             default:

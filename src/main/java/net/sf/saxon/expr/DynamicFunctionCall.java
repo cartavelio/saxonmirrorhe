@@ -154,9 +154,9 @@ public class DynamicFunctionCall extends Expression {
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
 
-        Supplier<RoleDiagnostic> roleSupplier0 = () -> {
-            return new RoleDiagnostic(RoleDiagnostic.FUNCTION, "dynamic function call", 0);
-        };
+        Supplier<RoleDiagnostic> roleSupplier0 = () ->
+            new RoleDiagnostic(RoleDiagnostic.DYNAMIC_FUNCTION, targetFunction.getChildExpression().toShortString(), 0);
+
         targetFunction.setChildExpression(tc.staticTypeCheck(
                 targetFunction.getChildExpression(), SequenceType.SINGLE_FUNCTION, roleSupplier0, visitor));
 
