@@ -318,10 +318,10 @@
    
    <xsl:function name="f:fullClassName" as="xs:string">
       <xsl:param name="classElement" as="element()*"/>
-      <xsl:assert test="$classElement/@nodeType = 'ClassOrInterfaceDeclaration'"/>
+      <xsl:assert test="$classElement/@nodeType = ('ClassOrInterfaceDeclaration', 'RecordDeclaration')"/>
       <xsl:sequence
          select="$classElement!string-join((f:qualifiedName(ancestor::root/packageDeclaration/name), 
-         ancestor-or-self::*[@nodeType='ClassOrInterfaceDeclaration']/name/@identifier), '.')"/>
+         ancestor-or-self::*[@nodeType=('ClassOrInterfaceDeclaration','RecordDeclaration')]/name/@identifier), '.')"/>
    </xsl:function>
    
    <xsl:function name="f:isExceptionType" as="xs:boolean">

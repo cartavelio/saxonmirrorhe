@@ -243,6 +243,7 @@
    </xsl:template>
    
    <xsl:template match="*[@nodeType = 'RecordDeclaration']" priority="20">
+      <xsl:param name="indent" as="xs:integer" tunnel="yes"/>
       <xsl:call-template name="indent"/>
       <xsl:call-template name="modifiers"/>
       <xsl:text>record {name/@identifier} (</xsl:text>
@@ -252,7 +253,19 @@
          <xsl:apply-templates select="name"/>
          <xsl:if test="position() ne last()">, </xsl:if>
       </xsl:for-each>
-      <xsl:text>);{$NL}</xsl:text>
+      <xsl:text>) {{{$NL}</xsl:text>
+      
+      <xsl:apply-templates select="members/member">
+         <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
+      </xsl:apply-templates>
+      
+      <!-- Expand default methods inherited from interfaces -->
+      <xsl:if test="not(@isInterface='true')">
+         <xsl:call-template name="expand-defaulted-methods"/>
+      </xsl:if>
+      <xsl:text>{$NL}</xsl:text>
+      <xsl:call-template name="indent"/>
+      <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
    
    <!-- Code to inject an implementation of IEnumerable to a class that already supports Iterable -->
@@ -2094,7 +2107,7 @@
         in that interface, so we generate stub implementations that exist only to be overridden -->
    <xsl:template name="expand-defaulted-methods">
       <xsl:param name="indent" as="xs:integer" tunnel="yes" select="0"/>
-      <xsl:assert test="@nodeType='ClassOrInterfaceDeclaration'"/>
+      <xsl:assert test="@nodeType=('ClassOrInterfaceDeclaration', 'RecordDeclaration')"/>
       <xsl:variable name="thisClass" select="."/>
       <xsl:variable name="thisClassName" as="xs:string" select="f:fullClassName(.)"/>
       <!--<xsl:variable name="thisClassName" as="xs:string" 
