@@ -9,28 +9,27 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 
 /**
  * A ConstantFunction is a zero-argument function that always delivers the same result, supplied
- * at the time the function is instantiated. It is a subclass of system function, which means there must
- * be a "details" entry giving information about the function name, signature, etc
+ * at the time the function is created.
  */
 
-public class ConstantFunction0 extends AbstractFunction  {
+public class ConstantFunction extends AbstractFunction  {
 
-    private final GroundedValue value;
     private final StructuredQName name;
+    private final GroundedValue value;
     private final SequenceType resultType;
 
-    public ConstantFunction0(StructuredQName name, GroundedValue value, SequenceType resultType) {
+    private final static SequenceType[] NO_ARGS = new SequenceType[0];
+
+    public ConstantFunction(StructuredQName name, GroundedValue value, SequenceType resultType) {
         this.name = name;
         this.value = value;
         this.resultType = resultType;
@@ -43,7 +42,7 @@ public class ConstantFunction0 extends AbstractFunction  {
      */
     @Override
     public FunctionItemType getFunctionItemType() {
-        return new SpecificFunctionType(new SequenceType[]{}, resultType);
+        return new SpecificFunctionType(NO_ARGS, resultType);
     }
 
     /**
@@ -86,22 +85,6 @@ public class ConstantFunction0 extends AbstractFunction  {
     public GroundedValue getConstantValue() {
         return value;
     }
-
-
-    public static class True extends ConstantFunction0 {
-        public True() {
-            super(new StructuredQName("fn", NamespaceUri.FN, "true"),
-                  BooleanValue.TRUE, SequenceType.SINGLE_BOOLEAN);
-        }
-    }
-
-    public static class False extends ConstantFunction0 {
-        public False() {
-            super(new StructuredQName("fn", NamespaceUri.FN, "false"),
-                  BooleanValue.FALSE, SequenceType.SINGLE_BOOLEAN);
-        }
-    }
-
 
 }
 

@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
  * not at the point where the function is called.
  */
 
-public interface ContextAccessorFunction0 {
+public interface IContextAccessorFunction {
 
     /**
      * Bind context information to appear as part of the function's closure. If this method

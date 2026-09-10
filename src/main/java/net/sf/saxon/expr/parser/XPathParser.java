@@ -4346,26 +4346,32 @@ public class XPathParser {
         try {
             FunctionLibrary lib = env.getFunctionLibrary();
             SymbolicName.F sn = new SymbolicName.F(functionName, arity);
-            FunctionItem functionSupplier = lib.getFunctionItemSupplier(sn, env);
-            if (functionSupplier == null) {
+            FunctionItem foundFunction = lib.getFunctionItem(sn, env);
+            if (foundFunction == null) {
                 grumble("Function " + functionName.getEQName() + "#" + arity + " not found", "XPST0017", offset);
             }
 
-            // functionSupplier is a zero-arity function G, such that calling G() with
-            // a particular run-time context returns the function item we are looking for,
-            // bound to that context. In many cases, where the function reference is
-            // not context-dependent, functionSupplier will be a ConstantFunction wrapping
-            // the required function item, in which case we can simply unwrap it.
-            if (functionSupplier instanceof ConstantFunction0) {
-                return new FunctionLiteral((FunctionItem)((ConstantFunction0)functionSupplier).getConstantValue());
+            if (foundFunction instanceof IContextAccessorFunction) {
+                // This indicates that the function being referenced is dependent on the
+                // dynamic context, and cannot be invoked directly until it is bound to
+                // the dynamic context by calling the method {@link IContextAccessorFunction#bindContext}.
+                // This cannot be done until run-time. In the meantime we return an expression whose
+                // effect, when evaluated, is to make the call on {@code bindContext} and return
+                // the bound function item.
+                IContextAccessorFunction unboundFunction = (IContextAccessorFunction)foundFunction;
+                Callable callable = new CallableDelegate(
+                        (context, args) -> unboundFunction.bindContext(context));
+                CallableFunction binder = new CallableFunction(
+                        0, callable, new SpecificFunctionType(new SequenceType[]{}, SequenceType.SINGLE_FUNCTION));
+                DynamicFunctionCall dfc = new DynamicFunctionCall(
+                        new FunctionLiteral(binder), Collections.emptyList());
+                setLocation(dfc, offset);
+                return dfc;
             }
 
-            // In other cases we construct a call of the returned function G(), and this
-            // function call is the expression that we add to the parsed expression tree.
-            DynamicFunctionCall dfc = new DynamicFunctionCall(
-                    new FunctionLiteral(functionSupplier), Collections.emptyList());
-            setLocation(dfc, offset);
-            return dfc;
+            // In other cases we simply wrap the returned function item in a
+            // {@code FunctionLiteral}.
+            return new FunctionLiteral(foundFunction);
         } catch (XPathException e) {
             grumble(e.getMessage(), "XPST0017", offset);
             return null;

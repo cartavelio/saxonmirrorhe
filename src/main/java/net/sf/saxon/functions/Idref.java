@@ -11,14 +11,14 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.LocalOrderComparer;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.KeyDefinitionSet;
-import net.sf.saxon.trans.KeyManager;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 
-public class Idref extends SystemFunction {
+public class Idref extends SystemFunction implements IContextAccessorFunction {
 
     /**
      * Get the static properties of this expression (other than its type). The result is
@@ -80,6 +80,38 @@ public class Idref extends SystemFunction {
         }
         return new LazySequence(getIdrefMultiple(arg2.getTreeInfo(), arguments[0].iterate(), context));
     }
+
+    /**
+     * Bind context information to appear as part of the function's closure. If this method
+     * has been called, the supplied context will be used in preference to the
+     * context at the point where the function is actually called.
+     *
+     * @param context the context to which the function applies. Must not be null.
+     */
+    @Override
+    public FunctionItem bindContext(XPathContext context) throws XPathException {
+        if (getArity() == 2) {
+            return this;
+        }
+        Callable body;
+        try {
+            NodeInfo target = getContextNode(context);
+            body = new CallableDelegate(
+                    (cxt, args) -> call(cxt, new Sequence[]{args[0], target}));
+        } catch (XPathException e) {
+            // Test function-lookup-358. Don't throw the error unless and until the function is called.
+            body = new CallableDelegate(
+                    (cxt, args) -> {
+                        throw new UncheckedXPathException(e);
+                    }
+            );
+        }
+        return new CallableFunction(
+                new SymbolicName.F(getFunctionName(), 1),
+                body,
+                new SpecificFunctionType(new SequenceType[]{SequenceType.STRING_SEQUENCE}, SequenceType.NODE_SEQUENCE));
+    }
+
 
     private static class IdrefMappingFunction implements MappingFunction {
         public TreeInfo document;

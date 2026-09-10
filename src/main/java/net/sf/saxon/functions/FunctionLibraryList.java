@@ -78,24 +78,6 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
     }
 
     /**
-     * Get an expression that can be evaluated (in some dynamic context) to return
-     * a function item based on the requested function.
-     */
-
-    @Override
-    public FunctionItem getFunctionItemSupplier(SymbolicName.F functionName, StaticContext staticContext)
-            throws XPathException {
-        for (FunctionLibrary lib : libraryList) {
-            FunctionItem fi = lib.getFunctionItemSupplier(functionName, staticContext);
-            if (fi != null) {
-                return fi;
-            }
-        }
-        return null;
-    }
-
-
-    /**
      * Test whether a function with a given name and arity is available
      * <p>This supports the function-available() function in XSLT.</p>
      *

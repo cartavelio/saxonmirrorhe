@@ -362,54 +362,6 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         }
     }
 
-    /**
-     * Get an expression that can be evaluated (in some dynamic context) to return
-     * a function item based on the requested function.
-     *
-     * @param symbolicName
-     * @param staticContext
-     */
-    @Override
-    public FunctionItem getFunctionItemSupplier(SymbolicName.F symbolicName, StaticContext staticContext) throws XPathException {
-
-        StructuredQName functionName = symbolicName.getComponentName();
-        int arity = symbolicName.getArity();
-        if (functionName.hasURI(getNamespace())) {
-            net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry details = getFunctionDetails(functionName.getLocalPart(), arity);
-            if (details == null) {
-                return null;
-            }
-            SystemFunction fn = makeFunction(functionName.getLocalPart(), arity);
-            if (fn instanceof ContextAccessorFunction0) {
-                // This applies to functions such as name#0 where the first argument defaults
-                // to the context item
-//                SystemFunction fn1 = makeFunction(functionName.getLocalPart(), 1);
-//                Callable f0Callable = new CallableDelegate(
-//                        (context, args) -> ContextItemAccessorFunction.bindContextItem(
-//                                fn1, context));
-                FunctionItemType f0Type = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
-//                return new CallableFunction(new SymbolicName.F(functionName, 0), f0Callable, f0Type);
-                ContextAccessorFunction0 unboundFunction = (ContextAccessorFunction0)fn;
-                Callable expander = new CallableDelegate(
-                          (context, args) -> unboundFunction.bindContext(context));
-                return new CallableFunction(symbolicName, expander, f0Type);
-            }
-                // Not context-dependent
-            RetainedStaticContext rsc = staticContext.makeRetainedStaticContext();
-            if (staticContext.getXPathVersion() < 40 && fn instanceof Concat31 && arity < 2) {
-                // Treat concat() specially prior to 4.0
-                return null;
-            }
-            fn.setRetainedStaticContext(rsc);
-            return new ConstantFunction0(functionName, fn, SequenceType.SINGLE_FUNCTION);
-
-
-            // TODO: handle other cases such as position#0, last#0, lang#1
-        } else {
-            return null;
-        }
-    }
-
 
     /**
      * Register a system function in the table of function details.

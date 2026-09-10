@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
  * not at the point where the function is called.
  */
 
-public abstract class ContextAccessorFunction extends SystemFunction implements ContextAccessorFunction0 {
+public abstract class ContextAccessorFunction extends SystemFunction implements IContextAccessorFunction {
 
     /**
      * Evaluate the expression

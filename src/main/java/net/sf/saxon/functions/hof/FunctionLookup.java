@@ -13,13 +13,15 @@ import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.ContextAccessorFunction;
+import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.functions.IContextAccessorFunction;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
@@ -93,37 +95,37 @@ public class FunctionLookup extends ContextAccessorFunction {
         Controller controller = context.getController();
         Executable exec = controller.getExecutable();
         RetainedStaticContext rsc = getRetainedStaticContext();
+        StaticContext ic = rsc.reinstate();
         PackageData pd = rsc.getPackageData();
         FunctionLibrary lib = pd instanceof StylesheetPackage ?
                 ((StylesheetPackage) pd).getFunctionLibrary() : exec.getFunctionLibrary();
         SymbolicName.F sn = new SymbolicName.F(name, arity);
 
-        IndependentContext ic = new IndependentContext(controller.getConfiguration());
-        ic.setDefaultCollationName(rsc.getDefaultCollationName());
-        ic.setBaseURI(rsc.getStaticBaseUriString());
-        ic.setDecimalFormatManager(rsc.getDecimalFormatManager());
-        ic.setNamespaceResolver(rsc);
-        ic.setPackageData(pd);
         try {
-            FunctionItem functionSupplier = lib.getFunctionItemSupplier(sn, ic);
-            if (functionSupplier instanceof ConstantFunction0) {
+            FunctionItem foundFunction = lib.getFunctionItem(sn, ic);
+            if (foundFunction == null) {
+                return null;
+            }
+            if (foundFunction instanceof IContextAccessorFunction) {
+                // The function is context-dependent, so it needs to be bound to the
+                // dynamic context of the call on function-lookup
+                return ((IContextAccessorFunction)foundFunction).bindContext(context);
+//                assert functionSupplier.getArity() == 0;
+//                FunctionItem fi = (FunctionItem) functionSupplier.call(context, new Sequence[]{});
+//                if (fi instanceof ContextItemAccessorFunction) {
+//                    return ((ContextItemAccessorFunction) fi).bindContext(context);
+//                } else if (fi instanceof SystemFunction && ((SystemFunction) fi).dependsOnContextItem()) {
+//                    return new SystemFunctionWithBoundContextItem((SystemFunction) fi, context);
+//                }
+            } else {
                 // Indicates a function with no dynamic context dependencies
-                FunctionItem fi = (FunctionItem)((ConstantFunction0)functionSupplier).getConstantValue();
-                if (fi instanceof UserFunction) {
-                    Visibility vis = ((UserFunction) fi).getDeclaredVisibility();
+                if (foundFunction instanceof UserFunction) {
+                    Visibility vis = ((UserFunction) foundFunction).getDeclaredVisibility();
                     if (vis == Visibility.ABSTRACT) {
                         return null;
                     }
                 }
-                return fi;
-            } else {
-                assert functionSupplier.getArity() == 0;
-                FunctionItem fi = (FunctionItem) functionSupplier.call(context, new Sequence[]{});
-                if (fi instanceof ContextItemAccessorFunction) {
-                    return ((ContextItemAccessorFunction) fi).bindContext(context);
-                } else if (fi instanceof SystemFunction && ((SystemFunction) fi).dependsOnContextItem()) {
-                    return new SystemFunctionWithBoundContextItem((SystemFunction) fi, context);
-                }
+                return foundFunction;
             }
 //            FunctionItem fi = lib.getFunctionItem(sn, ic);
 //            if (fi instanceof UserFunction) {
@@ -146,7 +148,6 @@ public class FunctionLookup extends ContextAccessorFunction {
             }
             throw e;
         }
-        return null;
     }
 
     /**

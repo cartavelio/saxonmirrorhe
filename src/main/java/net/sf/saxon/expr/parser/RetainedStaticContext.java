@@ -15,6 +15,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.XPathException;
 
@@ -331,6 +332,16 @@ public class RetainedStaticContext implements NamespaceResolver {
     public NamespaceMap getNamespaceMap() {
         // This fails for a JAXP static context, whose namespaces cannot be enumerated
         return NamespaceMap.fromNamespaceResolver(namespaces);
+    }
+
+    public IndependentContext reinstate() {
+        IndependentContext ic = new IndependentContext(getConfiguration());
+        ic.setDefaultCollationName(getDefaultCollationName());
+        ic.setBaseURI(getStaticBaseUriString());
+        ic.setDecimalFormatManager(getDecimalFormatManager());
+        ic.setNamespaceResolver(this);
+        ic.setPackageData(getPackageData());
+        return ic;
     }
 
 

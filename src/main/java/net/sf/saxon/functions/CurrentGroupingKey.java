@@ -46,7 +46,7 @@ public class CurrentGroupingKey extends ContextAccessorFunction {
             throw new XPathException("There is no current grouping key", "XTDE1071");
         }
         AtomicSequence groupingKey = gi.getCurrentGroupingKey();
-        return new ConstantFunction0(getFunctionName(), groupingKey, SequenceType.ATOMIC_SEQUENCE);
+        return new ConstantFunction(getFunctionName(), groupingKey, SequenceType.ATOMIC_SEQUENCE);
     }
 
     /**

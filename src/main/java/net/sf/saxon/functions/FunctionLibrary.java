@@ -15,7 +15,6 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.List;
 import java.util.Map;
@@ -107,9 +106,9 @@ public interface FunctionLibrary {
      * @return if a function with the required name and arity is available, returns that function;
      * otherwise null. If the required function is context-sensitive (for example, {@code fn:name#0}
      * or {@code fn:lang#1} or {@code fn:position#0}, then the result will be a function item
-     * that implements the interface {@link ContextAccessorFunction0}, which means that the
+     * that implements the interface {@link IContextAccessorFunction}, which means that the
      * returned function item can be turned into a non-context-sensitive function item by calling
-     * the method {@link ContextAccessorFunction0#bindContext(XPathContext)}.
+     * the method {@link IContextAccessorFunction#bindContext(XPathContext)}.
      * @throws XPathException in the event of certain errors, for example attempting to get a function
      *                        that is private
      */
@@ -117,26 +116,6 @@ public interface FunctionLibrary {
     /*@Nullable*/
     FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext)
             throws XPathException;
-
-    /**
-     * Get a zero-arity function that can be evaluated (in some dynamic context) to return
-     * a function item. In many cases (in particular, where the function required is
-     * context-independent) this will be an {@link ConstantFunction0} that returns
-     * a {@link FunctionItem}. But for function references to context-dependent
-     * functions such as {@code fn:name#0}, evaluating the returned zero-arity function
-     * will "bake in" the context item at the point where it is evaluated
-     */
-
-    default FunctionItem getFunctionItemSupplier(SymbolicName.F functionName, StaticContext staticContext)
-            throws XPathException {
-        FunctionItem fit = getFunctionItem(functionName, staticContext);
-        if (fit != null) {
-            return new ConstantFunction0(functionName.getComponentName(), fit, SequenceType.SINGLE_FUNCTION);
-        } else {
-            return null;
-        }
-    }
-
 
 
 }

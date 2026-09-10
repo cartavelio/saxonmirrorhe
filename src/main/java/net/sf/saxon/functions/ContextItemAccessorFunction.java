@@ -50,7 +50,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
             FunctionItemType fit = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
             return new CallableFunction(new SymbolicName.F(getFunctionName(), 0), callable, fit);
         }
-        return new ConstantFunction0(getFunctionName(), evaluate(ci, context), getFunctionItemType().getResultType());
+        return new ConstantFunction(getFunctionName(), evaluate(ci, context), getFunctionItemType().getResultType());
     }
 
     /**
@@ -190,7 +190,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     public static FunctionItem bindContextItem(FunctionItem fi, XPathContext context) throws XPathException {
         Item item = context.getContextItem();
         GroundedValue gv = fi.call(context, new Sequence[]{item}).materialize();
-        return new ConstantFunction0(fi.getFunctionName(), gv, fi.getFunctionItemType().getResultType());
+        return new ConstantFunction(fi.getFunctionName(), gv, fi.getFunctionItemType().getResultType());
 //        return new CallableFunction(
 //                new SymbolicName.F(fi.getFunctionName(), 0),
 //                new CallableDelegate((cxt, args) -> gv),

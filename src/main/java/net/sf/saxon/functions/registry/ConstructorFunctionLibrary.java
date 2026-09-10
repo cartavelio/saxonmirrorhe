@@ -9,15 +9,9 @@ package net.sf.saxon.functions.registry;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.functions.ConstantFunction0;
-import net.sf.saxon.functions.ContextItemAccessorFunction;
-import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.AtomicConstructorFunction;
-import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -64,7 +58,11 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
      */
     @Override
     public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
-        if (functionName.getArity() != 1) {
+        int arity = functionName.getArity();;
+        if (arity > 1) {
+            return null;
+        }
+        if (arity == 0 && staticContext.getPackageData().getHostLanguageVersion() < 40) {
             return null;
         }
         final NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
@@ -75,6 +73,14 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         final SchemaType type = config.getSchemaType(new StructuredQName("", uri, localName));
         if (type == null || type.isComplexType()) {
             return null;
+        }
+        if (arity == 0) {
+            FunctionItem arity1Function = getFunctionItem(
+                    new SymbolicName.F(functionName.getComponentName(), 1), staticContext);
+            if (arity1Function == null) {
+                return null;
+            }
+            return new ZeroArityConstructorFunction(arity1Function);
         }
         final NamespaceResolver resolver = ((SimpleType) type).isNamespaceSensitive() ? staticContext.getNamespaceResolver() : null;
         if (type instanceof AtomicType) {
@@ -93,57 +99,6 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
             return new CallableFunction(1, callable,
                                         new SpecificFunctionType(new SequenceType[]{SequenceType.OPTIONAL_ATOMIC}, returnType));
         }
-    }
-
-    /**
-     * Get an expression that can be evaluated (in some dynamic context) to return
-     * a function item based on the requested function.
-     *
-     * @param functionName
-     * @param staticContext
-     */
-    @Override
-    public FunctionItem getFunctionItemSupplier(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
-
-        if (functionName.getArity() > 1) {
-            return null;
-        }
-        if (functionName.getArity() == 1) {
-            // Look for an arity-1 constructor function, which is simple
-            // because there is no context dependency
-            FunctionItem fit = getFunctionItem(functionName, staticContext);
-            if (fit != null) {
-                return new ConstantFunction0(
-                        functionName.getComponentName(), fit, SequenceType.SINGLE_FUNCTION);
-            } else {
-                return null;
-            }
-        }
-        final SchemaType type = config.getSchemaType(functionName.getComponentName());
-        if (type == null || type.isComplexType()) {
-            return null;
-        }
-
-        SymbolicName.F f1Name = new SymbolicName.F(functionName.getComponentName(), 1);
-        FunctionItem f1Function = getFunctionItem(f1Name, staticContext);
-        if (f1Function == null) {
-            return null;
-        }
-
-        // Arity-0 constructor function.
-
-        // OK, hold on to your hat, this is going to be a rough ride.
-        // The expression xs:integer#0, when evaluated in a specific context C,
-        // returns a function item F. If the context item of C is 23, then
-        // F() will always return 23: it is in effect a constant function.
-        // This method returns a function G, such that G() returns F.
-
-        Callable f0Callable = new CallableDelegate(
-                (context, args) -> ContextItemAccessorFunction.bindContextItem(
-                        f1Function, context));
-        FunctionItemType f0Type = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
-        return new CallableFunction(functionName, f0Callable, f0Type);
-
     }
 
     @Override
@@ -283,6 +238,117 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
     @Override
     public FunctionLibrary copy() {
         return this;
+    }
+
+    /**
+     * A function representing a zero-arity constructor reference such as `xs:integer#0`. These
+     * are fairly useless, and the implementation is surprisingly complex, but they are needed
+     * for orthogonality. Any attempt to invoke the function ends up invoking the arity-1
+     * equivalent, with the atomized value of the context item as the supplied argument value.
+     */
+
+    private static class ZeroArityConstructorFunction extends AbstractFunction implements IContextAccessorFunction {
+
+        FunctionItem arityOneConstructor;
+
+        public ZeroArityConstructorFunction(FunctionItem arityOneConstructor) {
+            this.arityOneConstructor = arityOneConstructor;
+        }
+
+        /**
+         * Call the Callable.
+         *
+         * @param context   the dynamic evaluation context
+         * @param arguments the values of the arguments, supplied as Sequences.
+         *                  <p>Generally it is advisable, if calling iterate() to process a supplied sequence, to
+         *                  call it only once; if the value is required more than once, it should first be converted
+         *                  to a {@link GroundedValue} by calling the utility method
+         *                  SequenceTool.toGroundedValue().</p>
+         *                  <p>If the expected value is a single item, the item should be obtained by calling
+         *                  Sequence.head(): it cannot be assumed that the item will be passed as an instance of
+         *                  {@link Item} or {@link AtomicValue}.</p>
+         *                  <p>It is the caller's responsibility to perform any type conversions required
+         *                  to convert arguments to the type expected by the callee. An exception is where
+         *                  this Callable is explicitly an argument-converting wrapper around the original
+         *                  Callable.</p>
+         * @return the result of the evaluation, in the form of a Sequence. It is the responsibility
+         * of the callee to ensure that the type of result conforms to the expected result type.
+         * @throws XPathException if a dynamic error occurs during the evaluation of the expression
+         */
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            return bindContext(context).call(context, arguments);
+        }
+
+        /**
+         * Bind context information to appear as part of the function's closure. If this method
+         * has been called, the supplied context will be used in preference to the
+         * context at the point where the function is actually called.
+         *
+         * @param context the context to which the function applies. Must not be null.
+         */
+        @Override
+        public FunctionItem bindContext(XPathContext context) throws XPathException {
+            try {
+                Item item = context.getContextItem();
+                if (item == null) {
+                    throw new XPathException("No context item for constructor function", "XPDY0002");
+                }
+                AtomicSequence atomized = item.atomize();
+                GroundedValue result = arityOneConstructor.call(
+                                context, new Sequence[]{atomized})
+                        .materialize();
+                return new ConstantFunction(arityOneConstructor.getFunctionName(),
+                                            result,
+                                            arityOneConstructor.getFunctionItemType().getResultType());
+            } catch (Exception e) {
+                throw new XPathException("Unsuitable context for constructor function "
+                                                 + getDescription() + ": " + e.getMessage());
+            }
+        }
+
+        /**
+         * Get the item type of the function item
+         *
+         * @return the function item's type
+         */
+        @Override
+        public FunctionItemType getFunctionItemType() {
+            return new SpecificFunctionType(
+                    new SequenceType[0], arityOneConstructor.getFunctionItemType().getResultType());
+        }
+
+        /**
+         * Get the name of the function, or null if it is anonymous
+         *
+         * @return the function name, or null for an anonymous inline function
+         */
+        @Override
+        public StructuredQName getFunctionName() {
+            return arityOneConstructor.getFunctionName();
+        }
+
+        /**
+         * Get the arity of the function
+         *
+         * @return the number of arguments in the function signature
+         */
+        @Override
+        public int getArity() {
+            return 0;
+        }
+
+        /**
+         * Get a description of this function for use in error messages. For named functions, the description
+         * is the function name (as a lexical QName). For others, it might be, for example, "inline function",
+         * or "partially-applied ends-with function".
+         *
+         * @return a description of the function for use in error messages
+         */
+        @Override
+        public String getDescription() {
+            return getFunctionName() + "#0";
+        }
     }
 
 }

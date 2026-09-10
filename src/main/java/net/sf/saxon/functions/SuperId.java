@@ -12,10 +12,14 @@ import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.LocalOrderComparer;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
 
@@ -28,7 +32,7 @@ import net.sf.saxon.value.Whitespace;
  */
 
 
-public abstract class SuperId extends SystemFunction {
+public abstract class SuperId extends SystemFunction implements IContextAccessorFunction {
 
     public static final int ID = 0;
     public static final int ELEMENT_WITH_ID = 1;
@@ -125,6 +129,37 @@ public abstract class SuperId extends SystemFunction {
             result = getIdMultiple(doc, idrefs, getOp());
         }
         return SequenceTool.toLazySequence(result);
+    }
+
+    /**
+     * Bind context information to appear as part of the function's closure. If this method
+     * has been called, the supplied context will be used in preference to the
+     * context at the point where the function is actually called.
+     *
+     * @param context the context to which the function applies. Must not be null.
+     */
+    @Override
+    public FunctionItem bindContext(XPathContext context) throws XPathException {
+        if (getArity() == 2) {
+            return this;
+        }
+        Callable body;
+        try {
+            NodeInfo target = getContextNode(context);
+            body = new CallableDelegate(
+                    (cxt, args) -> call(cxt, new Sequence[]{args[0], target}));
+        } catch (XPathException e) {
+            // Test function-lookup-350. Don't throw the error unless and until the function is called.
+            body = new CallableDelegate(
+                    (cxt, args) -> {
+                        throw new UncheckedXPathException(e);
+                    }
+            );
+        }
+        return new CallableFunction(
+                new SymbolicName.F(getFunctionName(), 1),
+                body,
+                new SpecificFunctionType(new SequenceType[]{SequenceType.STRING_SEQUENCE}, SequenceType.NODE_SEQUENCE));
     }
 
     private static class IdMappingFunction implements MappingFunction {

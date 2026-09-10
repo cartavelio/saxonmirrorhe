@@ -45,7 +45,7 @@ public class CurrentGroup extends ContextAccessorFunction {
             throw new XPathException("There is no current group", "XTDE1061");
         }
         GroundedValue group = gi.currentGroup();
-        return new ConstantFunction0(getFunctionName(), group, SequenceType.ANY_SEQUENCE);
+        return new ConstantFunction(getFunctionName(), group, SequenceType.ANY_SEQUENCE);
     }
 
     /**

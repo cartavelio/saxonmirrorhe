@@ -20,7 +20,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -54,7 +53,7 @@ public class RegexGroup extends ContextAccessorFunction {
         BuiltInFunctionSet lib = MapFunctionSet.getInstance(40);
 
         SymbolicName.F symbolicName = new SymbolicName.F(mapGetName, 3);
-        FunctionItem mapGet3 = lib.getFunctionItem(symbolicName, new IndependentContext(context.getConfiguration()));
+        FunctionItem mapGet3 = lib.getFunctionItem(symbolicName, getRetainedStaticContext().reinstate());
         return new CurriedFunction(mapGet3, new Sequence[]{map, null, alwaysEmptyFunction});
     }
 

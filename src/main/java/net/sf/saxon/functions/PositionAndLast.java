@@ -64,7 +64,7 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
             });
             return new CallableFunction(name, callable, getFunctionItemType());
         }
-        return new ConstantFunction0(getFunctionName(), value, SequenceType.SINGLE_INTEGER);
+        return new ConstantFunction(getFunctionName(), value, SequenceType.SINGLE_INTEGER);
     }
 
     /**

@@ -1,4 +1,5 @@
-package net.sf.saxon.s9api;public class XdmAtomicType {
+package net.sf.saxon.s9api;
+public class XdmAtomicType {
 }
 
 //
