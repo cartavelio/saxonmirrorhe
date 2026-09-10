@@ -163,11 +163,10 @@ public class DocumentBuilder {
      *     <li>The option {@link SchemaValidator#isUseXsiSchemaLocation()}</li>
      *     <li>The option {@link SchemaValidator#isExpandAttributeDefaults()}</li>
      *     <li>Validation parameters set using {@link SchemaValidator#setParameter}</li>
-     * </ul>
-     * <p>Properties that currently do NOT have any effect include:</p>
-     * <ul>
      *     <li>The {@link net.sf.saxon.lib.InvalidityHandler}</li>
-
+     * </ul>
+     * <p>Properties that do NOT have any effect include:</p>
+     * <ul>
      *     <li>The option {@link SchemaValidator#isCollectStatistics()}</li>
      * </ul>
      *
@@ -365,6 +364,7 @@ public class DocumentBuilder {
             options.setExpandAttributeDefaults(schemaValidator.isExpandAttributeDefaults());
             options.setUseXsiSchemaLocation(schemaValidator.isUseXsiSchemaLocation());
             options.setValidationParams(schemaValidator.getValidationParameters());
+            options.setInvalidityHandler(schemaValidator.getInvalidityHandler());
         }
 
         if (treeModel != null) {
