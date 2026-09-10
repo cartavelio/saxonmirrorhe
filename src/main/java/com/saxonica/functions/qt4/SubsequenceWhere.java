@@ -9,40 +9,23 @@ import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 
 /**
- * This class supports the two extension functions saxon:items-from and saxon:items-after,
- * also available as experimental XPath 4.0 functions in the fn namespace.
- * These functions take two arguments: the first is a sequence of items, the second is a
- * function used as a predicate to determine the first item to be included in the result.
- * The functions differ in whether the matching item is included in the result or not.
+ * This class supports the proposed QT4 function fn:subsequence-where.
+ * The function takes three arguments: the first is a sequence of items, the second is a
+ * function used as a predicate to determine the first item to be included in the result,
+ * the third is a function used as a predicate to determine the last item to be included in the result,
  */
 
-public abstract class ItemsStarting extends SystemFunction {
+public class SubsequenceWhere extends SystemFunction {
 
-    protected abstract boolean includeMatchingItem();
 
-    public static class ItemsFrom extends ItemsStarting {
-        @Override
-        protected boolean includeMatchingItem() {
-            return true;
-        }
+    
 
-        @Override
-        public String getStreamerName() {
-            return "saxon:ItemsFrom";
-        }
+    @Override
+    public String getStreamerName() {
+        return "saxon:ItemsFrom";
     }
 
-    public static class ItemsAfter extends ItemsStarting {
-        @Override
-        protected boolean includeMatchingItem() {
-            return false;
-        }
 
-        @Override
-        public String getStreamerName() {
-            return "saxon:ItemsAfter";
-        }
-    }
 
     /**
      * Evaluate this function call at run-time
@@ -58,62 +41,97 @@ public abstract class ItemsStarting extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence input = arguments[0];
         FunctionItem startCondition = (FunctionItem) arguments[1].head();
-        return new LazySequence(new StartingIterator(
-                input.iterate(), startCondition, includeMatchingItem(), context));
+        FunctionItem endCondition = (FunctionItem) arguments[2].head();
+        return new LazySequence(new BetweenIterator(
+                input.iterate(), startCondition, endCondition, context));
     }
 
-    private static class StartingIterator implements SequenceIterator {
+    private static class BetweenIterator implements SequenceIterator {
 
         private final SequenceIterator baseIterator;
         private final FunctionItem start;
-        private final boolean inclusive;
+        private final FunctionItem end;
         private final XPathContext context;
         private boolean started;
+        private boolean ended;
         private int position;
-        private int arity;
+        private final int startArity;
+        private final int endArity;
 
-        StartingIterator(SequenceIterator in, FunctionItem start, boolean inclusive, XPathContext context) {
+        BetweenIterator(SequenceIterator in, FunctionItem start, FunctionItem end, XPathContext context) {
             this.baseIterator = in;
             this.start = start;
-            this.inclusive = inclusive;
+            this.end = end;
             this.context = context;
             this.position = 0;
-            arity = start.getArity();
+            if (start == null) {
+                started = true;
+            }
+            startArity = start == null ? 0 : start.getArity();
+            endArity = end == null ? 0 : end.getArity();
         }
 
         @Override
         public Item next() {
+            if (ended) {
+                return null;
+            }
             Item item;
             while ((item = baseIterator.next()) != null) {
                 position++;
                 if (started) {
+                    if (end != null) {
+                        ended = isMatchesEnd(item, position);
+                    }
                     return item;
                 }
                 try {
-                    BooleanValue matches;
-                    switch (arity) {
+                    BooleanValue matchesStart;
+                    switch (startArity) {
                         case 0:
-                            matches = (BooleanValue) start.call(context, new Sequence[]{}).head();
+                            matchesStart = (BooleanValue) start.call(context, new Sequence[]{}).head();
                             break;
                         case 1:
-                            matches = (BooleanValue) start.call(context, new Sequence[]{item}).head();
+                            matchesStart = (BooleanValue) start.call(context, new Sequence[]{item}).head();
                             break;
                         case 2:
                         default:
-                            matches = (BooleanValue) start.call(context, new Sequence[]{item, new Int64Value(position)}).head();
+                            matchesStart = (BooleanValue) start.call(context, new Sequence[]{item, new Int64Value(position)}).head();
                             break;
                     }
-                    if (matches.getBooleanValue()) {
+                    if (matchesStart.getBooleanValue()) {
                         started = true;
-                        if (inclusive) {
-                            return item;
+                        if (end != null) {
+                            ended = isMatchesEnd(item, position);
                         }
+                        return item;
                     }
                 } catch (XPathException e) {
                     throw new UncheckedXPathException(e);
                 }
             }
             return null;
+        }
+
+        private boolean isMatchesEnd(Item item, int position) {
+            try {
+                BooleanValue matchesEnd;
+                switch (endArity) {
+                    case 0:
+                        matchesEnd = (BooleanValue) end.call(context, new Sequence[]{}).head();
+                        break;
+                    case 1:
+                        matchesEnd = (BooleanValue) end.call(context, new Sequence[]{item}).head();
+                        break;
+                    case 2:
+                    default:
+                        matchesEnd = (BooleanValue) end.call(context, new Sequence[]{item, new Int64Value(position)}).head();
+                        break;
+                }
+                return matchesEnd.getBooleanValue();
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
+            }
         }
 
         @Override

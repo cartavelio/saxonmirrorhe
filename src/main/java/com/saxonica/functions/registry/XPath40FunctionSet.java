@@ -391,6 +391,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, NumericType.getInstance(), ONE, null)
                 .arg(2, NumericType.getInstance(), OPT, null));
 
+        register("subsequence-where", 1, 3, e -> e.populate(SubsequenceWhere::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate2, OPT, null)
+                .arg(2, predicate2, OPT, null));
+
         register("substring-after", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.STRING, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
