@@ -376,10 +376,6 @@ EndGlobal
    <Import Project="core.csproj"/>
    <PropertyGroup>
       <LangVersion>10.0</LangVersion>
-      <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
-      <Version>12.9.0</Version>
-      <AssemblyVersion>12.9.0</AssemblyVersion>
-      <Authors>Saxonica Ltd.</Authors>
       <TargetFramework>net8.0</TargetFramework>
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
@@ -396,7 +392,7 @@ EndGlobal
                                                 'NUnit',
                                                 'NUnit.Analyzers',
                                                 'NUnit3TestAdapter'))"/>
-      <xsl:sequence select="$common-packages"/>
+
    </ItemGroup>
    <ItemGroup>
       <Using Include="NUnit.Framework"/>

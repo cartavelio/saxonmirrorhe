@@ -606,17 +606,16 @@ tasks.register<Exec>("samples") {
 
 // ============================================================
 
-val templateName = project.findProperty("projectTemplateName") ?: "SaxonCS"
-
 val csprojTemplateTask = tasks.register<JavaExec>("csproj-template") {
   inputs.files(layout.projectDirectory.file("../tools/generateCSProjFiles.xsl"))
-  outputs.file(layout.projectDirectory.file("${templateName}.csproj"))
-  outputs.file(layout.projectDirectory.file("${templateName}.sln"))
+  outputs.file(layout.projectDirectory.file("SaxonCS.csproj"))
+  outputs.file(layout.projectDirectory.file("SaxonCS.sln"))
+  outputs.file(layout.projectDirectory.file("NUnitTests.csproj"))
   classpath = saxonClasspath
   mainClass = "net.sf.saxon.Transform"
   args("-it",
     "-xsl:${layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")}",
-    "-o:${layout.projectDirectory.file("${templateName}.sln")}",
+    "-o:${layout.projectDirectory.file("SaxonCS.sln")}",
     "release=${CSReleaseConfiguration.Debug}",
     "platform=${extension.platform.get().msbuild}",
     "arch=${extension.architecture.get().msbuild}",
