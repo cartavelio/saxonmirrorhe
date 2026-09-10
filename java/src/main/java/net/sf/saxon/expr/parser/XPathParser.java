@@ -367,7 +367,7 @@ public class XPathParser {
      */
 
     public void grumble(String message, String errorCode) throws XPathException {
-        grumble(message, new StructuredQName("", NamespaceUri.ERR, errorCode), t.inputOffset);
+        grumble(message, new StructuredQName("", NamespaceUri.ERR, errorCode), t==null ? -1 : t.inputOffset);
     }
 
     /**
