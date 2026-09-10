@@ -1,0 +1,256 @@
+default namespace = ""
+datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+start = root
+
+
+root = element \datatypes { cm.root }
+cm.root = (
+	attlist.root, 
+	bibliography?,
+	datatype+
+)
+attlist.root = attlist.none
+
+
+bold = element b { cm.bold }
+cm.bold = (
+	attlist.bold,
+	text
+)
+attlist.bold = attlist.none
+
+
+comparison-family = element comparison-family { cm.comparison-family }
+cm.comparison-family = (
+	attlist.comparison-family,
+	text
+)
+attlist.comparison-family = attlist.none
+
+
+categories = element category { cm.categories }
+cm.categories = (
+	attlist.categories,
+	category+
+)
+attlist.categories = (attlist.none)
+
+
+category = element type { cm.category }
+cm.category = (
+	attlist.category,
+	text
+)
+attlist.category = (
+	att.category-name?
+)
+att.category-name = attribute name {
+	enum.categories.xsd.top-level |
+	enum.categories.xsd.atomicity | 
+	enum.categories.xpath.colloquial
+} 
+
+enum.categories.xsd.top-level = ("Schema (XSD)" | "Schema (XDM)" | "Special (XSD)"  | "Special (XPath)" | "Primitive" | "Ordinary" | "Item" | "XDM")
+enum.categories.xsd.atomicity = ("Generalized Atomic (XPath)" | "Atomic" | "List" | "Union")
+enum.categories.xpath.colloquial = ("date/time" | "Numeric" | "Abstract (XSD)" | "Abstract (XPath)" | "Namespace-sensitive (XPath)")
+
+
+code = element code { cm.code }
+cm.code = (
+	attlist.code,
+	text
+)
+attlist.code = attlist.none
+
+
+att.class = attribute class {
+	"qt4" | 
+	"bodylink"
+}
+
+
+datatype = element datatype { ( cm.datatype | cm.datatype-aka) }
+cm.datatype = (
+	attlist.datatype,
+	name,
+	description,
+	categories,
+	comparison-family,
+	notes?,
+	source-refs?,
+	sub-types?
+)
+attlist.datatype = (
+	att.id,
+	att.first-introduced?
+)
+
+att.id = attribute id { 
+	xsd:ID 
+}
+att.ref = attribute ref { 
+	xsd:IDREF 
+}
+att.first-introduced = attribute first-introduced {
+    "XDM 4.0" |
+    "XDM 3.0"
+}
+
+
+cm.datatype-aka = (
+    attlist.datatype-aka,
+    name,
+    notes?
+)
+attlist.datatype-aka = (
+    att.id,
+    att.ref,
+    att.first-introduced?
+)
+
+
+derived-from = element derived-from { cm.derived-from }
+cm.derived-from = (
+	attlist.derived-from,
+	xref*
+)
+attlist.derived-from = attlist.none
+
+
+description = element description { cm.description }
+cm.description = (
+	attlist.description, 
+	cm.inline-text
+)
+attlist.description = attlist.none
+
+exref = element a { cm.exref }
+cm.exref = (
+	attlist.exref,
+	text
+)
+attlist.exref = (
+	att.href,
+	att.class?
+)
+
+
+att.href = attribute href {
+	xsd:anyURI
+}
+
+
+cm.inline-text = (
+	mixed {
+		(
+			code |
+			xref |
+			exref |
+			italic | 
+			bold
+		)*
+	}
+)
+
+
+italic = element i { cm.italic }
+cm.italic = (
+	attlist.italic,
+	text
+)
+attlist.italic = attlist.none
+
+
+name = element name { cm.name }
+cm.name = (
+	attlist.name,
+	text
+)
+attlist.name = attlist.none
+
+
+notes = element notes { cm.notes }
+cm.notes = (
+	attlist.notes,
+	paragraph*
+)
+attlist.notes = attlist.none
+
+
+paragraph = element p { cm.paragraph }
+cm.paragraph = (
+	attlist.paragraph, 
+	cm.inline-text
+)
+attlist.paragraph = (
+	att.class?
+)
+
+
+bibliography = element sources { cm.bibliography }
+cm.bibliography = (
+	attlist.bibliography,
+	bibliography-entry*
+)
+attlist.bibliography = attlist.none
+
+bibliography-entry = element source { cm.bibliography-entry }
+cm.bibliography-entry = (
+	attlist.bibliography-entry,
+	mixed { 
+		(
+			italic |
+			code
+		)*
+	}
+)
+attlist.bibliography-entry = (
+	att.href,
+	att.id
+)
+
+
+source-ref = element source { cm.source-ref }
+cm.source-ref = (
+	attlist.source-ref,
+	mixed {
+		(
+			italic |
+			code
+		)*
+	}
+)
+attlist.source-ref = (
+	att.ref
+)
+
+source-refs = element sources { cm.source-refs }
+cm.source-refs = (
+	attlist.source-refs,
+	source-ref*
+)
+attlist.source-refs = attlist.none
+
+
+sub-types = element sub-types { cm.sub-types }
+cm.sub-types = (
+	attlist.sub-types,
+	datatype+
+)
+attlist.sub-types = attlist.none
+
+
+xref = element xref { cm.xref }
+cm.xref = (
+	attlist.xref,
+	empty
+)
+attlist.xref = (
+	att.ref
+)
+
+
+attlist.none = (
+	empty
+)

@@ -348,6 +348,7 @@ tasks.register("gen_doc") {
   dependsOn("expath_doc")
   dependsOn("doc_FeatureKeysDoc")
   dependsOn("doc_ConfigFileDoc")
+  dependsOn("gen_datatypes_table")
   // Just a place to hang dependencies
 }
 
@@ -413,6 +414,19 @@ tasks.register<JavaExec>("gen_xslt_element_reference") {
   args ("-s:${layout.buildDirectory.file("userdoc/tmp/xsl-elements-expanded.xml").get().asFile}",
         "-xsl:${layout.projectDirectory.file("tools/userdoc/elements-body.xsl")}",
         "-o:${layout.buildDirectory.file("src/userdoc/xsl-elements.xml").get().asFile}")
+}
+
+tasks.register<JavaExec>("gen_datatypes_table") {
+  group = "Internal"
+  description = "Generate the table of datatypes included in expressions"
+
+  inputs.files(layout.projectDirectory.dir("tools/datatypes"))
+  outputs.dir(layout.buildDirectory.dir("src/userdoc/datatypes"))
+  classpath = configurations.named("documentation").get()
+  mainClass = "com.saxonica.Transform"
+  args("-s:${layout.projectDirectory.file("tools/datatypes/xml/datatypes.xml")}",
+       "-xsl:${layout.projectDirectory.file("tools/datatypes/xsl/xml2html.xsl")}",
+       "-o:${layout.buildDirectory.file("src/userdoc/datatypes/datatypes_table.xml").get().asFile}")
 }
 
 // ============================================================

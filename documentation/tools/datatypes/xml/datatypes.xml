@@ -1,0 +1,1342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="../schemas/datatypes.rnc" type="application/relax-ng-compact-syntax"?>
+<?xml-model href="../schemas/datatypes.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<datatypes>
+	<sources>
+		<!-- XSD 1.1 Datatypes -->
+		<source id="xml-schema-11-2" href="https://www.w3.org/TR/xmlschema11-2/"/>
+		<source id="xml-schema-11-2-atomic-list-union" href="https://www.w3.org/TR/xmlschema11-2/#atomic-vs-list"/>
+		<source id="xml-schema-11-2-atomic" href="https://www.w3.org/TR/xmlschema11-2/#dt-atomic"/>
+		<source id="xml-schema-11-2-id" href="https://www.w3.org/TR/xmlschema11-2/#ID"/>
+		<source id="xml-schema-11-2-language" href="https://www.w3.org/TR/xmlschema11-2/#language"/>
+		<source id="xml-schema-11.2-list" href="https://www.w3.org/TR/xmlschema11-2/#dt-list"/>
+		<source id="xml-schema-11-2-ordinary" href="https://www.w3.org/TR/xmlschema11-2/#dt-ordinary"/>
+		<source id="xml-schema-11-2-primitive" href="https://www.w3.org/TR/xmlschema11-2/#built-in-primitive-datatypes"/>
+		<source id="xml-schema-11-2-special-datatypes" href="https://www.w3.org/TR/xmlschema11-2/#special-datatypes"/>
+		<source id="xml-schema-11-2-union" href="https://www.w3.org/TR/xmlschema11-2/#dt-union"/>
+		<!-- XDM 4.0 -->
+		<source id="xdm-40-types" href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xs-types"/>
+		<!-- XPath 3.1 -->
+		<source id="xpath-31-type-system-part-3-atomic-types-diagram" href="https://www.w3.org/TR/xpath-datamodel-31/">Diagram named <i>XPath 3.1 and XQuery 3.1 Type System Part 3: Atomic Types</i> in § 2.7.4 Type System</source>
+		<source id="xpath-31-cast" href="https://www.w3.org/TR/2017/REC-xpath-31-20170321/#id-cast"/>
+		<!-- XPath 4.0 -->
+		<source id="xpath-40-enumeration-types" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-enumeration-types"/>
+		<source id="xpath-40-generalized-atomic-type" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#dt-generalized-atomic-type"/>
+		<source id="xpath-40-gnode" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#dt-GNode"/>
+		<source id="xpath-40-item" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#dt-item"/>
+		<source id="xpath-40-jnode" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#dt-JNode"/>
+		<source id="xpath-40-matching-item" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-matching-item"/>
+		<source id="xpath-40-namespace-sensitive-datatypes" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-namespace-sensitive">Listed in the definition.</source>
+		<source id="xpath-40-sequence-types" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-sequencetype-syntax"/>
+		<source id="xpath-40-xnode" href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#dt-XNode"/>
+	</sources>
+	<datatype id="xs-anytype">
+		<name>xs:anyType</name>
+		<description>A generalisation that represents all datatypes.</description>
+		<category>
+			<type name="Schema (XSD)"/>
+			<type name="Ordinary"/>
+			<type name="Abstract (XPath)"/>
+		</category>
+		<comparison-family/>
+		<notes/>
+		<sources>
+			<source ref="xml-schema-11-2"/>
+			<source ref="xml-schema-11-2-ordinary"/>
+			<source ref="xpath-31-cast"/>
+		</sources>
+		<sub-types>
+			<datatype id="xs-anysimpletype" first-introduced="XDM 3.0">
+				<name>xs:anySimpleType</name>
+				<description>A restriction of xs:anyType to just all atomic values and all finite-length lists of zero or more atomic values.</description>
+				<category>
+					<type name="Schema (XSD)"/>
+					<type name="Special (XSD)"/>
+					<type name="Abstract (XPath)"/>
+				</category>
+				<comparison-family/>
+				<sources>
+					<source ref="xml-schema-11-2-special-datatypes"/>
+					<source ref="xml-schema-11-2"/>
+					<source ref="xpath-31-cast"/>
+				</sources>
+				<sub-types>
+					<datatype id="xs-anyatomictype" first-introduced="XDM 3.0">
+						<name>xs:anyAtomicType</name>
+						<description>A generalisation, representing any atomic item type.</description>
+						<category>
+							<type name="Schema (XSD)"/>
+							<type name="Schema (XDM)"/>
+							<type name="Special (XSD)"/>
+							<type name="Atomic"/>
+							<type name="Generalized Atomic (XPath)"/>
+							<type name="Abstract (XPath)"/>
+						</category>
+						<comparison-family/>
+						<sources>
+							<source ref="xml-schema-11-2-special-datatypes"/>
+							<source ref="xml-schema-11-2-atomic"/>
+							<source ref="xpath-40-generalized-atomic-type"/>
+							<source ref="xml-schema-11-2"/>
+							<source ref="xdm-40-types"/>
+							<source ref="xpath-31-cast"/>
+						</sources>
+						<sub-types>
+							<datatype id="xs-anyuri">
+								<name>xs:anyURI</name>
+								<description>An Internationalized Resource Identifier Reference (IRI).</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>String-like</comparison-family>
+								<notes/>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-base64binary">
+								<name>xs:base64Binary</name>
+								<description>Arbitrary Base64-encoded binary data.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>Binary</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-boolean">
+								<name>xs:boolean</name>
+								<description>The values <code>true</code> or <code>false</code>.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>Boolean</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-date">
+								<name>xs:date</name>
+								<description>An entire calendar day.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="date/time"/>
+								</category>
+								<comparison-family>Date</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-datetime">
+								<name>xs:dateTime</name>
+								<description>An instant in time.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="date/time"/>
+								</category>
+								<comparison-family>DateTime</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+								<sub-types>
+									<datatype id="xs-datetimestamp">
+										<name>xs:dateTimeStamp</name>
+										<description>A generalized atomic type.</description>
+										<category>
+											<type name="Schema (XSD)"/>
+											<type name="Schema (XDM)"/>
+											<type name="Atomic"/>
+											<type name="Ordinary"/>
+											<type name="Generalized Atomic (XPath)"/>
+											<type name="date/time"/>
+										</category>
+										<comparison-family>DateTime</comparison-family>
+										<sources>
+											<source ref="xml-schema-11-2-atomic"/>
+											<source ref="xpath-40-generalized-atomic-type"/>
+											<source ref="xml-schema-11-2"/>
+											<source ref="xdm-40-types"/>
+											<source ref="xml-schema-11-2-ordinary"/>
+										</sources>
+									</datatype>
+								</sub-types>
+							</datatype>
+							<datatype id="xs-decimal">
+								<name>xs:decimal</name>
+								<description>A real number that can be represented by decimal numerals.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>Numeric</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+								<sub-types>
+									<datatype id="xs-integer">
+										<name>xs:integer</name>
+										<description>A generalized atomic type.</description>
+										<category>
+											<type name="Schema (XSD)"/>
+											<type name="Atomic"/>
+											<type name="Generalized Atomic (XPath)"/>
+											<type name="Ordinary"/>
+										</category>
+										<comparison-family>Numeric</comparison-family>
+										<sources>
+											<source ref="xml-schema-11-2-atomic"/>
+											<source ref="xpath-40-generalized-atomic-type"/>
+											<source ref="xml-schema-11-2"/>
+											<source ref="xml-schema-11-2-ordinary"/>
+										</sources>
+										<sub-types>
+											<datatype id="xs-long">
+												<name>xs:long</name>
+												<description>A generalized atomic type.</description>
+												<category>
+													<type name="Schema (XSD)"/>
+													<type name="Atomic"/>
+													<type name="Generalized Atomic (XPath)"/>
+													<type name="Ordinary"/>
+												</category>
+												<comparison-family>Numeric</comparison-family>
+												<sources>
+													<source ref="xml-schema-11-2-atomic"/>
+													<source ref="xpath-40-generalized-atomic-type"/>
+													<source ref="xml-schema-11-2"/>
+													<source ref="xml-schema-11-2-ordinary"/>
+												</sources>
+												<sub-types>
+													<datatype id="xs-int">
+														<name>xs:int</name>
+														<description>A generalized atomic type.</description>
+														<category>
+															<type name="Schema (XSD)"/>
+															<type name="Atomic"/>
+															<type name="Generalized Atomic (XPath)"/>
+															<type name="Ordinary"/>
+														</category>
+														<comparison-family>Numeric</comparison-family>
+														<sources>
+															<source ref="xml-schema-11-2-atomic"/>
+															<source ref="xpath-40-generalized-atomic-type"/>
+															<source ref="xml-schema-11-2"/>
+															<source ref="xml-schema-11-2-ordinary"/>
+														</sources>
+														<sub-types>
+															<datatype id="xs-short">
+																<name>xs:short</name>
+																<description>An <xref ref="xs-int"/> between -32768 and 32767 (inclusive).</description>
+																<category>
+																	<type name="Schema (XSD)"/>
+																	<type name="Atomic"/>
+																	<type name="Generalized Atomic (XPath)"/>
+																	<type name="Ordinary"/>
+																	<type name="Numeric"/>
+																</category>
+																<comparison-family/>
+																<sources>
+																	<source ref="xml-schema-11-2-atomic"/>
+																	<source ref="xpath-40-generalized-atomic-type"/>
+																	<source ref="xml-schema-11-2"/>
+																	<source ref="xml-schema-11-2-ordinary"/>
+																</sources>
+																<sub-types>
+																	<datatype id="xs-byte">
+																		<name>xs:byte</name>
+																		<description>A generalized atomic type.</description>
+																		<category>
+																			<type name="Schema (XSD)"/>
+																			<type name="Atomic"/>
+																			<type name="Generalized Atomic (XPath)"/>
+																			<type name="Ordinary"/>
+																		</category>
+																		<comparison-family>Numeric</comparison-family>
+																		<sources>
+																			<source ref="xml-schema-11-2-atomic"/>
+																			<source ref="xpath-40-generalized-atomic-type"/>
+																			<source ref="xml-schema-11-2"/>
+																			<source ref="xml-schema-11-2-ordinary"/>
+																		</sources>
+																	</datatype>
+																</sub-types>
+															</datatype>
+														</sub-types>
+													</datatype>
+												</sub-types>
+											</datatype>
+											<datatype id="xs-nonnegativeinteger">
+												<name>xs:nonNegativeInteger</name>
+												<description>A generalized atomic type.</description>
+												<category>
+													<type name="Schema (XSD)"/>
+													<type name="Atomic"/>
+													<type name="Generalized Atomic (XPath)"/>
+													<type name="Ordinary"/>
+												</category>
+												<comparison-family>Numeric</comparison-family>
+												<sources>
+													<source ref="xml-schema-11-2-atomic"/>
+													<source ref="xpath-40-generalized-atomic-type"/>
+													<source ref="xml-schema-11-2"/>
+													<source ref="xml-schema-11-2-ordinary"/>
+												</sources>
+												<sub-types>
+													<datatype id="xs-positiveinteger">
+														<name>xs:positiveInteger</name>
+														<description>A generalized atomic type.</description>
+														<category>
+															<type name="Schema (XSD)"/>
+															<type name="Atomic"/>
+															<type name="Generalized Atomic (XPath)"/>
+															<type name="Ordinary"/>
+														</category>
+														<comparison-family>Numeric</comparison-family>
+														<sources>
+															<source ref="xml-schema-11-2-atomic"/>
+															<source ref="xpath-40-generalized-atomic-type"/>
+															<source ref="xml-schema-11-2"/>
+															<source ref="xml-schema-11-2-ordinary"/>
+														</sources>
+														<sub-types>
+															<datatype id="xs-unsignedlong">
+																<name>xs:unsignedLong</name>
+																<description>A generalized atomic type.</description>
+																<category>
+																	<type name="Schema (XSD)"/>
+																	<type name="Atomic"/>
+																	<type name="Generalized Atomic (XPath)"/>
+																	<type name="Ordinary"/>
+																</category>
+																<comparison-family>Numeric</comparison-family>
+																<sources>
+																	<source ref="xml-schema-11-2-atomic"/>
+																	<source ref="xpath-40-generalized-atomic-type"/>
+																	<source ref="xml-schema-11-2"/>
+																	<source ref="xml-schema-11-2-ordinary"/>
+																</sources>
+																<sub-types>
+																	<datatype id="xs-unsignedint">
+																		<name>xs:unsignedInt</name>
+																		<description>Derived from <xref ref="xs-unsignedlong"/> by setting the value of maxInclusive to 4294967295.</description>
+																		<category>
+																			<type name="Schema (XSD)"/>
+																			<type name="Atomic"/>
+																			<type name="Generalized Atomic (XPath)"/>
+																			<type name="Ordinary"/>
+																		</category>
+																		<comparison-family>Numeric</comparison-family>
+																		<sources>
+																			<source ref="xml-schema-11-2-atomic"/>
+																			<source ref="xpath-40-generalized-atomic-type"/>
+																			<source ref="xml-schema-11-2"/>
+																			<source ref="xml-schema-11-2-ordinary"/>
+																		</sources>
+																		<sub-types>
+																			<datatype id="xs-unsignedshort">
+																				<name>xs:unsignedShort</name>
+																				<description>Derived from <xref ref="xs-unsignedint"/> by setting the value of maxInclusive to 65535.</description>
+																				<category>
+																					<type name="Schema (XSD)"/>
+																					<type name="Atomic"/>
+																					<type name="Generalized Atomic (XPath)"/>
+																					<type name="Ordinary"/>
+																				</category>
+																				<comparison-family>Numeric</comparison-family>
+																				<sources>
+																					<source ref="xml-schema-11-2-atomic"/>
+																					<source ref="xpath-40-generalized-atomic-type"/>
+																					<source ref="xml-schema-11-2"/>
+																					<source ref="xml-schema-11-2-ordinary"/>
+																				</sources>
+																				<sub-types>
+																					<datatype id="xs-unsignedbyte">
+																						<name>xs:unsignedByte</name>
+																						<description>Derived from <xref ref="xs-unsignedshort"/> by setting the value of maxInclusive to 255.</description>
+																						<category>
+																							<type name="Schema (XSD)"/>
+																							<type name="Atomic"/>
+																							<type name="Generalized Atomic (XPath)"/>
+																							<type name="Ordinary"/>
+																						</category>
+																						<comparison-family>Numeric</comparison-family>
+																						<sources>
+																							<source ref="xml-schema-11-2-atomic"/>
+																							<source ref="xpath-40-generalized-atomic-type"/>
+																							<source ref="xml-schema-11-2"/>
+																							<source ref="xml-schema-11-2-ordinary"/>
+																						</sources>
+																					</datatype>
+																				</sub-types>
+																			</datatype>
+																		</sub-types>
+																	</datatype>
+																</sub-types>
+															</datatype>
+														</sub-types>
+													</datatype>
+												</sub-types>
+											</datatype>
+											<datatype id="xs-nonpositiveinteger">
+												<name>xs:nonPositiveInteger</name>
+												<description>A generalized atomic type.</description>
+												<category>
+													<type name="Schema (XSD)"/>
+													<type name="Atomic"/>
+													<type name="Generalized Atomic (XPath)"/>
+													<type name="Ordinary"/>
+												</category>
+												<comparison-family>Numeric</comparison-family>
+												<sources>
+													<source ref="xml-schema-11-2-atomic"/>
+													<source ref="xpath-40-generalized-atomic-type"/>
+													<source ref="xml-schema-11-2"/>
+													<source ref="xml-schema-11-2-ordinary"/>
+												</sources>
+												<sub-types>
+													<datatype id="xs-negativeinteger">
+														<name>xs:negativeInteger</name>
+														<description>A generalized atomic type.</description>
+														<category>
+															<type name="Schema (XSD)"/>
+															<type name="Atomic"/>
+															<type name="Generalized Atomic (XPath)"/>
+															<type name="Ordinary"/>
+														</category>
+														<comparison-family>Numeric</comparison-family>
+														<sources>
+															<source ref="xml-schema-11-2-atomic"/>
+															<source ref="xpath-40-generalized-atomic-type"/>
+															<source ref="xml-schema-11-2"/>
+															<source ref="xml-schema-11-2-ordinary"/>
+														</sources>
+													</datatype>
+												</sub-types>
+											</datatype>
+										</sub-types>
+									</datatype>
+								</sub-types>
+							</datatype>
+							<datatype id="xs-double">
+								<name>xs:double</name>
+								<description>A double-precision floating point number.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>Numeric</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-duration">
+								<name>xs:duration</name>
+								<description>A duration of time without fixed endpoints.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="date/time"/>
+								</category>
+								<comparison-family>Duration</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+								<sub-types>
+									<datatype id="xs-daytimeduration" first-introduced="XDM 3.0">
+										<name>xs:dayTimeDuration</name>
+										<description>A generalized atomic type.</description>
+										<category>
+											<type name="Schema (XSD)"/>
+											<type name="Schema (XDM)"/>
+											<type name="Atomic"/>
+											<type name="Generalized Atomic (XPath)"/>
+											<type name="Ordinary"/>
+											<type name="date/time"/>
+										</category>
+										<comparison-family>Duration</comparison-family>
+										<sources>
+											<source ref="xml-schema-11-2-atomic"/>
+											<source ref="xpath-40-generalized-atomic-type"/>
+											<source ref="xml-schema-11-2"/>
+											<source ref="xdm-40-types"/>
+											<source ref="xml-schema-11-2-ordinary"/>
+										</sources>
+									</datatype>
+									<datatype id="xs-yearmonthduration" first-introduced="XDM 3.0">
+										<name>xs:yearMonthDuration</name>
+										<description>A generalized atomic type.</description>
+										<category>
+											<type name="Schema (XSD)"/>
+											<type name="Schema (XDM)"/>
+											<type name="Atomic"/>
+											<type name="Generalized Atomic (XPath)"/>
+											<type name="Ordinary"/>
+											<type name="date/time"/>
+										</category>
+										<comparison-family>Duration</comparison-family>
+										<sources>
+											<source ref="xml-schema-11-2-atomic"/>
+											<source ref="xpath-40-generalized-atomic-type"/>
+											<source ref="xml-schema-11-2"/>
+											<source ref="xdm-40-types"/>
+											<source ref="xml-schema-11-2-ordinary"/>
+										</sources>
+									</datatype>
+								</sub-types>
+							</datatype>
+							<datatype id="xs-float">
+								<name>xs:float</name>
+								<description>A floating point number.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>Numeric</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-gday">
+								<name>xs:gDay</name>
+								<description>A whole Gregorian day within an arbitrary month and year.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="date/time"/>
+								</category>
+								<comparison-family>gDay</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-gmonth">
+								<name>xs:gMonth</name>
+								<description>A whole Gregorian month within an arbitrary year.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="date/time"/>
+								</category>
+								<comparison-family>gMonth</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-gmonthday">
+								<name>xs:gMonthDay</name>
+								<description>A whole day within a specific Gregorian month in an arbitrary year.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="date/time"/>
+								</category>
+								<comparison-family>gMonthDay</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-gyear">
+								<name>xs:gYear</name>
+								<description>A whole Gregoria year.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="date/time"/>
+								</category>
+								<comparison-family>gYear</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-gyearmonth">
+								<name>xs:gYearMonth</name>
+								<description>A whole Gregorian month in a specific Gregorian year.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="date/time"/>
+								</category>
+								<comparison-family>gYearMonth</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-hexbinary">
+								<name>xs:hexBinary</name>
+								<description>Arbitrary hex-encoded binary data.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>Binary</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-notation">
+								<name>xs:NOTATION</name>
+								<description>An XML notation attribute.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="Namespace-sensitive (XPath)"/>
+									<type name="Abstract (XPath)"/>
+								</category>
+								<comparison-family>Notation</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-namespace-sensitive-datatypes"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+									<source ref="xpath-31-cast"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-qname">
+								<name>xs:QName</name>
+								<description>An XML qualified name.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="Namespace-sensitive (XPath)"/>
+								</category>
+								<comparison-family>QName</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-namespace-sensitive-datatypes"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-string">
+								<name>xs:string</name>
+								<description>A string of characters.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>String-like</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+								<sub-types>
+									<datatype id="xs-normalizedstring">
+										<name>xs:normalizedString</name>
+										<description>A string that doesn't contain the following characters: carriage return (<code>#xD</code>); line feed (<code>#xA</code>); line feed (<code>#x9</code>).</description>
+										<category>
+											<type name="Schema (XSD)"/>
+											<type name="Ordinary"/>
+											<type name="Atomic"/>
+											<type name="Generalized Atomic (XPath)"/>
+										</category>
+										<comparison-family>String-like</comparison-family>
+										<sources>
+											<source ref="xml-schema-11-2-atomic"/>
+											<source ref="xpath-40-generalized-atomic-type"/>
+											<source ref="xml-schema-11-2"/>
+											<source ref="xml-schema-11-2-ordinary"/>
+										</sources>
+										<sub-types>
+											<datatype id="xs-token">
+												<name>xs:token</name>
+												<description>An xs:normalizedString that has no leading or trailing spaces (<code>#x20</code>) and includes no internal sequences of two or more spaces.</description>
+												<category>
+													<type name="Schema (XSD)"/>
+													<type name="Ordinary"/>
+													<type name="Atomic"/>
+													<type name="Generalized Atomic (XPath)"/>
+												</category>
+												<comparison-family>String-like</comparison-family>
+												<sources>
+													<source ref="xml-schema-11-2-atomic"/>
+													<source ref="xpath-31-type-system-part-3-atomic-types-diagram"/>
+													<source ref="xpath-40-generalized-atomic-type"/>
+													<source ref="xml-schema-11-2"/>
+													<source ref="xml-schema-11-2-ordinary"/>
+												</sources>
+												<sub-types>
+													<datatype id="xs-nmtoken">
+														<name>xs:NMTOKEN</name>
+														<description>A single name token.</description>
+														<category>
+															<type name="Schema (XSD)"/>
+															<type name="Ordinary"/>
+															<type name="Atomic"/>
+															<type name="Generalized Atomic (XPath)"/>
+														</category>
+														<comparison-family>String-like</comparison-family>
+														<sources>
+															<source ref="xml-schema-11-2-atomic"/>
+															<source ref="xpath-31-type-system-part-3-atomic-types-diagram"/>
+															<source ref="xpath-40-generalized-atomic-type"/>
+															<source ref="xml-schema-11-2"/>
+															<source ref="xml-schema-11-2-ordinary"/>
+														</sources>
+													</datatype>
+													<datatype id="xs-language">
+														<name>xs:language</name>
+														<description>A formal natural language identifier.</description>
+														<category>
+															<type name="Schema (XSD)"/>
+															<type name="Atomic"/>
+															<type name="Generalized Atomic (XPath)"/>
+															<type name="Ordinary"/>
+														</category>
+														<comparison-family>String-like</comparison-family>
+														<sources>
+															<source ref="xml-schema-11-2-atomic"/>
+															<source ref="xpath-31-type-system-part-3-atomic-types-diagram"/>
+															<source ref="xml-schema-11-2-language"/>
+															<source ref="xpath-40-generalized-atomic-type"/>
+															<source ref="xml-schema-11-2"/>
+															<source ref="xml-schema-11-2-ordinary"/>
+														</sources>
+													</datatype>
+													<datatype id="xs-name">
+														<name>xs:Name</name>
+														<description>An XML Name.</description>
+														<category>
+															<type name="Schema (XSD)"/>
+															<type name="Atomic"/>
+															<type name="Generalized Atomic (XPath)"/>
+															<type name="Ordinary"/>
+														</category>
+														<comparison-family>String-like</comparison-family>
+														<sources>
+															<source ref="xml-schema-11-2-atomic"/>
+															<source ref="xpath-31-type-system-part-3-atomic-types-diagram"/>
+															<source ref="xpath-40-generalized-atomic-type"/>
+															<source ref="xml-schema-11-2"/>
+															<source ref="xml-schema-11-2-ordinary"/>
+														</sources>
+														<sub-types>
+															<datatype id="xs-ncname">
+																<name>xs:NCName</name>
+																<description>An XML "non-colonized" <xref ref="xs-name"/></description>
+																<category>
+																	<type name="Schema (XSD)"/>
+																	<type name="Atomic"/>
+																	<type name="Generalized Atomic (XPath)"/>
+																	<type name="Ordinary"/>
+																</category>
+																<comparison-family>String-like</comparison-family>
+																<sources>
+																	<source ref="xml-schema-11-2-atomic"/>
+																	<source ref="xpath-31-type-system-part-3-atomic-types-diagram"/>
+																	<source ref="xpath-40-generalized-atomic-type"/>
+																	<source ref="xml-schema-11-2"/>
+																	<source ref="xml-schema-11-2-ordinary"/>
+																</sources>
+																<sub-types>
+																	<datatype id="xs-id">
+																		<name>xs:ID</name>
+																		<description>An XML identifier.</description>
+																		<category>
+																			<type name="Schema (XSD)"/>
+																			<type name="Atomic"/>
+																			<type name="Generalized Atomic (XPath)"/>
+																			<type name="Ordinary"/>
+																		</category>
+																		<comparison-family>String-like</comparison-family>
+																		<sources>
+																			<source ref="xml-schema-11-2-atomic"/>
+																			<source ref="xml-schema-11-2-id"/>
+																			<source ref="xpath-31-type-system-part-3-atomic-types-diagram"/>
+																			<source ref="xpath-40-generalized-atomic-type"/>
+																			<source ref="xml-schema-11-2"/>
+																			<source ref="xml-schema-11-2-ordinary"/>
+																		</sources>
+																	</datatype>
+																	<datatype id="xs-idref">
+																		<name>xs:IDREF</name>
+																		<description>A cross-reference to an <xref ref="xs-id"/>.</description>
+																		<category>
+																			<type name="Schema (XSD)"/>
+																			<type name="Atomic"/>
+																			<type name="Generalized Atomic (XPath)"/>
+																			<type name="Ordinary"/>
+																		</category>
+																		<comparison-family>String-like</comparison-family>
+																		<sources>
+																			<source ref="xml-schema-11-2-atomic"/>
+																			<source ref="xpath-31-type-system-part-3-atomic-types-diagram"/>
+																			<source ref="xpath-40-generalized-atomic-type"/>
+																			<source ref="xml-schema-11-2"/>
+																			<source ref="xml-schema-11-2-ordinary"/>
+																		</sources>
+																	</datatype>
+																	<datatype id="xs-entity">
+																		<name>xs:ENTITY</name>
+																		<description>An XML entity.</description>
+																		<category>
+																			<type name="Schema (XSD)"/>
+																			<type name="Atomic"/>
+																			<type name="Generalized Atomic (XPath)"/>
+																			<type name="Ordinary"/>
+																		</category>
+																		<comparison-family>String-like</comparison-family>
+																		<sources>
+																			<source ref="xml-schema-11-2-atomic"/>
+																			<source ref="xpath-31-type-system-part-3-atomic-types-diagram"/>
+																			<source ref="xpath-40-generalized-atomic-type"/>
+																			<source ref="xml-schema-11-2"/>
+																			<source ref="xml-schema-11-2-ordinary"/>
+																		</sources>
+																	</datatype>
+																</sub-types>
+															</datatype>
+														</sub-types>
+													</datatype>
+												</sub-types>
+											</datatype>
+										</sub-types>
+									</datatype>
+								</sub-types>
+							</datatype>
+							<datatype id="xs-time">
+								<name>xs:time</name>
+								<description>An instant in time that recurs at the same point in each calendar day, or that occurs in some arbitrary calendar day.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Primitive"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>Time</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-primitive"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-untypedatomic">
+								<name>xs:untypedAtomic</name>
+								<description>A primitive atomic type.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Atomic"/>
+									<type name="Generalized Atomic (XPath)"/>
+									<type name="Ordinary"/>
+								</category>
+								<comparison-family>String-like</comparison-family>
+								<sources>
+									<source ref="xml-schema-11-2-atomic"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-ordinary"/>
+								</sources>
+							</datatype>
+						</sub-types>
+					</datatype>
+					<datatype id="list">
+						<name>list</name>
+						<description/>
+						<category>
+							<type name="Abstract (XSD)"/>
+						</category>
+						<comparison-family/>
+						<sources>
+							<source ref="xml-schema-11.2-list"/>
+							<source ref="xml-schema-11-2-atomic-list-union"/>
+						</sources>
+						<sub-types>
+							<datatype id="xs-entities">
+								<name>xs:ENTITIES</name>
+								<description>A list of <xref ref="xs-entity"/> values.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="List"/>
+									<type name="Ordinary"/>
+								</category>
+								<comparison-family/>
+								<notes>
+									<p>See <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xs-types">Types adopted from XML Schema</a></p>
+								</notes>
+								<sources>
+									<source ref="xml-schema-11.2-list"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-ordinary"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-idrefs">
+								<name>xs:IDREFS</name>
+								<description>A list of <xref ref="xs-idref"/> values.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="List"/>
+									<type name="Ordinary"/>
+								</category>
+								<comparison-family/>
+								<notes>
+									<p>See <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xs-types">Types adopted from XML Schema</a>
+									</p>
+								</notes>
+								<sources>
+									<source ref="xml-schema-11.2-list"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-ordinary"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-nmtokens">
+								<name>xs:NMTOKENS</name>
+								<description>A list of <xref ref="xs-nmtoken"/> values.</description>
+								<category>
+									<type name="Schema (XSD)"/>
+									<type name="Schema (XDM)"/>
+									<type name="Ordinary"/>
+									<type name="List"/>
+								</category>
+								<comparison-family/>
+								<notes/>
+								<sources>
+									<source ref="xml-schema-11.2-list"/>
+									<source ref="xml-schema-11-2"/>
+									<source ref="xdm-40-types"/>
+									<source ref="xml-schema-11-2-ordinary"/>
+								</sources>
+							</datatype>
+						</sub-types>
+					</datatype>
+					<datatype id="union">
+						<name>union</name>
+						<description>A generalized type.</description>
+						<category>
+							<type name="Abstract (XSD)"/>
+						</category>
+						<comparison-family>N/A</comparison-family>
+						<notes/>
+						<sources>
+							<source ref="xml-schema-11-2-atomic-list-union"/>
+						</sources>
+						<sub-types>
+							<datatype id="xs-error">
+								<name>xs:error</name>
+								<description>A union type. Also a generalized atomic type.</description>
+								<category>
+									<type name="Schema (XDM)"/>
+									<type name="Union"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family/>
+								<notes>
+									<p>Not expected to have any instances. See <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xs-types">Types adopted from XML Schema</a></p>
+								</notes>
+								<sources>
+									<source ref="xpath-40-generalized-atomic-type">Described as a "pure union type"</source>
+									<source ref="xml-schema-11-2-union"/>
+									<source ref="xdm-40-types"/>
+								</sources>
+							</datatype>
+							<datatype id="xs-numeric">
+								<name>xs:numeric</name>
+								<description>A union type whose members are: <xref ref="xs-double"/>, <xref ref="xs-float"/> and <xref ref="xs-decimal"/>.</description>
+								<category>
+									<type name="Schema (XDM)"/>
+									<type name="Union"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family/>
+								<notes>
+									<p>See <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xs-types">Types adopted from XML Schema</a></p>
+								</notes>
+								<sources>
+									<source ref="xpath-40-generalized-atomic-type">Described as a "pure union type"</source>
+									<source ref="xml-schema-11-2-union"/>
+									<source ref="xdm-40-types"/>
+								</sources>
+							</datatype>
+						</sub-types>
+					</datatype>
+				</sub-types>
+			</datatype>
+			<datatype id="sequence">
+				<name>sequence</name>
+				<description>One or more occurrences of an <xref ref="empty-sequence"/>, <xref ref="item"/> or non-abstract sub-type of <xref ref="xs-anyatomictype"/>.</description>
+				<category>
+					<type name="Abstract (XPath)"/>
+				</category>
+				<comparison-family/>
+				<notes/>
+				<sources>
+					<source ref="xpath-31-cast"/>
+				</sources>
+				<sub-types>
+					<datatype id="empty-sequence">
+						<name>empty-sequence()</name>
+						<description/>
+						<category>
+							<type name="Special (XPath)"/>
+						</category>
+						<comparison-family/>
+						<sources>
+							<source ref="xpath-40-sequence-types">Describes <code>empty-sequence()</code> as a special type.</source>
+						</sources>
+					</datatype>
+					<datatype id="item">
+						<name>item()</name>
+						<description>An item is either an atomic item, a GNode, or a function item.</description>
+						<category>
+							<type name="Item"/>
+						</category>
+						<comparison-family/>
+						<notes/>
+						<sources>
+							<source ref="xpath-40-item">Definition</source>
+							<source ref="xpath-40-matching-item">Matches all items, so not abstract?</source>
+						</sources>
+						<sub-types>
+							<datatype id="function">
+								<name>function()</name>
+								<description>A function.</description>
+								<category>
+									<type name="Item"/>
+								</category>
+								<comparison-family>Function</comparison-family>
+								<notes>
+									<?source https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items ?>
+									<p>For more information, see <a class="bodylink" href="/expressions/primary/function-items">Function items</a>.</p>
+									<p class="qt4">From XPath 4.0, function items have an identity property, which can be used to test whether two variables refer to the same function item or not.</p>
+								</notes>
+								<sources>
+									<source ref="xpath-40-matching-item"/>
+								</sources>
+								<sub-types>
+									<datatype id="array">
+										<name>array()</name>
+										<description>An array.</description>
+										<category>
+											<type name="Item"/>
+										</category>
+										<comparison-family>Function</comparison-family>
+										<notes>
+											<p>For more information, see <a class="bodylink" href="/expressions/primary/arrays">Arrays</a>.</p>
+										</notes>
+										<sources>
+											<source ref="xpath-40-matching-item"/>
+										</sources>
+									</datatype>
+									<datatype id="map">
+										<name>map()</name>
+										<description>A map.</description>
+										<category>
+											<type name="Item"/>
+										</category>
+										<comparison-family>Function</comparison-family>
+										<notes>
+											<p>For more information, see <a class="bodylink" href="/expressions/primary/maps">Maps</a>.</p>
+											<p>A <xref ref="record"/> may be used to constrain the type of items that may be added to a map.</p>
+										</notes>
+										<sources>
+											<source ref="xpath-40-matching-item"/>
+										</sources>
+										<sub-types>
+											<datatype id="record">
+												<name>record()</name>
+												<description>May be used to constrain the type of items that may be added to a map.</description>
+												<category>
+													<type name="Item"/>
+												</category>
+												<comparison-family>Function</comparison-family>
+												<sources>
+													<source ref="xpath-40-matching-item"/>
+												</sources>
+											</datatype>
+										</sub-types>
+									</datatype>
+								</sub-types>
+							</datatype>
+							<datatype id="gnode" first-introduced="XDM 4.0">
+								<name>gnode()</name>
+								<description>A generalized node. It is always either an <xref ref="xnode"/> or a <xref ref="jnode"/>.</description>
+								<category>
+									<type name="Item"/>
+									<type name="Abstract (XPath)"/>
+								</category>
+								<comparison-family/>
+								<notes/>
+								<sources>
+									<source ref="xpath-40-gnode">Definition</source>
+									<source ref="xpath-31-cast"/>
+									<source ref="xpath-40-matching-item"/>
+								</sources>
+								<sub-types>
+									<datatype id="jnode" first-introduced="XDM 4.0">
+										<name>jnode()</name>
+										<description>An encapsulation of a value as it appears within a tree of maps and arrays, typically (but not necessarily) obtained by parsing JSON texts.</description>
+										<category>
+											<type name="Item"/>
+										</category>
+										<comparison-family>JNode</comparison-family>
+										<notes/>
+										<sources>
+											<source ref="xpath-40-jnode">Definition</source>
+											<source ref="xpath-40-matching-item"/>
+										</sources>
+									</datatype>
+									<datatype id="xnode" ref="node" first-introduced="XDM 4.0">
+										<name>xnode()</name>
+										<notes>
+											<p>This alternative name is only used in documentation. It's not expected to be used in code.</p>
+										</notes>
+									</datatype>
+									<datatype id="node">
+										<name>node()</name>
+										<description>An XML node.</description>
+										<category>
+											<type name="Item"/>
+										</category>
+										<comparison-family>XNode</comparison-family>
+										<notes>
+											<p class="qt4">While the concept of a node existed before 4.0, the term <xref ref="xnode"/> was introduced in 4.0 to differentiate between XML nodes and JSON nodes (see <xref ref="jnode"/>).</p>
+										</notes>
+										<sources>
+											<source ref="xpath-40-xnode">Definition</source>
+											<source ref="xpath-40-matching-item"/>
+										</sources>
+										<sub-types>
+											<datatype id="attribute">
+												<name>attribute()</name>
+												<description>An XML attribute.</description>
+												<category>
+													<type name="Item"/>
+												</category>
+												<comparison-family>Attribute</comparison-family>
+												<notes/>
+												<sources>
+													<source ref="xpath-40-matching-item"/>
+												</sources>
+											</datatype>
+											<datatype id="comment">
+												<name>comment()</name>
+												<description>An XML comment.</description>
+												<category>
+													<type name="Item"/>
+												</category>
+												<comparison-family>Comment</comparison-family>
+												<notes/>
+												<sources>
+													<source ref="xpath-40-matching-item"/>
+												</sources>
+											</datatype>
+											<datatype id="document-node">
+												<name>document-node()</name>
+												<description>A wrapper node that represents an XML document.</description>
+												<category>
+													<type name="Item"/>
+												</category>
+												<comparison-family>Document</comparison-family>
+												<notes/>
+												<sources>
+													<source ref="xpath-40-matching-item"/>
+												</sources>
+											</datatype>
+											<datatype id="element">
+												<name>element()</name>
+												<description>An XML element.</description>
+												<category>
+													<type name="Item"/>
+												</category>
+												<comparison-family>Element</comparison-family>
+												<notes/>
+												<sources>
+													<source ref="xpath-40-matching-item"/>
+												</sources>
+											</datatype>
+											<datatype id="namespace-node">
+												<name>namespace-node()</name>
+												<description>An XML namespace node.</description>
+												<category>
+													<type name="Item"/>
+												</category>
+												<comparison-family>Namespace</comparison-family>
+												<notes/>
+												<sources>
+													<source ref="xpath-40-matching-item"/>
+												</sources>
+											</datatype>
+											<datatype id="processing-instruction">
+												<name>processing-instruction()</name>
+												<description>A processing instruction (PI).</description>
+												<category>
+													<type name="Item"/>
+												</category>
+												<comparison-family>Processing-instruction</comparison-family>
+												<notes/>
+												<sources>
+													<source ref="xpath-40-matching-item"/>
+												</sources>
+											</datatype>
+											<datatype id="text">
+												<name>text()</name>
+												<description>Text in XML.</description>
+												<category>
+													<type name="Item"/>
+												</category>
+												<comparison-family>Text</comparison-family>
+												<notes/>
+												<sources>
+													<source ref="xpath-40-matching-item"/>
+												</sources>
+											</datatype>
+										</sub-types>
+									</datatype>
+								</sub-types>
+							</datatype>
+							<datatype id="enum">
+								<name>enum()</name>
+								<description>A constraint on <xref ref="xs-string"/>, restricting the set of valid values.</description>
+								<category>
+									<type name="Item"/>
+									<type name="Generalized Atomic (XPath)"/>
+								</category>
+								<comparison-family>N/A</comparison-family>
+								<notes/>
+								<sources>
+									<source ref="xpath-40-enumeration-types"/>
+									<source ref="xpath-40-generalized-atomic-type"/>
+									<source ref="xpath-40-matching-item"/>
+								</sources>
+							</datatype>
+						</sub-types>
+					</datatype>
+				</sub-types>
+			</datatype>
+		</sub-types>
+	</datatype>
+</datatypes>
