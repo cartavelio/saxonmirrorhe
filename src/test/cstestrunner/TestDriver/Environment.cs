@@ -432,7 +432,9 @@ namespace TestDriver {
 
             if (sources.Count > 0) {
                 environment.schema = compiler.Compile(sources.ToArray());
-                environment.xsltCompiler.Schema = environment.schema;
+                if (environment.xsltCompiler != null) {
+                    environment.xsltCompiler.Schema = environment.schema;
+                }
                 environment.xpathCompiler.Schema = environment.schema;
                 environment.xqueryCompiler.Schema = environment.schema;
                 return validateSources;
