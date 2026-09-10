@@ -30,6 +30,8 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.sf.saxon.trans.SaxonErrorCode.SXWN9024;
+
 /**
  * Streaming adjunct for the xsl:merge instruction. This is rather different from the usual run of streaming
  * adjuncts since it is more concerned with initiating streaming than with the actual processing
@@ -74,7 +76,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
                 for (String s : reasons) {
                     buffer.append(s + ". ");
                 }
-                config.makeErrorReporter().report(new XmlProcessingIncident(buffer.toString()).asWarning());
+                config.makeErrorReporter().report(new XmlProcessingIncident(buffer.toString(), SXWN9024).asWarning());
                 mergeSource.streamable = false;
             } else {
                 StringBuilder buffer = new StringBuilder(120);
