@@ -63,11 +63,15 @@ public class DOM4JDocumentWrapper extends GenericTreeInfo {
     @Override
     public NodeInfo selectID(String id, boolean getParent) {
         HashMap<String, Element> idIndex = (HashMap<String, Element>)getUserData("saxon-id-index");
-        if (idIndex != null) {
+        if (idIndex == null) {
+            // System-constructed document
+            Element e = ((DOM4JNodeWrapper)getRootNode()).getUnderlyingNode().getDocument().elementByID(id);
+            return e == null ? null : wrap(e);
+        } else {
+            // Document constructed using Dom4JWriter
             Element e = idIndex.get(id);
             return e==null ? null : wrap(e);
         }
-        return null;
     }
 
     /**
