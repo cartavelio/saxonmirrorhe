@@ -144,7 +144,9 @@ public class StandardUnparsedTextResolver
                     }
                 }
             }
-            return ResourceLoader.getReaderFromStream(inputStream, encoding);
+            if (encoding != null) {
+                return ResourceLoader.getReaderFromStream(inputStream, encoding);
+            }
         }
 
         try {
