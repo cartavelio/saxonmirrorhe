@@ -166,6 +166,13 @@ public class TestXdmArray {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void testArrayToString() {
+        XdmArray a = new XdmArray(new XdmValue[]{new XdmAtomicValue(1), new XdmAtomicValue(2), new XdmAtomicValue("x")});
+        String s = a.toString();
+        assertEquals("[1,2,\"x\"]", s);
+    }
 }
 
 

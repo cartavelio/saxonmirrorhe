@@ -152,6 +152,16 @@ public class TestXdmMap {
                                               SequenceType.makeSequenceType(ItemType.STRING, OccurrenceIndicator.ONE));
         assertTrue(mapType.matches(map));
     }
+
+    @Test
+    public void testMapToString() {
+        XdmMap map = new XdmMap();
+        map = map.put(new XdmAtomicValue("a"), new XdmAtomicValue(1));
+        map = map.put(new XdmAtomicValue("b"), new XdmAtomicValue(2));
+        map = map.put(new XdmAtomicValue("c"), new XdmAtomicValue(3));
+        String result = map.toString();
+        assertEquals("map{\"a\":1,\"b\":2,\"c\":3}", result); // Could change
+    }
 }
 
 
