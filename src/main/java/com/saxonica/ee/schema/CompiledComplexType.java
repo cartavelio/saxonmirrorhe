@@ -115,7 +115,7 @@ public class CompiledComplexType {
                 return AnyType.getInstance();
             }
             for (UserComplexType ext : ((PreparedSchema)schema).getExtensionsOfType(type)) {
-                // No need to consider further extensions, as iterateExtensionTypes() returns the transitive set
+                // No need to consider further extensions, as getExtensionsOfType() returns the transitive set
                 SchemaType st = ext.getElementParticleType(elementName, schema, false);
                 if (st != null) {
                     if (child == null) {

@@ -1058,6 +1058,21 @@ public class PreparedSchema implements Schema, NotationSet {
             }
         }
 
+        for (Map.Entry<UserDefinedType, Set<UserComplexType>> entry : typeExtensions.entrySet()) {
+            for (UserComplexType uct : entry.getValue()) {
+                destination.registerExtensionOfUserDefinedType(entry.getKey(), uct);
+            }
+        }
+//            IntIterator ii = typeExtensions.keyIterator();
+//            while (ii.hasNext()) {
+//                int fp = ii.next();
+//                Set<UserComplexType> types = getExtensionsOfBuiltInType(fp);
+//                for (UserComplexType type : types) {
+//                    destination.registerExtensionOfBuiltInType(fp, type);
+//                }
+//            }
+
+
         for (GlobalParam param : params.values()) {
             try {
                 destination.addGlobalParam(param);

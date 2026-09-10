@@ -133,6 +133,14 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
 
 
     public void processSchemaImports(QueryModule module, List<XQueryParser.Import> schemaImports) throws XPathException {
+        Configuration config = module.getConfiguration();
+        try {
+            config.checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY,
+                                        "import schema",
+                                        module.getPackageData().getLocalLicenseId());
+        } catch (LicenseException err) {
+            throw new XPathException(err).withErrorCode("XTSE1650");   //TODO error code
+        }
         if (schemaCompiler == null) {
             schemaCompiler = new SchemaCompiler((EnterpriseConfiguration)module.getConfiguration());
         }
@@ -152,13 +160,6 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     private void gatherSources(QueryModule env, XQueryParser.Import schemaImport, List<Source> sources) throws XPathException {
         try {
             Configuration config = env.getConfiguration();
-            try {
-                config.checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT,
-                                            "xsl:import-schema",
-                                            env.getPackageData().getLocalLicenseId());
-            } catch (LicenseException err) {
-                throw new XPathException(err).withErrorCode("XTSE1650");
-            }
 
             String namespace = Whitespace.trim(schemaImport.namespaceURI.toString());
             if (namespace == null) {
@@ -192,7 +193,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
                     continue;
                 }
 
-                Source source = SchemaReader.getSource(hint, hint, schemaCompiler, targetNamespace);
+                Source source = SchemaReader.getSource(env.getStaticBaseURI(), hint, schemaCompiler, targetNamespace);
                 if (source != null) {
 
                     AugmentedSource as = AugmentedSource.makeAugmentedSource(source);

@@ -222,9 +222,18 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
                 if (!ignore) {
 
+                    PreparedSchema existingSchema = getValidationContext().getSchema();
+
+                    // If the schema already contains this namespace, ignore it
+
+                    if (existingSchema.includesTargetNamespace(targetNS)) {
+                        targetNS = null;
+                        continue;
+                    }
+
                     // First see if we already have a loaded schema for this namespace. If so, assume it's the same one.
 
-                    int status = getValidationContext().getSchema().getNamespaceStatus(targetNS);
+                    int status = existingSchema.getNamespaceStatus(targetNS);
 
                     // There are three possibilities. Either this schema is previously
                     // unknown, and we carry on to load it. Or it was a normal PreparedSchema, in which case we can
@@ -237,7 +246,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                         targetNS = null;
                         continue;
                     }
-                    if (!getValidationContext().getSchema().includesSchemaLocation(absoluteLocation.toString())) {
+                    if (!existingSchema.includesSchemaLocation(absoluteLocation.toString())) {
                         // We've already checked the namespace, but it's possible that the schema location
                         // has been loaded without registering the same namespace (IBM test EDCWildcard/s3_8_6v01)
                         locationHints.add(new StreamSource(absoluteLocation.toString()));
