@@ -10,6 +10,7 @@
 
 
 #include "XdmFunctionItem.h"
+#include "XdmArray.h"
 #include <string>
 
 #include <stdlib.h>
@@ -53,13 +54,17 @@ public:
 
     std::set<XdmAtomicValue*> keySet();
 
+    XdmAtomicValue ** keys();
+
     //std::map<XdmAtomicValue*, XdmValue*> asMap();
 
     bool isEmpty();
 
     bool containsKey(XdmAtomicValue* key);
 
-    std::list<XdmValue*> values();
+    std::list<XdmValue*> valuesAsList();
+
+    XdmValue** values();
 
     /**
      * Determine whether the item is a function or some other type of item
@@ -74,7 +79,7 @@ public:
 	* Get the type of the object
 	*/
 	XDM_TYPE getType() {
-		return XDM_FUNCTION_ITEM;
+		return XDM_MAP;
 	}
 
 
@@ -83,7 +88,7 @@ private:
 
     std::string fname;
     std::map<XdmAtomicValue *, XdmValue*> data;
-    int arity;
+    int arity, map_size;
 
 };
 

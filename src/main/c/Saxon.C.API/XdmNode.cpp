@@ -433,6 +433,7 @@ return this;}
 			//tempNode->incrementRefCount();
 			childreni[p] = tempNode;
 		}
+		SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
 	//}
     if (cached) {
         children = childreni;

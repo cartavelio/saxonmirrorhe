@@ -32,7 +32,7 @@ class XdmNode;
 
 
 
-typedef enum eXdmType { XDM_VALUE = 1, XDM_ITEM = 2, XDM_NODE = 3, XDM_ATOMIC_VALUE = 4, XDM_FUNCTION_ITEM = 5 } XDM_TYPE;
+typedef enum eXdmType { XDM_VALUE = 1, XDM_ITEM = 2, XDM_NODE = 3, XDM_ATOMIC_VALUE = 4, XDM_FUNCTION_ITEM = 5, XDM_MAP=6, XDM_ARRAY=7 } XDM_TYPE;
 
 typedef enum saxonTypeEnum
 {

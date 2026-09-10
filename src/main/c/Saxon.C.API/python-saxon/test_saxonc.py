@@ -899,3 +899,159 @@ def test_apply():
         assert output2 is not None
         assert output2.startswith('<?xml version="1.0" encoding="UTF-8"?>\n<output>text1<out>6</out')
 
+
+
+def testMapOperations(saxonproc):
+
+        mymap = {saxonproc.make_string_value("a"):saxonproc.make_integer_value(1), saxonproc.make_string_value("b"):saxonproc.make_integer_value(2),
+                 saxonproc.make_string_value("c"):saxonproc.make_integer_value(3)}
+        map =saxonproc.make_map(mymap)
+        assert map is not None
+        print(map.values())
+        assert map.map_size == 3
+
+
+def testMapOperations2(saxonproc):
+
+        mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2),
+                 "c":saxonproc.make_integer_value(3)}
+
+        xdmdict = create_xdm_dict(saxonproc, mymap)
+        map =saxonproc.make_map(xdmdict)
+        assert map is not None
+        print(map.values())
+        assert map.map_size == 3
+
+
+def testMapOperations3(saxonproc):
+
+        thisdict = {"a":1, "b":2,"c":5}
+        xdmdict = create_xdm_dict(saxonproc, thisdict)
+        xdm_map =saxonproc.make_map(xdmdict)
+        assert xdm_map is not None
+        print(xdm_map.values())
+        assert xdm_map.map_size == 3
+
+
+
+def testMapValues(saxonproc):
+
+    mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2), "c":saxonproc.make_integer_value(5)}
+    xdmdict = create_xdm_dict(saxonproc, mymap)
+    map =saxonproc.make_map(xdmdict)
+    assert map is not None
+    assert map.map_size == 3
+    mapList = map.values()
+    assert len(mapList) == 3
+    print(mapList)
+    item = mapList[2].head
+    assert isinstance(item, PyXdmAtomicValue)
+    assert item.integer_value == 5
+
+
+
+def testMapPutOperations(saxonproc):
+
+    mymap = {saxonproc.make_string_value("a"):saxonproc.make_integer_value(1)}
+    map =saxonproc.make_map(mymap)
+    assert map is not None
+    map1= map.put(saxonproc.make_string_value("b"), saxonproc.make_integer_value(2))
+    assert map1 is not None
+    map2 = map1.put(saxonproc.make_string_value("c"), saxonproc.make_integer_value(3))
+    assert map2 is not None
+    assert map2.map_size == 3
+
+def testConversionFromPythonMap(saxonproc):
+    mymap = {saxonproc.make_string_value("a"):saxonproc.make_integer_value(1), saxonproc.make_string_value("b"):saxonproc.make_integer_value(2), saxonproc.make_string_value("c"):saxonproc.make_integer_value(3)}
+    map =saxonproc.make_map(mymap)
+    assert map is not None
+    assert map.map_size == 3
+    bKey = saxonproc.make_string_value("b")
+    dVar = map.get(bKey)
+    assert dVar is not None
+    print(dVar)
+    assert dVar.head == 2
+
+    cKey = saxonproc.make_string_value("c")
+    dKey = saxonproc.make_string_value("d")
+    map = map.remove(cKey)
+    map = map.remove(dKey)
+    map = map.put( saxonproc.make_string_value("a"), saxonproc.make_integer_value(4))
+    assert map.map_size == 2
+    aVar =   map.get("a")
+    assert aVar is not None
+    aVar.head.integer_value == 4
+
+
+def testMapAsFunction():
+    with PySaxonProcessor(license=True) as saxonproc:
+        mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2), "c":saxonproc.make_integer_value(3)}
+        xdmdict = create_xdm_dict(saxonproc, mymap)
+        map =saxonproc.make_map(xdmdict)
+        assert map is not None
+        cVar = [saxonproc.make_integer_value(1)]
+        result = map.call(cVar)
+        assert isinstance(result, PyXdmAtomicValue)
+        assert result.integer_value == 3
+
+
+def testMapAsQueryParameter():
+
+    with PySaxonProcessor(license=True) as saxonproc:
+        mymap = {saxonproc.make_string_value("a"):saxonproc.make_integer_value(1), saxonproc.make_string_value("b"):saxonproc.make_integer_value(2), saxonproc.make_string_value("c"):saxonproc.make_integer_value(3)}
+        map =saxonproc.make_map(mymap)
+        assert map is not None
+        cVar = [saxonproc.make_integer_value(1)]
+        result = map.call(cVar)
+        assert isinstance(result, PyXdmAtomicValue)
+        assert result.integer_value == 3
+        query = """\
+        declare namespace m='http://www.w3.org/2005/xpath-functions/map';" +
+                                    "declare variable $a as map(*) external; " +
+                                    "m:size($a)
+        """
+        query_proc = proc.new_xquery_processor()
+        query_proc.set_query_content(query)
+        query_proc.set_parameter("a", map)
+        result = query_proc.run_query_to_value()
+        assert result is not None
+        assert result.integer_value == 3
+
+
+def testMapAsQueryResult():
+    with PySaxonProcessor(license=True) as proc:
+        query = "map{1:2, 2:3, 3:4}"
+        query_proc = proc.new_xquery_processor()
+        query_proc.set_query_content(query)
+        result = query_proc.run_query_to_value()
+
+        assert isinstance(result, PyXdmMap)
+
+        assert result.map_size == 3
+
+def testMap2():
+
+    with PySaxonProcessor(license=True) as proc:
+        query = "map{1:2, 2:3, 3:4}"
+        query_proc = proc.new_xquery_processor()
+        query_proc.set_query_content(query)
+        result = query_proc.run_query_to_value()
+        assert result is not None
+        print(result)
+        assert isinstance(result, PyXdmValue)
+        mmVar = result.head
+        assert mmVar is not None
+        assert isinstance(mmVar, PyXdmMap)
+
+        assert mmVar.map_size == 3
+
+        avar = mmVar.get(3)
+
+        assert avar.integer_value == 4
+
+
+
+
+
+
+

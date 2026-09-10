@@ -78,6 +78,26 @@
 	return false;
     }
 
+
+    int XdmAtomicValue::getHashCode(){
+		jclass xdmAtomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
+		jmethodID bhcID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicValueClass,
+					"hashCode", "()I");
+		if (!bhcID) {
+			std::cerr << "Error: SaxonC." << "getHashCode"
+				<< " not found\n" << std::endl;
+			return 0;
+		} else {
+			jint result = (jint)(SaxonProcessor::sxn_environ->env->CallIntMethod(value, bhcID));
+			if(result) {
+				return (int)result;
+			}
+		}
+
+	return 0;
+
+    }
+
     double XdmAtomicValue::getDoubleValue(){
 		jclass xdmNodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
 		jmethodID bmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(xdmNodeClass,

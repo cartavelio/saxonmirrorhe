@@ -37,10 +37,33 @@ public:
 
     const char* getName();
 
+    /**
+     * Get the arity of the function
+     *
+     * @return the arity of the function, that is, the number of arguments in the function's signature
+     */
     virtual int getArity();
 
     static XdmFunctionItem * getSystemFunction(SaxonProcessor * processor, const char * name, int arity);
 
+
+
+    /**
+    * Utility method for working with Saxon/C on Python
+    */
+    XdmValue ** createXdmValueArray(int len){
+	   return (new XdmValue*[len]);
+    }
+
+
+    /**
+     * Call the function
+     *
+     * @param arguments the values to be supplied as arguments to the function. The "function
+     *                  conversion rules" will be applied to convert the arguments to the required
+     *                  type when necessary.
+     * @return the result of calling the function
+     */
     XdmValue * call(XdmValue ** arguments, int argument_length);
     
     bool isAtomic(){
