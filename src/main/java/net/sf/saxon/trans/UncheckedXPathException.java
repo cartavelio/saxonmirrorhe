@@ -36,8 +36,7 @@ public class UncheckedXPathException extends RuntimeException {
      * Create an unchecked XPath exception with supplied error message
      * @param message the error message
      */
-
-    @CSharpModifiers(code = {"public", "override"})
+    
     public UncheckedXPathException(String message) {
         super(new XPathException(message));
     }
