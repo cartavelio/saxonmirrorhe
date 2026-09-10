@@ -3374,9 +3374,11 @@ public class XPathParser {
     private NodeTest parseKindTest() throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         String typeName = t.currentTokenValue;
-        oolean schemaDeclaration = typeName.startsWith("schema-");
+
+        boolean schemaDeclaration = typeName.startsWith("schema-");
         int primaryType = getSystemType(typeName);
         //int fp = -1;
+
         boolean empty = false;
         nextToken();
         if (t.currentToken == Token.RPAR) {
@@ -3444,16 +3446,18 @@ public class XPathParser {
                 if (empty) {
                     return NodeKindTest.PROCESSING_INSTRUCTION;
                 } else if (t.currentToken == Token.STRING_LITERAL) {
-                    localName = Whitespace.trim(unescape(t.currentTokenValue));
-                    if (!NameChecker.isValidNCName(StringTool.codePoints(localName))) {
+                    String piName = Whitespace.trim(unescape(t.currentTokenValue));
+                    if (!NameChecker.isValidNCName(StringTool.codePoints(piName))) {
                         // Became an error as a result of XPath erratum XP.E7
                         grumble("Processing instruction name must be a valid NCName", "XPTY0004");
+                    } else {
+                        fp = pool.allocateFingerprint(NamespaceUri.NULL, piName);
                     }
                 } else if (t.currentToken == Token.NAME) {
                     try {
                         String[] parts = NameChecker.getQNameParts(t.currentTokenValue);
                         if (parts[0].isEmpty()) {
-                            localName = parts[1];
+                            fp = pool.allocateFingerprint(NamespaceUri.NULL, parts[1]);
                         } else {
                             grumble("Processing instruction name must not contain a colon");
                         }
@@ -3466,7 +3470,7 @@ public class XPathParser {
                 nextToken();
                 expect(Token.RPAR);
                 nextToken();
-                return new NameTest(Type.PROCESSING_INSTRUCTION, new NoNamespaceName(localName), pool);
+                return new NameTest(Type.PROCESSING_INSTRUCTION, fp, pool);
 
             case "schema-attribute":
 
@@ -3483,12 +3487,12 @@ public class XPathParser {
                     if (!env.isImportedSchema(pool.getURI(fp))) {
                         grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
                     }
-                    SchemaDeclaration decl = env.getConfiguration().getAttributeDeclaration(fp);
+                    SchemaDeclaration decl = env.getPackageData().getImportedSchema().getAttributeDecl(fp);
                     if (decl == null) {
                         grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
                         return null;
                     } else {
-                        return decl.makeSchemaNodeTest();
+                        return env.getPackageData().getImportedSchema().makeSchemaAttributeTest(fp);
                     }
                 }
             case "schema-element":
@@ -3506,12 +3510,12 @@ public class XPathParser {
                     if (!env.isImportedSchema(pool.getURI(fp))) {
                         grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
                     }
-                    SchemaDeclaration decl = env.getConfiguration().getElementDeclaration(fp);
+                    SchemaDeclaration decl = env.getPackageData().getImportedSchema().getElementDecl(fp);
                     if (decl == null) {
                         grumble("There is no declaration for element " + name + " in an imported schema", "XPST0008");
                         return null;
                     } else {
-                        return decl.makeSchemaNodeTest();
+                        return env.getPackageData().getImportedSchema().makeSchemaElementTest(fp);
                     }
 
                     nodeName = t.currentTokenValue;
@@ -3558,14 +3562,10 @@ public class XPathParser {
                         StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
                         NamespaceUri uri = contentType.getNamespaceUri();
 
-                        if (uri.equals(NamespaceUri.SCHEMA)) {
-                            schemaType = env.getPackageData().getImportedSchema().getSchemaType(contentType);
-                        } else {
-                            if (!env.isImportedSchema(uri)) {
-                                grumble("No schema has been imported for namespace '" + uri + '\'', "XPST0008");
-                            }
-                            schemaType = env.getPackageData().getImportedSchema().getSchemaType(contentType);
+                        if (!(uri.equals(NamespaceUri.SCHEMA) || env.isImportedSchema(uri))) {
+                            grumble("No schema has been imported for namespace '" + uri + '\'', "XPST0008");
                         }
+                        SchemaType schemaType = env.getPackageData().getImportedSchema().getSchemaType(contentType);
                         if (schemaType == null) {
                             grumble("Unknown type name " + contentType.getEQName(), "XPST0008");
                             return null;
