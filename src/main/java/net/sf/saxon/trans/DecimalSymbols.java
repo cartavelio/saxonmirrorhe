@@ -365,24 +365,62 @@ public class DecimalSymbols {
     }
 
     /**
-     * Export a property value to a SEF file
-     * @param name the property to be exported
+     * Export a decimal format to a SEF file
+     * @param name the name of the decimal format to be exported, or null for the unnamed decimal format
      * @param out the destination of the export
      */
     public void export(StructuredQName name, ExpressionPresenter out) {
-        DecimalSymbols defaultSymbols = new DecimalSymbols(HostLanguage.XSLT, 31);
         out.startElement("decimalFormat");
         if (name != null) {
             out.emitAttribute("name", name);
         }
-        // TODO: recombine marker/rendition property pairs for SEF compatibility
-        for (Map.Entry<Property, UnicodeString> pair : properties.entrySet()) {
-            UnicodeString propValue = pair.getValue();
-            if (!propValue.equals(defaultSymbols.getProperty(pair.getKey()))) {
-                out.emitAttribute(getPropertyName(pair.getKey()), propValue + "");
-            }
+        HashMap<String, UnicodeString> result = new HashMap<>(10);
+        if (!(hasDefaultValue(Property.DECIMAL_SEPARATOR_MARKER) && hasDefaultValue(Property.DECIMAL_SEPARATOR_RENDITION))) {
+            exportDual("decimal-separator", Property.DECIMAL_SEPARATOR_MARKER, Property.DECIMAL_SEPARATOR_RENDITION, out);
         }
+        if (!(hasDefaultValue(Property.GROUPING_SEPARATOR_MARKER) && hasDefaultValue(Property.GROUPING_SEPARATOR_RENDITION))) {
+            exportDual("grouping-separator", Property.GROUPING_SEPARATOR_MARKER, Property.GROUPING_SEPARATOR_RENDITION, out);
+        }
+        if (!hasDefaultValue(Property.DIGIT)) {
+            out.emitAttribute("digit", getProperty(Property.DIGIT).toString());
+        }
+        if (!(hasDefaultValue(Property.EXPONENT_SEPARATOR_MARKER) && hasDefaultValue(Property.EXPONENT_SEPARATOR_RENDITION))) {
+            exportDual("exponent-separator", Property.EXPONENT_SEPARATOR_MARKER, Property.EXPONENT_SEPARATOR_RENDITION, out);
+        }
+        if (!hasDefaultValue(Property.INFINITY)) {
+            out.emitAttribute("infinity", getProperty(Property.INFINITY).toString());
+        }
+        if (!hasDefaultValue(Property.MINUS_SIGN)) {
+            out.emitAttribute("minus-sign", getProperty(Property.MINUS_SIGN).toString());
+        }
+        if (!hasDefaultValue(Property.NAN)) {
+            out.emitAttribute("NaN", getProperty(Property.NAN).toString());
+        }
+        if (!hasDefaultValue(Property.PATTERN_SEPARATOR)) {
+            out.emitAttribute("pattern-separator", getProperty(Property.PATTERN_SEPARATOR).toString());
+        }
+        if (!(hasDefaultValue(Property.PERCENT_MARKER) && hasDefaultValue(Property.PERCENT_RENDITION))) {
+            exportDual("percent", Property.PERCENT_MARKER, Property.PERCENT_RENDITION, out);
+        }
+        if (!(hasDefaultValue(Property.PER_MILLE_MARKER) && hasDefaultValue(Property.PER_MILLE_RENDITION))) {
+            exportDual("per-mille", Property.PER_MILLE_MARKER, Property.PER_MILLE_RENDITION, out);
+        }
+        if (!hasDefaultValue(Property.ZERO_DIGIT)) {
+            out.emitAttribute("zero-digit", getProperty(Property.ZERO_DIGIT).toString());
+        }
+
         out.endElement();
+    }
+
+    private void exportDual(String propertyName, Property marker, Property rendition, ExpressionPresenter out) {
+        if (getProperty(marker).equals(getProperty(rendition))) {
+            out.emitAttribute(propertyName, getProperty(marker).toString());
+        } else {
+            out.emitAttribute(propertyName, getProperty(marker)
+                    .concat(new UnicodeChar(':'))
+                    .concat(getProperty(rendition))
+                    .toString());
+        }
     }
 
     private String getPropertyName(Property prop) {
@@ -424,7 +462,6 @@ public class DecimalSymbols {
         }
     }
 
-    
 
     /**
      * Check that no character is used in more than one role
