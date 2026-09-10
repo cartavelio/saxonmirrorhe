@@ -70,12 +70,12 @@
    </exception>
    
    
-   <exception test-set="prod-ItemTypeDecl" test-case="itemTypeDecl-016 
+   <!--<exception test-set="prod-ItemTypeDecl" test-case="itemTypeDecl-016 
                                                       itemTypeDecl-017 
                                                       itemTypeDecl-018" run="false" report="notRun">
       <created by="Michael Kay" on="2026-01-01"/>
       <reason>XQuery item types: forwards references and self-references not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="prod-ModuleImport" test-case="modules-43" run="false" report="notRun">
       <created by="Michael Kay" on="2026-01-12"/>
