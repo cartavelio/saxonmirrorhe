@@ -1024,12 +1024,18 @@ task saxonc_doc_setup(dependsOn: ["saxonc_docbuild_container"]) {
   }
 }
 
-task saxonc_doxygen(dependsOn: ['saxon_eec_pypi']) {
+task saxonc_doc_pypi(type: Copy, dependsOn: ['saxon_eec_pypi']) {
+  into "${buildDir}/doc_pypi"
+  from "${buildDir}/eec_pypi"
+}
+
+task saxonc_doxygen(dependsOn: ['saxonc_doc_pypi']) {
   doLast {
     copy {
-      into "${buildDir}/eec_pypi/Saxon.C.API"
+      into "${buildDir}/doc_pypi/Saxon.C.API"
       from "${projectDir}/src/main/c/Saxon.C.API"
       include "Doxyfile"
+      include "readme.md"
       filter { line ->
         line.replaceAll('@@VERSION@@', saxonVersion)
           .replace('@@LOGO@@', '/img/saxonica_logo.gif')
@@ -1041,33 +1047,26 @@ task saxonc_doxygen(dependsOn: ['saxon_eec_pypi']) {
 
   doLast {
     exec {
-      workingDir "${buildDir}/eec_pypi"
+      workingDir "${buildDir}/doc_pypi"
       commandLine 'doxygen', 'Saxon.C.API/Doxyfile'
     }
   }
 }
 
-// gradle saxon_eec_pypi
-// cd build/eec_pypi
-// python setup.py build_ext -if
-// pydoc3 -w saxonc
-
-// Remove saxonc_doc_setup ?
-
-task saxonc_pydoc3(dependsOn: ['saxon_eec_pypi']) {
-  inputs.files fileTree(dir: "${buildDir}/eec_pypi", exclude: "*.html")
-  outputs.file "${buildDir}/eec_pypi/saxonc.html"
+task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi']) {
+  inputs.files fileTree(dir: "${buildDir}/doc_pypi", exclude: "*.html")
+  outputs.file "${buildDir}/doc_pypi/saxonc.html"
 
   doLast {
     exec {
-      workingDir "${buildDir}/eec_pypi"
+      workingDir "${buildDir}/doc_pypi"
       commandLine 'python3', 'setup.py', 'build_ext', '-if'
     }
   }
 
   doLast {
     exec {
-      workingDir "${buildDir}/eec_pypi"
+      workingDir "${buildDir}/doc_pypi"
       commandLine 'pydoc3', '-w', 'saxonc'
     }
   }
