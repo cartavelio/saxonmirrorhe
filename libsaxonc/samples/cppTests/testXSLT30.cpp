@@ -3742,6 +3742,13 @@ int main(int argc, char *argv[]) {
      << endl
      << endl;
 
+  testSharedExecutable(&dataDir, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
   testCallSystemFunction(processor, sresult);
   cout << endl
      << "============================================================="

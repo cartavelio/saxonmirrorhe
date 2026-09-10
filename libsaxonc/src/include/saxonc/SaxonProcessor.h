@@ -168,6 +168,7 @@ public:
 
   SaxonProcessor();
 
+
   /**
    * Constructor based upon a Saxon configuration file.
    * Creates a Saxon processor.
@@ -785,6 +786,16 @@ public:
   static XdmValue *makeXdmValueFromRef(int64_t valueRef);
 
 protected:
+
+
+ /**
+ * Internal constructor for creating a SaxonProcessor with a Java Processor.
+ * Creates a Saxon processor.
+ * @param procRef - Java Processor object. Internal memory management of the procRef.
+ * @param license - Is the Processor licensed
+ * @throws SaxonApiException
+ */
+  SaxonProcessor(int64_t procRef, bool license=false);
 
   std::string cwdV; /*!< Current working directory */
   // std::string resources_dir; /*!< Saxon resources directory */

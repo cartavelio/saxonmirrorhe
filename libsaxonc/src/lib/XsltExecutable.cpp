@@ -18,19 +18,19 @@
 #define new new (__FILE__, __LINE__)
 #endif
 
-XsltExecutable::XsltExecutable(SaxonProcessor *proci, int64_t exRef,
+XsltExecutable::XsltExecutable(int64_t procRefi, int64_t exRef,
                                std::string curr, std::string resources) {
 
 #ifdef DEBUG
 
 #endif
-  proc = proci;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   rawResultsFlag = false;
   selectionRef = SXN_UNSET;
   saxonMessageListenerRef = SXN_UNSET;
   saxonResultDocRef = SXN_UNSET;
   executableRef = exRef;
-  procRef = proc->procRef;
+  procRef = j_copy_handles(thread, (void *)procRefi);
   cwdXE = curr;
   resources_dir = resources;
   exceptionFound = false;
@@ -59,6 +59,11 @@ XsltExecutable::~XsltExecutable() {
                       (void *)executableRef);
     executableRef = SXN_UNSET;
   }
+  if (procRef != SXN_UNSET) {
+    j_handles_destroy(thread,
+                      (void *)procRef);
+    procRef = SXN_UNSET;
+  }
 
 }
 
@@ -69,18 +74,12 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
 
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
-  /*sxn_environ =
-         new sxnc_environment;
-  sxn_environ->isolate = other.sxn_environ->isolate;
-  thread =  other.thread;
-  SaxonProcessor::attachCurrentThread(sxn_environ); */
-
   executableRef = j_copy_handles(thread, (void *)other.executableRef);
   if(executableRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
-  //executableRef = other.executableRef;
-  procRef = other.procRef;
+
+  procRef = j_copy_handles(thread, (void *)other.procRef);
   cwdXE = other.cwdXE;
   resources_dir = other.resources_dir;
   selectionRef = other.selectionRef;
@@ -110,6 +109,16 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
     properties[propIter->first] = propIter->second;
     propIter++;
   }
+}
+
+
+SaxonProcessor* XsltExecutable::getSaxonProcessor() {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  bool licensed = j_isLicensed(thread, (void *)procRef);
+  int64_t newProcRef = j_copy_handles(thread, (void *)procRef);
+  SaxonProcessor * processor = new SaxonProcessor(newProcRef, licensed);
+  processor->setcwd(cwdXE.c_str());
+  return processor;
 }
 
 void XsltExecutable::deleteXdmValueArray(XdmValue **arr, int len) {
@@ -161,27 +170,6 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
 
     setProperty("_i_file_matches", filename);
 
-
-
-    /*
-
-    else if (selectionRef != SXN_UNSET && selectionStringFlag) {
-    j_handles_destroy(thread,
-                      (void *)selectionRef);
-  }
-  selectionRef = SXN_UNSET;
-
-  if (filename != nullptr) {
-    selectionRef = j_createStringObject(thread,
-                                        (char *)filename);
-    selectionStringFlag = true;
-    if (selectionRef == SXN_EXCEPTION) {
-      exceptionFound = true;
-      throw SaxonApiException();
-    }
-  } else {
-    selectionRef = SXN_UNSET;
-  } */
 }
 
 void XsltExecutable::setOutputFile(const char *ofile) {
@@ -661,7 +649,6 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
-  return;
 }
 
 const char *XsltExecutable::callFunctionReturningString(

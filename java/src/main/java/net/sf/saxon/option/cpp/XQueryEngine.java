@@ -115,21 +115,7 @@ public class XQueryEngine extends SaxonCAPI {
                     } catch (IllegalArgumentException err) {
                         throw new SaxonApiException(err.getMessage());
                     }
-                }  else if (params[i].equals("resources")) {
-                    char separatorChar = '/';
-                    if (SaxonCAPI.RESOURCES_DIR == null && values[i] instanceof String) {
-                        String dir1 = (String) values[i];
-                        /*if (!dir1.endsWith("/")) {
-                            dir1 = dir1.concat("/");
-                        } */
-                        if (File.separatorChar != '/') {
-                            dir1.replace(separatorChar, File.separatorChar);
-                            separatorChar = '\\';
-                            dir1.replace('/', '\\');
-                        }
-                        SaxonCAPI.RESOURCES_DIR = dir1;
-                    }
-                }else if (params[i].equals("sa")) {
+                }  else if (params[i].equals("sa")) {
                     String value = ((String)values[i]).toLowerCase();
                     if(value.equals("true") || value.equals("on")) {
                         compiler.setSchemaAware(true);

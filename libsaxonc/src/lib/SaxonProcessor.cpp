@@ -298,6 +298,13 @@ SaxonApiException(result1.c_str());
   return nullptr;
 }
 
+SaxonProcessor::SaxonProcessor(int64_t proc, bool l) {
+  cwd = "";
+  licensei = l;
+  exception = nullptr;
+  procRef = proc;
+}
+
 SaxonProcessor::SaxonProcessor() { initialize(false); }
 
 SaxonProcessor::SaxonProcessor(bool l) { initialize(l); }
@@ -827,14 +834,25 @@ SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
 }
 
 SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
-
-  procRef = other.procRef;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  procRef = j_copy_handles(thread, (void *)other.procRef);
   cwd = other.cwd;
 
-  parameters = other.parameters;
   //configProperties = other.configProperties;
   licensei = other.licensei;
-  exception = other.exception;
+  std::map<std::string, XdmValue *>::const_iterator paramIter =
+      other.parameters.begin();
+  while (paramIter != other.parameters.end()) {
+
+    XdmValue *valuei = paramIter->second;
+    if (valuei == nullptr) {
+      /*throw SaxonApiException("Error in XsltExecutable copy constructor -
+         parameter value " "is NULL");*/
+    } else {
+      parameters[paramIter->first] = new XdmValue(*(valuei));
+    }
+    paramIter++;
+  }
 }
 
 DocumentBuilder *SaxonProcessor::newDocumentBuilder() {

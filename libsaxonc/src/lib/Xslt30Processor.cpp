@@ -24,13 +24,10 @@ Xslt30Processor::Xslt30Processor() {
   Xslt30Processor(p, "");
 }
 
-Xslt30Processor::Xslt30Processor(SaxonProcessor *p, std::string curr) {
+Xslt30Processor::Xslt30Processor(SaxonProcessor *proc, std::string curr) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  proc = p;
-  if (proc == nullptr) {
 
-    return;
-  }
+  procRef = j_copy_handles(thread, (void *)proc->procRef);
   jitCompilation = false;
   importPackageValue = SXN_UNSET;
   exception = nullptr;
@@ -72,11 +69,16 @@ Xslt30Processor::~Xslt30Processor() {
                       (void *)importPackageValue);
     importPackageValue = SXN_UNSET;
   }
+  if (procRef != SXN_UNSET) {
+    j_handles_destroy(thread,
+                      (void *)procRef);
+    procRef = SXN_UNSET;
+  }
 }
 
 Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  proc = other.proc;
+  procRef = j_copy_handles(thread, (void *)other.procRef);
   cppXT = j_copy_handles(thread, (void *)other.cppXT);
   if(cppXT == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -230,6 +232,15 @@ const char * Xslt30Processor::getcwd() {
   return cwdXT.c_str();
 }
 
+SaxonProcessor *Xslt30Processor::getSaxonProcessor() {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  bool licensed = j_isLicensed(thread, (void *)procRef);
+  int64_t newProcRef = j_copy_handles(thread, (void *)procRef);
+  SaxonProcessor * processor = new SaxonProcessor(newProcRef, licensed);
+  processor->setcwd(cwdXT.c_str());
+  return processor;
+}
+
 SaxonApiException *Xslt30Processor::getException() { return exception; }
 
 void Xslt30Processor::createException(const char *message) {}
@@ -292,7 +303,6 @@ void Xslt30Processor::importPackage(const char *packageFile) {
 
 void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
                                              const char *filename) {
-  proc->attachCurrentThread();
   if (xslFilename == nullptr) {
     throw SaxonApiException("XSL filename is null");
   }
@@ -318,7 +328,6 @@ void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
 
 XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
                                                    const char *encoding) {
-  proc->attachCurrentThread();
   if (stylesheetStr == nullptr) {
     throw SaxonApiException("XSL string is null");
   }
@@ -352,13 +361,12 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
     throw SaxonApiException(true);
   }
   XsltExecutable *executable =
-      new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
+      new XsltExecutable(procRef, objRef, cwdXT, "");
 
   return executable;
 }
 
 XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
-  proc->attachCurrentThread();
   if (node == nullptr) {
     throw SaxonApiException("XSL node is null");
   }
@@ -391,7 +399,7 @@ XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
     throw SaxonApiException(true);
   }
   XsltExecutable *executable =
-      new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
+      new XsltExecutable(procRef, objRef, cwdXT, "");
 
   return executable;
 }
@@ -431,7 +439,7 @@ XsltExecutable *Xslt30Processor::compileFromAssociatedFile(const char *source) {
     throw SaxonApiException(true);
   }
   XsltExecutable *executable =
-      new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
+      new XsltExecutable(procRef, objRef, cwdXT, "");
   return executable;
 }
 
@@ -470,7 +478,7 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
     throw SaxonApiException(true);
   }
   XsltExecutable *executable =
-      new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
+      new XsltExecutable(procRef, objRef, cwdXT, "");
 
   return executable;
 }

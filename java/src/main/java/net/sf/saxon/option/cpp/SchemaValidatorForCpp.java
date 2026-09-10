@@ -650,23 +650,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
                 System.err.println("Type of node Property error.");
             }
         }
-        if (optionsMap.containsKey("resources")) {
-            valuei = optionsMap.get("resources");
-            char separatorChar = '/';
-            if (SaxonCAPI.RESOURCES_DIR == null && valuei instanceof String) {
-                String dir1 = (String) valuei;
-                if (!dir1.endsWith("/")) {
-                    dir1 = dir1.concat("/");
-                }
-                if (File.separatorChar != '/') {
-                    dir1.replace(separatorChar, File.separatorChar);
-                    separatorChar = '\\';
-                    dir1.replace('/', '\\');
-                }
-                SaxonCAPI.RESOURCES_DIR = dir1;
-            }
 
-        }
         if (optionsMap.containsKey("string")) {
             valuei = optionsMap.get("string");
             XdmNode sourceNode = SaxonCAPI.main_parseXmlString(cwd, processor, builder, null, (String) valuei);

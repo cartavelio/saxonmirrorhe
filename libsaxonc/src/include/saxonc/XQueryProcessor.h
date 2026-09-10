@@ -312,6 +312,7 @@ public:
    * Check for thrown exceptions.
    * @return The main exception message if any has been thrown otherwise
    * return nullptr
+   * @deprecated This method is no longer used and returns nullptr. It will be removed in future release
    */
   const char *checkException();
 
@@ -358,14 +359,13 @@ public:
   /**
    * Get the SaxonProcessor which created this XQueryProcessor.
    */
-  SaxonProcessor* getSaxonProcessor() { return proc; }
+  SaxonProcessor* getSaxonProcessor();
 
 private:
   void createException(const char *message = nullptr);
   bool streaming;
   std::string cwdXQ; /*!< Current working directory */
-  SaxonProcessor *proc; /*!< Pointer to the SaxonProcessor object which created this XQueryProcessor */
-
+  int64_t procRef;
   int64_t cppXQ;
   std::map<std::string, XdmValue *>
       parameters; /*!< Map of parameters used for the query as (string, value)

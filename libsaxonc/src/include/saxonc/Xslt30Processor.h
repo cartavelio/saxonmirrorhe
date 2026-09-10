@@ -58,7 +58,7 @@ public:
    * Get the SaxonProcessor object
    * @return Pointer to the SaxonProcessor object
    */
-  SaxonProcessor *getSaxonProcessor() { return proc; }
+  SaxonProcessor *getSaxonProcessor();
 
   /**
    * Set the current working directory (cwd).
@@ -427,8 +427,9 @@ private:
    */
   void clearProperties();
 
-  SaxonProcessor *proc; /*!< Pointer to the SaxonProcessor object which created this Xslt30Processor */
-  int64_t cppXT;
+  //SaxonProcessor *proc; /*!< Pointer to the SaxonProcessor object which created this Xslt30Processor */
+
+  int64_t cppXT, procRef;
   int64_t importPackageValue;
   std::string cwdXT;   /*!< Current working directory */
   bool jitCompilation; /*!< Just-in-time compilation flag*/

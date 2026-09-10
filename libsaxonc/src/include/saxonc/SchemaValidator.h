@@ -272,15 +272,13 @@ public:
   /**
    * Get the SaxonProcessor which created this SchemaValidator.
    */
-  SaxonProcessor* getSaxonProcessor() { return proc; }
+  SaxonProcessor* getSaxonProcessor();
 
 private:
   bool lax; /*!< Flag to indicate lax mode for the Schema validation */
-  SaxonProcessor
-      *proc; /*!< Pointer to the SaxonProcessor object which created this SchemaValidator */
   // jclass  cppClass; /*!< JNI object where the SchemaValidator method will be
   // invoked */
-  int64_t cppV;     /*!< The underlying SchemaValidator Java object */
+  int64_t cppV, procRef;     /*!< The underlying SchemaValidator Java object */
   std::string cwdV; /*!< Current working directory */
   std::string
       outputFile; /*!< The output file name for the exported schema validator */
