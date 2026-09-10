@@ -57,6 +57,7 @@
         <xsl:variable name="sfn-functions" select="sfn:function"/>
 
         <xsl:for-each select="$qt4cg-functions//fos:function">
+          <xsl:sort select="lower-case(@name)"/>
           <xsl:variable name="ns" select="sfn:prefix-to-ns(@prefix)"/>
           <xsl:if test="$ns = $nsuri">
             <xsl:variable name="name" select="@name/string()"/>
