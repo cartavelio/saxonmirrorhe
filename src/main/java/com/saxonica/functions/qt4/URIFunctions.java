@@ -52,34 +52,34 @@ abstract public class URIFunctions extends SystemFunction {
 
     protected static final Set<Character> escapedPathCharacters;
     static {
-        HashSet<Character> chars = new HashSet<>();
-        chars.add(' ');
-        chars.add('%');
-        chars.add('/');
-        chars.add('?');
-        chars.add('#');
-        chars.add('+');
-        chars.add('[');
-        chars.add(']');
-        escapedPathCharacters = unmodifiable(chars);
+        HashSet<Character> pchars = new HashSet<>();
+        pchars.add(' ');
+        pchars.add('%');
+        pchars.add('/');
+        pchars.add('?');
+        pchars.add('#');
+        pchars.add('+');
+        pchars.add('[');
+        pchars.add(']');
+        escapedPathCharacters = unmodifiable(pchars);
     }
 
     protected static final Set<Character> escapedQueryCharacters;
     static {
-        HashSet<Character> chars = new HashSet<>(escapedPathCharacters);
-        chars.remove('/');
-        chars.remove('?');
-        chars.add('=');
-        chars.add('&');
-        escapedQueryCharacters = unmodifiable(chars);
+        HashSet<Character> qchars = new HashSet<>(escapedPathCharacters);
+        qchars.remove('/');
+        qchars.remove('?');
+        qchars.add('=');
+        qchars.add('&');
+        escapedQueryCharacters = unmodifiable(qchars);
     }
 
     protected static final Set<Character> escapedFragidCharacters;
     static {
-        HashSet<Character> chars = new HashSet<>(escapedPathCharacters);
-        chars.remove('/');
-        chars.remove('?');
-        escapedFragidCharacters = unmodifiable(chars);
+        HashSet<Character> fchars = new HashSet<>(escapedPathCharacters);
+        fchars.remove('/');
+        fchars.remove('?');
+        escapedFragidCharacters = unmodifiable(fchars);
     }
 
     @CSharpReplaceBody(code="return chars;")
