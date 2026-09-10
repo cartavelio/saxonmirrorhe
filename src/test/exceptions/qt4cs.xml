@@ -53,7 +53,10 @@
    </exception>
    
  
- 
+   <exception test-set="prod-Recordtest" test-case="RecordTest-010" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-18"/>
+      <reason>Coercion on fields of record test not yet implemented</reason>
+   </exception>
  
 
    <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
