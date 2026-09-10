@@ -243,9 +243,9 @@
             <xsl:otherwise>
                 <div id="aside">
                     <h2>Packages by platform</h2>
-                    <p><b>Java:</b> SaxonJ 11 first released Jan 2022.</p>
+                    <p><b>Java:</b> SaxonJ 11 first released Feb 2022.</p>
                     <p><b>.NET:</b> SaxonCS 11 for .NET 5 available only as the Enterprise Edition.</p>
-                    <p><b>Native:</b> SaxonC 11 first release (built from SaxonJ 11) released Jan 2022.</p>
+                    <p><b>Native:</b> SaxonC 11 first release (built from SaxonJ 11) released Feb 2022.</p>
                     <p><b>JavaScript:</b> SaxonJS 2 does not require a commercial license.</p>
                 </div>
                 
