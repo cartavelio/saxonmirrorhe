@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018 Saxonica Limited.
+// Copyright (c) 2018-2021 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -7,9 +7,6 @@
 
 
 package he;
-import net.sf.saxon.option.dom4j.DOM4JObjectModel;
-import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
-import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import org.w3c.dom.Document;
 import org.xml.sax.Attributes;
@@ -56,6 +53,7 @@ public class S9APIExamples {
      *             name of a test, or "all" to run all tests, or "nonschema" to run all the tests that are not schema-aware.
      */
     public static void main(String[] argv) {
+        Processor processor = new Processor(false);
 
         List<Test> tests = new ArrayList<>();
         tests.add(new S9APIExamples.QueryA());
@@ -63,9 +61,14 @@ public class S9APIExamples {
         tests.add(new S9APIExamples.QueryC());
         tests.add(new S9APIExamples.QueryD());
         tests.add(new S9APIExamples.QueryE());
-        tests.add(new S9APIExamples.QueryF());
-        tests.add(new S9APIExamples.QueryG());
-        tests.add(new S9APIExamples.QueryUpdateA());
+
+        if (!"HE".equals(processor.getUnderlyingConfiguration().getEditionCode())) {
+            // These tests will work on PE or EE but not HE
+            tests.add(new S9APIExamples.QueryF());
+            tests.add(new S9APIExamples.QueryG());
+            tests.add(new S9APIExamples.QueryUpdateA());
+        }
+
         tests.add(new S9APIExamples.TransformA());
         tests.add(new S9APIExamples.TransformB());
         tests.add(new S9APIExamples.TransformC());
@@ -79,9 +82,6 @@ public class S9APIExamples {
         tests.add(new S9APIExamples.XPathB());
         tests.add(new S9APIExamples.XPathC());
         tests.add(new S9APIExamples.XPathDOM());
-        tests.add(new S9APIExamples.XPathJDOM());
-        tests.add(new S9APIExamples.XPathXOM());
-        tests.add(new S9APIExamples.XPathDOM4J());
         tests.add(new S9APIExamples.SerializeA());
         tests.add(new S9APIExamples.SerializeB());
         tests.add(new S9APIExamples.SerializeC());
@@ -650,7 +650,7 @@ public class S9APIExamples {
             XsltExecutable templates = compiler.compile(styleSource);
             Xslt30Transformer transformer = templates.load30();
             transformer.setMessageListener(
-                    (content, terminate, locator) -> {
+                    (content, errorCode, terminate, locator) -> {
                         System.err.println("MESSAGE terminate=" + (terminate ? "yes" : "no") + " at " + new Date());
                         System.err.println("From instruction at line " + locator.getLineNumber() +
                                 " of " + locator.getSystemId());
@@ -930,6 +930,8 @@ public class S9APIExamples {
 
     /**
      * Demonstrate use of an XPath expression against a DOM source document.
+     *
+     * For examples using alternate object models (JDOM2, XOM, and DOM4J), see S9APIExamplesOM.java
      */
 
     private static class XPathDOM implements S9APIExamples.Test {
@@ -975,128 +977,6 @@ public class S9APIExamples {
         }
 
     }
-
-
-    /**
-     * Demonstrate use of an XPath expression against a JDOM2 source document.
-     */
-
-    private static class XPathJDOM implements S9APIExamples.Test {
-        public String name() {
-            return "XPathJDOM";
-        }
-
-        public boolean needsSaxonEE() {
-            return false;
-        }
-
-        public void run() throws SaxonApiException {
-            // Build the JDOM document
-            org.jdom2.input.SAXBuilder jdomBuilder = new org.jdom2.input.SAXBuilder();
-            File file = new File("data/books.xml");
-            org.jdom2.Document doc;
-            try {
-                doc = jdomBuilder.build(file);
-            } catch (org.jdom2.JDOMException | IOException e) {
-                throw new SaxonApiException(e);
-            }
-            Processor processor = new Processor(false);
-            processor.getUnderlyingConfiguration().registerExternalObjectModel(new JDOM2ObjectModel());
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode xdmDoc = builder.wrap(doc);
-            XPathCompiler xpath = processor.newXPathCompiler();
-            XPathExecutable xx = xpath.compile("//ITEM/TITLE");
-            XPathSelector selector = xx.load();
-            selector.setContextItem(xdmDoc);
-            for (XdmItem item : selector) {
-                XdmNode node = (XdmNode) item;
-                org.jdom2.Element element = (org.jdom2.Element) node.getExternalNode();
-                System.out.println(element.getValue());
-            }
-        }
-
-    }
-
-    /**
-     * Demonstrate use of an XPath expression against a XOM source document.
-     */
-
-    private static class XPathXOM implements S9APIExamples.Test {
-        public String name() {
-            return "XPathXOM";
-        }
-
-        public boolean needsSaxonEE() {
-            return false;
-        }
-
-        public void run() throws SaxonApiException {
-            // Build the XOM document
-            nu.xom.Builder xomBuilder = new nu.xom.Builder();
-            File file = new File("data/books.xml");
-            nu.xom.Document doc;
-            try {
-                doc = xomBuilder.build(file);
-            } catch (nu.xom.ParsingException | IOException e) {
-                throw new SaxonApiException(e);
-            }
-            Processor processor = new Processor(false);
-            processor.getUnderlyingConfiguration().registerExternalObjectModel(new XOMObjectModel());
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode xdmDoc = builder.wrap(doc);
-            XPathCompiler xpath = processor.newXPathCompiler();
-            XPathExecutable xx = xpath.compile("//ITEM/TITLE");
-            XPathSelector selector = xx.load();
-            selector.setContextItem(xdmDoc);
-            for (XdmItem item : selector) {
-                XdmNode node = (XdmNode) item;
-                nu.xom.Element element = (nu.xom.Element) node.getExternalNode();
-                System.out.println(element.toXML());
-            }
-        }
-
-    }
-
-    /**
-     * Demonstrate use of an XPath expression against a DOM4J source document.
-     */
-
-    private static class XPathDOM4J implements S9APIExamples.Test {
-        public String name() {
-            return "XPathDOM4J";
-        }
-
-        public boolean needsSaxonEE() {
-            return false;
-        }
-
-        public void run() throws SaxonApiException {
-            // Build the DOM4J document
-            org.dom4j.io.SAXReader dom4jBuilder = new org.dom4j.io.SAXReader();
-            File file = new File("data/books.xml");
-            org.dom4j.Document doc;
-            try {
-                doc = dom4jBuilder.read(file);
-            } catch (org.dom4j.DocumentException e) {
-                throw new SaxonApiException(e);
-            }
-            Processor processor = new Processor(false);
-            processor.getUnderlyingConfiguration().registerExternalObjectModel(new DOM4JObjectModel());
-            DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode xdmDoc = builder.wrap(doc);
-            XPathCompiler xpath = processor.newXPathCompiler();
-            XPathExecutable xx = xpath.compile("//ITEM/TITLE");
-            XPathSelector selector = xx.load();
-            selector.setContextItem(xdmDoc);
-            for (XdmItem item : selector) {
-                XdmNode node = (XdmNode) item;
-                org.dom4j.Element element = (org.dom4j.Element) node.getExternalNode();
-                System.out.println(element.asXML());
-            }
-        }
-
-    }
-
 
     /**
      * Serialize a document
@@ -1199,7 +1079,10 @@ public class S9APIExamples {
             Serializer out = processor.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.METHOD, "xml");
             out.setOutputProperty(Serializer.Property.INDENT, "yes");
-            out.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
+            // HE doesn't support indent spaces
+            if (!"HE".equals(processor.getUnderlyingConfiguration().getEditionCode())) {
+                out.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
+            }
             out.setOutputProperty(Serializer.Property.CDATA_SECTION_ELEMENTS, "{http://example.com/out}script");
             XMLStreamWriter writer = out.getXMLStreamWriter();
             try {
