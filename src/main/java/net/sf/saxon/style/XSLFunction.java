@@ -55,6 +55,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     private FunctionStreamability streamability;
     private UserFunction.Determinism determinism = UserFunction.Determinism.PROACTIVE;
     private boolean explaining;
+    private boolean updating = false;
 
     /**
      * Get the corresponding Procedure object that results from the compilation of this
@@ -165,6 +166,14 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                         extraAsAtt = att.getValue();
                     } else if (local.equals("explain") && isYes(Whitespace.trim(att.getValue()))) {
                         explaining = true;
+                    }
+                }
+            } else if (uri.equals(NamespaceUri.IXSL)) {
+                if (isExtensionAttributeAllowed(att.getNodeName().getDisplayName())) {
+                    if (local.equals("updating")) {
+                        if (getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT)) {
+                            updating = processBooleanAttribute("ixsl:updating", att.getValue());
+                        }
                     }
                 }
             } else {
@@ -364,6 +373,10 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         return overrideExtensionFunction;
     }
 
+    public boolean isUpdating() {
+        return updating;
+    }
+
     @Override
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) {
         //getSkeletonCompiledFunction();
@@ -387,8 +400,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         int maxArity = getNumberOfParameters();
         int minArity = maxArity - getNumberOfOptionalParameters();
         if (minArity <= 1 && maxArity >= 1) {
-            StructuredQName name = getObjectName();
-            SchemaType type = getPackageData().getImportedSchema().getSchemaType(name);
+            SchemaType type = getConfiguration().getSchemaType(getObjectName());
             if (type instanceof PlainType) {
                 compileError("Stylesheet function clashes with constructor function for an imported atomic type", "XTSE0770");
             }
@@ -649,6 +661,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             fn.setDeclaredVisibility(getDeclaredVisibility());
             fn.setDeclaredStreamability(streamability);
             fn.setDeterminism(determinism);
+            fn.setIxslUpdating(updating);
             List<Annotation> annotations = new ArrayList<>();
             if (memoFunction) {
                 annotations.add(new Annotation(new StructuredQName("saxon", NamespaceUri.SAXON, "memo-function")));

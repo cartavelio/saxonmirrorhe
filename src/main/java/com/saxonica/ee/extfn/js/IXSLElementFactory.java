@@ -30,6 +30,8 @@ public abstract class IXSLElementFactory {
                 return new IXSLRemoveProperty();
             case "set-style":
                 return new IXSLSetStyle();
+            case "promise":
+                return new IXSLPromise();
         }
         return null;
     };

@@ -68,6 +68,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     protected SequenceEvaluator bodyEvaluator = null;
     protected PushEvaluator pushEvaluator = null;
     private boolean updating = false;
+    private boolean ixslUpdating = false;
     private int inlineable = -1; // 0:no 1:yes -1:don't know
     private int inliningCount = 0;
     private boolean overrideExtensionFunction = true;
@@ -487,6 +488,17 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     }
 
     /**
+     * Set whether this is an ixsl:updating function, as defined for use with IXSL promises in SaxonJS,
+     * allowing the function to have updating side effects
+     *
+     * @param isUpdating true if this is an updating function
+     */
+
+    public void setIxslUpdating(boolean isUpdating) {
+        this.ixslUpdating = isUpdating;
+    }
+
+    /**
      * Set the declared streamability (XSLT 3.0 attribute)
      *
      * @param streamability the declared streamability (defaults to "unclassified")
@@ -799,6 +811,9 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         }
         if (isMemoFunction()) {
             flags += "m";
+        }
+        if (ixslUpdating) {
+            flags += "u";
         }
         switch (declaredStreamability) {
             case UNCLASSIFIED:
