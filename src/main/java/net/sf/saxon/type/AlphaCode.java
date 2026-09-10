@@ -114,7 +114,7 @@ import java.util.Set;
  *
  * <li>E: xs:error </li>
  *
- * <li>U: union (choice) of the alternatives listed in the 'm' property</li></l>
+ * <li>U: union (choice) of the alternatives listed in the 'm' property</li>
  *
  * <li>X: external (wrapped) object </li>
  * <li>XJ: external Java object </li>
