@@ -271,4 +271,4 @@ public class XSDAssert extends AnnotationParent {
 
 }
 
-// Copyright (c) 2007-2016, Saxonica Limited
+// Copyright (c) 2007-2022, Saxonica Limited

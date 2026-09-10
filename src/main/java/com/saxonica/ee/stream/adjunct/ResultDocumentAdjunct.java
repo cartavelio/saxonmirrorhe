@@ -71,4 +71,4 @@ public class ResultDocumentAdjunct extends ParentConstructorAdjunct {
     }
 }
 
-// Copyright (c) 2009-19 Saxonica Limited
+// Copyright (c) 2009-2022 Saxonica Limited

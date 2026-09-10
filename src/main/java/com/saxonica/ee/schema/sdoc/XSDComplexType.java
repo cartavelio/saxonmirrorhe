@@ -448,4 +448,4 @@ public class XSDComplexType extends SchemaElement {
 
 }
 
-// Copyright (c) 2004-8 Saxonica Limited
+// Copyright (c) 2004-2022 Saxonica Limited

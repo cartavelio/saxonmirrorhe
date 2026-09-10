@@ -207,4 +207,4 @@ public class ForkAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright Saxonica 2014-2019.
+// Copyright 2014-2022 Saxonica Limited.

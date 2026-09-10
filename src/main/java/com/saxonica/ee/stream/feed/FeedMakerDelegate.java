@@ -25,3 +25,5 @@ public class FeedMakerDelegate implements FeedMaker {
     }
 }
 
+// Copyright (c) 2020-2022 Saxonica Limited
+

@@ -63,3 +63,4 @@ public class ReadBinaryResource extends SystemFunction {
     }
 }
 
+// Copyright (c) 2020-2022 Saxonica Limited

@@ -110,4 +110,4 @@ public class SwitchAdjunct extends TransmissionAdjunct {
 
 }
 
-// Copyright Saxonica 2018.
+// Copyright 2018-2022 Saxonica Limited.

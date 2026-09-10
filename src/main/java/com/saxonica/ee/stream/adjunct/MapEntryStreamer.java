@@ -85,4 +85,4 @@ public class MapEntryStreamer extends StreamingAdjunct implements FeedMaker {
     }
 }
 
-// Copyright Saxonica 2014.
+// Copyright (c) 2014-2022 Saxonica Limited

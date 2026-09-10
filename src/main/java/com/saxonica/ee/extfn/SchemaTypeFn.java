@@ -57,7 +57,7 @@ public class SchemaTypeFn extends SystemFunction {
     }
 
 
-
-
 }
+
+// Copyright (c) 2020-2022 Saxonica Limited
 

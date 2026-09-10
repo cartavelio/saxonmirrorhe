@@ -1237,4 +1237,4 @@ public abstract class SchemaElement extends ElementImpl {
     }
 }
 
-// Copyright (c) 2004-19 Saxonica Limited
+// Copyright (c) 2004-2022 Saxonica Limited

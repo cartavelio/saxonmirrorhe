@@ -181,3 +181,5 @@ public class JavaVerifier extends Verifier {
 
 }
 
+// Copyright (c) 2010-2022 Saxonica Limited
+

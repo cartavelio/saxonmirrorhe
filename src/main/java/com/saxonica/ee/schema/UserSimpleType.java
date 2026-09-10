@@ -1012,4 +1012,4 @@ public abstract class UserSimpleType extends UserDefinedType
 
 }
 
-// Copyright (c) 2004-16 Saxonica Limited
+// Copyright (c) 2004-2022 Saxonica Limited

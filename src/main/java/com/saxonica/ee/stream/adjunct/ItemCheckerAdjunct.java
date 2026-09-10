@@ -49,4 +49,4 @@ public class ItemCheckerAdjunct extends TransmissionAdjunct implements FeedMaker
     }
 }
 
-// Copyright (c) 2010-13 Saxonica Limited
+// Copyright (c) 2010-2022 Saxonica Limited

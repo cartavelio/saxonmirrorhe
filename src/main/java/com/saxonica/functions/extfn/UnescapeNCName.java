@@ -84,4 +84,4 @@ public class UnescapeNCName extends SystemFunction {
 
 }
 
-// Copyright (c) 2021 Saxonica Limited
+// Copyright (c) 2021-2022 Saxonica Limited

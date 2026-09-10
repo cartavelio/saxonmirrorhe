@@ -16,4 +16,4 @@ public class MinInclusiveFacet extends ValueRangeFacet {
     }
 }
 
-// Copyright (c) Saxonica 2009.
+// Copyright (c) 2009-2022 Saxonica Limited.

@@ -330,4 +330,4 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
     }
 }
 
-// Copyright Saxonica 2014-2017.
+// Copyright 2014-2022 Saxonica Limited.

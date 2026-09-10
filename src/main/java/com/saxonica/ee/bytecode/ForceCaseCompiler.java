@@ -36,4 +36,4 @@ public class ForceCaseCompiler extends ToStringCompiler {
     }
 }
 
-// Copyright (c) 2011-12 Saxonica Limited
+// Copyright (c) 2011-2022 Saxonica Limited

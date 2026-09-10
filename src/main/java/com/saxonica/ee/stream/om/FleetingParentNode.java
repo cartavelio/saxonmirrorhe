@@ -37,4 +37,4 @@ public abstract class FleetingParentNode extends FleetingNode {
 
 }
 
-// Copyright (c) 2012-2020 Saxonica.
+// Copyright (c) 2012-2022 Saxonica Limited.

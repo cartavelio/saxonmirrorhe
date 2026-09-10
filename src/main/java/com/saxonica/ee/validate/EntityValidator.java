@@ -295,6 +295,6 @@ public class EntityValidator extends ValidatingFilter {
 
 }
 
-// Copyright (c) 2020 Saxonica Limited No warranty.
+// Copyright (c) 2020-2022 Saxonica Limited
 
 

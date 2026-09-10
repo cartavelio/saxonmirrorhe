@@ -23,4 +23,4 @@ public interface Pusher {
     void push(Outputter output, XPathContext context) throws XPathException;
 }
 
-// Copyright (c) Saxonica 2021
+// Copyright (c) 2021-2022 Saxonica Limited

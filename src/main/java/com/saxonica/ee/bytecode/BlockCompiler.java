@@ -185,4 +185,4 @@ public class BlockCompiler extends ToIteratorCompiler {
 
 }
 
-// Copyright (c) 2011-2021 Saxonica Limited
+// Copyright (c) 2011-2022 Saxonica Limited
