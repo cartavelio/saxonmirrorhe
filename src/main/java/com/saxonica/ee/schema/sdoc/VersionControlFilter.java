@@ -15,6 +15,7 @@ import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.BigDecimalValue;
+import net.sf.saxon.value.DecimalValue;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -35,7 +36,7 @@ public class VersionControlFilter extends ProxyReceiver {
     private int depthOfHole = 0;
     private boolean emptySchemaElement = false;
 
-    private final BigDecimalValue thisVersion;
+    private final DecimalValue thisVersion;
     private final boolean isXSD11;
     private boolean foundErrors;
 
@@ -92,7 +93,7 @@ public class VersionControlFilter extends ProxyReceiver {
                     try {
                         switch (localName) {
                             case "minVersion": {
-                                BigDecimalValue dv = parseDecimalValue(att.getValue());
+                                DecimalValue dv = parseDecimalValue(att.getValue());
                                 if (thisVersion.compareTo(dv) < 0) {
                                     ignore = true;
                                     doneAttributes = true;
@@ -100,7 +101,7 @@ public class VersionControlFilter extends ProxyReceiver {
                                 break;
                             }
                             case "maxVersion": {
-                                BigDecimalValue dv = parseDecimalValue(att.getValue());
+                                DecimalValue dv = parseDecimalValue(att.getValue());
                                 if (thisVersion.compareTo(dv) >= 0) {
                                     ignore = true;
                                     doneAttributes = true;
@@ -245,8 +246,8 @@ public class VersionControlFilter extends ProxyReceiver {
      * @throws ValidationException if the value is not a valid decimal
      */
 
-    private BigDecimalValue parseDecimalValue(String value) throws ValidationException {
-        return (BigDecimalValue)BigDecimalValue.makeDecimalValue(value, true).asAtomic();
+    private DecimalValue parseDecimalValue(String value) throws ValidationException {
+        return (DecimalValue)BigDecimalValue.makeDecimalValue(value, true).asAtomic();
     }
 
     /**

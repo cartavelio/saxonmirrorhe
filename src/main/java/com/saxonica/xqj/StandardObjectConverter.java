@@ -87,7 +87,7 @@ public class StandardObjectConverter implements ObjectConverter {
                 case StandardNames.XS_DATE_TIME:
                     return new SaxonXMLGregorianCalendar((CalendarValue) p);
                 case StandardNames.XS_DECIMAL:
-                    return ((BigDecimalValue) p).getDecimalValue();
+                    return ((DecimalValue) p).getDecimalValue();
                 case StandardNames.XS_DOUBLE:
                     return ((DoubleValue) p).getDoubleValue();
                 case StandardNames.XS_DURATION:
