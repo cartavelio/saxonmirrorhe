@@ -10,27 +10,37 @@
    details are likely to change as the design progresses.</p>
    
    <p>With the exception of new functions in the function library, these extensions need to be
-   explicitly enabled. The following mechanisms can be used to enable syntax extensions:</p>
+   explicitly enabled. Use one of the following mechanisms to enable syntax extensions:</p>
    
    <ul>
-      <li><b>Either</b> set the the configuration property
+      <li>Set the the configuration property
          <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"
-         /> (use <code>--allowSyntaxExtensions:on</code> on the command line, 
+         /> (equivalently, use <code>--allowSyntaxExtensions:on</code> on the command line, 
          or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</li>
-      <li><b>Or</b> set the language level to 4.0 in a call to an API method such as 
+      <li>Set the language level to 4.0 in a call to an API method such as 
       <code>XsltCompiler.setXsltLanguageVersion()</code></li>
-      <li><b>Or</b> set the language level to 4.0 in the <code>version</code> attribute
+      <li>For XQuery, set the language level to 4.0 in the <code>version</code> attribute
       of <code>xsl:stylesheet</code>, or in the XQuery declaration in the query prolog.</li>
    </ul>
+   
+   <p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This gives you an
+   XSLT 3.0 processor running in forwards compatibility mode, rather than an XSLT 4.0 processor.</p>
 
    
       <p>Like other Saxon extensions, these extensions all require Saxon-PE or higher.
-      They are available in Saxon-CS.</p>
+      They are also available in Saxon-CS.</p>
+   
+   <p>Generally, Saxonica aims to avoid making incompatible changes except in major releases.
+   The features described in this section are experimental, so this policy does not apply: the aim
+   instead is to respond rapidly to changes in the developing specification.</p>
 
       <p>Further information:</p>
       <nav>
          <ul/>
       </nav>
+   
+   TODO: document xsl:array, xsl:item-type, xsl:array-member, xsl:switch; add additional attributes to element
+   syntax summary. saxon:array and saxon:array-member are now synonyms.
 
       <section id="new-types" title="New Types">
          <h1>New Types</h1>
@@ -420,6 +430,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
             <p>In XQuery, type aliases can be declared in the query prolog using the syntax <code>declare type QName = ItemType;</code>, 
         for example: <code>declare type cx:complex = record(r as xs:double, i as xs:double);</code>.</p>
+            
+            <p>For further details see <a class="bodylink" href="/xsl-elements/item-type">xsl:item-type</a>.</p>
          </section>
       </section>
    
@@ -514,10 +526,10 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>For example, <code>fn:lowest(//employee, (), ->{number(@salary)})</code> returns those
          employees having the lowest salary.</p>
       
-      <h2>fn:parcel($sequence as item()*) as item()</h2>
+      <h2>fn:parcel($sequence as item()*) as record(value)</h2>
       
       <p>Wraps an arbitrary sequence of items as a <i>parcel</i>: a parcel is a map with a single entry,
-      whose key is the string <code>"parcel"</code> and whose value is the wrapped sequence. Parcels are
+      whose key is the string <code>"value"</code> and whose value is the wrapped sequence. Parcels are
       useful because they enable an array to be treated as a sequence of items, by wrapping each member of the
       array as a parcel.</p>
       
@@ -546,19 +558,27 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Returns true if at least one item in <code>$sequence</code> satisfies the predicate.</p>
       
-      <h2>fn:unparcel($parcel as map(xs:string, item()*) as item()*</h2>
+      <h2>fn:unparcel($parcel as record(value, *)) as item()*</h2>
       
-      <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?parcel</code>.)</p>
+      <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?value</code>.)</p>
       
-      <h2>array:of(map(xs:string, item()*)*) as array(*)</h2>
+      <h2>array:of(record(value, *)*) as array(*)</h2>
       
       <p>Accepts a sequence of parcels (as produced by the <code>fn:parcel()</code> function), and returns an array
       whose members are the sequences obtained by applying <code>fn:unparcel()</code> to each parcel in turn.</p>
       
-      <h2>array:members(array(*)) as map(xs:string, item()*)*</h2>
+      <h2>array:members(array(*)) as record(value)*</h2>
       
       <p>Accepts an array as input, and turns it into a sequence of parcels: the inverse of the <code>array:of()</code>
       function.</p>
+      
+      <h2>map:entries(map(*)) as record(key as xs:anyAtomicType, value as item()*)*</h2>
+      
+      <p>Accepts a map as input, and turns it into a sequence of maps representing the key-value pairs contained in the map.
+      Equivalent to <code>map:for-each($map, ->($k, $v){map{"key":$k, "value":$v}})</code>.</p>
+      
+      
+      
       
       
       
@@ -815,8 +835,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
       </section>
          </section>
 
-   <section id="xslt-syntax-extensions" title="XSLT Syntax Extensions">
-      <h1>XSLT 4.0 Syntax Extensions</h1>
+   <section id="xslt-syntax-extensions" title="XSLT 4.0 Extensions">
+      <h1>Experimental XSLT 4.0 Extensions</h1>
 
       <aside>Requires Saxon-PE or Saxon-EE. Available in Saxon-CS.</aside>
 
@@ -891,6 +911,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
       <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for
       <code>.[. instance of type(T)]</code>.</p>
          
+         <p>TODO: add information on default priority. Add examples.</p>
+         
       </section>
       <section id="xslt-conditionals" title="Conditional Instructions">
          <h1>Conditional Instructions</h1>
@@ -948,6 +970,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
     </xsl:switch>
   </xsl:function>]]></samp></example>
          
+         <p>For further details see <a class="bodylink" href="/xsl-elements/switch">xsl:switch</a>.</p>
+         
       </section>
       <section id="separator-attribute" title="Separator Attribute">
 
@@ -969,16 +993,20 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
       <section id="iteration-maps-arrays" title="Iterating over Maps and Arrays">
          <h1>Iterating over Maps and Arrays</h1>
          
+         <aside>Although this is implemented, it's probably best to avoid using this feature as we think the design can be improved.
+         To iterate over arrays, use <code>&lt;xsl:for-each select="array:members($array)"></code> instead.
+            To iterate over maps, use <code>&lt;xsl:for-each select="map:entries($map)"></code>.</aside>
+         
          <p>The three instructions <code>xsl:for-each</code>, <code>xsl:iterate</code>, and <code>xsl:for-each-group</code>
          can take an attribute <code>array</code> or <code>map</code> in place of the <code>select</code> attribute.</p>
          
          <p>If <code>array</code> is specified, the instruction iterates over the selected array. Specifically, the
          body of the instruction is evaluated with the context item being a <i>parcel</i> containing the items making
          up the corresponding member of the array; these items may be extracted with the <code>fn:unparcel()</code>
-         function, or simply with the lookup expression <code>?parcel</code>. For example:</p>
+         function, or simply with the lookup expression <code>?value</code>. For example:</p>
          
          <example><samp><![CDATA[
-<xsl:for-each array="[1, 3 to 5, 10 to 20, 31 to 32]" separator=" ">{count(?parcel)}</xsl:for-each>
+<xsl:for-each array="[1, 3 to 5, 10 to 20, 31 to 32]" separator=" ">{count(?value)}</xsl:for-each>
             ]]></samp></example>
          
          <p>outputs <code>1 3 11 2</code>.</p>
@@ -1013,6 +1041,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
             <code>on-duplicates="->($old, $new){$old || ',' || $new}</code> concatenates the values with comma as
             a separator. Specifying <code>on-duplicates="->($old, $new){$old}</code> takes the first of the duplicates, while 
             <code>on-duplicates="->($old, $new){$new}</code> takes the last.</p>
+         
+         <p>See also <a class="bodylink" href="/xsl-elements/map">xsl:map</a>.</p>
       </section>
    </section>
 
