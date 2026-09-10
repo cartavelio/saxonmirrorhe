@@ -455,6 +455,14 @@ public class PatternParser extends XPathParser {
                 return parseStringLiteral(true);
             } else if (tok instanceof Token.NumericLiteral) {
                 return parseNumericLiteral(true);
+            } else if (tok == Token.MINUS || isKeyword("true") || isKeyword("false")) {
+                if (languageVersion >= 40) {
+                    AtomicValue val = parseConstant();
+                    return Literal.makeLiteral(val);
+                } else {
+                    grumble("Prior to 4.0, a function argument in an XSLT pattern must be a variable reference or literal");
+                    return null;
+                }
             } else {
                 grumble("A function argument in an XSLT pattern must be a variable reference or literal");
                 return null;
