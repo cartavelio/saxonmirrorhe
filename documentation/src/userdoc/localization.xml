@@ -64,6 +64,8 @@
         providing plug-ins for some common European languages.</li>
       <li class="javaonly">In SaxonJ-PE and -EE, spellout numbering is available via the ICU4J library, which
         supports a large variety of languages. This does not require any special configuration.</li>
+      <li class="csonly">In SaxonCS-HE, spellout numbering is supported "out of the box" only for English; if
+        any other language is requested, the output falls back to English.</li>
       <li class="csonly">In SaxonCS-EE, spellout numbering is available via the ICU4N library.</li>
     </ul>
 
@@ -91,8 +93,8 @@
       fall back to values obtained from operating system settings.</p>
 
     <p>Where parts of a date are formatted as numbers (for example "1st December") the rules closely follow
-      the rules for formatting of numbers. This includes spellout numbering (for example "December First, Two
-      Thousand and Twenty-One").</p>
+      the rules for <a class="bodylink" href="../number-formatting">formatting numbers</a>. This includes
+      spellout numbering (for example "December First, Two Thousand and Twenty-One").</p>
 
     <p>Month names and day names (e.g. "January", "Friday") are handled as follows:</p>
 

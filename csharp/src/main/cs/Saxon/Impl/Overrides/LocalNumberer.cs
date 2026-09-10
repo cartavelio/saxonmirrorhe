@@ -15,9 +15,10 @@ using Saxon.Hej.expr.number;
 namespace Saxon.Impl.Overrides {
     
     /// <summary>
-    /// Handles localized formatting of dates, using .NET CultureInfo. Although a <c>LocalNumberer</c> in theory
-    /// handles number formatting as well as date formatting, this particular implementation delegates
-    /// all number formatting to its superclass, which only supports English.
+    /// Handles localized formatting of numbers and dates. Date formatting of month and day
+    /// names uses .NET CultureInfo. Support for number formatting depends on the edition.
+    /// For HE, number formatting is delegated to the superclass, which only supports English.
+    /// For EE, number formatting uses ICU4N, which supports a large variety of languages.
     /// </summary>
 
     public class LocalNumberer : Numberer_en {
