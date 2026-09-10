@@ -7,6 +7,7 @@ import net.sf.saxon.Version;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.TreeReceiver;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
+import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.style.Compilation;
@@ -52,7 +53,7 @@ public class SchemaDocumentTransformer {
         try {
             XsltController transformer = pss.newController();
             transformer.initializeController(params);
-            LinkedTreeBuilder builder = new LinkedTreeBuilder(pipe);
+            LinkedTreeBuilder builder = new LinkedTreeBuilder(pipe, Durability.LASTING);
             builder.setNodeFactory(new SchemaNodeFactory(compiler, pipe, referrer));
             transformer.setBaseOutputURI(input.getSystemId());
             transformer.setGlobalContextItem(input);

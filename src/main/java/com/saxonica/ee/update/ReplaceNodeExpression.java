@@ -183,6 +183,9 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
             err.setLocation(getLocation());
             throw err;
         }
+        if (!target.getTreeInfo().isMutable()) {
+            throw new XPathException("Attempting to update a non-updatable tree", SaxonErrorCode.SXUP0081);
+        }
         int kind = target.getNodeKind();
         if (kind == Type.NAMESPACE) {
             XPathException err = new XPathException(

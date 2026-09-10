@@ -4,6 +4,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.MutableNodeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 
 import java.util.Set;
@@ -44,7 +46,10 @@ public class InsertAction extends PendingUpdateAction {
      */
 
     @Override
-    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) {
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) throws XPathException {
+        if (!targetNode.getTreeInfo().isMutable()) {
+            throw new XPathException("Attempting to update a non-updatable element", SaxonErrorCode.SXUP0081);
+        }
         boolean affectsType = false;
         for (NodeInfo node : content) {
             int kind = node.getNodeKind();

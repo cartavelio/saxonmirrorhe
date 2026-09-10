@@ -183,8 +183,8 @@ public class RenameExpression extends BasicUpdatingExpression {
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         NodeInfo node = (NodeInfo) getTargetExp().evaluateItem(context);
-        if (!(node instanceof MutableNodeInfo)) {
-            XPathException err = new XPathException("Node to be renamed is not an updateable node",
+        if (!node.getTreeInfo().isMutable()) {
+            XPathException err = new XPathException("Node to be renamed is not updatable",
                     SaxonErrorCode.SXUP0081);
             err.setLocation(getLocation());
             throw err;

@@ -2,7 +2,6 @@ package com.saxonica.ee.update;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.MutableNodeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -124,8 +123,8 @@ public class DeleteExpression extends BasicUpdatingExpression {
             SequenceIterator iter = getTargetExp().iterate(context);
             NodeInfo node;
             while ((node = (NodeInfo) iter.next()) != null) {
-                if (!(node instanceof MutableNodeInfo)) {
-                    XPathException err = new XPathException("Node to be deleted is not an updateable node",
+                if (!(node.getTreeInfo().isMutable())) {
+                    XPathException err = new XPathException("Node to be deleted is not an updatable node",
                             SaxonErrorCode.SXUP0081);
                     err.setLocation(getLocation());
                     throw err;

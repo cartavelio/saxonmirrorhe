@@ -206,6 +206,9 @@ public class InsertExpression extends BasicUpdatingExpression {
             e.setXPathContext(context);
             throw e;
         }
+        if (!target.getTreeInfo().isMutable()) {
+            throw new XPathException("Target of insert expression is not updatable", SaxonErrorCode.SXUP0081);
+        }
         int kind = target.getNodeKind();
         if (position == Token.AFTER || position == Token.BEFORE) {
             if (!(kind == Type.ELEMENT || kind == Type.TEXT ||

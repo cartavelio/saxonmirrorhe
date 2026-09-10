@@ -3,6 +3,8 @@ package com.saxonica.ee.update;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.MutableNodeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.XPathException;
 
 import java.util.Set;
 
@@ -38,7 +40,10 @@ public class ReplaceNodeAction extends PendingUpdateAction {
      */
 
     @Override
-    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) {
+    public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) throws XPathException {
+        if (!targetNode.getTreeInfo().isMutable()) {
+            throw new XPathException("Attempting to update a non-updatable element", SaxonErrorCode.SXUP0081);
+        }
         NodeInfo root = targetNode.getRoot();
         MutableNodeInfo parent = (MutableNodeInfo) targetNode.getParent();
         if (!parent.isDeleted() && !targetNode.isDeleted()) {

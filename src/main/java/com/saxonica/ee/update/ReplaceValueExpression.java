@@ -163,6 +163,9 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
         Item newText = result.evaluateItem(context);
         String newString = newText == null ? "" : newText.getStringValue();
         NodeInfo targetNode = (NodeInfo) getTargetExp().evaluateItem(context);
+        if (!targetNode.getTreeInfo().isMutable()) {
+            throw new XPathException("Target of replace value expression is not updatable", SaxonErrorCode.SXUP0081);
+        }
         XPathException err = null;
         switch (targetNode.getNodeKind()) {
             case Type.COMMENT:

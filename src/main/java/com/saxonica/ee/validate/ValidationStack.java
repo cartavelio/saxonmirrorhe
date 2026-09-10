@@ -378,7 +378,7 @@ public class ValidationStack extends ValidatingFilter {
         for (Assertion a : assertions) {
             if (a.getSweep() == Sweep.MOTIONLESS) {
                 if (stub == null) {
-                    LinkedTreeBuilder stubBuilder = new LinkedTreeBuilder(pipe);
+                    LinkedTreeBuilder stubBuilder = new LinkedTreeBuilder(pipe, Durability.TEMPORARY);
                     stubBuilder.open();
                     stubBuilder.startElement(elemName, Untyped.INSTANCE, validatedAttributes, namespaces, location, properties);
                     stubBuilder.endElement();

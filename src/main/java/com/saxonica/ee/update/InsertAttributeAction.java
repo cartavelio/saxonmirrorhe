@@ -4,6 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.MutableNodeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SimpleType;
 
@@ -58,6 +59,9 @@ public class InsertAttributeAction extends PendingUpdateAction {
 
     @Override
     public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) throws XPathException {
+        if (!element.getTreeInfo().isMutable()) {
+            throw new XPathException("Attempting to update a non-updatable element", SaxonErrorCode.SXUP0081);
+        }
         if (element.getAttributeValue(name.getURI(), name.getLocalPart()) != null) {
             throw new XPathException("Attempt to insert an attribute " +
                     name.getDisplayName() +

@@ -66,6 +66,16 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
     }
 
     /**
+     * Get the durability: always FLEETING
+     * @return {@link Durability#FLEETING}
+     */
+
+    @Override
+    public Durability getDurability() {
+        return Durability.FLEETING;
+    }
+
+    /**
      * Set the configuration
      * @param config the configuration to which this document belongs
      */
