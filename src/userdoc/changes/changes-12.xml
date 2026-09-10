@@ -530,6 +530,8 @@
         
         <p>From 12.4, <code>true()</code> and <code>false()</code> are allowed as annotation values. (In previous
         XQuery versions, only string literals and numeric literals were allowed).</p>
+        
+        <p>From 12.4, the comparand expression in a switch expression can be omitted, and defaults to <code>true()</code>.</p>
         <h2>XSLT extensions</h2>
         
         

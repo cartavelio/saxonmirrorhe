@@ -874,7 +874,10 @@ public class XQueryParser extends XPathParser {
                     grumble("Annotation parameter list cannot be empty");
                 }
                 while (true) {
-                    // nextToken();
+                    boolean negative = t.currentToken == Token.MINUS;
+                    if (negative) {
+                        nextToken();
+                    }
                     Literal arg;
                     switch (t.currentToken) {
                         case Token.STRING_LITERAL:
@@ -917,6 +920,13 @@ public class XQueryParser extends XPathParser {
                             return null;
                     }
                     GroundedValue val = arg.getGroundedValue();
+                    if (negative) {
+                        if (val instanceof NumericValue) {
+                            val = ((NumericValue)val).negate();
+                        } else {
+                            grumble("Minus sign in annotation parameter must be followed by a numeric literal");
+                        }
+                    }
                     if (val instanceof StringValue || val instanceof NumericValue || val instanceof BooleanValue) {
                         annotation.addAnnotationParameter((AtomicValue) val);
                     } else {
