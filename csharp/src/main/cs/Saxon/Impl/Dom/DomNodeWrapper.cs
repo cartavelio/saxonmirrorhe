@@ -97,6 +97,10 @@ namespace Saxon.Impl.Dom {
             return docTree.getSystemId();
         }
 
+        public override string getBaseURI() {
+            return this.node.BaseURI;
+        }
+
         public override object getUnderlyingNode() {
             return node;
         }
