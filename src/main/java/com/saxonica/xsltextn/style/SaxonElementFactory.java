@@ -1,8 +1,8 @@
 package com.saxonica.xsltextn.style;
 
 import com.saxonica.xsltextn.ExtensionElementCreator;
-import net.sf.saxon.style.XSLArray;
-import net.sf.saxon.style.XSLArrayMember;
+import com.saxonica.trans.XSLArray;
+import com.saxonica.trans.XSLArrayMember;
 import net.sf.saxon.style.XSLItemType;
 
 /**

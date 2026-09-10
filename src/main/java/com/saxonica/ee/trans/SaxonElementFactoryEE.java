@@ -1,9 +1,10 @@
 package com.saxonica.ee.trans;
 
 import com.saxonica.ee.xtupdate.*;
+import com.saxonica.trans.XSLArray;
+import com.saxonica.trans.XSLArrayMember;
 import com.saxonica.xsltextn.ExtensionElementCreator;
 import com.saxonica.xsltextn.style.*;
-import net.sf.saxon.style.*;
 
 /**
  * A Factory for Saxon extension nodes in the stylesheet tree. <br>

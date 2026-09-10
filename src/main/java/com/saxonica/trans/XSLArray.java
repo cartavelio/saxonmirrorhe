@@ -5,7 +5,7 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.style;
+package com.saxonica.trans;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
@@ -16,6 +16,9 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.om.*;
+import net.sf.saxon.style.Compilation;
+import net.sf.saxon.style.ComponentDeclaration;
+import net.sf.saxon.style.XSLSequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.SpecificFunctionType;
