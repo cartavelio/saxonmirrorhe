@@ -7,10 +7,7 @@
   task "${release}_samples_common"(
     type: Copy,
     dependsOn: ["${release}_samples_setup", "${release}_samples_cs"]
-  ) {
-    into "${buildDir}/output/${release}/resources/use-cases"
-    from "${projectDir}/src/use-cases"
-  }
+  ) { }
 
   task "${release}_samples_setup"(
     type: Copy
@@ -124,6 +121,9 @@ task run_config_tests(
             dependsOn: dependencies,
             description: "Run a transform using the generated-config-${options}.xml sample configuration file"
     ) {
+      doFirst {
+        mkdir "${buildDir}/samples/results/config/"
+      }
       inputs.files "${buildDir}/samples/config/generated-config-${options}.xml"
       workingDir = "${buildDir}/saxon-resources/samples"
 
