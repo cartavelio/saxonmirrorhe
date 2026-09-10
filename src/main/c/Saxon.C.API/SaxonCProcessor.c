@@ -294,7 +294,7 @@ const char * executeQueryToString(sxnc_environment environi, sxnc_processor ** p
 	   }
 	  
 	}
-    jobject obj = (jstring)((*(environi.env))->CallObjectMethod(environi.env, cpp, queryStrID, (cwd== NULL ? (*(environi.env))->NewStringUTF(environi.env, "") : (*(environi.env))->NewStringUTF(environi.env, cwd)), stringArray, objectArray ));
+    jobject obj = ((*(environi.env))->CallObjectMethod(environi.env, cpp, queryStrID, (cwd== NULL ? (*(environi.env))->NewStringUTF(environi.env, "") : (*(environi.env))->NewStringUTF(environi.env, cwd)), stringArray, objectArray ));
 
       (*(environi.env))->DeleteLocalRef(environi.env, objectArray);
       (*(environi.env))->DeleteLocalRef(environi.env, stringArray);

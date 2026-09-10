@@ -50,7 +50,7 @@ void testApplyTemplatesString1(Xslt30Processor *trans, sResultCount *sresult) {
     cout << "Test: testApplyTemplatesString1:" << endl;
 //    trans->setupXslMessage(false);
 
-    XsltExecutable *executable = trans->compileFromFile("test.xsl");
+    XsltExecutable *executable = trans->compileFromFile("../data/test.xsl");
 
     if(executable== nullptr) {
         sresult->failure++;
@@ -61,7 +61,7 @@ void testApplyTemplatesString1(Xslt30Processor *trans, sResultCount *sresult) {
         }
         return;
     }
-    executable->setInitialMatchSelectionAsFile("cat.xml");
+    executable->setInitialMatchSelectionAsFile("../data/cat.xml");
 
     const char *output = executable->applyTemplatesReturningString();
     if (output == nullptr) {
@@ -111,13 +111,13 @@ void testTransformToStringExtensionFunc(SaxonProcessor *processor, Xslt30Process
     executable->setProperty("extc", "home/ond1/work/svn/latest9.9-saxonc/samples/cppTests/cppExtensionFunction");
 
     if (nativeFound) {
-        const char *output = executable->transformFileToString("cat.xml");
+        const char *output = executable->transformFileToString("../data/cat.xml");
 
         if (output == nullptr) {
             SaxonProcessor::sxn_environ->env->ExceptionDescribe();
             printf("result is null ====== FAIL ======  \n");
             sresult->failure++;
-            sresult->failureList.push_back("testTransformToStringExnteionFunc");
+            sresult->failureList.push_back("testTransformToStringExtensionFunc");
         } else {
             sresult->success++;
             printf("result is OK \n");
@@ -125,7 +125,7 @@ void testTransformToStringExtensionFunc(SaxonProcessor *processor, Xslt30Process
         fflush(stdout);
         delete output;
     } else {
-        printf("native Class not foun ====== FAIL ====== ");
+        printf("native Class not found ====== FAIL ====== ");
         sresult->failure++;
         sresult->failureList.push_back("testTransformToStringExtensionFunc");
     }
@@ -141,7 +141,7 @@ void testApplyTemplatesString2(SaxonProcessor *processor, Xslt30Processor *trans
     cout << "Test: testApplyTemplatesString2:" << endl;
 
 
-    XdmNode *input = processor->parseXmlFromFile("cat.xml");
+    XdmNode *input = processor->parseXmlFromFile("../data/cat.xml");
 
     if (input== nullptr) {
         cout << "Source document is null." << endl;
@@ -153,7 +153,7 @@ void testApplyTemplatesString2(SaxonProcessor *processor, Xslt30Processor *trans
         return;
 
     }
-    XsltExecutable * executable = trans->compileFromFile("test.xsl");
+    XsltExecutable * executable = trans->compileFromFile("../data/test.xsl");
     if(executable == nullptr) {
         sresult->failure++;
         sresult->failureList.push_back("testApplyTemplatesString2");
@@ -190,7 +190,7 @@ void testApplyTemplates2a_Error(SaxonProcessor *processor, Xslt30Processor *tran
 
     cout << "Test: TransformToString2a_Error:" << endl;
 
-    XdmNode *input = processor->parseXmlFromFile("cat.xml");
+    XdmNode *input = processor->parseXmlFromFile("../data/cat.xml");
 
     if (input == nullptr) {
         cout << "Source document is null. ====== FAIL ======" << endl;
@@ -292,7 +292,7 @@ void testTransformToString3(SaxonProcessor *processor, Xslt30Processor *trans, s
         return;
     }
 
-    XsltExecutable * executable = trans->compileFromFile("test.xsl");
+    XsltExecutable * executable = trans->compileFromFile("../data/test.xsl");
 
     if(executable== nullptr) {
         sresult->failure++;
@@ -1168,7 +1168,7 @@ void exampleSimple_xmark(Xslt30Processor *proc, sResultCount *sresult) {
 
     proc->setJustInTimeCompilation(true);
 
-    XdmValue *result = proc->transformFileToValue("xmark100k.xml", "q12.xsl");
+    XdmValue *result = proc->transformFileToValue("../data/xmark100k.xml", "../data/q12.xsl");
 
     if (result != nullptr && !proc->exceptionOccurred()) {
         cout << "XdmNode returned" << endl;
@@ -1197,8 +1197,8 @@ void testPackage1(Xslt30Processor *trans, sResultCount *sresult) {
     trans->clearParameters();
 
 
-    trans->compileFromFileAndSave("test.xsl", "test1.sef");
-    const char *output = trans->transformFileToString("cat.xml", "test1.sef");
+    trans->compileFromFileAndSave("../data/test.xsl", "test1.sef");
+    const char *output = trans->transformFileToString("../data/cat.xml", "test1.sef");
 
     if (output== nullptr) {
         printf("result is null \n");
@@ -1227,7 +1227,7 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
     cout << endl << "Test: testPackage1a" << endl;
     trans->clearParameters();
 
-    trans->compileFromFileAndSave("test.xsl", "test1a.sef");
+    trans->compileFromFileAndSave("../data/test.xsl", "test1a.sef");
 
     if(trans->exceptionOccurred()) {
         const char *message = trans->getErrorMessage();
@@ -1259,7 +1259,7 @@ void testPackage1a(Xslt30Processor *trans, sResultCount *sresult) {
 
     }
 
-    executable->setInitialMatchSelectionAsFile("cat.xml");
+    executable->setInitialMatchSelectionAsFile("../data/cat.xml");
     const char * output = executable->applyTemplatesReturningString();
     if (output== nullptr) {
         printf("result is null \n");
@@ -1292,9 +1292,9 @@ void testPackage2_Error(Xslt30Processor *trans, sResultCount *sresult) {
     const char *stylesheet = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='2.0'>       <xsl:param name='values' select='(2,3,4)' /><xsl:output method='xml' indent='yes' /><xsl:template match='*'><output><xsl:for-each select='$values' ><out><xsl:value-of select='. * 3'/></out><xsl:for-each></output></xsl:template><xsl:stylesheet>";
 
     trans->compileFromStringAndSave(stylesheet, "test2.sef");
-    std::cerr<<"testx30 cp0"<<std::endl;
+
     if(trans->exceptionOccurred() || trans->getException() != nullptr) {
-        std::cerr<<"testx30 cp0-1"<<std::endl;
+
         const char *message = trans->getErrorMessage();
         if (message != nullptr) {
             cout << "Error message =" << message << endl;
@@ -1304,7 +1304,7 @@ void testPackage2_Error(Xslt30Processor *trans, sResultCount *sresult) {
         return;
 
     }
-    std::cerr<<"testx30 cp2"<<std::endl;
+
     trans->exceptionClear();
     sresult->failure++;
     sresult->failureList.push_back("testPackage2_Error");
