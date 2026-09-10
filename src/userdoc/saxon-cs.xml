@@ -362,7 +362,14 @@ need to mix use of the .NET API with the internal classes converted from the ori
       
       <!--<p>One known restriction is that the value <code>alternate=blanked</code> is not recognized.</p>
       -->
-      <p>Localization of numbers and dates is not currently available for languages other than English.</p>
+      <p>Localization of dates (specifically, month names and day-of-the-week names for different languages,
+         as requested using <code>format-date()</code>)
+         is implemented from SaxonCS 11.1. The data is obtained from the .NET platform interfaces: 
+         <code>CultureInfo.DateTimeFormatInfo</code>.</p>
+      
+      <p>Spelled-out formatting of numbers ("one", "two", "three"), which can be requested using <code>&lt;xsl:number&gt;</code>,
+      <code>format-integer()</code>, or <code>format-date()</code>, is not available for languages other than English.
+      (We have not been able to find a .NET library that provides this capability).</p>
    </section>
    <section id="restrictions" title="Restrictions" class="csonly">
       <h1>Restrictions</h1>
