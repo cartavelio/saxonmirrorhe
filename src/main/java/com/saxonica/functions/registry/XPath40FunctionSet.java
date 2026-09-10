@@ -390,7 +390,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, inScopeNamespacesResult, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, ONE, null));
 
-        register("intersperse", 2, e -> e.populate(Intersperse::new, AnyItemType.getInstance(), STAR, LATE)
+        register("sequence-join", 2, e -> e.populate(SequenceJoin::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null));
 

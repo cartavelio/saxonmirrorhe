@@ -19,7 +19,7 @@ import net.sf.saxon.type.Type;
  */
 
 
-public class Intersperse extends SystemFunction {
+public class SequenceJoin extends SystemFunction {
 
     /**
      * Evaluate the expression as a general function call

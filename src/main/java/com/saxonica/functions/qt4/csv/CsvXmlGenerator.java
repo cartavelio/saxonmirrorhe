@@ -55,7 +55,7 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
 
         ArrayItem firstRow = (ArrayItem) rows.next();
         if (firstRow == null) {
-            generateRows(EmptyIterator.getInstance(), Collections.emptyList());
+            generateRows(EmptyIterator.getInstance(), explicitColumnNamesAsStrings());
             generator.endDocument();
             return generator.getResult();
         }
@@ -74,16 +74,21 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
         } else {
             rows = new PrependSequenceIterator(firstRow, rows);
             ItemMappingIterator adjustedRows = ItemMappingIterator.map(rows, rowAdjuster);
-            List<String> columnNames = new ArrayList<>();
-            if (explicitColumnNames != null) {
-                for (Item name : explicitColumnNames.asIterable()) {
-                    columnNames.add(name.getStringValue());
-                }
-            }
+            List<String> columnNames = explicitColumnNamesAsStrings();
             generateRows(adjustedRows, columnNames);
         }
         generator.endDocument();
         return generator.getResult();
+    }
+
+    private List<String> explicitColumnNamesAsStrings() {
+        List<String> columnNames = new ArrayList<>();
+        if (explicitColumnNames != null) {
+            for (Item name : explicitColumnNames.asIterable()) {
+                columnNames.add(name.getStringValue());
+            }
+        }
+        return columnNames;
     }
 
     /**

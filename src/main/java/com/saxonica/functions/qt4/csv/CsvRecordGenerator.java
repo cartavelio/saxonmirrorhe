@@ -68,6 +68,13 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
 
         ArrayItem firstRow = (ArrayItem)rows.next();
         if (firstRow == null) {
+            if (explicitColumnNames != null) {
+                new ShapedMap(RESULT_RECORD_SHAPE,
+                              explicitColumnNames,
+                              EmptyMap.getInstance(),
+                              EmptySequence.getInstance(),
+                              makeGetterFunction(EmptySequence.getInstance(), null));
+            }
             return EMPTY_CSV;
         }
         if (rowAdjuster == null) {
