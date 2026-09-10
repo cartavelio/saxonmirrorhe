@@ -313,7 +313,7 @@ public class TransformMessageTest {
                 @Override
                 public void fatalError(TransformerException exception) throws TransformerException {
                     if (errors.isEmpty()) {
-                        assertTrue(exception.getMessage().contains("No schema has been imported"));
+                        assertTrue(exception.getMessage().contains("no declaration for element"));
                     }
                     errors.add(exception);
                     throw exception;

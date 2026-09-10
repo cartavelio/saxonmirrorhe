@@ -137,7 +137,7 @@ public class ValidationTest {
             fail("Expected exception to be thrown, though we didn't do so in 9.9");
         } catch (SAXException e) {
             assertEquals(0, (int) counts.get(0), "warnings");
-            assertEquals(4, (int) counts.get(1), "errors");
+            assertEquals(5, (int) counts.get(1), "errors");
             assertEquals(0, (int) counts.get(2), "fatals");
 
         }

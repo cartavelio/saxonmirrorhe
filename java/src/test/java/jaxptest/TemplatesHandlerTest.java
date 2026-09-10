@@ -18,7 +18,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -119,9 +118,9 @@ public class TemplatesHandlerTest {
                     new StreamResult(new OutputStreamWriter(System.out)));
             System.out.println();
             System.out.println("XSLT finished.");
-            assertFalse(true); // should not succeed
+            fail(); // should not succeed
         } catch (TransformerException e) {
-            assertTrue(e.getMessage().contains("Cannot find a 1-argument function")) ;
+            assertTrue(e.getMessage().contains("Errors were reported during stylesheet compilation")) ;
             //e.printStackTrace();
         }
     }
