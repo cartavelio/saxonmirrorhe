@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  * Handle validating option parameters that can't be handled using the <code>OptionsParameter</code> machinery.
  *
  * <p>Specifically, ensure that mutually exclusive options are not specified together, and that all integer value
- * options are positive (>0), which is required, but we can't use <code>xs:positiveInteger</code> to enforce it through
+ * options are positive (&gt;0), which is required, but we can't use <code>xs:positiveInteger</code> to enforce it through
  * type checking.</p>
  */
 class CsvOptionsParameterValidator {
