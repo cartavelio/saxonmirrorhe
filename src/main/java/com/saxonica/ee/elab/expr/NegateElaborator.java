@@ -20,13 +20,21 @@ public class NegateElaborator extends ItemElaborator {
         final boolean maybeEmpty = Cardinality.allowsZero(exp.getBaseExpression().getCardinality());
         final boolean backwardsCompatible = exp.isBackwardsCompatible();
 
-        return context -> {
-            NumericValue v1 = (NumericValue)argEval.eval(context);
-            if (maybeEmpty && v1 == null) {
-                return backwardsCompatible ? DoubleValue.NaN : null;
+        if (maybeEmpty) {
+            if (backwardsCompatible) {
+                return context -> {
+                    NumericValue v1 = (NumericValue) argEval.eval(context);
+                    return v1 == null ? DoubleValue.NaN : v1.negate();
+                };
+            } else {
+                return context -> {
+                    NumericValue v1 = (NumericValue) argEval.eval(context);
+                    return v1 == null ? null : v1.negate();
+                };
             }
-            return v1.negate();
-        };
+        } else {
+            return context -> ((NumericValue) argEval.eval(context)).negate();
+        }
     }
 
 }
