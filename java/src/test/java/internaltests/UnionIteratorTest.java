@@ -4,7 +4,6 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.UnionIterator;
 import net.sf.saxon.expr.sort.LocalOrderComparer;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.Processor;
@@ -74,10 +73,10 @@ public class UnionIteratorTest {
                 iters.add(new ListIterator.Of<>(list));
             }
             UnionIterator union = new UnionIterator(iters, LocalOrderComparer.getInstance());
-            assertEquals("a", union.next().getLocalPart());
-            assertEquals("b", union.next().getLocalPart());
-            assertEquals("c", union.next().getLocalPart());
-            assertEquals("f", union.next().getLocalPart());
+            assertEquals("a", ((NodeInfo) union.next()).getLocalPart());
+            assertEquals("b", ((NodeInfo) union.next()).getLocalPart());
+            assertEquals("c", ((NodeInfo) union.next()).getLocalPart());
+            assertEquals("f", ((NodeInfo) union.next()).getLocalPart());
             assertNull(union.next());
         } catch (XPathException e) {
             fail();
