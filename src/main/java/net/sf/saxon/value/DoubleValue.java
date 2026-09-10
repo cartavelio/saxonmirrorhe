@@ -223,7 +223,7 @@ public final class DoubleValue extends NumericValue {
 
     public static UnicodeString doubleToString(double value) {
         double d = Math.abs(value);
-        return FloatingPointConverter.convertDouble(value, d != 0 & (d >= 1000000 || d < 0.000001));
+        return FloatingPointConverter.convertDouble(value, d != 0 && (d >= 1000000 || d < 0.000001));
     }
 
 
