@@ -956,6 +956,15 @@
          })"/>     
    </xsl:template>
    
+   <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.ma.map.KeyValuePair']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'key#0':             '%scope%.key',
+         'value#0':           '%scope%.value',
+         '*':                 '%scope%.%name%(%args%)' 
+         })"/>     
+   </xsl:template>
+   
    <!--Handle java.lang.Iterator, which becomes IEnumerator. -->
    <!--This conversion is optimistic, because the methods hasNext() and next() have no direct
       equivalents (hasNext() shouldn't change the iterator position, but MoveNext does). We
