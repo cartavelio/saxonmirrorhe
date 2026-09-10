@@ -390,6 +390,7 @@ public class QT3TestDriverHE extends TestDriver {
 
         hostLang = spec.shortSpecName;
         langVersion = spec.version;
+        xpath.setLanguageVersion(langVersion);
 
         if (isSlow(testCaseName)) {
             writeTestcaseElement(testCaseName, "tooBig", "test is excessively slow");
@@ -581,7 +582,7 @@ public class QT3TestDriverHE extends TestDriver {
                             testXpc.setLanguageVersion(langVersion);
                             testXpc.declareNamespace("fn", NamespaceConstant.FN);
                             testXpc.declareNamespace("xs", NamespaceConstant.SCHEMA);
-                            //testXpc.declareNamespace("math", NamespaceConstant.MATH);
+                            testXpc.declareNamespace("math", NamespaceConstant.MATH);
                             testXpc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
                             testXpc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
 

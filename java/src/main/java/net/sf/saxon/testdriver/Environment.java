@@ -106,6 +106,7 @@ public class Environment implements ResourceResolver {
 
         environment.xpathCompiler = environment.processor.newXPathCompiler();
         environment.xpathCompiler.setBaseURI(baseURI);
+
         environment.xqueryCompiler = environment.processor.newXQueryCompiler();
         if (spec == Spec.XQ40 || spec == Spec.XP40) {
             environment.xqueryCompiler.setLanguageVersion("4.0");
@@ -481,6 +482,9 @@ public class Environment implements ResourceResolver {
                 }
                 if (environment.xsltCompiler != null) {
                     environment.xsltCompiler.useSchema(schema);
+                }
+                if (environment.xpathCompiler != null) {
+                    environment.xpathCompiler.useSchema(schema);
                 }
             } catch (SaxonApiException err) {
                 driver.println("*** Failed to load schema: " + err.getMessage());
