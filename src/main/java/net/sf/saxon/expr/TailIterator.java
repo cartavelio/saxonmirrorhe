@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.*;
 
@@ -62,11 +63,15 @@ public class TailIterator
         } else if (base instanceof ArrayIterator) {
             return ((ArrayIterator) base).makeSliceIterator(start, Integer.MAX_VALUE);
         } else if (base instanceof GroundedIterator && ((GroundedIterator)base).isActuallyGrounded()) {
-            GroundedValue value = SequenceTool.toGroundedValue(base);
-            if (start > value.getLength()) {
-                return EmptyIterator.getInstance();
-            } else {
-                return new ValueTailIterator(value, start - 1);
+            try {
+                GroundedValue value = SequenceTool.toGroundedValue(base);
+                if (start > value.getLength()) {
+                    return EmptyIterator.getInstance();
+                } else {
+                    return new ValueTailIterator(value, start - 1);
+                }
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
             }
         } else {
             // discard the first n-1 items from the underlying iterator

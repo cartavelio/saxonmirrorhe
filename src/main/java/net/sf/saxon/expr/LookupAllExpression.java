@@ -128,7 +128,11 @@ public class LookupAllExpression extends UnaryExpression {
         }
 
         if (getBaseExpression() instanceof Literal) {
-            return new Literal(SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+            try {
+                return new Literal(SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
         return this;
@@ -139,7 +143,11 @@ public class LookupAllExpression extends UnaryExpression {
         getOperand().optimize(visitor, contextItemType);
 
         if (getBaseExpression() instanceof Literal) {
-            return new Literal(SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+            try {
+                return new Literal(SequenceTool.toGroundedValue(iterate(visitor.makeDynamicContext())));
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
         
         // See W3C bug 30228. In the interests of keeping certain tests streamable, we do a rewrite of [A,B,C]?*

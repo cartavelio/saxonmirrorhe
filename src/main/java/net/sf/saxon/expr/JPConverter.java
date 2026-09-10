@@ -21,6 +21,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.*;
@@ -296,7 +297,11 @@ public abstract class JPConverter {
 
         @Override
         public GroundedValue convert(Object object, XPathContext context) throws XPathException {
-            return SequenceTool.toGroundedValue(((SequenceIterator)object));
+            try {
+                return SequenceTool.toGroundedValue(((SequenceIterator)object));
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
 
         @Override

@@ -14,6 +14,7 @@ import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
@@ -126,8 +127,12 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
     }
 
     private static GroundedValue atomize(Sequence input) throws XPathException {
-        SequenceIterator iterator = input.iterate();
-        SequenceIterator mapper = Atomizer.getAtomizingIterator(iterator, false);
-        return SequenceTool.toGroundedValue(mapper);
+        try {
+            SequenceIterator iterator = input.iterate();
+            SequenceIterator mapper = Atomizer.getAtomizingIterator(iterator, false);
+            return SequenceTool.toGroundedValue(mapper);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 }

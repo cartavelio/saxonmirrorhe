@@ -781,15 +781,19 @@ public class UseWhenFilter extends ProxyReceiver {
      */
 
     public Sequence evaluateStatic(String expression, Location locationId, UseWhenStaticContext staticContext) throws XPathException {
-        setNamespaceBindings(staticContext);
-        Expression expr = ExpressionTool.make(expression, staticContext,
-                                              0, Token.EOF, null);
-        expr = typeCheck(expr, staticContext);
-        SlotManager stackFrameMap = getPipelineConfiguration().getConfiguration().makeSlotManager();
-        ExpressionTool.allocateSlots(expr, stackFrameMap.getNumberOfVariables(), stackFrameMap);
-        XPathContext dynamicContext = makeDynamicContext(staticContext);
-        ((XPathContextMajor) dynamicContext).openStackFrame(stackFrameMap);
-        return SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
+        try {
+            setNamespaceBindings(staticContext);
+            Expression expr = ExpressionTool.make(expression, staticContext,
+                                                  0, Token.EOF, null);
+            expr = typeCheck(expr, staticContext);
+            SlotManager stackFrameMap = getPipelineConfiguration().getConfiguration().makeSlotManager();
+            ExpressionTool.allocateSlots(expr, stackFrameMap.getNumberOfVariables(), stackFrameMap);
+            XPathContext dynamicContext = makeDynamicContext(staticContext);
+            ((XPathContextMajor) dynamicContext).openStackFrame(stackFrameMap);
+            return SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
 

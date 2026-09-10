@@ -647,6 +647,8 @@ public class ConfigurationReader implements Receiver {
             value = SequenceTool.toGroundedValue(exp.iterate(env.makeEarlyEvaluationContext()));
         } catch (XPathException e) {
             error(e);
+        } catch (UncheckedXPathException e) {
+            error(e.getXPathException());
         }
         if (currentPackage.staticParams == null) {
             currentPackage.staticParams = new HashMap<>();
