@@ -2458,7 +2458,7 @@ int main(int argc, char* argv[]) {
     }
     int check =0;
 
-    SaxonProcessor *processor = new SaxonProcessor(false);
+    SaxonProcessor *processor = new SaxonProcessor(true);
     //setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
 
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
