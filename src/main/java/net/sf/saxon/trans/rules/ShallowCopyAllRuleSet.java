@@ -12,7 +12,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.*;
@@ -221,7 +220,7 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
 
         @Override
         public void append(Item item) throws XPathException {
-            if (item instanceof Parcel) {
+            if (RecordTest.VALUE_RECORD.matches(item, getConfiguration().getTypeHierarchy())) {
                 super.append(item);
             } else {
                 mustBeValueRecord(locationId);
