@@ -348,7 +348,7 @@ public class Processor implements Configuration.ApiProvider {
     /**
      * Test whether this processor is schema-aware
      *
-     * @return true if this this processor is licensed for schema processing, false otherwise
+     * @return true if this processor is licensed for schema processing, false otherwise
      */
 
     public boolean isSchemaAware() {
