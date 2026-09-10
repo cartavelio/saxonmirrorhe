@@ -37,7 +37,7 @@ public class XSLNamespaceAlias extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String stylesheetPrefix = null;
         String resultPrefix = null;

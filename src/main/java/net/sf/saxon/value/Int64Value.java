@@ -10,6 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -19,6 +20,7 @@ import net.sf.saxon.type.ValidationFailure;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 
 /**
  * An integer value: note this is a subtype of decimal in XML Schema, not a primitive type.
@@ -421,7 +423,7 @@ public final class Int64Value extends IntegerValue {
     public UnicodeString getPrimitiveStringValue() {
         // Copied from Long.toString(), but generating single-byte characters
         if (value == Long.MIN_VALUE) {
-            return new Twine8(new byte[]{'-','9','2','2','3','3','7','2','0','3','6','8','5','4','7','7','5','8','0','8'});
+            return StringConstants.MIN_LONG;
         }
         int size = (value < 0) ? stringSize(-value) + 1 : stringSize(value);
         byte[] buf = new byte[size];
@@ -448,8 +450,8 @@ public final class Int64Value extends IntegerValue {
             // really: r = i - (q * 100);
             r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
             i = q;
-            buf[--charPos] = DigitOnes[r];
-            buf[--charPos] = DigitTens[r];
+            buf[--charPos] = DIGIT_ONES[r];
+            buf[--charPos] = DIGIT_TENS[r];
         }
 
         // Get 2 digits/iteration using ints
@@ -460,8 +462,8 @@ public final class Int64Value extends IntegerValue {
             // really: r = i2 - (q * 100);
             r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
             i2 = q2;
-            buf[--charPos] = DigitOnes[r];
-            buf[--charPos] = DigitTens[r];
+            buf[--charPos] = DIGIT_ONES[r];
+            buf[--charPos] = DIGIT_TENS[r];
         }
 
         // Fall thru to fast mode for smaller numbers
@@ -469,7 +471,7 @@ public final class Int64Value extends IntegerValue {
         do {
             q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
-            buf[--charPos] = digits[r];
+            buf[--charPos] = DIGITS[r];
             i2 = q2;
         } while (i2 != 0);
 
@@ -478,33 +480,32 @@ public final class Int64Value extends IntegerValue {
         }
     }
 
-    private final static byte[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
-    private final static byte[] DigitTens = {
-            '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',
-            '1', '1', '1', '1', '1', '1', '1', '1', '1', '1',
-            '2', '2', '2', '2', '2', '2', '2', '2', '2', '2',
-            '3', '3', '3', '3', '3', '3', '3', '3', '3', '3',
-            '4', '4', '4', '4', '4', '4', '4', '4', '4', '4',
-            '5', '5', '5', '5', '5', '5', '5', '5', '5', '5',
-            '6', '6', '6', '6', '6', '6', '6', '6', '6', '6',
-            '7', '7', '7', '7', '7', '7', '7', '7', '7', '7',
-            '8', '8', '8', '8', '8', '8', '8', '8', '8', '8',
-            '9', '9', '9', '9', '9', '9', '9', '9', '9', '9',
-    };
+    private final static byte[] DIGITS = "0123456789".getBytes(StandardCharsets.UTF_8);
 
-    private final static byte[] DigitOnes = {
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    };
+    private final static byte[] DIGIT_TENS =
+            (   "0000000000" +
+                "1111111111" +
+                "2222222222" +
+                "3333333333" +
+                "4444444444" +
+                "5555555555" +
+                "6666666666" +
+                "7777777777" +
+                "8888888888" +
+                "9999999999" ).getBytes(StandardCharsets.UTF_8);
+
+    private final static byte[] DIGIT_ONES =
+            (   "0123456789" +
+                "0123456789" +
+                "0123456789" +
+                "0123456789" +
+                "0123456789" +
+                "0123456789" +
+                "0123456789" +
+                "0123456789" +
+                "0123456789" +
+                "0123456789" ).getBytes(StandardCharsets.UTF_8);
 
 
     // Requires positive x

@@ -53,7 +53,7 @@ public class XSLDecimalFormat extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         if (prepared) {
             return;

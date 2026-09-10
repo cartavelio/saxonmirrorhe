@@ -98,7 +98,7 @@ public class ItemTypePattern extends Pattern {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return 0x7a83d1a8 ^ itemType.hashCode();
     }
 

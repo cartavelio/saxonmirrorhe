@@ -119,7 +119,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         //prepareSimpleAttributes();
 

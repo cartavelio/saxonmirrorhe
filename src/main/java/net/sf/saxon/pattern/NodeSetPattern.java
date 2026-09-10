@@ -236,7 +236,7 @@ public class NodeSetPattern extends Pattern {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return 0x73108728 ^ getSelectionExpression().hashCode();
     }
 

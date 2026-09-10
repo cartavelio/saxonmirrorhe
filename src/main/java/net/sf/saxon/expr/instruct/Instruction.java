@@ -105,7 +105,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
@@ -248,7 +248,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         if (alwaysCreatesNewNodes()) {
             p |= StaticProperty.ALL_NODES_NEWLY_CREATED;

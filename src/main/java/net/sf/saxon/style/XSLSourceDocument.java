@@ -56,7 +56,7 @@ public class XSLSourceDocument extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
@@ -67,7 +67,7 @@ public class XSLSourceDocument extends StyleElement {
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         parseOptions = new ParseOptions(getConfiguration().getParseOptions());
 

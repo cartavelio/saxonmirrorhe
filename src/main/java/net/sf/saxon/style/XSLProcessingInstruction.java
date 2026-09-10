@@ -22,7 +22,7 @@ public class XSLProcessingInstruction extends XSLLeafNodeConstructor {
     Expression name;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         name = prepareAttributesNameAndSelect();
     }
 

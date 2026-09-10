@@ -46,7 +46,7 @@ public class AbsentExtensionElement extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
@@ -125,7 +125,7 @@ public class AbsentExtensionElement extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
     }
 
     /**
@@ -134,7 +134,7 @@ public class AbsentExtensionElement extends StyleElement {
      */
 
     @Override
-    public boolean markTailCalls() {
+    protected boolean markTailCalls() {
         useTailRecursion = true;
         if (instruction != null) {
             instruction.setTailRecursive(true);

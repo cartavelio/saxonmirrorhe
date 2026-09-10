@@ -491,7 +491,7 @@ public class StandardDiagnostics {
      * @return the expanded message
      */
 
-    public CharSequence expandSpecialCharacters(CharSequence in, int threshold) {
+    public String expandSpecialCharacters(String in, int threshold) {
         if (threshold >= UTF16CharacterSet.NONBMP_MAX) {
             return in;
         }
@@ -508,7 +508,7 @@ public class StandardDiagnostics {
                 fsb.append("]");
             }
         }
-        return fsb;
+        return fsb.toString();
     }
 
 

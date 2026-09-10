@@ -47,7 +47,7 @@ public class XSLCatch extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
@@ -63,7 +63,7 @@ public class XSLCatch extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String selectAtt = null;
         String errorAtt = null;

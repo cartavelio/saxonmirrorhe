@@ -47,7 +47,7 @@ public class SQLColumn extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return false;
     }
 
@@ -57,7 +57,7 @@ public class SQLColumn extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String selectAtt = null;
         String nameAtt = null;

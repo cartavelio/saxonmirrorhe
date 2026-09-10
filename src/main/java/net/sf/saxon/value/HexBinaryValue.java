@@ -52,35 +52,6 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
     }
 
     /**
-     * Constructor: create a HexBinary value from a supplied string in hexBinary encoding,
-     * with a specified type. This method throws no checked exceptions; the caller is expected
-     * to ensure that the string is a valid Base64 lexical representation, that it conforms
-     * to the specified type, and that the type is indeed a subtype of xs:base64Binary.
-     * An unchecked exception such as an IllegalArgumentException may be thrown if these
-     * conditions are not satisfied, but this is not guaranteed.
-     *
-     * @param s    the value in hexBinary encoding, with no leading or trailing whitespace
-     * @param type the atomic type. This must be xs:base64binary or a subtype.
-     */
-
-    public HexBinaryValue(/*@NotNull*/ CharSequence s, AtomicType type) {
-        if ((s.length() & 1) != 0) {
-            throw new IllegalArgumentException(
-                    "A hexBinary value must contain an even number of characters");
-        }
-        binaryValue = new byte[s.length() / 2];
-        try {
-            for (int i = 0; i < binaryValue.length; i++) {
-                binaryValue[i] = (byte) ((fromHex(s.charAt(2 * i)) << 4) +
-                        fromHex(s.charAt(2 * i + 1)));
-            }
-        } catch (XPathException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-        typeLabel = type;
-    }
-
-    /**
      * Constructor: create a hexBinary value from a given array of bytes
      *
      * @param value the value as an array of bytes
@@ -137,7 +108,7 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, Compa
      */
 
     private int fromHex(int c) throws XPathException {
-        int d = "0123456789ABCDEFabcdef".indexOf(c);
+        int d = c < 255 ? "0123456789ABCDEFabcdef".indexOf((char)c) : -1;
         if (d > 15) {
             d = d - 6;
         }

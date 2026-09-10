@@ -484,7 +484,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (resultWhenEmpty != null) {
             return StaticProperty.EXACTLY_ONE;
         } else {

@@ -298,7 +298,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
     }
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return getBasePattern().hashCode() ^ getPredicate().hashCode();
     }
 

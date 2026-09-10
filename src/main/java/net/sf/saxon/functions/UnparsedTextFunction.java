@@ -138,12 +138,12 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      *
      * @param checker predicate for checking whether characters are valid XML characters
      * @param reader  Reader to be used for reading the file
-     * @return the contents of the file, as a {@link CharSequence}
+     * @return the contents of the file, as a {@link UnicodeString}
      * @throws IOException    if a failure occurs reading the file
      * @throws XPathException if the file contains illegal characters
      */
 
-    public static CodePoints readFile(IntPredicate checker, Reader reader) throws IOException, XPathException {
+    public static UnicodeString readFile(IntPredicate checker, Reader reader) throws IOException, XPathException {
         UnicodeBuilder buffer = new UnicodeBuilder();
         readFile(checker, reader, new UniStringConsumer() {
             @Override

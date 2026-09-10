@@ -10,7 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringItem;
@@ -27,8 +27,8 @@ public class LocalName_1 extends ScalarSystemFunction {
     }
 
     @Override
-    public ZeroOrOne resultWhenEmpty() {
-        return ZERO_LENGTH_STRING;
+    public Sequence resultWhenEmpty() {
+        return StringItem.EMPTY_STRING;
     }
 
     @Override

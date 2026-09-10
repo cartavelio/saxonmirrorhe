@@ -297,7 +297,7 @@ public final class GeneralNodePattern extends Pattern {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return 83641 ^ equivalentExpr.hashCode();
     }
 

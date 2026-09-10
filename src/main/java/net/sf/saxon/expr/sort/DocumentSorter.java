@@ -217,7 +217,7 @@ public class DocumentSorter extends UnaryExpression {
 
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return getBaseExpression().getSpecialProperties() | StaticProperty.ORDERED_NODESET;
     }
 

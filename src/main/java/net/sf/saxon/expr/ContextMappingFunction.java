@@ -19,6 +19,7 @@ import net.sf.saxon.trans.XPathException;
  *
  */
 
+@FunctionalInterface
 public interface ContextMappingFunction {
 
     /**

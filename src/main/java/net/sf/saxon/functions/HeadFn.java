@@ -36,8 +36,8 @@ public class HeadFn extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item head = arguments[0].head();
-        return new ZeroOrOne(head);
+        return new ZeroOrOne<>(head);
     }
 }

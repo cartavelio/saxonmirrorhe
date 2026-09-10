@@ -39,12 +39,12 @@ public class XSLNextMatch extends StyleElement {
      */
 
     @Override
-    public boolean mayContainFallback() {
+    protected boolean mayContainFallback() {
         return true;
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();

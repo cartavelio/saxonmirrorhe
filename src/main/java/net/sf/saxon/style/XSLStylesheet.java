@@ -35,7 +35,7 @@ public class XSLStylesheet extends XSLModuleRoot {
      */
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         processDefaultCollationAttribute();
         processDefaultMode();

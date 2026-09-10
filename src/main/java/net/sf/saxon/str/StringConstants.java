@@ -14,6 +14,8 @@ public class StringConstants {
     public static final UnicodeString ONE = new Twine8(new byte[]{'1'});
     public static final UnicodeString ZERO = new Twine8(new byte[]{'0'});
 
+    public static final UnicodeString MIN_LONG = new Twine8(bytes("-9223372036854775808"));
+
     public static final byte[] COMMENT_START = bytes("<!--");
     public static final byte[] COMMENT_END = bytes("-->");
     public static final byte[] PI_START = bytes("<?");
@@ -32,5 +34,6 @@ public class StringConstants {
     public static final byte[] ESCAPE_QUOT = bytes("&#34;");
     public static final byte[] ESCAPE_APOS = bytes("&#39;");
     public static final byte[] ESCAPE_NBSP = bytes("&nbsp;");
+
 }
 

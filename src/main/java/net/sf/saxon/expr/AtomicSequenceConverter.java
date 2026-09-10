@@ -269,7 +269,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties() | StaticProperty.NO_NODES_NEWLY_CREATED;
         if (requiredItemType == BuiltInAtomicType.UNTYPED_ATOMIC) {
             p &= ~StaticProperty.NOT_UNTYPED_ATOMIC;
@@ -399,7 +399,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getBaseExpression().getCardinality();
     }
 
@@ -418,7 +418,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return super.computeHashCode() ^ requiredItemType.hashCode();
     }
 

@@ -13,6 +13,7 @@ import net.sf.saxon.trans.XPathException;
 /**
  * General action class which can be used to process all nodes on an expression tree
  */
+@FunctionalInterface
 public interface ExpressionAction {
 
     /**

@@ -154,7 +154,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NO_NODES_NEWLY_CREATED | StaticProperty.NOT_UNTYPED_ATOMIC;
     }
@@ -200,7 +200,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getBaseExpression().getCardinality();
     }
 
@@ -218,7 +218,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return super.computeHashCode();
     }
 

@@ -51,7 +51,7 @@ public class XSLOutput extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         String nameAtt = null;
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();

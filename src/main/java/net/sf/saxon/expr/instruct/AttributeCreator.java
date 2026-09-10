@@ -152,7 +152,7 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
      * @return a set of flags indicating static properties of this expression
      */
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         if (getValidationAction() == Validation.SKIP) {
             p |= StaticProperty.ALL_NODES_UNTYPED;

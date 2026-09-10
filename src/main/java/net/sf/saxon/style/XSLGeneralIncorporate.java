@@ -53,7 +53,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
     public abstract boolean isImport();
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();

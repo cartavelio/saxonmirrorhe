@@ -261,7 +261,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
     public void computeEvaluationMode() {
         if (getSelectExpression() != null) {
             if (referenceCount == FilterExpression.FILTERED) {
-                evaluator = Evaluator.MAKE_INDEXED_VARIABLE;
+                evaluator = Evaluator.MAKE_INDEXED_VARIABLE.INSTANCE;
             } else {
                 evaluator = ExpressionTool.lazyEvaluator(getSelectExpression(), referenceCount > 1);
             }
@@ -349,7 +349,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
             int savedOutputState = context.getTemporaryOutputState();
             context.setTemporaryOutputState(StandardNames.XSL_WITH_PARAM);
             Sequence result;
-            Evaluator eval = evaluator == null ? Evaluator.EAGER_SEQUENCE : evaluator;
+            Evaluator eval = evaluator == null ? Evaluator.EAGER_SEQUENCE.INSTANCE : evaluator;
             result = eval.evaluate(select, context);
             context.setTemporaryOutputState(savedOutputState);
             return result;
@@ -589,7 +589,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return the static cardinality
      */
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
@@ -601,7 +601,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return a set of flags indicating static properties of this expression
      */
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return StaticProperty.HAS_SIDE_EFFECTS;
     }
 

@@ -178,7 +178,7 @@ public class VennExpression extends BinaryExpression {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         final int prop0 = getLhsExpression().getSpecialProperties();
         final int prop1 = getRhsExpression().getSpecialProperties();
         int props = StaticProperty.ORDERED_NODESET;
@@ -603,7 +603,7 @@ public class VennExpression extends BinaryExpression {
     }
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return getLhsExpression().hashCode() ^ getRhsExpression().hashCode();
     }
 

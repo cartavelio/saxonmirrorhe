@@ -41,7 +41,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
     public SystemFunctionCall(SystemFunction target, Expression[] arguments) {
         super(target, arguments);
         argumentEvaluators = new Evaluator[arguments.length];
-        Arrays.fill(argumentEvaluators, Evaluator.LAZY_SEQUENCE);
+        Arrays.fill(argumentEvaluators, Evaluator.LAZY_SEQUENCE.INSTANCE);
     }
 
     /**
@@ -103,15 +103,15 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
             Expression arg = arguments[i];
             int cardinality = getTargetFunction().getDetails().argumentTypes[Math.min(i, lastExplicitArg)].getCardinality();
             if (arg instanceof Literal) {
-                argumentEvaluators[i] = Evaluator.LITERAL;
+                argumentEvaluators[i] = Evaluator.LITERAL.INSTANCE;
             } else if (arg instanceof VariableReference) {
-                argumentEvaluators[i] = Evaluator.VARIABLE;
+                argumentEvaluators[i] = Evaluator.VARIABLE.INSTANCE;
             } else if (cardinality == StaticProperty.EXACTLY_ONE) {
-                argumentEvaluators[i] = Evaluator.SINGLE_ITEM;
+                argumentEvaluators[i] = Evaluator.SINGLE_ITEM.INSTANCE;
             } else if (cardinality == StaticProperty.ALLOWS_ZERO_OR_ONE) {
-                argumentEvaluators[i] = Evaluator.OPTIONAL_ITEM;
+                argumentEvaluators[i] = Evaluator.OPTIONAL_ITEM.INSTANCE;
             } else {
-                argumentEvaluators[i] = Evaluator.LAZY_SEQUENCE;
+                argumentEvaluators[i] = Evaluator.LAZY_SEQUENCE.INSTANCE;
             }
         }
     }

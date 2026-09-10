@@ -22,7 +22,7 @@ import net.sf.saxon.value.StringItem;
 public final class XSLComment extends XSLLeafNodeConstructor {
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         for (AttributeInfo att : attributes()){
             NodeName attName = att.getNodeName();
             String f = attName.getDisplayName();

@@ -92,7 +92,7 @@ public class SquareArrayConstructor extends Expression {
 
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return 0;
     }
 
@@ -125,7 +125,7 @@ public class SquareArrayConstructor extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         int h = 0x878b92a0;
         for (Operand o : operands()) {
             h ^= o.getChildExpression().hashCode();
@@ -228,7 +228,7 @@ public class SquareArrayConstructor extends Expression {
      */
 
     @Override
-    public final int computeCardinality() {
+    protected final int computeCardinality() {
         // An array is an item!
         return StaticProperty.EXACTLY_ONE;
     }

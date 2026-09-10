@@ -971,7 +971,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (getFilter() instanceof Literal && ((Literal) getFilter()).getGroundedValue() instanceof NumericValue) {
             if (((NumericValue) ((Literal) getFilter()).getGroundedValue()).compareTo(1) == 0 &&
                     !Cardinality.allowsZero(getBase().getCardinality())) {
@@ -1009,7 +1009,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return getBase().getSpecialProperties();
     }
 
@@ -1036,7 +1036,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return "FilterExpression".hashCode() + getBase().hashCode() + getFilter().hashCode();
     }
 

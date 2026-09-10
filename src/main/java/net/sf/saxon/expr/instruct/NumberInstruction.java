@@ -172,7 +172,7 @@ public class NumberInstruction extends Expression {
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         switch (level) {
             case SIMPLE:
             case SINGLE:

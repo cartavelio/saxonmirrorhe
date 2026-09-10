@@ -88,7 +88,7 @@ public class ConsumingOperand extends UnaryExpression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getBaseExpression().getCardinality();
     }
 

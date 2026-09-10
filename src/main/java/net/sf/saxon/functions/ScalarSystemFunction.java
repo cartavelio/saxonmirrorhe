@@ -11,11 +11,11 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.One;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
 
 /**
  * A Scalar system function is a pure function that accepts a single item as its operand,
@@ -42,15 +42,9 @@ public abstract class ScalarSystemFunction extends SystemFunction {
      * @return the result of evaluation when the supplied argument is an empty sequence
      */
 
-    public ZeroOrOne resultWhenEmpty() {
-        return ZeroOrOne.empty();
+    public Sequence resultWhenEmpty() {
+        return EmptySequence.getInstance();
     }
-
-    /**
-     * Static constant representing a zero-length string
-     */
-
-    public final static One ZERO_LENGTH_STRING = One.string("");
 
     /**
      * Evaluate the expression
@@ -62,12 +56,12 @@ public abstract class ScalarSystemFunction extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public final ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public final Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item val0 = arguments[0].head();
         if (val0 == null) {
             return resultWhenEmpty();
         }
-        return new ZeroOrOne(evaluate(val0, context));
+        return new ZeroOrOne<>(evaluate(val0, context));
 
     }
 

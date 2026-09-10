@@ -60,7 +60,7 @@ public class ArithmeticExpression extends BinaryExpression {
      * for some subclasses.
      */
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NOT_UNTYPED_ATOMIC;
     }

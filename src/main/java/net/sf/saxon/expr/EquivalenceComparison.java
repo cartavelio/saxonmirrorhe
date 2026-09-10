@@ -171,7 +171,7 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 

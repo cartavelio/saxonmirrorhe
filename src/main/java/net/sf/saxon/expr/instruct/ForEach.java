@@ -397,7 +397,7 @@ public class ForEach extends Instruction implements ContextMappingFunction, Cont
      * @return a set of flags indicating static properties of this expression
      */
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         if (getSelect().getCardinality() == StaticProperty.EXACTLY_ONE) {
             p |= getAction().getSpecialProperties();

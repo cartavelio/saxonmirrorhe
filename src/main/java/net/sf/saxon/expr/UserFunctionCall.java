@@ -210,16 +210,16 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             int cardinality = required.getCardinality();
 
             if (i == 0 && function.getDeclaredStreamability().isConsuming()) {
-                argumentEvaluators[i] = Evaluator.STREAMING_ARGUMENT;
+                argumentEvaluators[i] = Evaluator.STREAMING_ARGUMENT.INSTANCE;
             } else if (function.getParameterDefinitions()[i].isIndexedVariable()) {
-                argumentEvaluators[i] = Evaluator.MAKE_INDEXED_VARIABLE;
+                argumentEvaluators[i] = Evaluator.MAKE_INDEXED_VARIABLE.INSTANCE;
             } else {
                 if (arg instanceof Literal) {
-                    argumentEvaluators[i] = Evaluator.LITERAL;
+                    argumentEvaluators[i] = Evaluator.LITERAL.INSTANCE;
                 } else if (arg instanceof VariableReference) {
-                    argumentEvaluators[i] = Evaluator.VARIABLE;
+                    argumentEvaluators[i] = Evaluator.VARIABLE.INSTANCE;
                 } else if (cardinality == StaticProperty.EXACTLY_ONE) {
-                    argumentEvaluators[i] = Evaluator.SINGLE_ITEM;
+                    argumentEvaluators[i] = Evaluator.SINGLE_ITEM.INSTANCE;
                 } else if ((arg.getDependencies() & UNHANDLED_DEPENDENCIES) != 0) {
                     // If the argument contains a call to a user-defined function, then it might be a recursive call.
                     // It's better to evaluate it now, rather than waiting until we are on a new stack frame, as
@@ -227,12 +227,12 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     // If the argument contains calls to position(), last(), regex-group(), current-group(),
                     // current-merge-group(), etc, then in general we can't save the values in a Closure
                     // so we need to evaluate the argument eagerly. (Tests position-0103, merge-096).
-                    argumentEvaluators[i] = Evaluator.EAGER_SEQUENCE;
+                    argumentEvaluators[i] = new Evaluator.EAGER_SEQUENCE();
                 } else if (!Cardinality.allowsMany(arg.getCardinality()) && arg.getCost() < 20) {
                     // the argument is cheap to evaluate and doesn't use much memory...
-                    argumentEvaluators[i] = Evaluator.EAGER_SEQUENCE;
+                    argumentEvaluators[i] = new Evaluator.EAGER_SEQUENCE();
                 } else if (cardinality == StaticProperty.ALLOWS_ZERO_OR_ONE) {
-                    argumentEvaluators[i] = Evaluator.OPTIONAL_ITEM;
+                    argumentEvaluators[i] = Evaluator.OPTIONAL_ITEM.INSTANCE;
                 } else if (arg instanceof Block && ((Block) arg).isCandidateForSharedAppend()) {
                     // If the expression is a Block, that is, it is appending a value to a sequence,
                     // then we have the opportunity to use a shared list underpinning the old value and
@@ -241,9 +241,9 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     // reference as one of its subexpressions. The most common case is that the first argument is a reference
                     // to an argument of recursive function, where the recursive function returns the result of
                     // appending to the sequence.
-                    argumentEvaluators[i] = Evaluator.SHARED_APPEND;
+                    argumentEvaluators[i] = Evaluator.SHARED_APPEND.INSTANCE;
                 } else {
-                    argumentEvaluators[i] = Evaluator.MEMO_CLOSURE;
+                    argumentEvaluators[i] = Evaluator.MEMO_CLOSURE.INSTANCE;
                 }
             }
             i++;
@@ -385,7 +385,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (staticType == null) {
             // the actual type is not known yet, so we return an approximation
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
@@ -654,8 +654,8 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
         for (int i = 0; i < numArgs; i++) {
             Evaluator eval = argumentEvaluators[i];
-            if (eval == Evaluator.STREAMING_ARGUMENT && !streamed) {
-                eval = Evaluator.EAGER_SEQUENCE;
+            if (eval == Evaluator.STREAMING_ARGUMENT.INSTANCE && !streamed) {
+                eval = Evaluator.EAGER_SEQUENCE.INSTANCE;
             }
             actualArgs[i] = eval.evaluate(getArg(i), c);
 

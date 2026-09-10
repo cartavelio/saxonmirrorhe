@@ -25,7 +25,7 @@ public class XSLOutputCharacter extends StyleElement {
     private String replacementString = null;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
@@ -53,6 +53,7 @@ public class XSLOutputCharacter extends StyleElement {
                     default:
                         compileError("character attribute must be a single XML character", "XTSE0020");
                         codepoint = 256; // for error recovery
+                        break;
                 }
             } else if (f.equals("string")) {
                 replacementString = value;

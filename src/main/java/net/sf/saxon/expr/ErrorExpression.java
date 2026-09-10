@@ -182,7 +182,7 @@ public class ErrorExpression extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
         // we return a liberal value, so that we never get a type error reported
         // statically

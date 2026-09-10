@@ -45,7 +45,7 @@ public class XSLCallTemplate extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String nameAttribute = null;
 
@@ -166,7 +166,7 @@ public class XSLCallTemplate extends StyleElement {
      */
 
     @Override
-    public boolean markTailCalls() {
+    protected boolean markTailCalls() {
         useTailRecursion = true;
         return true;
     }

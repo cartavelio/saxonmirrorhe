@@ -105,9 +105,9 @@ public final class Cardinality {
      */
 
     public static int sum(int c1, int c2) {
-        int min = min(c1) + min(c2);
-        int max = max(c1) + max(c2);
-        return fromMinAndMax(min, max);
+        int mini = min(c1) + min(c2);
+        int maxi = max(c1) + max(c2);
+        return fromMinAndMax(mini, maxi);
     }
 
     /**

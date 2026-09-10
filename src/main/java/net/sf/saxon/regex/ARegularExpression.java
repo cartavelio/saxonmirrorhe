@@ -13,6 +13,7 @@ import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
+import net.sf.saxon.value.StringItem;
 
 import java.util.List;
 import java.util.function.Function;
@@ -65,7 +66,7 @@ public class ARegularExpression implements RegularExpression {
     }
 
     /**
-     * Static factory method intended for simple static regular expressions known to be correcct
+     * Static factory method intended for simple static regular expressions known to be correct
      */
 
     public static ARegularExpression compile(String pattern, String flags) {
@@ -77,7 +78,7 @@ public class ARegularExpression implements RegularExpression {
     }
 
     /**
-     * Static factory method intended for simple static regular expressions known to be correcct
+     * Static factory method intended for simple static regular expressions known to be correct
      */
 
     public static ARegularExpression compile(UnicodeString pattern, String flags) {
@@ -122,7 +123,7 @@ public class ARegularExpression implements RegularExpression {
      * @return a SequenceIterator containing the resulting tokens, as objects of type StringValue
      */
     @Override
-    public AtomicIterator tokenize(UnicodeString input) {
+    public AtomicIterator<StringItem> tokenize(UnicodeString input) {
         return new ATokenIterator(input.tidy(), new REMatcher(regex));
     }
 

@@ -22,7 +22,7 @@ import net.sf.saxon.type.Type;
 public class XSLOverride extends StyleElement {
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             checkUnknownAttribute(attName);
@@ -72,8 +72,7 @@ public class XSLOverride extends StyleElement {
                                     ((StyleElement) curr).compileError(
                                         "An overriding template rule must not specify mode=\"#all\"", "XTSE3440");
                                 } else if (modeName.equals(Mode.UNNAMED_MODE_NAME)) {
-                                    modeName = decl.getDefaultMode();
-                                    if (modeName.equals(Mode.UNNAMED_MODE_NAME)) {
+                                    if (decl.getDefaultMode().equals(Mode.UNNAMED_MODE_NAME)) {
                                         ((StyleElement) curr).compileError(
                                             "An overriding template rule must not belong to the unnamed mode", "XTSE3440");
                                     }

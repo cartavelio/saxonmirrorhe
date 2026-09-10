@@ -229,7 +229,7 @@ public class SaplingElement extends SaplingNode {
     }
 
     @Override
-    protected void sendTo(Receiver receiver) throws XPathException {
+    public void sendTo(Receiver receiver) throws XPathException {
         final Configuration config = receiver.getPipelineConfiguration().getConfiguration();
         final NamePool namePool = config.getNamePool();
         NamespaceMap ns = namespaces;

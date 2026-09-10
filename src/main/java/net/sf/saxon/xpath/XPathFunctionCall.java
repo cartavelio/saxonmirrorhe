@@ -213,7 +213,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
      * @return ZERO_OR_MORE (we don't know)
      */
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 

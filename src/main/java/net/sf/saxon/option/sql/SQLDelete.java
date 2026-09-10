@@ -47,7 +47,7 @@ public class SQLDelete extends ExtensionInstruction {
     Expression where;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         final AttributeMap atts = attributes();
         table = atts.getValue("", "table");

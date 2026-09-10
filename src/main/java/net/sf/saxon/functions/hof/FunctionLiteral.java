@@ -100,7 +100,7 @@ public class FunctionLiteral extends Literal {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 
@@ -113,7 +113,7 @@ public class FunctionLiteral extends Literal {
 
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return StaticProperty.NO_NODES_NEWLY_CREATED;
     }
 
@@ -173,7 +173,7 @@ public class FunctionLiteral extends Literal {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return getGroundedValue().hashCode();
     }
 

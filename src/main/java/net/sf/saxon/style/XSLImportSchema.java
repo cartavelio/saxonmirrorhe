@@ -43,7 +43,7 @@ public class XSLImportSchema extends StyleElement {
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String namespace = null;
 

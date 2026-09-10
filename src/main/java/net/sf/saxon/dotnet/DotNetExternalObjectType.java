@@ -13,7 +13,6 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Whitespace;
 
 /**
@@ -393,19 +392,6 @@ public class DotNetExternalObjectType extends ExternalObjectType {
     }
 
     /**
-     * Apply the whitespace normalization rules for this simple type
-     *
-     * @param value the string before whitespace normalization
-     * @return the string after whitespace normalization
-     */
-
-    public CharSequence applyWhitespaceNormalization(CharSequence value) {
-        return value;
-    }
-
-
-
-    /**
      * Test whether this simple type is namespace-sensitive, that is, whether
      * it is derived from xs:QName or xs:NOTATION
      *
@@ -437,43 +423,6 @@ public class DotNetExternalObjectType extends ExternalObjectType {
     public AtomicSequence atomize(NodeInfo node) throws XPathException {
         throw new IllegalStateException("The type annotation of a node cannot be an external object type");
     }
-
-    /**
-     * Get the typed value corresponding to a given string value, assuming it is
-     * valid against this type
-     *
-     * @param value    the string value
-     * @param resolver a namespace resolver used to resolve any namespace prefixes appearing
-     *                 in the content of values. Can supply null, in which case any namespace-sensitive content
-     *                 will be rejected.
-     * @param rules    the conversion rules for the configuration
-     * @return an iterator over the atomic sequence comprising the typed value. The objects
-     *         returned by this SequenceIterator will all be of type {@link net.sf.saxon.value.AtomicValue}
-     */
-
-    public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
-            throws ValidationException {
-        throw new ValidationFailure("Cannot validate a string against an external object type").makeException();
-    }
-
-
-    /**
-     * Validate that a primitive atomic value is a valid instance of a type derived from the
-     * same primitive type.
-     *
-     * @param primValue    the value in the value space of the primitive type.
-     * @param lexicalValue the value in the lexical space. If null, the string value of primValue
-     *                     is used. This value is checked against the pattern facet (if any)
-     * @param rules        the conversion rules for the configuration
-     * @return null if the value is valid; otherwise, a ValidationFailure object indicating
-     *         the nature of the error.
-     * @throws UnsupportedOperationException in the case of an external object type
-     */
-
-    public ValidationFailure validate(AtomicValue primValue, CharSequence lexicalValue, ConversionRules rules) {
-        throw new UnsupportedOperationException("validate");
-    }
-
 
     /**
      * Get the .NET type to which this external XPath type corresponds
@@ -513,24 +462,6 @@ public class DotNetExternalObjectType extends ExternalObjectType {
         return null;
     }
 
-    /**
-     * Check whether a given input string is valid according to this SimpleType
-     *
-     * @param value      the input string to be checked
-     * @param nsResolver a namespace resolver used to resolve namespace prefixes if the type
-     *                   is namespace sensitive. The value supplied may be null; in this case any namespace-sensitive
-     *                   content will throw an UnsupportedOperationException.
-     * @param rules      the conversion rules for the configuration
-     * @return null if validation succeeds; return a ValidationException describing the validation failure
-     *         if validation fails, unless throwException is true, in which case the exception is thrown rather than
-     *         being returned.
-     * @throws UnsupportedOperationException if the type is namespace-sensitive and no namespace
-     *                                       resolver is supplied
-     */
-
-    public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
-        throw new UnsupportedOperationException("Cannot use an external object type for validation");
-    }
 
     public int getFingerprint() {
         return getNameCode() & NamePool.FP_MASK;
@@ -539,33 +470,6 @@ public class DotNetExternalObjectType extends ExternalObjectType {
     public String getDisplayName() {
         return toString();
     }
-
-    /**
-     * Apply any pre-lexical facets, other than whitespace. At the moment the only such
-     * facet is saxon:preprocess
-     *
-     * @param input the value to be preprocessed
-     * @return the value after preprocessing
-     */
-
-    public CharSequence preprocess(CharSequence input) {
-        return input;
-    }
-
-    /**
-     * Reverse any pre-lexical facets, other than whitespace. At the moment the only such
-     * facet is saxon:preprocess. This is called when converting a value of this type to
-     * a string
-     *
-     * @param input the value to be postprocessed: this is the "ordinary" result of converting
-     *              the value to a string
-     * @return the value after postprocessing
-     */
-
-    public CharSequence postprocess(CharSequence input) {
-        return input;
-    }
-
 
     @Override
     public double getDefaultPriority() {

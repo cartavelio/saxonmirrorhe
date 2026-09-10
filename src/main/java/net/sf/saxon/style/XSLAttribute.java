@@ -36,7 +36,7 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
     private SimpleType schemaType;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String nameAtt = null;
         String namespaceAtt = null;

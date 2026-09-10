@@ -530,12 +530,8 @@ public abstract class StyleElement extends ElementImpl {
         processDefaultMode();
         staticContext = new ExpressionContext(this, null);
         processAttributes();
-        for (NodeInfo child : children()) {
-            if (child instanceof StyleElement) {
-                ((StyleElement) child).processAllAttributes();
-            } else if (child instanceof TextValueTemplateNode) {
-                ((TextValueTemplateNode) child).parse();
-            }
+        for (NodeInfo child : children(StyleElement.class::isInstance)) {
+            ((StyleElement) child).processAllAttributes();
         }
     }
 
@@ -790,7 +786,7 @@ public abstract class StyleElement extends ElementImpl {
         }
     }
 
-    final static String[] YES_NO = new String[]{"0", "1", "false", "no", "true", "yes"};
+    public final static String[] YES_NO = {"0", "1", "false", "no", "true", "yes"};
 
 
     /**

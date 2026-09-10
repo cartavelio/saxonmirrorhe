@@ -66,7 +66,7 @@ public final class IsLastExpression extends Expression {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         int p = super.computeSpecialProperties();
         return p | StaticProperty.NO_NODES_NEWLY_CREATED;
     }
@@ -93,7 +93,7 @@ public final class IsLastExpression extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 
@@ -150,8 +150,8 @@ public final class IsLastExpression extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
-        return condition ? 0x236b91a0 : 0x896b92a0;
+    protected int computeHashCode() {
+        return condition ? 0x236b91a0 : 0x396b92a0;
     }
 
     /**

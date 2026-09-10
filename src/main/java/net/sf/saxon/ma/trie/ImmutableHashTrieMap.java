@@ -73,24 +73,24 @@ public abstract class ImmutableHashTrieMap<K, V>
     private static class EmptyHashNode<K, V>
             extends ImmutableHashTrieMap<K, V> {
         @Override
-        ImmutableHashTrieMap<K, V> put(final int shift, final K key,
+        public ImmutableHashTrieMap<K, V> put(final int shift, final K key,
                                        final V value) {
             return new EntryHashNode<>(key, value);
         }
 
         @Override
-        ImmutableHashTrieMap<K, V> remove(final int shift,
+        public ImmutableHashTrieMap<K, V> remove(final int shift,
                                           final K key) {
             return this;
         }
 
         @Override
-        boolean isArrayNode() {
+        public boolean isArrayNode() {
             return false;
         }
 
         @Override
-        V get(final int shift, final K key) {
+        public V get(final int shift, final K key) {
             return null;
         }
 
@@ -118,7 +118,7 @@ public abstract class ImmutableHashTrieMap<K, V>
         }
 
         @Override
-        ImmutableHashTrieMap<K, V> put(final int shift, final K key,
+        public ImmutableHashTrieMap<K, V> put(final int shift, final K key,
                                        final V value) {
             if (this.key.equals(key)) {
                 // Overwriting this entry
@@ -135,7 +135,7 @@ public abstract class ImmutableHashTrieMap<K, V>
         }
 
         @Override
-        ImmutableHashTrieMap<K, V> remove(final int shift,
+        public ImmutableHashTrieMap<K, V> remove(final int shift,
                                           final K key) {
             if (this.key.equals(key)) {
                 return empty();
@@ -144,12 +144,12 @@ public abstract class ImmutableHashTrieMap<K, V>
         }
 
         @Override
-        boolean isArrayNode() {
+        public boolean isArrayNode() {
             return false;
         }
 
         @Override
-        V get(final int shift, final K key) {
+        public V get(final int shift, final K key) {
             if (this.key.equals(key)) {
                 return value;
             }
@@ -187,7 +187,7 @@ public abstract class ImmutableHashTrieMap<K, V>
         }
 
         @Override
-        ImmutableHashTrieMap<K, V> put(final int shift, final K key,
+        public ImmutableHashTrieMap<K, V> put(final int shift, final K key,
                                        final V value) {
             if (entries.head()._1.hashCode() != key.hashCode()) {
                 return newArrayHashNode(shift,
@@ -216,7 +216,7 @@ public abstract class ImmutableHashTrieMap<K, V>
         }
 
         @Override
-        ImmutableHashTrieMap<K, V> remove(final int shift,
+        public ImmutableHashTrieMap<K, V> remove(final int shift,
                                           final K key) {
             ImmutableList<Tuple2<K, V>> newList = ImmutableList.empty();
             int size = 0;
@@ -234,12 +234,12 @@ public abstract class ImmutableHashTrieMap<K, V>
         }
 
         @Override
-        boolean isArrayNode() {
+        public boolean isArrayNode() {
             return false;
         }
 
         @Override
-        V get(final int shift, final K key) {
+        public V get(final int shift, final K key) {
             for (Tuple2<K, V> entry : entries) {
                 if (entry._1.equals(key)) {
                     return entry._2;
@@ -350,7 +350,7 @@ public abstract class ImmutableHashTrieMap<K, V>
         }
 
         @Override
-        ImmutableHashTrieMap<K, V> put(final int shift, final K key,
+        public ImmutableHashTrieMap<K, V> put(final int shift, final K key,
                                        final V value) {
             final int bucket = getBucket(shift, key);
             ImmutableHashTrieMap<K, V>[] newNodes = new ImmutableHashTrieMap[FANOUT];
@@ -364,7 +364,7 @@ public abstract class ImmutableHashTrieMap<K, V>
         }
 
         @Override
-        ImmutableHashTrieMap<K, V> remove(final int shift,
+        public ImmutableHashTrieMap<K, V> remove(final int shift,
                                           final K key) {
             final int bucket = getBucket(shift, key);
             if (subnodes[bucket] == EMPTY_NODE) {
@@ -395,7 +395,7 @@ public abstract class ImmutableHashTrieMap<K, V>
         }
 
         @Override
-        V get(final int shift, final K key) {
+        public V get(final int shift, final K key) {
             final int bucket = getBucket(shift, key);
             return subnodes[bucket].get(shift + BITS, key);
         }

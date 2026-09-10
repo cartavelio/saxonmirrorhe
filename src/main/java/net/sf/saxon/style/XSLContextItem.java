@@ -29,7 +29,7 @@ public class XSLContextItem extends StyleElement {
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         String asAtt = null;
         String useAtt = null;

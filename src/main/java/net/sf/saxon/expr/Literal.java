@@ -164,7 +164,7 @@ public class Literal extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (value.getLength() == 0) {
             return StaticProperty.EMPTY;
         } else if (value instanceof AtomicValue) {
@@ -197,7 +197,7 @@ public class Literal extends Expression {
 
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         if (value.getLength() == 0) {
             // An empty sequence has all special properties except "has side effects".
             return StaticProperty.SPECIAL_PROPERTY_MASK & ~StaticProperty.HAS_SIDE_EFFECTS;
@@ -508,7 +508,7 @@ public class Literal extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         if (value instanceof AtomicSequence) {
             return ((AtomicSequence) value).getSchemaComparable().hashCode();
         } else {
@@ -802,7 +802,7 @@ public class Literal extends Expression {
      * @return the Literal
      */
 
-    public static <T extends Item> Literal makeLiteral(GroundedValue value) {
+    public static Literal makeLiteral(GroundedValue value) {
         value = value.reduce();
         if (value instanceof StringItem) {
             return new StringLiteral((StringItem) value);

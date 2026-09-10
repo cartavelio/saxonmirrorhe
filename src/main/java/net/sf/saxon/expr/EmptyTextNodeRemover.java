@@ -46,7 +46,7 @@ public class EmptyTextNodeRemover extends UnaryExpression
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getBaseExpression().getCardinality() | StaticProperty.ALLOWS_ZERO;
     }
 

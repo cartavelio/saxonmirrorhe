@@ -43,7 +43,7 @@ public class SQLExecute extends ExtensionInstruction {
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         // Attributes for SQL-statement
         AttributeMap atts = attributes();
         AttributeInfo statementAtt = atts.get("", "statement");

@@ -55,7 +55,7 @@ public class HTML5CaseBlindCollator implements StringCollator, SubstringMatcher 
     }
 
     /**
-     * Compare two CharSequence objects. This is hand-coded to avoid converting the objects into
+     * Compare two UnicodeString objects. This is hand-coded to avoid converting the objects into
      * Strings.
      *
      * @return &lt;0 if a&lt;b, 0 if a=b, &gt;0 if a&gt;b

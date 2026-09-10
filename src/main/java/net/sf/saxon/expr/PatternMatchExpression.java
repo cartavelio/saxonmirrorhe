@@ -89,7 +89,7 @@ public final class PatternMatchExpression extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.EXACTLY_ONE;
     }
 
@@ -140,7 +140,7 @@ public final class PatternMatchExpression extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return getSelectExpression().computeHashCode() << 5 ^ getPattern().computeHashCode();
     }
 

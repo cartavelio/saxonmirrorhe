@@ -9,9 +9,9 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.CalendarValue;
+import net.sf.saxon.value.EmptySequence;
 
 /**
  * This class implements the XPath 2.0 functions
@@ -32,12 +32,12 @@ public class Adjust_1 extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         CalendarValue in = (CalendarValue) arguments[0].head();
         if (in == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         } else {
-            return new ZeroOrOne(in.adjustTimezone(context.getImplicitTimezone()));
+            return in.adjustTimezone(context.getImplicitTimezone());
         }
     }
 }

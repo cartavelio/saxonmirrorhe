@@ -79,7 +79,7 @@ public class SQLQuery extends ExtensionInstruction {
     boolean disable = false;    // true means disable-output-escaping="yes"
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         // Attributes for SQL-statement
         AttributeMap atts = attributes();
         AttributeInfo dbCol = atts.get("", "column");

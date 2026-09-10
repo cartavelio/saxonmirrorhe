@@ -25,11 +25,11 @@ import java.util.function.IntPredicate;
 public class CodepointsToString extends SystemFunction implements Callable {
 
     /**
-     * Return the Unicode string corresponding to a given sequence of Unicode code values
+     * Return a StringItem corresponding to a given sequence of Unicode code values
      *
      * @param chars   iterator delivering the characters as integer values
      * @param checker used to test whether a character is valid in the appropriate XML version
-     * @return the sequence of characters as a CharSequence
+     * @return the sequence of characters as a StringItem
      * @throws net.sf.saxon.trans.XPathException
      *          if any of the integers is not the codepoint of a valid XML character
      */

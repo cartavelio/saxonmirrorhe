@@ -10,7 +10,6 @@ package net.sf.saxon.type;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
 
@@ -178,50 +177,6 @@ public interface ItemType {
         return toString();
     }
 
-
-    /**
-     * Extension of the ItemType interface implemented by some item types, to provide
-     * a cache of SequenceType objects based on this item type, with different
-     * occurrence indicators.
-     */
-
-    interface WithSequenceTypeCache extends ItemType {
-        /**
-         * Get a sequence type representing exactly one instance of this atomic type
-         *
-         * @return a sequence type representing exactly one instance of this atomic type
-         * @since 9.8.0.2
-         */
-
-        SequenceType one();
-        /**
-         * Get a sequence type representing zero or one instances of this atomic type
-         *
-         * @return a sequence type representing zero or one instances of this atomic type
-         * @since 9.8.0.2
-         */
-
-        SequenceType zeroOrOne();
-
-        /**
-         * Get a sequence type representing one or more instances of this atomic type
-         *
-         * @return a sequence type representing one or more instances of this atomic type
-         * @since 9.8.0.2
-         */
-
-        SequenceType oneOrMore();
-
-        /**
-         * Get a sequence type representing one or more instances of this atomic type
-         *
-         * @return a sequence type representing one or more instances of this atomic type
-         * @since 9.8.0.2
-         */
-
-        SequenceType zeroOrMore();
-
-    }
 
     String toString();
 

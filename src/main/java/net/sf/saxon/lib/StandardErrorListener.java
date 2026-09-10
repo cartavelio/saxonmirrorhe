@@ -655,14 +655,14 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
      * in this way is to mark the logger as being unicode-aware.</p>
      *
      * <p>If messages are expanded, then they will be expanded using the method
-     * {@link #expandSpecialCharacters(CharSequence, int)}, which can be overridden
+     * {@link #expandSpecialCharacters(String, int)}, which can be overridden
      * to define the actual format in which special characters are displayed.</p>
      *
      * @param in the message to be expanded
      * @return the expanded message
      */
 
-    public CharSequence expandSpecialCharacters(CharSequence in) {
+    public String expandSpecialCharacters(String in) {
         if (logger.isUnicodeAware()) {
             return in;
         } else {

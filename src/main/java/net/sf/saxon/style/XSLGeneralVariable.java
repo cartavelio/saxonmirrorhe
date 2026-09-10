@@ -16,7 +16,11 @@ import net.sf.saxon.trans.XPathException;
 
 public abstract class XSLGeneralVariable extends StyleElement {
 
-    protected SourceBinding sourceBinding = new SourceBinding(this);
+    protected SourceBinding sourceBinding;
+
+    public XSLGeneralVariable() {
+        sourceBinding = new SourceBinding(this);
+    }
 
     /**
      * Get the source binding object that holds information about the declared variable.
@@ -42,7 +46,7 @@ public abstract class XSLGeneralVariable extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 

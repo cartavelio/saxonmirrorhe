@@ -117,7 +117,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
 
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         useAtt = null;
         String streamableAtt = null;
 

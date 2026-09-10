@@ -100,7 +100,7 @@ public class RootExpression extends Expression {
     }
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return StaticProperty.ORDERED_NODESET |
                 StaticProperty.CONTEXT_DOCUMENT_NODESET |
                 StaticProperty.SINGLE_DOCUMENT_NODESET |
@@ -187,7 +187,7 @@ public class RootExpression extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return "RootExpression".hashCode();
     }
 

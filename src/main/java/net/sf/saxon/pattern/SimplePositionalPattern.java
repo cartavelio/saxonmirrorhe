@@ -121,7 +121,7 @@ public final class SimplePositionalPattern extends Pattern {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return nodeTest.hashCode() ^ (position<<3);
     }
 

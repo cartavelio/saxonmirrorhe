@@ -155,7 +155,7 @@ public class FormatDate extends SystemFunction implements Callable {
     private static final Pattern componentPattern =
             Pattern.compile("([YMDdWwFHhmsfZzPCE])\\s*(.*)");
 
-    private static UnicodeString formatComponent(CalendarValue value, CharSequence specifier,
+    private static UnicodeString formatComponent(CalendarValue value, String specifier,
                                                  Numberer numberer, String country, XPathContext context)
             throws XPathException {
         boolean ignoreDate = value instanceof TimeValue;

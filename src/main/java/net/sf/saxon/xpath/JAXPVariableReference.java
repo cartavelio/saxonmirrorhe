@@ -87,7 +87,7 @@ public class JAXPVariableReference extends Expression implements Callable {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
@@ -98,7 +98,7 @@ public class JAXPVariableReference extends Expression implements Callable {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return StaticProperty.NO_NODES_NEWLY_CREATED;
     }
 
@@ -122,7 +122,7 @@ public class JAXPVariableReference extends Expression implements Callable {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return name.hashCode();
     }
 
