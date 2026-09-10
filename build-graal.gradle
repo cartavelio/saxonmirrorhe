@@ -625,19 +625,22 @@ task graal_eec_jar(
   ) {
     inputs.files fileTree(dir: "${projectDir}/src/main/c")
     outputs.files fileTree(dir: saxoncReleaseDir, exclude: "dist/**")
-
-
-    def SAXONC_HOME = (systemOs.isMacOsX()
-            ? "${saxoncReleaseDir}/libs/darwin"
-            : (systemOs.isLinux()
-            ? "${saxoncReleaseDir}/libs/nix"
-            : "${saxoncReleaseDir}/libs/win"))
+    
 
     doLast {
       copy {
-        into SAXONC_HOME
+        into "${saxoncReleaseDir}"
         from "${buildDir}/c"
-        include "libsaxon-${edition}c-*"
+        include "libsaxon-${edition}c-*.so"
+        include "libsaxon-${edition}c-*.dylib"
+        include "libsaxon-${edition}c-*.dll"
+      }
+    }
+
+    doLast {
+      copy {
+        from "${projectDir}/src/main/c"
+        into "${saxoncReleaseDir}"
         include "setenv"
       }
     }

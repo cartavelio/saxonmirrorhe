@@ -26,6 +26,7 @@ def testValidator2(saxonproc2):
     val.register_schema(xsd_text=sch1)
     val.validate()
     assert val.exception_occurred
+    val.exception_clear()
 
 
 def testValdiator3(saxonproc2):
@@ -37,9 +38,11 @@ def testValdiator3(saxonproc2):
     val.register_schema(xsd_file="family.xsd")
     val.validate(file_name="family.xml")
     nodea = val.validation_report
-
+    if val.exception_occurred:
+        print(val.get_error_message(0))
     assert not val.exception_occurred
     assert nodea is None
+    val.exception_clear()
 
 def testExportSchema(saxonproc2):
     saxonproc2.set_cwd('.')
