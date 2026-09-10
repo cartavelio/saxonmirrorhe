@@ -19,26 +19,16 @@ function exampleSimple1($proc, $validator)
         $validator->validate();
         $node = $validator->getValidationReport();
         echo 'Validation Report:' . $node->getStringValue() . '<br/>';
-        if ($validator->exceptionOccurred()) {
-            echo "Doc is not valid!";
-            $errCount = $validator->getExceptionCount();
-            if ($errCount > 0) {
-                for ($i = 0; $i < $errCount; $i++) {
-                    $errCode = $validator->getErrorCode(intval($i));
-                    $errMessage = $validator->getErrorMessage(intval($i));
-                    echo 'Expected error: Code=' . $errCode . ' Message=' . $errMessage;
-                }
-                $validator->exceptionClear();
-            }
 
-        } else {
-            echo "Doc is valid";
-        }
-        $validator->clearParameters();
-        $validator->clearProperties();
+        echo "Doc is valid";
+
     } catch(Exception $e){
-
+        echo "Doc is not valid!";
+        echo 'Caught validation exception: ',  $e->getMessage(), "\n";
     }
+
+    $validator->clearParameters();
+    $validator->clearProperties();
 
 }
             
@@ -46,46 +36,60 @@ function exampleSimple1($proc, $validator)
 function exampleSimple2($proc, $validator)
 {
     echo '<b>exampleSimple2:</b><br/>';
-    $validator->registerSchemaFromString("<?xml version='1.0' encoding='UTF-8'?><schema targetNamespace='http://myexample/family' xmlns:fam='http://myexample/family' xmlns='http://www.w3.org/2001/XMLSchema'><element name='FamilyMember' type='string' /><element name='Parent' type='string' substitutionGroup='fam:FamilyMember'/><element name='Child' type='string' substitutionGroup='fam:FamilyMember'/><element name='Family'><complexType><sequence><element ref='fam:FamilyMember' maxOccurs='unbounded'/></sequence></complexType></element>  </schema>");
+    try {
+        $validator->registerSchemaFromString("<?xml version='1.0' encoding='UTF-8'?><schema targetNamespace='http://myexample/family' xmlns:fam='http://myexample/family' xmlns='http://www.w3.org/2001/XMLSchema'><element name='FamilyMember' type='string' /><element name='Parent' type='string' substitutionGroup='fam:FamilyMember'/><element name='Child' type='string' substitutionGroup='fam:FamilyMember'/><element name='Family'><complexType><sequence><element ref='fam:FamilyMember' maxOccurs='unbounded'/></sequence></complexType></element>  </schema>");
 
 
-    //$proc->setProperty('base', '/');
-    $validator->setProperty('report-node', 'true');
-    $validator->registerSchemaFromFile("xsd/family-ext.xsd");
+        //$proc->setProperty('base', '/');
+        $validator->setProperty('report-node', 'true');
+        $validator->registerSchemaFromFile("xsd/family-ext.xsd");
 
-    $validator->validate("xml/family.xml");
-    if ($validator->exceptionOccurred()) {
-        echo "Doc is not valid!";
+        $validator->validate("xml/family.xml");
         $node = $validator->getValidationReport();
-        echo 'Validation Report:' . $node->getStringValue() . '<br/>';
-    } else {
-        echo "Doc family.xml is valid!";
+        if ($node != NULL) {
+
+            echo 'Validation Report:' . $node->getStringValue() . '<br/>';
+        } else {
+            echo "Doc family.xml is valid!";
+        }
+    } catch(Exception $e) {
+        echo "Doc is not valid!";
+        echo 'Caught validation exception: ',  $e->getMessage(), "\n";
+
     }
     $validator->clearParameters();
     $validator->clearProperties();
 }
 
- function exampleSimple3($proc, $validator){
-		echo '<b>exampleSimple3:</b><br/>';	
-                $validator->registerSchemaFromFile("xsd/family-ext.xsd");
-		$validator->registerSchemaFromFile("xsd/family.xsd");
+ function exampleSimple3($proc, $validator)
+ {
+     echo '<b>exampleSimple3:</b><br/>';
+     try {
 
-		
-  	        $validator->setProperty('report-node', 'true');       
-                $validator->validate("xml/family.xml");              
-		if($validator->exceptionOccurred()) {
-		   echo "Error: Doc is not valid!";
-		   $node = $validator->getValidationReport();
-		   echo 'Validation Report:'.$node->getStringValue().'<br/>';
-	        } else {
-			echo "Doc is valid!";
-		}
-		$validator->clearParameters();
-		$validator->clearProperties();            
-            }
+         $validator->registerSchemaFromFile("xsd/family-ext.xsd");
+         $validator->registerSchemaFromFile("xsd/family.xsd");
+
+
+         $validator->setProperty('report-node', 'true');
+         $validator->validate("xml/family.xml");
+         if ($validator->exceptionOccurred()) {
+             echo "Error: Doc is not valid!";
+             $node = $validator->getValidationReport();
+             echo 'Validation Report:' . $node->getStringValue() . '<br/>';
+         } else {
+             echo "Doc is valid!";
+         }
+         $validator->clearParameters();
+         $validator->clearProperties();
+
+     } catch (Exception $e) {
+         echo 'Caught validation exception: ', $e->getMessage(), "\n";
+
+     }
+ }
 		
 	   $var ='/usr/lib' ;
-            putenv("SAXONC_HOME=$var"); 
+       putenv("SAXONC_HOME=$var");
             
             $books_xml = "query/books.xml";
             $books_to_html_xq = "query/books-to-html.xq";
