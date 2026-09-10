@@ -2011,38 +2011,34 @@ public class XPathParser {
         List<AtomicType> memberTypes = new ArrayList<>(6);
 
         while (true) {
-            if (t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("enum")) {
-                EnumerationType type = parseEnumType();
-                memberTypes.add(type);
-            } else {
-                expect(Token.NAME);
-                StructuredQName member = getQNameParser().parse(
-                        t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
-                ItemType type = getPlainType(member);
-                if (type instanceof AtomicType) {
-                    memberTypes.add((AtomicType) type);
-                } else if (type instanceof PlainType) {
-                    for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
-                        if (pt instanceof AtomicType) {
-                            memberTypes.add((AtomicType) pt);
-                        } else {
-                            grumble("Union type " + type + " has a non-atomic member type " + pt);
-                        }
+            expect(Token.NAME);
+            StructuredQName member = getQNameParser().parse(
+                    t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
+            ItemType type = getPlainType(member);
+            if (type instanceof AtomicType) {
+                memberTypes.add((AtomicType) type);
+            } else if (type instanceof PlainType) {
+                for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
+                    if (pt instanceof AtomicType) {
+                        memberTypes.add((AtomicType) pt);
+                    } else {
+                        grumble("Union type " + type + " has a non-atomic member type " + pt);
                     }
-                } else {
-                    grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
                 }
-                nextToken();
+            } else {
+                grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
             }
+            nextToken();
             if (t.currentToken == Token.RPAR) {
                 break;
             } else if (t.currentToken == Token.COMMA) {
                 nextToken();
             } else {
                 grumble("Expected ',' or ')' after member name in union type, found '" +
-                                  Token.tokens[t.currentToken] + '\'');
+                                Token.tokens[t.currentToken] + '\'');
             }
         }
+
         nextToken();
         return new LocalUnionType(memberTypes);
 
@@ -3363,10 +3359,6 @@ public class XPathParser {
         NamePool pool = env.getConfiguration().getNamePool();
         String typeName = t.currentTokenValue;
 
-        boolean schemaDeclaration = typeName.startsWith("schema-");
-        int primaryType = getSystemType(typeName);
-        //int fp = -1;
-
         boolean empty = false;
         nextToken();
         if (t.currentToken == Token.RPAR) {
@@ -3486,7 +3478,6 @@ public class XPathParser {
                     return null;
                 } else {
                     expect(Token.NAME);
-                } else if (t.currentToken == Token.NAME) {
                     String name = t.currentTokenValue;
                     fp = makeFingerprint(name, true);
                     nextToken();
@@ -3499,20 +3490,6 @@ public class XPathParser {
                     } else {
                         return env.getPackageData().getImportedSchema().makeSchemaElementTest(fp);
                     }
-
-                    nodeName = t.currentTokenValue;
-                    NamespaceUri defaultNS = primaryType == Type.ELEMENT ? env.getDefaultElementNamespace() : NamespaceUri.NULL;
-                    sq = qNameParser.parse(nodeName, defaultNS);
-                    //fp = makeFingerprint(t.currentTokenValue, primaryType == Type.ELEMENT);
-                    nextToken();
-                } else if ((t.currentToken == Token.PREFIX || t.currentToken == Token.SUFFIX) && allowXPath40Syntax) {
-                    nodeTest = parseNodeTest((short)primaryType);
-                } else {
-                    grumble("Unexpected " + Token.tokens[t.currentToken] + " after '(' in SequenceType");
-                }
-                NamespaceUri suri = null;
-                if (sq != null) {
-                    suri = sq.getNamespaceUri();
                 }
 
             case "attribute":
@@ -3587,7 +3564,6 @@ public class XPathParser {
                 grumble("Unknown node kind " + typeName);
                 return null;
         }
-        return null;
     }
 
 
