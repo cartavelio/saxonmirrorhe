@@ -15,7 +15,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.QNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.*;
 
 import java.util.List;

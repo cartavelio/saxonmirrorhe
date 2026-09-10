@@ -8,6 +8,7 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -27,7 +28,7 @@ import java.util.Optional;
  * @since 12.4
  */
 
-public class NameTestUnion extends NodeTest implements QNameTest {
+public class NameTestUnion extends NodeTest {
 
     private final UnionQNameTest nameTest;
     private final int nodeKind;
@@ -51,11 +52,7 @@ public class NameTestUnion extends NodeTest implements QNameTest {
         assert nodeKind == Type.ELEMENT || nodeKind == Type.ATTRIBUTE;
         List<QNameTest> qNameTests = new ArrayList<>(tests.size());
         for (NodeTest test : tests) {
-            if (test instanceof QNameTest) {
-                qNameTests.add((QNameTest)test);
-            } else {
-                assert false;
-            }
+            qNameTests.add(test.getQNameTest());
         }
         return new NameTestUnion(new UnionQNameTest(qNameTests), nodeKind);
     }
@@ -124,29 +121,29 @@ public class NameTestUnion extends NodeTest implements QNameTest {
         return matches(node.getNodeKind(), NameOfNode.makeName(node), node.getSchemaType());
     }
 
-    /**
-     * Test whether the NameTest matches a given QName
-     *
-     * @param qname the QName to be matched
-     * @return true if the name matches
-     */
+//    /**
+//     * Test whether the NameTest matches a given QName
+//     *
+//     * @param qname the QName to be matched
+//     * @return true if the name matches
+//     */
+//
+//    @Override
+//    public boolean matches(StructuredQName qname) {
+//        return nameTest.matches(qname);
+//    }
 
-    @Override
-    public boolean matches(StructuredQName qname) {
-        return nameTest.matches(qname);
-    }
-
-    /**
-     * Test whether the QNameTest matches a given fingerprint
-     *
-     * @param namePool the name pool
-     * @param fp       the fingerprint of the QName to be matched
-     * @return true if the name matches, false if not
-     */
-    @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return nameTest.matchesFingerprint(namePool, fp);
-    }
+//    /**
+//     * Test whether the QNameTest matches a given fingerprint
+//     *
+//     * @param namePool the name pool
+//     * @param fp       the fingerprint of the QName to be matched
+//     * @return true if the name matches, false if not
+//     */
+//    @Override
+//    public boolean matchesFingerprint(NamePool namePool, int fp) {
+//        return nameTest.matchesFingerprint(namePool, fp);
+//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
@@ -165,7 +162,7 @@ public class NameTestUnion extends NodeTest implements QNameTest {
      */
 
     public QNameTest getQNameTest() {
-        return this;
+        return nameTest;
     }
 
 
@@ -243,17 +240,17 @@ public class NameTestUnion extends NodeTest implements QNameTest {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
-     *
-     * @return a string representation of the QNameTest, suitable for use in export files. The format is
-     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
-     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
-     */
-    @Override
-    public String exportQNameTest() {
-        throw new UnsupportedOperationException();
-    }
+//    /**
+//     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
+//     *
+//     * @return a string representation of the QNameTest, suitable for use in export files. The format is
+//     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+//     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
+//     */
+//    @Override
+//    public String exportQNameTest() {
+//        throw new UnsupportedOperationException();
+//    }
 
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this

@@ -9,6 +9,7 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
@@ -70,9 +71,7 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
      * @return the strongest possible QNameTest
      */
 
-    public QNameTest getQNameTest() {
-        return AnyNodeTest.getInstance();
-    }
+    public abstract QNameTest getQNameTest();
 
 
     @Override

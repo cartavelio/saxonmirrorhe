@@ -10,6 +10,8 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
@@ -60,7 +62,7 @@ public class NodeKindTest extends NodeTest {
      */
 
     public QNameTest getQNameTest() {
-        return AnyNodeTest.getInstance();
+        return AnyQNameTest.getInstance();
     }
 
 

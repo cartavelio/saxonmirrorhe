@@ -11,7 +11,7 @@ import net.sf.saxon.expr.Component;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.QNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.*;
 
 /**

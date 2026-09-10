@@ -9,6 +9,7 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.qname.QNameTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;

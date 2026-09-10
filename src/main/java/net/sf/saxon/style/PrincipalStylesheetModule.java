@@ -19,8 +19,8 @@ import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.serialize.CharacterMap;
@@ -30,7 +30,6 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.DocumentImpl;
-import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
 
@@ -1572,14 +1571,12 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
             ComponentTest exactNameTest =
                     new ComponentTest(fp,
-                                      new NameTest(Type.ELEMENT, new FingerprintedQName(component.getActor().getComponentName(), pool), pool), -1);
+                                      new SpecificQNameTest(component.getActor().getComponentName(), pool), -1);
             ComponentTest exactFunctionTest = null;
             if (fp == StandardNames.XSL_FUNCTION) {
                 FunctionItem fn = (FunctionItem) component.getActor();
                 exactFunctionTest =
-                        new ComponentTest(fp,
-                                          new NameTest(Type.ELEMENT,
-                                                       new FingerprintedQName(fn.getFunctionName(), pool), pool), fn.getArity());
+                        new ComponentTest(fp, new SpecificQNameTest(fn.getFunctionName(), pool), fn.getArity());
             }
             boolean matched = false;
             for (XSLExpose exposure : exposeDeclarations) {

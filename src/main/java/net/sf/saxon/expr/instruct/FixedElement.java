@@ -25,6 +25,8 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -191,6 +193,8 @@ public class FixedElement extends ElementCreator {
         final Configuration config = env.getConfiguration();
         ItemType itemType;
         int fp = elementName.obtainFingerprint(config.getNamePool());   // Bug #2563 - namespaced alias in unoptimized export
+        QNameTest elementNameTest = new SpecificQNameTest(
+                elementName.getStructuredQName(), config.getNamePool(), fp);
         if (schemaType == null) {
             if (validation == Validation.STRICT) {
                 SchemaDeclaration decl = config.getElementDeclaration(fp);
@@ -217,7 +221,7 @@ public class FixedElement extends ElementCreator {
                 }
 
                 itemType = new ContentTypeTest(Type.ELEMENT,
-                                               new NameTest(Type.ELEMENT, fp, env.getConfiguration().getNamePool()),
+                                               elementNameTest,
                                                schemaType, false, config);
                 if (xsiType != null || !decl.hasTypeAlternatives()) {
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
@@ -250,7 +254,7 @@ public class FixedElement extends ElementCreator {
                     schemaType = decl.getType();
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                     itemType = new ContentTypeTest(Type.ELEMENT,
-                                                   new NameTest(Type.ELEMENT, fp, config.getNamePool()),
+                                                   elementNameTest,
                                                    instr.getSchemaType(), false, config);
                     try {
                         schemaType.analyzeContentExpression(content, Type.ELEMENT);
@@ -262,17 +266,17 @@ public class FixedElement extends ElementCreator {
             } else if (validation == Validation.PRESERVE) {
                 // we know the result will be an element of type xs:anyType
                 itemType = new ContentTypeTest(Type.ELEMENT,
-                                            new NameTest(Type.ELEMENT, fp, config.getNamePool()),
-                                               AnyType.getInstance(), false, config);
+                                                elementNameTest,
+                                                AnyType.getInstance(), false, config);
             } else {
                 // we know the result will be an untyped element
                 itemType = new ContentTypeTest(Type.ELEMENT,
-                                               new NameTest(Type.ELEMENT, fp, config.getNamePool()),
+                                               elementNameTest,
                                                Untyped.getInstance(), false, config);
             }
         } else {
             itemType = new ContentTypeTest(Type.ELEMENT,
-                                           new NameTest(Type.ELEMENT, fp, config.getNamePool()),
+                                           elementNameTest,
                                            schemaType, false, config);
             try {
                 schemaType.analyzeContentExpression(content, Type.ELEMENT);

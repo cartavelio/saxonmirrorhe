@@ -8,6 +8,8 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
@@ -28,9 +30,10 @@ import java.util.Optional;
  * <p>Note: it's not safe to use this if the supplied node is mutable.</p>
  */
 
-public class SameNameTest extends NodeTest implements QNameTest {
+public class SameNameTest extends NodeTest {
 
     private final NodeInfo origin;
+
     /**
      * Create a SameNameTest to match nodes by name
      *
@@ -71,7 +74,11 @@ public class SameNameTest extends NodeTest implements QNameTest {
      */
 
     public QNameTest getQNameTest() {
-        return this;
+        NamePool pool = origin.getConfiguration().getNamePool();
+        if (origin.hasFingerprint()) {
+            return new SpecificQNameTest(pool, origin.getFingerprint());
+        }
+        return new SpecificQNameTest(new StructuredQName("", origin.getNamespaceUri(), origin.getLocalPart()), pool);
     }
 
 
@@ -135,29 +142,29 @@ public class SameNameTest extends NodeTest implements QNameTest {
             (node.getNodeKind() == origin.getNodeKind() && Navigator.haveSameName(node, origin));
     }
 
-    /**
-     * Test whether the NameTest matches a given QName
-     *
-     * @param qname the QName to be matched
-     * @return true if the name matches
-     */
-
-    @Override
-    public boolean matches(StructuredQName qname) {
-        return NameOfNode.makeName(origin).getStructuredQName().equals(qname);
-    }
-
-    /**
-     * Test whether the QNameTest matches a given fingerprint
-     *
-     * @param namePool the name pool
-     * @param fp       the fingerprint of the QName to be matched
-     * @return true if the name matches, false if not
-     */
-    @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return fp == getFingerprint();
-    }
+//    /**
+//     * Test whether the NameTest matches a given QName
+//     *
+//     * @param qname the QName to be matched
+//     * @return true if the name matches
+//     */
+//
+//    @Override
+//    public boolean matches(StructuredQName qname) {
+//        return NameOfNode.makeName(origin).getStructuredQName().equals(qname);
+//    }
+//
+//    /**
+//     * Test whether the QNameTest matches a given fingerprint
+//     *
+//     * @param namePool the name pool
+//     * @param fp       the fingerprint of the QName to be matched
+//     * @return true if the name matches, false if not
+//     */
+//    @Override
+//    public boolean matchesFingerprint(NamePool namePool, int fp) {
+//        return fp == getFingerprint();
+//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
@@ -268,18 +275,18 @@ public class SameNameTest extends NodeTest implements QNameTest {
         return new NameTest(origin.getNodeKind(), origin.getNamespaceUri(), origin.getLocalPart(), origin.getConfiguration().getNamePool());
     }
 
-    /**
-     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
-     *
-     * @return a string representation of the QNameTest, suitable for use in export files. The format is
-     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
-     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
-     */
-    @Override
-    public String exportQNameTest() {
-        // Not applicable
-        return "";
-    }
+//    /**
+//     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
+//     *
+//     * @return a string representation of the QNameTest, suitable for use in export files. The format is
+//     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+//     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
+//     */
+//    @Override
+//    public String exportQNameTest() {
+//        // Not applicable
+//        return "";
+//    }
 
 }
 

@@ -9,6 +9,8 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 
 import net.sf.saxon.type.*;
@@ -74,6 +76,11 @@ public final class MultipleNodeKindTest extends NodeTest {
     @Override
     public UType getUType() {
         return uType;
+    }
+
+    @Override
+    public QNameTest getQNameTest() {
+        return AnyQNameTest.getInstance();
     }
 
     /**

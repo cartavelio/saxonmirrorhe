@@ -8,11 +8,10 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.trans.ComponentTest;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.HashSet;
@@ -132,7 +131,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
                                  this instanceof XSLAccept ? "XTSE3032" : "XTSE3022", "names");
                 } else if (componentTypeCode == StandardNames.XSL_FUNCTION) {
                     StructuredQName name = makeQName(tok.substring(0, hash), null, "names");
-                    test = new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), getNamePool());
+                    test = new SpecificQNameTest(new StructuredQName("", name.getNamespaceUri(), name.getLocalPart()), getNamePool());
                     int arity = 0;
                     try {
                         arity = Integer.parseInt(tok.substring(hash + 1));
@@ -144,7 +143,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
                     compileErrorInAttribute("Cannot specify arity for components other than functions", "XTSE3020", "names");
                 }
             } else if (tok.equals("*")) {
-                test = AnyNodeTest.getInstance();
+                test = AnyQNameTest.getInstance();
                 addWildCardTest(componentTypeCode, test);
             } else if (tok.endsWith(":*")) {
                 if (tok.length() == 2) {
@@ -156,18 +155,18 @@ public abstract class XSLAcceptExpose extends StyleElement {
                     compileErrorInAttribute("Undeclared prefix " + prefix, "XTSE0020", "names");
                     uri = NamespaceUri.ANONYMOUS; // for recovery
                 }
-                test = new NamespaceTest(getNamePool(), Type.ELEMENT, uri);
+                test = new NamespaceQNameTest(uri);
                 addWildCardTest(componentTypeCode, test);
             } else if (tok.startsWith("Q{") && tok.endsWith("}*")) {
                 final String uri = tok.substring(2, tok.length() - 2);
-                test = new NamespaceTest(getNamePool(), Type.ELEMENT, NamespaceUri.of(uri));
+                test = new NamespaceQNameTest(NamespaceUri.of(uri));
                 wildcardComponentTests.add(new ComponentTest(componentTypeCode, test, -1));
             } else if (tok.startsWith("*:")) {
                 if (tok.length() == 2) {
                     compileErrorInAttribute("No local name after '*:'", "XTSE0020", "names");
                 }
                 final String localname = tok.substring(2);
-                test = new LocalNameTest(getNamePool(), Type.ELEMENT, localname);
+                test = new LocalQNameTest(localname);
                 addWildCardTest(componentTypeCode, test);
 
             } else {
@@ -180,7 +179,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
 
                 } else {
                     StructuredQName name = makeQName(tok, null, "names");
-                    test = new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalPart(), getNamePool());
+                    test = new SpecificQNameTest(new StructuredQName("", name.getNamespaceUri(), name.getLocalPart()), getNamePool());
                     explicitComponentTests.add(new ComponentTest(componentTypeCode, test, -1));
                 }
             }

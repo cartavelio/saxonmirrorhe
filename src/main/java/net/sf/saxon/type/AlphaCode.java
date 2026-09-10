@@ -17,6 +17,7 @@ import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
@@ -809,10 +810,10 @@ public class AlphaCode {
                 QNameTest partialNameTest = null;
                 if (name != null && name.contains("*")) {
                     if (name.startsWith("*:")) {
-                        partialNameTest = new LocalNameTest(config.getNamePool(), kind, name.substring(2));
+                        partialNameTest = new LocalQNameTest(name.substring(2));
                     } else if (name.endsWith("}*")) {
                         String uri = name.substring(2, name.length() - 2);
-                        partialNameTest = new NamespaceTest(config.getNamePool(), kind, NamespaceUri.of(uri));
+                        partialNameTest = new NamespaceQNameTest(NamespaceUri.of(uri));
                     }
                 }
                 if (partialNameTest != null) {
@@ -859,8 +860,8 @@ public class AlphaCode {
                                         : new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());;
                             } else {
                                  QNameTest nameTest = qName == null
-                                         ? AnyNodeTest.getInstance()
-                                         : new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
+                                         ? AnyQNameTest.getInstance()
+                                         : new SpecificQNameTest(new StructuredQName("", qName.getNamespaceUri(), qName.getLocalPart()), config.getNamePool());
 
                                  itemType = new ContentTypeTest(Type.ELEMENT, nameTest, contentType, nillable, config);
                             }
@@ -873,8 +874,8 @@ public class AlphaCode {
                                 ;
                             } else {
                                 QNameTest nameTest = qName == null
-                                        ? AnyNodeTest.getInstance()
-                                        : new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
+                                        ? AnyQNameTest.getInstance()
+                                        : new SpecificQNameTest(new StructuredQName("", qName.getNamespaceUri(), qName.getLocalPart()), config.getNamePool());
 
                                 itemType = new ContentTypeTest(Type.ATTRIBUTE, nameTest, contentType, false, config);
                             }

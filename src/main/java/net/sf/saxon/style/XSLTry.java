@@ -12,7 +12,7 @@ import net.sf.saxon.expr.TryCatch;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.pattern.QNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.ArrayList;

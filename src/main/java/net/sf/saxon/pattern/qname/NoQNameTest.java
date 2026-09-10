@@ -3,29 +3,29 @@ package net.sf.saxon.pattern.qname;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
 
-public class AnyQNameTest implements QNameTest {
+public class NoQNameTest implements QNameTest {
 
-    private static AnyQNameTest INSTANCE = new AnyQNameTest();
+    private final static NoQNameTest INSTANCE = new NoQNameTest();
 
-    public static AnyQNameTest getInstance() {
+    public static NoQNameTest getInstance() {
         return INSTANCE;
     }
 
-    private AnyQNameTest(){};
+    private NoQNameTest(){};
 
     @Override
     public boolean matches(StructuredQName qname) {
-        return true;
+        return false;
     }
 
     @Override
     public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return true;
+        return false;
     }
 
     @Override
     public String exportQNameTest() {
-        return "*";
+        return "xs:error";
     }
 }
 

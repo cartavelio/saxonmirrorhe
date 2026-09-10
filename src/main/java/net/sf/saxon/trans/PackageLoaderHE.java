@@ -36,6 +36,7 @@ import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -3247,14 +3248,14 @@ public class PackageLoaderHE implements IPackageLoader {
                 List<QNameTest> list = new ArrayList<>();
                 for (String t : tests) {
                     if (t.equals("*")) {
-                        list.add(AnyNodeTest.getInstance());
+                        list.add(AnyQNameTest.getInstance());
                     } else if (t.startsWith("*:")) {
-                        list.add(new LocalNameTest(pool, Type.ELEMENT, t.substring(2)));
+                        list.add(new LocalQNameTest(t.substring(2)));
                     } else if (t.endsWith("}*")) {
-                        list.add(new NamespaceTest(pool, Type.ELEMENT, NamespaceUri.of(t.substring(2, t.length()-2))));
+                        list.add(new NamespaceQNameTest(NamespaceUri.of(t.substring(2, t.length()-2))));
                     } else {
                         StructuredQName qName = StructuredQName.fromEQName((t));
-                        list.add(new NameTest(Type.ELEMENT, new FingerprintedQName(qName, pool), pool));
+                        list.add(new SpecificQNameTest(qName, pool));
                     }
                 }
                 QNameTest test;

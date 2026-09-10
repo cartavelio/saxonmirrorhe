@@ -13,6 +13,8 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
@@ -312,7 +314,7 @@ public class CombinedNodeTest extends NodeTest {
             return (QNameTest) nodetest2;
         }
         if (!b1) {
-            return AnyNodeTest.getInstance();
+            return AnyQNameTest.getInstance();
         }
         QNameTest test1 = nodetest1.getQNameTest();
         QNameTest test2 = nodetest2.getQNameTest();
@@ -322,7 +324,7 @@ public class CombinedNodeTest extends NodeTest {
         if (operator == OperatorSymbol.UNION) {
             return new UnionQNameTest(test1, test2);
         }
-        return AnyNodeTest.getInstance();
+        return AnyQNameTest.getInstance();
     }
 
 

@@ -9,9 +9,9 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.UnionQNameTest;
+import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +84,7 @@ public class XSLCatch extends StyleElement {
 
         if (errorAtt == null) {
             // default is "catch all errors"
-            nameTest = AnyNodeTest.getInstance(); // for error recovery
+            nameTest = AnyQNameTest.getInstance(); // for error recovery
         } else {
             List<QNameTest> tests = parseNameTests(errorAtt);
             if (tests.size() == 0) {
@@ -112,31 +112,25 @@ public class XSLCatch extends StyleElement {
             String s = st.nextToken();
             QNameTest nt;
             if (s.equals("*")) {
-                nt = AnyNodeTest.getInstance();
+                nt = AnyQNameTest.getInstance();
                 result.add(nt);
 
             } else if (s.endsWith(":*")) {
                 if (s.length() == 2) {
                     compileError("No prefix before ':*'");
-                    result.add(AnyNodeTest.getInstance());
+                    result.add(AnyQNameTest.getInstance());
                 }
                 String prefix = s.substring(0, s.length() - 2);
                 NamespaceUri uri = getURIForPrefix(prefix, false);
-                nt = new NamespaceTest(
-                        getNamePool(),
-                        Type.ELEMENT,
-                        uri);
+                nt = new NamespaceQNameTest(uri);
                 result.add(nt);
             } else if (s.startsWith("*:")) {
                 if (s.length() == 2) {
                     compileErrorInAttribute("No local name after '*:'", "XTSE0010", "errors");
-                    result.add(AnyNodeTest.getInstance());
+                    result.add(AnyQNameTest.getInstance());
                 }
                 String localname = s.substring(2);
-                nt = new LocalNameTest(
-                        getNamePool(),
-                        Type.ELEMENT,
-                        localname);
+                nt = new LocalQNameTest(localname);
                 result.add(nt);
             } else {
                 String prefix;
@@ -151,19 +145,19 @@ public class XSLCatch extends StyleElement {
                         uri = getURIForPrefix(prefix, false);
                         if (uri == null) {
                             undeclaredNamespaceError(prefix, "XTSE0280", "errors");
-                            result.add(AnyNodeTest.getInstance());
+                            result.add(AnyQNameTest.getInstance());
                             break;
                         }
                     }
                     localName = parts[1];
                 } catch (QNameException err) {
                     compileErrorInAttribute("Error code " + s + " is not a valid QName", "XTSE0280", "errors");
-                    result.add(AnyNodeTest.getInstance());
+                    result.add(AnyQNameTest.getInstance());
                     break;
                 }
                 NamePool target = getNamePool();
                 int nameCode = target.allocateFingerprint(uri, localName);
-                nt = new NameTest(Type.ELEMENT, nameCode, getNamePool());
+                nt = new SpecificQNameTest(getNamePool(), nameCode);
                 result.add(nt);
             }
         }

@@ -7,10 +7,10 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -23,7 +23,7 @@ import net.sf.saxon.z.IntPredicateProxy;
  * name and type. An AnyNodeTest matches any node.
  */
 
-public final class AnyNodeTest extends NodeTest implements QNameTest {
+public final class AnyNodeTest extends NodeTest {
 
     private static final AnyNodeTest THE_INSTANCE = new AnyNodeTest();
 
@@ -93,29 +93,29 @@ public final class AnyNodeTest extends NodeTest implements QNameTest {
         return true;
     }
 
-    /**
-     * Test whether this QNameTest matches a given QName
-     *
-     * @param qname the QName to be matched
-     * @return true if the name matches, false if not
-     */
-
-    @Override
-    public boolean matches(StructuredQName qname) {
-        return true;
-    }
-
-    /**
-     * Test whether the QNameTest matches a given fingerprint
-     *
-     * @param namePool
-     * @param fp       the fingerprint of the QName to be matched
-     * @return true if the name matches, false if not
-     */
-    @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return true;
-    }
+//    /**
+//     * Test whether this QNameTest matches a given QName
+//     *
+//     * @param qname the QName to be matched
+//     * @return true if the name matches, false if not
+//     */
+//
+//    @Override
+//    public boolean matches(StructuredQName qname) {
+//        return true;
+//    }
+//
+//    /**
+//     * Test whether the QNameTest matches a given fingerprint
+//     *
+//     * @param namePool
+//     * @param fp       the fingerprint of the QName to be matched
+//     * @return true if the name matches, false if not
+//     */
+//    @Override
+//    public boolean matchesFingerprint(NamePool namePool, int fp) {
+//        return true;
+//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
@@ -134,7 +134,7 @@ public final class AnyNodeTest extends NodeTest implements QNameTest {
      */
 
     public QNameTest getQNameTest() {
-        return this;
+        return AnyQNameTest.getInstance();
     }
 
     /*@NotNull*/
@@ -142,17 +142,17 @@ public final class AnyNodeTest extends NodeTest implements QNameTest {
         return "node()";
     }
 
-    /**
-     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
-     *
-     * @return a string representation of the QNameTest, suitable for use in export files. The format is
-     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
-     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
-     */
-    @Override
-    public String exportQNameTest() {
-        return "*";
-    }
+//    /**
+//     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
+//     *
+//     * @return a string representation of the QNameTest, suitable for use in export files. The format is
+//     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+//     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
+//     */
+//    @Override
+//    public String exportQNameTest() {
+//        return "*";
+//    }
 
 
 }

@@ -7,7 +7,12 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pattern.qname.LocalQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.SchemaType;
@@ -27,15 +32,13 @@ import java.util.Optional;
  * it represents an XPath 2.0 test of the form *:name.
  */
 
-public final class LocalNameTest extends NodeTest implements QNameTest {
+public final class LocalNameTest extends NodeTest {
 
-    private final NamePool namePool;
     private final int nodeKind;
     private final String localName;
     private final UType uType;
 
-    public LocalNameTest(NamePool pool, int nodeKind, String localName) {
-        this.namePool = pool;
+    public LocalNameTest(int nodeKind, String localName) {
         this.nodeKind = nodeKind;
         this.localName = localName;
         uType = UType.fromTypeCode(nodeKind);
@@ -104,6 +107,7 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
     public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         final int[] nameCodeArray = tree.getNameCodeArray();
+        final NamePool namePool = tree.getNamePool();
         if (nodeKind == Type.ELEMENT && tree instanceof TinyTree) {
              Map<String, IntSet> localNameIndex = ((TinyTree)tree).getLocalNameIndex();
              IntSet intSet = localNameIndex.get(localName);
@@ -132,29 +136,29 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
         return localName.equals(node.getLocalPart()) && nodeKind == node.getNodeKind();
     }
 
-    /**
-     * Test whether this QNameTest matches a given QName
-     *
-     * @param qname the QName to be matched
-     * @return true if the name matches, false if not
-     */
-
-    @Override
-    public boolean matches(StructuredQName qname) {
-        return localName.equals(qname.getLocalPart());
-    }
-
-    /**
-     * Test whether the QNameTest matches a given fingerprint
-     *
-     * @param namePool the name pool
-     * @param fp       the fingerprint of the QName to be matched
-     * @return true if the name matches, false if not
-     */
-    @Override
-    public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return namePool.getLocalName(fp).equals(localName);
-    }
+//    /**
+//     * Test whether this QNameTest matches a given QName
+//     *
+//     * @param qname the QName to be matched
+//     * @return true if the name matches, false if not
+//     */
+//
+//    @Override
+//    public boolean matches(StructuredQName qname) {
+//        return localName.equals(qname.getLocalPart());
+//    }
+//
+//    /**
+//     * Test whether the QNameTest matches a given fingerprint
+//     *
+//     * @param namePool the name pool
+//     * @param fp       the fingerprint of the QName to be matched
+//     * @return true if the name matches, false if not
+//     */
+//    @Override
+//    public boolean matchesFingerprint(NamePool namePool, int fp) {
+//        return namePool.getLocalName(fp).equals(localName);
+//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
@@ -173,7 +177,7 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
      */
 
     public QNameTest getQNameTest() {
-        return this;
+        return new LocalQNameTest(localName);
     }
 
 
@@ -227,19 +231,17 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
                 ((LocalNameTest) other).localName.equals(localName);
     }
 
-    public NamePool getNamePool() {return namePool;}
-
-    /**
-     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
-     *
-     * @return a string representation of the QNameTest, suitable for use in export files. The format is
-     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
-     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
-     */
-    @Override
-    public String exportQNameTest() {
-        return "*:" + localName;
-    }
+//    /**
+//     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
+//     *
+//     * @return a string representation of the QNameTest, suitable for use in export files. The format is
+//     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+//     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
+//     */
+//    @Override
+//    public String exportQNameTest() {
+//        return "*:" + localName;
+//    }
 
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this

@@ -384,7 +384,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 && ((CompareToStringConstant) getFilter()).getLhsExpression().isCallOn(LocalName_1.class)
                 && ((SystemFunctionCall)((CompareToStringConstant) getFilter()).getLhsExpression()).getArg(0) instanceof ContextItemExpression) {
             AxisExpression ax2 = new AxisExpression(((AxisExpression) getBase()).getAxis(),
-                                       new LocalNameTest(config.getNamePool(), Type.ELEMENT, ((CompareToStringConstant) getFilter()).getComparand().toString()));
+                                       new LocalNameTest(Type.ELEMENT, ((CompareToStringConstant) getFilter()).getComparand().toString()));
             ExpressionTool.copyLocationInfo(this, ax2);
             return ax2;
         }

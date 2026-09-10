@@ -10,10 +10,15 @@ package net.sf.saxon.trans;
 
 import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.pattern.LocalNameTest;
-import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NamespaceTest;
-import net.sf.saxon.pattern.QNameTest;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.qname.LocalQNameTest;
+import net.sf.saxon.pattern.qname.NamespaceQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
+
+/**
+ * A test for a specific kind/name/arity of component in a stylesheet (used in xsl:accept and xsl:expose)
+ */
 
 public class ComponentTest {
 
@@ -40,7 +45,7 @@ public class ComponentTest {
     }
 
     public boolean isPartialWildcard() {
-        return nameTest instanceof LocalNameTest || nameTest instanceof NamespaceTest;
+        return nameTest instanceof LocalQNameTest || nameTest instanceof NamespaceQNameTest;
     }
 
     public boolean matches(Actor component) {
@@ -54,11 +59,12 @@ public class ComponentTest {
     }
 
     public SymbolicName getSymbolicNameIfExplicit() {
-        if (nameTest instanceof NameTest) {
+        if (nameTest instanceof SpecificQNameTest) {
+            StructuredQName name = ((SpecificQNameTest)nameTest).getStructuredQName();
             if (componentKind == StandardNames.XSL_FUNCTION) {
-                return new SymbolicName.F(((NameTest)nameTest).getMatchingNodeName(), arity);
+                return new SymbolicName.F(name, arity);
             } else {
-                return new SymbolicName(componentKind, ((NameTest) nameTest).getMatchingNodeName());
+                return new SymbolicName(componentKind, name);
             }
         } else {
             return null;

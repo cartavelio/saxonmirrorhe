@@ -17,6 +17,8 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -364,11 +366,11 @@ public class ItemTypeFactory {
      */
 
     public ItemType getElementTest(/*@Nullable*/ QName name, QName schemaType, boolean nillable) throws SaxonApiException {
-        NameTest nameTest = null;
+        QNameTest nameTest = null;
         ContentTypeTest contentTest = null;
         if (name != null) {
             int elementFP = config.getNamePool().allocateFingerprint(name.getNamespaceUri(), name.getLocalName());
-            nameTest = new NameTest(Type.ELEMENT, elementFP, config.getNamePool());
+            nameTest = new SpecificQNameTest(config.getNamePool(), elementFP);
         }
         if (schemaType != null) {
             SchemaType type = config.getSchemaType(
@@ -382,7 +384,8 @@ public class ItemTypeFactory {
             if (nameTest == null) {
                 return getNodeKindTest(XdmNodeKind.ELEMENT);
             } else {
-                return new ConstructedItemType(nameTest, config);
+                NameTest namedNodeTest = new NameTest(Type.ELEMENT, name.getNamespaceUri(), name.getLocalName(), config.getNamePool());
+                return new ConstructedItemType(namedNodeTest, config);
             }
         } else {
             return new ConstructedItemType(contentTest, config);

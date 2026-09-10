@@ -10,6 +10,7 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.Nilled_1;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
@@ -63,6 +64,11 @@ public class ContentTypeTest extends NodeTest {
         return kind == Type.ELEMENT ? UType.ELEMENT : UType.ATTRIBUTE;
     }
 
+
+    @Override
+    public QNameTest getQNameTest() {
+        return nameTest;
+    }
 
     /**
      * The test is nillable if a question mark was specified as the occurrence indicator
@@ -164,11 +170,11 @@ public class ContentTypeTest extends NodeTest {
     @Override
     public final double getDefaultPriority() {
         // TODO: QT4 issue 1394, the spec needs to define the rules for new nodetest options
-        if (nameTest instanceof AnyNodeTest) {
+        if (nameTest instanceof AnyQNameTest) {
             return 0;
-        } else if (nameTest instanceof NameTest) {
+        } else if (nameTest instanceof SpecificQNameTest) {
             return 0.25;
-        } else if (nameTest instanceof LocalNameTest || nameTest instanceof NamespaceTest) {
+        } else if (nameTest instanceof LocalQNameTest || nameTest instanceof NamespaceQNameTest) {
             return 0.125;
         } else {
             // Not sure what this covers...

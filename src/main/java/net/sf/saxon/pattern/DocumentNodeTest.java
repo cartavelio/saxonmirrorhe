@@ -11,6 +11,8 @@ import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pattern.qname.NoQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
@@ -43,6 +45,11 @@ public class DocumentNodeTest extends NodeTest {
     @Override
     public UType getUType() {
         return UType.DOCUMENT;
+    }
+
+    @Override
+    public QNameTest getQNameTest() {
+        return NoQNameTest.getInstance();
     }
 
     /**

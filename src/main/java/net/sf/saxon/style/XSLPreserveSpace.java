@@ -104,7 +104,7 @@ public class XSLPreserveSpace extends StyleElement {
                         NamespaceUri uri = NamespaceUri.of(s.substring(2, brace));
                         String local = s.substring(brace+1);
                         if (local.equals("*")) {
-                            nt = new NamespaceTest(getNamePool(), Type.ELEMENT, uri);
+                            nt = new NamespaceTest(Type.ELEMENT, uri);
                         } else {
                             nt = new NameTest(Type.ELEMENT, uri, local, getNamePool());
                         }
@@ -119,7 +119,7 @@ public class XSLPreserveSpace extends StyleElement {
                     if (uri == null) {
                         undeclaredNamespaceError(prefix, "XTSE0280", "elements");
                     }
-                    nt = new NamespaceTest(getNamePool(), Type.ELEMENT, uri);
+                    nt = new NamespaceTest(Type.ELEMENT, uri);
                     rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
 
                 } else if (s.startsWith("*:")) {
@@ -127,7 +127,7 @@ public class XSLPreserveSpace extends StyleElement {
                         compileErrorInAttribute("No local name after '*:'", "XTSE0010", "elements");
                     }
                     String localname = s.substring(2);
-                    nt = new LocalNameTest(getNamePool(), Type.ELEMENT, localname);
+                    nt = new LocalNameTest(Type.ELEMENT, localname);
                     rules.addRule(nt, preserve, decl.getModule(), decl.getSourceElement().getLineNumber());
 
                 } else {

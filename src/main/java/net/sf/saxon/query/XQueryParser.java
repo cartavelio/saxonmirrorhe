@@ -20,9 +20,9 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.AnyNodeTest;
-import net.sf.saxon.pattern.QNameTest;
 import net.sf.saxon.pattern.UnionQNameTest;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.CharacterMap;
@@ -3868,14 +3868,14 @@ public class XQueryParser extends XPathParser {
                     String prefix = ((Token.Wildcard) tok).getPrefix();
                     String suffix = ((Token.Wildcard) tok).getSuffix();
                     if (prefix.equals("*")) {
-                        tests.add(makeLocalNameTest(Type.ELEMENT, suffix));
+                        tests.add(makeLocalQNameTest(suffix));
                     } else {
-                        tests.add(makeNamespaceTest(Type.ELEMENT, prefix));
+                        tests.add(makeNamespaceQNameTest(prefix));
                     }
                 } else if (tok instanceof Token.NameToken) {
-                    tests.add(makeQNameTest(Type.ELEMENT, ((Token.NameToken)tok).getValue()));
+                    tests.add(makeQNameTest(((Token.NameToken)tok).getValue()));
                 } else if (tok == Token.STAR) {
-                    tests.add(AnyNodeTest.getInstance());
+                    tests.add(AnyQNameTest.getInstance());
                 } else {
                     grumble("Unrecognized name test in catch clause at " + t.currentToken);
                     return null;

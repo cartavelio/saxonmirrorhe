@@ -31,6 +31,7 @@ import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryParser;
@@ -3226,9 +3227,15 @@ public class XPathParser {
     private NodeTest getNodeTestForWildcard(Token.Wildcard token, short kind) throws XPathException {
         String prefix = token.getPrefix();
         String suffix = token.getSuffix();
-        return prefix.equals("*")
-                ? makeLocalNameTest(kind, suffix)
-                : makeNamespaceTest(kind, prefix);
+        if (prefix.equals("*")) {
+            if (!NameChecker.isValidNCName(StringTool.codePoints(suffix))) {
+                grumble("Local name `" + suffix + "` contains invalid characters");
+            }
+            return new LocalNameTest(kind, suffix);
+        } else {
+            NamespaceQNameTest test = makeNamespaceQNameTest(prefix);
+            return new NamespaceTest(kind, test.getNamespace());
+        }
     }
 
     protected Expression getPendingDirectElementConstructor() {
@@ -3656,29 +3663,29 @@ public class XPathParser {
      * One of QName, prefix:*, *:suffix, *, text(), node(), comment(), or
      * processing-instruction(literal?), or element(~,~), attribute(~,~), etc.
      *
-     * @param nodeType the node type being sought if one is specified
+     * @param nodeKind the node type being sought if one is specified
      * @return the resulting NodeTest object
      * @throws XPathException if any error is encountered
      */
 
     /*@NotNull*/
-    protected NodeTest parseNodeTest(short nodeType) throws XPathException {
+    protected NodeTest parseNodeTest(short nodeKind) throws XPathException {
         Token tok = t.currentToken;
         if (tok instanceof Token.NameToken) {
             if (t.peekAhead() == Token.LPAREN) {
                 return parseKindTest();
             }
-            NodeTest test = makeNameTest(nodeType, ((Token.NameToken)tok).getValue(), nodeType == Type.ELEMENT);
+            NodeTest test = makeNameTest(nodeKind, ((Token.NameToken)tok).getValue(), nodeKind == Type.ELEMENT);
             nextToken();
             return test;
         } else if (tok == Token.LPAREN) {
-            return parseUnionNodeTest(nodeType);
+            return parseUnionNodeTest(nodeKind);
         } else if (tok == Token.STAR) {
             nextToken();
-            return NodeKindTest.makeNodeKindTest(nodeType);
+            return NodeKindTest.makeNodeKindTest(nodeKind);
         } else if (tok instanceof Token.Wildcard) {
             nextToken();
-            return getNodeTestForWildcard(((Token.Wildcard) tok), nodeType);
+            return getNodeTestForWildcard(((Token.Wildcard) tok), nodeKind);
         } else {
             grumble("Unrecognized node test");
             return null;
@@ -3888,7 +3895,7 @@ public class XPathParser {
                                 (nodeKind == Type.ATTRIBUTE && schemaType == AnySimpleType.getInstance())) {
                             result = nodeTest;
                         } else {
-                            NodeTest typeTest = new ContentTypeTest(nodeKind, AnyNodeTest.getInstance(), schemaType, nillable, env.getConfiguration());
+                            NodeTest typeTest = new ContentTypeTest(nodeKind, AnyQNameTest.getInstance(), schemaType, nillable, env.getConfiguration());
                             if (nodeTest instanceof NodeKindTest) {
                                 // this represents element(*,T) or attribute(*,T)
                                 result = typeTest;
@@ -5452,7 +5459,7 @@ public class XPathParser {
                     if (!NameChecker.isValidNCName(StringTool.codePoints(qname))) {
                         grumble("Invalid name '" + qname + "'");
                     }
-                    return new LocalNameTest(pool, nodeKind, qname);
+                    return new LocalNameTest(nodeKind, qname);
             }
         }
         StructuredQName qName = makeStructuredQName(qname, defaultNS);
@@ -5460,40 +5467,38 @@ public class XPathParser {
         return new NameTest(nodeKind, fp, pool);
     }
 
-    public QNameTest makeQNameTest(int nodeKind, String qname)
+    public QNameTest makeQNameTest(String qname)
             throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         StructuredQName q = makeStructuredQName(qname, NamespaceUri.NULL);
         assert q != null;
         int fp = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
-        return new NameTest(nodeKind, fp, pool);
+        return new SpecificQNameTest(pool, fp);
     }
 
     /**
      * Make a NamespaceTest (name:*)
      *
-     * @param nodeKind integer code identifying the type of node required
-     * @param prefix   the namespace prefix, or a string in the form Q{uri}
+     * @param prefix the namespace prefix, or a string in the form Q{uri}
      * @return the NamespaceTest, a pattern that matches all nodes in this
      * namespace
      * @throws XPathException if the namespace prefix is not declared
      */
 
     /*@NotNull*/
-    public NamespaceTest makeNamespaceTest(int nodeKind, String prefix)
+    public NamespaceQNameTest makeNamespaceQNameTest(String prefix)
             throws XPathException {
-        NamePool pool = env.getConfiguration().getNamePool();
         if (scanOnly) {
             // return an arbitrary namespace if we're only doing a syntax check
-            return new NamespaceTest(pool, nodeKind, NamespaceUri.SAXON);
+            return new NamespaceQNameTest(NamespaceUri.SAXON);
         }
         if (prefix.startsWith("Q{")) {
             String uri = prefix.substring(2, prefix.length() - 1);
-            return new NamespaceTest(pool, nodeKind, NamespaceUri.of(uri));
+            return new NamespaceQNameTest(NamespaceUri.of(uri));
         }
         try {
             StructuredQName sq = qNameParser.parse(prefix + ":dummy", NamespaceUri.NULL);
-            return new NamespaceTest(pool, nodeKind, sq.getNamespaceUri());
+            return new NamespaceQNameTest(sq.getNamespaceUri());
         } catch (XPathException err) {
             grumble(err.getMessage(), err.getErrorCodeQName());
             return null;
@@ -5503,7 +5508,6 @@ public class XPathParser {
     /**
      * Make a LocalNameTest (*:name)
      *
-     * @param nodeKind  the kind of node to be matched
      * @param localName the requred local name
      * @return a LocalNameTest, a pattern which matches all nodes of a given
      * local name, regardless of namespace
@@ -5511,12 +5515,12 @@ public class XPathParser {
      */
 
     /*@NotNull*/
-    public LocalNameTest makeLocalNameTest(int nodeKind, String localName)
+    public LocalQNameTest makeLocalQNameTest(String localName)
             throws XPathException {
         if (!NameChecker.isValidNCName(StringTool.codePoints(localName))) {
             grumble("Local name [" + localName + "] contains invalid characters");
         }
-        return new LocalNameTest(env.getConfiguration().getNamePool(), nodeKind, localName);
+        return new LocalQNameTest(localName);
     }
 
     /**

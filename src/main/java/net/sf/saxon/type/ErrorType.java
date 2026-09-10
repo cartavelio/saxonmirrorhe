@@ -13,6 +13,8 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.qname.NoQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
@@ -55,6 +57,11 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     @Override
     public UType getUType() {
         return UType.VOID;
+    }
+
+    @Override
+    public QNameTest getQNameTest() {
+        return NoQNameTest.getInstance();
     }
 
     /**

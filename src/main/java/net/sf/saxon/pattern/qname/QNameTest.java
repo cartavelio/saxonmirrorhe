@@ -5,7 +5,7 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.pattern;
+package net.sf.saxon.pattern.qname;
 
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;

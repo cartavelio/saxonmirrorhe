@@ -16,6 +16,9 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.LocalQNameTest;
+import net.sf.saxon.pattern.qname.NamespaceQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.s9api.Location;
@@ -544,10 +547,10 @@ public class TypeHierarchy {
         if (t1 instanceof SameNameTest) {
             return t2.matches(((SameNameTest) t1).getMatchingNodeName()) ? SUBSUMED_BY : DISJOINT;
         }
-        if (t1 instanceof NamespaceTest && t2 instanceof NamespaceTest) {
+        if (t1 instanceof NamespaceQNameTest && t2 instanceof NamespaceQNameTest) {
             return DISJOINT;
         }
-        if (t1 instanceof LocalNameTest && t2 instanceof LocalNameTest) {
+        if (t1 instanceof LocalQNameTest && t2 instanceof LocalQNameTest) {
             return DISJOINT;
         }
         return OVERLAPS;

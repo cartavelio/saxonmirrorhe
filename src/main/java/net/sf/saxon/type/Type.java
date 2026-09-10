@@ -171,7 +171,8 @@ public abstract class Type {
                     if (eltype.equals(Untyped.getInstance()) || eltype.equals(AnyType.getInstance())) {
                         return new SameNameTest(node);
                     } else {
-                        return new ContentTypeTest(Type.ELEMENT, new SameNameTest(node), eltype, false, node.getConfiguration());
+                        return new ContentTypeTest(Type.ELEMENT, new SameNameTest(node).getQNameTest(),
+                                                   eltype, false, node.getConfiguration());
                     }
 
                 case Type.ATTRIBUTE:
@@ -179,7 +180,8 @@ public abstract class Type {
                     if (attype.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
                         return new SameNameTest(node);
                     } else {
-                        return new ContentTypeTest(Type.ATTRIBUTE, new SameNameTest(node), attype, false, node.getConfiguration());
+                        return new ContentTypeTest(Type.ATTRIBUTE, new SameNameTest(node).getQNameTest(),
+                                                   attype, false, node.getConfiguration());
                     }
 
                 case Type.TEXT:
