@@ -38,7 +38,7 @@ public class IXSLSetAttribute extends StyleElement {
     /**
      * Determine whether this type of element is allowed to contain a sequence constructor
      *
-     * @return true: no, the element must be empty
+     * @return false: no, the element must be empty
      */
 
     @Override
