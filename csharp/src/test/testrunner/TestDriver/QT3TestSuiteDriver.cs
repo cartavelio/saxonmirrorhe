@@ -506,8 +506,9 @@ namespace TestDriver {
                         applicable = true;
                     }
                     else if ((((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XP30") ||
-                              ((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XP31")) &&
-                             (value.Contains("XP20+") || value.Contains("XP30+"))) {
+                              ((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XP31") ||
+                              ((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XP40")) &&
+                             (value.Contains("XP20+") || value.Contains("XP30+") || value.Contains("XP31+"))) {
                         applicable = true;
                     }
 
