@@ -117,6 +117,30 @@
             <xsl:variable name="product-siblings" select="parent::products/product"/>
             <xsl:variable name="variants" as="xs:string*">
                 <xsl:choose>
+                    <xsl:when test="exists(subsumed-by)">
+                        <!-- This feature may be "subsumed by" others.
+                            Upper bound for this feature's variants range comes from intersection of product
+                            lists for 'subsumed-by' features. -->
+                        <xsl:variable name="this-product" select="."/>
+                        <xsl:variable name="ids" select="tokenize(subsumed-by/@feature, '\s')"/>
+                        <xsl:variable name="subsuming-features" select="ancestor::featureMatrix/feature[string(@id) =
+                            $ids]"/>
+                        <!--<xsl:message><xsl:value-of select="$topic-shortName"/></xsl:message>
+                        <xsl:message>subsumed by: <xsl:value-of select="$ids"/></xsl:message>
+                        <xsl:message>features count: <xsl:value-of select="count($subsuming-features)"/></xsl:message>-->
+                        <xsl:iterate select="$subsuming-features">
+                            <xsl:param name="variants" select="()" as="xs:string*"/>
+                            <xsl:variable name="variants-range" as="xs:string*"
+                                select="local:get-variants-range($this-product, ./products/product)"/>
+                            <!--<xsl:message>variants-range: <xsl:value-of select="$variants-range"/></xsl:message>-->
+                            <xsl:variable name="intersection" as="xs:string*"
+                                select="if (empty($variants)) then $variants-range else distinct-values($variants[. = $variants-range])"/>
+                            <xsl:sequence select="$intersection"/>
+                            <xsl:next-iteration>
+                                <xsl:with-param name="variants" select="$intersection"/>
+                            </xsl:next-iteration>
+                        </xsl:iterate>
+                    </xsl:when>
                     <xsl:when test="count($product-siblings) gt 1">
                         <xsl:choose>
                             <xsl:when test="@level eq 'Basic'">
