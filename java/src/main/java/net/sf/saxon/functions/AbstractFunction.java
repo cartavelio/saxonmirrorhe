@@ -162,6 +162,9 @@ public abstract class AbstractFunction implements FunctionItem {
 
     @Override
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
+        if (options.version < 40) {
+            throw new XPathException("Cannot compare function items using deep-equal()", "FOTY0015");
+        }
         return this.equals(other);
     }
 
