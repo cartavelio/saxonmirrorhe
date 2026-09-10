@@ -60,8 +60,10 @@ def saxonApiDir = "${buildDir}/../src/main/c/Saxon.C.API"
 def commandDir = "${buildDir}/../src/main/c/command"
 def sharedLibDir = "${buildDir}/c"
 
-task buildSaxonGlue(type: Exec) {
-  dependsOn 'graalImage'
+task buildSaxonGlue(
+  type: Exec,
+  dependsOn: ["graal_ce_home"]
+) {
   workingDir "${commandDir}"
   commandLine "/usr/bin/gcc", "-m64", "-fPIC", "-I${saxonApiDir}/graalvm", "-c", "${saxonApiDir}/SaxonCGlue.c", "-o", "${commandDir}/SaxonCGlue.o"
   doLast {
@@ -591,8 +593,8 @@ task graal_eec_jar(
   }
 }
 
-task setup_pypi(
-  dependsOn: ["graalImage"]
+task setup_eec_pypi(
+  dependsOn: ["graal_ee_home"]
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
   outputs.files fileTree(dir: "${buildDir}/pypi", exclude: "dist/**")
@@ -690,11 +692,11 @@ task setup_pypi(
   }
 }
 
-task saxoncee_pypi(
+task saxon_eec_pypi(
   type: Exec,
-  dependsOn: ["setup_pypi"]
+  dependsOn: ["setup_eec_pypi"]
 ) {
-  inputs.files setup_pypi.outputs.getFiles()
+  inputs.files setup_eec_pypi.outputs.getFiles()
   outputs.files fileTree(dir: "${buildDir}/pypi/dist")
 
   workingDir "${buildDir}/pypi"
