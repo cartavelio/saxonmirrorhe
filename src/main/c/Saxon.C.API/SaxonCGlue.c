@@ -52,9 +52,35 @@ int create_graalvm_isolate(sxnc_environment * env)
 
 
     if (graal_create_isolate(NULL, &((env)->isolate), &((env)->thread)) != 0) {
-        fprintf(stderr, "initialization error\n");
+        fprintf(stderr, "graal_create_isolate error\n");
         return 1;
     }
+    fprintf(stdout, "Current thread pointer %p\n", (void *)((env)->thread));
+    fflush(stdout);
+    return 0;
+}
+
+
+int attach_graalvm_thread(sxnc_environment * env)
+{
+    fprintf(stdout, "graal_attach_thread before\n");
+    fflush(stdout);
+    graal_isolatethread_t *newthread = NULL;
+    //graal_create_isolate(NULL, &isolate1, &newthread);
+    graal_isolatethread_t *curthread = graal_get_current_thread(((env)->isolate));
+    fprintf(stdout, "Cur thread pointer %p\n", (void *)curthread);
+    fflush(stdout);
+
+    if (graal_attach_thread(((env)->isolate), &newthread) != 0) {
+        fprintf(stdout, "graal_attach_thread error\n");
+        fflush(stdout);
+        return 1;
+    }
+    fprintf(stderr, "graal_attach_thread ok\n");
+    fflush(stdout);
+    fprintf(stdout, "Cur thread pointer %p\n", (void *)newthread);
+    fflush(stdout);
+    (env)->thread = newthread;
     return 0;
 }
 

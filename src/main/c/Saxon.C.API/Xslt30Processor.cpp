@@ -249,6 +249,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 }
 
 XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
+    //proc->attachCurrentThread();
     if(stylesheetStr == nullptr) {
         createException("XSL string is null");
         return nullptr;
@@ -271,6 +272,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 }
 
 XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
+    //proc->attachCurrentThread();
     if(node == nullptr) {
         createException("XSL node is null");
         return nullptr;
@@ -308,6 +310,7 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 
 
 XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
+
     if(stylesheet == nullptr) {
         createException("XSL filename is null");
         return nullptr;
