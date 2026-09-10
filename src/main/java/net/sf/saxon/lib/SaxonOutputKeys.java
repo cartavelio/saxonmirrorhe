@@ -77,6 +77,13 @@ public class SaxonOutputKeys {
     /*@NotNull*/ public static final String ALLOW_DUPLICATE_NAMES = "allow-duplicate-names";
 
     /**
+     * escape-solidus = yes|no.
+     * <p>Defines whether forward slash is escaped by the JSON output method</p>
+     */
+
+    /*@NotNull*/ public static final String ESCAPE_SOLIDUS = "escape-solidus";
+
+    /**
      * build-tree = yes|no.
      * <p>Defines whether the raw output is used to build an XML document tree</p>
      */

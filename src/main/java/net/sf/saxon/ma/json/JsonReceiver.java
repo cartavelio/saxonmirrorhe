@@ -184,7 +184,7 @@ public class JsonReceiver implements Receiver {
                                                      "' is not a valid xs:boolean", ERR_INPUT);
                 }
             }
-            key = (alreadyEscaped ? handleEscapedString(key) : escape(key, false, isControlChar));
+            key = (alreadyEscaped ? handleEscapedString(key) : escape(key, false, false, isControlChar));
 
             String normalizedKey = alreadyEscaped ? unescape(key) : key;
             boolean added = keyChecker.peek().add(normalizedKey);
@@ -292,7 +292,7 @@ public class JsonReceiver implements Receiver {
             if (escaped) {
                 output.accept(StringView.of(handleEscapedString(content)));
             } else {
-                output.accept(StringView.of(escape(content, false, isControlChar)));
+                output.accept(StringView.of(escape(content, false, false, isControlChar)));
             }
             output.accept(BMPString.of("\""));
         } else if (!Whitespace.isAllWhite(uContent)) {
@@ -365,13 +365,13 @@ public class JsonReceiver implements Receiver {
      * @throws XPathException if the input contains invalid escape sequences
      */
 
-    public static String escape(String in, boolean forXml, IntPredicate hexEscapes) throws XPathException {
+    public static String escape(String in, boolean retainQuot, boolean retainSlash, IntPredicate hexEscapes) throws XPathException {
         StringBuilder out = new StringBuilder(in.length());
         for (int i=0; i<in.length(); i++) {
             int c = in.charAt(i);
             switch (c) {
                 case '"':
-                    out.append(forXml ? "\"" : "\\\"");
+                    out.append(retainQuot ? "\"" : "\\\"");
                     break;
                 case '\b':
                     out.append("\\b");
@@ -389,7 +389,7 @@ public class JsonReceiver implements Receiver {
                     out.append("\\t");
                     break;
                 case '/':
-                    out.append(forXml ? "/" : "\\/");  // spec bug 29665, saxon bug 2849
+                    out.append(retainSlash ? "/" : "\\/");  // spec bug 29665, saxon bug 2849
                     break;
                 case '\\':
                     out.append("\\\\");

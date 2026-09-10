@@ -118,7 +118,7 @@ public class JsonHandler {
     public String reEscape(String val) throws XPathException {
         String escaped;
         if (escape) {
-            escaped = JsonReceiver.escape(val, true, value ->
+            escaped = JsonReceiver.escape(val, true, true, value ->
                     (value >= 0 && value <= 0x1F) ||
                     (value >= 0x7F && value <= 0x9F) ||
                     !charChecker.test(value) ||
