@@ -267,11 +267,12 @@ namespace TestDriver {
         }
 
         internal void CopySchemaNamespace(Environment env, XPathCompiler testXpc) {
-            JConfiguration config = env.xpathCompiler.Processor.Implementation;
-            SysCollGen.ISet<NamespaceUri> ns = config.getImportedNamespaces();
-            foreach (NamespaceUri s in ns.ToArray()) {
-                testXpc.ImportSchemaNamespace(s.ToString());
-            }
+            testXpc.Schema = env.schema;
+            // JConfiguration config = env.xpathCompiler.Processor.Implementation;
+            // SysCollGen.ISet<NamespaceUri> ns = config.getImportedNamespaces();
+            // foreach (NamespaceUri s in ns.ToArray()) {
+            //     testXpc.ImportSchemaNamespace(s.ToString());
+            // }
         }
 
 
@@ -404,22 +405,22 @@ namespace TestDriver {
                             // No action
                         }
                     }
-                    // else {
-                    //     if (!expectStaticError) {
-                    //         string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
-                    //         Location loc = err.Location;
-                    //         try {
-                    //             Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
-                    //                                     loc.SystemId + "#" + loc.LineNumber +
-                    //                                     "\n   " + err.Message);
-                    //             recordFailure(testSetName, testName);
-                    //         }
-                    //         catch (Exception) {
-                    //             // No action
-                    //         }
-                    //     }
-                    //     outcome.ReportError(err.ErrorCode);
-                    // }
+                    else {
+                        if (!expectStaticError) {
+                            string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
+                            Location loc = err.Location;
+                            try {
+                                Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
+                                                        loc.SystemId + "#" + loc.LineNumber +
+                                                        "\n   " + err.Message);
+                                recordFailure(testSetName, testName);
+                            }
+                            catch (Exception) {
+                                // No action
+                            }
+                        }
+                        outcome.ReportError(err.ErrorCode);
+                    }
                 };
                 Stream styleSource;
                 try {

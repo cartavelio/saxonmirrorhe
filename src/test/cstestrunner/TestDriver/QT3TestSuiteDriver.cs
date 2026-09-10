@@ -871,6 +871,9 @@ namespace TestDriver {
                 assertXpc.XPathLanguageVersion = "3.1";
 #endif                
                 assertXpc.SchemaAware = testIsSchemaAware;
+                if (testIsSchemaAware) {
+                    assertXpc.Schema = env.schema;
+                }
                 assertXpc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
                 assertXpc.DeclareNamespace("math", "http://www.w3.org/2005/xpath-functions/math");
@@ -946,10 +949,11 @@ namespace TestDriver {
         }
         
         protected void copySchemaNamespaces(Environment env, XPathCompiler testXpc) {
-            JConfiguration config = env.xpathCompiler.Processor.Implementation;
-            foreach (NamespaceUri s in config.getImportedNamespaces()) {
-                testXpc.ImportSchemaNamespace(s.ToString());
-            }
+            testXpc.Schema = env.schema;
+            // JConfiguration config = env.xpathCompiler.Processor.Implementation;
+            // foreach (NamespaceUri s in config.getImportedNamespaces()) {
+            //     testXpc.ImportSchemaNamespace(s.ToString());
+            // }
         }
 
         private string truncate(string in1) {

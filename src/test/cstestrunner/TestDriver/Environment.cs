@@ -420,8 +420,6 @@ namespace TestDriver {
                         // }
                     }
 
-                    xpc.ImportSchemaNamespace(ns);
-                    environment.xpathCompiler.ImportSchemaNamespace(ns);
                     if ("source-reference".Equals(role)) {
                         validateSources = true;
                     }
@@ -434,6 +432,9 @@ namespace TestDriver {
 
             if (sources.Count > 0) {
                 environment.schema = compiler.Compile(sources.ToArray());
+                environment.xsltCompiler.Schema = environment.schema;
+                environment.xpathCompiler.Schema = environment.schema;
+                environment.xqueryCompiler.Schema = environment.schema;
                 return validateSources;
             }
 
