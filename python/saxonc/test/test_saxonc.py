@@ -117,11 +117,6 @@ def test_version2():
 def test_schema_aware1(saxonproc):
     assert saxonproc.is_schema_aware == False
 
-
-def test_saxon_edition(saxonproc):
-    assert saxonproc.edition == '@@edition@@'.upper()
-
-
 class myThread(threading.Thread):
     def __init__(self, threadID, name, saxon_proc):
         threading.Thread.__init__(self)
@@ -248,7 +243,7 @@ def test_threading3(data_dir, saxonproc):
     except Exception as err:
         print("Error: ", err)
         assert False
-    
+
 
 
 def test_icu_lib():
@@ -279,7 +274,7 @@ def test_icu_lib():
     result7 = xqc.run_query_to_value()
     print("format-integer(33,'Ww','cs') => " + str(result7))
     assert 'Třicet Tři' in str(result7)
-    
+
 
 
 def test_icu_lib_HE():

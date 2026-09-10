@@ -201,7 +201,7 @@ public class XQueryEngine extends SaxonCAPI {
         XQueryExecutable executable = null;
 
         compiler.setErrorReporter(SaxonCException.errorReporter);
-        if(cwd != null) {
+        if(compiler.getBaseURI() == null && cwd != null) {
             URI baseURI = PathHelper.pathToURI(processor.getUnderlyingConfiguration(), cwd);
             compiler.setBaseURI(baseURI);
         }
