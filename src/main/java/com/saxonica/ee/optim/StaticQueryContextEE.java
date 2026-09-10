@@ -146,6 +146,8 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
     public void compileLibrary(String query) throws XPathException {
         try {
             Configuration config = getConfiguration();
+            getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY,
+                                                    "separate XQuery compilation", -1);
             Executable executable = makeExecutable();
             FunctionLibraryList libList = new FunctionLibraryList();
             libList.addFunctionLibrary(new ExecutableFunctionLibrary(config));
