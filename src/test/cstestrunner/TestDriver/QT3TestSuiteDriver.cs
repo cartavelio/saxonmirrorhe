@@ -753,6 +753,7 @@ namespace TestDriver {
                 assertXpc.DeclareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
                 assertXpc.DeclareNamespace("j", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareVariable(new QName("result"));
+                assertXpc.BaseUri = assertion.BaseUri;
 
                 bool b = outcome.TestAssertion(outcome, assertion, outcome.GetPrincipalResultDoc(), assertXpc, xpc,
                     debug);

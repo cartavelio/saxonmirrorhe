@@ -170,11 +170,21 @@ namespace TestDriver {
                     // no action
                 }
             }
+            
+            // Handle dependencies
 
             foreach (XdmItem dependency in xpc.Evaluate("(dependency, ../dependencies/*)", env)) {
                 if (!driver.EnsureDependencySatisfied((XdmNode) dependency, environment)) {
                     environment.usable = false;
                 }
+            }
+            
+            // Handle configuration properties
+
+            foreach (XdmItem property in xpc.Evaluate("Q{http://saxon.sf.net/}property", env)) {
+                string propertyName = ((XdmNode) property).GetAttributeValue(new QName("name"));
+                string propertyValue = ((XdmNode) property).GetAttributeValue(new QName("value"));
+                environment.processor.SetProperty(propertyName, propertyValue);
             }
 
             // set the base URI if specified
