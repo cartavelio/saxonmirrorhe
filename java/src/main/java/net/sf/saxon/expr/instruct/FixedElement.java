@@ -170,9 +170,9 @@ public class FixedElement extends ElementCreator {
         Schema schema = getSchema();
         FixedElement fe = new FixedElement(elementName, namespaceBindings, bequeathNamespacesToChildren,
                                            inheritNamespacesFromParent, schema, getSchemaType(), getValidationAction());
+        ExpressionTool.copyLocationInfo(this, fe);
         fe.setContentExpression(getContentExpression().copy(rebindings));
         fe.preservingTypes = preservingTypes;
-        ExpressionTool.copyLocationInfo(this, fe);
         return fe;
     }
 
