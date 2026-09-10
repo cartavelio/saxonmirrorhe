@@ -14,6 +14,7 @@ import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.type.Schema;
@@ -517,9 +518,18 @@ public abstract class TestDriver {
             env = localEnvironments.get("default");
         } else {
             String envName = environmentNode.get().attribute("ref");
-            if (envName == null || envName.equals("")) {
+            if (envName == null || envName.isEmpty()) {
                 boolean baseUriCheck = false;
                 env = null;
+
+                // Special case for embedded stylesheet tests: don't build the environment if running 4.0
+                // tests with a 3.0 processor
+                if (spec.version.equals("3.0")) {
+                    Optional<XdmNode> requiredVn = testCase.select(Steps.path("dependencies", "spec", "@value")).asOptionalNode();
+                    if (requiredVn.isPresent() && requiredVn.get().getStringValue().equals("XSLT40+")) {
+                        return null;
+                    }
+                }
                 try {
                     env = Environment.processEnvironment(
                             this, xpc, environmentNode.get(), null, localEnvironments.get("default"));

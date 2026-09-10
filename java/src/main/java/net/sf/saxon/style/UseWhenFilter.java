@@ -258,10 +258,10 @@ public class UseWhenFilter extends ProxyReceiver {
         if (map.containsKey(key)) {
             // In 4.0, ignore an included stylesheet module if it has already been included at the
             // same stylesheet level.
-            if (is40 && compilation.existsLoadedModule(key, precedence)) {
+            if (is40 && compilation.existsLoadedModule(key, newPrecedence)) {
                 return null;
             } else {
-                compilation.addLoadedModule(key, precedence);
+                compilation.addLoadedModule(key, newPrecedence);
                 return (DocumentImpl) map.get(key);
             }
         } else {

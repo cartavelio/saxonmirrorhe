@@ -38,7 +38,7 @@ import java.util.function.IntPredicate;
  * The semantics depend on whether we are selecting JNodes or XNodes, which we don't know
  * in advance (except in the case where the axis is the attribute or namespace axis).
  *
- * <p>Once is is known whether the nodes to be matched will be JNodes or XNodes, this
+ * <p>Once it is known whether the nodes to be matched will be JNodes or XNodes, this
  * node test can be replaced by something more specific; but in many cases that isn't known
  * till evaluation time.</p>
  *

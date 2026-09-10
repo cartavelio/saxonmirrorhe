@@ -227,8 +227,6 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
 
     private Expression checkPlausibility(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, boolean warnings)
             throws XPathException {
-        StaticContext env = visitor.getStaticContext();
-        Configuration config = env.getConfiguration();
         ItemType contextType = contextInfo.getItemType();
 
         if (!(contextType instanceof NodeTest)) {
@@ -303,7 +301,6 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
 
         // For an X-or-self axis, if X never selects anything, then substitute the self axis.
         int nonSelf = AxisInfo.excludeSelfAxis[axis];
-        UType kind = test == null ? UType.XNODE : test.getUType();
         if (axis != nonSelf) {
             UType nonSelfTarget = AxisInfo.getTargetUType(originUType, nonSelf);
             if (!nonSelfTarget.overlaps(testUType)) {
@@ -599,7 +596,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
      * on the context position, while (position()+1) does not. The default implementation
      * of the method returns 0, indicating "no dependencies".
      *
-     * @return a set of bit-significant flags identifying the "intrinsic"
+     * @return an integer comprising bit-significant flags identifying the "intrinsic"
      * dependencies. The flags are documented in class net.sf.saxon.value.StaticProperty
      */
     @Override
@@ -614,17 +611,15 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
     @Override
     protected int computeCardinality() {
         ItemType originNodeType = staticInfo.getItemType();
-        if (!(originNodeType instanceof GNodeType)) {
+        if (!(originNodeType instanceof GNodeType gNodeType)) {
             // context item not a node - we'll report a type error somewhere along the line
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
         if (test == null) {
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
-        GNodeType gNodeType = (GNodeType)originNodeType;
 
-        if (axis == AxisInfo.ATTRIBUTE && test instanceof NamedXNodePredicate) {
-            NamedXNodePredicate fpTest = (NamedXNodePredicate) test;
+        if (axis == AxisInfo.ATTRIBUTE && test instanceof NamedXNodePredicate fpTest) {
             int attFingerprint = fpTest.getRequiredFingerprint();
             if (fpTest.getNodeKind() == Type.ATTRIBUTE && attFingerprint != -1) {
                 StructuredQName attName = getConfiguration().getNamePool().getStructuredQName(attFingerprint);
@@ -647,8 +642,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                 return StaticProperty.ALLOWS_ZERO_OR_ONE;
             }
         }
-        if (axis == AxisInfo.CHILD && test instanceof NamedXNodePredicate) {
-            NamedXNodePredicate fpTest = (NamedXNodePredicate) test;
+        if (axis == AxisInfo.CHILD && test instanceof NamedXNodePredicate fpTest) {
             int elemFingerprint = fpTest.getRequiredFingerprint();
             if (fpTest.getNodeKind() == Type.ELEMENT && elemFingerprint != -1) {
                 Schema schema = getRetainedStaticContext().getImportedSchema();
@@ -664,8 +658,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                 }
             }
         }
-        if (axis == AxisInfo.DESCENDANT && test instanceof NamedXNodePredicate) {
-            NamedXNodePredicate fpTest = (NamedXNodePredicate) test;
+        if (axis == AxisInfo.DESCENDANT && test instanceof NamedXNodePredicate fpTest) {
             int elemFingerprint = fpTest.getRequiredFingerprint();
             if (fpTest.getNodeKind() == Type.ELEMENT && elemFingerprint != -1) {
                 Schema schema = getRetainedStaticContext().getImportedSchema();
@@ -887,11 +880,9 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
      */
 
     public String toString() {
-        StringBuilder fsb = new StringBuilder(16);
-        fsb.append(AxisInfo.axisName[axis]);
-        fsb.append("::");
-        fsb.append(test == null ? "gnode()" : test.toString());
-        return fsb.toString();
+        return AxisInfo.axisName[axis]
+                + "::"
+                + (test == null ? "gnode()" : test.toString());
     }
 
     @Override

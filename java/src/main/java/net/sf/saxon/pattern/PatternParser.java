@@ -17,6 +17,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.value.*;
 
 /**
@@ -303,8 +304,9 @@ public class PatternParser extends XPathParser {
 
         ExpressionVisitor visitor = ExpressionVisitor.make(env);
         visitor.setOptimizeForPatternMatching(true);
+        ItemType contextItemType = isAllowXPath40Syntax() ? AnyGNodeType.getInstance() : AnyXNodeType.getInstance();
         ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(
-                AnyGNodeType.getInstance(), Optionality.OPTIONAL);
+                contextItemType, Optionality.OPTIONAL);
         Pattern pat;
         try {
             pat = PatternMaker.fromExpression(exp.simplify().typeCheck(visitor, cit), env.getConfiguration(), true);

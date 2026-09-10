@@ -81,7 +81,7 @@ public class SequenceCoercer extends UnaryExpression {
             if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
                 result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
             }
-            if (requiredItemType != AnyXNodeType.getInstance()) {
+            if (!(sequence.getItemType() instanceof XNodeType && requiredItemType == AnyXNodeType.getInstance())) {
                 result = new ItemChecker(result, requiredItemType, role);
             }
             return result;

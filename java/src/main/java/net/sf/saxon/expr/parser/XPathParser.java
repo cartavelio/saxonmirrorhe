@@ -3855,11 +3855,12 @@ public class XPathParser {
             boolean asNCName = NameChecker.isValidNCName(((Token.NameToken) tok).getValue());
             nextToken();
 
-            if (nodeKind == Type.ATTRIBUTE || nodeKind == Type.NAMESPACE) {
+            if (nodeKind == Type.ATTRIBUTE || nodeKind == Type.NAMESPACE || !isAllowXPath40Syntax()) {
                 // these axes never select JNodes
                 return new NamedXNodeType(nodeKind, test, env.getConfiguration());
             }
             return new SelectorTest(test, asNCName, nodeKind);
+
 //            GNodeType type = new NamedXNodeType(nodeKind, test, env.getConfiguration());
 //            return new NodeTypeTest(type);
         } else if (tok == Token.LPAREN) {

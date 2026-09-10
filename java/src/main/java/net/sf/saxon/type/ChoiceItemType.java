@@ -127,14 +127,39 @@ public class ChoiceItemType implements ItemType, ChoiceType {
         return false;
     }
 
-
-    protected boolean someMemberTypeSatisfies(Predicate<? super ItemType> condition) {
+    /**
+     * Ask whether there is an alternative in the choice type that
+     * satisfies a given condition
+     * @param condition the given condition
+     * @return true if a matching alternative is found
+     */
+    public boolean someMemberTypeSatisfies(Predicate<? super ItemType> condition) {
         for (ItemType member : memberTypes) {
             if (condition.test(member)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Return an item type that eliminates one (or more) of the alternatives
+     * @param condition predicate determining which alternatives to drop
+     * @return an ItemType that eliminates the selected choices
+     */
+
+    public ItemType eliminating(Predicate<? super ItemType> condition) {
+        List<ItemType> newList = new ArrayList<>(memberTypes.size());
+        for (ItemType member : memberTypes) {
+            if (!condition.test(member)) {
+                newList.add(member);
+            }
+        }
+        if (newList.size() == 1) {
+            return newList.get(0);
+        } else {
+            return new ChoiceItemType(newList);
+        }
     }
 
     /**

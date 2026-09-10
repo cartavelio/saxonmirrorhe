@@ -212,8 +212,7 @@ public class SlashExpression extends BinaryExpression
         getRhs().typeCheck(visitor, cit);
 
         // Give a warning if people write a/[x = 3]
-        if (getRhsExpression() instanceof SquareArrayConstructor)  {
-            SquareArrayConstructor sq = (SquareArrayConstructor)getRhsExpression();
+        if (getRhsExpression() instanceof SquareArrayConstructor sq)  {
             if (sq.getOperanda().getNumberOfOperands() == 1) {
                 visitor.getStaticContext().issueWarning("An array constructor appears immediately after '/' or '//'. Perhaps " +
                                 "'/*[predicate]' was intended? If not, consider using '!' rather than '/' to remove this warning.", SaxonErrorCode.SXWN9028, sq.getLocation());
@@ -270,8 +269,7 @@ public class SlashExpression extends BinaryExpression
 
         // detect .//x as a special case; this will appear as descendant-or-self::node()/x
 
-        if (start instanceof GeneralizedAxisExpression) {
-            GeneralizedAxisExpression stax = (GeneralizedAxisExpression) start;
+        if (start instanceof GeneralizedAxisExpression stax) {
             if (stax.getAxis() != AxisInfo.DESCENDANT_OR_SELF) {
                 return null;
             }
@@ -497,9 +495,9 @@ public class SlashExpression extends BinaryExpression
                 return (SlashExpression) path;
             }
         }
-        if (first instanceof DocumentSorter && ((DocumentSorter) first).getBaseExpression() instanceof SlashExpression) {
+        if (first instanceof DocumentSorter
+                && ((DocumentSorter) first).getBaseExpression() instanceof SlashExpression se) {
             // see test case filter-001 in xqts-extra
-            SlashExpression se = (SlashExpression) ((DocumentSorter) first).getBaseExpression();
             SlashExpression se2 = se.tryToMakeAbsolute();
             if (se2 != null) {
                 if (se2 == se) {
@@ -806,16 +804,14 @@ public class SlashExpression extends BinaryExpression
             head = ((SequenceCoercer)head).getBaseExpression();
         }
         Expression tail = getLastStep();
-        if (head instanceof ItemChecker) {
+        if (head instanceof ItemChecker checker) {
             // No need to type check the context item
-            ItemChecker checker = (ItemChecker) head;
             if (checker.getBaseExpression() instanceof ContextItemExpression) {
                 return tail.toPattern(config);
             }
-        } else if (tail instanceof VennExpression) {
+        } else if (tail instanceof VennExpression ve) {
             // Bug 4645. Rewrite a/(b|c) as (a/b union a/c). Note this rewrite isn't safe for
             // the "intersect" and "except" operators, except in special cases
-            VennExpression ve = (VennExpression)tail;
             if (ve.operator == OperatorSymbol.UNION) {
                 Expression lhExpansion = new SlashExpression(
                         head.copy(new RebindingMap()), ve.getLhsExpression());
@@ -1112,8 +1108,7 @@ public class SlashExpression extends BinaryExpression
             SlashExpression expr = (SlashExpression) getExpression();
             PullEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForPull();
             PullEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPull();
-            if (expr.contextFree && expr.getStep() instanceof AxisExpression) {
-                AxisExpression step = (AxisExpression)expr.getStep();
+            if (expr.contextFree && expr.getStep() instanceof AxisExpression step) {
                 return context -> MappingIterator.map(select.iterate(context), item -> step.iterate((GNode)item));
             } else {
                 @SuppressWarnings("Convert2MethodRef")
@@ -1131,8 +1126,7 @@ public class SlashExpression extends BinaryExpression
             SlashExpression expr = (SlashExpression)getExpression();
             PullEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForPull();
             PushEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPush();
-            if (expr.contextFree && expr.getStep() instanceof AxisExpression) {
-                AxisExpression step = (AxisExpression) expr.getStep();
+            if (expr.contextFree && expr.getStep() instanceof AxisExpression step) {
                 return (out, context) -> {
                     SequenceIterator outer = select.iterate(context);
                     for (Item a; (a = outer.next()) != null; ) {
