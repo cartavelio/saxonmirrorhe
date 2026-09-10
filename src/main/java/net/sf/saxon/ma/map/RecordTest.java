@@ -10,10 +10,7 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.om.Genre;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -48,6 +45,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final Set<String> optionalFields = new HashSet<>();
     private boolean _extensible;
+    private StructuredQName name;
 
     public static RecordTest VALUE_RECORD = nonExtensible(
             new Field("value", SequenceType.ANY_SEQUENCE, false)
@@ -80,6 +78,14 @@ public class RecordTest extends AnyFunctionType implements RecordType {
     public RecordTest() {}
 
     /**
+     * Construct a named RecordTest, details to be supplied later
+     */
+
+    public RecordTest(StructuredQName name) {
+        this.name = name;
+    }
+
+    /**
      * Construct a RecordTest
      * @param names the names of the fields
      * @param types the types of the fields
@@ -90,6 +96,22 @@ public class RecordTest extends AnyFunctionType implements RecordType {
 
     public RecordTest(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible) {
         setDetails(names, types, optionalFieldNames, extensible);
+    }
+
+    /**
+     * Construct a named RecordTest
+     *
+     * @param names              the names of the fields
+     * @param types              the types of the fields
+     * @param optionalFieldNames a list of the names of the fields that are declared optional
+     * @param extensible         indicates whether the RecordTest is extensible (allows fields other
+     *                           than those declared)
+     * @param name               the name of the record type
+     */
+
+    public RecordTest(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible, StructuredQName name) {
+        setDetails(names, types, optionalFieldNames, extensible);
+        this.name = name;
     }
 
     /**
@@ -188,6 +210,16 @@ public class RecordTest extends AnyFunctionType implements RecordType {
     @Override
     public boolean isArrayType() {
         return false;
+    }
+
+    /**
+     * Get the name of the record type, if it has one
+     *
+     * @return the name of the record type, or null if it has no name
+     */
+    @Override
+    public StructuredQName getName() {
+        return name;
     }
 
     /**
@@ -373,6 +405,9 @@ public class RecordTest extends AnyFunctionType implements RecordType {
      */
 
     private String makeString(Function<SequenceType, String> show) {
+        if (name != null) {
+            return "record " + name.getEQName() + "()";
+        }
         StringBuilder sb = new StringBuilder(100);
         sb.append("record(");
         boolean first = true;
@@ -421,8 +456,11 @@ public class RecordTest extends AnyFunctionType implements RecordType {
      */
     @Override
     public int hashCode() {
-        // Need to avoid infinite recursion for self-reference fields
+        // Need to avoid infinite recursion for recursive record types
         int h = 0x27ca481f;
+        if (name != null) {
+            return h ^ name.hashCode();
+        }
         for (Map.Entry<String, SequenceType> entry : fieldTypes.entrySet()) {
             h ^= entry.getKey().hashCode();
             if (entry.getValue().getPrimaryType() == this) {

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.ma.map;
 
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.value.SequenceType;
 
@@ -23,6 +24,12 @@ import net.sf.saxon.value.SequenceType;
  * types permit fields other than those listed to appear; non-extensible record types do not.
  */
 public interface RecordType extends FunctionItemType {
+
+    /**
+     * Get the name of the record type, if it has one
+     * @return the name of the record type, or null if it has no name
+     */
+    StructuredQName getName();
 
     /**
      * Get the names of all the fields

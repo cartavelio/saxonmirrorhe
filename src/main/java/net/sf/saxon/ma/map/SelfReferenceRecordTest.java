@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
@@ -48,6 +49,16 @@ public class SelfReferenceRecordTest extends AnyFunctionType implements RecordTy
     @CSharpModifiers(code = {"public", "override"})
     public Genre getGenre() {
         return Genre.MAP;
+    }
+
+    /**
+     * Get the name of the record type, if it has one
+     *
+     * @return the name of the record type, or null if it has no name
+     */
+    @Override
+    public StructuredQName getName() {
+        return null;
     }
 
     /**

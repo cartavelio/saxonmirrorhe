@@ -588,7 +588,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 newArgs[3] = FunctionLiteral.makeLiteral(
                         new SimpleBinaryFunction(
                                 (a0, a1) -> SequenceExtent.from(
-                                                    new InsertBefore.InsertIterator(a0.iterate(), a1.iterate(), 1)
+                                                    new InsertBefore.InsertIterator(a1.iterate(), a0.iterate(), 1)
                                             ),
                                 SequenceType.ANY_SEQUENCE,
                                 SequenceType.ANY_SEQUENCE,

@@ -1465,6 +1465,9 @@ public class QueryModule implements StaticContext {
     /*@Nullable*/
     @Override
     public NamespaceUri getDefaultElementNamespace() {
+        if (fixedDefaultElementNamespace) {
+            return defaultElementNamespace;
+        }
         return checkURIForPrefix("");
     }
 

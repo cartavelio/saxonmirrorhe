@@ -221,7 +221,9 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     @Override
     public synchronized void compact(int size) {
         super.compact(size);
-        lineNumberMap.condense();
+        if (lineNumberMap != null) {
+            lineNumberMap.condense();
+        }
     }
 
     /**
