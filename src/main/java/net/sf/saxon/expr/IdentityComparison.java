@@ -8,9 +8,9 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.BooleanElaborator;
 import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.om.NodeInfo;
@@ -281,7 +281,7 @@ public final class IdentityComparison extends BinaryExpression {
      * Elaborator for an identity comparison (operators {@code is}, {@code <<}, and {@code >>} )
      */
 
-    public static class IdentityComparisonElaborator extends BooleanElaborator {
+    public static class IdentityComparisonElaborator extends ItemElaborator {
 
         public BooleanEvaluator elaborateForBoolean() {
             final IdentityComparison exp = (IdentityComparison)getExpression();
