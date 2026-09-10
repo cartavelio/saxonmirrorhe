@@ -316,6 +316,7 @@ namespace SaxonCS_NUnit
             public override void SupplyStaticContext(StaticContext staticContext)
             {
                 this.staticContext = staticContext;
+                Console.WriteLine("Processor version = " + staticContext.Processor.ProductTitle);
             }
 
             /**
