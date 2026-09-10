@@ -14,6 +14,7 @@ using Saxon.Hej.trace;
 using Saxon.Hej.tree.tiny;
 using SaxonCS_NUnit;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
+using NamespaceConstant = Saxon.Api.NamespaceConstant;
 using Processor = Saxon.Api.Processor;
 using SchemaManager = Saxon.Api.SchemaManager;
 using SchemaValidator = Saxon.Api.SchemaValidator;
@@ -29,11 +30,38 @@ using XsltCompiler = Saxon.Api.XsltCompiler;
 
 namespace SaxonCS_NUnit {
     internal class TestValidator {
+        
+        [Test]
+        public void TestTypeAnnotations() {
+            try {
+                Processor proc = new Processor(true);
+                DocumentBuilder builder = proc.NewDocumentBuilder();
+                XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri, "books.xml"));
+                Assert.AreEqual(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), doc.TypeAnnotationName);
 
+                SchemaManager mgr = proc.SchemaManager;
+                mgr.Compile(new Uri(ConfigTest.DataDirUri, "books.xsd"));
+                SchemaValidator v = mgr.NewSchemaValidator();
+                XdmDestination dest = new XdmDestination();
+                v.SetDestination(dest);
+                //dest.BaseURI = doc.BaseURI;
+                v.Validate(doc);
 
+                XdmNode validDoc = dest.XdmNode;
+                Assert.AreEqual(new QName("xs", NamespaceConstant.SCHEMA, "anyType"), validDoc.TypeAnnotationName);
+                XdmNode books = validDoc.Select(Steps.Descendant("BOOKS")).First();
+                Assert.AreEqual(NamespaceConstant.ANONYMOUS, books.TypeAnnotationName.Uri);
+                XdmNode price = books.Select(Steps.Path("ITEM", "PRICE")).First();
+                Assert.AreEqual(new QName("moneyType"), price.TypeAnnotationName);
+                Assert.AreEqual(new QName("xs", NamespaceConstant.SCHEMA, "decimal"), ((XdmAtomicValue)price.TypedValue).PrimitiveTypeName);
+            } catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        
         [Test]
         public void TestReportMultipleErrors() {
-
             // This validation run should report exactly two validation errors.
 
             string source_xml =
@@ -72,7 +100,6 @@ namespace SaxonCS_NUnit {
                 sv.Validate(new StringReader(source_xml));
 
                 Assert.Fail("Validation errors not detected");
-
             }
             catch (SaxonApiException sapie) {
                 Assert.AreEqual(2, errorList.Count);
@@ -89,12 +116,11 @@ namespace SaxonCS_NUnit {
          * Test that multiple base URIs derived from a multiple-entity input document are
          * preserved through validation
          */
-
         [Ignore("Unresolved bug: 5107")]
         //[Test]
         public void TestValidationWithEntities() {
             try {
-                Processor proc = new ();
+                Processor proc = new();
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri, "book-wrapper.xml"));
                 Assert.AreEqual(3, GetAllBaseUris(doc).Count, "3 distinct base URIs in input");
@@ -112,7 +138,6 @@ namespace SaxonCS_NUnit {
 
                 Assert.AreEqual(3, GetAllBaseUris(validDoc).Count, "3 distinct base URIs in output");
                 Assert.That(validDoc.BaseUri.ToString().EndsWith("book-wrapper.xml"), "validated doc base URI");
-
             }
             catch (Exception e) {
                 Debug.Print(e.StackTrace);
@@ -170,7 +195,6 @@ namespace SaxonCS_NUnit {
                     }
 
                     return null;
-
                 };
 
                 sm.Compile(new StringReader(xsd0), new Uri("file:///0"));
@@ -222,7 +246,7 @@ namespace SaxonCS_NUnit {
                     "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>" +
                     "<xs:element name='c'/>\n" +
                     "</xs:schema>";
-                
+
                 sm.SchemaResolver = (ns, baseUri, hint) => {
                     if ("file:///1" == hint.ToString()) {
                         return new TextResource(xsd1, hint);
@@ -233,7 +257,6 @@ namespace SaxonCS_NUnit {
                     }
 
                     return null;
-
                 };
 
                 sm.Compile(new StringReader(xsd0), new Uri("file:///0"));
@@ -337,7 +360,6 @@ namespace SaxonCS_NUnit {
                 catch (Exception ve) {
                     // OK
                 }
-
             }
             catch (SaxonApiException err) {
                 Console.WriteLine(err.StackTrace);
@@ -345,11 +367,9 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        
 
         [Test]
         public void TestAssertionsHidingComments() {
-
             // This validation run should report exactly two validation errors.
 
             string valid_xml = "<?xml version='1.0'?><request><a/>x<!--comment-->y<b/></request>";
@@ -384,7 +404,7 @@ namespace SaxonCS_NUnit {
 
                 XPathCompiler xp = proc.NewXPathCompiler();
                 xp.SchemaAware = true;
-                XdmAtomicValue result = (XdmAtomicValue) xp.Evaluate("count(//comment())", destination.XdmNode);
+                XdmAtomicValue result = (XdmAtomicValue)xp.Evaluate("count(//comment())", destination.XdmNode);
                 Assert.AreEqual(1, result.AsLong());
 
                 try {
@@ -408,7 +428,6 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void TestAssertionsSeeingComments() {
-
             string valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
             string invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
             string xsd =
@@ -439,7 +458,7 @@ namespace SaxonCS_NUnit {
 
                 XPathCompiler xp = proc.NewXPathCompiler();
                 xp.SchemaAware = (true);
-                XdmAtomicValue result = (XdmAtomicValue) xp.Evaluate("count(//comment())", destination.XdmNode);
+                XdmAtomicValue result = (XdmAtomicValue)xp.Evaluate("count(//comment())", destination.XdmNode);
                 Assert.AreEqual(1, result.AsLong());
 
                 try {
@@ -459,7 +478,6 @@ namespace SaxonCS_NUnit {
         }
 
         private void assertionUsingXPath3(bool allow) {
-
             string xsd =
                 "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
                 "\t<xs:element name=\"request\">\n" +
@@ -512,7 +530,6 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void TestAssertionsOnBadData() {
-
             // This validation run should report exactly two validation errors. Bug 4172
 
             string invalid_xml = "<?xml version='1.0'?><request><a>x</a><b/></request>";
@@ -562,7 +579,6 @@ namespace SaxonCS_NUnit {
          * Test the effect of changing a schema to add members to a substitution group.
          * See bug 2174.
          */
-
         [Test]
         public void TestSchemaChange() {
             try {
@@ -620,7 +636,6 @@ namespace SaxonCS_NUnit {
 //            } catch (SaxonApiException e) {
 //                Assert.That("expectedError", e.getMessage().contains("It is not possible to add to the substitution group"));
 //            }
-
             }
             catch (SaxonApiException sapie) {
                 Console.Error.WriteLine(sapie.Message);
@@ -630,7 +645,6 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void TestImplicitSchemaImportsOption() {
-
             string source_xml = "<?xml version='1.0'?><e xmlns='http://y.com/ns'><f/></e>";
             string xsd1 =
                 "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace='http://y.com/ns' elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
@@ -651,7 +665,7 @@ namespace SaxonCS_NUnit {
 
             using Stream output = File.Create(ConfigTest.DATA_DIR + "sandpit/validation.out");
             try {
-                Processor proc = new ();
+                Processor proc = new();
                 proc.SetProperty(Saxon.Api.Feature.IMPLICIT_SCHEMA_IMPORTS, true);
 
                 SchemaManager sm = proc.SchemaManager;
@@ -663,7 +677,7 @@ namespace SaxonCS_NUnit {
                         return null;
                     }
                 };
-                
+
                 sm.Compile(new StringReader(xsd1));
                 sm.Compile(new StringReader(xsd2));
 
@@ -680,7 +694,6 @@ namespace SaxonCS_NUnit {
                 sv.Validate(new StringReader(source_xml));
 
                 output.Close();
-
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -736,22 +749,19 @@ namespace SaxonCS_NUnit {
                 validator.SetValidityReporting(report);
                 validator.Validate(new StringReader(invalid_xml), new Uri("http://doc1"));
                 Assert.Fail("Invalidity not detected");
-
-
             }
             catch (SaxonApiException sapie) {
                 Console.Error.WriteLine(sapie.Message);
-
             }
             finally {
                 XdmNode reportDoc = report.XdmNode;
-                Assert.AreEqual(1, reportDoc.Children("http://saxon.sf.net/ns/validation", "validation-report").Count());
+                Assert.AreEqual(1,
+                    reportDoc.Children("http://saxon.sf.net/ns/validation", "validation-report").Count());
                 Assert.That(reportDoc.Select(Steps.Descendant("error")).Count() == 2);
                 Assert.That(reportDoc.Select(Steps.Descendant("meta-data")).Count() == 1);
-                Assert.That(reportDoc.Select(Steps.Descendant("schema")).First().GetAttributeValue("xsd-version") == "1.1");
+                Assert.That(reportDoc.Select(Steps.Descendant("schema")).First().GetAttributeValue("xsd-version") ==
+                            "1.1");
             }
-
-
         }
 
         [Test]
@@ -815,20 +825,16 @@ namespace SaxonCS_NUnit {
                     .Build(new Uri(ConfigTest.DataDirUri, "sandpit/validationReport.xml"));
                 Console.Error.WriteLine(resultdoc.StringValue);
                 Assert.That(false); // TBA
-
             }
             catch (SaxonApiException sapie) {
                 Console.Error.WriteLine(sapie.Message);
                 //sapie.printStackTrace();
                 //  Console.Error.WriteLine(writer.toString());
-
             }
             catch (Exception ex) {
                 Assert.Fail(ex.Message);
                 //ex.printStackTrace();
             }
-
-
         }
 
         /**
@@ -857,7 +863,7 @@ namespace SaxonCS_NUnit {
                 Processor proc = new Processor(true);
                 SchemaManager sm = proc.SchemaManager;
                 sm.XsdVersion = "1.1";
-                
+
                 sm.Compile(new StringReader(sch1));
                 Console.Error.WriteLine("Schema 1 OK");
                 validator = sm.NewSchemaValidator();
@@ -869,13 +875,14 @@ namespace SaxonCS_NUnit {
             }
             catch (SaxonApiException sapie) {
                 Assert.Fail(sapie.Message);
-
             }
             finally {
                 XdmNode reportDoc = report.XdmNode;
                 Console.WriteLine(reportDoc.OuterXml);
-                Assert.AreEqual(1, reportDoc.Children( "validation-reports").Count());
-                Assert.AreEqual(2, reportDoc.Select(Steps.Descendant("http://saxon.sf.net/ns/validation", "validation-report")).Count());
+                Assert.AreEqual(1, reportDoc.Children("validation-reports").Count());
+                Assert.AreEqual(2,
+                    reportDoc.Select(Steps.Descendant("http://saxon.sf.net/ns/validation", "validation-report"))
+                        .Count());
                 Assert.AreEqual(2, reportDoc.Select(
                     Steps.Descendant("validation-report")
                         .Where(Predicates.AttributeEq("system-id", "http://invalid.xml/"))
@@ -885,8 +892,6 @@ namespace SaxonCS_NUnit {
                         .Where(Predicates.AttributeEq("system-id", "http://valid.xml/"))
                         .Then(Steps.Child("error"))).Count());
             }
-
-
         }
 
 
@@ -946,25 +951,17 @@ namespace SaxonCS_NUnit {
                 validator.AddSource(new StringReader(doc1));
                 validator.ValidateMultipleDocuments();
                 Console.Error.WriteLine("Validation completed OK");
-
-
             }
             catch (SaxonApiException sapie) {
                 Console.Error.WriteLine(sapie.Message);
-
             }
             finally {
                 if (dest != null) {
                     Console.Error.WriteLine(sw);
                     Assert.That(true, sw.ToString());
-
                 }
-
             }
-
-
         }
-
 
 
         // [Test]
@@ -999,7 +996,7 @@ namespace SaxonCS_NUnit {
                 builder.TreeModel = TreeModel.TinyTree;
 
                 XdmNode node = builder.Build(new Uri(ConfigTest.DataDirUri, "leak/instance.xml"));
-                WeakReference<TinyTree> tinyTree = new(((TinyDocumentImpl) node.Implementation).getTree());
+                WeakReference<TinyTree> tinyTree = new(((TinyDocumentImpl)node.Implementation).getTree());
 
                 XPathCompiler compiler = processor.NewXPathCompiler();
                 compiler.ImportSchemaNamespace("http://example.org");
@@ -1033,7 +1030,6 @@ namespace SaxonCS_NUnit {
         }
 
         private void loadMultiple(bool multiple, bool fromNode) {
-
             try {
                 Processor proc = new();
 
@@ -1055,7 +1051,6 @@ namespace SaxonCS_NUnit {
                 }
 
                 Console.Error.WriteLine("Loading successful");
-
             }
             catch (Exception e) {
                 //e.printStackTrace();
@@ -1065,7 +1060,6 @@ namespace SaxonCS_NUnit {
 
         private static void loadSchemaOK(Processor proc, Uri urlStr) {
             proc.SchemaManager.Compile(urlStr);
-
         }
 
         private static void loadSchemaFromNode(Processor proc, Uri urlStr) {
@@ -1075,13 +1069,11 @@ namespace SaxonCS_NUnit {
             //Console.Error.WriteLine( QueryResult.serialize(ni) );
             //Console.Error.WriteLine( ni.getSystemId() );
             proc.SchemaManager.Compile(ni);
-
         }
 
 
         [Test]
         public void TestValidateTransformationOutput() {
-
             // This validation run should report exactly two validation errors.
 
             string xml = "<?xml version='1.0'?>"
@@ -1132,18 +1124,16 @@ namespace SaxonCS_NUnit {
 
 
                 Assert.Fail("Validation errors not detected");
-
             }
             catch (SaxonApiException sapie) {
                 Assert.AreEqual(4, errors.Count, "No of errors"); // 3 validation errors plus one summary fatal error
                 //Assert.AreEqual("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
-
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
             }
         }
-        
+
         [Test]
         public void TestValidateTransformationOutputPassing() {
             // Use SchemaValidator as transformation destination (Saxon 11.1)
@@ -1194,17 +1184,16 @@ namespace SaxonCS_NUnit {
 
 
                 Assert.That(sw.ToString().Contains("<date1> 2009-01-01</date1>"));
-
             }
             catch (SaxonApiException sapie) {
-                Assert.Fail(sapie.Message); 
+                Assert.Fail(sapie.Message);
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
             }
         }
 
-        
+
         [Test]
         public void TestValidateTransformationOutputFailing() {
             // Use SchemaValidator as transformation destination (Saxon 11.1)
@@ -1255,12 +1244,10 @@ namespace SaxonCS_NUnit {
 
 
                 Assert.Fail("Validation errors not detected");
-
             }
             catch (SaxonApiException sapie) {
                 Assert.AreEqual(3, errors.Count, "No of errors"); // 3 validation errors
                 //Assert.AreEqual("/doc[1]/request[1]/d1[2]", ((ValidationException)errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
-
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
@@ -1270,7 +1257,6 @@ namespace SaxonCS_NUnit {
 
         [Test]
         public void TestErrorListenerBug4744() {
-
             // This validation run should report exactly two validation errors.
 
             using Stream output = File.Create(ConfigTest.DATA_DIR + "sandpit/validation.out");
@@ -1296,7 +1282,6 @@ namespace SaxonCS_NUnit {
 
                 output.Close();
                 Assert.Fail("Validation errors not detected");
-
             }
             catch (SaxonApiException sapie) {
                 try {
@@ -1313,44 +1298,38 @@ namespace SaxonCS_NUnit {
             }
         }
 
- 
-    private void testSchemaLocationHints(bool useHints, bool withNS) {
-        try {
-            Processor processor = new ();
-            DocumentBuilder builder = processor.NewDocumentBuilder();
-            XdmNode source = builder.Build(new Uri(ConfigTest.DataDirUri, (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
-            SchemaManager manager = processor.SchemaManager;
-            SchemaValidator validator = manager.NewSchemaValidator();
+        private void testSchemaLocationHints(bool useHints, bool withNS) {
+            try {
+                Processor processor = new();
+                DocumentBuilder builder = processor.NewDocumentBuilder();
+                XdmNode source = builder.Build(new Uri(ConfigTest.DataDirUri,
+                    (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
-            validator.UseXsiSchemaLocation = useHints;
+                SchemaManager manager = processor.SchemaManager;
+                SchemaValidator validator = manager.NewSchemaValidator();
 
-            validator.Validate(source);
+                validator.UseXsiSchemaLocation = useHints;
 
-            if (!useHints) {
-                Assert.Fail("Document should not have validated");
+                validator.Validate(source);
+
+                if (!useHints) {
+                    Assert.Fail("Document should not have validated");
+                }
             }
-        } catch (Exception ex) {
-            if (useHints) {
-                Assert.Fail("Validation should not have failed");
+            catch (Exception ex) {
+                if (useHints) {
+                    Assert.Fail("Validation should not have failed");
+                }
             }
         }
+
+        [Test]
+        public void testIgnoreSchemaLocationHints() {
+            testSchemaLocationHints(false, false);
+            testSchemaLocationHints(false, true);
+            testSchemaLocationHints(true, false);
+            testSchemaLocationHints(true, true);
+        }
     }
-
-    [Test]
-    public void testIgnoreSchemaLocationHints() {
-        testSchemaLocationHints(false, false);
-        testSchemaLocationHints(false, true);
-        testSchemaLocationHints(true, false);
-        testSchemaLocationHints(true, true);
-    }
-
- 
-
-
- 
-
-    }
-
 }
-
