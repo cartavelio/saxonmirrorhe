@@ -7,35 +7,49 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class supports the node-name() function with a single argument
  */
 
-public class NodeName_1 extends ScalarSystemFunction {
+public class NodeKind_1 extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item item, XPathContext context) throws XPathException {
-        return nodeName((NodeInfo) item);
+        return new StringValue(nodeKind((NodeInfo) item));
     }
 
-    public static QNameValue nodeName(NodeInfo node) {
-        if (node.getLocalPart().isEmpty()) {
-            return null;
+    public static String nodeKind(NodeInfo node) {
+        int k = node.getNodeKind();
+        switch (k) {
+            case Type.DOCUMENT:
+                return "document";
+            case Type.ELEMENT:
+                return "element";
+            case Type.ATTRIBUTE:
+                return "attribute";
+            case Type.TEXT:
+                return "text";
+            case Type.COMMENT:
+                return "comment";
+            case Type.PROCESSING_INSTRUCTION:
+                return "processing-instruction";
+            case Type.NAMESPACE:
+            default:
+                return "namespace";
         }
-        return new QNameValue(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart(), BuiltInAtomicType.QNAME);
     }
 
     /**
@@ -45,14 +59,14 @@ public class NodeName_1 extends ScalarSystemFunction {
      */
     @Override
     public Elaborator getElaborator() {
-        return new NodeNameFnElaborator();
+        return new NodeKindFnElaborator();
     }
 
     /**
-     * Elaborator for the fn:node-name() function
+     * Elaborator for the fn:node-kind() function
      */
 
-    public static class NodeNameFnElaborator extends ItemElaborator {
+    public static class NodeKindFnElaborator extends ItemElaborator {
 
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
@@ -61,12 +75,11 @@ public class NodeName_1 extends ScalarSystemFunction {
 
             return context -> {
                 NodeInfo node = (NodeInfo) argEval.eval(context);
-                if (node == null || node.getLocalPart().isEmpty()) {
+                if (node == null) {
                     return null;
                 }
-                return new QNameValue(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart(), BuiltInAtomicType.QNAME);
+                return new StringValue(nodeKind(node));
             };
-
         }
 
     }
