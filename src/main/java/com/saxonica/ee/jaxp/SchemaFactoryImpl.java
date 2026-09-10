@@ -505,7 +505,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
                     handler.error (exception);
                 }
             } catch (SAXException e) {
-                error.setFatal(e.getMessage());
+                error.setTerminationMessage(e.getMessage());
             }
         }
 
