@@ -416,27 +416,22 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
             write(chars.toString());
         } else {
             if (chars instanceof UnicodeChar) {
-                writeCodePoint(chars.codePointAt(0));
-            }
-            if (chars.getWidth() <= 8) {
+                writeCodePoint(((UnicodeChar) chars).getCodepoint());
+            } else if (chars.getWidth() <= 8) {
                 if (chars instanceof Twine8) {
-                    int width = ((UnicodeString) chars).getWidth();
+                    int width = chars.getWidth();
                     if (width == 7) {
                         writeAscii(((Twine8) chars).getByteArray(), 0, chars.length32());
-                        return;
                     } else if (width == 8) {
                         writeLatin1(((Twine8) chars).getByteArray(), 0, chars.length32());
-                        return;
                     }
                 } else if (chars instanceof Slice8) {
                     Slice8 s8 = (Slice8) chars;
                     int width = chars.getWidth();
                     if (width == 7) {
                         writeAscii(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
-                        return;
                     } else if (width == 8) {
                         writeLatin1(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
-                        return;
                     }
                 } else if (chars instanceof CompressedWhitespace) {
                     ((CompressedWhitespace)chars).write(this);
@@ -450,11 +445,9 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
             } else if (chars.getWidth() == 16) {
                 if (chars instanceof Twine16) {
                     write(((Twine16)chars).getCharArray());
-                    return;
                 } else if (chars instanceof Slice16) {
                     Slice16 s16 = (Slice16) chars;
                     write(s16.getCharArray(), s16.getStart(), s16.getEnd() - s16.getStart());
-                    return;
                 }
             } else {
                 IntIterator iter = chars.codePoints();
