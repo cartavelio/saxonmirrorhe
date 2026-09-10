@@ -109,6 +109,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
+        ItemType schemaTypeRecord = SchemaTypeFn.schemaTypeRecord;
+
+        register("atomic-type-annotation", 1, e -> e.populate(AtomicTypeAnnotationFn::new, BuiltInAtomicType.QNAME, ONE, 0)
+                         .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
+
         //#if EE==true || PE==true
         register("build-uri", 1, 2, e -> e.populate(BuildURI::new, BuiltInAtomicType.STRING, ONE, LATE | NEW)
                 .arg(0, BuildURI.uriStructureRecord, ONE, null)
@@ -470,6 +475,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("node-kind", 1, e -> e.populate(NodeKind_1::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
+
+        register("node-type-annotation", 1, e -> e.populate(NodeTypeAnnotationFn::new, BuiltInAtomicType.QNAME, ONE, 0)
+                .arg(0, AnyNodeTest.getInstance(), ONE, null));
         
         register("normalize-unicode", 2, e -> e.populate(NormalizeUnicode::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
@@ -597,6 +605,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("round-half-to-even", 2, e -> e.populate(RoundHalfToEven::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.INTEGER, OPT, null));
+
+
+
+        register("schema-type", 1, e -> e.populate(SchemaTypeFn::new, schemaTypeRecord, OPT, 0)
+                .arg(0, BuiltInAtomicType.QNAME, ONE, null));
 
         register("seconds", 1, e -> e.populate(SecondsFn::new, BuiltInAtomicType.DAY_TIME_DURATION, OPT, 0)
                 .arg(0, BuiltInAtomicType.DECIMAL, OPT, null));

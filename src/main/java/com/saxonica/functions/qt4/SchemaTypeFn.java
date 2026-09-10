@@ -1,29 +1,61 @@
 package com.saxonica.functions.qt4;
 
+import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.*;
-import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.type.*;
+import net.sf.saxon.value.*;
 
 /**
- * This class supports the proposed QT4 function fn:take-while.
- * The function takes two arguments: the first is a sequence of items, the second is a
- * function used as a predicate to determine the first item to be excluded from the result.
+ * This class supports the proposed QT4 function fn:schema-type.
  */
 
-public class TakeWhile extends SystemFunction {
+public class SchemaTypeFn extends SystemFunction {
 
+    public final static RecordTest schemaTypeRecord = new RecordTest();
 
+    private final static SequenceType[] NO_ARGS = new SequenceType[]{};
+
+    static {
+        schemaTypeRecord.setDetails(
+                true,
+                f("name", SequenceType.SINGLE_QNAME, false),
+                f("is-simple", SequenceType.SINGLE_BOOLEAN, false),
+                f("base-type", SequenceType.one(
+                        new SpecificFunctionType(NO_ARGS,
+                                                 SequenceType.optional(schemaTypeRecord))), false),
+                f("primitive-type", SequenceType.one(
+                        new SpecificFunctionType(NO_ARGS,
+                                                 SequenceType.one(schemaTypeRecord))), true),
+                f("variety", SequenceType.one(
+                        EnumerationUnionType.of("atomic", "list", "union", "empty", "simple", "element-only", "mixed")), false),
+                f("members", SequenceType.one(
+                        new SpecificFunctionType(NO_ARGS,
+                                                 SequenceType.zeroOrMore(schemaTypeRecord))), true),
+                f("simple-content-type", SequenceType.one(
+                        new SpecificFunctionType(NO_ARGS,
+                                                 SequenceType.one(schemaTypeRecord))), false),
+                f("matches", SequenceType.one(
+                        new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_ATOMIC},
+                                                 SequenceType.SINGLE_BOOLEAN)), true),
+                f("constructor", SequenceType.one(
+                        new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_ATOMIC},
+                                                 SequenceType.SINGLE_ATOMIC)), true)
+        );
+    }
     
 
-    @Override
-    public String getStreamerName() {
-        return "saxon:takeWhile";
-    }
 
+    private static RecordTest.Field f(String name, SequenceType type, boolean optional) {
+        return new RecordTest.Field(name, type, optional);
+    }
 
 
     /**
@@ -38,75 +70,58 @@ public class TakeWhile extends SystemFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Sequence input = arguments[0];
-        FunctionItem whileCondition = (FunctionItem) arguments[1].head();
-        return new LazySequence(new WhileIterator(
-                input.iterate(), whileCondition, context));
+        QNameValue name = (QNameValue) arguments[0].head();
+        SchemaType st = getRetainedStaticContext().getPackageData()
+                .getImportedSchema().getSchemaType(name.getStructuredQName());
+        if (st == null) {
+            return EmptySequence.getInstance();
+        }
+        return makeSchemaRecord(st);
     }
 
-    private static class WhileIterator implements SequenceIterator {
-
-        private final SequenceIterator baseIterator;
-        private final FunctionItem whileCondition;
-        private final XPathContext context;
-        private int position;
-        private final int whileArity;
-
-
-        WhileIterator(SequenceIterator in, FunctionItem whileCondition, XPathContext context) {
-            this.baseIterator = in;
-            this.whileCondition = whileCondition;
-            this.context = context;
-            this.position = 0;
-            this.whileArity = whileCondition.getArity();
+    public static MapItem makeSchemaRecord(SchemaType st) {
+        DictionaryMap result = new DictionaryMap(10);
+        result.initialPut("is-atomic", BooleanValue.get(st.isSimpleType()));
+        if (!st.isAnonymousType()) {
+            result.initialPut("name", new QNameValue(st.getStructuredQName(), BuiltInAtomicType.QNAME));
         }
-
-        @Override
-        public Item next() {
-            if (position == -1) {
-                return null;
+        SchemaType base = st.getBaseType();
+        if (base != null) {
+            result.initialPut("base-type", makeSchemaRecord(base));
+        }
+        String variety = "*unknown*";
+        if (st.isSimpleType()) {
+            if (st.isAtomicType()) {
+                variety = "atomic";
+            } else if (((SimpleType) st).isUnionType()) {
+                variety = "union";
+            } else if (((SimpleType) st).isListType()) {
+                variety = "list";
             }
-            Item item = baseIterator.next();
-            if (item != null) {
-                position++;
-                try {
-                    BooleanValue matches;
-                    switch (whileArity) {
-                        case 0:
-                            matches = ((BooleanValue)whileCondition.call(context, new Sequence[]{}).head());
-                            break;
-                        case 1:
-                            matches = ((BooleanValue) whileCondition.call(context, new Sequence[]{item}).head());
-                            break;
-                        case 2:
-                        default:
-                            final Int64Value pos = Int64Value.makeIntegerValue(position);
-                            matches = ((BooleanValue) whileCondition.call(context,
-                                                                          new Sequence[]{item, pos}).head());
-                            break;
-                    }
-                    if (matches != null && matches.getBooleanValue()) {
-                        return item;
-                    } else {
-                        position = -1;
-                        baseIterator.close();
-                        return null;
-                    }
-                } catch (XPathException e) {
-                    throw new UncheckedXPathException(e);
-                }
+        } else {
+            if (((ComplexType) st).isSimpleContent()) {
+                variety = "simple";
+            } else if (((ComplexType) st).isEmptyContent()) {
+                variety = "empty";
+            } else if (((ComplexType) st).isMixedContent()) {
+                variety = "mixed";
+            } else {
+                variety = "element-only";
             }
-            position = -1;
-            return null;
         }
+        result.initialPut("variety", new StringValue(variety));  // TODO: should be an enum type
 
-        @Override
-        public void close() {
-            baseIterator.close();
+        if (st.isAtomicType() && !st.isSameType(BuiltInAtomicType.ANY_ATOMIC)) {
+            Callable callable = new CallableDelegate((context, args) -> makeSchemaRecord(((AtomicType) st).getPrimitiveAtomicType()));
+            CallableFunction fn = new CallableFunction(0, callable,
+                                                       new SpecificFunctionType(NO_ARGS, SequenceType.one(schemaTypeRecord)));
+            result.initialPut("primitive-type", fn);
+
         }
-
+        return result;
     }
+
 
 }
 
-// Copyright (c) 2018-2023 Saxonica Limited
+// Copyright (c) 2024 Saxonica Limited

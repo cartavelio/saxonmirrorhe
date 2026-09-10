@@ -2,16 +2,16 @@ package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.type.SchemaType;
 
 /**
- * This class supports the proposed QT4 function fn:schema-type.
+ * This class supports the proposed QT4 function fn:node-type-annotation.
  */
 
-public class AtomicTypeAnnotationFn extends SystemFunction {
+public class NodeTypeAnnotationFn extends SystemFunction {
 
 
     /**
@@ -26,8 +26,8 @@ public class AtomicTypeAnnotationFn extends SystemFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        AtomicValue item = (AtomicValue) arguments[0].head();
-        AtomicType annotation = item.getItemType();
+        NodeInfo item = (NodeInfo) arguments[0].head();
+        SchemaType annotation = item.getSchemaType();
         return SchemaTypeFn.makeSchemaRecord(annotation);
     }
 
