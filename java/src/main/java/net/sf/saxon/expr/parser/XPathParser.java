@@ -3955,7 +3955,7 @@ public class XPathParser {
                 return NodeKindType.COMMENT;
             case "namespace-node":
                 expectEmptyParens();
-                return NodeKindType.COMMENT;
+                return NodeKindType.NAMESPACE;
             case "document-node":
                 nextToken();
                 readToken(Token.LPAREN);
