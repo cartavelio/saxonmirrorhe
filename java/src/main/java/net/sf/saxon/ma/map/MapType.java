@@ -134,7 +134,7 @@ public class MapType extends AnyFunctionType {
      */
     @Override
     public double getDefaultPriority() {
-        return keyType.getNormalizedDefaultPriority() * valueType.getPrimaryType().getNormalizedDefaultPriority();
+        return this == ANY_MAP_TYPE ? -0.25 : 0;
     }
 
     /**

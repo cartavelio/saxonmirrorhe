@@ -147,7 +147,7 @@ public class ArrayItemType extends AnyFunctionType {
      */
     @Override
     public double getDefaultPriority() {
-        return memberType.getPrimaryType().getNormalizedDefaultPriority();
+        return this == ANY_ARRAY_TYPE ? -0.25 : 0;
     }
 
     /**

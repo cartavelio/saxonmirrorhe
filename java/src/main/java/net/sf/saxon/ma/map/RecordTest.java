@@ -360,12 +360,11 @@ public class RecordTest implements FunctionItemType {
      */
     @Override
     public double getDefaultPriority() {
-        // TODO: this algorithm means that adding fields to the record type reduces its priority, which is wrong
-        double prio = 1;
-        for (SequenceType st : fieldTypes.values()) {
-            prio *= st.getPrimaryType().getNormalizedDefaultPriority();
+        if (fieldTypes.isEmpty() && isExtensible()) {
+            return -0.25;
+        } else {
+            return 0.0;
         }
-        return _extensible ? 0.5 + prio/2 : prio;
     }
 
     /**

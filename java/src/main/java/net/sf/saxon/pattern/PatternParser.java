@@ -60,7 +60,7 @@ public class PatternParser extends XPathParser {
             trimmed = trimmed.substring(start);
         }
 
-        if (isSelectionPattern(trimmed)) {
+        if (isPredicatePattern(trimmed)) {
             Expression e = parse(pattern, 0, Tokenizer.END_OF_INPUT, env);
             if (e instanceof Pattern) {
                 return (Pattern) e;
@@ -261,7 +261,7 @@ public class PatternParser extends XPathParser {
         }
     }
 
-    private boolean isSelectionPattern(String pattern)  {
+    private boolean isPredicatePattern(String pattern)  {
         return pattern.startsWith(".");
     }
 
@@ -274,7 +274,8 @@ public class PatternParser extends XPathParser {
     }
 
     private boolean isTypePattern(String pattern) throws XPathException {
-        if (pattern.matches("^(type|record|map|array|union|atomic)\\s*\\(.+")) {
+        // TODO: this won't handle union patterns such as map(*) | array(*)
+        if (pattern.matches("^(type|item|function|record|map|array|enum)\\s*\\(.+")) {
             checkLanguageVersion40("a type pattern");
             return true;
         }

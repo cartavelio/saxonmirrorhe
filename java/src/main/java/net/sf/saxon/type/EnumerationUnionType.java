@@ -40,6 +40,11 @@ public class EnumerationUnionType extends LocalUnionType {
         return new EnumerationUnionType(types);
     }
 
+    @Override
+    public double getDefaultPriority() {
+        return 0.25;
+    }
+
     /**
      * Ask whether this type is an ID type. This is defined to be any simple type
      * who typed value may contain atomic values of type xs:ID: that is, it includes types derived

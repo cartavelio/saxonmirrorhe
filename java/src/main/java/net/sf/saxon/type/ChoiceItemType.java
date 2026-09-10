@@ -297,15 +297,14 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     /**
      * Get the default priority when this ItemType is used as an XSLT pattern
      *
-     * @return the default priority. For a union type this is defined as the product
-     * of the default priorities of the member types. Because the priorities of member
-     * types are in the range 0 to 1, their product is also in the range 0 to 1.
+     * @return the default priority. For a choice type this is defined as the maximum
+     * of the default priorities of the member types.
      */
     @Override
     public double getDefaultPriority() {
-        double result = 1;
+        double result = Double.NEGATIVE_INFINITY;
         for (ItemType t : memberTypes) {
-             result *= t.getDefaultPriority();
+             result = Double.max(result, t.getDefaultPriority());
         }
         return result;
     }
