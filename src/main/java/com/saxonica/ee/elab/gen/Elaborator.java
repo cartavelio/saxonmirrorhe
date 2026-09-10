@@ -135,7 +135,7 @@ public abstract class Elaborator {
 
     /**
      * Get a function that evaluates the underlying expression in the form of
-     * a string, this being the result of applying fn:string() to the result
+     * a unicode string, this being the result of applying fn:string() to the result
      * of the expression.
      *
      * @param zeroLengthWhenAbsent if true, then when the result of the expression
@@ -145,7 +145,24 @@ public abstract class Elaborator {
      * @return an evaluator for the expression that returns a string.
      */
 
-    public abstract StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent);
+    public abstract UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent);
+
+    /**
+     * Get a function that evaluates the underlying expression in the form of
+     * a Java string, this being the result of applying fn:string() to the result
+     * of the expression.
+     *
+     * @param zeroLengthWhenAbsent if true, then when the result of the expression
+     *                             is an empty sequence, the result of the StringEvaluator
+     *                             should be a zero-length string. If false, the return value
+     *                             should be null.
+     * @return an evaluator for the expression that returns a string.
+     */
+
+    public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+        return context -> elaborateForUnicodeString(zeroLengthWhenAbsent).eval(context).toString();
+    }
+
 
     /**
      * Helper method that returns either a zero length string or null, depending
@@ -153,8 +170,19 @@ public abstract class Elaborator {
      * @param zeroLengthWhenAbsent if true, return a zero length string; if false, return null
      */
 
-    protected final UnicodeString handleNullString(boolean zeroLengthWhenAbsent) {
+    protected final UnicodeString handleNullUnicodeString(boolean zeroLengthWhenAbsent) {
         return zeroLengthWhenAbsent ? EmptyUnicodeString.getInstance() : null;
+    }
+
+    /**
+     * Helper method that returns either a zero length string or null, depending
+     * on the parameter
+     *
+     * @param zeroLengthWhenAbsent if true, return a zero length string; if false, return null
+     */
+
+    protected final String handleNullString(boolean zeroLengthWhenAbsent) {
+        return zeroLengthWhenAbsent ? "" : null;
     }
 
 }

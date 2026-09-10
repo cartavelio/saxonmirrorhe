@@ -2,7 +2,7 @@ package com.saxonica.ee.elab.insn;
 
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.eval.StringEvaluator;
+import com.saxonica.ee.elab.eval.UnicodeStringEvaluator;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.Expression;
@@ -20,7 +20,7 @@ public class AnalyzeStringElaborator extends PullElaborator {
     @Override
     public PullEvaluator elaborateForPull() {
         AnalyzeString insn = (AnalyzeString) getExpression();
-        StringEvaluator input = makeElaborator(insn.getSelect()).elaborateForString(true);
+        UnicodeStringEvaluator input = makeElaborator(insn.getSelect()).elaborateForUnicodeString(true);
         PullEvaluator matching = insn.getMatching() == null
                 ? null
                 : makeElaborator(insn.getMatching()).elaborateForPull();
@@ -55,7 +55,7 @@ public class AnalyzeStringElaborator extends PullElaborator {
     @Override
     public PushEvaluator elaborateForPush() {
         AnalyzeString insn = (AnalyzeString) getExpression();
-        StringEvaluator input = makeElaborator(insn.getSelect()).elaborateForString(true);
+        UnicodeStringEvaluator input = makeElaborator(insn.getSelect()).elaborateForUnicodeString(true);
         PushEvaluator matching = insn.getMatching() == null
                 ? null
                 : makeElaborator(insn.getMatching()).elaborateForPush();

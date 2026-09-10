@@ -1,7 +1,7 @@
 package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.BooleanEvaluator;
-import com.saxonica.ee.elab.eval.StringEvaluator;
+import com.saxonica.ee.elab.eval.UnicodeStringEvaluator;
 import com.saxonica.ee.elab.gen.BooleanElaborator;
 import net.sf.saxon.expr.CompareToConstant;
 import net.sf.saxon.expr.CompareToStringConstant;
@@ -18,7 +18,7 @@ public class CompareToStringConstantElaborator extends BooleanElaborator {
     public BooleanEvaluator elaborateForBoolean() {
         final CompareToStringConstant expression = (CompareToStringConstant) getExpression();
         final Expression arg = expression.getBaseExpression();
-        final StringEvaluator argEval = makeElaborator(arg).elaborateForString(false);
+        final UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(false);
         final boolean nullable = Cardinality.allowsZero(expression.getCardinality());
         final int operator = expression.getComparisonOperator();
         final UnicodeString comparand = expression.getComparand();

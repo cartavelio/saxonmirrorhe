@@ -35,11 +35,11 @@ public abstract class PullElaborator extends Elaborator {
     }
 
     @Override
-    public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+    public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
         ItemEvaluator ie = elaborateForItem();
         return context -> {
             Item item = ie.eval(context);
-            return item == null ? handleNullString(zeroLengthWhenAbsent) : item.getUnicodeStringValue();
+            return item == null ? handleNullUnicodeString(zeroLengthWhenAbsent) : item.getUnicodeStringValue();
         };
     }
 

@@ -17,6 +17,7 @@ import net.sf.saxon.Version;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sink;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
@@ -68,6 +69,7 @@ public class XMarkBenchmark {
     static boolean saproduct = false;
     static boolean satests = false;
     static boolean xslt = false;
+    static boolean elab = true;
     static String generateByteCode = null;
     static int byteCodeThreshold = 100;
     static boolean checkResults = false;
@@ -185,6 +187,9 @@ public class XMarkBenchmark {
             if (anArgv.equals("-xslt")) {
                 xslt = true;
             }
+            if (anArgv.equals("-elab:off")) {
+                elab = false;
+            }
             if (anArgv.startsWith("-runcomp")) {
                 if (anArgv.equals("-runcomp")) {
                     generateByteCode = "on";
@@ -264,6 +269,7 @@ public class XMarkBenchmark {
         if (generateByteCode != null) {
             options += "-runcomp:" + generateByteCode;
         }
+        options += ("-elab:" + (elab ? "on " : "off "));
         println("<xmark-results product='Saxon' lang='query' version='" + Version.getProductVersion() +
                         "' options='" + options + "' when='" + when + "'>");
 
@@ -295,11 +301,15 @@ public class XMarkBenchmark {
                         config.loadSchema(new File(dir + "sa//schema.xsd").toURI().toString());
                         config.setSchemaValidationMode(Validation.STRICT);
                     }
+                    if (!elab) {
+                        config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, "-bc");
+                    }
                     if (generateByteCode != null) {
                         config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, generateByteCode);
                         config.setBooleanProperty(FeatureKeys.DEBUG_BYTE_CODE, false);
                         //config.setTiming(true);
                     }
+
                 }
 
 

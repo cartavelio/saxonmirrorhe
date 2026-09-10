@@ -11,6 +11,7 @@ import net.sf.saxon.expr.instruct.FixedElement;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 
 /**
  * Elaborator for a FixedElement (literal result element) expression.
@@ -19,6 +20,7 @@ import net.sf.saxon.trans.XPathException;
 public class FixedElementElaborator extends ComplexNodePushElaborator {
     
     @Override
+    @CSharpInnerClass(outer = false, extra = {"Saxon.Hej.expr.instruct.FixedElement instr", "Saxon.Eej.ee.elab.eval.PushEvaluator contentPusher"})
     public PushEvaluator elaborateForPush() {
         final FixedElement instr = (FixedElement) getExpression();
         final PushEvaluator contentPusher =
@@ -35,8 +37,8 @@ public class FixedElementElaborator extends ComplexNodePushElaborator {
             }
 
             @Override
-            public void processContent(Outputter out, XPathContext context) throws XPathException {
-                TailCall tc = contentPusher.process(out, context);
+            public void processContent(Outputter output, XPathContext context) throws XPathException {
+                TailCall tc = contentPusher.process(output, context);
                 Expression.dispatchTailCall(tc);
             }
         };

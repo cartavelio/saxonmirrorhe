@@ -1,7 +1,6 @@
 package com.saxonica.ee.elab.gen;
 
 import com.saxonica.ee.elab.eval.*;
-import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -12,7 +11,7 @@ public abstract class StringElaborator extends Elaborator {
 
     @Override
     public PullEvaluator elaborateForPull() {
-        StringEvaluator strEval = elaborateForString(false);
+        UnicodeStringEvaluator strEval = elaborateForUnicodeString(false);
         return context -> {
             UnicodeString value = strEval.eval(context);
             if (value == null) {
@@ -37,7 +36,7 @@ public abstract class StringElaborator extends Elaborator {
 
     @Override
     public ItemEvaluator elaborateForItem() {
-        StringEvaluator strEval = elaborateForString(false);
+        UnicodeStringEvaluator strEval = elaborateForUnicodeString(false);
         return context -> {
             UnicodeString value = strEval.eval(context);
             if (value == null) {
@@ -49,7 +48,7 @@ public abstract class StringElaborator extends Elaborator {
     }
 
     public BooleanEvaluator elaborateForBoolean() {
-        StringEvaluator strEval = elaborateForString(false);
+        UnicodeStringEvaluator strEval = elaborateForUnicodeString(false);
         return context -> {
             UnicodeString value = strEval.eval(context);
             return value != null && !value.isEmpty();
@@ -57,7 +56,7 @@ public abstract class StringElaborator extends Elaborator {
     }
 
     @Override
-    public abstract StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent);
+    public abstract UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent);
 
 
 }

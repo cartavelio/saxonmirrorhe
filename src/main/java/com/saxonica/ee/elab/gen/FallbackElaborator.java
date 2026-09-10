@@ -40,7 +40,7 @@ public class FallbackElaborator extends Elaborator {
         return context -> getExpression().effectiveBooleanValue(context);
     }
 
-    public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+    public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
         if (zeroLengthWhenAbsent) {
             return context -> getExpression().evaluateAsString(context);
         } else {

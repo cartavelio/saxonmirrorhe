@@ -158,6 +158,9 @@ public class ElaboratorFactory {
     }
 
     public static Supplier<Elaborator> getElaborator(String label) {
+        if (label == null) {
+            return null;
+        }
         return map.get(label);
     }
 

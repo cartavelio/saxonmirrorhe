@@ -2,10 +2,10 @@ package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.*;
 import com.saxonica.ee.elab.gen.PullElaborator;
-import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
@@ -60,6 +60,29 @@ public class LiteralElaborator extends PullElaborator {
             throw new UncheckedXPathException(e);
         }
     }
+
+    @Override
+    public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
+        GroundedValue value = ((Literal) getExpression()).getGroundedValue();
+        try {
+            UnicodeString str = value.getUnicodeStringValue();
+            return context -> str;
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
+    }
+
+    @Override
+    public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+        GroundedValue value = ((Literal) getExpression()).getGroundedValue();
+        try {
+            String str = value.getStringValue();
+            return context -> str;
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
+    }
+
 
 }
 

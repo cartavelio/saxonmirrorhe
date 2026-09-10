@@ -105,7 +105,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     //#if BYTECODE == true
         private ByteCodeMonitor byteCodeMonitor;
     //#endif
-    private boolean useElaboration;
 
 
     /**
@@ -1920,7 +1919,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     public OperandEvaluator obtainOperandEvaluator(Expression expression) {
-        if (isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION) && optimizer.isOptionSet(OptimizerOptions.ELABORATION)) {
+        if (isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION) && getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
             return new OperandElaborator(expression);
         } else {
             return super.obtainOperandEvaluator(expression);

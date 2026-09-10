@@ -27,7 +27,7 @@ public class OperandElaborator implements OperandEvaluator {
     private PushEvaluator pushEvaluator = null;
     private PullEvaluator pullEvaluator = null;
     private ItemEvaluator itemEvaluator = null;
-    private StringEvaluator stringEvaluator = null;
+    private UnicodeStringEvaluator stringEvaluator = null;
     private BooleanEvaluator booleanEvaluator = null;
 
     public OperandElaborator(Expression expr) {
@@ -57,7 +57,7 @@ public class OperandElaborator implements OperandEvaluator {
 
     public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
         if (stringEvaluator == null) {
-            stringEvaluator = Elaborator.makeElaborator(expression).elaborateForString(true);
+            stringEvaluator = Elaborator.makeElaborator(expression).elaborateForUnicodeString(true);
         }
         return stringEvaluator.eval(context);
     }

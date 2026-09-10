@@ -2,7 +2,6 @@ package com.saxonica.ee.elab.gen;
 
 import com.saxonica.ee.elab.eval.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
@@ -54,11 +53,11 @@ public abstract class SimpleNodePushElaborator extends Elaborator {
     }
 
     @Override
-    public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+    public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
         ItemEvaluator ie = elaborateForItem();
         return context -> {
             Item item = ie.eval(context);
-            return item == null ? handleNullString(zeroLengthWhenAbsent) : item.getUnicodeStringValue();
+            return item == null ? handleNullUnicodeString(zeroLengthWhenAbsent) : item.getUnicodeStringValue();
         };
     }
 
