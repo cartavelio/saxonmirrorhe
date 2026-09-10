@@ -239,7 +239,7 @@ public class TimingTraceListener implements TraceListener {
      * This method can be overridden in a subclass to produce the output in a different format.
      */
     /*@NotNull*/
-    private PreparedStylesheet getStyleSheet() throws XPathException {
+    protected PreparedStylesheet getStyleSheet() throws XPathException {
         InputStream in = getStylesheetInputStream();
         StreamSource ss = new StreamSource(in, "profile.xsl");
         CompilerInfo info = config.getDefaultXsltCompilerInfo();
@@ -249,11 +249,12 @@ public class TimingTraceListener implements TraceListener {
     }
 
     /**
-     * Get an input stream containing the stylesheet used for formatting results
-     * @return the input stream
+     * Get an input stream containing the stylesheet used for formatting results.
+     * The method is protected so that a user-written stylesheet can be supplied in a subclass.
+     * @return the input stream containing the stylesheet for processing the results.
      */
 
-    private InputStream getStylesheetInputStream() {
+    protected InputStream getStylesheetInputStream() {
         return Version.platform.locateResource("profile.xsl", new ArrayList<>());
     }
 
