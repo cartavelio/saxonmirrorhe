@@ -1,5 +1,6 @@
 package net.sf.saxon.type.coercion;
 
+import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.hof.CoercedFunction;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.AtomicSequence;
@@ -7,10 +8,7 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UnionType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
@@ -66,20 +64,28 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
             }
             throw new AssertionError("Item matches the choice type but doesn't match any of the alternatives");
         }
-        List<XPathException> errors = null;
-        for (ItemType it : reqType.getAlternatives()) {
-            CoercionPlan plan = it.getCoercionPlan(version);
-            try {
-                return plan.coerceItem(item, it, request);
-            } catch (XPathException error) {
-                if (errors == null) {
-                    errors = new ArrayList<>();
-                    errors.add(error);
+        if (version >= 40 || BuiltInAtomicType.UNTYPED_ATOMIC.matches(item, th) ) {
+            List<XPathException> errors = null;
+            for (ItemType it : reqType.getAlternatives()) {
+                CoercionPlan plan = it.getCoercionPlan(version);
+                try {
+                    return plan.coerceItem(item, it, request);
+                } catch (XPathException error) {
+                    if (errors == null) {
+                        errors = new ArrayList<>();
+                        errors.add(error);
+                    }
                 }
             }
+            assert errors != null;
+            throw errors.get(0);
+        } else {
+            RoleDiagnostic role = request.roleSupplier.get();
+            ValidationFailure vf = new ValidationFailure(
+                    "The " + role.getMessage() + " does not match any alternative of the union type " + reqType.getDescription());
+            vf.setErrorCode("XPTY0004");
+            throw vf.makeException().asTypeError();
         }
-        assert errors != null;
-        throw errors.get(0);
     }
 
 
