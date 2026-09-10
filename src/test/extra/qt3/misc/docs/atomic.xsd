@@ -72,6 +72,7 @@
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
+			<xs:anyAttribute namespace="##other" processContents="skip"/>
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

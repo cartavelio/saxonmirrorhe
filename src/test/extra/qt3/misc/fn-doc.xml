@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test-set xmlns="http://www.w3.org/2010/09/qt-fots-catalog" name="fn-doc" covers="fn-doc">
+   <description>
+      Tests implementation-defined aspects of the doc() function.
+   </description>
+   <link type="spec" document="http://www.w3.org/TR/xpath-functions-11/" idref="func-doc"/>
+   
+   <dependency type="saxon:config" name="http://saxon.sf.net/feature/recognize-uri-query-parameters" value="true"/>
+   
+   <test-case name="fn-doc-001">
+      <description>Query parameters, validation=skip</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XP31+ XQ31+"/>
+      <test>doc('docs/atomic.xml?validation=skip')</test>
+      <result>
+         <all-of>
+            <assert>$result/(/*:root)</assert>
+            <assert>$result//*:duration instance of element(*, xs:untyped)</assert>
+         </all-of>
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-002">
+      <description>Query parameters, validation=lax</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XQ31+"/>
+      <dependency type="feature" value="schemaImport"/>
+      <test>
+         import schema "http://www.w3.org/XQueryTest" at "docs/atomic.xsd"; 
+         doc('docs/atomic.xml?validation=lax')
+      </test>
+      <result>
+         <assert>$result//*:duration instance of element(*, xs:duration)</assert>
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-003">
+      <description>Query parameters, validation=strict</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XQ31+"/>
+      <dependency type="feature" value="schemaImport"/>
+      <test>
+         import schema "http://www.w3.org/XQueryTest" at "docs/atomic.xsd"; 
+         doc('docs/atomic.xml?validation=lax')
+      </test>
+      <result>
+         <assert>$result//*:duration instance of element(*, xs:duration)</assert>
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-004">
+      <description>Query parameters, validation=strict, early evaluation of doc()</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XQ31+"/>
+      <dependency type="feature" value="schemaImport"/>
+      <dependency type="saxon:config" name="http://saxon.sf.net/feature/preEvaluateDocFunction" value="true"/>
+      <test>
+         import schema "http://www.w3.org/XQueryTest" at "docs/atomic.xsd"; 
+         doc('docs/atomic.xml?validation=lax')
+      </test>
+      <result>
+         <assert>$result//*:duration instance of element(*, xs:duration)</assert>
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-101">
+      <description>Query parameters, strip-space=no</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XP31+ XQ31+"/>
+      <test>doc('docs/atomic.xml?strip-space=no')</test>
+      <result>
+         <assert>$result//*:duration/following-sibling::node()[1][self::text()]</assert>        
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-102">
+      <description>Query parameters, strip-space=yes</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XP31+ XQ31+"/>
+      <test>doc('docs/atomic.xml?strip-space=yes')</test>
+      <result>
+         <assert>$result//*:duration/following-sibling::node()[1][self::*:dateTime]</assert>        
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-103">
+      <description>Query parameters, strip-space=ignorable, untyped</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XP31+ XQ31+"/>
+      <test>doc('docs/atomic.xml?strip-space=ignorable')</test>
+      <result>
+         <assert>$result//*:duration/following-sibling::node()[1][self::text()]</assert>        
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-104">
+      <description>Query parameters, strip-space=ignorable, typed</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XP31+ XQ31+"/>
+      <dependency type="feature" value="schemaImport"/>
+      <test>
+         import schema "http://www.w3.org/XQueryTest" at "docs/atomic.xsd"; 
+         doc('docs/atomic.xml?strip-space=ignorable;validation=strict')</test>
+      <result>
+         <assert>$result//*:duration/following-sibling::node()[1][self::*:dateTime]</assert>        
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-201">
+      <description>Query parameters, xinclude=yes</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XP31+ XQ31+"/>
+      <test>doc('docs/xinclude-test.xml?xinclude=yes')</test>
+      <result>
+         <assert>$result/a/Q{http://www.w3.org/XQueryTest}root/Q{http://www.w3.org/XQueryTest}duration</assert>        
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-202">
+      <description>Query parameters, xinclude=no</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XP31+ XQ31+"/>
+      <test>doc('docs/xinclude-test.xml?xinclude=no')</test>
+      <result>
+         <assert>$result/a/Q{http://www.w3.org/2001/XInclude}include</assert>        
+      </result>
+   </test-case>
+   
+   <test-case name="fn-doc-203">
+      <description>Query parameters, xinclude=yes with validation</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-19"/>
+      <dependency type="spec" value="XP31+ XQ31+"/>
+      <dependency type="feature" value="schemaImport"/>
+      <test>
+         import schema "http://www.w3.org/XQueryTest" at "docs/atomic.xsd"; 
+         doc('docs/xinclude-test.xml?xinclude=yes;validation=lax')
+      </test>
+      <result>
+         <assert>$result/a/Q{http://www.w3.org/XQueryTest}root/Q{http://www.w3.org/XQueryTest}duration[self::element(*, xs:duration)]</assert>        
+      </result>
+   </test-case>
+ 
+
+</test-set>
