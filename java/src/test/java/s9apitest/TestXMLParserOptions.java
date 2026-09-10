@@ -379,12 +379,12 @@ public class TestXMLParserOptions {
             XMLReader xmr = spf.newSAXParser().getXMLReader();
             xmr.setFeature("http://apache.org/xml/features/validation/schema", true);
 
-            XsltExecutable exp = comp.compile(new StreamSource(Testdata.bugsFile("4996/test.xsl")));
+            XsltExecutable exp = comp.compile(new StreamSource(Testdata.bugs().file("4996/test.xsl")));
 
             StringWriter sw = new StringWriter();
             Serializer out = proc.newSerializer(sw);
 
-            File dataFile = Testdata.bugsFile("4996/xmlSchemaDefaultAttributeA.xml");
+            File dataFile = Testdata.bugs().file("4996/xmlSchemaDefaultAttributeA.xml");
             InputSource inputSource = new InputSource(dataFile.toURI().toString());
             SAXSource source1 = new SAXSource(xmr, inputSource);
 

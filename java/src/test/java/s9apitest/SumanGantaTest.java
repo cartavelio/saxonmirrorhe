@@ -2,7 +2,7 @@ package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.optim.StaticQueryContextEE;
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.query.StaticQueryContext;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Loads xquery module info by parsing the module text
  */
 public class SumanGantaTest {
-    private final ConfigTest configTest = new ConfigTest();
     private final int mIterations = 2000;
 
     @Test
@@ -44,7 +43,8 @@ public class SumanGantaTest {
             String expression = getTestExpression();
             mConfig = new EnterpriseConfiguration();
             mStaticContext = new StaticQueryContextEE(mConfig);
-            mStaticContext.setBaseURI(new File(configTest.getDataDir() + "ganta/").toURI().toString());
+            // TODO: CHECK THIS ONE TOO
+            mStaticContext.setBaseURI(Testdata.file("ganta/").toURI().toString());
 
             parse(mStaticContext, expression, "justParse", mIterations, aSequential);
         } catch (Exception e) {
@@ -68,9 +68,9 @@ public class SumanGantaTest {
 
             Collection<String> moduleFiles = new ArrayList<String>();
 
-            moduleFiles.add(configTest.getDataDir() + "ganta/genBPEL.xq");
-            moduleFiles.add(configTest.getDataDir() + "ganta/hello_notworking.xq");
-            moduleFiles.add(configTest.getDataDir() + "ganta/avoscentral.xq");
+            moduleFiles.add(Testdata.pathString("ganta/genBPEL.xq"));
+            moduleFiles.add(Testdata.pathString("ganta/hello_notworking.xq"));
+            moduleFiles.add(Testdata.pathString("ganta/avoscentral.xq"));
             addLibs(mStaticContext, moduleFiles);
 
             parse(mStaticContext, expression, "justParse", mIterations, aSequential);

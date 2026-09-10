@@ -6,6 +6,7 @@ import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.dom.NodeOverNodeInfo;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.jaxp.TransformerImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.om.NodeInfo;
@@ -45,21 +46,17 @@ import static org.junit.jupiter.api.Assertions.fail;
  * originally created by Scott Boag, but much evolved since.
  */
 public class TraxTest {
-    private final ConfigTest configTest = new ConfigTest();
-
-    private final String d = configTest.getDataDir() + "trax/";
-
-    private final String foo_xml = d+"xml/foo.xml";
-    private final String foo_xsl = d+"xsl/foo.xsl";
-    private final String baz_xml = d+"xml/baz.xml";
-    private final String baz_xsl = d+"xsl/baz.xsl";
-    private final String foo2_xsl = d+"xsl/foo2.xsl";
-    private final String foo3_xsl = d+"xsl/foo3.xsl";
-    private final String text_xsl = d+"xsl/text.xsl";
-    private final String cities_xml = d+"xml/cities.xml";
-    private final String embedded_xml = d+"xml/embedded.xml";
-    private final String multidoc_xsl = d+"xsl/multidoc.xsl";
-    private final String identity_xsl = d+"xsl/identity.xsl";
+    private final String foo_xml = Testdata.pathString("xml/foo.xml");
+    private final String foo_xsl = Testdata.pathString("xsl/foo.xsl");
+    private final String baz_xml = Testdata.pathString("xml/baz.xml");
+    private final String baz_xsl = Testdata.pathString("xsl/baz.xsl");
+    private final String foo2_xsl = Testdata.pathString("xsl/foo2.xsl");
+    private final String foo3_xsl = Testdata.pathString("xsl/foo3.xsl");
+    private final String text_xsl = Testdata.pathString("xsl/text.xsl");
+    private final String cities_xml = Testdata.pathString("xml/cities.xml");
+    private final String embedded_xml = Testdata.pathString("xml/embedded.xml");
+    private final String multidoc_xsl = Testdata.pathString("xsl/multidoc.xsl");
+    private final String identity_xsl = Testdata.pathString("xsl/identity.xsl");
 
 
     private static TransformerFactory makeFactory() {
@@ -115,11 +112,11 @@ public class TraxTest {
             Transformer transformer =
                     tfactory.newTransformer(new StreamSource(foo_xsl));
 
-            String outpath = configTest.getDataDir() + "temp/Simple2.out";
+            File outpath = Testdata.file("temp/Simple2.out");
 
             // Transform the source XML to System.out.
             transformer.transform(new StreamSource(foo_xml),
-                    new StreamResult(new File(outpath)));
+                    new StreamResult(outpath));
 
             System.out.println("\nOutput written to " + outpath + "\n");
         } catch (Exception ex) {

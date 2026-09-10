@@ -1,8 +1,8 @@
 package internaltests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.DocumentBuilder;
@@ -30,8 +30,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *  Tests of the NodeInfo interface as implemented by the tinytree
  */
 public class TinyTreeTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testIsAncestor() {
         try {
@@ -65,14 +63,14 @@ public class TinyTreeTest {
             configuration.setTreeModel(
               net.sf.saxon.om.TreeModel.TINY_TREE_CONDENSED.getSymbolicValue());
 
-            Source source = new StreamSource(new File(configTest.getDataDir() + "tinytreetest.xsl"));
+            Source source = new StreamSource(Testdata.file("tinytreetest.xsl"));
 
             Templates templates = transformerFactory.newTemplates(source);
             Transformer transformer = templates.newTransformer();
 
             transformer.transform(
               new StreamSource(new StringReader("<e/>")),
-              new StreamResult(new File(configTest.getDataDir() + "temp/out.xml")));
+              new StreamResult(Testdata.file("temp/out.xml")));
           }
        catch (Exception err) {
            err.printStackTrace();

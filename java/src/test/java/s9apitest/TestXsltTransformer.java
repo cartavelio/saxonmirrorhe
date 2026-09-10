@@ -633,7 +633,7 @@ public class TestXsltTransformer {
 
 
             Serializer serializer = processor.newSerializer();
-            serializer.setOutputFile(Testdata.tempFile("validationWarnings.xml"));
+            serializer.setOutputFile(Testdata.temp().file("validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.useSchema(schema);

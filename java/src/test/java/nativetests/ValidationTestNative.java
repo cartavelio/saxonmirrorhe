@@ -3,9 +3,9 @@ package nativetests;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
-import jaxptest.ConfigTest;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sender;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.ParseOptions;
@@ -32,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test options on schema validation interfaces
  */
 public class ValidationTestNative {
-    private final ConfigTest configTest = new ConfigTest();
-
     private class LocalErrorListener implements ErrorReporter {
         public int warnings = 0;
         public int errors = 0;
@@ -60,7 +58,7 @@ public class ValidationTestNative {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
             SchemaCompiler compiler = new SchemaCompiler(config);
             List<Source> sources = new ArrayList<>();
-            sources.add(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            sources.add(new StreamSource(Testdata.file("books.xsd")));
             compiler.setErrorReporter(listener);
             PreparedSchema schema = compiler.loadSources(sources);
             StringWriter sw = new StringWriter();
@@ -95,7 +93,7 @@ public class ValidationTestNative {
             config.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
             SchemaCompiler compiler = new SchemaCompiler(config);
             List<Source> sources = new ArrayList<>();
-            sources.add(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            sources.add(new StreamSource(Testdata.file("books.xsd")));
             compiler.setErrorReporter(listener);
             PreparedSchema schema = compiler.loadSources(sources);
             SerializationProperties props = new SerializationProperties();
@@ -131,7 +129,7 @@ public class ValidationTestNative {
             config.setConfigurationProperty(FeatureKeys.VALIDATION_COMMENTS, true);
             SchemaCompiler compiler = new SchemaCompiler(config);
             List<Source> sources = new ArrayList<>();
-            sources.add(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            sources.add(new StreamSource(Testdata.file("books.xsd")));
             compiler.setErrorReporter(listener);
             PreparedSchema schema = compiler.loadSources(sources);
             Properties props = new Properties();

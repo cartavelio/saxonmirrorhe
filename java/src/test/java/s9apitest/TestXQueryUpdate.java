@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestXQueryUpdate {
     public void setUp() throws IOException {
         // Copy books.xml to the temp directory so that the updates don't matter
-        String tempfn = Testdata.tempFile("books.xml").getAbsolutePath();
+        String tempfn = Testdata.temp().file("books.xml").getAbsolutePath();
         String origfn = Testdata.file("books.xml").getAbsolutePath();
         InputStream instream;
         OutputStream outstream;
@@ -49,7 +49,7 @@ public class TestXQueryUpdate {
             proc.setConfigurationProperty(Feature.TREE_MODEL, Builder.LINKED_TREE);
             proc.setConfigurationProperty(Feature.TREE_MODEL_NAME, "linkedTree");
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(Testdata.tempPath("").toUri());
+            comp.setBaseURI(Testdata.temp().path("").toUri());
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                 comp.compile("for $p in doc('books.xml')//PRICE "
@@ -90,7 +90,7 @@ public class TestXQueryUpdate {
         try {
             try {
                 Files.copy(Testdata.file("books.xml").toPath(),
-                           Testdata.tempFile("books.xml").toPath(),
+                           Testdata.temp().file("books.xml").toPath(),
                            StandardCopyOption.REPLACE_EXISTING);
             } catch (FileAlreadyExistsException e) {
                 // ignore the failure
@@ -100,9 +100,9 @@ public class TestXQueryUpdate {
             //proc.setConfigurationProperty(FeatureKeys.TREE_MODEL_NAME, "linkedTree");
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.LINKED_TREE);
-            XdmNode input = builder.build(Testdata.tempFile("books.xml"));
+            XdmNode input = builder.build(Testdata.temp().file("books.xml"));
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(Testdata.tempPath("").toUri());
+            comp.setBaseURI(Testdata.temp().path("").toUri());
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                 comp.compile("copy $doc := .\n" +
@@ -131,7 +131,7 @@ public class TestXQueryUpdate {
         try {
             try {
                 Files.copy(Testdata.file("books.xml").toPath(),
-                           Testdata.tempFile("books.xml").toPath(),
+                           Testdata.temp().file("books.xml").toPath(),
                            StandardCopyOption.REPLACE_EXISTING);
             } catch (FileAlreadyExistsException e) {
                 // ignore the failure
@@ -139,9 +139,9 @@ public class TestXQueryUpdate {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.TINY_TREE);
-            XdmNode input = builder.build(Testdata.tempFile("books.xml"));
+            XdmNode input = builder.build(Testdata.temp().file("books.xml"));
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(Testdata.tempPath("").toUri());
+            comp.setBaseURI(Testdata.temp().path("").toUri());
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                     comp.compile("let $updated := copy $doc := .\n" +
@@ -167,7 +167,7 @@ public class TestXQueryUpdate {
         try {
             try {
                 Files.copy(Testdata.file("books.xml").toPath(),
-                           Testdata.tempFile("books.xml").toPath(),
+                           Testdata.temp().file("books.xml").toPath(),
                            StandardCopyOption.REPLACE_EXISTING);
             } catch (FileAlreadyExistsException e) {
                 // ignore the failure
@@ -175,9 +175,9 @@ public class TestXQueryUpdate {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.TINY_TREE);
-            XdmNode input = builder.build(Testdata.tempFile("books.xml"));
+            XdmNode input = builder.build(Testdata.temp().file("books.xml"));
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(Testdata.tempPath("").toUri());
+            comp.setBaseURI(Testdata.temp().path("").toUri());
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                     comp.compile("declare variable $updated as element() := "
@@ -261,10 +261,10 @@ public class TestXQueryUpdate {
 
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.LINKED_TREE);
-            XdmNode doc = builder.build(Testdata.tempFile("books.xml"));
+            XdmNode doc = builder.build(Testdata.temp().file("books.xml"));
 
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(Testdata.tempPath("").toUri());
+            comp.setBaseURI(Testdata.temp().path("").toUri());
             comp.setUpdatingEnabled(true);
 
             XQueryExecutable exp1 =

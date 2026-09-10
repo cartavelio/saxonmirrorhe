@@ -1,5 +1,6 @@
 package modeltests;
 
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.axiom.AxiomObjectModel;
 import net.sf.saxon.s9api.DocumentBuilder;
@@ -25,8 +26,8 @@ public class AxiomTreeTests extends ObjectModelTests {
     @Override
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
-            //InputStream in = new FileInputStream(configTest.getDataDir() + fileName);
-            StreamSource ss = new StreamSource(new File(configTest.getDataDir() + fileName));
+            //InputStream in = new FileInputStream(Testdata.file(fileName));
+            StreamSource ss = new StreamSource(Testdata.file(fileName));
             OMXMLParserWrapper axiomBuilder = OMXMLBuilderFactory.createOMBuilder(ss);
             OMDocument doc = axiomBuilder.getDocument();
             DocumentBuilder builder = processor.newDocumentBuilder();

@@ -1,12 +1,12 @@
 package pulltests;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.event.EventSource;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.StandardURIResolver;
@@ -34,22 +34,20 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class PullTest {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void testPullSource() {
         try {
             // Note: this test fails with the Sun XMLStreamReader because the initial state
             // of the parser is 3 (XML Processing Instruction) rather than 7 (start document)
             // as required by the new StaxSource() constructor.
-            String strStylSheetPath = configTest.getDataDir() + "books.xsl";
-            String omElemPath = configTest.getDataDir() + "books.xml";
-            InputStream imp = new FileInputStream(new File(omElemPath));
+            File strStylSheetFile = Testdata.file("books.xsl");
+            File omElemFile = Testdata.file("books.xml");
+            InputStream imp = new FileInputStream(omElemFile);
             InputStreamReader impsr = new InputStreamReader(imp);
             System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
             XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(impsr);
             System.err.println(parser.getEventType());
-            FileInputStream fileInputStream = new FileInputStream(strStylSheetPath);
+            FileInputStream fileInputStream = new FileInputStream(strStylSheetFile);
             Source srcStylSheet = new StreamSource(fileInputStream);
             System.setProperty("javax.xml.transform.TransformerFactory", TransformerFactoryImpl.class.getName());
             Transformer xDSFieldsValidationStylesheet = TransformerFactoryImpl.newInstance().newTransformer(srcStylSheet);

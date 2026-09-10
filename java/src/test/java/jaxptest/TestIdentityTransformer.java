@@ -1,5 +1,6 @@
 package jaxptest;
 
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.FeatureKeys;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -28,8 +29,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TestIdentityTransformer {
-    private final ConfigTest configTest = new ConfigTest();
-
     private static TransformerFactory makeFactory() {
         // We don't simply do newInstance(), because that can give us Xalan in cases where the test is
         // run from a development environment.
@@ -250,7 +249,7 @@ public class TestIdentityTransformer {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder db = factory.newDocumentBuilder();
-            Document doc = db.parse(new FileInputStream(configTest.getXMarkDir() + "xmark1.xml"));
+            Document doc = db.parse(new FileInputStream(Testdata.xmark().file("xmark1.xml")));
 
             Transformer saxon = makeFactory().newTransformer();
             //Transformer xalan = TransformerFactory.newDefaultInstance();

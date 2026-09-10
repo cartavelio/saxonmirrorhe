@@ -1,6 +1,6 @@
 package modeltests;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.TreeModel;
@@ -38,8 +38,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 
 public abstract class ObjectModelTests {
-    protected final ConfigTest configTest = new ConfigTest();
-    
     abstract TreeModel getTreeModel();
 
     abstract XdmNode buildExternalDocument(Processor processor, String fileName);
@@ -309,7 +307,7 @@ public abstract class ObjectModelTests {
         try {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
-            XdmNode source = builder.build(new File(configTest.getDataDir() + "books-sql.xsl"));
+            XdmNode source = builder.build(Testdata.file("books-sql.xsl"));
             XdmDestination dest = makeDestination(proc);
             XQueryCompiler compiler = proc.newXQueryCompiler();
             XQueryExecutable exec = compiler.compile("copy-of(.)");

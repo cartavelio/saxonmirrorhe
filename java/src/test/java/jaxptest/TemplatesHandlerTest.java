@@ -1,5 +1,6 @@
 package jaxptest;
 
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.FeatureKeys;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
@@ -25,15 +26,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class TemplatesHandlerTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testTemplatesHandler() throws SAXException,
             ParserConfigurationException,
             IOException, TransformerException {
 
-        String xsl = configTest.getDataDir() + "books.xsl";
-        String xml = configTest.getDataDir() + "books.xml";
+        File xsl = Testdata.file("books.xsl");
+        File xml = Testdata.file("books.xml");
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -47,12 +46,12 @@ public class TemplatesHandlerTest {
         TemplatesHandler templatesHandler =
                 transformerFactory.newTemplatesHandler();
         reader.setContentHandler(templatesHandler);
-        reader.parse(new File(xsl).toURI().toASCIIString());
+        reader.parse(xsl.toURI().toASCIIString());
 
         Templates templates = templatesHandler.getTemplates();
         Transformer transformer = templates.newTransformer();
         StringWriter sw = new StringWriter();
-        transformer.transform(new StreamSource(new File(xml)), new StreamResult(sw));
+        transformer.transform(new StreamSource(xml), new StreamResult(sw));
         assertTrue(sw.toString().startsWith("<!DOCTYPE html>")
             || sw.toString().startsWith("<!DOCTYPE HTML>"));
 
@@ -68,7 +67,7 @@ public class TemplatesHandlerTest {
                     "<xsl:variable name='x' static='yes' xmlns:t='http://www.w3.org/1999/XSL/Transform' select='system-property(\"t:schema-aware\")'/>" +
                     "<xsl:template match='/'><out x='{$x}'/></xsl:template>" +
                     "</xsl:transform>";
-            String xml = configTest.getDataDir() + "books.xml";
+            File xml = Testdata.file("books.xml");
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setValidating(false);
@@ -83,7 +82,7 @@ public class TemplatesHandlerTest {
 
             Templates templates = templatesHandler.getTemplates();
             Transformer transformer = templates.newTransformer();
-            transformer.transform(new StreamSource(new File(xml)), new StreamResult(System.out));
+            transformer.transform(new StreamSource(xml), new StreamResult(System.out));
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -98,8 +97,8 @@ public class TemplatesHandlerTest {
     @Test
     public void testExtensionNotFound() {
         try {
-            String inputUri = configTest.getDataDir() + "base64/books.xml";
-            String xsltUrl = configTest.getDataDir() + "base64/TextTobase64.xsl";
+            File inputUri = Testdata.file("base64/books.xml");
+            File xslt = Testdata.file("base64/TextTobase64.xsl");
 
             TransformerFactory tFactory = new net.sf.saxon.TransformerFactoryImpl();
             tFactory.setAttribute(FeatureKeys.RECOGNIZE_URI_QUERY_PARAMETERS, Boolean.TRUE);
@@ -109,7 +108,7 @@ public class TemplatesHandlerTest {
             // disable JIT compilation
             tFactory.setAttribute(FeatureKeys.OPTIMIZATION_LEVEL, "-j");
 
-            Transformer transformer = tFactory.newTransformer(new StreamSource(xsltUrl));
+            Transformer transformer = tFactory.newTransformer(new StreamSource(xslt));
 
 
             System.out.println();

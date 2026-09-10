@@ -1,9 +1,9 @@
 package internaltests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.UnparsedTextIterator;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ public class ResourceTests {
             Configuration config = new Configuration();
             Controller controller = new Controller(config);
             XPathContext context = controller.newXPathContext();
-            LineNumberReader reader = new LineNumberReader(new FileReader(new ConfigTest().getDataDir() + "books.xml"));
+            LineNumberReader reader = new LineNumberReader(new FileReader(Testdata.file("books.xml")));
             readFilePartly(reader, context);
             try {
                 Thread.sleep(1000);
@@ -74,7 +74,7 @@ public class ResourceTests {
 
     private void readFilePartly(LineNumberReader reader, XPathContext context) {
         try {
-            URI uri = new URI(new ConfigTest().getDataDir() + "books.xml");
+            URI uri = new URI(Testdata.file("books.xml"));
             UnparsedTextIterator iter = new UnparsedTextIterator(reader, uri, context, "UTF-8", false);
             iter.next();
             iter.next();
@@ -99,7 +99,7 @@ public class ResourceTests {
 //            Controller controller = new Controller(config);
 //            XPathContext context = controller.newXPathContext();
 //
-//            ZipInputStream stream = new ZipInputStream(new FileInputStream(new ConfigTest().getDataDir() + "collection3/saxon9he.jar"));
+//            ZipInputStream stream = new ZipInputStream(new FileInputStream(Testdata.file("collection3/saxon9he.jar")));
 //
 //            JarCollection jar = new JarCollection(context, "http://dummy/dummy.jar", new URIQueryParameters("", config));
 //

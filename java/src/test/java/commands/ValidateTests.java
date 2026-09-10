@@ -1,14 +1,14 @@
 package commands;
 
 import com.saxonica.Validate;
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XdmAtomicValue;
 import net.sf.saxon.s9api.XdmItem;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,9 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests on Validate Command Line options
  */
 public class ValidateTests {
-    private final ConfigTest configTest = new ConfigTest();
-
-    private final String TEMPDIR = configTest.getDataDir() + "temp/";
+    private final Path TEMPDIR = Testdata.path("temp");
 
     public void setUp() {
         System.err.println("TEMP:" + TEMPDIR);
@@ -30,7 +28,7 @@ public class ValidateTests {
     public void testSchemaValidation() {
 
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "books.xsd",
+                "-xsd:" + Testdata.file("books.xsd"),
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
@@ -45,8 +43,8 @@ public class ValidateTests {
     public void testBasicInstanceValidation() {
 
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "books.xsd",
-                "-s:" + configTest.getDataDir() + "books.xml",
+                "-xsd:" + Testdata.file("books.xsd"),
+                "-s:" + Testdata.file("books.xml"),
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
@@ -60,8 +58,8 @@ public class ValidateTests {
     private void testExportSCM() {
 
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "books.xsd",
-                "-export:" + TEMPDIR + "books.scm",
+                "-xsd:" + Testdata.file("books.xsd"),
+                "-export:" + TEMPDIR.resolve("books.scm"),
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
@@ -76,9 +74,9 @@ public class ValidateTests {
     private void testImportSCM() {
 
         String[] args = {
-                "-xsd:" + TEMPDIR + "books.scm",
+                "-xsd:" + TEMPDIR.resolve("books.scm"),
                 "-xsiloc:off",
-                "-s:" + configTest.getDataDir() + "books.xml",
+                "-s:" + Testdata.file("books.xml"),
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
@@ -98,8 +96,8 @@ public class ValidateTests {
     @Test
     public void testValidationWithParams() {
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
-                "-s:" + configTest.getDataDir() + "birthdays.xml",
+                "-xsd:" + Testdata.file("schema-with-param.xsd"),
+                "-s:" + Testdata.file("birthdays.xml"),
                 "-xsdversion:1.1",
                 "-t",
                 "baseLine=2012-01-01",
@@ -116,8 +114,8 @@ public class ValidateTests {
     @Test
     public void testValidationFailureWithParams() {
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
-                "-s:" + configTest.getDataDir() + "birthdays.xml",
+                "-xsd:" + Testdata.file("schema-with-param.xsd"),
+                "-s:" + Testdata.file("birthdays.xml"),
                 "-xsdversion:1.1",
                 "-t",
                 "-quit:off",
@@ -134,8 +132,8 @@ public class ValidateTests {
     @Test
     public void testTypeAlternativeWithParams() {
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
-                "-s:" + configTest.getDataDir() + "stayAtHome.xml",
+                "-xsd:" + Testdata.file("schema-with-param.xsd"),
+                "-s:" + Testdata.file("stayAtHome.xml"),
                 "-xsdversion:1.1",
                 "-t",
                 "dayOfWeek=Sunday"};
@@ -151,8 +149,8 @@ public class ValidateTests {
     @Test
     public void testTypeAlternativeWithParams2() {
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
-                "-s:" + configTest.getDataDir() + "goToWork.xml",
+                "-xsd:" + Testdata.file("schema-with-param.xsd"),
+                "-s:" + Testdata.file("goToWork.xml"),
                 "-xsdversion:1.1",
                 "-t",
                 "dayOfWeek=Monday"};
@@ -168,8 +166,8 @@ public class ValidateTests {
     @Test
     public void testTypeAlternativeWithParamsFailure() {
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "schema-with-param.xsd",
-                "-s:" + configTest.getDataDir() + "goToWork.xml",
+                "-xsd:" + Testdata.file("schema-with-param.xsd"),
+                "-s:" + Testdata.file("goToWork.xml"),
                 "-xsdversion:1.1",
                 "-t",
                 "dayOfWeek=Sunday"};
@@ -186,19 +184,19 @@ public class ValidateTests {
     public void testStatsReporting() {
 
         //noinspection ResultOfMethodCallIgnored
-        new File(TEMPDIR + "validation-report.xml").delete();
+        TEMPDIR.resolve("validation-report.xml").toFile().delete();
 
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "books.xsd",
-                "-s:" + configTest.getDataDir() + "books.xml",
-                "-stats:" + TEMPDIR + "validation-report.xml",
+                "-xsd:" + Testdata.file("books.xsd"),
+                "-s:" + Testdata.file("books.xml"),
+                "-stats:" + TEMPDIR.resolve("validation-report.xml"),
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
             assertEquals(0, rc);
             Processor proc = new Processor(false);
             XdmItem report = proc.newDocumentBuilder().build(
-                    new File(TEMPDIR + "validation-report.xml"));
+                    TEMPDIR.resolve("validation-report.xml").toFile());
             XPathCompiler compiler = proc.newXPathCompiler();
             XdmAtomicValue result = (XdmAtomicValue) compiler.evaluateSingle(
                     "count(/schemaCoverage/component)", report);

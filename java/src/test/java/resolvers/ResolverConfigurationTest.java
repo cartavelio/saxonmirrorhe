@@ -1,7 +1,7 @@
 package resolvers;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.s9api.*;
@@ -25,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResolverConfigurationTest {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void defaultCatalogResourceResolver() {
         Configuration config = new Configuration();
@@ -74,7 +72,7 @@ public class ResolverConfigurationTest {
         try {
             Configuration config = new Configuration();
             config.setResourceResolver(new ResourceResolverWrappingURIResolver(new StandardURIResolver(config)));
-            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
+            TreeInfo info = config.buildDocumentTree(new StreamSource(Testdata.file("books.xml")));
             assertTrue(info.getRootNode().getBaseURI().endsWith("books.xml"));
         } catch (XPathException e) {
             fail();
@@ -112,9 +110,12 @@ public class ResolverConfigurationTest {
                             }));
 
             //config.setResourceResolver(new ResourceResolverWrappingURIResolver(new StandardURIResolver(config)));
-            TreeInfo info = config.buildDocumentTree(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
+            TreeInfo info = config.buildDocumentTree(new StreamSource(Testdata.file("books.xml")));
             XQueryCompiler xqc = proc.newXQueryCompiler();
-            xqc.setBaseURI(new File(configTest.getDataDir()).toURI());
+            /* TODO: Is this right? the original code does what this does: make a file from the base path and toURI()'s it
+               But, making a file from a path string ending in / strips that off, and URI resolving is different if
+               the URI being resolved from ends in a / */
+            xqc.setBaseURI(Testdata.dir().toFile().toURI());
             XQueryExecutable exec = xqc.compile("doc('books.xml')");
             exec.load().run(new NullDestination());
             assertTrue(info.getRootNode().getBaseURI().endsWith("books.xml"));
@@ -135,7 +136,7 @@ public class ResolverConfigurationTest {
             Processor processor = new Processor(false);
 
             XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
-            xqueryCompiler.setBaseURI(new File(configTest.getDataDir()).toURI());
+            xqueryCompiler.setBaseURI(Testdata.dir().toFile().toURI());
             XQueryEvaluator xqueryEvaluator = xqueryCompiler.compile(query).load();
             xqueryEvaluator.run(processor.newSerializer(System.out));
             System.err.println("First run successful");
@@ -147,7 +148,7 @@ public class ResolverConfigurationTest {
             Processor processor = new Processor(false);
             processor.setConfigurationProperty("http://saxon.sf.net/feature/parserFeature?uri=http://apache.org/xml/features/disallow-doctype-decl", true);
             XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
-            xqueryCompiler.setBaseURI(new File(configTest.getDataDir()).toURI());
+            xqueryCompiler.setBaseURI(Testdata.dir().toFile().toURI());
             XQueryEvaluator xqueryEvaluator = xqueryCompiler.compile(query).load();
             xqueryEvaluator.run(processor.newSerializer(System.out));
             System.err.println("Second run wrongly successful");
@@ -160,7 +161,7 @@ public class ResolverConfigurationTest {
             Processor processor = new Processor(false);
             processor.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "https,http");
             XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
-            xqueryCompiler.setBaseURI(new File(configTest.getDataDir()).toURI());
+            xqueryCompiler.setBaseURI(Testdata.dir().toFile().toURI());
             XQueryEvaluator xqueryEvaluator = xqueryCompiler.compile(query).load();
             xqueryEvaluator.run(processor.newSerializer(System.out));
             System.err.println("Third run wrongly successful");
@@ -181,7 +182,7 @@ public class ResolverConfigurationTest {
                     "<root>&amp;xxe;</root>')";
             Processor processor = new Processor(false);
             XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
-            xqueryCompiler.setBaseURI(new File(configTest.getDataDir()).toURI());
+            xqueryCompiler.setBaseURI(Testdata.dir().toFile().toURI());
             XQueryEvaluator xqueryEvaluator = xqueryCompiler.compile(query).load();
             xqueryEvaluator.run(processor.newSerializer(System.out));
             fail("Error not detected");

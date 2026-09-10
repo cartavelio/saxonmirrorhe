@@ -1,11 +1,11 @@
 package internaltests;
 
 import com.saxonica.functions.registry.XPath40FunctionSet;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.MathFunctionSet;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.NamespaceUri;
@@ -70,8 +70,7 @@ public class SignatureTest {
 
     @Test
     public void testFunctionSignatures() {
-        File catalog = new File(new ConfigTest().getQt4SpecsDir()
-                                        + "specifications/xpath-functions-40/src/function-catalog.xml");
+        File catalog = Testdata.qt4Specs().file("specifications/xpath-functions-40/src/function-catalog.xml");
         int failures = 0;
         try {
             Processor proc = new Processor(true);

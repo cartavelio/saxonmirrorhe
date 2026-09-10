@@ -2,6 +2,7 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.NamespaceConstant;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.ls.LSInput;
@@ -33,8 +34,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Tests for JAXP validatorHandler interface
  */
 public class ValidatorHandlerTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     private void parseToValidator(ValidatorHandler handler, InputSource source) {
         try {
             SAXParserFactory parserFactory = SAXParserFactory.newInstance();
@@ -52,11 +51,11 @@ public class ValidatorHandlerTest {
     public void testTypeAnnotations() {
         try {
             SchemaFactoryImpl schemaFactory = new SchemaFactoryImpl();
-            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            Schema grammar = schemaFactory.newSchema(Testdata.file("books.xsd"));
             ValidatorHandler validator = grammar.newValidatorHandler();
             TypeInfoProvider provider = validator.getTypeInfoProvider();
             validator.setContentHandler(new TypeInfoChecker(provider));
-            parseToValidator(validator, new InputSource(Files.newInputStream(Paths.get(configTest.getDataDir() + "books.xml"))));
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books.xml"))));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,9 +100,9 @@ public class ValidatorHandlerTest {
     public void testDefaultErrorHandling() {
         try {
             SchemaFactoryImpl schemaFactory = new SchemaFactoryImpl();
-            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            Schema grammar = schemaFactory.newSchema(Testdata.file("books.xsd"));
             ValidatorHandler validator = grammar.newValidatorHandler();
-            parseToValidator(validator, new InputSource(Files.newInputStream(Paths.get(configTest.getDataDir() + "books-invalid.xml"))));
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books-invalid.xml"))));
 
         } catch (Exception e) {
             fail();
@@ -114,12 +113,12 @@ public class ValidatorHandlerTest {
     public void testResolver() {
         try {
             SchemaFactoryImpl schemaFactory = new SchemaFactoryImpl();
-            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            Schema grammar = schemaFactory.newSchema(Testdata.file("books.xsd"));
             ValidatorHandler validator = grammar.newValidatorHandler();
             Resolver resolver = new Resolver();
             validator.setResourceResolver(resolver);
             assertEquals(resolver, validator.getResourceResolver());
-            parseToValidator(validator, new InputSource(Files.newInputStream(Paths.get(configTest.getDataDir() + "books-invalid.xml"))));
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books-invalid.xml"))));
 
         } catch (Exception e) {
             fail();
@@ -172,7 +171,7 @@ public class ValidatorHandlerTest {
         counts.add(0);
         try {
             SchemaFactory schemaFactory = makeSchemaFactory();
-            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            Schema grammar = schemaFactory.newSchema(Testdata.file("books.xsd"));
             ValidatorHandler validator = grammar.newValidatorHandler();
 
             validator.setErrorHandler(new ErrorHandler() {
@@ -191,7 +190,7 @@ public class ValidatorHandlerTest {
                     counts.set(2, counts.get(2) + 1);
                 }
             });
-            parseToValidator(validator, new InputSource(Files.newInputStream(Paths.get(configTest.getDataDir() + "books-invalid.xml"))));
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books-invalid.xml"))));
             assertEquals(0, (int) counts.get(0), "warnings");
             assertEquals(3, (int) counts.get(1), "errors");
             assertEquals(0, (int) counts.get(2), "fatals");

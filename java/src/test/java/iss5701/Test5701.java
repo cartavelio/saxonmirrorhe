@@ -1,6 +1,6 @@
 package iss5701;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class Test5701 {
-    private final ConfigTest config = new ConfigTest();
     @Test
     public void testTransformXsl() {
         Processor processor = new Processor(false);
@@ -53,7 +52,7 @@ public class Test5701 {
             InputStream stylef = Files.newInputStream(Paths.get("src/test/java/iss5701/style.xsl"));
             compiler.setJustInTimeCompilation(false);
             XsltExecutable exec = compiler.compile(new SAXSource(new InputSource(stylef)));
-            exec.export(Files.newOutputStream(Paths.get(config.getTempDir() + "style12.sef.xml")));
+            exec.export(Files.newOutputStream(Testdata.path("style12.sef.xml")));
         } catch (Exception ex) {
             ex.printStackTrace();
             fail();

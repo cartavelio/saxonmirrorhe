@@ -650,7 +650,7 @@ public class TestXslt30TransformerDebug {
             XsdSchema schema = schemaManager.load(new StreamSource(Testdata.file("books.xsd")));
 
             Serializer serializer = processor.newSerializer();
-            serializer.setOutputFile(Testdata.tempFile("validationWarnings.xml"));
+            serializer.setOutputFile(Testdata.temp().file("validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);

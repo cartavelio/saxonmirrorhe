@@ -1,6 +1,7 @@
 package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
+import net.sf.saxon.junit.Testdata;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Templates;
@@ -21,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test that DOM access is threadsafe. Test deleted - because DOM access is not thread-safe!
  */
 public class ThreadTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testDummy() {
         assertTrue(true);
@@ -59,7 +58,7 @@ public class ThreadTest {
                     @Override
                     public void run() {
                         try {
-                            StreamSource styleSource = new StreamSource(new StringReader(copyXslSa), configTest.getDataDir() + "/");
+                            StreamSource styleSource = new StreamSource(new StringReader(copyXslSa), Testdata.dir() + "/");
                             final Templates templates = factory.newTemplates(styleSource);
                             System.out.println("thread-#" + Thread.currentThread().getId() + " OK");
                             assertNotNull(templates);

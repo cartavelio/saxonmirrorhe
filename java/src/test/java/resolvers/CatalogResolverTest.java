@@ -1,6 +1,5 @@
 package resolvers;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ResourceRequest;
@@ -23,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CatalogResolverTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void noResolverFail() {
         Configuration config = new Configuration();
@@ -257,7 +254,7 @@ public class CatalogResolverTest {
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
 
-            String fn = configTest.getDataDir() + "bug5950/identity.xsl";
+            Path fn = Testdata.path("bug5950/identity.xsl");
             Source xsl = new SAXSource(new InputSource(Files.newInputStream(new File(fn).toPath())));
             XsltExecutable exec = compiler.compile(xsl);
 
@@ -265,7 +262,7 @@ public class CatalogResolverTest {
 
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(true);
-            XdmNode doc = builder.build(new File(configTest.getDataDir() + "bug5950/doc.xml"));
+            XdmNode doc = builder.build(Testdata.file("bug5950/doc.xml"));
 
             transformer.setGlobalContextItem(doc);
 
@@ -284,12 +281,12 @@ public class CatalogResolverTest {
         @Override
         public Source resolve(ResourceRequest request) throws XPathException {
             if ("chapter.xml".equals(request.uri)) {
-                return new SAXSource(new InputSource(configTest.getDataDir() + "bug5950/chapter.xml"));
+                return new SAXSource(new InputSource(Testdata.pathString("bug5950/chapter.xml")));
                 /*
                 // This shows what happens if you return a StAXSource...it goes bang.
                 try {
                     XMLInputFactory factory = XMLInputFactory.newInstance();
-                    XMLEventReader reader = factory.createXMLEventReader(new FileInputStream(configTest.getDataDir() + "bug5950/chapter.xml"));
+                    XMLEventReader reader = factory.createXMLEventReader(new FileInputStream(Testdata.file("bug5950/chapter.xml")));
                     return new StAXSource(reader);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
@@ -300,7 +297,7 @@ public class CatalogResolverTest {
                 try {
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                     javax.xml.parsers.DocumentBuilder builder = factory.newDocumentBuilder();
-                    Document doc = builder.parse(configTest.getDataDir() + "bug5950/chapter.xml");
+                    Document doc = builder.parse(Testdata.fileString("bug5950/chapter.xml"));
                     return new DOMSource(doc);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);

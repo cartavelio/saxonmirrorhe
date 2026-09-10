@@ -16,7 +16,7 @@
 package performance;
 
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -29,8 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class SimonSoftTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     // See bug 2929 - cost of whitespace stripping
 
     private static long numTransformed = 0;
@@ -80,7 +78,7 @@ public class SimonSoftTest {
                 StreamSource xslSource = new StreamSource(new StringReader(xsl));
 
 
-                InputStream xml = new FileInputStream(configTest.getDataDir() + "xmark1.xml");
+                InputStream xml = new FileInputStream(Testdata.file("xmark1.xml"));
 
                 transformElements(xslSource, xml);
             } catch (FileNotFoundException | SaxonApiException e) {

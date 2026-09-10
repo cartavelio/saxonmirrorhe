@@ -4,6 +4,7 @@ import com.saxonica.ee.domino.DominoTreeModel;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
@@ -25,13 +26,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
 
-    private final String INPUT = configTest.getXMarkDir() + "xmark10.xml";
+    private final File INPUT = Testdata.xmark().file("xmark10.xml");
 
-    private void searchXPathDescendants(final TreeModel model, final String fileName, final int expected) {
+    private void searchXPathDescendants(final TreeModel model, final File file, final int expected) {
         Processor proc = new Processor(true);
         final Configuration config = proc.getUnderlyingConfiguration();
         final ParseOptions options = new ParseOptions().withModel(model);
-        StreamSource source = new StreamSource(new File(fileName));
+        StreamSource source = new StreamSource(file);
         TreeInfo tree = null;
         NodeInfo documentElement = null;
         try {

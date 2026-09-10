@@ -3,7 +3,7 @@ package jaxptest;
 import com.saxonica.config.ProfessionalTransformerFactory;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
-import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.junit.Testdata;import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -22,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test for s9api serialization
  */
 public class SerializerTests {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testTemplatesOutputProperties() {
         try {
@@ -209,8 +207,7 @@ public class SerializerTests {
             Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(stylesheet)));
             Transformer trans = templates.newTransformer();
             StreamSource input = new StreamSource(new StringReader(stylesheet));
-            String s = configTest.getTempDir() + ".\\config\\testIllegalUriOutput.xml";
-            StreamResult result = new StreamResult(new File(s));
+            StreamResult result = new StreamResult(Testdata.temp().file(".\\config\\testIllegalUriOutput.xml"));
             trans.transform(input, result);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -366,11 +363,11 @@ public class SerializerTests {
 
         TransformerFactory tf = new net.sf.saxon.TransformerFactoryImpl();
 
-        Source templateSource = new StreamSource(new FileInputStream(configTest.getDataDir() + "davis/formatter.xsl"));
+        Source templateSource = new StreamSource(new FileInputStream(Testdata.file("davis/formatter.xsl")));
 
         Transformer t = tf.newTransformer(templateSource);
 
-        Source inputSource = new StreamSource(new FileInputStream(configTest.getDataDir() + "davis/inputData.xml"));
+        Source inputSource = new StreamSource(new FileInputStream(Testdata.file("davis/inputData.xml")));
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Result result = new StreamResult(os);
         t.transform(inputSource, result);
@@ -590,7 +587,7 @@ public class SerializerTests {
                         "</xsl:stylesheet>";
         String xslPath = "test.xsl";
         String xmlPath = "test.xml";
-        String outPath = configTest.getDataDir() + "output.xml";
+        String outPath = Testdata.file("output.xml");
         // Create transformer
         File xslFile = new File(xslPath);
         InputSource inputSource = new InputSource(xslFile.toURI().toString());
@@ -645,11 +642,10 @@ public class SerializerTests {
     @Test
     public void testNextInChainPisoiTest() {
         try {
-            String xslPath = configTest.getDataDir() + "next-in-chain/main.xsl";
-            String xmlPath = configTest.getDataDir() + "next-in-chain/test.xml";
+            File xslFile = Testdata.file("next-in-chain/main.xsl");
+            File xmlFile = Testdata.file("next-in-chain/test.xml");
 
             // Create transformer
-            File xslFile = new File(xslPath);
             InputSource inputSource = new InputSource(xslFile.toURI().toString());
             Source source = new SAXSource(inputSource);
 
@@ -657,12 +653,12 @@ public class SerializerTests {
             Transformer transformer = transformerFactory.newTransformer(source);
 
             // Create XML SAX source
-            Source xmlSource = new SAXSource(new InputSource(new File(xmlPath).toURI().toString()));
+            Source xmlSource = new SAXSource(new InputSource(xmlFile.toURI().toString()));
 
             // Output stream result
             StringWriter sw = new StringWriter();
             Result outputTarget = new StreamResult(sw);
-            outputTarget.setSystemId(new File(configTest.getDataDir() + "next-in-chain/dummy-output.xml").toURI().toASCIIString());
+            outputTarget.setSystemId(Testdata.file("next-in-chain/dummy-output.xml").toURI().toASCIIString());
 
             // Run transformation
             System.out.println("Run transformation...");

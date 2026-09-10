@@ -7,8 +7,8 @@
 
 package internaltests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.gizmo.JLine2Talker;
+import net.sf.saxon.junit.Testdata;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -26,8 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Test aspects of content completion in Gizmo
  */
 public class GizmoCompleterTests {
-    private final ConfigTest configTest = new ConfigTest();
-    
     private static final String[] keywords = new String[]{
             "ancestor::", "ancestor-or-self::", "array", "attribute", "cast as", "castable as", "child::",
             "comment()", "descendant::", "descendant-or-self::", "document-node()", "element()", "else",
@@ -48,8 +46,7 @@ public class GizmoCompleterTests {
     @BeforeAll
     public static void setUp() {
         cwd = System.getProperty("user.dir");
-        ConfigTest ctest = new ConfigTest();
-        String root = ctest.getDataDir();
+        String root = Testdata.dir().toString();
         // If you leave "/" on the end of "user.dir", bad happens
         if (root.endsWith("/") && root.length() > 1) {
             root = root.substring(0, root.length() - 1);
@@ -169,7 +166,7 @@ public class GizmoCompleterTests {
     @Test
     public void testFileCompletion004() {
         String home = System.getProperty("user.home");
-        System.setProperty("user.home", configTest.getDataDir());
+        System.setProperty("user.home", Testdata.dir().toString());
         List<String> options = new ArrayList<>();
         int pos = go("load ~/bible/com", options);    // Assumes MHK filestore layout
         assertEquals(1, options.size(), "a");

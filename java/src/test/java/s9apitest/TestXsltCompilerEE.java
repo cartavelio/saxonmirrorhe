@@ -139,7 +139,7 @@ public class TestXsltCompilerEE {
 
             comp.useSchema(sm.getXsdSchema());
             XsltPackage pack = comp.compilePackage(new StreamSource(new StringReader(xsl1)));
-            File sefFile = Testdata.tempFile("6969test.sef");
+            File sefFile = Testdata.temp().file("6969test.sef");
             pack.save(sefFile);
 
             Processor proc2 = new Processor(true);

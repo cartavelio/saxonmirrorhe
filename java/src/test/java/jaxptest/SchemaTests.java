@@ -3,6 +3,7 @@ package jaxptest;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
@@ -34,13 +35,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Tests for JAXP schema validation interface
  */
 public class SchemaTests {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testStreamNotClosed() {
         try {
-            InputStream inStream = new BufferedInputStream(new FileInputStream(new
-                    File(configTest.getDataDir() + "books.xml")), 100000);  // size of blah is << 100000
+            InputStream inStream = new BufferedInputStream(new FileInputStream(Testdata.file("books.xml")), 100000);  // size of blah is << 100000
 
             inStream.mark(99999);
 
@@ -54,7 +52,7 @@ public class SchemaTests {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
             SchemaFactory schemaFactory = new com.saxonica.ee.jaxp.SchemaFactoryImpl(config);
             Schema schemaGrammar = schemaFactory.newSchema(
-                    new StreamSource[]{new StreamSource(new File(configTest.getDataDir() + "books.xsd"))});
+                    new StreamSource[]{new StreamSource(Testdata.file("books.xsd"))});
 
             Validator schemaValidator = schemaGrammar.newValidator();
 
@@ -74,7 +72,7 @@ public class SchemaTests {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setNamespaceAware(true);
-            Document doc = docFactory.newDocumentBuilder().parse(new File(configTest.getDataDir() + "books.xsd"));
+            Document doc = docFactory.newDocumentBuilder().parse(Testdata.file("books.xsd"));
             Element top = doc.getDocumentElement();
             DOMSource source = new DOMSource(top);
 
@@ -84,7 +82,7 @@ public class SchemaTests {
 
             Validator schemaValidator = schemaGrammar.newValidator();
 
-            schemaValidator.validate(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
+            schemaValidator.validate(new StreamSource(Testdata.file("books.xml")));
 
         } catch (SAXException e) {
             e.printStackTrace();
@@ -103,7 +101,7 @@ public class SchemaTests {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setNamespaceAware(true);
-            Document doc = docFactory.newDocumentBuilder().parse(new File(configTest.getDataDir() + "books.xsd"));
+            Document doc = docFactory.newDocumentBuilder().parse(Testdata.file("books.xsd"));
             DOMSource source = new DOMSource(doc);
 
             EnterpriseConfiguration config = new EnterpriseConfiguration();
@@ -112,7 +110,7 @@ public class SchemaTests {
 
             Validator schemaValidator = schemaGrammar.newValidator();
 
-            schemaValidator.validate(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
+            schemaValidator.validate(new StreamSource(Testdata.file("books.xml")));
 
         } catch (SAXException e) {
             e.printStackTrace();
@@ -309,7 +307,7 @@ public class SchemaTests {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setNamespaceAware(true);
-            Document doc = docFactory.newDocumentBuilder().parse(new File(configTest.getDataDir() + "books-wrapper.xsd"));
+            Document doc = docFactory.newDocumentBuilder().parse(Testdata.file("books-wrapper.xsd"));
             Element top = doc.getDocumentElement();
             DOMSource source = new DOMSource(top);
 
@@ -320,7 +318,7 @@ public class SchemaTests {
 
             Validator schemaValidator = schemaGrammar.newValidator();
 
-            schemaValidator.validate(new StreamSource(new File(configTest.getDataDir() + "books.xml")));
+            schemaValidator.validate(new StreamSource(Testdata.file("books.xml")));
             fail("undetected failure");
         } catch (SAXException | IOException | ParserConfigurationException e) {
             // failed as expected

@@ -1,8 +1,8 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.style.Compilation;
@@ -23,8 +23,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TestPackage {
-    private ConfigTest configTest = new ConfigTest();
-    
     /**
      * Basic test: compile a package, save it to filestore, load it as a library package that overrides it,
      * then execute
@@ -35,14 +33,14 @@ public class TestPackage {
         try {
             Processor proc = new Processor(true);
             XsltCompiler xc = proc.newXsltCompiler();
-            XsltPackage pack = xc.compilePackage(new StreamSource(new File(configTest.getDataDir() + "packages/override-base-f-001.xsl")));
-            pack.save(new File(configTest.getDataDir()+"sandpit/"+"test-package-001.pack"));
+            XsltPackage pack = xc.compilePackage(new StreamSource(Testdata.file("packages/override-base-f-001.xsl")));
+            pack.save(Testdata.file("sandpit/"+"test-package-001.pack"));
 
             Processor proc2 = new Processor(true);
             XsltCompiler xc2 = proc2.newXsltCompiler();
-            XsltPackage xp = xc2.loadLibraryPackage(new File(configTest.getDataDir()+"sandpit/" + "test-package-001.pack").toURI());
+            XsltPackage xp = xc2.loadLibraryPackage(Testdata.file("sandpit/" + "test-package-001.pack").toURI());
             xc2.importPackage(xp);
-            XsltExecutable xe = xc2.compile(new StreamSource(new File(configTest.getDataDir() + "packages/override-f-001.xsl")));
+            XsltExecutable xe = xc2.compile(new StreamSource(Testdata.file("packages/override-f-001.xsl")));
             Xslt30Transformer xt = xe.load30();
             XdmValue result = xt.callTemplate(new QName("main"));
             System.err.println(result);
@@ -107,7 +105,7 @@ public class TestPackage {
                     "        </xsl:template>\n" +
                     "</xsl:package>";
             XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(xsl)));
-            File file = new File(configTest.getDataDir()+"sandpit/"+"package01.xsltpack");
+            File file = Testdata.file("sandpit/"+"package01.xsltpack");
             pack.save(file);
             System.err.println("Package written to " + file.getAbsolutePath());
         } catch (SaxonApiException e) {
@@ -118,7 +116,7 @@ public class TestPackage {
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
-            File file = new File(configTest.getDataDir()+"sandpit/"+"package01.xsltpack");
+            File file = Testdata.file("sandpit/"+"package01.xsltpack");
             XsltExecutable pack = compiler.loadExecutablePackage(file.toURI());
             System.err.println("Package loaded from " + file.getAbsolutePath());
             XsltTransformer trans = pack.load();
@@ -153,7 +151,7 @@ public class TestPackage {
                     "        </xsl:template>\n" +
                     "</xsl:package>";
             XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(xsl)));
-            File file = new File(configTest.getDataDir()+"sandpit/"+"package02.xsltpack");
+            File file = Testdata.file("sandpit/"+"package02.xsltpack");
             pack.save(file);
             System.err.println("Package written to " + file.getAbsolutePath());
         } catch (SaxonApiException e) {
@@ -164,11 +162,11 @@ public class TestPackage {
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
-            File file = new File(configTest.getDataDir()+"sandpit/"+"package02.xsltpack");
+            File file = Testdata.file("sandpit/"+"package02.xsltpack");
             XsltExecutable pack = compiler.loadExecutablePackage(file.toURI());
             System.err.println("Package loaded from " + file.getAbsolutePath());
             DocumentBuilder db = processor.newDocumentBuilder();
-            XdmNode root = db.build(new File(configTest.getDataDir() + "books.xml"));
+            XdmNode root = db.build(Testdata.file("books.xml"));
             XsltTransformer trans = pack.load();
             trans.setInitialContextNode(root);
             StringWriter out = new StringWriter();
@@ -190,13 +188,13 @@ public class TestPackage {
         try {
             Processor processor = new Processor(true);
             XsltCompiler compiler = processor.newXsltCompiler();
-            File file = new File(configTest.getDataDir() + "override-m-021-base-v12.0.sef");
+            File file = Testdata.file("override-m-021-base-v12.0.sef");
             XsltPackage pack = compiler.loadLibraryPackage(file.toURI());
             System.err.println("Package loaded from " + file.getAbsolutePath());
             compiler.importPackage(pack);
-            XsltExecutable exec = compiler.compile(new StreamSource(new File(configTest.getDataDir() + "override-m-021.xsl")));
+            XsltExecutable exec = compiler.compile(new StreamSource(Testdata.file("override-m-021.xsl")));
             DocumentBuilder db = processor.newDocumentBuilder();
-            XdmNode root = db.build(new File(configTest.getDataDir() + "override-m-021.xml"));
+            XdmNode root = db.build(Testdata.file("override-m-021.xml"));
             Xslt30Transformer trans = exec.load30();
             StringWriter out = new StringWriter();
             Serializer ser = processor.newSerializer(out);
@@ -232,13 +230,13 @@ public class TestPackage {
 
     public void runConfigFileTest(String configurationFile, String startPack, boolean expectSuccess) {
         try {
-            String configFile = configTest.getDataDir() + configurationFile;
-            Processor processor = new Processor(new StreamSource(new File(configFile)));
+            File configFile = Testdata.file(configurationFile);
+            Processor processor = new Processor(new StreamSource(configFile));
             XsltCompiler compiler = processor.newXsltCompiler();
             XsltPackage pack1 = compiler.obtainPackage(startPack, "*");
             XsltExecutable pack = pack1.link();
             DocumentBuilder db = processor.newDocumentBuilder();
-            XdmNode root = db.build(new File(configTest.getDataDir() + "books.xml"));
+            XdmNode root = db.build(Testdata.file("books.xml"));
             XsltTransformer trans = pack.load();
             trans.setInitialContextNode(root);
             StringWriter out = new StringWriter();
@@ -267,7 +265,7 @@ public class TestPackage {
             XsltCompiler compiler = processor1.newXsltCompiler();
             compiler.setJustInTimeCompilation(false);
             XsltExecutable top = compiler.compile(
-                    new StreamSource(new File(configTest.getDataDir() + "bills.xsl")));
+                    new StreamSource(Testdata.file("bills.xsl")));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             top.export(baos);
             Processor processor2 = new Processor(false);
@@ -276,7 +274,7 @@ public class TestPackage {
             compiler2.setJustInTimeCompilation(false);
             compiler2.compile(new StreamSource(new ByteArrayInputStream(baos.toByteArray())));
             Xslt30Transformer trans = top.load30();
-            XdmValue result = trans.applyTemplates(new StreamSource(new File(configTest.getDataDir() + "bills.xml")));
+            XdmValue result = trans.applyTemplates(new StreamSource(Testdata.file("bills.xml")));
             System.err.println(result.toString());
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -294,7 +292,7 @@ public class TestPackage {
             compiler.setTargetEdition("HE");
             // Choose a stylesheet that Saxon-EE will optimize
             XsltExecutable top = compiler.compile(
-                    new StreamSource(new File(configTest.getXMarkDir() + "q8.xsl")));
+                    new StreamSource(Testdata.xmark().file("q8.xsl")));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             top.export(baos);
             Processor processor2 = new Processor(false);
@@ -302,7 +300,7 @@ public class TestPackage {
             XsltCompiler compiler2 = processor2.newXsltCompiler();
             compiler2.compile(new StreamSource(new ByteArrayInputStream(baos.toByteArray())));
             Xslt30Transformer trans = top.load30();
-            XdmValue result = trans.applyTemplates(new StreamSource(new File(configTest.getXMarkDir() + "xmark1.xml")));
+            XdmValue result = trans.applyTemplates(new StreamSource(Testdata.xmark().file("xmark1.xml")));
             System.err.println(result.toString());
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -333,7 +331,7 @@ public class TestPackage {
                     "        </xsl:template>\n" +
                     "</xsl:package>";
             XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(xsl)));
-            File file = new File(configTest.getDataDir() + "sandpit/" + "package01.xsltpack");
+            File file = Testdata.file("sandpit/package01.xsltpack");
             pack.save(file);
         } catch (SaxonApiException e) {
             fail("Unexpected failure");
@@ -365,7 +363,7 @@ public class TestPackage {
                     "        </xsl:template>\n" +
                     "</xsl:package>";
             XsltPackage pack = compiler.compilePackage(new StreamSource(new StringReader(xsl)));
-            File file = new File(configTest.getDataDir() + "sandpit/" + "package01.xsltpack");
+            File file = Testdata.file("sandpit/package01.xsltpack");
             pack.save(file);
             fail("Unexpected success");
         } catch (SaxonApiException e) {

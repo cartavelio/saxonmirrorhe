@@ -1,6 +1,7 @@
 package jaxptest;
 
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
@@ -29,17 +30,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test that line numbers are reported correctly for dynamic errors
  */
 public class StylesheetCopyLineNumbersTest {
-    private final ConfigTest configTest = new ConfigTest();
-
-
     @Test
-    public static void testStylesheetCopyInterpreted() throws Exception {
+    public void testStylesheetCopyInterpreted() throws Exception {
         testStylesheetCopyTree(false);
         testStylesheetCopySax(false);
     }
 
-    public static void testStylesheetCopyTree(boolean compile) throws Exception {
-        ConfigTest ctest = new ConfigTest();
+    public void testStylesheetCopyTree(boolean compile) throws Exception {
         TransformerFactoryImpl factory = new TransformerFactoryImpl();
 
         // Run the stylesheets with an empty document to show the difference in error line number
@@ -53,7 +50,7 @@ public class StylesheetCopyLineNumbersTest {
         };
 
         // Make an in memory tiny tree for caching in memory.
-        Source sourceToCache2 = new SAXSource(new InputSource(new FileInputStream(ctest.getDataDir() + "runtime-error.xsl")));
+        Source sourceToCache2 = new SAXSource(new InputSource(new FileInputStream(Testdata.file("runtime-error.xsl"))));
         DocumentBuilder docBuilder = new Processor(false).newDocumentBuilder();
         docBuilder.setLineNumbering(true);
         Source cachedTree = docBuilder.build(sourceToCache2).asSource();
@@ -80,11 +77,10 @@ public class StylesheetCopyLineNumbersTest {
         }
     }
 
-    public static void testStylesheetCopySax(boolean compile) throws Exception {
-        ConfigTest ctest = new ConfigTest();
+    public void testStylesheetCopySax(boolean compile) throws Exception {
         TransformerFactoryImpl factory = new TransformerFactoryImpl();
 
-        Source sourceToCache = new SAXSource(new InputSource(new FileInputStream(ctest.getDataDir() + "runtime-error.xsl")));
+        Source sourceToCache = new SAXSource(new InputSource(new FileInputStream(Testdata.file("runtime-error.xsl"))));
 
         // Compile stylesheets from different sources.
         Templates stylesheetSax = factory.newTemplates(sourceToCache);
@@ -121,7 +117,7 @@ public class StylesheetCopyLineNumbersTest {
      */
 
     @Test
-    public static void testMultiPackageLocationInfo() {
+    public void testMultiPackageLocationInfo() {
         try {
             Processor p = new Processor(true);
             XsltCompiler c = p.newXsltCompiler();

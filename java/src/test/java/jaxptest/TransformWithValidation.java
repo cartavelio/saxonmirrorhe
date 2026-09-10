@@ -2,6 +2,7 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.Validation;
 import org.junit.jupiter.api.Test;
@@ -12,13 +13,12 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TransformWithValidation {
-    private final ConfigTest configTest = new ConfigTest();
-
     private static int errorCount = 0;
 
     private static final ErrorListener errorListener = new ErrorListener() {
@@ -44,17 +44,16 @@ public class TransformWithValidation {
         }
     };
 
-    private final String dir = configTest.getDataDir() + "defaultAttTest/";
+    private final Path dir = Testdata.path("defaultAttTest");
 
-    private final String xslPath = dir+"samples/validation/bookstore/BookStore.xsl";
-    private final String xmlPath = dir+"samples/validation/bookstore/BookStore.xml";
-    private final String outPath = dir+"samples/validation/bookstore/out.xml";
+    private final File xslFile = dir.resolve("samples/validation/bookstore/BookStore.xsl").toFile();
+    private final File xmlFile = dir.resolve("samples/validation/bookstore/BookStore.xml").toFile();
+    private final File outFile = dir.resolve("samples/validation/bookstore/out.xml").toFile();
 
     @Test
     public void testWithInputValidation() {
         try {
             // Create transformer
-            File xslFile = new File(xslPath);
             InputSource inputSource = new InputSource(xslFile.toURI().toString());
             Source source = new SAXSource(inputSource);
 
@@ -67,10 +66,9 @@ public class TransformWithValidation {
             transformer.setErrorListener(errorListener);
 
             // Create source
-            Source xmlSource = new StreamSource(new File(xmlPath));
+            Source xmlSource = new StreamSource(xmlFile);
 
             // Output stream result
-            File outFile = new File(outPath);
             if (outFile.exists()) {
                 outFile.delete();
             }

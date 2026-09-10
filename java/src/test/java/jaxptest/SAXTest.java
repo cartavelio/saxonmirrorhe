@@ -2,6 +2,7 @@ package jaxptest;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.Processor;
@@ -33,8 +34,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class SAXTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     /**
      * Test using a SAXSource with a user-supplied ErrorHandler. In 9.1 Saxon replaces this with
      * its own ErrorHandler
@@ -87,7 +86,7 @@ public class SAXTest {
     @Test
     public void testBackMapping() {
         String xml = "<a/>";
-        String textUri = "file:///" + configTest.getDataDir() + "sample.json";
+        String textUri = Testdata.fileUri("sample.json").toString();
         String xsl = "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
                 "<xsl:template match='/'>\n" +
                 "<out>\n" +

@@ -1,7 +1,7 @@
 package failing;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.s9api.*;
@@ -21,20 +21,15 @@ import static org.junit.jupiter.api.Assertions.fail;
  * tests are known problems and should not inhibit progress.
  */
 public class FailingTests {
-    private final ConfigTest configTest = new ConfigTest();
-    public final String DATA_DIR = configTest.getDataDir();
-
-
-
     @Test
     @Disabled("Known to fail. There are spec problems and implementation problems loading a package multiple times with different static parameter values")
     public void testPackageRenaming() {
         try {
-            String configFile = DATA_DIR + "packages/config-120.xml";
-            Processor processor = new Processor(new StreamSource(new File(configFile)));
+            File configFile = Testdata.file("packages/config-120.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
             XsltCompiler compiler = processor.newXsltCompiler();
             XsltExecutable top = compiler.compile(
-                    new StreamSource(new File(DATA_DIR + "packages/pack-120-top.xsl")));
+                    new StreamSource(Testdata.file("packages/pack-120-top.xsl")));
             Xslt30Transformer trans = top.load30();
             XdmNode result = (XdmNode) trans.callTemplate(null);
             XPathCompiler xp = processor.newXPathCompiler();
@@ -55,17 +50,17 @@ public class FailingTests {
     public void testPackageExportWithParams() {
         // See bug 4220, currently still open (2020-01-23)
         try {
-            String configFile = DATA_DIR + "packages/config-120.xml";
-            Processor processor = new Processor(new StreamSource(new File(configFile)));
+            File configFile = Testdata.file("packages/config-120.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
             XsltCompiler compiler = processor.newXsltCompiler();
             XsltExecutable top = compiler.compile(
-                    new StreamSource(new File(DATA_DIR + "packages/pack-120-top.xsl")));
+                    new StreamSource(Testdata.file("packages/pack-120-top.xsl")));
             XsltPackage add = compiler.obtainPackage("http://package-add/", "1.0");
-            add.save(new File(DATA_DIR + "packages/pack-120-add.xsl"));
+            add.save(Testdata.file("packages/pack-120-add.xsl"));
             XsltPackage subtract = compiler.obtainPackage("http://package-subtract/", "1.0");
-            subtract.save(new File(DATA_DIR + "packages/pack-120-subtract.xsl"));
+            subtract.save(Testdata.file("packages/pack-120-subtract.xsl"));
             XsltPackage multiply = compiler.obtainPackage("http://package-multiply/", "1.0");
-            multiply.save(new File(DATA_DIR + "packages/pack-120-multiply.xsl"));
+            multiply.save(Testdata.file("packages/pack-120-multiply.xsl"));
 
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -79,11 +74,11 @@ public class FailingTests {
         // This uses the sef packages created by test testPackageExportWithParams
         // See bug 4220, currently still open (2020-01-23)
         try {
-            String configFile = DATA_DIR + "packages/config-121.xml";
-            Processor processor = new Processor(new StreamSource(new File(configFile)));
+            File configFile = Testdata.file("packages/config-121.xml");
+            Processor processor = new Processor(new StreamSource(configFile));
             XsltCompiler compiler = processor.newXsltCompiler();
             XsltExecutable top = compiler.compile(
-                    new StreamSource(new File(DATA_DIR + "packages/pack-120-top.xsl")));
+                    new StreamSource(Testdata.file("packages/pack-120-top.xsl")));
             Xslt30Transformer trans = top.load30();
             XdmNode result = (XdmNode) trans.callTemplate(null);
             XPathCompiler xp = processor.newXPathCompiler();
@@ -98,7 +93,5 @@ public class FailingTests {
             fail();
         }
     }
-
-
 }
 

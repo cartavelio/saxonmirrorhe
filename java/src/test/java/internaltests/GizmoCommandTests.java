@@ -7,9 +7,9 @@
 
 package internaltests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Gizmo;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.s9api.*;
@@ -26,8 +26,6 @@ import static net.sf.saxon.event.Builder.LINKED_TREE;
  * Test aspects of content completion in Gizmo
  */
 public class GizmoCommandTests {
-    private final ConfigTest configTest = new ConfigTest();
-    
     /**
      * Execute a Gizmo command and test the result
      * @param command the command to be executed. On entry the current document will be the "books.xml" sample document
@@ -44,7 +42,7 @@ public class GizmoCommandTests {
             config.setTreeModel(LINKED_TREE);
             TreeInfo doc;
             try {
-                doc = config.buildDocumentTree(new StreamSource(configTest.getDataDir() + "books.xml"));
+                doc = config.buildDocumentTree(new StreamSource(Testdata.file("books.xml")));
             } catch (Exception ex) {
                 System.err.println("CAUGHT ONE");
                 ex.printStackTrace();
@@ -81,7 +79,7 @@ public class GizmoCommandTests {
             Configuration config = gizmo.getConfiguration();
             Processor proc = new Processor(config);
             config.setTreeModel(LINKED_TREE);
-            TreeInfo doc = config.buildDocumentTree(new StreamSource(configTest.getDataDir() + "books.xml"));
+            TreeInfo doc = config.buildDocumentTree(new StreamSource(Testdata.file("books.xml")));
             gizmo.setCurrentDoc((DocumentImpl) doc.getRootNode());
             StringBuilder resultString = new StringBuilder();
             for (String command : commands) {
@@ -268,7 +266,7 @@ public class GizmoCommandTests {
     @Test
     public void validate001() {
         runMultiTest(new String[]{
-                "schema " + configTest.getDataDir() + "books.xsd",
+                "schema " + Testdata.file("books.xsd"),
                 "validate"
         }, "data((//PRICE)[1]) instance of xs:decimal");
     }

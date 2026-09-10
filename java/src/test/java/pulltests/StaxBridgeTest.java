@@ -2,10 +2,10 @@ package pulltests;
 
 import com.saxonica.xqj.pull.PullToStax;
 import com.saxonica.xqj.pull.TreeWalker;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullProvider;
@@ -38,8 +38,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test input from a Stax (JSR173) parser
  */
 public class StaxBridgeTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testFromStaxToSerializer() {
         try {
@@ -47,12 +45,12 @@ public class StaxBridgeTest {
             System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
             PipelineConfiguration pipe = new Configuration().makePipelineConfiguration();
             StaxBridge puller = new StaxBridge();
-            File f = new File(configTest.getDataDir() + "books.xml");
+            File f = Testdata.file("books.xml");
             puller.setInputStream(f.toURI().toString(), new FileInputStream(f));
             XMLEmitter emitter = new XMLEmitter();
             emitter.setPipelineConfiguration(pipe);
             emitter.setOutputProperties(new Properties());
-            emitter.setUnicodeWriter(new UTF8Writer(new FileOutputStream(configTest.getDataDir() + "temp/books.xml")));
+            emitter.setUnicodeWriter(new UTF8Writer(new FileOutputStream(Testdata.file("temp/books.xml"))));
             NamespaceReducer r = new NamespaceReducer(emitter);
             puller.setPipelineConfiguration(pipe);
             r.setPipelineConfiguration(pipe);
@@ -105,7 +103,7 @@ public class StaxBridgeTest {
             String comment = null;
             String piName = null;
             String piContent = null;
-            File f = new File(configTest.getDataDir() + "birthdays.xml");
+            File f = Testdata.file("birthdays.xml");
             puller.setInputStream(f.toURI().toString(), new FileInputStream(f));
             PullEvent ev;
             while ((ev = puller.next()) != PullEvent.END_OF_INPUT) {

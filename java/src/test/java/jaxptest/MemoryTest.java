@@ -2,6 +2,7 @@ package jaxptest;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.om.AllElementsSpaceStrippingRule;
@@ -19,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class MemoryTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     @Tag("performance")
     public void testTinyTree() {
@@ -28,7 +27,7 @@ public class MemoryTest {
             System.gc();
             long initFree = getUsedMemory();
             System.err.println("init: " + initFree);
-            StreamSource source = new StreamSource(configTest.getXMarkDir() + "xmark1.xml"); //Use 100Mb for real work
+            StreamSource source = new StreamSource(Testdata.xmark().file("xmark1.xml")); //Use 100Mb for real work
             Configuration config = new Configuration();
             ParseOptions options = config.getParseOptions()
                     .withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE);
@@ -51,7 +50,7 @@ public class MemoryTest {
             System.gc();
             long initFree = getUsedMemory();
             System.err.println("init: " + initFree);
-            StreamSource source = new StreamSource(configTest.getXMarkDir() + "xmark1.xml");  //Use 100Mb for real work
+            StreamSource source = new StreamSource(Testdata.xmark().file("xmark1.xml"));  //Use 100Mb for real work
             Configuration config = new Configuration();
             ParseOptions options = config.getParseOptions()
                     .withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE);

@@ -3,6 +3,7 @@ package jaxptest;
 import com.saxonica.config.EnterpriseTransformerFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ExtensionFunctionCall;
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.om.Sequence;
@@ -17,16 +18,15 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import java.nio.file.Path;
+
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * tests for handling of exceptions from extension functions while multithreading.
  */
 public class MultithreadedExtensionTest {
-    private final ConfigTest configTest = new ConfigTest();
-
-    private final String bugs = configTest.getBugsDir() + "4788/";
-    private final String temp = configTest.getTempDir();
+    private final Path bugs = Testdata.bugs().path("4788");
 
     @Test
     public void testFailingMultithreadedExtension() { // Bug 4788
@@ -57,12 +57,12 @@ public class MultithreadedExtensionTest {
 
         transformerFactory.setConfiguration(configuration);
 
-        StreamSource xslt = new StreamSource(bugs + "test.xslt");
+        StreamSource xslt = new StreamSource(bugs.resolve("test.xslt").toFile());
 
         Transformer transformer = transformerFactory.newTransformer(xslt);
 
-        StreamSource input = new StreamSource(bugs + "input.xml");
-        StreamResult output = new StreamResult(temp + "4788output.xml");
+        StreamSource input = new StreamSource(bugs.resolve("input.xml").toFile());
+        StreamResult output = new StreamResult(Testdata.temp().file("4788output.xml"));
 
         transformer.transform(input, output);
     }

@@ -2,6 +2,7 @@ package jaxptest;
 
 import com.saxonica.config.EnterpriseTransformerFactory;
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.om.TreeModel;
@@ -33,8 +34,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class ParserTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testValidationError() throws Exception {
         try {
@@ -43,8 +42,8 @@ public class ParserTest {
             factory.setAttribute(FeatureKeys.VERSION_WARNING, Boolean.FALSE);
             factory.setAttribute(FeatureKeys.DTD_VALIDATION, Boolean.TRUE);
             factory.setAttribute(FeatureKeys.DTD_VALIDATION_RECOVERABLE, Boolean.FALSE);
-            Transformer trans = factory.newTransformer(new StreamSource(configTest.getDataDir() + "bills.xsl"));
-            trans.transform(new StreamSource(configTest.getDataDir() + "bills.xml"), new StreamResult(System.out));
+            Transformer trans = factory.newTransformer(new StreamSource(Testdata.file("bills.xsl")));
+            trans.transform(new StreamSource(Testdata.file("bills.xml")), new StreamResult(System.out));
             fail("Transformation should fail");
         } catch (TransformerException err) {
             // failure expected
@@ -59,8 +58,8 @@ public class ParserTest {
             factory.setAttribute(FeatureKeys.VERSION_WARNING, Boolean.FALSE);
             factory.setAttribute(FeatureKeys.DTD_VALIDATION, Boolean.TRUE);
             factory.setAttribute(FeatureKeys.DTD_VALIDATION_RECOVERABLE, Boolean.TRUE);
-            Transformer trans = factory.newTransformer(new StreamSource(configTest.getDataDir() + "bills.xsl"));
-            trans.transform(new StreamSource(configTest.getDataDir() + "bills.xml"), new StreamResult(System.out));
+            Transformer trans = factory.newTransformer(new StreamSource(Testdata.file("bills.xsl")));
+            trans.transform(new StreamSource(Testdata.file("bills.xml")), new StreamResult(System.out));
         } catch (XPathException err) {
             fail("Transformation should not fail");
         }
@@ -70,7 +69,7 @@ public class ParserTest {
     public void testTransformerHandler() throws Exception {
 
         try {
-            String template = configTest.getDataDir() + "bills.xsl";
+            String template = Testdata.pathString("bills.xsl");
 
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setNamespaceAware(true);
@@ -98,8 +97,8 @@ public class ParserTest {
     @Test
     public void testSetParserProperties() {
         try {
-            String xsl = configTest.getDataDir() + "bills.xsl";
-            String xml = configTest.getDataDir() + "bills.xml";
+            String xsl = Testdata.pathString("bills.xsl");
+            String xml = Testdata.pathString("bills.xml");
             TransformerFactory f = new TransformerFactoryImpl();
             f.setAttribute(FeatureKeys.XSLT_VERSION, "2.0");
             f.setAttribute(FeatureKeys.XML_PARSER_PROPERTY + "http://apache.org/xml/properties/input-buffer-size", 1000);
@@ -121,7 +120,7 @@ public class ParserTest {
             XQueryEvaluator q = proc.newXQueryCompiler().compile("string-join(//WEIGHT/@EXTRA, ' ')").load();
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setDTDValidation(true);
-            XdmNode source = builder.build(new File(configTest.getDataDir() + "books-with-dtd.xml"));
+            XdmNode source = builder.build(Testdata.file("books-with-dtd.xml"));
             q.setContextItem(source);
             XdmValue r = q.evaluateSingle();
             assertEquals("Extra Extra Extra Extra Extra Extra", r.toString());
@@ -141,7 +140,7 @@ public class ParserTest {
             XQueryEvaluator q = proc.newXQueryCompiler().compile("string-join(//WEIGHT/@EXTRA, ' ')").load();
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setDTDValidation(true);
-            XdmNode source = builder.build(new File(configTest.getDataDir() + "books-with-dtd.xml"));
+            XdmNode source = builder.build(Testdata.file("books-with-dtd.xml"));
             q.setContextItem(source);
             XdmValue r = q.evaluateSingle();
             assertEquals("", r.toString());
@@ -161,7 +160,7 @@ public class ParserTest {
 
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setDTDValidation(true);
-            XdmNode source = builder.build(new File(configTest.getDataDir() + "books-with-dtd.xml"));
+            XdmNode source = builder.build(Testdata.file("books-with-dtd.xml"));
 
             XQueryEvaluator q1 = proc.newXQueryCompiler().compile(
                 "string-join(//WEIGHT/@EXTRA!Q{http://saxon.sf.net/}is-defaulted(.)!string(.), ' ')").load();
@@ -190,7 +189,7 @@ public class ParserTest {
             Transformer transformer = transformerFactory.newTransformer();
 
             // Create XML SAX source
-            SAXSource xmlSource = new SAXSource(new InputSource(new File(configTest.getDataDir() + "bug3068/defAttr.xml").toURI().toString()));
+            SAXSource xmlSource = new SAXSource(new InputSource(Testdata.file("bug3068/defAttr.xml").toURI().toString()));
             org.apache.xerces.parsers.SAXParser saxParser = new org.apache.xerces.parsers.SAXParser();
 
             //EXM-11081 Set this feature so that the default attributes from the schema are reported...
@@ -235,7 +234,7 @@ public class ParserTest {
             Transformer transformer = transformerFactory.newTransformer();
 
             // Create XML SAX source
-            SAXSource xmlSource = new SAXSource(new InputSource(new File(configTest.getDataDir() + "bug3068/defAttr2.xml").toURI().toString()));
+            SAXSource xmlSource = new SAXSource(new InputSource(Testdata.file("bug3068/defAttr2.xml").toURI().toString()));
             org.apache.xerces.parsers.SAXParser saxParser = new org.apache.xerces.parsers.SAXParser();
 
             //EXM-11081 Set this feature so that the default attributes from the schema are reported...
