@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test XdmArray class, representing an XPath map item
+ * Test XdmValue class, representing an arbitrary value
  */
 public class TestXdmValue {
 
