@@ -24,7 +24,7 @@ public class DeleteAction extends PendingUpdateAction {
     public DeleteAction(NodeInfo node) {
         targetNode = node;
         if (!(node instanceof MutableNodeInfo)) {
-            throw new IllegalArgumentException("Attempting to delete a non-updateable node");
+            throw new IllegalArgumentException("Attempting to delete a non-updatable node");
         }
     }
 

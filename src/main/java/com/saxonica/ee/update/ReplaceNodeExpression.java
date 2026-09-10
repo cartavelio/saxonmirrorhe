@@ -233,7 +233,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                     throw err;
                 }
                 if (!(parent instanceof MutableNodeInfo)) {
-                    XPathException err = new XPathException("Target node of replace expression is not updateable",
+                    XPathException err = new XPathException("Target node of replace expression is not updatable",
                                                             SaxonErrorCode.SXUP0081);
                     err.setLocation(expr.getLocation());
                     throw err;

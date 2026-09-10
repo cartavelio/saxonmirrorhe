@@ -221,9 +221,6 @@ public class InsertExpression extends BasicUpdatingExpression {
                     e.setXPathContext(context);
                     throw e;
                 }
-                if (!target.getTreeInfo().isMutable()) {
-                    throw new XPathException("Target of insert expression is not updatable", SaxonErrorCode.SXUP0081);
-                }
                 int kind = target.getNodeKind();
                 if (expr.position == Token.AFTER || expr.position == Token.BEFORE) {
                     if (!(kind == Type.ELEMENT || kind == Type.TEXT ||
@@ -254,7 +251,7 @@ public class InsertExpression extends BasicUpdatingExpression {
                     throw err;
                 }
                 if (!(parent instanceof MutableNodeInfo)) {
-                    XPathException err = new XPathException("Target node of insert expression is not updateable",
+                    XPathException err = new XPathException("Target node of insert expression is not updatable",
                                                             SaxonErrorCode.SXUP0081);
                     err.setLocation(expr.getLocation());
                     err.setXPathContext(context);

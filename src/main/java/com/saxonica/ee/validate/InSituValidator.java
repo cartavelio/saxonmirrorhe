@@ -36,7 +36,7 @@ public class InSituValidator {
      * Create an InSituValidator
      *
      * @param root           the root node of the tree to be validated. This must be a document or element node,
-     *                       and it must be an updateable node
+     *                       and it must be an updatable node
      * @param validationMode the validation mode: {@link net.sf.saxon.lib.Validation#STRICT} or {@link net.sf.saxon.lib.Validation#LAX}
      */
 
