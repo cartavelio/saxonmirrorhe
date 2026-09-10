@@ -72,7 +72,7 @@ public class FunctionAvailable extends SystemFunction {
 
             for (int i = minArity; i <= maxArity; i++) {
                 SymbolicName.F sn = new SymbolicName.F(functionName, i);
-                if (env.getFunctionLibrary().isAvailable(sn, env.getXPathVersion())) {
+                if (env.getFunctionLibrary().isAvailable(sn, env.getPackageData().getImportedSchema(), env.getXPathVersion())) {
                     b = true;
                     break;
                 }
@@ -120,7 +120,7 @@ public class FunctionAvailable extends SystemFunction {
 //                // TODO: some further functions are not available in SaxonJS
 //            }
 //        }
-        return lib.isAvailable(sn, rsc.getPackageData().getHostLanguageVersion());
+        return lib.isAvailable(sn, rsc.getPackageData().getImportedSchema(), rsc.getPackageData().getHostLanguageVersion());
     }
 
     /**

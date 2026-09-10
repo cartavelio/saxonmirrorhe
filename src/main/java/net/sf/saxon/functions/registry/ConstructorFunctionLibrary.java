@@ -95,12 +95,12 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
     }
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
         if (functionName.getArity() != 1) {
             return false;
         }
         StructuredQName name = functionName.getComponentName();
-        final SchemaType type = config.getSchema().getSchemaType(name);
+        final SchemaType type = schema.getSchemaType(name);
         if (type == null || type.isComplexType()) {
             return false;
         }

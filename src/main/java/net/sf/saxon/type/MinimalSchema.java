@@ -10,6 +10,9 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
+import java.util.Collections;
+import java.util.Set;
+
 public class MinimalSchema implements Schema {
 
     final Configuration config;
@@ -164,6 +167,18 @@ public class MinimalSchema implements Schema {
     @Override
     public NodeTest makeSchemaAttributeTest(int fp) throws SchemaException {
         return null;
+    }
+
+    /**
+     * Get the set of complex types that have been defined as extensions of a given type.
+     * Note that we do not seal the schema namespace, so this list is not necessarily final; we must
+     * assume that new extensions of built-in simple types can be added at any time
+     *
+     * @param type the type whose extensions are required
+     */
+    @Override
+    public Set<? extends SchemaType> getExtensionsOfType(SchemaType type) {
+        return Collections.emptySet();
     }
 }
 

@@ -4,7 +4,6 @@ import net.sf.saxon.type.Schema;
 
 public abstract class XsdSchema {
 
-
     /**
      * Create a SchemaValidator which can be used to validate instance documents against this schema
      * @return a new SchemaValidator

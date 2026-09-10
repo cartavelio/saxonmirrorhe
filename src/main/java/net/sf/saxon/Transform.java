@@ -26,6 +26,7 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.DateTimeValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -693,8 +694,9 @@ public class Transform {
 
             value = options.getOptionValue("scmin");
             if (value != null) {
-                PreparedSchema ps = new PreparedSchema();
-                config.importComponents(new StreamSource(value));
+                PreparedSchema ps = PreparedSchema.fromScm(config, new StreamSource(value));
+                compiler.useSchema(null);
+                throw new NotImplementedException();
             }
 
             if (additionalSchemas != null) {

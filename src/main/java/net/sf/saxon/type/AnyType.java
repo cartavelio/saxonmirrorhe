@@ -552,7 +552,7 @@ public enum AnyType implements ComplexType {
      */
 
     @Override
-    public boolean allowsAttributes() {
+    public boolean allowsAttributes(Schema schema) {
         return true;
     }
 
@@ -629,7 +629,7 @@ public enum AnyType implements ComplexType {
      */
 
     @Override
-    public boolean containsElementWildcard() {
+    public boolean containsElementWildcard(Schema schema) {
         return true;
     }
 

@@ -19,6 +19,7 @@ import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
@@ -207,7 +208,7 @@ public class TestXQueryNative {
                 }
 
                 @Override
-                public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+                public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
                     return functionName.equals(fn);
                 }
 

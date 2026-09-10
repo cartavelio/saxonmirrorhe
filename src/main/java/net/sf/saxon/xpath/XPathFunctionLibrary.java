@@ -8,6 +8,7 @@
 package net.sf.saxon.xpath;
 
 import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
@@ -136,11 +137,12 @@ public class XPathFunctionLibrary implements FunctionLibrary {
      * <p>This supports the function-available() function in XSLT.</p>
      *
      * @param functionName  the qualified name of the function being called
+     * @param schema
      * @param languageLevel the XPath language level (times 10, e.g. 31 for XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
         return resolver != null &&
                 resolver.resolveFunction(
                         new QName(functionName.getComponentName().getNamespaceUri().toString(),

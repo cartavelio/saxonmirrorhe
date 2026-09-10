@@ -10,6 +10,8 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 
+import java.util.Set;
+
 /**
  * A schema is a collection of schema components. It may be derived from a single schema
  * document (an xs:schema element), in which case it contains those components defined in that
@@ -149,5 +151,16 @@ public interface Schema {
      */
 
     NodeTest makeSchemaAttributeTest(int fp) throws SchemaException;
+
+    /**
+     * Get the set of complex types that have been defined as extensions of a given type.
+     * Note that we do not seal the schema namespace, so this list is not necessarily final; we must
+     * assume that new extensions of built-in simple types can be added at any time
+     *
+     * @param type the type whose extensions are required
+     */
+
+    Set<? extends SchemaType> getExtensionsOfType(SchemaType type);
+
 }
 

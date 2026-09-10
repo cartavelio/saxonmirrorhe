@@ -352,14 +352,14 @@ public final class AxisExpression extends Expression {
                     } else if (axis == AxisInfo.ATTRIBUTE) {
                         boolean found = false;
                         if (targetfp == -1) {
-                            for (SchemaType extension : config.getExtensionsOfType(contentType, schema)) {
-                                if (((ComplexType)extension).allowsAttributes()) {
+                            for (SchemaType extension : schema.getExtensionsOfType(contentType)) {
+                                if (((ComplexType)extension).allowsAttributes(schema)) {
                                     found = true;
                                     break;
                                 }
                             }
                         } else {
-                            for (SchemaType extension : config.getExtensionsOfType(contentType, schema)) {
+                            for (SchemaType extension : schema.getExtensionsOfType(contentType)) {
                                 try {
                                     if (((ComplexType)extension).getAttributeUseType(targetName, schema) != null) {
                                         found = true;
@@ -399,7 +399,7 @@ public final class AxisExpression extends Expression {
                 return Literal.makeEmptySequence();
             } else if (((ComplexType) contentType).isEmptyContent() &&
                     (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF)) {
-                for (SchemaType extension : config.getExtensionsOfType(contentType, schema)) {
+                for (SchemaType extension : schema.getExtensionsOfType(contentType)) {
                     if (!((ComplexType)extension).isEmptyContent()) {
                         return this;
                     }
@@ -414,7 +414,7 @@ public final class AxisExpression extends Expression {
             } else if (axis == AxisInfo.ATTRIBUTE) {
                if (targetfp == -1) {
                     if (warnings) {
-                        if (!((ComplexType) contentType).allowsAttributes()) {
+                        if (!((ComplexType) contentType).allowsAttributes(schema)) {
                             visitor.issueWarning(
                                     "The complex type " + contentType.getDescription() +
                                             " allows no attributes other than the standard attributes in the xsi namespace",
@@ -458,7 +458,7 @@ public final class AxisExpression extends Expression {
                     int childfp = targetfp;
                     if (targetName == null) {
                         // select="child::*"
-                        if (((ComplexType) contentType).containsElementWildcard()) {
+                        if (((ComplexType) contentType).containsElementWildcard(schema)) {
                             return this;
                         }
                         IntHashSet children = new IntHashSet();

@@ -2,6 +2,7 @@ package nativetests;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.PreparedSchema;
+import com.saxonica.ee.schema.SchemaCompiler;
 import jaxptest.ConfigTest;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sender;
@@ -13,11 +14,14 @@ import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.serialize.SerializationProperties;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,10 +58,11 @@ public class ValidationTest {
         LocalErrorListener listener = new LocalErrorListener();
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            PreparedSchema schema = new PreparedSchema(
-                    config,
-                    new StreamSource(new File(configTest.getDataDir() + "books.xsd")),
-                    listener);
+            SchemaCompiler compiler = new SchemaCompiler(config);
+            List<Source> sources = new ArrayList<>();
+            sources.add(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            compiler.setErrorReporter(listener);
+            PreparedSchema schema = compiler.loadSources(sources);
             StringWriter sw = new StringWriter();
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw));
             ParseOptions options = new ParseOptions()
@@ -88,10 +93,11 @@ public class ValidationTest {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
             config.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
-            PreparedSchema schema = new PreparedSchema(
-                    config,
-                    new StreamSource(new File(configTest.getDataDir() + "books.xsd")),
-                    listener);
+            SchemaCompiler compiler = new SchemaCompiler(config);
+            List<Source> sources = new ArrayList<>();
+            sources.add(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            compiler.setErrorReporter(listener);
+            PreparedSchema schema = compiler.loadSources(sources);
             SerializationProperties props = new SerializationProperties();
             props.setProperty("omit-xml-declaration", "yes");
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw), props);
@@ -123,10 +129,11 @@ public class ValidationTest {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
             config.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
             config.setConfigurationProperty(FeatureKeys.VALIDATION_COMMENTS, true);
-            PreparedSchema schema = new PreparedSchema(
-                    config,
-                    new StreamSource(new File(configTest.getDataDir() + "books.xsd")),
-                    listener);
+            SchemaCompiler compiler = new SchemaCompiler(config);
+            List<Source> sources = new ArrayList<>();
+            sources.add(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            compiler.setErrorReporter(listener);
+            PreparedSchema schema = compiler.loadSources(sources);
             Properties props = new Properties();
             props.setProperty("omit-xml-declaration", "yes");
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw), new SerializationProperties(props));

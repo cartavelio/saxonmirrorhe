@@ -3027,21 +3027,18 @@ public class Configuration implements SourceResolver {
     }
     //#endif
 
-    public Schema getSchema() {
-        needEnterpriseEdition();
-        return null;
-    }
-
     public Schema getSchemaForNamespace(NamespaceUri uri) {
         return null;
     }
 
     /**
-     * Simple interface to load a schema document
+     * Simple interface to load a schema document. This is a factory method that has no effect
+     * on the state of the {@link Configuration}. Requires a Saxon-EE licensed configuration.
      *
      * @param absoluteURI the absolute URI of the location of the schema document
      * @return the compiled schema
-     * @throws net.sf.saxon.type.SchemaException if the schema document at the given location cannot be read or is invalid
+     * @throws net.sf.saxon.type.SchemaException if the schema document at the given location cannot be
+     * read or is invalid
      */
 
     public Schema loadSchema(String absoluteURI) throws SchemaException {
@@ -3222,20 +3219,7 @@ public class Configuration implements SourceResolver {
         return null;
     }
 
-    /**
-     * Get the set of complex types that have been defined as extensions of a given type.
-     * Note that we do not seal the schema namespace, so this list is not necessarily final; we must
-     * assume that new extensions of built-in simple types can be added at any time
-     *
-     * @param type the type whose extensions are required
-     * @return an iterator over the types that are derived from the given type by extension
-     */
-
-    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type, Schema schema) {
-        return Collections.emptyList();
-    }
-
-//    /**
+    //    /**
 //     * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
 //     * document are added to the cache of schema components maintained by this SchemaManager
 //     *

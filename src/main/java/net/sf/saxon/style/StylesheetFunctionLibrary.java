@@ -19,6 +19,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -200,11 +201,12 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
      * <p>This supports the function-available() function in XSLT.</p>
      *
      * @param functionName  the qualified name of the function being called
+     * @param schema
      * @param languageLevel the XPath language level (times 10, e.g. 31 for XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
         return pack.getFunction(functionName) != null;
     }
 

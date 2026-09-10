@@ -189,7 +189,7 @@ public interface ComplexType extends SchemaType {
      *         false indicates that only the standard attributes in the xsi namespace are permitted.
      */
 
-    boolean allowsAttributes() throws MissingComponentException;
+    boolean allowsAttributes(Schema schema) throws MissingComponentException;
 
     /**
      * Get a list of all the names of elements that can appear as children of an element having this
@@ -253,7 +253,7 @@ public interface ComplexType extends SchemaType {
      * @return true if the content model of this type, or its extensions, contains an element wildcard
      */
 
-    boolean containsElementWildcard() throws MissingComponentException;
+    boolean containsElementWildcard(Schema schema) throws MissingComponentException;
 
     /**
      * Ask whether there are any assertions defined on this complex type
