@@ -159,7 +159,7 @@ public:
    * zero return nullptr  if n is less than zero or greater than or equal to the
    * number of items in the value return nullptr if the value is lazily
    * evaluated and the delayed evaluation fails with a dynamic error.
-   * TThe caller is responsible for memory deallocation
+   * The caller is responsible for memory deallocation
    */
   XdmItem *itemAt(int n);
 

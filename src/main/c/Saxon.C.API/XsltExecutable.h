@@ -214,6 +214,7 @@ public:
    * Get a property value by name
    * @param name - Specified paramater name to get
    * @return string - Get string of the property as char pointer array
+   * Memory deallocation internally managed
    */
   const char *getProperty(const char *name);
 
@@ -325,7 +326,8 @@ public:
    * The result is returned as a string
    *
    * @param sourcefile - The file name of the source document
-   * @return char array - result of the transformation
+   * @return char pointer array - result of the transformation
+   * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    */
   const char *transformFileToString(const char *sourcefile);
@@ -335,6 +337,7 @@ public:
    *
    * @param sourcefile - The file name of the source document
    * @return XdmValue - result of the transformation
+   * The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException
    */
   XdmValue *transformFileToValue(const char *sourcefile);
@@ -347,6 +350,8 @@ public:
    * stored in the supplied output file.
    *
    * @param outfile - The file name where results will be stored
+   * @return char pointer array - result of the transformation
+   * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    */
   void applyTemplatesReturningFile(const char *outfile);
@@ -356,6 +361,8 @@ public:
   /**
    * The initial match selection must be set using one of the two methods
    * setInitialMatchSelection or setInitialMatchSelectionFile.
+   * @return char pointer array - result of the transformation
+   * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    *
    */
@@ -366,6 +373,8 @@ public:
   /**
    * The initial match selection must be set using one of the two methods
    * setInitialMatchSelection or setInitialMatchSelectionFile.
+   * @return result of the transformation as XdmValue
+   * The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException
    *
    */
@@ -396,6 +405,8 @@ public:
    * @param templateName - the name of the initial template. This must match the
    * name of a public named template in the stylesheet. If the value is nullptr,
    * the clark name for xsl:initial-template is used.
+   * @return char pointer array - result of the transformation
+   * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    */
   const char *callTemplateReturningString(const char *templateName = nullptr);
@@ -410,6 +421,9 @@ public:
    * @param templateName - the name of the initial template. This must match the
    * name of a public named template in the stylesheet. If the value is nullptr,
    * the clark name for xsl:initial-template is used.
+   * @return the raw results of the called template, without wrapping in a document node
+   * or serialization.
+   * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    */
   XdmValue *callTemplateReturningValue(const char *templateName = nullptr);
@@ -437,7 +451,9 @@ public:
    * arguments to be supplied to the function. These will be converted if
    * necessary to the type as defined in the function signature, using the
    * function conversion rules.
+   * The caller is responsible for memory deallocation using `operator delete`
    * @param argument_length - the Count of arguments objects in the array
+   * @return the result of calling the function.
    * @throws SaxonApiException
    */
   const char *callFunctionReturningString(const char *functionName,
@@ -453,6 +469,9 @@ public:
    * necessary to the type as defined in the function signature, using the
    * function conversion rules.
    * @param argument_length - the Count of arguments objects in the array
+   * @return the result of calling the function. This is the raw result, without wrapping in a document
+   * node and without serialization.
+   * The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException
    */
   XdmValue *callFunctionReturningValue(const char *functionName,
@@ -464,7 +483,8 @@ public:
    * Perform the transformation based upon what has been cached.
    * @param source - source document supplied as an XdmNode object. nullptr
    * accepted if source document has been set already.
-   * @return char*. Pointer to Array of chars. Result returned as a string.
+   * @return Pointer to Array of chars. Result returned as a string.
+   * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    *
    */
@@ -477,6 +497,7 @@ public:
    * @param source - source document supplied as an XdmNode object. nullptr
    * accepted if source document has been set already.
    * @return as an XdmValue.
+   * The caller is responsible for memory deallocation using `operator delete`
    * @throws SaxonApiException
    *
    */
@@ -497,13 +518,14 @@ public:
    * Returns null if the user has not enabled capturing of xsl:messages via
    * setSaveXslMessage()
    * @return XdmValue - the sequence of xsl:messages as an XdmValue
+   * The caller is responsible for memory deallocation using `operator delete`
    */
   XdmValue *getXslMessages();
 
   /**
    * Clear xsl:message data that are held in the Processor.
    * If the save to file has been enabled then clearXslMessages
-   * does not take affect
+   * does not take effect
    */
   void clearXslMessages();
 

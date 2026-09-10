@@ -96,7 +96,7 @@ public:
   void setBaseURI(const char *uriStr);
 
   //! Get the static base URI for XPath expressions compiled using this
-  //! XPathCompiler.
+  //! XPathCompiler. The memory deallocation is internally managed.
   /**
    * @return base URI as string of the xPathProcessor
    */
@@ -108,6 +108,7 @@ public:
    * @param encoding -  the encoding of the string. If not specified then the
    * platform default encoding is used.
    *  @return XdmValue - representing the results of the expression.
+   *  The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException
    */
   XdmValue *evaluate(const char *xpathStr, const char *encoding = nullptr);
@@ -122,6 +123,7 @@ public:
    empty sequence.
    * If the expression returns a sequence of more than one item, any items after
    the first are ignored.
+   * The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException
   */
   XdmItem *evaluateSingle(const char *xpathStr, const char *encoding = nullptr);

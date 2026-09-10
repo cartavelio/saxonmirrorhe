@@ -271,7 +271,7 @@ public:
    *
    * @return a simple XML serialization of the node. Under error conditions the
    * method may return an error message which will always begin with the label
-   * "Error: ". The caller should deallocate memory using `delete`.
+   * "Error: ". The caller should deallocate memory using `operator delete`.
    */
   const char *toString();
 

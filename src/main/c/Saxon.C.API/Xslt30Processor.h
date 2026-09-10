@@ -194,6 +194,7 @@ public:
 
   /**
    * Utility method for working with SaxonC on Python
+   * Internal use
    */
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
@@ -230,7 +231,8 @@ public:
    *
    * @param sourcefile - The file name of the source document
    * @param stylesheetfile - The file name of the stylesheet document.
-   * @return char array - result of the transformation
+   * @return char array - result of the transformation.
+   * The caller is responsible for memory deallocation. Must use `operator delete`
    * @throws SaxonApiException if the transformation fails
    */
   const char *transformFileToString(const char *sourcefile,
@@ -242,6 +244,7 @@ public:
    * @param sourcefile - The file name of the source document
    * @param stylesheetfile - The file name of the stylesheet document.
    * @return XdmValue - result of the transformation
+   * The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException if the transformation fails
    */
   XdmValue *transformFileToValue(const char *sourcefile,
@@ -267,6 +270,7 @@ public:
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
+   * The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   XsltExecutable *compileFromFile(const char *stylesheet);
@@ -283,6 +287,7 @@ public:
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
+   * The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   XsltExecutable *compileFromString(const char *stylesheet,
@@ -304,6 +309,7 @@ public:
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
+   * The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   XsltExecutable *compileFromAssociatedFile(const char *sourceFile);
@@ -350,6 +356,7 @@ public:
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
+   * The caller is responsible for memory deallocation using `delete`
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   XsltExecutable *compileFromXdmNode(XdmNode *node);
