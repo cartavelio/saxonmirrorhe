@@ -314,6 +314,10 @@ TODO: rethink redefines and override
         of an element) acquire an extra parameter to identify the schema, since a component such as an element
         declaration is not exclusive to one schema.</p>
         
+        <p>Any user-written class that inherits from <code>net.sf.saxon.lib.StandardLogger</code> may need changing.
+        The constructors on this class have been replaced by static factory methods, to allow them to create different
+        subclasses (a capability which is currently used only in SaxonCS).</p>
+        
        
     </category>
     
