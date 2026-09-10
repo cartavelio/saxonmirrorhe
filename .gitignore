@@ -1,5 +1,6 @@
-.gradle/
-build/
+/.gradle/
+/build/
+/out/
 java_*.hprof
 /.idea/
 /src/test/testdata/temp/
