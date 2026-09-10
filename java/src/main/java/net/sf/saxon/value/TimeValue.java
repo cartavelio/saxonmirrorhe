@@ -114,7 +114,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (value > 24) {
             return badTime("hour is out of range", s);
         }
-        byte hour = (byte) value;
+        int hour = (int) value;
         if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
@@ -136,7 +136,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (value > 59) {
             return badTime("minute is out of range", s);
         }
-        byte minute = (byte) value;
+        int minute = (int) value;
         if (hour == 24 && minute != 0) {
             return badTime("If hour is 24, minute must be 00", s);
         }
@@ -161,8 +161,8 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (value > 59) {
             return badTime("second is out of range", s);
         }
-        byte second = (byte) value;
-        if (hour == 24 && second != 0) {
+        BigDecimal second = BigDecimal.valueOf(value);
+        if (hour == 24 && second.signum() != 0) {
             return badTime("If hour is 24, second must be 00", s);
         }
 
@@ -182,19 +182,16 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 if (!tok.hasMoreTokens()) {
                     return badTime("decimal point must be followed by digits", s);
                 }
+
                 part = tok.nextToken();
-                if (part.length() > 9 && part.matches("^[0-9]+$")) {
-                    part = part.substring(0, 9);
-                }
-                value = DurationValue.simpleInteger(part);
-                if (value < 0) {
+                if (!part.matches("^[0-9]+$")) {
                     return badTime("Non-numeric fractional seconds component", s);
                 }
-                double fractionalSeconds = Double.parseDouble('.' + part);
-                nanosecond = (int) Math.round(fractionalSeconds * 1_000_000_000);
-                if (hour == 24 && nanosecond != 0) {
-                    return badTime("If hour is 24, fractional seconds must be 0", s);
+                BigDecimal fractionalSeconds = new BigDecimal("0." + part).stripTrailingZeros();
+                if (hour == 24 && fractionalSeconds.signum() != 0) {
+                    return badTime("If hours is 24, fractional seconds must be 0", s);
                 }
+                second = second.add(fractionalSeconds);
                 state = 1;
             } else if ("Z".equals(delim)) {
                 if (state > 1) {
@@ -252,7 +249,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
             }
         }
 
-        if (state == 2 || state == 3) {
+        if (state == 2) {
             return badTime("timezone incomplete", s);
         }
 
@@ -260,7 +257,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
             hour = 0;
         }
 
-        return new TimeValue(hour, minute, DateTimeValue.makeSeconds(second, nanosecond), tz, BuiltInAtomicType.TIME);
+        return new TimeValue(hour, minute, second, tz, BuiltInAtomicType.TIME);
     }
 
     /**

@@ -235,7 +235,7 @@ public class DurationValue extends AtomicValue implements XPathComparable, Atomi
      * Parse a simple unsigned integer
      *
      * @param s the string containing the sequence of digits. No sign or whitespace is allowed.
-     * @return the integer. Return -1 if the string is not a sequence of digits, or -2 if it exceeds 2^31
+     * @return the integer. Return -1 if the string is not a sequence of digits, or -2 if it exceeds 2^63
      */
 
     protected static long simpleInteger(String s) {

@@ -910,12 +910,14 @@ public abstract class StringConverter extends Converter {
                 if (uri == null) {
                     return new ValidationFailure("Namespace prefix " + Err.wrap(parts[0]) + " has not been declared");
                 }
-                // This check added in 9.3. The XSLT spec says that this check should not be performed during
-                // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
-                if (!getConversionRules().isDeclaredNotation(uri, parts[1])) {
-                    //System.err.println(getConversionRules().isDeclaredNotation(uri, parts[1]));
-                    return new ValidationFailure("Notation {" + uri + "}" + parts[1] + " is not declared in the schema");
-                }
+                // No need to check that this is a declared notation. That is only needed when checking the
+                // emumeration facet of a type derived from xs:NOTATION, and that is handled by the schema compiler.
+//                // This check added in 9.3. The XSLT spec says that this check should not be performed during
+//                // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
+//                if (!getConversionRules().isDeclaredNotation(uri, parts[1])) {
+//                    //System.err.println(getConversionRules().isDeclaredNotation(uri, parts[1]));
+//                    return new ValidationFailure("Notation {" + uri + "}" + parts[1] + " is not declared in the schema");
+//                }
                 return new NotationValue(parts[0], uri, parts[1], false);
             } catch (QNameException err) {
                 return new ValidationFailure("Invalid lexical QName " + Err.wrap(input));

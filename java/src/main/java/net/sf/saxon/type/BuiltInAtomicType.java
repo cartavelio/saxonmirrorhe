@@ -1067,15 +1067,22 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
             if (result instanceof ValidationFailure) {
                 return (ValidationFailure) result;
             }
-            if (fingerprint == StandardNames.XS_NOTATION) {
-                NotationValue nv = (NotationValue) result;
-                // This check added in 9.3. The XSLT spec says that this check should not be performed during
-                // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
-                if (!rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName())) {
-                    return new ValidationFailure("Notation {" + nv.getNamespaceURI() + "}" +
-                                                         nv.getLocalName() + " is not declared in the schema");
-                }
-            }
+            // We no longer check for xs:NOTATION that the notation is declared in the schema. See Saxon bug 7060.
+            // The check is needed only when validating the values in the enumeration facet of a type derived
+            // from xs:NOTATION (in which case it is done by the schema processor directly). In all other cases,
+            // we are checking against a type derived from xs:NOTATION, and the check will be done while
+            // down-casting.
+
+// CAN DROP THIS:
+//            if (fingerprint == StandardNames.XS_NOTATION) {
+//                NotationValue nv = (NotationValue) result;
+//                // This check added in 9.3. The XSLT spec says that this check should not be performed during
+//                // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
+//                if (!rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName())) {
+//                    return new ValidationFailure("Notation {" + nv.getNamespaceURI() + "}" +
+//                                                         nv.getLocalName() + " is not declared in the schema");
+//                }
+//            }
             return null;
         }
         return converter.validate(value);

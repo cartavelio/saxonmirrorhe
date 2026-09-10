@@ -7,8 +7,6 @@
 
 package net.sf.saxon.lib;
 
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NotationSet;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringToDouble11;
@@ -28,7 +26,6 @@ import net.sf.saxon.value.StringToDouble11;
 public class ConversionRules {
 
     private StringToDouble stringToDouble = StringToDouble11.getInstance();
-    private NotationSet notationSet; // may be null
     private URIChecker uriChecker;
     private boolean allowYearZero = true;
 
@@ -67,7 +64,6 @@ public class ConversionRules {
 
     public void copyTo(ConversionRules cr) {
         cr.stringToDouble = stringToDouble;
-        cr.notationSet = notationSet;
         cr.uriChecker = uriChecker;
         cr.allowYearZero = allowYearZero;
     }
@@ -94,45 +90,6 @@ public class ConversionRules {
 
     public StringToDouble getStringToDoubleConverter() {
         return stringToDouble;
-    }
-
-    /**
-     * Specify the set of notations that are accepted by xs:NOTATION and its subclasses. This is to
-     * support the rule that for a notation to be valid, it must be declared in an xs:notation declaration
-     * in the schema
-     *
-     * @param notations the set of notations that are recognized; or null, to indicate that all notation
-     *                  names are accepted
-     */
-
-    public void setNotationSet(/*@Nullable*/ NotationSet notations) {
-        this.notationSet = notations;
-    }
-
-    public ConversionRules withNotationSet(NotationSet notations) {
-        ConversionRules rules2 = copy();
-        rules2.setNotationSet(notations);
-        return rules2;
-    }
-
-    /**
-     * Ask whether a given notation is accepted by xs:NOTATION and its subclasses. This is to
-     * support the rule that for a notation to be valid, it must be declared in an xs:notation declaration
-     * in the schema
-     *
-     * @param uri   the namespace URI of the notation
-     * @param local the local part of the name of the notation
-     * @return true if the notation is in the set of recognized notation names
-     */
-
-
-    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
-        //noinspection SimplifiableIfStatement
-        if (notationSet == null) {
-            return true;    // in the absence of a known configuration, treat all notations as valid
-        } else {
-            return notationSet.isDeclaredNotation(uri, local);
-        }
     }
 
     /**

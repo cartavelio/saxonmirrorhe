@@ -313,7 +313,7 @@ public final class DateTimeValue extends CalendarValue
      */
 
     public static BigDecimal makeSeconds(int wholeSeconds, int nanoSeconds) {
-        return BigDecimal.valueOf(wholeSeconds).add(decimalShift(BigDecimal.valueOf(nanoSeconds), -9));
+        return BigDecimal.valueOf(wholeSeconds).add(decimalShift(BigDecimal.valueOf(nanoSeconds), -9)).stripTrailingZeros();
     }
 
     @CSharpReplaceBody(code="return Singulink.Numerics.BigDecimal.ShiftDecimal(value, places);")
@@ -582,17 +582,13 @@ public final class DateTimeValue extends CalendarValue
                     return badDate("Decimal point must be followed by digits", s);
                 }
                 part = tok.nextToken();
-                if (part.length() > 9 && part.matches("^[0-9]+$")) {
-                    part = part.substring(0, 9);
-                }
-                value = DurationValue.simpleInteger(part);
-                if (value < 0) {
+                if (!part.matches("^[0-9]+$")) {
                     return badDate("Non-numeric fractional seconds component", s);
                 }
-                if (hours == 24 && value != 0) {
+                BigDecimal fractionalSeconds = new BigDecimal("0." + part).stripTrailingZeros();
+                if (hours == 24 && fractionalSeconds.signum() != 0) {
                     return badDate("If hours is 24, fractional seconds must be 0", s);
                 }
-                BigDecimal fractionalSeconds = new BigDecimal("0." + part);
                 seconds = seconds.add(fractionalSeconds);
                 state = 1;
             } else if ("Z".equals(delim)) {
