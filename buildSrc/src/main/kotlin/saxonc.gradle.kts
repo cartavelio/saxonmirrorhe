@@ -89,6 +89,7 @@ dependencies {
     compileOnly("org.graalvm.sdk:graal-sdk:${findProperty("graalSdkVersion")}")
     compileOnly("org.graalvm.nativeimage:svm:${findProperty("graalSvmVersion")}")
     compileOnly("com.ibm.icu:icu4j:${project.findProperty("icu4jVersion")}")
+    compileOnly("org.nineml:coffeefilter:${project.findProperty("ninemlVersion")}")
 }
 
 java {
