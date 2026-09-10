@@ -14,6 +14,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using Saxon.Ejava.net;
+using Saxon.Hej.om;
 #if EE
 using Saxon.Eej.functions.registry;
 #endif
@@ -878,6 +879,9 @@ namespace TestDriver {
                 assertXpc.DeclareNamespace("j", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareVariable(new QName("result"));
                 assertXpc.BaseUri = assertion.BaseUri;
+                
+                copySchemaNamespaces(env, assertXpc);
+                
                 //assertXpc.XPathLanguageVersion = "4.0";
                 bool b = outcome.TestAssertion(outcome, assertion, outcome.GetPrincipalResultDoc(), assertXpc, xpc,
                     debug);
@@ -938,6 +942,13 @@ namespace TestDriver {
                         }
                     }
                 }
+            }
+        }
+        
+        protected void copySchemaNamespaces(Environment env, XPathCompiler testXpc) {
+            JConfiguration config = env.xpathCompiler.Processor.Implementation;
+            foreach (NamespaceUri s in config.getImportedNamespaces()) {
+                testXpc.ImportSchemaNamespace(s.ToString());
             }
         }
 
