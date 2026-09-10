@@ -127,6 +127,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
+        //#if EE==true || PE==true
+        register("decode-from-uri", 1, 1, e -> e.populate(DecodeFromURI::new, BuiltInAtomicType.STRING, ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null));
+        //#endif
+
         register("distinct-values", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.ANY_ATOMIC, STAR, BASE | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
