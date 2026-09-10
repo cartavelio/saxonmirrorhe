@@ -32,6 +32,8 @@ def test_create_bool():
 
 
 '''@pytest.mark.skip('Error: SaxonDll.processor is nullptr in constructor(configFile)')'''
+
+
 def test_create_config():
     """Create SaxonProcessor object with a configuration file argument"""
     conf_xml = b"""\
@@ -125,8 +127,6 @@ class myThread(threading.Thread):
         self.threadID = threadID
         self.name = name
         self.saxon_proc = saxon_proc
-
-
 
     def run(self):
         print("Starting " + self.name)
@@ -1083,6 +1083,7 @@ def testParseJson(saxonproc):
     except Exception as e:
         print(e)
         assert False
+
 
 def testParseJsonWithEncoding(saxonproc):
     json1 = """{ "test" : "This is a test. Price is higher than 25 €. " }"""
