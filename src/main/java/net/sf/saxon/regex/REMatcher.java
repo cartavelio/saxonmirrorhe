@@ -299,7 +299,7 @@ public class REMatcher {
                 return false;
             }
             // Unprefixed matching must try for a match at each character
-            for (; !(i - 1 >= search.length32()); i++) {
+            for (; (i <= search.length32()); i++) {
                 // Try a match at index i
                 if (matchAt(i, false)) {
                     return true;
@@ -467,13 +467,14 @@ public class REMatcher {
         boolean firstMatch = true;
         boolean simpleReplacement = false;
 
-        // Try a match at each position
-        while (pos < len && match(in, pos)) {
+        // Try a match at each position including the position after the last character
+        while (pos <= len && match(in, pos)) {
             // Append chars from input string before match
             result = result.concat(in.substring(pos, getParenStart(0)));
 
             if (firstMatch) {
-                simpleReplacement = program.flags.isLiteral();
+                simpleReplacement = program.flags.isLiteral() ||
+                        (replacement.indexOf('$') < 0 && replacement.indexOf('\\') < 0);
                 firstMatch = false;
             }
 
@@ -545,9 +546,14 @@ public class REMatcher {
             int newpos = getParenEnd(0);
 
             // We always want to make progress!
-            if (newpos == pos) {
+            if (newpos == pos || newpos == getParenStart(0)) {
+                if (newpos == in.length32()) {
+                    pos = newpos;
+                    break;
+                }
+                result = result.concat(new UnicodeChar(in.codePointAt(newpos)));
                 newpos++;
-            }
+            } 
 
             // Try new position
             pos = newpos;

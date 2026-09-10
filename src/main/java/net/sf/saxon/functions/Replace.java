@@ -51,7 +51,7 @@ public class Replace extends RegexFunction  {
 
     @Override
     protected boolean allowRegexMatchingEmptyString() {
-        return false;
+        return version >= 40;
     }
 
     /**

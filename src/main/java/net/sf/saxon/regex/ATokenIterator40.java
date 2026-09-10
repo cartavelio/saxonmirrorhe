@@ -19,9 +19,11 @@ import java.util.Objects;
 
 /**
  * A ATokenIterator is an iterator over the strings that result from tokenizing a string using a regular expression
+ * This is a rewrite for 4.0 (which allows a regex to match a zero-length string; it is based on the implementation
+ * of fn:analyze string and could be considerably simplified.
  */
 
-public class ATokenIterator2 implements AtomicIterator {
+public class ATokenIterator40 implements AtomicIterator {
 
     private final UnicodeString theString;   // the input string being matched
     private final REMatcher _matcher;    // the Matcher object that does the matching, and holds the state
@@ -46,7 +48,7 @@ public class ATokenIterator2 implements AtomicIterator {
      * @param matcher a matcher for the regular expression
      */
 
-    public ATokenIterator2(UnicodeString str, REMatcher matcher) {
+    public ATokenIterator40(UnicodeString str, REMatcher matcher) {
         Objects.requireNonNull(str);
         //Objects.requireNonNull(regex);
         Objects.requireNonNull(matcher);

@@ -28,6 +28,11 @@ public class OpEOL extends Operation {
     }
 
     @Override
+    public boolean isAssertion() {
+        return true;
+    }
+
+    @Override
     public IntIterator iterateMatches(final REMatcher matcher, final int position) {
         // If we're not at the end of string
 

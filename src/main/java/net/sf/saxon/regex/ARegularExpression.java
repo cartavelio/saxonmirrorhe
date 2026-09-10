@@ -127,7 +127,11 @@ public class ARegularExpression implements RegularExpression {
      */
     @Override
     public AtomicIterator tokenize(UnicodeString input) {
-        return new ATokenIterator(input.tidy(), new REMatcher(regex));
+        if (regex.flags.isAllowsXPath40Extensions()) {
+            return new ATokenIterator40(input.tidy(), new REMatcher(regex));
+        } else {
+            return new ATokenIterator(input.tidy(), new REMatcher(regex));
+        }
     }
 
     /**

@@ -28,6 +28,11 @@ public class OpBOL extends Operation {
     }
 
     @Override
+    public boolean isAssertion() {
+        return true;
+    }
+
+    @Override
     public IntIterator iterateMatches(final REMatcher matcher, final int position) {
         // Fail if we're not at the start of the string
         if (position != 0) {

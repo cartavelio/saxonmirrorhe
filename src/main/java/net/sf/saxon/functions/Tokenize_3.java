@@ -28,7 +28,7 @@ public class Tokenize_3 extends RegexFunction {
 
     @Override
     protected boolean allowRegexMatchingEmptyString() {
-        return false;
+        return getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
     }
 
     /**

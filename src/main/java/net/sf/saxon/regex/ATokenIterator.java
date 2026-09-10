@@ -40,10 +40,20 @@ public class ATokenIterator implements AtomicIterator {
             return null;
         }
 
-        if (matcher.match(input, prevEnd)) {
+        int nextStart = prevEnd;
+        if (current != null && current.isEmpty()) {
+            // previous match was empty: we need to move forward
+            nextStart++;
+        }
+
+        if (matcher.match(input, nextStart)) {
             int start = matcher.getParenStart(0);
             current = new StringValue(input.substring(prevEnd, start));
             prevEnd = matcher.getParenEnd(0);
+//            if (prevEnd == start) {
+//                // zero-length match: we need to move forward
+//                prevEnd = (start == input.length32() ? -1 : prevEnd+1);
+//            }
         } else {
             current = new StringValue(input.substring(prevEnd));
             prevEnd = -1;

@@ -44,7 +44,7 @@ public class AnalyzeStringFn extends RegexFunction {
 
     @Override
     protected boolean allowRegexMatchingEmptyString() {
-        return false;
+        return getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
     }
 
     private synchronized void init(Configuration config, Schema schema) throws XPathException {

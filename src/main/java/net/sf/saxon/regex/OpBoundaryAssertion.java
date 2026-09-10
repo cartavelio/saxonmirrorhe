@@ -40,6 +40,11 @@ public class OpBoundaryAssertion extends Operation {
     }
 
     @Override
+    public boolean isAssertion() {
+        return true;
+    }
+
+    @Override
     public IntIterator iterateMatches(final REMatcher matcher, final int position) {
         UnicodeString search = matcher.search;
         // Assume a non-word character before and after the string

@@ -91,6 +91,14 @@ public abstract class Operation {
     }
 
     /**
+     * Ask whether the expression is a zero-width assertion
+     */
+
+    public boolean isAssertion() {
+        return false;
+    }
+
+    /**
      * Get a CharacterClass identifying the set of characters that can appear as the first
      * character of a non-empty string that matches this term. This is allowed to be an
      * over-estimate (that is, the returned Character class must match every character

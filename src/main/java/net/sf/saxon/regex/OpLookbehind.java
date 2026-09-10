@@ -53,6 +53,11 @@ public class OpLookbehind extends Operation {
     }
 
     @Override
+    public boolean isAssertion() {
+        return true;
+    }
+
+    @Override
     public IntIterator iterateMatches(final REMatcher matcher, final int position) {
         boolean foundMatch = false;
         for (Operation op : alternatives) {

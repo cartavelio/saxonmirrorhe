@@ -1051,7 +1051,7 @@ public class RECompiler {
         // In 4.0, quantifiers are not allowed after assertions
         boolean disallowQuantifier = false;
         if (isXPath40) {
-            disallowQuantifier = ret instanceof OpBOL || ret instanceof OpEOL || ret instanceof OpBoundaryAssertion;
+            disallowQuantifier = ret.isAssertion();
         }
 
         // Or in flags from terminal symbol
@@ -1082,7 +1082,7 @@ public class RECompiler {
                 }
 
 
-                if (ret instanceof OpBOL || ret instanceof OpEOL || ret instanceof OpBoundaryAssertion) {
+                if (ret.isAssertion()) {
                     if (disallowQuantifier) {
                         // XPath 4.0 path
                         throw new RESyntaxException("No quantifier allowed after an assertion", idx);
@@ -1246,6 +1246,7 @@ public class RECompiler {
                 idx += 3;
                 capturing = false;
             } else if (idx + 2 < len && pattern.codePointAt(idx + 1) == '*') {
+                capturing = false;
                 if (thereFollows("(*positive_lookahead:")) {
                     idx += "(*positive_lookahead:".length();
                     paren = 2;

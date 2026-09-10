@@ -36,6 +36,11 @@ public class OpLookahead extends Operation {
     }
 
     @Override
+    public boolean isAssertion() {
+        return true;
+    }
+
+    @Override
     public Operation optimize(REProgram program, REFlags flags) {
         childOp = childOp.optimize(program, flags);
         return this;
@@ -56,7 +61,9 @@ public class OpLookahead extends Operation {
         final IntIterator basis = childOp.iterateMatches(matcher, position);
         if (basis.hasNext() == positive) {
             // Need to call basis.next() in case this captures any captured groups
-            basis.next();
+            if (positive) {
+                basis.next();
+            }
             return new IntSingletonIterator(position);
         } else {
             return EmptyIntIterator.getInstance();
