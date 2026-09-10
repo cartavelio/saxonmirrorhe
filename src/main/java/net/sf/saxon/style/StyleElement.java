@@ -1449,10 +1449,10 @@ public abstract class StyleElement extends ElementImpl {
 
             // not a built-in type: look in the imported schemas
 
-            if (!getPrincipalStylesheetModule().isImportedSchemaNamespace(uri)) {
-                compileError("There is no imported schema for the namespace of type " + typeAtt, "XTSE1520");
-                return null;
-            }
+//            if (!getPrincipalStylesheetModule().isImportedSchemaNamespace(uri)) {
+//                compileError("There is no imported schema for the namespace of type " + typeAtt, "XTSE1520");
+//                return null;
+//            }
             StructuredQName qName = new StructuredQName("", uri, lname);
             SchemaType stype = getPackageData().getImportedSchema().getSchemaType(qName);
             if (stype == null) {

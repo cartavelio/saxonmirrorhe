@@ -27,9 +27,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.ItemType;
 
-import java.util.Collections;
-import java.util.Set;
-
 /**
  * This class implements the static context used for evaluating use-when and other
  * static expressions in XSLT 3.0
@@ -170,34 +167,6 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
     @Override
     public boolean isInBackwardsCompatibleMode() {
         return false;
-    }
-
-    /**
-     * Determine whether a Schema for a given target namespace has been imported. Note that the
-     * in-scope element declarations, attribute declarations and schema types are the types registered
-     * with the (schema-aware) configuration, provided that their namespace URI is registered
-     * in the static context as being an imported schema namespace. (A consequence of this is that
-     * within a Configuration, there can only be one schema for any given namespace, including the
-     * null namespace).
-     *
-     * @param namespace the target namespace in question
-     * @return true if the given namespace has been imported
-     */
-
-    @Override
-    public boolean isImportedSchema(NamespaceUri namespace) {
-        return false;
-    }
-
-    /**
-     * Get the set of imported schemas
-     *
-     * @return a Set, the set of URIs representing the names of imported schemas
-     */
-
-    @Override
-    public Set<NamespaceUri> getImportedSchemaNamespaces() {
-        return Collections.emptySet();
     }
 
     /**

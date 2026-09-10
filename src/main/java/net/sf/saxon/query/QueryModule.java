@@ -1218,37 +1218,6 @@ public class QueryModule implements StaticContext {
     }
 
     /**
-     * Ask whether a given schema target namespace has been imported
-     *
-     * @param namespace The namespace of the required schema. Supply "" for
-     *                  a no-namespace schema.
-     * @return The schema if found, or null if not found.
-     * @since 8.4
-     */
-
-    @Override
-    public boolean isImportedSchema(NamespaceUri namespace) {
-        //return importedSchemata != null && importedSchemata.contains(namespace);
-        return isSchemaAware() && getPackageData().getImportedSchema().includesTargetNamespace(namespace);
-    }
-
-    /**
-     * Get the set of imported schemas
-     *
-     * @return a Set, the set of URIs representing the names of imported schemas
-     */
-
-    /*@Nullable*/
-    @Override
-    public Set<NamespaceUri> getImportedSchemaNamespaces() {
-        if (importedSchemata == null) {
-            return Collections.emptySet();
-        } else {
-            return importedSchemata;
-        }
-    }
-
-    /**
      * Report a static error in the query (via the registered ErrorListener)
      *
      * @param err the error to be signalled

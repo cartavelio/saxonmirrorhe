@@ -22,8 +22,6 @@ import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
-import java.util.Set;
-
 /**
  * A StaticContext contains the information needed while an expression or pattern
  * is being parsed. The information is also sometimes needed at run-time.
@@ -170,33 +168,10 @@ public interface StaticContext {
     /**
      * Determine whether backwards compatibility mode is used
      *
-     * @return true if 1.0 compaibility mode is in force.
+     * @return true if 1.0 compatibility mode is in force.
      */
 
     boolean isInBackwardsCompatibleMode();
-
-    /**
-     * Ask whether a Schema for a given target namespace has been imported. Note that the
-     * in-scope element declarations, attribute declarations and schema types are the types registered
-     * with the (schema-aware) configuration, provided that their namespace URI is registered
-     * in the static context as being an imported schema namespace. (A consequence of this is that
-     * within a Configuration, there can only be one schema for any given namespace, including the
-     * null namespace).
-     *
-     * @param namespace the target namespace in question
-     * @return true if the given namespace has been imported
-     */
-
-    boolean isImportedSchema(NamespaceUri namespace);
-
-    /**
-     * Get the set of imported schemas
-     *
-     * @return a Set, the set of URIs representing the target namespaces of imported schemas,
-     *         using the zero-length string to denote the "null" namespace.
-     */
-
-    Set<NamespaceUri> getImportedSchemaNamespaces();
 
     /**
      * Get a namespace resolver to resolve the namespaces declared in this static context.

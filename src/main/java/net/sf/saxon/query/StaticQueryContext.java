@@ -94,14 +94,6 @@ public class StaticQueryContext {
     private Schema preLoadedSchema = null;
 
 
-
-    /**
-     * Private constructor used when copying a context
-     */
-
-    protected StaticQueryContext() {
-    }
-
     /**
      * Create a StaticQueryContext using a given Configuration. This creates a StaticQueryContext for a main module
      * (that is, a module that is not a library module). The static query context is initialized from the
@@ -1207,6 +1199,7 @@ public class StaticQueryContext {
     }
 
     public Schema getPreLoadedSchema() {
+        System.err.println("Get preloaded schema for SQC " + this + " = " + preLoadedSchema);
         return preLoadedSchema;
     }
 

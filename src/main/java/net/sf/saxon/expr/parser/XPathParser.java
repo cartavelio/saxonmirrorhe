@@ -1606,14 +1606,8 @@ public class XPathParser {
             if (st == null) {
                 grumble("Unknown simple type " + qname, "XPST0051");
             } else if (st.isAtomicType()) {
-                if (!env.isImportedSchema(uri)) {
-                    grumble("Atomic type " + qname + " exists, but its schema definition has not been imported", "XPST0051");
-                }
                 return (AtomicType) st;
             } else if (st instanceof ItemType && ((ItemType) st).isPlainType() && allowXPath30Syntax) {
-                if (!env.isImportedSchema(uri)) {
-                    grumble("Type " + qname + " exists, but its schema definition has not been imported", "XPST0051");
-                }
                 return (ItemType) st;
             } else if (st.isComplexType()) {
                 grumble("Type (" + qname + ") is a complex type", "XPST0051");
@@ -1711,17 +1705,11 @@ public class XPathParser {
             }
             if (allowXPath30Syntax) {
                 // XPath 3.0
-                if (!env.isImportedSchema(uri)) {
-                    grumble("Simple type " + qname + " exists, but its target namespace has not been imported in the static context");
-                }
                 return (CastingTarget) st;
 
             } else {
                 // XPath 2.0
                 if (st.isAtomicType()) {
-                    if (!env.isImportedSchema(uri)) {
-                        grumble("Atomic type " + qname + " exists, but its target namespace has not been imported in the static context");
-                    }
                     return (AtomicType) st;
                 } else if (st.isComplexType()) {
                     grumble("Cannot cast to a complex type (" + qname + ")", "XPST0051");
@@ -3484,9 +3472,6 @@ public class XPathParser {
                     nextToken();
                     expect(Token.RPAR);
                     nextToken();
-                    if (!env.isImportedSchema(pool.getURI(fp))) {
-                        grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
-                    }
                     SchemaDeclaration decl = env.getPackageData().getImportedSchema().getAttributeDecl(fp);
                     if (decl == null) {
                         grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
@@ -3507,9 +3492,6 @@ public class XPathParser {
                     nextToken();
                     expect(Token.RPAR);
                     nextToken();
-//                    if (!env.isImportedSchema(pool.getURI(fp))) {
-//                        grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
-//                    }
                     SchemaDeclaration decl = env.getPackageData().getImportedSchema().getElementDecl(fp);
                     if (decl == null) {
                         grumble("There is no declaration for element " + name + " in an imported schema", "XPST0008");
@@ -3560,11 +3542,6 @@ public class XPathParser {
                     NodeTest result;
                     if (t.currentToken == Token.NAME) {
                         StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
-//                        NamespaceUri uri = contentType.getNamespaceUri();
-
-//                        if (!(uri.equals(NamespaceUri.SCHEMA) || env.isImportedSchema(uri))) {
-//                            grumble("No schema has been imported for namespace '" + uri + '\'', "XPST0008");
-//                        }
                         SchemaType schemaType = env.getPackageData().getImportedSchema().getSchemaType(contentType);
                         if (schemaType == null) {
                             grumble("Unknown type name " + contentType.getEQName(), "XPST0008");
