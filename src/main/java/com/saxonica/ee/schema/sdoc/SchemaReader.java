@@ -328,7 +328,6 @@ public abstract class SchemaReader {
 
 //#if CSHARP==false
     public static void setupSourceWithReader(Source source, SchemaCompiler compiler, Valve valve, Configuration config, ParseOptions options) throws XPathException {
-//#if DOTNET==false
         XMLReader parser = config.getStyleParser();
         options.setXMLReader(parser);
         if (options.getEntityResolver() != null && parser.getEntityResolver() == null) {
@@ -341,7 +340,6 @@ public abstract class SchemaReader {
         options.setDTDValidationMode(Validation.SKIP);
         Sender.send(source, valve, options);
         config.reuseStyleParser(parser);
-//#endif
     }
 //#endif
 

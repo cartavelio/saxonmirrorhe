@@ -187,18 +187,6 @@ public class ProfessionalConfiguration extends Configuration {
         }
     }
 
-//#if DOTNET==true && CSHARP==false
-    /**
-     * Declare a mapping from a specific namespace URI to a .NET class
-     * @param uri - the namespace URI of the function name
-     * @param type - the .NET class that implements the functions in this namespace
-     */
-    @Override
-    public void bindExtensions(String uri , cli.System.Type type) {
-        ((DotNetExtensionLibrary)getExtensionBinder("clitype")).declareDotNetType(uri, type);
-    }
-//#endif
-
     /**
      * Get the edition code identifying this configuration: "HE", "PE" or "EE"
      */
