@@ -7,6 +7,8 @@
 
 package net.sf.saxon.style;
 
+import com.saxonica.ee.schema.CachedSchemaSource;
+import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.sdoc.SchemaReader;
 import net.sf.saxon.Configuration;
@@ -138,9 +140,9 @@ public class XSLImportSchema extends StyleElement {
                     namespace.equals(NamespaceConstant.FN) ||
                     namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
                 targetNamespace = NamespaceUri.of(namespace);
-                config.getSchemaForBuiltInNamespace(targetNamespace);
+                Schema xmlSchema = config.getSchemaForBuiltInNamespace(targetNamespace);
                 getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
-                return null;
+                return new CachedSchemaSource((PreparedSchema) xmlSchema);
             }
 
             getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
