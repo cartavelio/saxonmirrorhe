@@ -53,15 +53,6 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
         register("dynamic-error-info", 1, e -> e.populate(DynamicErrorInfoFn::new, AnyItemType.getInstance(), STAR, FOCUS | LATE | SIDE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        // saxon:apply is the same as fn:apply, but does not require the HOF feature
-//        register("apply", 2, e -> e.populate(ApplyFn::new, AnyItemType.getInstance(), STAR, LATE)
-//                .arg(0, AnyFunctionType.getInstance(), ONE, null)
-//                .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
-
-        // Create a map according to the semantics of the XPath map constructor and XSLT xsl:map instruction
-        register("create-map", 1, e -> e.populate(MapCreate::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, STAR, null));
-
         // Variant of the doc() function with an options parameter
         register("doc", 2, e -> e.populate(Doc_2::new, NodeKindTest.DOCUMENT, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
