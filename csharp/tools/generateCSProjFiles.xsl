@@ -272,9 +272,28 @@ EndGlobal
             <StartupObject>Saxon.Cmd.Command</StartupObject>
             <OutputType>Exe</OutputType>
             <AssemblyName>SaxonCS-{$EDITION}</AssemblyName>
-            <Description>SaxonCS is a high-performance XSLT 3.0 processor. It conforms with the
-            latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Description>
-            <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
+<xsl:choose>
+  <xsl:when test="$EDITION = 'EE'">
+            <Description>SaxonCS-{$EDITION} is a high-performance XPath, XQuery, and XSLT
+            processor.</Description>
+            <PackageReleaseNotes>SaxonCS-{$EDITION} conforms with the latest W3C
+            specifications, XSLT 3.0, XQuery 3.1, and XPath 3.1. It also
+            includes support for many features in the XPath, XQuery, and XSLT
+            4.0 specifications currently in development in the QT4 Community
+            Group.</PackageReleaseNotes>
+  </xsl:when>
+  <xsl:when test="$EDITION = 'HE'">
+            <Description>SaxonCS-{$EDITION} is a high-performance XPath, XQuery, and XSLT
+            processor.</Description>
+            <PackageReleaseNotes>SaxonCS-{$EDITION} conforms with the latest W3C
+            specifications, XSLT 3.0, XQuery 3.1, and XPath 3.1. It aims to have
+            feature parity with our open source Saxon-HE product.</PackageReleaseNotes>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:message terminate="yes">Unrecognized edition: {$EDITION}</xsl:message>
+  </xsl:otherwise>
+</xsl:choose>
+
           </PropertyGroup>
           <PropertyGroup>
             <!-- This is inconsistent with generating a .nuget package
