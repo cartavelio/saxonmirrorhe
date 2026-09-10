@@ -84,14 +84,35 @@ public class ObjectMap extends SystemFunction {
             return mapView; // empty map; method calls not available
         }
 
+        // See bug 6286. To try and prevent reflexive use of methods on an inaccessible class, we
+        // first gather methods that are available on the object's interface if this is known;
+        // then we supplement this with methods from the instance class (which may turn out
+        // to be inaccessible, but this only matters if they are called).
+
+        Map<String, FunctionItem> interfaceMap = null;
+        if (value.getInterface() != null) {
+            interfaceMap = makeMethodMap(config, value.getInterface(), required);
+            for (String key : interfaceMap.keySet()) {
+                FunctionItem method = interfaceMap.get(key);
+                Sequence[] boundArgs = new Sequence[method.getArity()];
+                boundArgs[0] = value;
+                CurriedFunction fn = new CurriedFunction(method, boundArgs);
+                mapView.initialPut(key, fn);
+            }
+        }
+
         Map<String, FunctionItem> methodMap = makeMethodMap(config, obj.getClass(), required);
         for (String key : methodMap.keySet()) {
-            FunctionItem method = methodMap.get(key);
-            Sequence[] boundArgs = new Sequence[method.getArity()];
-            boundArgs[0] = value;
-            CurriedFunction fn = new CurriedFunction(method, boundArgs, null); // TODO: FIXME
-            mapView.initialPut(key, fn);
+            if (interfaceMap == null || !interfaceMap.containsKey(key)) {
+                FunctionItem method = methodMap.get(key);
+                Sequence[] boundArgs = new Sequence[method.getArity()];
+                boundArgs[0] = value;
+                CurriedFunction fn = new CurriedFunction(method, boundArgs);
+                mapView.initialPut(key, fn);
+            }
         }
+
+
         CallableDelegate returnThis = new CallableDelegate((context, args) -> value);
         mapView.initialPut("this", new CallableFunction(0, returnThis, AnyFunctionType.getInstance()));
         return mapView;
@@ -111,7 +132,7 @@ public class ObjectMap extends SystemFunction {
      * to the extent that these methods have unique names.
      */
 
-    public static Map<String, FunctionItem> makeMethodMap(Configuration config, Class javaClass, String required) {
+    public static Map<String, FunctionItem> makeMethodMap(Configuration config, Class<?> javaClass, String required) {
         HashMap<String, FunctionItem> methodMap = new HashMap<>();
 
         Set<String> methodsFound = new HashSet<>();

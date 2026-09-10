@@ -22,7 +22,7 @@ public class ExpressionFn extends Evaluate {
             namespaceOrigin = (NodeInfo) arguments[1].head();
         }
         PreparedExpression pexpr = prepareExpression(exprText, namespaceOrigin, getStaticBaseUriString(), "saxon:expression", c2);
-        return new ObjectValue<>(pexpr);
+        return new ObjectValue<>(pexpr, PreparedExpression.class);
     }
 
 }

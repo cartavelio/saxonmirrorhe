@@ -30,7 +30,7 @@ public class CompileQuery extends SystemFunction {
         StaticQueryContext sqc = context.getConfiguration().newStaticQueryContext();
         //sqc.setLanguageVersion(31);
         XQueryExpression exp = sqc.compileQuery(query);
-        return new ObjectValue<>(exp);
+        return new ObjectValue<>(exp, XQueryExpression.class);
     }
 }
 

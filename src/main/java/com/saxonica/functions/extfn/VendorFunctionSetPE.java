@@ -587,21 +587,21 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
     public static class ContextFn extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            return new ObjectValue<>(context);
+            return new ObjectValue<>(context, XPathContext.class);
         }
     }
 
     public static class ControllerFn extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            return new ObjectValue<Controller>(context.getController());
+            return new ObjectValue<Controller>(context.getController(), Controller.class);
         }
     }
 
     public static class ConfigurationFn extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            return new ObjectValue<Configuration>(context.getConfiguration());
+            return new ObjectValue<Configuration>(context.getConfiguration(), Configuration.class);
         }
     }
 

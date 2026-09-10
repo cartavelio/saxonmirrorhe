@@ -107,7 +107,7 @@ public class SQLConnectFn extends SystemFunction {
                     .withErrorCode(SaxonErrorCode.SXSQ0003);
         }
 
-        return new ObjectValue<>(connection);
+        return new ObjectValue<>(connection, Connection.class);
 
     }
 

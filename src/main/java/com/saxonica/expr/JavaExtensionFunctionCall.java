@@ -631,12 +631,18 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 xpe.maybeSetLocation(getLocation());
                 throw xpe;
             } catch (IllegalAccessException err1) {
-                throw new XPathException("Method access is illegal", err1).withLocation(getLocation());
+                throw new XPathException("Method access is illegal", err1)
+                        .withErrorCode(JavaExternalObjectType.classNameToQName(err1.getClass().getName()))
+                        .withLocation(getLocation());
             } catch (IllegalArgumentException err2) {
-                throw new XPathException("Argument is of wrong type", err2).withLocation(getLocation());
+                throw new XPathException("Argument is of wrong type", err2)
+                        .withErrorCode(JavaExternalObjectType.classNameToQName(err2.getClass().getName()))
+                        .withLocation(getLocation());
             } catch (NullPointerException err2) {
                 err2.printStackTrace();
-                throw new XPathException("Object is null", err2).withLocation(getLocation());
+                throw new XPathException("Object is null", err2)
+                        .withErrorCode(JavaExternalObjectType.classNameToQName(err2.getClass().getName()))
+                        .withLocation(getLocation());
             } catch (InvocationTargetException err3) {
                 Throwable ex = err3.getTargetException();
                 if (ex instanceof XPathException) {

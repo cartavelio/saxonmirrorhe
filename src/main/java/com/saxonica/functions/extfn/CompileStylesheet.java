@@ -37,7 +37,7 @@ public class CompileStylesheet extends SystemFunction {
         compilerInfo.setErrorReporter(context.getErrorReporter());
         compilerInfo.setResourceResolver(context.getResourceResolver());
         PreparedStylesheet pss = Compilation.compileSingletonPackage(config, compilerInfo, doc.asActiveSource());
-        return new ObjectValue<>(pss);
+        return new ObjectValue<>(pss, PreparedStylesheet.class);
     }
 
 
