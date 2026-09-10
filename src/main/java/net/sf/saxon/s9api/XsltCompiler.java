@@ -130,7 +130,7 @@ public class XsltCompiler {
 
     /**
      * Get the schema that is to be used for a schema-aware transformation.
-     * @return the schema previous supplied in a call of {@link #useSchema(XsdSchema), or null if
+     * @return the schema previous supplied in a call of {@link #useSchema(XsdSchema)}, or null if
      * that method has not been called.
      */
 

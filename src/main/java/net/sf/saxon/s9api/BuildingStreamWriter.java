@@ -12,7 +12,7 @@ import javax.xml.stream.XMLStreamWriter;
 /**
  * A <code>BuildingStreamWriter</code> allows a document to be constructed by calling the methods defined in the
  * {@link javax.xml.stream.XMLStreamWriter} interface; after the document has been constructed, its root
- * node may be retrieved by calling the <@link>#getDocumentNode()</code> method.
+ * node may be retrieved by calling the {@link #getDocumentNode()} method.
  * <p>The class will attempt to generate namespace prefixes where none have been supplied.
  * The preferred mode of use is to call the versions
  * of <code>writeStartElement</code> and <code>writeAttribute</code> that supply the prefix, URI, and

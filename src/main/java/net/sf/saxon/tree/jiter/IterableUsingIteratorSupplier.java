@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 
 /**
- * Implements an iterable over a @code{Supplier<Iterator<T>>} -- if a class can
+ * Implements an iterable over a {@code Supplier<Iterator<T>>} -- if a class can
  * supply iterators on demand, then it can implement {@code Iterable}
  * @param <T>
  */
