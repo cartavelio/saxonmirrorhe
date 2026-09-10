@@ -1451,7 +1451,7 @@ public class XPathParser {
 
         final StructuredQName varQName = readVariableName();
         result.setVariableQName(varQName);
-        String positionVar = null;
+        //String positionVar = null;
 
         if (languageVersion >= 40) {
             requiredType = readOptionalAsClause(requiredType);
@@ -1501,7 +1501,7 @@ public class XPathParser {
             result.setSequence(collection);
             declareRangeVariable(result);
             numberOfVariables++;
-            if (positionVar != null) {
+            if (positionBinding != null) {
                 declareRangeVariable(positionBinding);
                 numberOfVariables++;
             }
@@ -1561,7 +1561,7 @@ public class XPathParser {
             result.setSequence(collection);
             declareRangeVariable(result);
             numberOfVariables++;
-            if (positionVar != null) {
+            if (positionBinding != null) {
                 declareRangeVariable(positionBinding);
                 numberOfVariables++;
             }
