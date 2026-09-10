@@ -88,7 +88,7 @@ public class ParseURI extends URIFunctions {
         }
 
         final String authority;
-        if (uristr.matches("^//*[a-zA-Z][:|].*$")) {
+        if ((scheme == null || "file".equals(scheme)) && uristr.matches("^//*[a-zA-Z][:|].*$")) {
             authority = null;
             uristr = uristr.replaceAll("^/+([a-zA-Z]).", "/$1:");
             filepath = uristr.substring(1);

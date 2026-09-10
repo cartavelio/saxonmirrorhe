@@ -13,6 +13,9 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,26 +131,44 @@ abstract public class URIFunctions extends SystemFunction {
     }
 
     protected String decodeString(String value) {
-        Pattern pattern = Pattern.compile("^(.*?)(\\+|%[0-9a-fA-F]{2})(.*)$");
-        String input = value;
-        Matcher matcher = pattern.matcher(input);
-        StringBuilder output = new StringBuilder();
-        while (matcher.find()) {
-            output.append(matcher.group(1));
-            String esc = matcher.group(2);
-
-            if ("+".equals(esc)) {
-                output.append(" ");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] hexenc = new byte[2];
+        byte[] replacementCharacter = new byte[] { (byte)0xEF, (byte)0xBF, (byte)0xBD }; // UTF-8
+        byte[] bytes = value.replace('+', ' ').getBytes(StandardCharsets.UTF_8);
+        int offset = 0;
+        while (offset < bytes.length) {
+            byte ch = bytes[offset];
+            if (ch == '%') {
+                if (offset+2 < bytes.length) {
+                    hexenc[0] = bytes[offset+1];
+                    hexenc[1] = bytes[offset+2];
+                    String hex = new String(hexenc, StandardCharsets.UTF_8);
+                    try {
+                        int hexbyte = Integer.parseInt(hex, 16);
+                        baos.write(hexbyte & 0xff);
+                    } catch (NumberFormatException ex) {
+                        baos.write(replacementCharacter, 0, replacementCharacter.length);
+                    }
+                    System.err.println(hex);
+                } else {
+                    baos.write(replacementCharacter, 0, replacementCharacter.length);
+                }
+                offset += 3;
             } else {
-                int hex = Integer.parseInt(esc.substring(1), 16);
-                output.append((char) hex);
+                baos.write(bytes, offset, 1);
+                offset++;
             }
-
-            input = matcher.group(3);
-            matcher = pattern.matcher(input);
         }
-        output.append(input);
-        return output.toString();
-    }
 
+        //byte[] inbytes = baos.toByteArray();
+        String xo = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+        /*
+        offset = 0;
+        while (offset < xo.length()) {
+            int ch = xo.charAt(offset);
+            offset += Character.charCount(ch);
+        }
+         */
+        return xo;
+    }
 }
