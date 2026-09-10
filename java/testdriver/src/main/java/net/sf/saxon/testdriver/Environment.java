@@ -47,6 +47,7 @@ import java.util.*;
 
 import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
 import static net.sf.saxon.s9api.streams.Predicates.not;
+import static net.sf.saxon.s9api.streams.Steps.attribute;
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE.isTrue;
 
@@ -303,7 +304,7 @@ public class Environment implements ResourceResolver {
         declareExternalVariables(driver, xpc, envNode, environment);
 
         // declare any output controls
-        declareOutputControls(driver, xpc, envNode, environment);
+        declareOutputControls(envNode, environment);
 
         // handle requested context item
         for (XdmNode param : envNode.children("context-item")) {
@@ -421,12 +422,13 @@ public class Environment implements ResourceResolver {
         });
     }
 
-    private static void declareOutputControls(TestDriver driver, XPathCompiler xpc, XdmItem env, Environment environment) throws SaxonApiException {
-        String needsSerialization = xpc.evaluate("string((output/@serialize,'no')[1])", env).toString();
+    private static void declareOutputControls(XdmNode env, Environment environment) throws SaxonApiException {
+        Optional<XdmNode> serialize = env.select(child("output").then(attribute("serialize"))).asOptionalNode();
+        String needsSerialization = serialize.isPresent() ? serialize.get().getStringValue() : "no";
         environment.outputSerialize = "yes".equals(needsSerialization);
-        String needsTree = xpc.evaluate("string((output/@tree,'yes')[1])", env).toString();
+        Optional<XdmNode> tree = env.select(child("output").then(attribute("tree"))).asOptionalNode();
+        String needsTree = tree.isPresent() ? tree.get().getStringValue() : "yes";
         environment.outputTree = "yes".equals(needsTree);
-
     }
 
     private static void setBaseUri(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment) {
