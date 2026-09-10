@@ -81,17 +81,17 @@ public class ParseHtml extends Parse {
             }
             nsMap = nsMap.put("", nsStack.peek());
             NodeName nn = new FingerprintedQName("", nsStack.peek(), elemName.getLocalPart());
-            if (attributes.size() != 0) {
-                AttributeMap atts2 = EmptyAttributeMap.getInstance();
-                for (AttributeInfo info : attributes) {
-                    NodeName attName2 = new FingerprintedQName("",
-                                                               NamespaceUri.NULL,
-                                                               lowerCaseAttributeName(info.getNodeName().getLocalPart()));
-                    AttributeInfo info2 = info.withNodeName(attName2);
-                    atts2 = atts2.put(info2);
-                }
-                attributes = atts2;
-            }
+//            if (attributes.size() != 0) {
+//                AttributeMap atts2 = EmptyAttributeMap.getInstance();
+//                for (AttributeInfo info : attributes) {
+//                    NodeName attName2 = new FingerprintedQName("",
+//                                                               NamespaceUri.NULL,
+//                                                               lowerCaseAttributeName(info.getNodeName().getLocalPart()));
+//                    AttributeInfo info2 = info.withNodeName(attName2);
+//                    atts2 = atts2.put(info2);
+//                }
+//                attributes = atts2;
+//            }
             super.startElement(nn, type, attributes, nsMap, location, properties);
         }
 

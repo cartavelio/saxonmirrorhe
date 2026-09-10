@@ -11,6 +11,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
@@ -28,18 +29,20 @@ public class Partition extends SystemFunction {
         List<Item> lastPartition = new ArrayList<>();
         FunctionItem breakWhen = (FunctionItem) arguments[1].head();
         Item next;
+        int pos = 1;
         while ((next = iterator.next()) != null) {
             if (lastPartition.isEmpty()) {
                 // this is the first item in the sequence
                 lastPartition.add(next);
             } else {
                 Sequence val = dynamicCall(
-                        breakWhen, context, SequenceExtent.makeSequenceExtent(lastPartition), next);
+                        breakWhen, context, SequenceExtent.makeSequenceExtent(lastPartition), next, Int64Value.makeIntegerValue(pos));
                 if (((BooleanValue) val.head()).getBooleanValue()) {
                     completePartitions.add(SimpleArrayItem.makeSimpleArrayItem(new ListIterator.Of<>(lastPartition)));
                     lastPartition.clear();
                 }
                 lastPartition.add(next);
+                pos++;
             }
         }
         if (!lastPartition.isEmpty()) {

@@ -395,7 +395,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         //#endif
 
         ItemType partitionFunctionType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM},
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
                 SequenceType.SINGLE_BOOLEAN);
 
         register("partition", 2, e -> e.populate(Partition::new, new ArrayItemType(SequenceType.SINGLE_ITEM), STAR, 0)
