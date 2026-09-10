@@ -13,7 +13,7 @@ public class CatalogExample {
         String datapath = cwd + "/src/test/testdata/resolvers";
 
         String catalog = datapath + "/catalog.xml";
-        processor.setCatalogFile(catalog);
+        processor.setCatalogFiles(catalog);
 
         InputSource docsrc = new InputSource(datapath + "/input.xml");
         InputSource xslsrc = new InputSource(datapath + "/stylesheet.xsl");

@@ -2,7 +2,7 @@ namespace Saxon.Api {
     
     /// <summary>
     /// A bundle of information made available when requesting resource resolution using
-    /// a <c>ResourceResolver</c>. Any of these properties may be absent.
+    /// a <c>ResourceResolver</c>. Any of its properties may be absent.
     /// </summary>
     public class ResourceRequest {
         

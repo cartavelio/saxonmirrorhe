@@ -6,6 +6,8 @@ using Org.XmlResolver;
 using Org.XmlResolver.Features;
 using Org.XmlResolver.Utils;
 using Saxon.Api;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Ejavax.xml.transform.stream;
 
 namespace Saxon.Callbacks {
     /// <summary>
@@ -19,15 +21,12 @@ namespace Saxon.Callbacks {
     /// appear at the end of a chain of resolvers.
     /// </para>
     /// </remarks>
-    public class DirectResourceResolver : CommonResourceResolver {
+    public class DirectResourceResolver : Saxon.Hej.lib.JJ_ResourceResolver {
 
-        public DirectResourceResolver() {
+        public DirectResourceResolver(Saxon.Hej.Configuration config) {
 
         }
 
-        public override CommonResourceResolver NewInstance() {
-            return new DirectResourceResolver();
-        }
 
         /// <summary>
         /// Get a stream, and associated base URI, for a resource identified by a URI, supplied typically
@@ -37,14 +36,14 @@ namespace Saxon.Callbacks {
         /// <returns>An <c>IResource</c> containing the content of the resource as a <c>Stream</c> or
         /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
         /// resource. Returns null if the request cannot be resolved.</returns>
-        public override IResource Resolve(ResourceRequest request) {
+        public Source resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
 
             try {
-                string href = request.RelativeUri ?? request.Uri.ToString();
-                Uri baseUri = request.BaseUri ?? request.Uri;
-                Uri abs = new Uri(baseUri, href);
+                string href = request.relativeUri ?? request.uri;
+                string baseUri = request.baseUri ?? request.uri;
+                Uri abs = new Uri(new Uri(baseUri), href);
                 Stream stream = UriUtils.GetStream(abs);
-                return new TextResource(stream, abs);
+                return new StreamSource(stream, abs.ToString());
             }
 
             catch (WebException) {
@@ -57,7 +56,7 @@ namespace Saxon.Callbacks {
                 // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent file
             }
 
-            return nextResourceResolver?.Resolve(request);
+            return null;
         }
 
     }

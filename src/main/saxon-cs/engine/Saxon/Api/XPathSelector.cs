@@ -108,7 +108,7 @@ namespace Saxon.Api {
             get => xmlDocumentResolver;
             set {
                 xmlDocumentResolver = value;
-                selector.setURIResolver(new UriResolverWrappingDocumentResolver(
+                selector.setResourceResolver(new JResourceResolverWrappingCS(
                     value, selector.getUnderlyingXPathContext().getXPathContextObject().getConfiguration()));
             }
         }

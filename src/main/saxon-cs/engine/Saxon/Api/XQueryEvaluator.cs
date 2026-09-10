@@ -36,8 +36,6 @@ namespace Saxon.Api {
         internal XQueryEvaluator(Processor processor, Saxon.Hej.s9api.XQueryEvaluator eval) {
             this.evaluator = eval;
             this.Processor = processor;
-            XmlDocumentResolver = processor.Implementation.getCommonResourceResolver()
-                .chain(new DirectResourceResolver()).Resolve;
         }
         
         /// <summary>
@@ -138,7 +136,8 @@ namespace Saxon.Api {
             get => xmlDocumentResolver;
             set {
                 xmlDocumentResolver = value;
-                evaluator.setURIResolver(new UriResolverWrappingDocumentResolver(value, evaluator.getUnderlyingQueryContext().getConfiguration()));
+                evaluator.setResourceResolver(
+                    new JResourceResolverWrappingCS(value, evaluator.getUnderlyingQueryContext().getConfiguration()));
             }
         }
 

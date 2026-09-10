@@ -186,17 +186,43 @@ namespace Saxon.Api {
         // }
         
         /// <summary>
+        /// Set a resource resolver to be used to resolve URIs referring to external resources.
+        /// </summary>
+        /// <remarks>
+        /// <para>This resolver is used for all resources within the scope of the <c>Processor</c>, unless
+        /// a more specific resolver is allocated for example at the level of an <c>XsltCompiler</c>
+        /// or <c>XQueryEvaluator</c>.</para>
+        /// <para>If the resolver returns null, then "direct URI resolution" (using the native methods
+        /// supported by the platform) is used as a fallback.</para>
+        /// </remarks>
+        /// <param name="resolver">The resource resolver to be used</param>
+        /// <param name="combine">If true, then the existing resource resolver registered
+        /// at configuration level is used as a fallback when the new resource resolver returns null.</param>
+
+        public void SetResourceResolver(Saxon.Api.ResourceResolver resolver, bool combine) {
+            Saxon.Hej.lib.JJ_ResourceResolver wrapper = new JResourceResolverWrappingCS(resolver, Implementation);
+            Saxon.Hej.lib.JJ_ResourceResolver newResolver = combine
+                ? new ChainedResourceResolver(wrapper, Implementation.getResourceResolver())
+                : wrapper;
+            Implementation.setResourceResolver(newResolver);
+        }
+        
+        /// <summary>
         /// Set one or more catalog files to be used for resolving URIs
         /// </summary>
         /// <remarks>
-        /// <para>The call has no effect unless the configuration is using resolver that does not use catalogs.</para>
+        /// <para>The call has no effect unless the configuration is using a resolver capable of using catalogs.
+        /// It generally won't work if <c>SetResourceResolver</c> has been called to set a different configuration-level
+        /// resolver. However you can call this method to set catalogs for use by the standard resolver, and
+        /// then subsequently call <c>SetResourceResolver</c> with <c>combine=true</c> to combine a user-defined
+        /// resolver for specific URIs with a catalog-based resolver for others.</para>
         /// </remarks>
-        /// <param name="fileNames">A list of filenames. (Usually a single filename.)
+        /// <param name="fileNames">A list of filenames. (Often a single filename.)
         /// The call has no effect if the list is empty.
         /// Relative filenames are interpreted relative to the current working directory.</param>
 
-        public void SetCatalogFile(params string[] fileNames) {
-            Implementation.getCommonResourceResolver().SetFeature(ResolverFeature.CATALOG_FILES, fileNames.ToList());
+        public void SetCatalogFiles(params string[] fileNames) {
+            JProcessor.setCatalogFiles(fileNames);
         }
         
         /// <summary>

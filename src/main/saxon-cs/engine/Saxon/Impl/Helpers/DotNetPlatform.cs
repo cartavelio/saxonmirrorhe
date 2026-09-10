@@ -12,6 +12,7 @@ using Saxon.Hej.pull;
 using Saxon.Callbacks;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using Org.XmlResolver.Features;
 
 
@@ -36,7 +37,7 @@ namespace Saxon.Impl.Helpers {
             //config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver(config)));
             config.setCollectionFinder((cxt, uri) => 
                 new Saxon.Hej.resource.StandardCollectionFinder().findCollection(cxt, uri));
-            config.setUnparsedTextURIResolver(new StandardUnparsedTextResolver(config).resolve);
+            //config.setUnparsedTextURIResolver(new StandardUnparsedTextResolver(config).resolve);
             config.setLocalizerFactory(new Saxon.Impl.Overrides.DotNetLocalizerFactory(config));
         }
         
@@ -98,152 +99,7 @@ namespace Saxon.Impl.Helpers {
             return false;
         }
 
-        // public org.xml.sax.XMLReader loadParser() {
-        //     org.xml.sax.XMLReader parser;
-        //     try {
-        //         parser = Saxon.Ejavax.xml.parsers.SAXParserFactory.newInstance("org.apache.xerces.jaxp.SAXParserFactoryImpl", this.GetType().GetClassLoader()).newSAXParser().getXMLReader();
-        //     } catch (Saxon.Ejavax.xml.parsers.ParserConfigurationException err) {
-        //         throw new Saxon.Ejavax.xml.transform.TransformerFactoryConfigurationError(err);
-        //     } catch (org.xml.sax.SAXException err) {
-        //         throw new Saxon.Ejavax.xml.transform.TransformerFactoryConfigurationError(err);
-        //     }
-        //     return parser;
-        // }
-        // public org.xml.sax.XMLReader loadParserForXmlFragments() {
-        //     return loadParser();
-        // }
-        public Saxon.Ejavax.xml.transform.Source getParserSource(Saxon.Hej.@event.PipelineConfiguration pipe,
-            Saxon.Ejavax.xml.transform.stream.StreamSource input, int validation, bool dtdValidation) {
-            return getParserSourceInternal(pipe, input, validation, dtdValidation, 0);
-        }
 
-        private Saxon.Ejavax.xml.transform.Source getParserSourceInternal(Saxon.Hej.@event.PipelineConfiguration pipe,
-            Saxon.Ejavax.xml.transform.stream.StreamSource input, int validation, bool dtdValidation, int depth) {
-            if (depth > 2) {
-                return input;
-            }
-
-            XmlReaderSettings settings = new() {
-                ConformanceLevel = ConformanceLevel.Document, 
-                DtdProcessing = DtdProcessing.Parse
-            };
-            if (pipe.getURIResolver() is StandardURIResolver) {
-                settings.XmlResolver = ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
-            }
-            settings.ValidationType = dtdValidation ? ValidationType.DTD : ValidationType.None;
-
-            Stream inputStream = input.getInputStream();
-            if (inputStream != null) {
-                
-
-                XmlReader parser = XmlReader.Create(inputStream, settings);
-                
-                //XmlReader parser = new XmlTextReader(input.getSystemId(), inputStream);
-                ((XmlTextReader) parser).EntityHandling = EntityHandling.ExpandEntities;
-                ((XmlTextReader) parser).WhitespaceHandling = WhitespaceHandling.All;
-                ((XmlTextReader) parser).Normalization = true;
-                // if (pipe.getURIResolver() is StandardURIResolver)
-                //     ((XmlTextReader) parser).XmlResolver =
-                //         ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
-                // parser = new XmlValidatingReader(parser);
-                // if (dtdValidation)
-                //     ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
-                // else
-                //     ((XmlValidatingReader) parser).ValidationType = ValidationType.None;
-                Saxon.Hej.pull.PullProvider provider = new DotNetPullProvider(parser);
-                var ps = new Saxon.Hej.pull.PullSource(provider);
-                ps.setSystemId(input.getSystemId());
-                if (validation == Saxon.Hej.lib.Validation.DEFAULT) {
-                    return ps;
-                } else {
-                    var @as = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(ps);
-                    @as.setSchemaValidationMode(validation);
-                    return @as;
-                }
-            }
-
-            TextReader reader = input.getReader();
-            if (reader != null) {
-                XmlReader parser = XmlReader.Create(reader, settings);
-                
-                //XmlReader parser = new XmlTextReader(input.getSystemId(), reader);
-                ((XmlTextReader) parser).EntityHandling = EntityHandling.ExpandEntities;
-                ((XmlTextReader) parser).WhitespaceHandling = WhitespaceHandling.All;
-                ((XmlTextReader) parser).Normalization = true;
-                // if (pipe.getURIResolver() is StandardURIResolver)
-                //     ((XmlTextReader) parser).XmlResolver =
-                //         ((StandardURIResolver) pipe.getURIResolver()).getXmlResolver();
-                // parser = new XmlValidatingReader(parser);
-                // if (dtdValidation)
-                //     ((XmlValidatingReader) parser).ValidationType = ValidationType.DTD;
-                // else
-                //     ((XmlValidatingReader) parser).ValidationType = ValidationType.None;
-                Saxon.Hej.pull.PullProvider provider = new DotNetPullProvider(parser);
-                PullSource ps = new (provider);
-                ps.setSystemId(input.getSystemId());
-                if (validation == Saxon.Hej.lib.Validation.DEFAULT) {
-                    return ps;
-                } else {
-                    var @as = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(ps);
-                    @as.setSchemaValidationMode(validation);
-                    return @as;
-                }
-            }
-
-            var uri = input.getSystemId();
-            if (uri != null)
-                try {
-                    var r = pipe.getURIResolver().resolve(uri, null);
-                    if (r == null) {
-                        return input;
-                    }
-                    else {
-                        if (r is Saxon.Hej.lib.AugmentedSource augmentedSource) {
-                            Source r2 = augmentedSource.getContainedSource();
-                            if (r2 is Saxon.Ejavax.xml.transform.stream.StreamSource streamSource) {
-                                r2 = getParserSourceInternal(pipe, streamSource,
-                                    validation, dtdValidation, depth + 1);
-                                return r2;
-                            } else {
-                                return r2;
-                            }
-                        } else {
-                            if (r is Saxon.Ejavax.xml.transform.stream.StreamSource streamSource) {
-                                if (isSame(streamSource, input)) return input;
-                                Source r2 = getParserSourceInternal(pipe, streamSource,
-                                    validation, dtdValidation, depth + 1);
-                                AugmentedSource @as = Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(r2);
-                                @as.setPleaseCloseAfterUse(true);
-                                return @as;
-                            }
-                            else {
-                                return r;
-                            }
-                        }
-                    }
-                }
-                catch (Saxon.Ejavax.xml.transform.TransformerException) {
-                    return input;
-                }
-
-            return input;
-        }
-
-        private static bool isSame(Saxon.Ejavax.xml.transform.Source first, Saxon.Ejavax.xml.transform.Source second) {
-            if (first == second) return true;
-            if (first is Saxon.Ejavax.xml.transform.stream.StreamSource && second is Saxon.Ejavax.xml.transform.stream.StreamSource) {
-                var ssFirst = (Saxon.Ejavax.xml.transform.stream.StreamSource) first;
-                var ssSecond = (Saxon.Ejavax.xml.transform.stream.StreamSource) second;
-                if (ssFirst.getInputStream() != null && ssSecond.getInputStream() != null)
-                    return ssFirst.getInputStream() == ssSecond.getInputStream();
-                if (ssFirst.getReader() != null && ssSecond.getReader() != null)
-                    return ssFirst.getReader() == ssSecond.getReader();
-                if (ssFirst.getSystemId() != null && ssSecond.getSystemId() != null)
-                    return ssFirst.getSystemId().Equals(ssSecond.getSystemId());
-            }
-
-            return false;
-        }
 
         public Saxon.Hej.lib.StringCollator makeCollation(Saxon.Hej.Configuration config,
                     Saxon.Ejava.util.Properties props, string uri) {
@@ -385,63 +241,25 @@ namespace Saxon.Impl.Helpers {
             if (source is ActiveSource activeSource) {
                 return activeSource;
             }
+            
             if (source is StreamSource streamSource) {
                 
                 Stream inputStream = streamSource.getInputStream();
-                //string docTypeName = null;
-                // bool hasDTD = false;
-                // if (inputStream.CanSeek) {
-                //     byte[] buffer = new byte[256];
-                //     int size = inputStream.Read(buffer, 0, 256);
-                //     string content = Encoding.Latin1.GetString(buffer);
-                //     int docTypeStart = content.IndexOf("<!DOCTYPE");
-                //     hasDTD = content.Contains("<!DOCTYPE");
-                //     inputStream.Position = 0;
-                // }
-                //Console.WriteLine("Parsing " + source.getSystemId());
-                
+            
                 XmlReaderSettings settings = new XmlReaderSettings() {
                     DtdProcessing = DtdProcessing.Parse,
                     MaxCharactersFromEntities = 100000,
-                    XmlResolver = config.getCommonResourceResolver().GetEntityResolver()
+                    XmlResolver = new XmlResolverWrappingResourceResolver(config.getResourceResolver())
                 };
-
+            
                 // if (source.getSystemId() != null) {
                 //     settings.XmlResolver =
                 //         new TracingXmlResolver(new Uri(source.getSystemId(), UriKind.RelativeOrAbsolute));
                 // }
-
+            
                 XmlReader xmlReader = null;
                 if (inputStream != null) {
                     xmlReader = XmlReader.Create(inputStream, settings,source.getSystemId());
-
-                    //if (hasDTD) {
-                        
-                    // }
-                    // else {
-                    //     xmlReader = XmlReader.Create(((StreamSource) source).getInputStream(),
-                    //         settings, (XmlParserContext) null);
-                    // }
-                    // xmlReader = new XmlTextReader(((StreamSource) source).getInputStream());
-                    // if (xmlReader is XmlTextReader textReader) {
-                    //     textReader.DtdProcessing = DtdProcessing.Parse;
-                    //     textReader.EntityHandling = EntityHandling.ExpandEntities;
-                    // }
-                    // Console.Error.WriteLine("CONTENTS OF STREAM SOURCE");
-                    // var reader = new StreamReader(((StreamSource) source).getInputStream(), Encoding.UTF8);
-                    // System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                    // string line;
-                    // while ((line = reader.ReadLine()) != null) {
-                    //     sb.Append(line);
-                    //     Console.Error.WriteLine(line);
-                    // }
-                    //
-                    // if (sb.Length == 0) {
-                    //     Console.Error.WriteLine("STREAM SOURCE IS EMPTY!!");
-                    // }
-                    // Console.Error.WriteLine("END OF CONTENTS OF STREAM SOURCE");
-                    // xmlReader = XmlReader.Create(new StringReader(sb.ToString()),
-                    //     settings, parserContext);
                 }
                 else if (streamSource.getReader() != null) {
                     xmlReader = XmlReader.Create(streamSource.getReader(), settings, source.getSystemId());
@@ -451,29 +269,15 @@ namespace Saxon.Impl.Helpers {
                     if (sysId == null) {
                         throw new IllegalArgumentException("Supplied StreamSource includes no stream, reader, or URI");
                     }
-                    else {
-                        Uri uri = new Uri(sysId);
-                        CommonResourceResolver crr = config.getCommonResourceResolver();
-                        object o = crr.GetEntityResolver().GetEntity(uri, "xml", typeof(Stream));
-                        if (o is Stream stream) {
-                            xmlReader = XmlReader.Create(stream, settings);
-                        }
-                        // URIResolver ur = config.getURIResolver();
-                        // if (ur is StandardURIResolver) {
-                        //     XmlResolver xr = ((StandardURIResolver) ur).getXmlResolver();
-                        //     object o = xr.GetEntity(uri, "xml", typeof(Stream));
-                        //     if (o is Stream) {
-                        //         xmlReader = XmlReader.Create((Stream) o, settings);
-                        //     }
-                        // }
-                    }
-                    
-                }
 
+                    Stream stream = new WebClient().OpenRead(new Uri(sysId));
+                    xmlReader = XmlReader.Create(stream, settings,source.getSystemId());
+                }
+            
                 if (xmlReader == null) {
                     throw new IllegalArgumentException("Unable to establish an XmlReader for supplied Source");
                 }
-
+            
                 DotNetPullProvider provider = new DotNetPullProvider(xmlReader);
                 provider.setBaseURI(source.getSystemId());
                 PullSource pullSource = new PullSource(provider);
@@ -482,7 +286,17 @@ namespace Saxon.Impl.Helpers {
             }
             return null;
         }
+        
+        public static System.Xml.XmlResolver getXmlResolverFromResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resourceResolver) {
+            if (resourceResolver is CatalogResourceResolver catalogResolver) {
+                return catalogResolver.GetEntityResolver();
+            }
+
+            return new XmlResolverWrappingResourceResolver(resourceResolver);
+        }
     }
+    
+    
 
     public class TracingXmlResolver : XmlUrlResolver {
         private readonly Uri baseUri;
