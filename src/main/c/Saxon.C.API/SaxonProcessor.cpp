@@ -129,14 +129,6 @@ void SaxonProcessor::exceptionClear() {
 
 void SaxonProcessor::createException(const char * message) {
 
-    exceptionClear();
-
-    if(message == nullptr) {
-        exception =  new SaxonApiException();
-    } else {
-        exception = new SaxonApiException(message);
-    }
-
 }
 
 
@@ -390,9 +382,6 @@ void SaxonProcessor::applyConfigurationProperties() {
 
         }
 
-        /* if (exceptionOccurred()) {
-            createException();
-        } */
         j_applyToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef, (void *) processorDataRef);
 
 
@@ -706,13 +695,13 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
 
 
     if (procRef == -1) {
-        createException("Processor is null in SaxonProcessor.setCatalogFiles");
+        throw SaxonApiException("Processor is null in SaxonProcessor.setCatalogFiles");
         return;
     }
 
     long result = j_setCatalogFile(sxn_environ->thread, (void *)procRef, (char *)catalogFile);
     if(result == -1) {
-        std::cerr<<"setCatalogFile failed"<<std::endl;
+        throw SaxonApiException("setCatalogFile failed");
     }
 }
 
@@ -727,7 +716,7 @@ XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator 
 
         return value;
     } else if (xdmNodeRef == -2) {
-        createException();
+        throw SaxonApiException();
     }
     return nullptr;
 
@@ -751,10 +740,7 @@ XdmNode *SaxonProcessor::parseXmlFromFile(const char *filename, SchemaValidator 
 
         return value;
     } else if (xdmNodeRef == -2) {
-        createException();
-        if(exception->getMessage() != nullptr) {
-            std::cerr<<"parseXmlFromFile, message ="<<exception->getMessage()<<std::endl;
-        }
+        throw SaxonApiException();
     }
     return nullptr;
 }
@@ -768,7 +754,7 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri, SchemaValidator * vali
 
         return value;
     } else if (xdmNodeRef == -2) {
-        createException();
+        throw SaxonApiException();
     }
     return nullptr;
 }

@@ -108,12 +108,11 @@ void Xslt30Processor::clearProperties() {
 
 
 bool Xslt30Processor::exceptionOccurred() {
-	return exception != nullptr;
+	return false;
 }
 
 const char * Xslt30Processor::getErrorCode() {
- if(exception == nullptr) {return nullptr;}
- return exception->getErrorCode();
+ return nullptr;
  }
 
 void Xslt30Processor::setBaseOutputURI(const char *baseURI) {
@@ -211,11 +210,6 @@ std::map<std::string,XdmValue*>& Xslt30Processor::getParameters(){
 
 
 void Xslt30Processor::exceptionClear(){
- if(exception != nullptr) {
- 	delete exception;
- 	exception = nullptr;
-
- }
       j_clearException(SaxonProcessor::sxn_environ->thread);
  }
 
@@ -230,15 +224,6 @@ SaxonApiException* Xslt30Processor::getException() {
 }
 
 void Xslt30Processor::createException(const char * message) {
-    if(exception != nullptr) {
-        delete exception;
-        exception = nullptr;
-    }
-    if(message == nullptr) {
-      exception = new SaxonApiException();
-    } else {
-        exception = new SaxonApiException(message);
-    }
 
 }
 
@@ -433,7 +418,6 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 
 
 const char * Xslt30Processor::getErrorMessage(){
- 	if(exception == nullptr) {return nullptr;}
- 	return exception->getMessage();
+ 	return nullptr;
  }
 
