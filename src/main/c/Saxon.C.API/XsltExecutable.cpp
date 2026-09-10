@@ -213,93 +213,31 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
 
 std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
         
-        /*if(saxonResultDocRef) {
-            static jmethodID getresultID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,
-                                                                                                      "getResultDocuments",
-                                                                                                      "()[Lnet/sf/saxon/s9api/XdmValue;");
+        if(saxonResultDocRef > 0) {
+            allocFn fn = operator new;
+            long long * results = j_getResultDocuments(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)saxonResultDocRef);
+            int64_t resultUrisRef = j_getResultDocumentURIs(SaxonProcessor::sxn_environ->thread, (void *)saxonResultDocRef);
 
-            static jmethodID getresult_uriID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,
-                                                                                                      "getResultDocumentURIs",
-                                                                                                      "()[Ljava/lang/String;");
-            if (!getresultID) {
-                std::cerr << "Error: " << getDllname() << ".getResultDocuments" << " not found\n"
-                          << std::endl;
-                SaxonProcessor::sxn_environ->env->ExceptionClear();
-            } else {
-                jobjectArray results = (jobjectArray) (
-                        SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonResultDocRef, getresultID));
-                jobjectArray resultUris = (jobjectArray) (
-                        SaxonProcessor::sxn_environ->env->CallObjectMethod(saxonResultDocRef, getresult_uriID));
-                if(!results || !resultUris ) {
-                    return resultDocumentMap;
-                }
-
-                int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
-                jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
-                jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
-                jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
-                jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                   "net/sf/saxon/s9api/XdmMap");
-                jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                                     "net/sf/saxon/s9api/XdmArray");
-
-                if (sizex > 0) {
-                    for (int p = 0; p < sizex; ++p) {
-                        jobject resulti = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(results, p);
-                        jobject resultURIsi = SaxonProcessor::sxn_environ->env->GetObjectArrayElement(resultUris, p);
-                        jstring sresultURI = (jstring)resultURIsi;
-                        const char * str = SaxonProcessor::sxn_environ->env->GetStringUTFChars(sresultURI,
-                                        NULL);
-
-
-                        XdmValue * value= nullptr;
-                        XdmItem * xdmItem = nullptr;
-                        if(rawResultsFlag) {
-                            value = new XdmValue();
-
-                            if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, atomicValueClass)           == JNI_TRUE) {
-                                xdmItem = new XdmAtomicValue(resulti);
-                                value->addXdmItem(xdmItem);
-
-
-                            } else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, nodeClass)           == JNI_TRUE) {
-                                xdmItem = new XdmNode(resulti);
-                                value->addXdmItem(xdmItem);
-
-
-                            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapItemClass) == JNI_TRUE) {
-                                xdmItem = new XdmMap(resulti);
-                                value->addXdmItem(xdmItem);
-
-                            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayItemClass) == JNI_TRUE) {
-                                xdmItem = new XdmArray(resulti);
-                                value->addXdmItem(xdmItem);
-
-                            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, functionItemClass)           == JNI_TRUE) {
-                                xdmItem = new XdmFunctionItem(resulti);
-                                value->addXdmItem(xdmItem);
-
-                            } else {
-                                value = new XdmValue(resulti, true);
-
-                            }
-
-                        } else {
-                            value = new XdmValue();
-                            value->addXdmItem(new XdmNode(resulti));
-                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
-
-                        }
+            if(results != nullptr) {
+                int sizex = results[0];
+                for(int i = 1; i< sizex; i++) {
+                    XdmValue * value= nullptr;
+                    char * str = j_getProcessorDataProperty(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)resultUrisRef, i);
+                    value = SaxonProcessor::makeXdmValueFromRef(results[i-1]);
+                    if(value != nullptr && str != nullptr) {
                         resultDocumentMap[str] = value;
-                        SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
-                        SaxonProcessor::sxn_environ->env->DeleteLocalRef(resultURIsi);
-
+                    } else {
+                            //TODO report result-document not found
                     }
-                    SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
-
                 }
+            } else {
+                exceptionFound = true;
             }
-        } */
+            delete results;
+            j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)resultUrisRef);
+        }
+
+
        return resultDocumentMap;
 }
 
