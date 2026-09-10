@@ -3,13 +3,19 @@ package com.saxonica.functions.qt4;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringValue;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +43,22 @@ public class CharFn extends SystemFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue name = (StringValue) arguments[0].head();
+        Item arg = arguments[0].head();
+        if (arg instanceof IntegerValue) {
+            IntegerValue val = (IntegerValue) arg;
+            if (val.signum() <= 0) {
+                throw new XPathException("Invalid Unicode codepoint " + val, "XPTY0004");
+            }
+            if (val.compareTo(Int64Value.MAX_INT) > 0) {
+                throw new XPathException("Invalid Unicode codepoint " + val, "FOCH0005");
+            }
+            int code = (int)val.longValue();
+            if (!context.getConfiguration().getValidCharacterChecker().test(code)) {
+                throw new XPathException("Character supplied to fn:char is not a valid XML character: " + val, "FOCH0005");
+            }
+            return new StringValue(new UnicodeChar(code));
+        }
+        StringValue name = (StringValue) arg;
         UnicodeString uName = name.getUnicodeStringValue();
         if (!uName.isEmpty()) {
             int lead = uName.codePointAt(0);

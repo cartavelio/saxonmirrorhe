@@ -97,7 +97,8 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         //#endif
 
         register("char", 1, e -> e.populate(CharFn::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+                .arg(0, new LocalUnionType(BuiltInAtomicType.STRING, BuiltInAtomicType.INTEGER), ONE, null));
+        // TODO: use POSITIVE_INTEGER (needs enhancement to implementation of coercion rules)
 
         register("characters", 1, e -> e.populate(CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
