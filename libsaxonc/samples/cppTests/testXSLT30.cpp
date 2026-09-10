@@ -1017,19 +1017,28 @@ void exampleSimple1(Xslt30Processor *proc, const std::string *const dataDir, sRe
     return;
   }
   string xmlPath = phpSampleDir + string { "/xml/foo.xml" };
-  executable->setInitialMatchSelectionAsFile(xmlPath.c_str());
-  const char *result = executable->applyTemplatesReturningString();
-  if (result != NULL) {
-    cout << result << endl;
-    sresult->success++;
-    operator delete((char *)result);
-  } else {
-    cout << "Result is null ====== FAIL ====== " << endl;
-    sresult->failureList.push_back("exampleSimple1");
+
+  try {
+    executable->setInitialMatchSelectionAsFile(xmlPath.c_str());
+    const char *result = executable->applyTemplatesReturningString();
+    if (result != NULL) {
+      cout << result << endl;
+      sresult->success++;
+      operator delete((char *)result);
+    } else {
+      cout << "Result is null ====== FAIL ====== " << endl;
+      sresult->failureList.push_back("exampleSimple1");
+      sresult->failure++;
+    }
+    proc->clearParameters();
+    delete executable;
+
+  } catch (SaxonApiException &e) {
+    cerr << "Failed - Exception thrown = " << e.what() << endl;
     sresult->failure++;
+    sresult->failureList.push_back("exampleSimple1-1");
+    return;
   }
-  proc->clearParameters();
-  delete executable;
 }
 
 void exampleSimple1Err(Xslt30Processor *proc, sResultCount *sresult) {
@@ -3129,6 +3138,8 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
 
   std::vector<std::thread> threads;
 
+  try {
+
   for (int i = 0; i < s.size(); i++) {
 
     XsltExecutable *executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/q12.xsl").c_str());
@@ -3138,11 +3149,25 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
     threads.push_back(std::thread(RunThread, executable, i, s[i]));
   }
 
+  } catch (SaxonApiException &e) {
+    const char *emessage = e.getMessage();
+    if (emessage != nullptr) {
+      cerr << "exception=" << emessage << endl;
+    } else {
+      cerr << "exception is nullptr" << endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testThreads");
+      return;
+
+	}
+  }
+
   for (auto &th : threads) {
         cerr << "testThreads cp1 - loop" << endl;
     th.join();
     cerr << "testThreads cp0 - loop" << endl;
   }
+        sresult->success++;
 }
 
 int main(int argc, char *argv[]) {

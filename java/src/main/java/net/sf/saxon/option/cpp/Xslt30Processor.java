@@ -8,22 +8,20 @@
 package net.sf.saxon.option.cpp;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.AugmentedSource;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.ResourceRequest;
-import net.sf.saxon.lib.Validation;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
-import org.graalvm.nativeimage.IsolateThread;
-import org.graalvm.nativeimage.ObjectHandle;
-import org.graalvm.nativeimage.c.function.CEntryPoint;
-import org.graalvm.nativeimage.c.type.CCharPointer;
-import org.graalvm.nativeimage.c.type.CTypeConversion;
-import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.*;
+
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.word.WordFactory;
 
 class Encoding {
     private String encoding;
@@ -43,7 +41,7 @@ class Encoding {
     public void setEncoding(String encoding) {
         this.encoding = encoding;
     }
-}
+};
 
 
 /**
@@ -827,31 +825,38 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
     private static Object getMatchSelectionObject(ObjectHandle sourceObjRef, Map<String, Object> paramsMap) throws SaxonApiException {
-                Object sourceObji;
-                Object sourceObj = null;
+        Object sourceObji;
+        Object sourceObj = null;
 
-                        if (paramsMap.containsKey("_i_matchs")) {
-                        sourceObji = paramsMap.get("_i_matchs");
-                        if (debug) {
-                                if(sourceObji == null) {
-                                        System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name null found");
-                                    } else {
-                                        System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name: " + sourceObji.getClass().getName());
-                                    }
-                            }
-                    } else if (sourceObjRef == WordFactory.nullPointer()) {
-                        throw new SaxonApiException("Source Object is NULL");
-                    } else {
-                        sourceObji = objectHandles.get(sourceObjRef);
-                    }
-
-                        if (sourceObji instanceof ProcessorDataAccumulator) {
-                        sourceObj = ((ProcessorDataAccumulator) sourceObji).getValues();
-                    } else {
-                        sourceObj = sourceObji;
-                    }
-                return sourceObj;
+        if (paramsMap.containsKey("_i_matches")) {
+            sourceObji = paramsMap.get("_i_matches");
+            if (debug) {
+                if(sourceObji == null) {
+                    System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name null found");
+                } else {
+                    System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name: " + sourceObji.getClass().getName());
+                }
             }
+        } else if (paramsMap.containsKey("_i_file_matches")) {
+            sourceObji = paramsMap.get("_i_file_matches");
+            if (debug) {
+                if(sourceObji == null) {
+                    System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match name null found");
+                } else {
+                    System.err.println("DEBUG: XSLT30TransformerForCpp set_initial_match file name: " + sourceObji.getClass().getName());
+                }
+            }
+        } else  {
+            throw new SaxonApiException("Source Object is NULL");
+        }
+
+        if (sourceObji instanceof ProcessorDataAccumulator) {
+            sourceObj = ((ProcessorDataAccumulator) sourceObji).getValues();
+        } else {
+            sourceObj = sourceObji;
+        }
+        return sourceObj;
+    }
 
     private static XdmValue getXdmValue(Destination xdmResult, Map<String, Object> paramsMap) {
         boolean returnXdmValue = false;
@@ -905,6 +910,7 @@ public class Xslt30Processor extends SaxonCAPI {
         transformer.setErrorReporter(SaxonCException.errorReporter);
         Processor processor = executable.getProcessor();
         Serializer serializer = null;
+
         String outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
         String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
         if (outFilename != null) {
@@ -921,6 +927,7 @@ public class Xslt30Processor extends SaxonCAPI {
         } else if (serializer == null) {
             throw new SaxonApiException("Output file not set for this transformation");
         }
+
         Object sourceObj = getMatchSelectionObject(sourceObjRef, paramsMap);
         try {
             applyXsltTransformerProperties(cwd, processor, transformer, serializer, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
