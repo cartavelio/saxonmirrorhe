@@ -114,14 +114,15 @@ task graalJar(
 
 task graalImage(
   dependsOn: ["graalJar"],
-  description: "Builds the GraalVM native image, add '-g' option for debugging"
+  description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
 ) {
   doLast {
     exec {
       commandLine "${graalHome}/native-image",
-        "-jar", "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar",
+        "-cp", "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar", "-o","${buildDir}/c/libsaxon-eec-${saxonVersion}",
         "--no-fallback", "-H:Path=${buildDir}/c",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
+        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
         "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
         "-H:+ReportExceptionStackTraces",
         "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
@@ -403,8 +404,8 @@ task graal_hec_jar(
 
 task graal_pec_jar(
   type: Jar,
-  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar", "compile_function_library"],
-  description: "Build the PE jar file for SaxonC"
+  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "compile_function_library"],
+  description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\","
 ) {
   archiveBaseName = "saxon9pe"
   destinationDirectory = file("${buildDir}/c/jars/pec")
@@ -460,8 +461,8 @@ task graal_pec_jar(
 
 task graal_eec_jar(
   type: Jar,
-  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar", "compile_function_library"],
-  description: "Build the EE jar file for SaxonC"
+  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "compile_function_library"],
+  description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\""
 ) {
   archiveBaseName = "saxon-ee-${saxonVersion}"
   destinationDirectory = file("${buildDir}/c/jars/eec")
@@ -491,6 +492,7 @@ task graal_eec_jar(
   from ("${buildDir}/icu") {
       include "**/*.class"
       include "**/*.*"
+      include "**/*.res"
       include "**/*.properties"
       exclude "META-INF/MANIFEST.MF"
     }
