@@ -65,7 +65,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     private UserFunctionParameter[] parameterDefinitions;
     private SequenceType resultType;
     private SequenceType declaredResultType;
-    protected SequenceEvaluator bodyEvaluator = null;
+    protected volatile SequenceEvaluator bodyEvaluator = null;
     protected PushEvaluator pushEvaluator = null;
     private boolean updating = false;
     private boolean ixslUpdating = false;
@@ -693,7 +693,8 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
      * Call this function to return a value.
      *
      * @param context    This provides the run-time context for evaluating the function. This should be created
-     *                   using {@link FunctionItem#makeNewContext(XPathContext, ContextOriginator)}. It must be an instance of XPathContextMajor.
+     *                   using {@link FunctionItem#makeNewContext(XPathContext, ContextOriginator)}.
+     *                   It must be an instance of XPathContextMajor.
      * @param actualArgs the arguments supplied to the function. These must have the correct
      *                   types required by the function signature (it is the caller's responsibility to check this).
      *                   It is acceptable to supply a {@link net.sf.saxon.value.Closure} to represent a value whose
@@ -706,10 +707,12 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     @Override
     public Sequence call(XPathContext context, Sequence[] actualArgs)
             throws XPathException {
-        synchronized (this) {
-            if (bodyEvaluator == null) {
-                // first time through
-                computeEvaluationMode();
+        if (bodyEvaluator == null) {
+            synchronized(this) {
+                if (bodyEvaluator == null) {
+                    // first time through
+                    computeEvaluationMode();
+                }
             }
         }
 

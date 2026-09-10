@@ -198,7 +198,7 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
             return null;
         }
         UserFunction uf = (UserFunction)c.getActor();
-        if (uf.getArity() > functionName.getArity() && uf.hasContextDependentDefaults(functionName.getArity())) {
+        if (uf.getArity() > functionName.getArity() /*&& uf.hasContextDependentDefaults(functionName.getArity()) */) {
             return new ContextDependentUserFunction(uf, functionName.getArity());
         }
         return uf;
