@@ -68,6 +68,9 @@ class PyTestOutcome:
         elif "assert-serialization-error" == tag:
             return self.assert_serialization_error(assertion, result_as_error, assert_xpc)
 
+        elif "assert-serialization" == tag:
+            return self.assert_serialization(assertion, result, catalog_xpc)
+
         elif "assert-message" == tag:
             catalog_xpc.set_context(xdm_item=assertion)
             sub_assertion = catalog_xpc.evaluate_single("*")
@@ -86,9 +89,11 @@ class PyTestOutcome:
             '''print(result.item_at(0).get_node_value().base_uri)'''
             uri = assertion.get_attribute_value("uri")
             uri = urllib.parse.urljoin(result.item_at(0).get_node_value().base_uri, uri)
-            print("uri=" + uri)
+            if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+                print("uri=" + uri)
             if self.result_documents:
-                print(list(self.result_documents.keys()))
+                if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+                    print(list(self.result_documents.keys()))
                 doc = self.result_documents[uri]
                 ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, result, assert_xpc, catalog_xpc, assert_set)
                 if not ok:
@@ -132,6 +137,80 @@ class PyTestOutcome:
         if resulti == False:
             self.wrong_error = str(result)
         return resulti
+
+    def assert_serialization(self, assertion: PyXdmNode, result: PyXdmValue, catalog_xpc: PyXPathProcessor):
+
+        method = assertion.get_attribute_value("method")
+
+        catalog_xpc.set_context(xdm_item=assertion)
+        comparand_node = catalog_xpc.evaluate("if (@file) then " +
+                            "if (@encoding) " +
+                            "then unparsed-text(resolve-uri(@file, base-uri(.)), @encoding) " +
+                            "else unparsed-text(resolve-uri(@file, base-uri(.))) " +
+                            "else string(.)")
+
+        if comparand_node is None:
+            return False
+
+        comparand = str(comparand_node)
+
+        comparand = comparand.replace("\r\n", "\n")
+        if comparand.endswith("\n"):
+            comparand = comparand[0:-1]
+
+        if result is None:
+            return False
+        result_str = str(result)
+
+        if result_str is None:
+            return False
+
+
+
+        if method is None:
+            method =  "xml"
+
+        is_html = method == "html" or method == "xhtml"
+
+        normalize = is_html
+
+        if not normalize:
+            normalize_attr = assertion.get_attribute_value("normalize-space")
+            normalize = normalize_attr is not None and (normalize_attr.strip() == "true" or normalize_attr.strip() == "1")
+
+        parser = etree.XMLParser(remove_blank_text=True)
+        '''if normalize:
+
+            comparand_xml = etree.XML(comparand, parser)
+            print("assert-serialization cp4")
+            print(comparand_xml)'''
+
+        if result_str.endswith("\n"):
+            result_str = result_str[0:-1]
+
+        if is_html:
+            comparand = comparand.replace(" <", "<")
+            comparand = comparand.replace("> ", ">")
+            result_str = result_str.replace(" <", "<")
+            result_str = result_str.replace("> ", ">")
+
+        print("result = " + result_str)
+        print('comparand = ' + comparand)
+
+        if result_str == comparand:
+            return True
+
+
+        '''try:
+            comparand_xml = etree.XML(comparand, parser)
+            resulti = etree.XML(result_str, parser)
+            return self.elements_equal(comparand_xml, resulti)
+        except Exception as ex:
+            print(ex)'''
+        return False
+
+
+
     def assert_serialization_matches(self, assertion: PyXdmNode, result: PyXdmValue, assert_xpc: PyXPathProcessor):
         flags_att_str = ""
         flags_att = assertion.get_attribute_value('flag')
@@ -139,6 +218,8 @@ class PyTestOutcome:
             flags_att_str =flags_att
 
         result_str = ""
+        if result is None:
+            return False
         if isinstance(result, PyXdmItem):
             result_str = result.string_value
         elif result.size == 1:
@@ -151,17 +232,21 @@ class PyTestOutcome:
         flags_att_str = flags_att_str.replace("!", "")
 
         assertion_regex = assertion.string_value
+        '''assertion.string_value'''
         assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
-        print(result_str)
+        '''print(result_str)
         print(assertion_regex)
-        print(flags_att_str)
+        print(assertion.children[0])
+        print(flags_att_str)'''
+        if re.search(str(assertion.children[0]), str(result)) is not None:
+            return True
 
         if re.search(assertion_regex, str(result)) is not None:
-            print("FOUND MATCH XXXXX")
+            return True
 
         xpath_str = "fn:matches('" + result_str + "', \'" + assertion_regex + "\','" + flags_att_str + "')"
-        print(xpath_str)
-        print('result = ' + result_str)
+        '''print(xpath_str)
+        print('result = ' + result_str)'''
         oki = False
         try:
             oki = assert_xpc.effective_boolean_value(xpath_str)
@@ -202,12 +287,12 @@ class PyTestOutcome:
         temp_xpath_proc.set_context(xdm_item=new_assertion)
         namespaceValues = temp_xpath_proc.evaluate("for $i in 1 to count(//namespace::*) return if (empty(index-of((//namespace::*)[position() = (1 to ($i - 1))][name() = name((//namespace::*)[$i])], (//namespace::*)[$i]))) then (//namespace::*)[$i] else ()")
         if namespaceValues != None and namespaceValues.size > 0:
-            print("values = " + str(namespaceValues))
-            print("================")
+            '''print("values = " + str(namespaceValues))
+            print("================")'''
             ns_size = namespaceValues.size
             for x in range(ns_size):
                 itemx = namespaceValues.item_at(x)
-                print("namespace node=" + str(itemx.get_node_value().string_value))
+                '''print("namespace node=" + str(itemx.get_node_value().string_value))'''
                 if itemx is not None and isinstance(itemx, PyXdmNode):
                     itemn = itemx.get_node_value()
                     ns_name = itemn.name
@@ -293,5 +378,5 @@ class PyTestOutcome:
             return item is not None and item.get_atomic_value().boolean_value
 
         except PySaxonApiError as ex:
-            print("assert-eq failed - " + str(ex))
+            '''print("assert-eq failed - " + str(ex))'''
             return False

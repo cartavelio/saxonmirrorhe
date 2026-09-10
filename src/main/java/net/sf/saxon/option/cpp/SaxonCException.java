@@ -41,7 +41,13 @@ public class SaxonCException  {
     public static CCharPointer j_getErrorMessage(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
         SaxonApiException exception = null;
         if(throwable == null) {
+            if(SaxonCAPI.debug) {
+                System.err.println("Java DEBUG: j_getErrorMessage throwable is null");
+            }
             return WordFactory.nullPointer();
+        }
+        if(SaxonCAPI.debug) {
+            System.err.println("Java DEBUG: j_getErrorMessage = " + throwable.getClass().getName());
         }
         if(throwable instanceof SaxonApiException) {
            exception = (SaxonApiException)throwable;
@@ -54,6 +60,10 @@ public class SaxonCException  {
             exception = new SaxonApiException(throwable);
         }
         if(exception.getMessage() == null) {
+            if(SaxonCAPI.debug) {
+                System.err.println("Exception thrown but getMessage() is null");
+                System.err.println(exception.getCause().toString());
+            }
             return WordFactory.nullPointer();
         }
 
@@ -66,6 +76,9 @@ public class SaxonCException  {
     public static CCharPointer j_getErrorMessageWithErrorCode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
         SaxonApiException exception = null;
         if(throwable == null) {
+            if(SaxonCAPI.debug) {
+                System.err.println("Java DEBUG: j_getErrorMessage throwable is null");
+            }
             return WordFactory.nullPointer();
         }
         if(throwable instanceof SaxonApiException) {
