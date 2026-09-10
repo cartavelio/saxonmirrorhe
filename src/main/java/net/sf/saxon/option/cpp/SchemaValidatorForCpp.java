@@ -222,7 +222,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param processorDataAccumulatorRef - parameters and property names given as reference to the ProcessorData object.
      * @return long value: Success= 0, Failure = -1 or Exception thrown = -2
      */
-    @CEntryPoint(name = "j_registerSchemaString")
+    @CEntryPoint(name = "j_registerSchemaString", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long registerSchemaString(IsolateThread thread, ObjectHandle processorRef, CCharPointer csystemId, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Processor processor = null;
         if (processorRef == WordFactory.nullPointer()) {
@@ -275,7 +275,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param processorDataAccumulatorRef - parameters and property names given as reference to the ProcessorData object.
      * @return long value: Success= 0, Failure = -1 or Exception thrown = -2
      */
-    @CEntryPoint(name = "j_registerSchemaNode")
+    @CEntryPoint(name = "j_registerSchemaNode", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long registerSchemaFromXdmNode(IsolateThread thread, ObjectHandle processorRef, ObjectHandle xsdRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Processor processor = null;
         if (processorRef == WordFactory.nullPointer()) {

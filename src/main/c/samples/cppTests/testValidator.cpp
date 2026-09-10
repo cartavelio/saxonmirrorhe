@@ -289,7 +289,6 @@ int main(int argc, char* argv[])
 	    validator = processor->newSchemaValidator();
 	} catch(SaxonApiException &e) {
 	    cout<<"Exception thrown when creating SchemaValidator message="<<e.what()<<endl;
-	    processor->release();
         delete processor;
 	    return 0;
 	}
@@ -320,8 +319,9 @@ int main(int argc, char* argv[])
 	delete validator;
 	delete validator2;
 	delete validator3;
-    processor->release();
+
     delete processor;
+    processor->release();
     delete sresult;
 	return 0;
 }
