@@ -171,7 +171,6 @@ dependencies {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib")
         exclude("org.jetbrains", "annotations")
     }
-
     editionCompileAndTestOnly("xom:xom:1.3.5")
     editionCompileAndTestOnly("org.jdom:jdom:1.1.3")
     editionCompileAndTestOnly("org.jdom:jdom2:2.0.6.1")

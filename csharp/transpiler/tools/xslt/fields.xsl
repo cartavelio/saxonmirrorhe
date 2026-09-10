@@ -34,6 +34,23 @@
       <xsl:apply-templates select="scope" mode="xml-to-cs"/>
       <xsl:text>)</xsl:text>
    </xsl:template>
+
+   <xsl:template match="*[name/@identifier = ('DOCUMENT', 'ELEMENT', 'ATTRIBUTE', 'TEXT',
+                                              'COMMENT', 'PROCESSING_INSTRUCTION')]
+                        [@RETURN = 'net.sf.saxon.s9api.XdmNodeKind']"
+                 priority="50">
+     <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+     <xsl:choose>
+       <xsl:when test="name/@identifier = 'PROCESSING_INSTRUCTION'">
+         <xsl:text>.ProcessingInstruction</xsl:text>
+       </xsl:when>
+       <xsl:otherwise>
+         <xsl:sequence select="'.'
+                               || substring(name/@identifier, 1, 1)
+                               || lower-case(substring(name/@identifier, 2))"/>
+       </xsl:otherwise>
+     </xsl:choose>
+   </xsl:template>
    
    <!-- Identify an unspecific static field accessor  -->
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][ends-with(f:degenerify(@RESOLVED_TYPE), '.'||scope/name/@identifier)][not(scope/scope)]" 

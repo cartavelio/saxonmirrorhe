@@ -74,6 +74,8 @@ dependencies {
   transpilerRuntime("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
   transpilerRuntime("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
   transpilerRuntime("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
+  transpilerRuntime("org.nineml:coffeegrinder:${findProperty("ninemlVersion")}")
+  transpilerRuntime("org.nineml:coffeefilter:${findProperty("ninemlVersion")}")
   transpilerRuntime(files(saxonBuild.saxonLicenseDir.get()))
 
   transpilerInputSaxonJarBucket(project(":java", "saxonJarArtifact"))
@@ -172,8 +174,10 @@ val transpileToXml = tasks.register<JavaExec>("transpileToXml") {
     "-xml:${layout.buildDirectory.dir("tmp/xml").get()}",
     "-h:${layout.buildDirectory.dir("src/main/java").get()}",
     "-src:${layout.buildDirectory.dir("src/main/java").get()}",
-    "-${extension.edition.get()}:${transpilerInputSaxonJar.map { it.singleFile }.get() }",
-    "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}")
+    "-jar:${transpilerInputSaxonJar.map { it.singleFile }.get() }",
+    "-jar:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}",
+    "-jar:${jarFinder.find("coffeegrinder-${findProperty("ninemlVersion")}.jar")}",
+    "-jar:${jarFinder.find("coffeefilter-${findProperty("ninemlVersion")}.jar")}")
 }
 
 val transpileToDigest = tasks.register<JavaExec>("transpileToDigest") {
@@ -227,10 +231,11 @@ val generateCode = tasks.register<JavaExec>("generateCode") {
     "-xml:${layout.buildDirectory.dir("tmp/xml/main/java").get()}",
     "-repo:${layout.projectDirectory}/../transpiler/",
     "-digest:${layout.buildDirectory.file("digest.xml").get()}",
-    "-${extension.edition.get()}:${transpilerInputSaxonJar.get().map { it }.get(0)}",
-    "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}",
+    "-jar:${transpilerInputSaxonJar.map { it.singleFile }.get() }",
+    "-jar:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}",
+    "-jar:${jarFinder.find("coffeegrinder-${findProperty("ninemlVersion")}.jar")}",
+    "-jar:${jarFinder.find("coffeefilter-${findProperty("ninemlVersion")}.jar")}",
     "-debug")
-
 }
 
 val preprocessCS = tasks.register<Sync>("preprocessCS") {
@@ -247,6 +252,12 @@ val additionalArchitectures = listOf(Architectures.ARM64, Architectures.X86_64) 
 val copyJavaResources = tasks.register<Copy>("copy-java-resources") {
   into(layout.buildDirectory.dir("resources"))
   from(layout.projectDirectory.dir("../../java/src/main/resources")) {
+    exclude("**/.DS_Store")
+  }
+  from(layout.projectDirectory.dir("../../submodules/nineml/coffeegrinder/src/main/resources")) {
+    exclude("**/.DS_Store")
+  }
+  from(layout.projectDirectory.dir("../../submodules/nineml/coffeefilter/src/main/resources")) {
     exclude("**/.DS_Store")
   }
 }

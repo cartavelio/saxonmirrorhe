@@ -104,7 +104,9 @@ dependencies {
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
 
-  testImplementation(files(layout.projectDirectory.dir("../lib/Tidy.jar")))
+  compileOnly("org.slf4j:slf4j-api:1.7.30")
+
+  testImplementation(files(layout.projectDirectory.dir("lib/Tidy.jar")))
   testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
   testImplementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
@@ -122,6 +124,12 @@ configurations {
 tasks.filteredSources {
   from(configurations.javaSources) {
     include("net/sf/saxon/**/*.java")
+    include("org/nineml/**/*.java")
+    exclude("org/nineml/logging/SystemLogger.java")
+    exclude("org/nineml/coffeegrinder/parser/AmbiguityReport.java")
+    exclude("org/nineml/coffeegrinder/parser/HygieneReport.java")
+    exclude("org/nineml/coffeegrinder/parser/HygieneReport.java")
+    exclude("org/nineml/coffeegrinder/util/BricsAmbiguity.java")
     include("javax/xml/xquery/*.java")
     exclude("**/dotnet/**")
     include("net/sf/saxon/**/package.html")

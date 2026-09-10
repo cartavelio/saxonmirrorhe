@@ -210,6 +210,7 @@
          'subSequence#2':     '%scope%.Substring(%arg1%, %arg2% - %arg1%)',
          'toLowerCase#0':     '%scope%.ToLower()',
          'toUpperCase#0':     '%scope%.ToUpper()',
+         'valueOf#1':         'Convert.ToString(%args%)',
          '*':                 '%scope%.%Name%(%args%)' 
          })"/>
       
@@ -736,6 +737,7 @@
          'subList#2':     'Saxon.Impl.Helpers.ListUtils.SubList(%scope%, %args%)',
          'toArray#1':     '%scope%.ToArray()', (: Linq extension method :)
          'trimToSize#0':  'Saxon.Impl.Helpers.ListUtils.TrimToSize(%scope%)',
+         'unmodifiableSet#1': 'Collections.UnmodifiableSet(%args)',
          '*':             '%scope%.%Name%(%args%)' 
          })"/>
    </xsl:template>
@@ -1243,6 +1245,10 @@
          'getUnderlyingNode#0':   '((Saxon.Hej.om.NodeInfo)%scope%.Unwrap())',
          'getUnderlyingValue#0':  '((Saxon.Hej.om.NodeInfo)%scope%.Unwrap())',
          'getStringValue#0':      '%scope%.StringValue',
+         'getBaseURI#0':          '%scope%.BaseUri',
+         'getNodeKind#0':         '%scope%.NodeKind',
+         'getNodeName#0':         '%scope%.NodeName',
+         'getParent#0':           '%scope%.Parent',
          '*':                     '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>

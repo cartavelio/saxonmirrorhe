@@ -22,6 +22,7 @@ tasks.filteredSources {
     include("net/sf/saxon/**/*.java")
     include("com/saxonica/**/*.java")
     include("net/sf/saxon/data/**")
+
     exclude("**/package-info.java")
     exclude("net/sf/saxon/CommandExitException.java")
     exclude("net/sf/saxon/dotnet/**")
@@ -199,7 +200,6 @@ tasks.filteredSources {
     //exclude("com/saxonica/functions/extfn/ReadBinaryResource.java")
     exclude("com/saxonica/functions/extfn/SendMail.java")
     exclude("com/saxonica/xqj/**")
-    exclude("com/saxonica/functions/qt4/ixml/**")
 
     filter { line ->
       if (line.contains("net.sf.saxon.xpath.JAXPXPathStaticContext")
@@ -211,6 +211,31 @@ tasks.filteredSources {
         line
       }
     }
+  }
+
+  from(layout.projectDirectory.dir("../../submodules/nineml/coffeegrinder/src/main/java")) {
+    include("org/nineml/**")
+    exclude("org/nineml/coffeegrinder/parser/AmbiguityReport.java")
+    exclude("org/nineml/coffeegrinder/parser/GrammarExporter.java")
+    exclude("org/nineml/coffeegrinder/parser/HygieneReport.java")
+    exclude("org/nineml/coffeegrinder/trees/PrintStreamTreeBuilder.java")
+    exclude("org/nineml/coffeegrinder/trees/StdoutTreeBuilder.java")
+    exclude("org/nineml/coffeegrinder/trees/StringTreeBuilder.java")
+    exclude("org/nineml/coffeegrinder/util/BricsAmbiguity.java")
+    exclude("org/nineml/coffeegrinder/util/Instrumentation.java")
+    exclude("org/nineml/logging/SystemLogger.java")
+  }
+
+  from(layout.projectDirectory.dir("../../submodules/nineml/coffeefilter/src/main/java")) {
+    exclude("org/nineml/coffeefilter/documents/SAXDocumentBuilder.java")
+    exclude("org/nineml/coffeefilter/model/ModularGrammar.java")
+    exclude("org/nineml/coffeefilter/model/ModularGrammar2.java")
+    exclude("org/nineml/coffeefilter/trees/AbstractTreeBuilder.java")
+    exclude("org/nineml/coffeefilter/trees/ContentHandlerAdapter.java")
+    exclude("org/nineml/coffeefilter/trees/DataTreeBuilder.java")
+    exclude("org/nineml/coffeefilter/trees/SimpleTreeBuilder.java")
+    exclude("org/nineml/coffeefilter/trees/StringTreeBuilder.java")
+    exclude("org/nineml/coffeefilter/util/VxmlValidator.java")
   }
 }
 

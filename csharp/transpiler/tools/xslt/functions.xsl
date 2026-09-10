@@ -202,7 +202,8 @@
       'net.sf.saxon.tree.util.ProcInstParser': 'Saxon.Impl.Helpers.ProcInstParser',
       'net.sf.saxon.tree.jiter.MappingJavaIterator': 'Saxon.Impl.Overrides.MappingEnumerator',
       'org.xmlresolver.ResolverFeature': 'XmlResolver.Features',
-      'net.sf.saxon.lib.DigestMaker': 'Saxon.Impl.Helpers.DigestMaker'
+      'net.sf.saxon.lib.DigestMaker': 'Saxon.Impl.Helpers.DigestMaker',
+      'net.sf.saxon.s9api.XdmNodeKind': 'Saxon.Api.XdmNodeKind'
       }"/>
    
    <xsl:variable name="jdkExceptionTypes" as="xs:string*" select="
@@ -367,6 +368,9 @@
       <xsl:param name="context" as="element(*)"/>
       <xsl:variable name="escaped" select="f:escapeSimpleName($identifier)"/>
       <xsl:variable name="expanded" select="f:degenerify($context/@RESOLVED_TYPE) || '#' || $escaped"/>     
+<!--
+      <xsl:message>REN: <xsl:sequence select="$identifier, '::', $renamings($identifier)"/></xsl:message>
+-->
       <xsl:choose>
          <xsl:when test="$renamings($identifier)">{$renamings($identifier)}</xsl:when>
          <xsl:when test="$renamings($expanded)">{$renamings($expanded)}</xsl:when>

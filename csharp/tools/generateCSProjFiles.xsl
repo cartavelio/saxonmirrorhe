@@ -463,13 +463,13 @@ EndGlobal
         <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.8" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.Extensions.Configuration'">
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.Extensions.Configuration.Json'">
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.Extensions.Configuration.Xml'">
-        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.11" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.NET.Test.Sdk'">
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
@@ -493,16 +493,16 @@ EndGlobal
         <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.3.2" />
       </xsl:when>
       <xsl:when test=". = 'System.Collections.Immutable'">
-        <PackageReference Include="System.Collections.Immutable" Version="10.0.7" />
+        <PackageReference Include="System.Collections.Immutable" Version="10.0.11" />
       </xsl:when>
       <xsl:when test=". = 'System.IO.Hashing'">
-        <PackageReference Include="System.IO.Hashing" Version="10.0.7" />
+        <PackageReference Include="System.IO.Hashing" Version="10.0.11" />
       </xsl:when>
       <xsl:when test=". = 'System.Net.Http'">
         <PackageReference Include="System.Net.Http" Version="4.3.4" />
       </xsl:when>
       <xsl:when test=". = 'System.Text.Encoding.CodePages'">
-        <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.7" />
+        <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.11" />
       </xsl:when>
       <xsl:when test=". = 'XmlResolver'">
         <PackageReference Include="XmlResolver" Version="6.0.24" />

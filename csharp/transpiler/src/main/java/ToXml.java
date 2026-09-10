@@ -59,10 +59,9 @@ public class ToXml {
     
     private static File repoDir = null;
     private static String repoDirName = null;
-    private static String jarVersion = null;
+    private static final List<File> jarList = new ArrayList<>();
 
     private static String edition = null;
-    private static String icu4jJar = null; // The location of the icu4j jar to read
     private File singleInputFile = null;
     private File historicInputDir = null; // directory holding the Java prior to preprocessing
     private File inputDir = null;
@@ -125,14 +124,18 @@ public class ToXml {
                 if (!csDir.isDirectory()) {
                     throw new IllegalArgumentException(xmlDir + " is not a directory");
                 }
-            } else if (arg.startsWith("-ee:")) {
-                edition = "ee";
-                jarVersion = arg.substring(4);
-            } else if (arg.startsWith("-he:")) {
-                edition = "he";
-                jarVersion = arg.substring(4);
-            } else if (arg.startsWith("-icu4j:")) {
-                icu4jJar = arg.substring(7);
+            } else if (arg.startsWith("-jar:")) {
+                File jarfile = new File(arg.substring(5));
+                if (!jarfile.isFile() || !jarfile.exists()) {
+                    throw new IllegalArgumentException(jarfile + " is not an existing file");
+                }
+
+                // This is a bit of a hack, but it avoids another option that could be inconsistent
+                if (jarfile.getName().toLowerCase().startsWith("saxon-")) {
+                    edition = jarfile.getName().substring(6,8).toLowerCase();
+                }
+
+                jarList.add(jarfile);
             } else if (arg.equals("-debug")) {
                 DEBUG = true;
                 compiler.setCompileWithTracing(true);
@@ -144,8 +147,8 @@ public class ToXml {
             }
         }
 
-        if (jarVersion == null) {
-            throw new IllegalArgumentException("You must specify the EE jar version: -ee:11.2 for example");
+        if (edition == null) {
+            throw new IllegalArgumentException("You must specify at least the Saxon jar file");
         }
 
 
@@ -337,8 +340,9 @@ public class ToXml {
 
             // This tells the JavaParser to use the Saxon 10.3 JAR file to resolve references to classes and methods
             //combinedTypeSolver.add(new JarTypeSolver(String.format("%s/build/libs/saxon-%s-%s.jar", repoDirName, edition, jarVersion)));
-            combinedTypeSolver.add(new JarTypeSolver(jarVersion));
-            combinedTypeSolver.add(new JarTypeSolver(icu4jJar));
+            for (File jar : jarList) {
+                combinedTypeSolver.add(new JarTypeSolver(jar));
+            }
             JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
             StaticJavaParser.getConfiguration().setAttributeComments(false);
@@ -370,6 +374,15 @@ public class ToXml {
             File xmlDirHE = new File(new File(new File(xmlDir, "net"), "sf"), "saxon");
             File csDirHE = new File(new File(csDir, "Saxon"), "Hej");
             processXmlSubDirectoryToCSharp(xmlDirHE, csDirHE, digest, xmlToCSharp);
+            File xmlDirLogger = new File(new File(new File(xmlDir, "org"), "nineml"), "logging");
+            File csDirLogger = new File(new File(csDir, "Saxon"), "Logging");
+            processXmlSubDirectoryToCSharp(xmlDirLogger, csDirLogger, digest, xmlToCSharp);
+            File xmlDirCoffeeGrinder = new File(new File(new File(xmlDir, "org"), "nineml"), "coffeegrinder");
+            File csDirCoffeeGrinder = new File(new File(csDir, "Saxon"), "Coffeegrinder");
+            processXmlSubDirectoryToCSharp(xmlDirCoffeeGrinder, csDirCoffeeGrinder, digest, xmlToCSharp);
+            File xmlDirCoffeeFilter = new File(new File(new File(xmlDir, "org"), "nineml"), "coffeefilter");
+            File csDirCoffeeFilter = new File(new File(csDir, "Saxon"), "Coffeefilter");
+            processXmlSubDirectoryToCSharp(xmlDirCoffeeFilter, csDirCoffeeFilter, digest, xmlToCSharp);
         } else {
             File xmlDirHE = new File(new File(new File(xmlDir, "net"), "sf"), "saxon");
             File csDirHE = new File(new File(csDir, "Saxon"), "Hej");
