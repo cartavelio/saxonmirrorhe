@@ -21,6 +21,9 @@
         part of the pattern. The templates use the default mode="diamond".
         
         The type inference rules here are also used for constructs such as Collections.emptyList().
+        
+        A template rule in mode 'diamond' takes an expression as its match selection, and returns
+        a string containing the type parameters to be used.
    -->
    
    

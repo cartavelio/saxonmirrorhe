@@ -464,7 +464,7 @@
       </xsl:choose>
    </xsl:template>
    
-   <!-- Convert method calls applied to java.util.Optional (which translates to System.Nullable) -->
+   <!--<!-\- Convert method calls applied to java.util.Optional (which translates to System.Nullable) -\->
    <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.util.Optional')]" 
       priority="30" mode="methods">
       <xsl:choose>
@@ -511,7 +511,7 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
-   
+   -->
    <!-- Convert method calls applied to java.net.URI (which translates to System.Uri) -->
    <xsl:template match="*[@RESOLVED_TYPE='java.net.URI']" 
       priority="30" mode="methods">
@@ -1316,17 +1316,13 @@
       </xsl:choose>
    </xsl:template>
    
-   <!-- Special-case Optionial.empty() and Optional.of() -->
+   <!-- Special-case Optional.empty() and Optional.of() -->
    <!-- Currently handled only when appearing in a return statement, the type is taken from the containing method declaration -->
    <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.util.Optional')]" 
       priority="20" mode="methods">
       <!--<xsl:message>Optional.{name/@identifier}()</xsl:message>-->
-      <xsl:variable name="targetClass" as="xs:string?">
-         <xsl:choose>
-            <xsl:when test="../@nodeType='ReturnStmt'">
-               <xsl:sequence select="ancestor::member/type/typeArguments/typeArgument[1]/@RESOLVED_TYPE ! string()"/>
-            </xsl:when>
-         </xsl:choose>
+      <xsl:variable name="targetClass" as="xs:string">
+         <xsl:apply-templates select="." mode="diamond"/>
       </xsl:variable>
       <xsl:choose>
          <xsl:when test="name/@identifier = ('empty', 'of') and $targetClass">
@@ -1356,8 +1352,6 @@
    <!-- Translate methods used on IO classes -->
    <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.io.') and not(@RESOLVED_TYPE = 'java.io.File')]" 
       priority="20" mode="methods">
-      <!--<xsl:message>Optional.{name/@identifier}()</xsl:message>-->
-
       <xsl:choose>
          <xsl:when test="@RESOLVED_TYPE = 'java.io.IOException' and name/@identifier = 'getMessage'">
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
