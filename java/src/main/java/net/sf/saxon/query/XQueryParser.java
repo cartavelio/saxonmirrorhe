@@ -867,8 +867,13 @@ public class XQueryParser extends XPathParser {
                     Token tok = t.currentToken;
                     if (tok instanceof Token.StringLiteral) {
                         arg = new StringValue(expectStringLiteral());
+                        nextToken();
                     } else if (tok instanceof Token.NumericLiteral) {
                         arg = ((Token.NumericLiteral)tok).getValue();
+                        nextToken();
+                    } else if (tok == Token.HASH_BEFORE_NAME && allowXPath40Syntax) {
+                        StructuredQName qn = parseEQName();
+                        arg = new QNameValue(qn, BuiltInAtomicType.QNAME);
                     } else if ((isKeyword("true") || isKeyword("false")) && t.peekAhead() == Token.LPAREN) {
                         if (isKeyword("true")) {
                             arg = BooleanValue.TRUE;
@@ -884,7 +889,7 @@ public class XQueryParser extends XPathParser {
                         }
                         nextToken();
                         readToken(Token.LPAREN);
-                        expect(Token.RPAREN);
+                        readToken(Token.RPAREN);
                     } else {
                         grumble("Annotation parameter must be a literal");
                         return null;
@@ -898,7 +903,7 @@ public class XQueryParser extends XPathParser {
                     }
                     annotation.addAnnotationParameter(arg);
 
-                    nextToken();
+                    //nextToken();
                     if (t.currentToken == Token.RPAREN) {
                         nextToken();
                         break;
