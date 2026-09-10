@@ -4,7 +4,6 @@ import com.saxonica.build.GatherReleaseArtifacts
 plugins {
   id("saxon-build")
   id("com.saxonica.build.testsuites")
-  id("com.saxonica.build.samples")
   id("saxonj")
   id("maven-publish")
   id("signing")
@@ -215,8 +214,7 @@ tasks.register<GatherReleaseArtifacts>("gather_release_artifacts") {
   artifacts.from(eeReleaseMaven)
 }
 
-// In principle, this should be in the samples-plugin...
-tasks.register<Copy>("copy_java_sample_sources") {
+val copySampleSources = tasks.register<Copy>("copy_java_sample_sources") {
     into(layout.buildDirectory.dir("samples/src/java/main"))
     from(javaSampleSources)
 }
@@ -234,93 +232,48 @@ val jar_sample_run_classes = tasks.register<Jar>("jar_sample_run_classes") {
 val javaSampleClasses by configurations.consumable("javaSampleClasses")
 javaSampleClasses.outgoing.artifact(jar_sample_run_classes)
 
-samples {
-  runclasspath = (files(sourceSets["edition"].output)
-                  + configurations.named("samplesConfiguration").get())
-  debugclasspath = (files(layout.buildDirectory.dir("classes/java/main"))
-                    + files(layout.buildDirectory.dir("build/resources/main"))
-                    + configurations.named("samplesConfiguration").get())
-
-  sources = sampleSources
-  product = "java"
-  edition = "ee"
+val copySampleResources = tasks.register<Copy>("copy_sample_sources") {
+    into(layout.buildDirectory.dir("samples/resources"))
+    from(sampleSources)
 }
 
-samples.transform("Books_Transform_1", "books.xml", "books.xsl", listOf())
-samples.transform("Books_Transform_2", "books.xml", "books.xsl", 
-                  listOf("top-author=Thomas Hardy"))
+val copyConfigEE = tasks.register<Copy>("copy_config_EE") {
+  dependsOn(copySampleResources)
+  into(layout.buildDirectory.dir("samples/resources/config"))
+  from(layout.projectDirectory.file("../samples/src/config/config.xml"))
+}
 
-samples.transform("Books_Transform_3", "books.xml", "books-csv.xsl")
+val sampleStaging = tasks.register<Copy>("samples_staging") {
+  dependsOn(tasks.named("release"))
 
-samples.query("Books_Query_1", "books.xml", "books.xq")
+  val filename = "SaxonEE${saxonBuild.publishVersion.get().replace(".","-")}J.zip"
 
-samples.queryString("Books_Query_2", "books.xml", "saxon:line-number((//*)[last()])", listOf("-l:on"))
-
-samples.validate("Books_Validate_1", "books.xml", "books.xsd")
-
-samples.validate("Books_Validate_2", "books-invalid.xml", "books.xsd", listOf("-quit:off"))
-
-samples.transform("Tour_Transform_1", null, "tour.xsl", listOf("-it:main"))
-samples.transform("Tour_Transform_2", null, "tour.xsl", listOf("-it:main", "start=a6"))
-samples.transform("Tour_Transform_3", null, "tour.xsl", listOf("-it:main", "start=g2"))
-
-samples.query("Tour_Query_1", null, "tour.xq", listOf("start=e5"))
-samples.query("Tour_Query_2", null, "tour.xq", listOf("start=d2", "end=42"))
-samples.query("Tour_Query_3", null, "tour.xq", listOf("end=61"))
-
-samples.transform("Shakespeare_1", "othello.xml", "play.xsl",
-                  listOf("dir=file:///${layout.buildDirectory.file("sample_results/playhtml").get()}"),
-                  layout.buildDirectory.file("sample_results/playhtml/play.html").get().asFile)
-
-samples.transform("Bible_1", "../bible/nt/nt.xml", "bible.xsl",
-                  listOf("dir=${layout.buildDirectory.file("sample_results/biblehtml").get()}"),
-                  layout.buildDirectory.file("sample_results/biblehtml/index.html").get().asFile)
-
-// ============================================================
-
-val run_with_config = tasks.register<JavaExec>("run_with_config") {
   doFirst {
-    mkdir(layout.buildDirectory.file("sample_results"))
+    mkdir(layout.buildDirectory.file("sample-staging"))
   }
+  from(zipTree(layout.buildDirectory.file("releases/${filename}")))
+  into(layout.buildDirectory.file("sample-staging"))
+}
 
+val run_classes = tasks.register<JavaCompile>("compile_sample_run_classes") {
+  dependsOn(copySampleSources)
+  dependsOn(copySampleResources)
+  dependsOn(copyConfigEE)
   classpath = (files(sourceSets["edition"].output)
                + configurations.named("samplesConfiguration").get())
-  mainClass = "net.sf.saxon.Transform"
-  args("-config:${layout.projectDirectory.file("../samples/src/config/config.xml")}",
-       "-s:${layout.projectDirectory.file("../samples/src/data/books.xml")}",
-       "-xsl:${layout.projectDirectory.file("../samples/src/styles/books.xsl")}",
-       "-o:${layout.buildDirectory.file("sample_results/books_with_config.html").get()}",
-       "--traceListenerOutputFile:${layout.buildDirectory.file("sample_results/traceOutput_config.log").get()}")
+  source = project.fileTree(layout.buildDirectory.dir("samples/src/java/main").get())
+  destinationDirectory = layout.buildDirectory.dir("samples/run/classes").get()
 }
-tasks.named("all_samples").get().dependsOn(run_with_config)
+
+tasks.register<Exec>("samples") {
+  dependsOn(run_classes)
+  dependsOn(sampleStaging)
+  commandLine = listOf("python", "../tools/run-samples.py",
+                       "--edition", "ee",
+                       "--platform", "java")
+}
 
 // ============================================================
-
-
-samples.sampleClass("JAXPExamples", listOf("all"), "he.JAXPExamples")
-samples.sampleClass("ApplyXPathJAXP_saxon",
-                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "saxon"),
-                    "he.ApplyXPathJAXP")
-samples.sampleClass("ApplyXPathJAXP_dom",
-                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "dom"),
-                    "he.ApplyXPathJAXP")
-samples.sampleClass("ExampleContentHandler", listOf("data/books.xml"), "he.ExampleContentHandler")
-samples.sampleClass("S9APIExamplesOM_ee", listOf("all"), "he.S9APIExamplesOM")
-samples.sampleClass("S9APIExamples_ee", listOf("all"), "he.S9APIExamples")
-samples.sampleClass("JDOM2Example", listOf("data/books.xml", "styles/books.xsl"))
-samples.sampleClass("PullExamples", listOf())
-samples.sampleClass("QuickValidator", listOf("data/books.xml", "data/books.xsd"))
-
-samples.sampleClass("SchemaValidatorExample_1", listOf("data/books.xsd", "data/books.xml"),
-                    "ee.SchemaValidatorExample")
-samples.sampleClass("SchemaValidatorExample_2", listOf("--", "data/books.xml"),
-                    "ee.SchemaValidatorExample")
-samples.sampleClass("SchemaValidatorHandlerExample_1", listOf("data/books.xsd", "data/books.xml"),
-                    "ee.SchemaValidatorHandlerExample")
-samples.sampleClass("SchemaValidatorHandlerExample_2", listOf("--", "data/books.xml"),
-                    "ee.SchemaValidatorHandlerExample")
-samples.sampleClass("XPathExampleSA", listOf("data/books.xml", "data/books.xsd"))
-samples.sampleClass("XQJExamples", listOf("all"))
 
 /*
 // The XMarkBenchmark runs slowly, so only add it on request
@@ -333,7 +286,6 @@ if (project.findProperty("xmark") == "true") {
                          "XMarkBenchmark_1": "XMarkBenchmark"]
                     "XMarkBenchmark_1": ["-dir:${buildDir}/tests/extra/data/xmark/"],
 */
-
 
 // ============================================================
 

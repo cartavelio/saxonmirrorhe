@@ -3,7 +3,6 @@ import com.saxonica.build.java.PomGenerator
 plugins {
   id("saxon-build")
   id("com.saxonica.build.testsuites")
-  id("com.saxonica.build.samples")
   id("saxonj")
   id("maven-publish")
   id("signing")
@@ -334,62 +333,46 @@ val downloadRelease = tasks.named<Zip>("downloadRelease") {
   }
 }
 
-// In principle, this should be in the samples-plugin...
-tasks.register<Copy>("copy_java_sample_sources") {
+val copySampleSources = tasks.register<Copy>("copy_java_sample_sources") {
     into(layout.buildDirectory.dir("samples/src/java/main"))
     from(javaSampleSources) {
       exclude("ee/**")
     }
 }
 
-samples {
-  runclasspath = (files(sourceSets["edition"].output)
-                  + configurations.named("samplesConfiguration").get())
-  debugclasspath = (files(layout.buildDirectory.dir("classes/java/main"))
-                    + files(layout.buildDirectory.dir("build/resources/main"))
-                    + configurations.named("samplesConfiguration").get())
-
-  sources = sampleSources
-  product = "java"
-  edition = "pe"
+val copySampleResources = tasks.register<Copy>("copy_sample_sources") {
+    into(layout.buildDirectory.dir("samples/resources"))
+    from(sampleSources)
 }
 
-samples.transform("Books_Transform_1", "books.xml", "books.xsl", listOf())
-samples.transform("Books_Transform_2", "books.xml", "books.xsl", 
-                  listOf("top-author=Thomas Hardy"))
+val sampleStaging = tasks.register<Copy>("samples_staging") {
+  dependsOn(tasks.named("release"))
 
-samples.transform("Books_Transform_3", "books.xml", "books-csv.xsl")
+  val filename = "SaxonPE${saxonBuild.publishVersion.get().replace(".","-")}J.zip"
 
-samples.query("Books_Query_1", "books.xml", "books.xq")
+  doFirst {
+    mkdir(layout.buildDirectory.file("sample-staging"))
+  }
+  from(zipTree(layout.buildDirectory.file("releases/${filename}")))
+  into(layout.buildDirectory.file("sample-staging"))
+}
 
-samples.transform("Tour_Transform_1", null, "tour.xsl", listOf("-it:main"))
-samples.transform("Tour_Transform_2", null, "tour.xsl", listOf("-it:main", "start=a6"))
-samples.transform("Tour_Transform_3", null, "tour.xsl", listOf("-it:main", "start=g2"))
+val run_classes = tasks.register<JavaCompile>("compile_sample_run_classes") {
+  dependsOn(copySampleSources)
+  dependsOn(copySampleResources)
+  classpath = (files(sourceSets["edition"].output)
+               + configurations.named("samplesConfiguration").get())
+  source = project.fileTree(layout.buildDirectory.dir("samples/src/java/main").get())
+  destinationDirectory = layout.buildDirectory.dir("samples/run/classes").get()
+}
 
-samples.query("Tour_Query_1", null, "tour.xq", listOf("start=e5"))
-samples.query("Tour_Query_2", null, "tour.xq", listOf("start=d2", "end=42"))
-samples.query("Tour_Query_3", null, "tour.xq", listOf("end=61"))
-
-samples.transform("Shakespeare_1", "othello.xml", "play.xsl",
-                  listOf("dir=file:///${layout.buildDirectory.file("sample_results/playhtml").get()}"),
-                  layout.buildDirectory.file("sample_results/playhtml/play.html").get().asFile)
-
-samples.transform("Bible_1", "../bible/nt/nt.xml", "bible.xsl",
-                  listOf("dir=${layout.buildDirectory.file("sample_results/biblehtml").get()}"),
-                  layout.buildDirectory.file("sample_results/biblehtml/index.html").get().asFile)
-
-// ============================================================
-
-samples.sampleClass("JAXPExamples", listOf("all"), "he.JAXPExamples")
-samples.sampleClass("ApplyXPathJAXP_saxon",
-                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "saxon"),
-                    "he.ApplyXPathJAXP")
-samples.sampleClass("ApplyXPathJAXP_dom",
-                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "dom"),
-                    "he.ApplyXPathJAXP")
-samples.sampleClass("ExampleContentHandler", listOf("data/books.xml"), "he.ExampleContentHandler")
-samples.sampleClass("S9APIExamplesOM_pe", listOf("nonschema"), "he.S9APIExamplesOM")
-samples.sampleClass("S9APIExamples_pe", listOf("nonschema"), "he.S9APIExamples")
+tasks.register<Exec>("samples") {
+  dependsOn(run_classes)
+  dependsOn(sampleStaging)
+  commandLine = listOf("python", "../../tools/run-samples.py",
+                       "--edition", "pe",
+                       "--platform", "java")
+}
 
 // ============================================================
 

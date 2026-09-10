@@ -1,8 +1,5 @@
-#!/usr/bin/env python3
-
 import re
 import sys
-import click
 
 def check_against_map(expect, output):
     found = {}
@@ -59,7 +56,6 @@ def check_jaxpexamples(output):
          "done!": []
      }, output)
 
-
 def check(expect, title, lines):
     #print(title)
     #for line in lines:
@@ -75,6 +71,11 @@ def check(expect, title, lines):
 
     return lines
 
+def check_applyxpathjaxp_dom(output):
+    check_applyxpathjaxp(output, "dom")
+
+def check_applyxpathjaxp_saxon(output):
+    check_applyxpathjaxp(output, "saxon")
 
 def check_applyxpathjaxp(output, om):
     lines = []
@@ -301,67 +302,3 @@ def check_xmarkbenchmark(output):
 
     lines = check(expect, "n/a", lines)
 
-
-@click.command()
-@click.option("--edition", default="he",
-              type=click.Choice(["he", "pe", "ee"]),
-              help="Saxon edition that produced the sample output")
-@click.option("--sample", required=True,
-              help="The name (key, really) of the sample to check")
-@click.option("--ignore-errors", is_flag=True,
-              help="Exit with an error code of 0 even if errors occur")
-@click.argument("output",
-                type=click.Path(file_okay=True, dir_okay=False,
-                                resolve_path=True, readable=True))
-def check_samples(edition, sample, output, ignore_errors):
-    try:
-        if sample == "JAXPExamples":
-            check_jaxpexamples(output)
-        elif sample == "ApplyXPathJAXP_dom":
-            check_applyxpathjaxp(output, "dom")
-        elif sample == "ApplyXPathJAXP_saxon":
-            check_applyxpathjaxp(output, "saxon")
-        elif sample == "ExampleContentHandler":
-            check_examplecontenthandler(output)
-        elif sample == "S9APIExamplesOM_ee":
-            check_s9apiexamplesom_ee(output)
-        elif sample == "S9APIExamplesOM_pe":
-            check_s9apiexamplesom_pe(output)
-        elif sample == "S9APIExamples_he":
-            check_s9apiexamples_he(output)
-        elif sample == "S9APIExamples_pe":
-            check_s9apiexamples_pe(output)
-        elif sample == "S9APIExamples_ee":
-            check_s9apiexamples_ee(output)
-        elif sample == "JDOM2Example":
-            check_jdom2example(output)
-        elif sample == "PullExamples":
-            check_pullexamples(output)
-        elif sample == "QuickValidator":
-            pass # produces no output
-        elif sample == "SchemaValidatorExample_1":
-            pass # produces no output
-        elif sample == "SchemaValidatorExample_2":
-            pass # produces no output
-        elif sample == "SchemaValidatorHandlerExample_1":
-            check_schemavalidatorhandler(output)
-        elif sample == "SchemaValidatorHandlerExample_2":
-            check_schemavalidatorhandler(output)
-        elif sample == "XPathExampleSA":
-            check_xpathexamplesa(output)
-        elif sample == "XQJExamples":
-            check_xqjexamples(output)
-        elif sample == "XMarkBenchmark_1":
-            check_xmarkbenchmark(output)
-        else:
-            raise RuntimeError(f"Unexpected {sample}")
-
-        print(f"👍 {sample}")
-    except RuntimeError as err:
-        print(f"👎 {sample}")
-        print("\t", str(err))
-        if (not ignore_errors):
-            sys.exit(1)
-
-if __name__ == "__main__":
-    check_samples()
