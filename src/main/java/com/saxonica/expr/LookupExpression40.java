@@ -34,6 +34,7 @@ import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.function.Supplier;
 
 
@@ -473,6 +474,16 @@ public class LookupExpression40 extends LookupExpression {
 
                     if (expr.isSingleContainer && expr.isSingleEntry) {
                         ItemEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForItem();
+
+                        if (expr.getRhsExpression() instanceof StringLiteral) {
+                            AtomicValue key = ((StringLiteral)expr.getRhsExpression()).getGroundedValue();
+                            Stack<LookupPlan> plans = new Stack<>();
+                            return context -> {
+                                MapItem map = (MapItem) lhs.eval(context);
+                                return optionalGroundedValueIterator(map.getWithPlan(key, plans));
+                            };
+                        }
+
                         ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
 
                         return context -> {
@@ -483,6 +494,17 @@ public class LookupExpression40 extends LookupExpression {
 
                     } else if (expr.isSingleEntry) {
                         PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
+
+                        if (expr.getRhsExpression() instanceof StringLiteral) {
+                            AtomicValue key = ((StringLiteral) expr.getRhsExpression()).getGroundedValue();
+                            Stack<LookupPlan> plans = new Stack<>();
+                            return context -> {
+                                SequenceIterator baseIterator = lhs.iterate(context);
+                                return MappingIterator.map(baseIterator, baseItem ->
+                                        optionalGroundedValueIterator(((MapItem) baseItem).getWithPlan(key, plans)));
+                            };
+                        }
+
                         ItemEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForItem();
                         return context -> {
                             SequenceIterator baseIterator = lhs.iterate(context);
