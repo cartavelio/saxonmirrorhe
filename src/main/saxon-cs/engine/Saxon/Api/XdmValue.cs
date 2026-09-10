@@ -136,7 +136,7 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Get the enumerable object of items that satisfy a supplied <c>Predicate</c>.
+        /// Get the collection of items that satisfy a supplied <c>Predicate</c>.
         /// </summary>
         /// <typeparam name="T">The types of object to enumerate. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
         /// <param name="predicate">The predicate to be applied</param>

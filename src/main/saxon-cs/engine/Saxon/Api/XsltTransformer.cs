@@ -240,12 +240,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public Consumer<Message> MessageListener {
-            get {
-                return transformer.controller.getMessageHandler();
-            }
-            set {
-                transformer.controller.setMessageHandler(value);
-            }
+            get => transformer.controller.getMessageHandler();
+            set => transformer.controller.setMessageHandler(value);
         }
 
 
