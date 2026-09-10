@@ -635,7 +635,12 @@ TODO: rethink redefines and override
         they have been implemented.</p>
         
         <ul>
-            <li><p>Item type declarations in XSLT and XQuery</p></li>
+            <li><p>Item type declarations in XSLT and XQuery have restrictions:</p>
+              <ul>
+                  <li><p>In XQuery, forwards references to named item type declarations are not allowed.</p></li>
+                  <li><p>In XQuery, self-references within named item type declarations are not allowed.</p></li>
+              </ul>
+            </li>
             <li><p>PR1355, PR1708 - Named record types in XSLT (xsl:record-type) and XQuery</p></li>
             <li><p>PR1817, PR1853 - Methods</p></li>
             <li><p>PR1856: lookahead/behind in regular expressions. While the basic

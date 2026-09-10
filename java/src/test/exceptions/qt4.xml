@@ -47,10 +47,10 @@
       <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
    </exception>
    
-   <exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
+   <!--<exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
       <created by="Michael Kay" on="2023-03-14"/>
       <reason>Placeholders currently not allowed as keyword arguments</reason>
-   </exception>
+   </exception>-->
    
    
    
@@ -64,48 +64,16 @@
       <reason>Currently restricting default value of a user function parameter to be a literal or "."</reason>
    </exception>
    
-   <exception test-set="prod-Lookup" test-case="Lookup-413" run="false" report="n/a">
-      <created by="Michael Kay" on="2024-12-02"/>
-      <reason>Declare context value not yet implemented</reason>
+   
+   <exception test-set="prod-ItemTypeDecl" test-case="itemTypeDecl-016 
+                                                      itemTypeDecl-017 
+                                                      itemTypeDecl-018" run="false" report="notRun">
+      <created by="Michael Kay" on="2026-01-01"/>
+      <reason>XQuery item types: forwards references and self-references not yet implemented</reason>
    </exception>
    
-   <!--<exception test-set="prod-ContextValueDecl"  run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-20"/>
-      <reason>Context value declaration not yet implemented</reason>
-   </exception>-->
-   
-   <exception test-set="prod-DefaultNamespaceDecl" test-case=" 
-      default-namespace-40-04" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-20"/>
-      <reason>Fixed default namespace declaration not yet implemented</reason>
-   </exception>
-   
-   <exception test-set="prod-SchemaImport" test-case="qischema017" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-20"/>
-      <reason>Fixed default namespace declaration not yet implemented</reason>
-   </exception>
-   
-   <!--<exception test-set="prod-VersionDecl" test-case="version_declaration-015
-      version_declaration-016" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-20"/>
-      <reason>Leading zeroes in version numbers not yet implemented</reason>
-   </exception>-->
-   
-   <!--<exception test-set="misc-BuiltInKeywords" test-case="
-      Keywords-fn-char-1
-      Keywords-fn-remove-1
-      " run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Function (changes) not implemented</reason>
-   </exception>
-   
-   <exception test-set="misc-BuiltInKeywords" test-case="
-      Keywords-fn-parse-html-1
-      " run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Generated test case contains incorrect syntax</reason>
-   </exception>-->
-   
+
+ 
    <exception test-set="misc-HtmlTestSuite" test-case="
       html-test-1050
       html-test-1054
@@ -120,92 +88,22 @@
       <reason>Wrong results from validator.nu? Needs checking.</reason>
    </exception>
  
-   <!--<exception test-set="fn-message" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Function fn:message not yet implemented</reason>
-   </exception>
-   
-  -->
-   
  
    
- 
    <exception test-set="app-spec-examples" 
-      test-case=" fo-test-array-values-001
-                  fo-test-array-values-002
-                  fo-test-array-sort-002
-                  fo-test-array-sort-005
-                  fo-test-fn-sort-002
+      test-case=" fo-test-fn-scan-left-001
+                  fo-test-fn-scan-left-002
+                  fo-test-fn-scan-left-003
+                  fo-test-fn-scan-left-004
+                  fo-test-fn-scan-right-001
+                  fo-test-fn-scan-right-002
+                  fo-test-fn-scan-right-003
                   " 
       run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
+      <created by="Michael Kay" on="2026-01-01"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
    
  
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-chain-001
-      fo-test-fn-chain-002
-      fo-test-fn-chain-003
-      fo-test-fn-chain-004
-      fo-test-fn-chain-005
-      fo-test-fn-chain-006
-      fo-test-fn-chain-007
-      fo-test-fn-chain-008
-      fo-test-fn-chain-009
-      fo-test-fn-chain-010
-      fo-test-fn-chain-011
-      fo-test-fn-chain-012
-      fo-test-fn-chain-013
-      fo-test-fn-chain-014
-      fo-test-fn-chain-015
-      fo-test-fn-chain-016
-      fo-test-fn-chain-017
-      fo-test-fn-chain-018
-      fo-test-fn-chain-019" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
-   
-  
-   
-   <exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-invisible-xml-001
-      fo-test-fn-invisible-xml-002
-      fo-test-fn-invisible-xml-003" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>
-   
-   
-   
-   <exception test-set="app-spec-examples" 
-      test-case="fo-test-map-substitute-001
-      fo-test-map-substitute-002" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>
-   
-   <exception test-set="app-spec-examples" 
-      test-case="fo-test-map-replace-001
-      fo-test-map-replace-002
-      fo-test-map-replace-003" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>
-   
- 
- 
-   
-
-   
-   
-   
- 
-   
 
 </exceptions>
