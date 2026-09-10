@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
+using Saxon.Ejava.net;
 using Saxon.Hej;
 using Saxon.Hej.om;
 using Saxon.Hej.type;
@@ -401,7 +402,7 @@ namespace SaxonCS_NUnit {
                 Assert.That((object)1, Is.EqualTo(serializers.Count));
                 object b = serializers[0].BaseUri;
                 Assert.That((object)new Uri(ConfigTest.SandpitDirUri, "result-1.json"), Is.EqualTo(b));
-                string downloadString = new WebClient().DownloadString(new Uri(ConfigTest.SandpitDirUri, "result-1.json"));
+                string downloadString = fetchContent(new Uri(ConfigTest.SandpitDirUri, "result-1.json"));
                 Assert.That(downloadString.Contains("\"name\": \"foo\""));
                 
             }
@@ -409,6 +410,11 @@ namespace SaxonCS_NUnit {
                 Console.WriteLine(ex.StackTrace);
                 Assert.Fail(ex.Message);
             }
+        }
+
+        private string fetchContent(Uri uri) {
+            Stream stream = new URL(uri).openStream();
+            return new StreamReader(stream).ReadToEnd();
         }
         
         [Test]
@@ -445,7 +451,7 @@ namespace SaxonCS_NUnit {
                 transformer.BaseOutputUri = ConfigTest.SandpitDirUri;
                 transformer.Run(proc.NewSerializer(Console.Out));
                 
-                string downloadString = new WebClient().DownloadString(new Uri(ConfigTest.SandpitDirUri, "result-1.txt"));
+                string downloadString = fetchContent(new Uri(ConfigTest.SandpitDirUri, "result-1.txt"));
                 Assert.That(downloadString.Contains("This is the output"));
                 
             }

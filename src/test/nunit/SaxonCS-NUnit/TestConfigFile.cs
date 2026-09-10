@@ -7,6 +7,7 @@ using System.Net;
 using System.Xml;
 using NUnit.Framework;
 using Saxon.Api;
+using Saxon.Ejava.net;
 using Saxon.Hej;
 
 namespace SaxonCS_NUnit {
@@ -20,7 +21,7 @@ namespace SaxonCS_NUnit {
             // Uses options not supported by SaxonCS. Should fail cleanly.
             try {
                 Uri configUri = new Uri(ConfigTest.DataDirUri, "config.xml");
-                Processor proc = new Processor(new WebClient().OpenRead(configUri), configUri);
+                Processor proc = new Processor(new URL(configUri).openStream(), configUri);
                 Assert.Fail("Error not detected");
             }
             catch (SaxonApiException e) {
@@ -34,7 +35,7 @@ namespace SaxonCS_NUnit {
             try {
                 // Create a Processor instance.
                 Uri address = new Uri(ConfigTest.DataDirUri, "saxon-cs.config");
-                Stream configFile = new WebClient().OpenRead(address);
+                Stream configFile = new URL(address).openStream();
                 Processor processor = new(configFile, address);
                 Assert.That((object)processor, Is.Not.Null);
             }
@@ -61,7 +62,7 @@ namespace SaxonCS_NUnit {
                 string newLicenseLocation = Path.Combine(newLicenseDir.FullName, "copied-license.text");
                 File.Copy(existingLicenseFileLocation, newLicenseLocation, true);
                 Uri address = new Uri(ConfigTest.DataDirUri, "config-with-link-to-license-file.config");
-                Stream configFile = new WebClient().OpenRead(address);
+                Stream configFile = new URL(address).openStream();
                 Processor processor = new(configFile, address);
                 Assert.That((object)processor, Is.Not.Null);
                 Assert.That(processor.Implementation.isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
@@ -73,7 +74,7 @@ namespace SaxonCS_NUnit {
                 File.WriteAllText(newLicenseLocation, content);
 
                 try {
-                    Stream configFile2 = new WebClient().OpenRead(address);
+                    Stream configFile2 = new URL(address).openStream();
                     Processor processor2 = new(configFile2, address);
                     Assert.Fail("Failed to detect invalid license");
                 }
