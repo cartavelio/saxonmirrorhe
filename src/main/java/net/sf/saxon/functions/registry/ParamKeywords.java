@@ -3,6 +3,10 @@ package net.sf.saxon.functions.registry;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Data-only class to define the keywords used for parameters of built-in functions.
+ */
+
 public class ParamKeywords {
 
     public final static Map<String, String> fnParamNames = new HashMap<>();
@@ -40,7 +44,8 @@ public class ParamKeywords {
         arrayParamNames.put("sort", "array|collation|key");
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
-        fnParamNames.put("QName", "uri|qname");
+        fnParamNames.put("QName#2", "uri|qname");
+        fnParamNames.put("QName#1", "eqname");
         fnParamNames.put("abs", "value");
         fnParamNames.put("adjust-date-to-timezone", "value|timezone");
         fnParamNames.put("adjust-dateTime-to-timezone", "value|timezone");
@@ -90,6 +95,7 @@ public class ParamKeywords {
         fnParamNames.put("escape-html-uri", "value");
         fnParamNames.put("exactly-one", "input");
         fnParamNames.put("exists", "input");
+        fnParamNames.put("expanded-QName", "qname");
         fnParamNames.put("false", "");
         fnParamNames.put("filter", "input|predicate");
         fnParamNames.put("floor", "value");
@@ -221,6 +227,7 @@ public class ParamKeywords {
         fnParamNames.put("year-from-dateTime", "value");
         fnParamNames.put("years-from-duration", "value");
         fnParamNames.put("zero-or-one", "input");
+        mapParamNames.put("build", "map|key|value|combine");
         mapParamNames.put("contains", "map|key");
         mapParamNames.put("entry", "key|value");
         mapParamNames.put("filter", "map|predicate");

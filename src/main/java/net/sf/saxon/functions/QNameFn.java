@@ -7,23 +7,23 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.QNameException;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.Whitespace;
 
 
 /**
  * This class supports the fn:QName() function (previously named fn:expanded-QName())
+ * The proposed 4.0 spec adds an arity-1 variant
  */
 
 public class QNameFn extends SystemFunction {
@@ -67,11 +67,21 @@ public class QNameFn extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public QNameValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return expandedQName(
-                (StringValue) arguments[0].head(),
-                (StringValue) arguments[1].head()
-        );
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        if (arguments.length == 1) {
+            StringValue argValue = (StringValue) arguments[0].head();
+            if (argValue == null) {
+                return EmptySequence.getInstance();
+            }
+            String input = Whitespace.trim(argValue.getStringValue());
+            StructuredQName qn = StructuredQName.fromLexicalQName(input, false, false, getRetainedStaticContext());
+            return new QNameValue(qn, BuiltInAtomicType.QNAME);
+        } else {
+            return expandedQName(
+                    (StringValue) arguments[0].head(),
+                    (StringValue) arguments[1].head()
+            );
+        }
     }
 
     @Override
@@ -93,9 +103,22 @@ public class QNameFn extends SystemFunction {
 
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall sfc = (SystemFunctionCall) getExpression();
-            ItemEvaluator arg0eval = sfc.getArg(0).makeElaborator().elaborateForItem();
-            ItemEvaluator arg1eval = sfc.getArg(1).makeElaborator().elaborateForItem();
-            return context -> expandedQName((StringValue)arg0eval.eval(context), (StringValue)arg1eval.eval(context));
+            if (sfc.getArity() == 2) {
+                ItemEvaluator arg0eval = sfc.getArg(0).makeElaborator().elaborateForItem();
+                ItemEvaluator arg1eval = sfc.getArg(1).makeElaborator().elaborateForItem();
+                return context -> expandedQName((StringValue) arg0eval.eval(context), (StringValue) arg1eval.eval(context));
+            } else {
+                ItemEvaluator arg0eval = sfc.getArg(0).makeElaborator().elaborateForItem();
+                NamespaceResolver resolver = sfc.getRetainedStaticContext();
+                return context -> {
+                    Item in = arg0eval.eval(context);
+                    if (in == null) {
+                        return null;
+                    }
+                    StructuredQName qn = StructuredQName.fromLexicalQName(in.getStringValue(), false, true, resolver);
+                    return new QNameValue(qn, BuiltInAtomicType.QNAME);
+                };
+            }
         }
 
     }

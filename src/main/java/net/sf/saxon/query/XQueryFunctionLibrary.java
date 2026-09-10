@@ -114,8 +114,8 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
     private static boolean hasOverlappingArity(XQueryFunction f1, XQueryFunction f2) {
         // From https://stackoverflow.com/questions/3269434,
         // [x1:x2] overlaps [y1:y2] === x1 <= y2 && y1 <= x2
-        return f1.getMinimumArity() <= f2.getNumberOfArguments()
-                && f2.getMinimumArity() <= f1.getNumberOfArguments();
+        return f1.getMinimumArity() <= f2.getNumberOfParameters()
+                && f2.getMinimumArity() <= f1.getNumberOfParameters();
     }
 
     /**
@@ -151,7 +151,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                 fd.registerReference(ref);
                 return new UnresolvedXQueryFunctionItem(fd, functionName, ref);
 
-            } else if (functionName.getArity() == fd.getNumberOfArguments()) {
+            } else if (functionName.getArity() == fd.getNumberOfParameters()) {
                 // all arguments supplied
                 return fn;
             } else {
@@ -271,7 +271,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             }
             UserFunctionCall ufc = new UserFunctionCall();
             ufc.setFunctionName(fd.getFunctionName());
-            int maxArity = fd.getNumberOfArguments();
+            int maxArity = fd.getNumberOfParameters();
             if (arguments.length == maxArity && (keywords == null || keywords.isEmpty())) {
                 ufc.setArguments(arguments);
             } else {
@@ -303,7 +303,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         List<XQueryFunction> homonyms = functionsByName.get(functionName);
         if (homonyms != null) {
             for (XQueryFunction f : homonyms) {
-                if (f.getMinimumArity() <= staticArgs && f.getNumberOfArguments() >= staticArgs) {
+                if (f.getMinimumArity() <= staticArgs && f.getNumberOfParameters() >= staticArgs) {
                     return f;
                 }
             }
@@ -325,7 +325,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                 return false;
             }
             ufc.setFunctionName(fd.getFunctionName());
-            int maxArity = fd.getNumberOfArguments();
+            int maxArity = fd.getNumberOfParameters();
             if (arguments.length == maxArity && (details.keywords == null || details.keywords.isEmpty())) {
                 ufc.setArguments(arguments);
             } else {

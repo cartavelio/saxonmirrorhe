@@ -15,7 +15,12 @@ public abstract class DeclaredFunction {
      */
     public abstract StructuredQName getFunctionName();
 
-    public abstract int getNumberOfArguments();
+    /**
+     * Get the number of declared parameters (the upper bound of the arity range)
+     * @return the number of declared parameters
+     */
+
+    public abstract int getNumberOfParameters();
 
     /**
      * Get the name (keyword) of the Nth parameter
@@ -60,7 +65,7 @@ public abstract class DeclaredFunction {
             Expression[] arguments, Map<StructuredQName, Integer> keywords, DeclaredFunction fd) throws XPathException {
         // 4.0: handle keyword arguments and default arguments
         Expression[] expandedArgs;
-        int maxArity = fd.getNumberOfArguments();
+        int maxArity = fd.getNumberOfParameters();
         // If there are keyword arguments, reposition them to the correct position in the argument sequence
         if (keywords != null) {
             expandedArgs = new Expression[maxArity];

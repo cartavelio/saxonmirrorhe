@@ -17,6 +17,8 @@ import net.sf.saxon.functions.Doc_2;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.*;
+import net.sf.saxon.ma.zeno.ZenoChain;
+import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.str.StringConstants;
@@ -108,6 +110,10 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
 
         register("yes-no-boolean", 1, e -> e.populate(YesNoBoolean::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
+
+        register("concatenate-sequences", 2, e -> e.populate(ConcatenateSequences::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, AnyItemType.getInstance(), STAR, null));
 
     }
 
@@ -351,6 +357,17 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
 
     }
 
+    public static class ConcatenateSequences extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ZenoChain<Item> chain = new ZenoChain<>();
+            chain = chain.addAll(arguments[0].materialize().asIterable());
+            chain = chain.addAll(arguments[1].materialize().asIterable());
+            return new ZenoSequence(chain);
+        }
+
+    }
 
 
 }

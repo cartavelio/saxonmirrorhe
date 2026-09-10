@@ -274,7 +274,7 @@ public class XQueryFunction extends DeclaredFunction implements Declaration, Loc
      * @return the arity (the maximum number of arguments including optional arguments)
      */
 
-    public int getNumberOfArguments() {
+    public int getNumberOfParameters() {
         return parameters.size();
     }
 
@@ -607,7 +607,7 @@ public class XQueryFunction extends DeclaredFunction implements Declaration, Loc
     public void explain(/*@NotNull*/ ExpressionPresenter out) throws XPathException {
         out.startElement("declareFunction");
         out.emitAttribute("name", functionName.getDisplayName());
-        out.emitAttribute("arity", "" + getNumberOfArguments());
+        out.emitAttribute("arity", "" + getNumberOfParameters());
         if (compiledFunction == null) {
             out.emitAttribute("unreferenced", "true");
         } else {
