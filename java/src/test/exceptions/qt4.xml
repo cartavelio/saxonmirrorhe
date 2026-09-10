@@ -159,6 +159,13 @@
       <reason>Functionality not yet implemented: recursive record types</reason>
    </exception>
    
+   <exception test-set="method-html" 
+      test-case="Serialization-html-59a" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-06"/>
+      <reason>Functionality not yet implemented: PR2372 - processing instructions in HTML5</reason>
+   </exception>
+   
    <!--<exception test-set="prod-PathExpr.J" 
       test-case="PathExpr-J-166 PathExpr-J-168" 
       run="false" report="n/a">
