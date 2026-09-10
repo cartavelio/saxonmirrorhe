@@ -356,18 +356,6 @@
          </tr>
          <tr>
             <td>
-               <p>-projection:(on|off)</p>
-            </td>
-            <td>
-               <p>Use (or don't use) document projection. <a href="/sourcedocs/beyond-parsing/projection">Document
-                     projection</a> is a mechanism that analyzes a query to determine what parts of
-                  a document it can potentially access, and then while building a tree to represent
-                  the document, leaves out those parts of the tree that cannot make any difference
-                  to the result of the query. Requires Saxon-EE. </p>
-            </td>
-         </tr>
-         <tr>
-            <td>
                <p>-q:queryfile</p>
             </td>
             <td>
