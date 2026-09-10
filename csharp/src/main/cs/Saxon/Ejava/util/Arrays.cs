@@ -102,5 +102,16 @@ namespace Saxon.Ejava.util
         {
             return a1[start1..end1].SequenceEqual(a2[start2..end2]);
         }
+
+        public static int compareUnsigned(byte[] a, byte[] b) {
+            int len = Math.Min(a.Length, b.Length);
+            for (int i = 0; i < len; i++) {
+                int diff = (a[i] & 0xff) - (b[i] & 0xff);
+                if (diff != 0) {
+                    return diff;
+                }
+            }
+            return a.Length.CompareTo(b.Length);
+        }
     }
 }
