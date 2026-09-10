@@ -313,6 +313,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * It is done once per stylesheet, so the stylesheet can be reused for multiple source
      * documents. The method is called only on the XSLStylesheet element representing the
      * principal stylesheet module
+     *
      * @param compilation the XSLT compilation in progress
      * @throws net.sf.saxon.trans.XPathException if errors are found in the stylesheet
      */
@@ -506,7 +507,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     }
 
 
-    private static void gatherUsePackageDeclarations(Compilation compilation, StyleElement wrapper, List<XSLUsePackage> declarations)  {
+    private static void gatherUsePackageDeclarations(Compilation compilation, StyleElement wrapper, List<XSLUsePackage> declarations) {
         for (NodeInfo use : wrapper.children()) {
             if (use instanceof XSLUsePackage) {
                 declarations.add((XSLUsePackage) use);
@@ -606,11 +607,30 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             ComponentDeclaration otherDecl = functionIndex.get(sName);
             Component otherComp = componentIndex.get(sName);
             if (otherDecl == null && otherComp == null) {
-                // this is the first one in this stylesheet; but there may be one in a used package
+                // this is the first one in this stylesheet; and there is none in a used package
                 if (arity == maxArity) {
                     componentIndex.put(sName, declaringComponent);
                 }
                 functionIndex.put(sName, decl);
+            } else if (otherDecl != null) {
+                // there is another function in this stylesheet
+                int thisPrecedence = decl.getPrecedence();
+                int otherPrecedence = otherDecl.getPrecedence();
+                if (thisPrecedence == otherPrecedence) {
+                    UserFunction otherFunction = ((XSLFunction) otherDecl.getSourceElement()).getCompiledFunction();
+                    if (minArity == maxArity && otherFunction.getMinimumArity() == otherFunction.getArity()) {
+                        sourceFunction.compileError("Function " + sName.getShortName() + " is declared twice - see "
+                                                            + Err.show(otherFunction.getLocation()), "XTSE0770");
+                    } else {
+                        sourceFunction.compileError("Function "
+                                                            + sName.getComponentName().getDisplayName()
+                                                            + " has overlapping arity range "
+                                                            + showArityRanges(compiledFunction, otherFunction)
+                                                            + " with another function of the same name - see "
+                                                            + Err.show(otherFunction.getLocation()), "XTSE0770");
+                    }
+                }
+                break;
             } else {
                 Component other = componentIndex.get(new SymbolicName.F(sourceFunction.getObjectName(), maxArity));
                 if (other != null && other.getDeclaringPackage() == getStylesheetPackage()) {
@@ -622,7 +642,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                         String message = "Duplicate named function (see line " +
                                 otherFunction.getSourceElement().getLineNumber() +
                                 " of " + otherFunction.getSourceElement().getSystemId() + ')';
-                        if (maxArity != ((UserFunction)other.getActor()).getNumberOfParameters()) {
+                        if (maxArity != ((UserFunction) other.getActor()).getNumberOfParameters()) {
                             message += ". The arity ranges of the two functions overlap";
                         }
                         sourceFunction.compileError(message, "XTSE0770");
@@ -647,8 +667,16 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
             }
         }
-
     }
+
+    private static String showArityRanges(UserFunction fn1, UserFunction fn2) {
+        return "(" + showArityRange(fn1) + "; " + showArityRange(fn2) + ")";
+    }
+
+    private static String showArityRange(UserFunction fn) {
+        return fn.getMinimumArity() + "-" + fn.getArity();
+    }
+
 
     /**
      * Index a global xsl:variable or xsl:param element
@@ -758,16 +786,16 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                                                             otherTemplate.getSourceElement().getLineNumber() + " of " + otherTemplate.getSourceElement().getSystemId() + ')', errorCode);
                     } else //noinspection StatementWithEmptyBody
                         if (thisPrecedence < otherPrecedence) {
-                        //return;
-                    } else {
-                        // can't happen, but we'll play safe
-                        //other.setRedundantNamedTemplate();
-                        NamedTemplate compiledTemplate = new NamedTemplate(sName.getComponentName(), getConfiguration());
-                        Component declaringComponent = compiledTemplate.obtainDeclaringComponent(sourceTemplate);
-                        componentIndex.put(sName, declaringComponent);
-                        templateIndex.put(sName.getComponentName(), decl);
-                        setLocalParamDetails(sourceTemplate, compiledTemplate);
-                    }
+                            //return;
+                        } else {
+                            // can't happen, but we'll play safe
+                            //other.setRedundantNamedTemplate();
+                            NamedTemplate compiledTemplate = new NamedTemplate(sName.getComponentName(), getConfiguration());
+                            Component declaringComponent = compiledTemplate.obtainDeclaringComponent(sourceTemplate);
+                            componentIndex.put(sName, declaringComponent);
+                            templateIndex.put(sName.getComponentName(), decl);
+                            setLocalParamDetails(sourceTemplate, compiledTemplate);
+                        }
                 } else if (sourceTemplate.findAncestorElement(StandardNames.XSL_OVERRIDE) != null) {
                     // the new one wins
                     NamedTemplate compiledTemplate = sourceTemplate.getCompiledNamedTemplate();//new NamedTemplate();
@@ -858,6 +886,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * Combine all like-named xsl:attribute-set declarations in this package into a single Component, whose body
      * is an AttributeSet object. The resulting attribute set Components are saved in the StylesheetPackage
      * object.
+     *
      * @param compilation the XSLT compilation in progress
      * @throws XPathException if a failure occurs
      */
@@ -1010,13 +1039,13 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                     bad = true;
                 } else {
                     SymbolicName modeName = mode.getSymbolicName();
-                    Component.M usedMode = (Component.M)((XSLUsePackage) grandParent).getUsedPackage().getComponent(modeName);
+                    Component.M usedMode = (Component.M) ((XSLUsePackage) grandParent).getUsedPackage().getComponent(modeName);
                     if (usedMode == null) {
                         bad = true;
                     } else if (usedMode.getVisibility() == Visibility.FINAL) {
                         bad = true;
                     }
-                } 
+                }
             }
             if (bad) {
                 template.compileError("A template rule cannot be added to a mode declared in a used package " +
@@ -1513,6 +1542,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
     /**
      * Adjust visibility of components by applying xsl:expose rules
+     *
      * @throws XPathException if this detects an error or inconsistency
      */
 
@@ -1531,7 +1561,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         Map<SymbolicName, Component> componentIndex = stylesheetPackage.getComponentIndex();
         for (Component component : componentIndex.values()) {
             int fp = component.getComponentKind();
-            if (fp == StandardNames.XSL_MODE && ((Mode)component.getActor()).isUnnamedMode()) {
+            if (fp == StandardNames.XSL_MODE && ((Mode) component.getActor()).isUnnamedMode()) {
                 continue;
             }
             ComponentTest exactNameTest =
@@ -1566,7 +1596,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         }
     }
 
-    private void lookForAnyWildcard(List<XSLExpose> exposeDeclarations, Component component) throws XPathException {
+    private void lookForAnyWildcard(List<XSLExpose> exposeDeclarations, Component component) throws
+            XPathException {
         for (XSLExpose exposure : exposeDeclarations) {
             for (ComponentTest test : exposure.getWildcardComponentTests()) {
                 if (test.matches(component.getActor())) {
@@ -1583,7 +1614,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         }
     }
 
-    private boolean lookForMatchingWildcard(List<XSLExpose> exposeDeclarations, Component component, boolean matched) throws XPathException {
+    private boolean lookForMatchingWildcard(List<XSLExpose> exposeDeclarations, Component component,
+                                            boolean matched) throws XPathException {
         // Look for a matching wildcard
         for (XSLExpose exposure : exposeDeclarations) {
             for (ComponentTest test : exposure.getWildcardComponentTests()) {
