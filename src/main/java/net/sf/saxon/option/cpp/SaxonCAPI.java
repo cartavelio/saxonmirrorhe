@@ -233,7 +233,7 @@ public class SaxonCAPI {
      * @param processorDataRef  - long value referencing Processor object in the ObjectHandle pool
      * @return    success status. 1 for success, -1 for fail and -2 for exception thrown
      */
-    @CEntryPoint(name = "j_run_query", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_run_query")
     public static long run_query(IsolateThread thread, ObjectHandle processorDataRef) {
 
         String[] args;
