@@ -651,5 +651,9 @@ tasks.register<DotNetBuild>("dotnetBuildTestDrivers") {
   dependsOn("dotnetBuild")
   target = "TestDrivers"
   arch = extension.arch
+  dotnet = extension.dotnet
+  version = saxonBuild.version
+  edition = extension.edition
+  platform = defaultPlatform
   inputs.files(copyTestDrivers)
 }
