@@ -890,6 +890,8 @@ task "pej_preprocess"(
 
   doLast {
     patchReleaseInfo("${buildDir}/src/pej/net/sf/saxon/Version.java")
+    patchKey("${buildDir}/src/eej/com/saxonica/config/JavaVerifier.java", "dsa", dsaPublicKey)
+    patchKey("${buildDir}/src/eej/com/saxonica/config/JavaVerifier.java", "ed25519", ed25519PublicKey)
   }
 }
 
