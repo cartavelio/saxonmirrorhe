@@ -12,6 +12,11 @@ import net.sf.saxon.type.Type;
  * An XML document containing a module of an XML Schema. This object is a simple wrapper around the document
  * node of the tree representing the parsed XML schema document, and is used to provide type-safety and a level
  * of abstraction for the interfaces that use it.
+ *
+ * <p>A {@code SchemaDocument} contains an {@link XSDSchemaElement} representing the xs:schema element of the
+ * schema document. This in turn contains a {@code schema} property, of type {@link com.saxonica.ee.schema.SingleNamespaceSchema},
+ * which is populated with the schema components derived from schema documents that are imported or included
+ * from this one.</p>
  */
 public class SchemaDocument {
 
@@ -56,6 +61,9 @@ public class SchemaDocument {
     public boolean isCompiledSchemaDocument() {
         AxisIterator iter = document.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.makeNodeKindTest(Type.ELEMENT));
         NodeInfo node = iter.next();
+        if (node == null) {
+            return false;
+        }
         return node.getNamespaceUri().equals(NamespaceUri.SCM);
     }
 

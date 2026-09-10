@@ -58,7 +58,7 @@ public class SchemaModelSerializer {
      * @throws XPathException if any failure occurs
      */
 
-    public void serialize() throws XPathException {
+    public void serialize(PreparedSchema schema) throws XPathException {
         cco.open();
         cco.startDocument(ReceiverOption.NONE);
         startElement("schema");
@@ -68,7 +68,6 @@ public class SchemaModelSerializer {
         if (dmk != null) {
             emitAttribute("dmk", dmk);
         }
-        PreparedSchema schema = config.getUnnamedSchema();
         // System.err.println("Serializing schema " + schema);
         for (SchemaType type : schema.getAllTypes()) {
             SchemaType sType = type;

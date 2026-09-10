@@ -17,13 +17,11 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.*;
-import net.sf.saxon.type.MissingComponentException;
-import net.sf.saxon.type.Schema;
-import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.AnyURIValue;
 
 import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -124,6 +122,79 @@ public class SchemaCompiler {
     public int getLanguageVersion() {
         return xsdVersion;
     }
+
+    /**
+     * Load a schema from a set of schema documents.
+     *
+     * @param sources       the JAXP Source objects identifying the schema documents to be loaded. These may be either
+     *                      source schema documents in XSD format, or a compiled schema in Saxon's SCM format
+     * @return a PreparedSchema containing the compiled schema.
+     * @throws SchemaException if the schema cannot be read or parsed or if it is invalid
+     */
+
+    public PreparedSchema loadSources(Iterable<Source> sources) throws SchemaException {
+        try {
+            PreparedSchema scmSchema = null;
+            PreparedSchema xsdSchema = null;
+            int numberOfSources = 0;
+            for (Source source : sources) {
+                numberOfSources++;
+
+                //#if CSHARP==false
+                if (source instanceof SAXSource && config.getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
+                    // This option is provided to allow the parser set by applications such as Ant to be overridden by
+                    // the parser requested using FeatureKeys.SOURCE_PARSER or FeatureKeys.STYLE_PARSER
+                    ((SAXSource) source).setXMLReader(null);
+                }
+                //#endif
+
+                // SchemaReader.read() constructs a schema document and checks that it is locally valid
+                // according to the XML representation constraints. It also expands included and imported
+                // schema documents
+
+                SchemaDocument schemadoc = SchemaReader.read(source, this, null);
+                if (schemadoc.isCompiledSchemaDocument()) {
+                    if (scmSchema != null) {
+                        throw new SchemaException("An SCM input file must be loaded as a single unit");
+                    }
+                    try {
+                        scmSchema = new PreparedSchema();
+                        scmSchema.importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
+                    } catch (XPathException e) {
+                        throw new SchemaException(e);
+                    }
+                } else {
+                    // TODO: defer validation until all documents have been read
+                    if (xsdSchema == null) {
+                        xsdSchema = new PreparedSchema(getConfiguration());
+                    }
+                    PreparedSchema ps = validate(schemadoc);
+                    xsdSchema.addSchema(ps);
+                    xsdSchema.setNamespaceStatus(schemadoc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
+                }
+            }
+            if (scmSchema != null) {
+                if (numberOfSources > 1) {
+                    throw new SchemaException("An SCM input file cannot be combined with other schema documents");
+                }
+                return scmSchema;
+            }
+            if (xsdSchema != null) {
+                return xsdSchema;
+            }
+            return new PreparedSchema(getConfiguration());
+
+        } catch (UncheckedXPathException e) {
+            // indicates that the error reporter asked for termination
+            XPathException xe = e.getXPathException();
+            if (xe instanceof SchemaException) {
+                throw (SchemaException) xe;
+            } else {
+                throw new SchemaException(xe);
+            }
+        }
+    }
+
 
     /**
      * Set the PreparedSchema. Used when validating a schema loaded using the SchemaModelLoader
@@ -330,8 +401,9 @@ public class SchemaCompiler {
         SchemaDocument schemadoc = SchemaReader.read(source, this, null);
         if (schemadoc.isCompiledSchemaDocument()) {
             try {
-                getConfiguration().importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
-                return null;  // TODO
+                PreparedSchema ps  = new PreparedSchema();
+                ps.importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
+                return ps;
             } catch (XPathException e) {
                 throw new SchemaException(e);
             }

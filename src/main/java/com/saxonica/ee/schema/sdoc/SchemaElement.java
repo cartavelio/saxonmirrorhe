@@ -106,22 +106,6 @@ public abstract class SchemaElement extends ElementImpl {
     }
 
     /**
-     * Set the line number
-     */
-
-//    public void setLineNumber(int line) {
-//        lineNumber = line;
-//    }
-
-    /**
-     * Get the line number
-     */
-
-//    public int getLineNumber() {
-//        return lineNumber;
-//    }
-
-    /**
      * Process the attributes of this element and all its children
      */
 
@@ -178,6 +162,7 @@ public abstract class SchemaElement extends ElementImpl {
 
     /**
      * Recursive walk through the schema to validate all nodes
+     * against the XML Representation constraints
      *
      * @param compiler used for error reporting
      */

@@ -305,6 +305,7 @@ public class Validate {
 
             SchemaManager manager = processor.getSchemaManager();
 
+            List<Source> schemaSources = new ArrayList<>();
             for (String schemaFileName : schemaFileNames) {
                 Source schemaSource;
                 if (useURLs || CommandLineOptions.isImplicitURI(schemaFileName)) {
@@ -350,17 +351,20 @@ public class Validate {
                     return quit("URIResolver for schema file must return a Source", 2);
                 }
 
-                try {
-                    manager.load(schemaSource);
-                } catch (SaxonApiException e) {
-                    if (e.getCause() instanceof SchemaException) {
-                        // bug 2351
-                        throw (SchemaException) e.getCause();
-                    } else {
-                        throw e;
-                    }
+                schemaSources.add(schemaSource);
+            }
+
+            try {
+                manager.load(schemaSources.toArray(new Source[0]));
+            } catch (SaxonApiException e) {
+                if (e.getCause() instanceof SchemaException) {
+                    // bug 2351
+                    throw (SchemaException) e.getCause();
+                } else {
+                    throw e;
                 }
             }
+
 
             if (scmInput != null) {
                 Source scm = new StreamSource(new File(scmInput));

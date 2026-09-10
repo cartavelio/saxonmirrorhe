@@ -17,7 +17,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.SchemaException;
@@ -144,29 +143,27 @@ public abstract class SchemaReader {
             config.getLogger().info("Loading schema document " + docId);
         }
         SchemaDocument schemaDocument = buildSchemaDocument(source, compiler, referrer);
-        AxisIterator children = schemaDocument.getDocument().getRootNode().iterateAxis(
-                AxisInfo.CHILD, NodeKindTest.makeNodeKindTest(Type.ELEMENT));
-        NodeInfo top = children.next();
-        if (top.getNamespaceUri().equals(NamespaceUri.SCM)) {
+        if (schemaDocument.isCompiledSchemaDocument()) {
             if (tracing) {
                 config.getLogger().info("Loaded compiled schema document " + docId);
             }
             return schemaDocument;
         }
-        if (!(top instanceof XSDSchemaElement)) {
+        XSDSchemaElement top = schemaDocument.getXSDSchemaElement();
+        if (top == null) {
             SchemaException err = new SchemaException("Outermost element of schema document must be xs:schema");
-            Loc loc = new Loc(source.getSystemId(), top == null ? 1 : top.getLineNumber(), -1);
+            Loc loc = new Loc(source.getSystemId(), -1, -1);
             err.setLocator(loc);
             compiler.getErrorReporter().report(new XmlProcessingException(err));
             throw err;
         }
 
         compiler.setBeingRead(source.getSystemId());
-        ((XSDSchemaElement) top).processAllAttributes();
-        ((XSDSchemaElement) top).validateSubtree(compiler);
-        compiler.markAsRead(source.getSystemId(), (XSDSchemaElement) top);
+        top.processAllAttributes();
+        top.validateSubtree(compiler);
+        compiler.markAsRead(source.getSystemId(), top);
 
-        int errors = ((XSDSchemaElement) top).getErrorCount();
+        int errors = top.getErrorCount();
         if (errors > 0) {
             String msg = errors == 1 ? "One error was" : errors + " errors were";
             throw new SchemaException(msg + " found while processing the schema");

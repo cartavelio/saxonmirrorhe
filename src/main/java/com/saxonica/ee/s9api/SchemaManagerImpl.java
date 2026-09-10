@@ -13,6 +13,7 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import java.util.Arrays;
 
 /**
  * A SchemaManager is used to load schema documents, and to set options for the way in which they are loaded.
@@ -152,8 +153,8 @@ public class SchemaManagerImpl extends SchemaManager {
      *                                              with the schema components already held by this SchemaManager.
      */
 
-    @Override
-    public synchronized XsdSchema load(Source... sources) throws SaxonApiException {
+    //@Override
+    public synchronized XsdSchema loadXXXX(Source... sources) throws SaxonApiException {
         if (sealed) {
             throw new SaxonApiException("The schema for this SchemaManager has already been loaded");
         }
@@ -189,6 +190,26 @@ public class SchemaManagerImpl extends SchemaManager {
             throw new SaxonApiException(e);
         }
     }
+
+    @Override
+    public synchronized XsdSchema load(Source... sources) throws SaxonApiException {
+        if (sealed) {
+            throw new SaxonApiException("The schema for this SchemaManager has already been loaded");
+        }
+        sealed = true;
+        try {
+            final EnterpriseConfiguration config = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
+            SchemaCompiler compiler = new SchemaCompiler(config);
+            compiler.setLanguageVersion(xsdVersion);
+            PreparedSchema ps = compiler.loadSources(Arrays.asList(sources));
+            if (!schemaName.equals("#local")) {
+                config.registerNamedSchema(schemaName, ps);
+            }
+            return new XsdSchemaImpl(ps);
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
+    }
     /**
      * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
      * document are added to the cache of schema components maintained by this SchemaManager
@@ -212,6 +233,10 @@ public class SchemaManagerImpl extends SchemaManager {
         return new XsdSchemaImpl(schema);
     }
 
+    public void clear() {
+        schema = null;
+    }
+
     public XsdSchema getXsdSchema() {
         return new XsdSchemaImpl(schema);
     }
@@ -233,7 +258,7 @@ public class SchemaManagerImpl extends SchemaManager {
                 throw new SaxonApiException("Exporting to an SCM file is not possible when unresolved references to schema components have been permitted");
             }
             Receiver out = destination.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
-            config.exportComponents(out);
+            schema.exportComponents(out);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
