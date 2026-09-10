@@ -180,9 +180,7 @@
     }
 
     XsdSchema * XsdCompiler::compileFromFiles(const char ** filenames, int count) {
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-            std::cerr << "compileFromFiles cp0 count="<<count << std::endl;
-        }
+
         if (filenames == nullptr || count == 0) {
             throw SaxonApiException("Error: filenames cannot be NULL");
         }
@@ -192,9 +190,6 @@
         saxon_error_t r = SAXON_ERROR_DEFAULT;
 
         schemaFilesRef = createProcessorDataWithCapacity(thread, (int) count);
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-            std::cerr << "compileFromFiles cp1" << std::endl;
-        }
         for (int i=0; i<count; i++) {
             if (filenames[i] != nullptr) {
                 addProcessorProperty(thread, (void *)schemaFilesRef, (char *)filenames[i], &r);
@@ -205,9 +200,6 @@
 
         if (r.status == SXN_EXCEPTION) {
             throw SaxonApiException(r);
-        }
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-            std::cerr << "compileFromFiles cp2" << std::endl;
         }
 
         int64_t processorDataRef =
@@ -228,10 +220,6 @@
         if (schemaFilesRef != SXN_UNSET) {
             j_handles_destroy(thread,(void *)schemaFilesRef);
             schemaFilesRef = SXN_UNSET;
-        }
-
-        if (getenv("SAXONC_DEBUG_FLAG")) {
-            std::cerr << "compileFromFiles r.status" <<((long)r.status) << std::endl;
         }
 
         if (r.status == SXN_EXCEPTION) {

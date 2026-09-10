@@ -166,7 +166,11 @@ void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
 }
 
 void XsltExecutable::setOutputFile(const char *ofile) {
-  setProperty("o", ofile);
+  if (ofile != nullptr) {
+    setProperty("o", ofile);
+  } else {
+    throw SaxonApiException("XsltExecutable output file cannot be null");
+  }
 }
 
 void XsltExecutable::setBaseOutputURI(const char *baseURI) {
@@ -299,12 +303,12 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
 XdmValue *XsltExecutable::getParameter(const char *name, bool withParam) {
   std::map<std::string, XdmValue *>::iterator it;
   it = parameters.find((withParam ? "param:" : "") + std::string(name));
-  if (it != parameters.end())
+  if (it != parameters.end()) {
     return it->second;
-  else {
-    it = parameters.find((withParam ? "sparam:" : "")  + std::string(name));
-    if (it != parameters.end())
-      return it->second;
+  }
+  it = parameters.find((withParam ? "sparam:" : "")  + std::string(name));
+  if (it != parameters.end()) {
+    return it->second;
   }
   return nullptr;
 }
@@ -417,7 +421,6 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
-
   int additions = 0;
   if (saxonMessageHandlerRef != SXN_UNSET) {
     additions++;
@@ -451,7 +454,7 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
                          (void *)saxonResultDocRef, &r);
   }
 
-  long status = j_applyTemplatesReturningFile(
+  j_applyTemplatesReturningFile(
       thread, (char *)cwdXE.c_str(),
       (void *)executableRef,
       (void *)(selectionRef == SXN_UNSET ? (void *)nullptr
@@ -526,8 +529,6 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 }
 
 XdmValue *XsltExecutable::applyTemplatesReturningValue() {
-  
-
 
   int additions = 0;
 
@@ -591,9 +592,6 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
                                                XdmValue **arguments,
                                                int argument_length,
                                                const char *outfile) {
-
-  
-
 
   int additions = 0;
   if(saxonMessageHandlerRef != SXN_UNSET ) {
@@ -663,9 +661,6 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
 
 const char *XsltExecutable::callFunctionReturningString(
     const char *functionName, XdmValue **arguments, int argument_length) {
-
-  
-
 
   int additions = 0;
 
@@ -740,9 +735,6 @@ const char *XsltExecutable::callFunctionReturningString(
 XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
                                                      XdmValue **arguments,
                                                      int argument_length) {
-
-  
-
 
   int additions = 0;
 
@@ -856,7 +848,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
     }
   }
 
-  long status = j_callTemplateReturningFile(
+  j_callTemplateReturningFile(
       thread, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)templateName, (char *)outfile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
@@ -872,8 +864,6 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
 
 const char *
 XsltExecutable::callTemplateReturningString(const char *templateName) {
-  
-
 
   int additions = 0;
   if (saxonMessageHandlerRef != SXN_UNSET) {
@@ -920,8 +910,6 @@ XsltExecutable::callTemplateReturningString(const char *templateName) {
 }
 
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
-  
-
 
   int additions = 0;
 
@@ -981,9 +969,6 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 }
 
 XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
-
-
-
 
   int additions = 0;
 
@@ -1052,8 +1037,6 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
 
 void XsltExecutable::transformFileToFile(const char *source,
                                          const char *outputfile) {
-
-
 
   int additions = 0;
 

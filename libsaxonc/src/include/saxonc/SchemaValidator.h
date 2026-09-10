@@ -156,7 +156,7 @@ public:
   /**
    * Set the source node for validation.
    * @param source - The source document supplied as an XdmNode, which will be
-   * used to validate against the schema using the validate methods.
+   * used to validate against the schema using the validate methods. Throw exception if source is NULL.
    * The caller is responsible for deallocation of memory associated with the source node.
    */
   void setSourceNode(XdmNode *source);

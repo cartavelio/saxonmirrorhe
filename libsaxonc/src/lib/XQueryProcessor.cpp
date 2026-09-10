@@ -83,6 +83,9 @@ XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
   } else {
     schemaRef = other.schemaRef;
   }
+  
+  baseURIState = other.baseURIState;
+  baseURI = other.baseURI;
 
   std::map<std::string, XdmValue *>::const_iterator paramIter =
       other.parameters.begin();
@@ -138,32 +141,38 @@ void XQueryProcessor::setContextItem(XdmItem *value) {
 void XQueryProcessor::declareNamespace(const char *prefix, const char *uri) {
   if (prefix == nullptr || uri == nullptr) {
     return;
-  } else {
-    // setProperty("ns-prefix", uri);
-    size_t s = properties.size();
-    std::string skey = std::string("ns-prefix:") + prefix;
-    properties.insert(
-        std::pair<std::string, std::string>(skey, std::string(uri)));
+  }
+  size_t s = properties.size();
+  std::string skey = std::string("ns-prefix:") + prefix;
+  properties.insert(
+    std::pair<std::string, std::string>(skey, std::string(uri)));
 
-    if (s == properties.size()) {
-      std::map<std::string, std::string>::iterator it;
-      it = properties.find(skey);
-      if (it != properties.end()) {
-        properties.erase(skey);
-        properties[skey] = std::string(uri);
-      }
+  if (s == properties.size()) {
+    std::map<std::string, std::string>::iterator it;
+    it = properties.find(skey);
+    if (it != properties.end()) {
+      properties.erase(skey);
+      properties[skey] = std::string(uri);
     }
   }
 }
 
 // Set the source document for the query
 void XQueryProcessor::setContextItemFromFile(const char *ifile) {
-  setProperty("s", ifile);
+  if (ifile != nullptr) {
+    setProperty("s", ifile);
+  } else {
+    throw SaxonApiException("Source document for query cannot be null");
+  }
 }
 
 // Set the output file where the result is sent
 void XQueryProcessor::setOutputFile(const char *ofile) {
-  setProperty("o", ofile);
+  if (ofile != nullptr) {
+    setProperty("o", ofile);
+  } else {
+    throw SaxonApiException("Output file name for query cannot be null");
+  }
 }
 
 XdmValue *XQueryProcessor::getParameter(const char *name, bool withParam) {
@@ -531,10 +540,13 @@ void XQueryProcessor::setStreaming(bool option) {
 bool XQueryProcessor::isStreaming() const { return streaming; }
 
 void XQueryProcessor::setLanguageVersion(const char *version) {
-  setProperty("-lang-version", version);
+  if (version != nullptr) {
+    setProperty("-lang-version", version);
+  } else {
+    throw SaxonApiException("XQuery version must be 3.1 or 4.0. Null given");
+  }
 }
 
 void XQueryProcessor::setQueryContent(const char *content) {
-  // outputfile1 = std::string(content);
   setProperty("qs", content);
 }

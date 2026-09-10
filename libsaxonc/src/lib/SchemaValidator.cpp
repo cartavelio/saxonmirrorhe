@@ -351,6 +351,8 @@ XdmNode *SchemaValidator::validateToNode(const char *sourceFile) {
 void SchemaValidator::setSourceNode(XdmNode *value) {
   if (value != nullptr) {
     setParameter("node", value, false);
+  } else {
+    throw SaxonApiException("Source node cannot be null");
   }
 }
 
