@@ -205,38 +205,33 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                 List<Item> content = new ArrayList<>();
                 NodeInfo target = (NodeInfo) targetEval.eval(context);
                 if (target == null) {
-                    XPathException err = new XPathException("Target of replace expression must not be empty", "XUDY0027");
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                    throw new XPathException("Target of replace expression must not be empty", "XUDY0027")
+                            .withLocation(expr.getLocation());
                 }
                 if (!target.getTreeInfo().isMutable()) {
                     throw new XPathException("Attempting to update a non-updatable tree", SaxonErrorCode.SXUP0081);
                 }
                 int kind = target.getNodeKind();
                 if (kind == Type.NAMESPACE) {
-                    XPathException err = new XPathException(
-                            "Target of replace expression must not be a namespace node", "XUTY0008");
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                    throw new XPathException(
+                            "Target of replace expression must not be a namespace node", "XUTY0008")
+                            .withLocation(expr.getLocation());
                 }
                 if (kind == Type.DOCUMENT) {
-                    XPathException err = new XPathException(
-                            "Target of replace expression must not be a document node", "XUTY0008");
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                    throw new XPathException(
+                            "Target of replace expression must not be a document node", "XUTY0008")
+                            .withLocation(expr.getLocation());
                 }
                 NodeInfo parent = target.getParent();
                 if (parent == null) {
-                    XPathException err = new XPathException("Target node of replace expression has no parent",
-                                                            "XUDY0009");
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                    throw new XPathException("Target node of replace expression has no parent",
+                                                            "XUDY0009")
+                            .withLocation(expr.getLocation());
                 }
                 if (!(parent instanceof MutableNodeInfo)) {
-                    XPathException err = new XPathException("Target node of replace expression is not updatable",
-                                                            SaxonErrorCode.SXUP0081);
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                    throw new XPathException("Target node of replace expression is not updatable",
+                                                            SaxonErrorCode.SXUP0081)
+                            .withLocation(expr.getLocation());
                 }
                 if (kind == Type.ATTRIBUTE) {
                     SequenceIterator iter = replacementEval.iterate(context);
@@ -244,11 +239,10 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                     for (Item item; (item = iter.next()) != null; ) {
                         boolean isAttribute = item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE;
                         if (!isAttribute) {
-                            XPathException err = new XPathException(
+                            throw new XPathException(
                                     "The replacement nodes for an attribute must all be attributes",
-                                    "XUTY0011");
-                            err.setLocation(expr.getLocation());
-                            throw err;
+                                    "XUTY0011")
+                                    .withLocation(expr.getLocation());
                         }
 
                         NodeInfo att = (NodeInfo) item;
@@ -280,11 +274,10 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                     SequenceIterator iter = replacementEval.iterate(context);
                     for (Item item; (item = iter.next()) != null; ) {
                         if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE) {
-                            XPathException err = new XPathException(
+                            throw new XPathException(
                                     "An attribute node cannot replace a node that is not itself an attribute",
-                                    "XUTY0010");
-                            err.setLocation(expr.getLocation());
-                            throw err;
+                                    "XUTY0010")
+                                    .withLocation(expr.getLocation());
                         } else {
                             content.add(item);
                         }
@@ -296,9 +289,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                             action.setOriginator(expr);
                             ((PendingUpdateListImpl) pul).add(action);
                         } catch (XPathException e) {
-                            e.maybeSetLocation(expr.getLocation());
-                            e.maybeSetContext(context);
-                            throw e;
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     } else {
                         // Make copies of the inserted nodes, and convert them to use the same object model implementation
@@ -345,9 +336,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                             action.setOriginator(expr);
                             ((PendingUpdateListImpl) pul).add(action);
                         } catch (XPathException e) {
-                            e.maybeSetLocation(expr.getLocation());
-                            e.maybeSetContext(context);
-                            throw e;
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     }
                 }

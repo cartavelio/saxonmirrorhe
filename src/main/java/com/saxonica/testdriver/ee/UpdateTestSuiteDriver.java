@@ -744,7 +744,7 @@ public class UpdateTestSuiteDriver {
 
     private void processError(XPathException err, NodeInfo state, String testName, NameTest expectedErrorNT, boolean reportResult)
             throws IOException {
-        String actualError = err.getErrorCodeLocalPart();
+        StructuredQName actualError = err.getErrorCodeQName();
         AxisIterator expectedErrors = state.iterateAxis(AxisInfo.CHILD, expectedErrorNT);
         StringBuilder expected = new StringBuilder(20);
         while (true) {
@@ -752,7 +752,7 @@ public class UpdateTestSuiteDriver {
             if (expectedError == null) {
                 break;
             }
-            if (expectedError.getStringValue().equals(actualError)) {
+            if (expectedError.getStringValue().equals(actualError.getLocalPart())) {
                 if (reportResult) {
                     successes++;
                     results.write("  <test-case name='" + testName + "' result='pass'/>\n");
@@ -1110,11 +1110,11 @@ public class UpdateTestSuiteDriver {
         @Override
         public void error(TransformerException exception) {
             if (exception instanceof XPathException) {
-                String code = ((XPathException) exception).getErrorCodeLocalPart();
+                String code = ((XPathException) exception).getErrorCodeQName().getLocalPart();
                 if (code != null) {
                     errorCode = code;
                 }
-                if ("FODC0005".equals(errorCode) || "FODC0002".equals(errorCode)) {
+                if (((XPathException) exception).hasErrorCode("FODC0005", "FODC0002")) {
                     fatalError(exception);
                 }
             }
@@ -1128,7 +1128,7 @@ public class UpdateTestSuiteDriver {
         @Override
         public void fatalError(TransformerException exception) {
             if (exception instanceof XPathException) {
-                String code = ((XPathException) exception).getErrorCodeLocalPart();
+                String code = ((XPathException) exception).getErrorCodeQName().getLocalPart();
                 if (code != null) {
                     errorCode = code;
                 }

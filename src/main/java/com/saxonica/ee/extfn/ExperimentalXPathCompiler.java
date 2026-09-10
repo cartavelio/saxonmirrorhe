@@ -225,9 +225,8 @@ public class ExperimentalXPathCompiler {
                     expr = make(exprText, env, inCatch, allowEmpty);
                 }
             } catch (XPathException e) {
-                XPathException err = new XPathException("Error in XPath expression {" + exprText + "}: " + e.getMessage());
-                err.setErrorCode("XTDE3160");
-                throw err;
+                throw new XPathException("Error in XPath expression {" + exprText + "}: " + e.getMessage())
+                        .withErrorCode("XTDE3160");
             }
 
             ExpressionVisitor visitor = new ExpressionVisitor(config);

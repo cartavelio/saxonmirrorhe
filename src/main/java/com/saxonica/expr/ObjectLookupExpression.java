@@ -76,10 +76,8 @@ public class ObjectLookupExpression extends LookupExpression {
             Map<String, FunctionItem> methodMap = ObjectMap.makeMethodMap(config, theClass, methodName);
             FunctionItem f = methodMap.get(methodName);
             if (f == null) {
-                XPathException err = new XPathException("No unique method " + methodName + " found in class " + theClass, "XPTY0004");
-                err.setIsTypeError(true);
-                err.setLocation(getLocation());
-                throw err;
+                throw new XPathException("No unique method " + methodName + " found in class " + theClass, "XPTY0004")
+                        .asTypeError().withLocation(getLocation());
             } else {
                 reflexiveFunction = f;
             }

@@ -72,9 +72,7 @@ public class ElementCreatorFeed extends ComplexNodeEventFeed {
             instr.outputNamespaceNodes(next, elemName, null);
 
         } catch (XPathException e) {
-            e.maybeSetLocation(instr.getLocation());
-            e.maybeSetContext(context);
-            throw e;
+            throw e.maybeWithLocation(instr.getLocation()).maybeWithContext(context);
         }
     }
 

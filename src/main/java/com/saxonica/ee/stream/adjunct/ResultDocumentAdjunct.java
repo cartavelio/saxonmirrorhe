@@ -61,8 +61,7 @@ public class ResultDocumentAdjunct extends ParentConstructorAdjunct {
             try {
                 next.endDocument();
             } catch (XPathException err) {
-                err.setXPathContext(context);
-                throw err;
+                throw err.withXPathContext(context);
             }
             next.close();
         }

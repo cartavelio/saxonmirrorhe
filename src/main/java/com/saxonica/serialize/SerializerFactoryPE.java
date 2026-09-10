@@ -84,9 +84,8 @@ public class SerializerFactoryPE extends SerializerFactory {
             return emitter;
 
         } else {
-            XPathException err = new XPathException("Unknown serialization method " + method);
-            err.setErrorCode(SaxonErrorCode.SXCH0004);
-            throw err;
+            throw new XPathException("Unknown serialization method " + method)
+                    .withErrorCode(SaxonErrorCode.SXCH0004);
         }
     }
 

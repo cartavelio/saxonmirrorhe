@@ -262,10 +262,9 @@ public class CompileXPath extends SystemFunction {
                 expr = make(exprText, env, 0, Token.EOF, null, inCatch);
             }
         } catch (XPathException e) {
-            XPathException err = new XPathException("Static error in XPath expression supplied to saxon:compile-XPath: " +
-                                                            e.getMessage() + ". Expression: {" + exprText + "}");
-            err.setErrorCode("XTDE3160");
-            throw err;
+            throw new XPathException("Static error in XPath expression supplied to saxon:compile-XPath: " +
+                                                            e.getMessage() + ". Expression: {" + exprText + "}")
+                    .withErrorCode("XTDE3160");
         }
 
         ExpressionVisitor visitor = new ExpressionVisitor(configuration);

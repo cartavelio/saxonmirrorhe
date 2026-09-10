@@ -681,9 +681,8 @@ public class OptimizerEE extends Optimizer {
                 for (String reason : reasons) {
                     message.append("\n  * ").append(reason);
                 }
-                XPathException err = new XPathException(message.toString());
-                err.setErrorCode("XTSE3430");
-                err.setLocator(sourceTemplate);
+                XPathException err = new XPathException(message.toString(), "XTSE3430")
+                        .withLocation(sourceTemplate);
                 if (fallback) {
                     message.append("\n  * Falling back to non-streaming implementation");
                     sourceTemplate.getStaticContext().issueWarning(message.toString(), SaxonErrorCode.SXWN9024, sourceTemplate);
@@ -1970,7 +1969,7 @@ public class OptimizerEE extends Optimizer {
             }
             // Create an accumulator that maintains the value of the xsl:number result
             SlotManager slots = getConfiguration().makeSlotManager();
-            StructuredQName valueName = new StructuredQName("", NamespaceUri.NULL, "value");
+            StructuredQName valueName = NamespaceUri.NULL.qName("value");
             slots.allocateSlotNumber(valueName);
             SuppliedParameterReference ref = new SuppliedParameterReference(0);
             ArithmeticExpression increment = new ArithmeticExpression(ref, Token.PLUS, Literal.makeLiteral(Int64Value.PLUS_ONE, ni));

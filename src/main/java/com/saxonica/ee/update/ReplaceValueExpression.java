@@ -228,24 +228,19 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
 
                 }
                 if (err != null) {
-                    err.setLocation(expr.getLocation());
-                    err.setXPathContext(context);
-                    throw err;
+                    throw err.withLocation(expr.getLocation()).withXPathContext(context);
                 }
                 if (!(targetNode instanceof MutableNodeInfo)) {
-                    XPathException er = new XPathException("Target node of replace value expression is not updatable",
-                                                           SaxonErrorCode.SXUP0081);
-                    er.setLocation(expr.getLocation());
-                    throw er;
+                    throw new XPathException("Target node of replace value expression is not updatable",
+                                                           SaxonErrorCode.SXUP0081)
+                            .withLocation(expr.getLocation());
                 }
                 try {
                     ReplaceValueAction action = new ReplaceValueAction(StringView.tidy(newString), (MutableNodeInfo) targetNode);
                     action.setOriginator(expr);
                     ((PendingUpdateListImpl) pul).add(action);
                 } catch (XPathException e) {
-                    e.maybeSetLocation(expr.getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
+                    throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                 }
             };
         }

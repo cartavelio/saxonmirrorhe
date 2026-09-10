@@ -96,10 +96,11 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
                         value = new DoubleValue(converter.stringToNumber(value.getUnicodeStringValue()));
                         foundDouble = true;
                     } catch (NumberFormatException e) {
-                        XPathException de = new XPathException("Failure converting " + Err.wrap(value.getUnicodeStringValue()) + " to a number");
-                        de.setErrorCode("FORG0001");
-                        de.setXPathContext(getContext());
-                        dynamicError(de);
+                        dynamicError(
+                                new XPathException("Failure converting " + Err.wrap(value.getUnicodeStringValue())
+                                                           + " to a number")
+                                            .withErrorCode("FORG0001")
+                                            .withXPathContext(getContext()));
                         return;
                     }
                 } else {
@@ -119,10 +120,9 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
                     }
                 } else {
                     if (!value.getPrimitiveType().isOrdered(false)) {
-                        XPathException de = new XPathException("Type " + value.getPrimitiveType() + " is not an ordered type");
-                        de.setErrorCode("FORG0006");
+                        XPathException de = new XPathException("Type " + value.getPrimitiveType() + " is not an ordered type")
+                                .withErrorCode("FORG0006").withXPathContext(getContext());
                         de.setIsTypeError(true);
-                        de.setXPathContext(getContext());
                         dynamicError(de);
                         return;
                     }
@@ -169,10 +169,9 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
                     } catch (XPathException err) {
                         dynamicError(err);
                     } catch (ClassCastException err) {
-                        XPathException de = new XPathException("Cannot compare " + min.getItemType() + " with " + value.getItemType());
-                        de.setErrorCode("FORG0006");
+                        XPathException de = new XPathException("Cannot compare " + min.getItemType() + " with " + value.getItemType())
+                            .withErrorCode("FORG0006").withXPathContext(getContext());
                         de.setIsTypeError(true);
-                        de.setXPathContext(getContext());
                         dynamicError(de);
                     }
                 }

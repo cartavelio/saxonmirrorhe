@@ -35,18 +35,13 @@ public class ParseQNameFn extends SystemFunction {
             final String[] parts = NameChecker.getQNameParts(lexical.getStringValue());
             // The QNameValue constructor does not check the prefix
             if (!parts[0].isEmpty() && !NameChecker.isValidNCName(parts[0])) {
-                XPathException err = new XPathException("Malformed prefix in QName: '" + parts[0] + '\'');
-                err.setErrorCode("FOCA0002");
-                throw err;
+                throw new XPathException("Malformed prefix in QName: '" + parts[0] + '\'', "FOCA0002");
             }
             return new QNameValue(parts[0], NamespaceUri.of(uri), parts[1], BuiltInAtomicType.QNAME, true);
         } catch (QNameException e) {
             throw new XPathException(e.getMessage(), "FOCA0002");
         } catch (XPathException err) {
-            if (err.getErrorCodeLocalPart().equals("FORG0001")) {
-                err.setErrorCode("FOCA0002");
-            }
-            throw err;
+            throw err.replacingErrorCode("FORG0001", "FOCA0002");
         }
     }
 

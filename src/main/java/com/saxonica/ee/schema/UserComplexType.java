@@ -2871,12 +2871,10 @@ public class UserComplexType extends UserDefinedType
         for (AttributeUse use : getAttributeGroup().getAttributeUses()) {
             if (use.isRequired()) {
                 if (th.relationship(expression.getItemType(), NodeKindTest.ATTRIBUTE) == Affinity.DISJOINT) {
-                    XPathException err = new XPathException("Type " + getDescription() + " defines a mandatory attribute " +
+                    throw new XPathException("Type " + getDescription() + " defines a mandatory attribute " +
                             use.getTargetComponentName().getDisplayName() +
-                            ", but there is no instruction to create such an attribute");
-                    err.setLocation(expression.getLocation());
-                    err.setIsStaticError(true);
-                    throw err;
+                            ", but there is no instruction to create such an attribute")
+                            .withLocation(expression.getLocation()).asStaticError();
                 }
 
                 if (expression instanceof Block) {
@@ -2900,9 +2898,9 @@ public class UserComplexType extends UserDefinedType
                     if (!foundPossible) {
                         XPathException err = new XPathException("Type " + getDescription() + " defines a mandatory attribute " +
                             use.getTargetComponentName().getDisplayName() +
-                                ", but there is no instruction to create such an attribute");
-                        err.setLocation(expression.getLocation());
-                        err.setIsStaticError(true);
+                                ", but there is no instruction to create such an attribute")
+                                .withLocation(expression.getLocation())
+                                .asStaticError();
                         throw err;
                     }
 
@@ -2963,18 +2961,13 @@ public class UserComplexType extends UserDefinedType
                                         (openContentWildcard == null ? "" : " (it does not match the open content wildcard)") +
                                         ". " + sb;
                             }
-                            XPathException ve = new XPathException(message);
-                            ve.setErrorCode("XPTY0004");
-                            ve.setLocation(child.getLocation());
-                            throw ve;
+                            throw new XPathException(message, "XPTY0004").withLocation(child.getLocation());
                         }
                         try {
                             state = edge.makeTransition(state);
                         } catch (ValidationException e) {
-                            XPathException ve = new XPathException(e.getMessage());
-                            ve.setErrorCode("XPTY0004");
-                            ve.setLocation(expression.getLocation());
-                            throw ve;
+                            throw new XPathException(e.getMessage(), "XPTY0004")
+                                    .withLocation(expression.getLocation());
                         }
 
                     } else {
@@ -2988,15 +2981,13 @@ public class UserComplexType extends UserDefinedType
                 if (!state.isFinalState()) {
                     int len = children.length;
                     if (len == 0) {
-                        XPathException ve = new XPathException("The generated content is empty: the schema requires at least one child element");
-                        ve.setErrorCode("XPTY0004");
-                        ve.setLocation(expression.getLocation());
-                        throw ve;
+                        throw new XPathException("The generated content is empty: the schema requires at least one child element")
+                                .withErrorCode("XPTY0004")
+                                .withLocation(expression.getLocation());
                     } else {
-                        XPathException ve = new XPathException("The generated content is incomplete: the schema requires further child elements");
-                        ve.setErrorCode("XPTY0004");
-                        ve.setLocation(children[len - 1].getChildExpression().getLocation());
-                        throw ve;
+                        throw new XPathException("The generated content is incomplete: the schema requires further child elements")
+                                .withErrorCode("XPTY0004")
+                                .withLocation(children[len - 1].getChildExpression().getLocation());
                     }
                 }
             }
@@ -3034,10 +3025,9 @@ public class UserComplexType extends UserDefinedType
         } else if (isEmptyContent()) {
             return EmptyAtomicSequence.getInstance();
         } else {
-            XPathException err = new XPathException("Cannot get the typed value of an element (" + node.getDisplayName() + ") with element-only content");
-            err.setErrorCode("FOTY0012");
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException("Cannot get the typed value of an element (" + node.getDisplayName() + ") with element-only content")
+                    .withErrorCode("FOTY0012")
+                    .asTypeError();
         }
     }
 

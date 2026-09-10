@@ -34,9 +34,8 @@ public class SQLExecuteFn extends SystemFunction {
             }
 
         } catch (SQLException ex) {
-            XPathException de = new XPathException("sql:execute() failed: " + ex.getMessage());
-            de.setXPathContext(context);
-            throw de;
+            throw new XPathException("sql:execute() failed: " + ex.getMessage())
+                    .withXPathContext(context);
         }
 
         return EmptySequence.getInstance();

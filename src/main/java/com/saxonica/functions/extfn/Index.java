@@ -60,9 +60,8 @@ public class Index extends SystemFunction {
                 }
                 return imap;
             } else {
-                XPathException err = new XPathException("Second argument of saxon:index must be a function item");
-                err.setXPathContext(context);
-                throw err;
+                throw new XPathException("Second argument of saxon:index must be a function item")
+                    .withXPathContext(context);
             }
         }
 

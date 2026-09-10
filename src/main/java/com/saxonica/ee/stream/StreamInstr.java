@@ -352,11 +352,7 @@ public class StreamInstr extends SourceDocument implements Pusher {
                     }
                     // otherwise, no action
                 } catch (XPathException e) {
-                    e.maybeSetLocation(expr.getLocation());
-                    if (e.getErrorCodeQName() == null) {
-                        e.setErrorCode("FODC0002");
-                    }
-                    throw e;
+                    throw e.maybeWithLocation(expr.getLocation()).maybeWithErrorCode("FODC0002");
                 }
                 return null;
             };

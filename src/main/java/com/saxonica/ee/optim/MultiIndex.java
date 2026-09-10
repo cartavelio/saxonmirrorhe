@@ -107,10 +107,7 @@ public class MultiIndex {
                                 untypedType.getDisplayName() +
                                 " during comparison operation. " +
                                 ((ValidationFailure) result).getMessage();
-                        XPathException de = new XPathException(msg);
-                        de.setErrorCode("FORG0001");
-                        de.setXPathContext(context);
-                        throw de;
+                        throw new XPathException(msg, "FORG0001").withXPathContext(context);
                     } else {
                         val2 = (AtomicValue) result;
                     }
@@ -214,10 +211,7 @@ public class MultiIndex {
                         if (!Type.isGuaranteedComparable(type, soughtType, false)) {
                             String message =
                                     "General comparison: cannot compare " + type + " to " + soughtType;
-                            XPathException err = new XPathException(message);
-                            err.setErrorCode("XPTY0004");
-                            err.setIsTypeError(true);
-                            throw err;
+                            throw new XPathException(message, "XPTY0004").asTypeError();
                         }
                     };
                 } else {
@@ -232,10 +226,7 @@ public class MultiIndex {
                         }
                         if (!Type.isGuaranteedComparable(t0, t1, false)) {
                             String message = "Value comparison: cannot compare " + type + " to " + soughtType;
-                            XPathException err = new XPathException(message);
-                            err.setErrorCode("XPTY0004");
-                            err.setIsTypeError(true);
-                            throw err;
+                            throw new XPathException(message, "XPTY0004").asTypeError();
                         }
                     };
                 }
@@ -254,10 +245,7 @@ public class MultiIndex {
                         BuiltInAtomicType indexedType = (BuiltInAtomicType) BuiltInType.getSchemaType(type);
                         if (!Type.isGuaranteedComparable(soughtType, indexedType, false)) {
                             String message = "Cannot compare " + indexedType + " to " + soughtType;
-                            XPathException err = new XPathException(message);
-                            err.setErrorCode("XPTY0004");
-                            err.setIsTypeError(true);
-                            throw err;
+                            throw new XPathException(message, "XPTY0004").asTypeError();
                         }
                     }
                     vi.typesChecked.add(soughtType.getFingerprint());
@@ -282,10 +270,7 @@ public class MultiIndex {
                                 requiredType.getDisplayName() +
                                 " during comparison operation. " +
                                 ((ValidationFailure) result).getMessage();
-                        XPathException de = new XPathException(msg);
-                        de.setErrorCode("FORG0001");
-                        de.setXPathContext(context);
-                        throw de;
+                        throw new XPathException(msg, "FORG0001").withXPathContext(context);
                     } else {
                         conv = (AtomicValue) result;
                     }

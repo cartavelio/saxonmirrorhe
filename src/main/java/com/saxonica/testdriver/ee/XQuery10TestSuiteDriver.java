@@ -457,7 +457,7 @@ public class XQuery10TestSuiteDriver {
 
                 setQueryParameters(catalog, testCase, dqc, inputUriNT, collectionNT);
                 if (unfolded) {
-                    dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, "zlsJJ"), StringValue.ZERO_LENGTH_UNTYPED);
+                    dqc.setParameter(NamespaceUri.NULL.qName("zlsJJ"), StringValue.ZERO_LENGTH_UNTYPED);
                 }
 
                 NodeInfo defaultCollection = getChildElement(testCase, defaultCollectionNT);
@@ -704,7 +704,7 @@ public class XQuery10TestSuiteDriver {
 
     private void processError(XPathException err, NodeInfo testCase, String testName, String queryPath, NameTest expectedErrorNT)
             throws java.io.IOException, XMLStreamException {
-        String actualError = err.getErrorCodeLocalPart();
+        String actualError = err.getErrorCodeQName().getLocalPart();
         AxisIterator expectedErrors = testCase.iterateAxis(AxisInfo.CHILD, expectedErrorNT);
         StringBuilder expected = new StringBuilder(20);
         while (true) {
@@ -1262,7 +1262,7 @@ public class XQuery10TestSuiteDriver {
         @Override
         public void error(TransformerException exception) {
             if (exception instanceof XPathException) {
-                String code = ((XPathException) exception).getErrorCodeLocalPart();
+                String code = ((XPathException) exception).getErrorCodeQName().getLocalPart();
                 if (code != null) {
                     errorCode = code;
                 }
@@ -1280,7 +1280,7 @@ public class XQuery10TestSuiteDriver {
         @Override
         public void fatalError(TransformerException exception) {
             if (exception instanceof XPathException) {
-                String code = ((XPathException) exception).getErrorCodeLocalPart();
+                String code = ((XPathException) exception).getErrorCodeQName().getLocalPart();
                 if (code != null) {
                     errorCode = code;
                 }

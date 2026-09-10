@@ -70,11 +70,10 @@ public class SaxonAssign extends XSLGeneralVariable {
         try {
             globalVariable = bindVariable(name);
             if (globalVariable == null) {
-                XPathException err = new XPathException("Variable " + name.getDisplayName() +
-                        " has not been declared");
-                err.setErrorCode("XPST0008");
-                err.setIsStaticError(true);
-                throw err;
+                throw new XPathException("Variable " + name.getDisplayName() +
+                        " has not been declared")
+                        .withErrorCode("XPST0008")
+                        .asStaticError();
             }
             globalVariable.registerReference(instruction);
         } catch (XPathException err) {

@@ -73,9 +73,7 @@ public class DocumentInstrAdjunct extends ParentConstructorAdjunct implements Fe
 //                setComplexContentOutputter(out);
 
             } catch (XPathException e) {
-                e.maybeSetLocation(exp.getLocation());
-                e.maybeSetContext(context);
-                dynamicError(e);
+                dynamicError(e.maybeWithLocation(exp.getLocation()).maybeWithContext(context));
             }
         }
 

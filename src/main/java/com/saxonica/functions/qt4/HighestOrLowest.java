@@ -74,9 +74,7 @@ public class HighestOrLowest extends SystemFunction {
 
         StringCollator collator = config.getCollation(collationUri);
         if (collator == null) {
-            XPathException e = new XPathException("Unknown collation " + getRetainedStaticContext().getDefaultCollationName());
-            e.setErrorCode("FOCH0002");
-            throw e;
+            throw new XPathException("Unknown collation " + getRetainedStaticContext().getDefaultCollationName(), "FOCH0002");
         }
         AtomicComparer comparer = new GenericAtomicComparer(collator, context);
         if (getFunctionName().getLocalPart().equals("lowest")) {
@@ -113,20 +111,18 @@ public class HighestOrLowest extends SystemFunction {
                     try {
                         keyVal = new DoubleValue(converter.stringToNumber(keyVal.getUnicodeStringValue()));
                     } catch (NumberFormatException e) {
-                        XPathException de = new XPathException("Failed to convert key to xs:double: " + e.getMessage(), "FORG0001");
-                        de.setXPathContext(context);
-                        throw de;
+                        throw new XPathException("Failed to convert key to xs:double: " + e.getMessage(), "FORG0001")
+                            .withXPathContext(context);
                     }
                 }
                 if (keyVal.isNaN()) {
                     continue;
                 }
                 if (!keyVal.getPrimitiveType().isOrdered(false)) {
-                    XPathException de = new XPathException("Type " + keyVal.getPrimitiveType() + " is not an ordered type");
-                    de.setErrorCode("FORG0006");
-                    de.setIsTypeError(true);
-                    de.setXPathContext(context);
-                    throw de;
+                    throw new XPathException("Type " + keyVal.getPrimitiveType() + " is not an ordered type")
+                            .withErrorCode("FORG0006")
+                            .asTypeError()
+                            .withXPathContext(context);
                 }
                 if (maxSoFar == null) {
                     highestSoFar.add(next);

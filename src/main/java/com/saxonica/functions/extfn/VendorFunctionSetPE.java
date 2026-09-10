@@ -636,9 +636,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             Item pi = context.getContextItem();
             if (pi == null) {
-                XPathException e = new XPathException("The context item for saxon:get-pseudo-attribute() is not set");
-                e.setXPathContext(context);
-                throw e;
+                throw new XPathException("The context item for saxon:get-pseudo-attribute() is not set")
+                    .withXPathContext(context);
             }
             // we'll assume it's a PI, it doesn't matter if it isn't...
             final String value = ProcInstParser.getPseudoAttribute(pi.getStringValue(), arguments[0].head().getStringValue());
@@ -1053,10 +1052,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         int ch32 = UTF16CharacterSet.firstInvalidChar(
                 StringTool.codePoints(new String(array, start, end - start)), checker);
         if (ch32 != -1) {
-            XPathException err = new XPathException("The byte sequence contains a character not allowed by XML (hex " +
-                                                            Integer.toHexString(ch32) + ')');
-            err.setErrorCode("XTDE1180");
-            throw err;
+            throw new XPathException("The byte sequence contains a character not allowed by XML (hex " +
+                                                            Integer.toHexString(ch32) + ')')
+                    .withErrorCode("XTDE1180");
         }
     }
 

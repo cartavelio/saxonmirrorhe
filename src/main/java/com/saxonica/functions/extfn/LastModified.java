@@ -49,10 +49,9 @@ public class LastModified extends SystemFunction {
         try {
             absoluteURI = ResolveURI.makeAbsolute(suppliedURI, getStaticBaseUriString());
         } catch (URISyntaxException e) {
-            XPathException err = new XPathException("Invalid URI passed to saxon:last-modified(). Base='"
-                                                            + getStaticBaseUriString() + " Relative='" + suppliedURI, e);
-            err.setErrorCode("FODC0005");
-            throw err;
+            throw new XPathException("Invalid URI passed to saxon:last-modified(). Base='"
+                                                            + getStaticBaseUriString() + " Relative='" + suppliedURI, e)
+                    .withErrorCode("FODC0005");
         }
         // The URL dereferencing classes throw all kinds of strange exceptions if given
         // ill-formed sequences of %hh escape characters. So we do a sanity check that the
@@ -64,20 +63,18 @@ public class LastModified extends SystemFunction {
         try {
             absoluteURL = absoluteURI.toURL();
         } catch (MalformedURLException e) {
-            XPathException err = new XPathException("Invalid URL passed to saxon:last-modified(). Base='"
-                                                            + getStaticBaseUriString() + " Relative='" + suppliedURI, e);
-            err.setErrorCode("FODC0005");
-            throw err;
+            throw new XPathException("Invalid URL passed to saxon:last-modified(). Base='"
+                                                            + getStaticBaseUriString() + " Relative='" + suppliedURI, e)
+                    .withErrorCode("FODC0005");
         }
         long lastMod;
         try {
             URLConnection connection = ResourceLoader.urlConnection(absoluteURL);
             lastMod = connection.getLastModified();
         } catch (IOException e) {
-            XPathException err = new XPathException("Cannot read from URI supplied to saxon:last-modified(). Base='"
-                                                            + getStaticBaseUriString() + " Relative='" + suppliedURI, e);
-            err.setErrorCode("FODC0002");
-            throw err;
+            throw new XPathException("Cannot read from URI supplied to saxon:last-modified(). Base='"
+                                                            + getStaticBaseUriString() + " Relative='" + suppliedURI, e)
+                    .withErrorCode("FODC0002");
         }
 
         if (lastMod == 0) {

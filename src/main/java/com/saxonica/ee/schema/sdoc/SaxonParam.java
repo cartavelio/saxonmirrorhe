@@ -141,16 +141,11 @@ public class SaxonParam extends AnnotationParent {
         try {
             qName = StructuredQName.fromLexicalQName(lexicalQName, false, true, this);
         } catch (XPathException e) {
-            e.setIsStaticError(true);
-            String code = e.getErrorCodeLocalPart();
-            if ("FONS0004".equals(code)) {
-                e.setErrorCode("XTSE0280");
-            } else if ("FOCA0002".equals(code)) {
-                e.setErrorCode("XTSE0020");
-            } else if (code == null) {
-                e.setErrorCode("XTSE0020");
-            }
-            throw new SchemaException(e);
+            throw new SchemaException(
+                    e.asStaticError()
+                            .maybeWithErrorCode("XTSE0020")
+                            .replacingErrorCode("FONS0004", "XTSE0280")
+                            .replacingErrorCode("FOCA0002", "XTSE0020"));
         }
         return qName;
     }

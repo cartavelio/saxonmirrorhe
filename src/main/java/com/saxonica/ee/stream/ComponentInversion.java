@@ -62,7 +62,7 @@ public class ComponentInversion {
             XPathException e2 = new XPathException(
                     "Component cannot be streamed, " + frag + " guaranteed streamable according to W3C rules. " +
                             e.getMessage(), SaxonErrorCode.SXST0062);
-            e2.setErrorCode(e.getErrorCodeLocalPart());
+            e2.setErrorCodeQName(e.getErrorCodeQName());
             e2.setLocator(body.getLocation());
             e2.setXPathContext(e.getXPathContext());
             throw e2;

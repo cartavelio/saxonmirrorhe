@@ -156,12 +156,10 @@ public class PendingUpdateListImpl implements PendingUpdateList {
     @Override
     public void addPutAction(NodeInfo node, String uri, Expression originator) throws XPathException {
         if (!putURIs.add(uri)) {
-            XPathException err1 = new XPathException(
-                    "Cannot put() two documents to the same URI (" + uri + ")");
-            err1.setErrorCode("XUDY0031");
-            err1.setIsTypeError(false);
-            err1.setLocation(originator.getLocation());
-            throw err1;
+            throw new XPathException(
+                    "Cannot put() two documents to the same URI (" + uri + ")")
+                    .withErrorCode("XUDY0031")
+                    .withLocation(originator.getLocation());
         }
         PutAction action = new PutAction(node, uri);
         action.setOriginator(originator);
@@ -189,13 +187,11 @@ public class PendingUpdateListImpl implements PendingUpdateList {
             NamespaceUri existingURI = map.getNamespaceUri(prefix);
 
             if (existingURI != null && !existingURI.isEmpty() && !existingURI.equals(uri)) {
-                XPathException err1 = new XPathException(
+                throw new XPathException(
                         "An update action creates a namespace binding that conflicts with an existing " +
-                                "namespace binding on the same target element");
-                err1.setErrorCode("XUDY0023");
-                err1.setIsTypeError(false);
-                err1.setLocation(action.getOriginator().getLocation());
-                throw err1;
+                                "namespace binding on the same target element")
+                        .withErrorCode("XUDY0023")
+                        .withLocation(action.getOriginator().getLocation());
             }
 
 
@@ -209,11 +205,10 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                     nsmap = nsmap.put(prefix, uri);
                     newNamespaceBindings.put(targetNode, nsmap);
                 } else if (!existingUri.equals(uri)) {
-                    XPathException err1 = new XPathException(
-                            "Two updates create conflicting namespace bindings on the same target node");
-                    err1.setErrorCode("XUDY0024");
-                    err1.setIsTypeError(false);
-                    throw err1;
+                    throw new XPathException(
+                            "Two updates create conflicting namespace bindings on the same target node")
+                            .withErrorCode("XUDY0024")
+                            .withLocation(action.getOriginator().getLocation());
                 }
             }
         }

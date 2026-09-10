@@ -117,9 +117,8 @@ public abstract class BinaryEmitter extends Emitter {
             mustClose = true;
         } catch (FileNotFoundException | URISyntaxException | IllegalArgumentException fnf) {
             // for example, the system ID doesn't use the file: scheme
-            XPathException err = new XPathException("Unable to write to output destination", fnf);
-            err.setErrorCode(SaxonErrorCode.SXRD0004);
-            throw err;
+            throw new XPathException("Unable to write to output destination", fnf)
+                    .withErrorCode(SaxonErrorCode.SXRD0004);
         }
         return outputStream;
     }

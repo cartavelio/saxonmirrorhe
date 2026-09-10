@@ -80,12 +80,11 @@ public class MultithreadedForEach extends ForEach {
             String threadsValue = getThreads().evaluateAsString(context).toString();
             int threads = 0;
             try {
-                threads = Integer.parseInt(threadsValue.toString());
+                threads = Integer.parseInt(threadsValue);
             } catch (NumberFormatException e) {
-                XPathException err = new XPathException("Value of 'threads' is not an integer (" + threadsValue + ")");
-                err.setLocation(getLocation());
-                err.setXPathContext(context);
-                throw err;
+                throw new XPathException("Value of 'threads' is not an integer (" + threadsValue + ")")
+                    .withLocation(getLocation())
+                    .withXPathContext(context);
             }
             return threads;
         }
@@ -165,10 +164,9 @@ public class MultithreadedForEach extends ForEach {
                 try {
                     threads = Integer.parseInt(threadsValue);
                 } catch (NumberFormatException e) {
-                    XPathException err = new XPathException("Value of 'threads' is not an integer (" + threadsValue + ")");
-                    err.setLocation(forEach.getLocation());
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new XPathException("Value of 'threads' is not an integer (" + threadsValue + ")")
+                            .withLocation(forEach.getLocation())
+                            .withXPathContext(context);
                 }
                 return threads;
             }

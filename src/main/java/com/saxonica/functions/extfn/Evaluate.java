@@ -80,11 +80,9 @@ public class Evaluate extends SystemFunction {
         try {
             expr = ExpressionTool.make(exprText, env, 0, Token.EOF, null);
         } catch (XPathException e) {
-            XPathException err = new XPathException("Static error in XPath expression supplied to " +
-                                                            functionName + ": " + e.getMessage().trim());
-            err.setErrorCodeQName(e.getErrorCodeQName());
-            err.setXPathContext(context);
-            throw err;
+            throw e.withMessage("Static error in XPath expression supplied to " +
+                                                            functionName + ": " + e.getMessage().trim())
+                .withXPathContext(context);
         }
         ItemType contextItemType = AnyItemType.getInstance();
         ExpressionVisitor visitor = ExpressionVisitor.make(env);

@@ -216,74 +216,66 @@ public class InsertExpression extends BasicUpdatingExpression {
                 List<Item> content = new ArrayList<>();
                 NodeInfo target = (NodeInfo) targetEval.eval(context);
                 if (target == null) {
-                    XPathException e = new XPathException("Target of insert expression must not be empty", "XUDY0027");
-                    e.setLocation(expr.getLocation());
-                    e.setXPathContext(context);
-                    throw e;
+                    throw new XPathException("Target of insert expression must not be empty", "XUDY0027")
+                        .withLocation(expr.getLocation())
+                        .withXPathContext(context);
                 }
                 int kind = target.getNodeKind();
                 if (expr.position == Token.AFTER || expr.position == Token.BEFORE) {
                     if (!(kind == Type.ELEMENT || kind == Type.TEXT ||
                                   kind == Type.COMMENT || kind == Type.PROCESSING_INSTRUCTION)) {
-                        XPathException e = new XPathException(
+                        throw new XPathException(
                                 "When inserting before or after a node, that node must " +
-                                        "be an element, text, comment, or processing-instruction node", "XUTY0006");
-                        e.setLocation(expr.getLocation());
-                        e.setXPathContext(context);
-                        throw e;
+                                        "be an element, text, comment, or processing-instruction node", "XUTY0006")
+                            .withLocation(expr.getLocation())
+                            .withXPathContext(context);
                     }
                 } else {
                     if (!(kind == Type.ELEMENT || kind == Type.DOCUMENT)) {
-                        XPathException e = new XPathException(
+                        throw new XPathException(
                                 "When inserting into a target node, that node must be an element or document node",
-                                "XUTY0005");
-                        e.setLocation(expr.getLocation());
-                        e.setXPathContext(context);
-                        throw e;
+                                "XUTY0005")
+                                .withLocation(expr.getLocation())
+                                .withXPathContext(context);
                     }
                 }
                 NodeInfo parent = expr.position == Token.AFTER || expr.position == Token.BEFORE ? target.getParent() : target;
                 if (parent == null) {
-                    XPathException err = new XPathException(
-                            "When inserting before or after a node, that node must have a parent", "XUDY0029");
-                    err.setLocation(expr.getLocation());
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new XPathException(
+                            "When inserting before or after a node, that node must have a parent", "XUDY0029")
+                            .withLocation(expr.getLocation())
+                            .withXPathContext(context);
                 }
                 if (!(parent instanceof MutableNodeInfo)) {
-                    XPathException err = new XPathException("Target node of insert expression is not updatable",
-                                                            SaxonErrorCode.SXUP0081);
-                    err.setLocation(expr.getLocation());
-                    err.setXPathContext(context);
-                    throw err;
+                    throw new XPathException("Target node of insert expression is not updatable",
+                                                            SaxonErrorCode.SXUP0081)
+                            .withLocation(expr.getLocation())
+                            .withXPathContext(context);
                 }
                 boolean foundNonAttribute = false;
                 SequenceIterator iter = sourceEval.iterate(context);
                 for (Item item; (item = iter.next()) != null; ) {
                     if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE) {
                         if (foundNonAttribute) {
-                            XPathException err = new XPathException(
+                            throw new XPathException(
                                     "Attributes must precede non-attributes in the list of nodes to be inserted",
-                                    "XUTY0004");
-                            err.setLocation(expr.getLocation());
-                            err.setXPathContext(context);
-                            throw err;
+                                    "XUTY0004")
+                                    .withLocation(expr.getLocation())
+                                    .withXPathContext(context);
                         }
                         if (parent.getNodeKind() != Type.ELEMENT) {
                             if (expr.position == Token.AFTER || expr.position == Token.BEFORE) {
-                                XPathException err = new XPathException(
+                                throw new XPathException(
                                         "When inserting an attribute before or after a node, that node must " +
-                                                "have a parent and the parent must be an element", "XUDY0030");
-                                err.setLocation(expr.getLocation());
-                                err.setXPathContext(context);
-                                throw err;
+                                                "have a parent and the parent must be an element", "XUDY0030")
+                                        .withLocation(expr.getLocation())
+                                        .withXPathContext(context);
                             } else {
-                                XPathException err = new XPathException(
+                                throw new XPathException(
                                         "When inserting an attribute into a target node, the target node must be an element",
-                                        "XUTY0022");
-                                err.setLocation(expr.getLocation());
-                                err.setXPathContext(context);
-                                throw err;
+                                        "XUTY0022")
+                                        .withLocation(expr.getLocation())
+                                        .withXPathContext(context);
                             }
                         }
                         NodeInfo copiedNode = (NodeInfo) item;
@@ -314,9 +306,7 @@ public class InsertExpression extends BasicUpdatingExpression {
                             action.setOriginator(expr);
                             ((PendingUpdateListImpl) pul).add(action);
                         } catch (XPathException e) {
-                            e.maybeSetLocation(expr.getLocation());
-                            e.maybeSetContext(context);
-                            throw e;
+                            throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                         }
                     } else {
                         foundNonAttribute = true;

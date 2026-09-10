@@ -152,10 +152,9 @@ public class DeleteExpression extends BasicUpdatingExpression {
                     NodeInfo node;
                     while ((node = (NodeInfo) iter.next()) != null) {
                         if (!(node.getTreeInfo().isMutable())) {
-                            XPathException err = new XPathException("Node to be deleted is not an updatable node",
-                                                                    SaxonErrorCode.SXUP0081);
-                            err.setLocation(expr.getLocation());
-                            throw err;
+                            throw new XPathException("Node to be deleted is not an updatable node",
+                                                                    SaxonErrorCode.SXUP0081)
+                                    .withLocation(expr.getLocation());
                         }
                         if (node.getParent() == null) {
                             // now a no-op - see spec bug 5702
@@ -165,9 +164,7 @@ public class DeleteExpression extends BasicUpdatingExpression {
                                 action.setOriginator(expr);
                                 ((PendingUpdateListImpl) pul).add(action);
                             } catch (XPathException e) {
-                                e.maybeSetLocation(expr.getLocation());
-                                e.maybeSetContext(context);
-                                throw e;
+                                throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                             }
                         }
                     }

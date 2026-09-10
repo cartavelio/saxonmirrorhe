@@ -85,18 +85,16 @@ public class SQLConnectFn extends SystemFunction {
             if (context.getConfiguration().isTiming()) {
                 nex.printStackTrace();
             }
-            XPathException err = new XPathException("JDBC Connection Failure: failure from naming service", nex);
-            err.setXPathContext(context);
-            err.setErrorCode(SaxonErrorCode.SXSQ0003);
-            throw err;
+            throw new XPathException("JDBC Connection Failure: failure from naming service", nex)
+                    .withXPathContext(context)
+                    .withErrorCode(SaxonErrorCode.SXSQ0003);
         } catch (SQLException ex) {
             if (context.getConfiguration().isTiming()) {
                 ex.printStackTrace();
             }
-            XPathException err = new XPathException("JDBC Connection Failure", ex);
-            err.setXPathContext(context);
-            err.setErrorCode(SaxonErrorCode.SXSQ0003);
-            throw err;
+            throw new XPathException("JDBC Connection Failure", ex)
+                    .withXPathContext(context)
+                    .withErrorCode(SaxonErrorCode.SXSQ0003);
         }
 
         try {
@@ -104,10 +102,9 @@ public class SQLConnectFn extends SystemFunction {
                 connection.setAutoCommit("yes".equals(autoCommitString));
             }
         } catch (SQLException e) {
-            XPathException err = new XPathException("Failed to set autoCommit on JDBC connection " + dbDriverString, e);
-            err.setXPathContext(context);
-            err.setErrorCode(SaxonErrorCode.SXSQ0003);
-            throw err;
+            throw new XPathException("Failed to set autoCommit on JDBC connection " + dbDriverString, e)
+                    .withXPathContext(context)
+                    .withErrorCode(SaxonErrorCode.SXSQ0003);
         }
 
         return new ObjectValue<>(connection);

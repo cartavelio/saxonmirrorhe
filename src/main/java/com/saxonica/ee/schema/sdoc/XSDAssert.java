@@ -114,7 +114,7 @@ public class XSDAssert extends AnnotationParent {
         env.setBaseURI(getBaseURI());
         env.setRequiredContextItemType(NodeKindTest.ELEMENT);
         env.setContextItemParentless(true);
-        env.setContainingLocation(new AttributeLocation(this, new StructuredQName("", NamespaceUri.NULL, "test")));
+        env.setContainingLocation(new AttributeLocation(this, NamespaceUri.NULL.qName("test")));
         int xpathVersion = config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSD);
         if (getXSDSchema().getAllowedExtensions().contains("any-xpath-version")) {
             xpathVersion = 31;

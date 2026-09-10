@@ -1152,12 +1152,11 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                 method = getBestFit(candidateMethods, argTypes, theClass, debug);
             }
             if (method == null) {
-                XPathException err = new XPathException("There is more than one method matching the function call " +
+                throw new XPathException("There is more than one method matching the function call " +
                                                                 getFunctionName().getEQName() + "#" + getArity() +
-                                                                ", and there is insufficient type information to determine which one should be used", "XPST0017");
-                err.setLocation(getLocation());
-                err.setIsStaticError(true);
-                throw err;
+                                                                ", and there is insufficient type information to determine which one should be used", "XPST0017")
+                        .withLocation(getLocation())
+                        .asStaticError();
             } else {
                 Expression call = functionFactory.makeExtensionFunctionCall(getFunctionName(), theClass, method, getArguments(), config);
                 ExpressionTool.copyLocationInfo(this, call);
@@ -1168,12 +1167,11 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         public Expression resolve(SequenceType[] argTypes) throws XPathException {
             AccessibleObject method = getBestFit(candidateMethods, argTypes, theClass, debug);
             if (method == null) {
-                XPathException err = new XPathException("There is more than one method matching the function call " +
+                throw new XPathException("There is more than one method matching the function call " +
                                                                 getFunctionName().getEQName() + "#" + getArity() +
-                                                                ", and there is insufficient type information to determine which one should be used", "XPST0017");
-                err.setLocation(getLocation());
-                err.setIsStaticError(true);
-                throw err;
+                                                                ", and there is insufficient type information to determine which one should be used", "XPST0017")
+                        .withLocation(getLocation())
+                        .asStaticError();
             } else {
                 Expression call = functionFactory.makeExtensionFunctionCall(getFunctionName(), theClass, method, getArguments(), config);
                 ExpressionTool.copyLocationInfo(this, call);

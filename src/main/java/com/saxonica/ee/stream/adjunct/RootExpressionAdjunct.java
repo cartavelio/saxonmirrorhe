@@ -71,10 +71,9 @@ public class RootExpressionAdjunct extends StreamingAdjunct {
      */
     @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {
-        XPathException err = new XPathException("Streaming is not supported for expression " + getExpression().toShortString());
-        err.setErrorCode(SaxonErrorCode.SXST0060);
-        err.setLocation(getExpression().getLocation());
-        throw err;
+        throw new XPathException("Streaming is not supported for expression " + getExpression().toShortString())
+                .withErrorCode(SaxonErrorCode.SXST0060)
+                .withLocation(getExpression().getLocation());
     }
 
 }

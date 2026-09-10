@@ -273,12 +273,11 @@ public class CopyModifyExpression extends Expression {
         Set<NodeInfo> copiedNodes = new HashSet<>();
         SequenceTool.supply(getCopyBindings().iterate(context), (ItemConsumer<? super Item>) node -> copiedNodes.add((NodeInfo) node));
         if (!copiedNodes.containsAll(pul.getAffectedTrees())) {
-            XPathException err = new XPathException(
-                    "A node that was not created during the copy phase has been updated during the modify phase");
-            err.setErrorCode("XUDY0014");
-            err.setLocation(getLocation());
-            err.setXPathContext(context);
-            throw err;
+            throw new XPathException(
+                    "A node that was not created during the copy phase has been updated during the modify phase")
+                    .withErrorCode("XUDY0014")
+                    .withLocation(getLocation())
+                    .withXPathContext(context);
         }
     }
 

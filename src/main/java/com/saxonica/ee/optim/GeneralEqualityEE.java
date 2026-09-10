@@ -219,12 +219,11 @@ public class GeneralEqualityEE extends GeneralComparison {
                                         RetainedStaticContext staticContext,
                                         XPathContext context) throws XPathException {
             if (needsRunTimeCheck && !UType.isGenerallyComparable(lhsValue.getUType(), rhsValue.getUType())) {
-                XPathException e2 = new XPathException("Cannot compare " + Type.displayTypeName(lhsValue) +
-                                                               " to " + Type.displayTypeName(rhsValue));
-                e2.setErrorCode("XPTY0004");
-                e2.setLocation(loc);
-                e2.setIsTypeError(true);
-                throw e2;
+                throw new XPathException("Cannot compare " + Type.displayTypeName(lhsValue) +
+                                                               " to " + Type.displayTypeName(rhsValue))
+                        .withErrorCode("XPTY0004")
+                        .withLocation(loc)
+                        .asTypeError();
             }
             return compare(lhsValue, Token.FEQ, rhsValue, comparer.provideContext(context),
                            false, context, staticContext);
@@ -386,9 +385,7 @@ public class GeneralEqualityEE extends GeneralComparison {
                                     hashTableType +
                                     " during comparison operation. " +
                                     ((ValidationFailure) result).getMessage();
-                            XPathException err = new XPathException(msg, "FORG0001", context);
-                            err.setLocation(loc);
-                            throw err;
+                            throw new XPathException(msg, "FORG0001", context).withLocation(loc);
                         } else {
                             v1 = (AtomicValue) result;
                         }
@@ -406,9 +403,7 @@ public class GeneralEqualityEE extends GeneralComparison {
                     } else if (hashTableType != UType.UNTYPED_ATOMIC &&
                             !UType.isPossiblyComparable(t1, hashTableType, false)) {
                         String msg = "Cannot compare " + t1 + " to " + hashTableType;
-                        XPathException err = new XPathException(msg, "XPTY0004", context);
-                        err.setLocation(loc);
-                        throw err;
+                        throw new XPathException(msg, "XPTY0004", context).withLocation(loc);
                     }
                     if (ut1 != hashTableType) {
                         if (strays2 != null) {
@@ -422,18 +417,16 @@ public class GeneralEqualityEE extends GeneralComparison {
                                     BuiltInAtomicType it2 = stray2.getPrimitiveType();
                                     XPathException err;
                                     if (it1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                                        err = new XPathException("Cannot convert untypedAtomic value to type of second operand (" + it2 + ")");
-                                        err.setErrorCode("FORG0001");
+                                        err = new XPathException("Cannot convert untypedAtomic value to type of second operand (" + it2 + ")")
+                                                .withErrorCode("FORG0001");
                                     } else if (it2.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                                        err = new XPathException("Cannot convert untypedAtomic value to type of first operand (" + it1 + ")");
-                                        err.setErrorCode("FORG0001");
+                                        err = new XPathException("Cannot convert untypedAtomic value to type of first operand (" + it1 + ")")
+                                                .withErrorCode("FORG0001");
                                     } else {
-                                        err = new XPathException("Cannot compare " + it1 + " to " + it2);
-                                        err.setErrorCode("XPTY0004");
+                                        err = new XPathException("Cannot compare " + it1 + " to " + it2)
+                                                .withErrorCode("XPTY0004");
                                     }
-                                    err.setXPathContext(context);
-                                    err.setLocation(loc);
-                                    throw err;
+                                    throw err.withXPathContext(context).withLocation(loc);
                                 }
                             }
                         }
@@ -472,9 +465,7 @@ public class GeneralEqualityEE extends GeneralComparison {
                                     hashTableType +
                                     " during comparison operation. " +
                                     ((ValidationFailure) result).getMessage();
-                            XPathException de = new XPathException(msg, "FORG0001", context);
-                            de.setLocation(loc);
-                            throw de;
+                            throw new XPathException(msg, "FORG0001", context).withLocation(loc);
                         } else {
                             v2 = (AtomicValue) result;
                         }
@@ -512,18 +503,16 @@ public class GeneralEqualityEE extends GeneralComparison {
                                     BuiltInAtomicType it1 = stray1.getPrimitiveType();
                                     XPathException err;
                                     if (it1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                                        err = new XPathException("Cannot convert untypedAtomic value to type of second operand (" + it2 + ")");
-                                        err.setErrorCode("FORG0001");
+                                        err = new XPathException("Cannot convert untypedAtomic value to type of second operand (" + it2 + ")")
+                                                .withErrorCode("FORG0001");
                                     } else if (it2.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                                        err = new XPathException("Cannot convert untypedAtomic value to type of first operand (" + it1 + ")");
-                                        err.setErrorCode("FORG0001");
+                                        err = new XPathException("Cannot convert untypedAtomic value to type of first operand (" + it1 + ")")
+                                                .withErrorCode("FORG0001");
                                     } else {
-                                        err = new XPathException("Cannot compare " + it1 + " to " + it2);
-                                        err.setErrorCode("XPTY0004");
+                                        err = new XPathException("Cannot compare " + it1 + " to " + it2)
+                                                .withErrorCode("XPTY0004");
                                     }
-                                    err.setXPathContext(context);
-                                    err.setLocation(loc);
-                                    throw err;
+                                    throw err.withXPathContext(context).withLocation(loc);
                                 }
                             }
                         }

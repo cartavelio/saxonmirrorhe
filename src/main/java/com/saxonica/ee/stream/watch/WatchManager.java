@@ -484,8 +484,8 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
     }
 
     private void warning(QuitParsingException exception) {
-        exception.maybeSetLocation(lastLocationId);
-        XmlProcessingException err = new XmlProcessingException(exception);
+        XmlProcessingException err = new XmlProcessingException(
+                exception.maybeWithLocation(lastLocationId));
         err.setWarning(true);
         getPipelineConfiguration().getErrorReporter().report(err);
     }

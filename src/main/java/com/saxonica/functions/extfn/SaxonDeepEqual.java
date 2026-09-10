@@ -74,9 +74,7 @@ public class SaxonDeepEqual extends SystemFunction {
         String collation = collationValue == null ? config.getDefaultCollationName() : collationValue.getStringValue();
         StringCollator collator = config.getCollation(collation);
         if (collator == null) {
-            XPathException e = new XPathException("Unknown collation " + collation);
-            e.setErrorCode("FOCH0002");
-            throw e;
+            throw new XPathException("Unknown collation " + collation, "FOCH0002");
         }
         GenericAtomicComparer comparer = new GenericAtomicComparer(collator, context);
         int flag = 0;

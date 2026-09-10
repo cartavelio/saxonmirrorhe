@@ -276,7 +276,7 @@ public abstract class ItemFeed extends ProxyOutputter {
                 getNextOutputter().close();
             } catch (XPathException e) {
                 if (expression != null) {
-                    e.maybeSetLocation(expression.getLocation());
+                    throw e.maybeWithLocation(expression.getLocation());
                 }
                 throw e;
             }

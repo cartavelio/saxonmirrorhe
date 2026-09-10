@@ -141,11 +141,10 @@ public class RenameExpression extends BasicUpdatingExpression {
         if (th.relationship(supplied, BuiltInAtomicType.STRING) == Affinity.DISJOINT &&
                 th.relationship(supplied, BuiltInAtomicType.UNTYPED_ATOMIC) == Affinity.DISJOINT &&
                 th.relationship(supplied, BuiltInAtomicType.QNAME) == Affinity.DISJOINT) {
-            XPathException de = new XPathException("The new name must be a string, QName, or untypedAtomic");
-            de.setErrorCode("XPTY0004");
-            de.setIsTypeError(true);
-            de.setLocation(getLocation());
-            throw de;
+            throw new XPathException("The new name must be a string, QName, or untypedAtomic")
+                    .withErrorCode("XPTY0004")
+                    .asTypeError()
+                    .withLocation(getLocation());
         }
         return this;
 
@@ -221,16 +220,14 @@ public class RenameExpression extends BasicUpdatingExpression {
                 NodeInfo node = (NodeInfo) targetEval.eval(context);
                 int nodeKind = node.getNodeKind();
                 if (!(nodeKind == Type.ELEMENT || nodeKind == Type.ATTRIBUTE || nodeKind == Type.PROCESSING_INSTRUCTION)) {
-                    XPathException err = new XPathException(
-                            "Node to be renamed is not an element, attribute, or processing-instruction", "XUTY0012");
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                    throw new XPathException(
+                            "Node to be renamed is not an element, attribute, or processing-instruction", "XUTY0012")
+                            .withLocation(expr.getLocation());
                 }
                 if (!node.getTreeInfo().isMutable()) {
-                    XPathException err = new XPathException("Node to be renamed is not updatable",
-                                                            SaxonErrorCode.SXUP0081);
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                    throw new XPathException("Node to be renamed is not updatable",
+                                                            SaxonErrorCode.SXUP0081)
+                            .withLocation(expr.getLocation());
                 }
 
                 // name needs to be evaluated at run-time
@@ -246,18 +243,16 @@ public class RenameExpression extends BasicUpdatingExpression {
                         prefix = parts[0];
                         localName = parts[1];
                     } catch (QNameException err11) {
-                        XPathException err1 = new XPathException("Invalid node name. " + err11.getMessage(), "XQDY0074", expr.getLocation());
-                        err1.setXPathContext(context);
-                        throw err1;
+                        throw new XPathException("Invalid node name. " + err11.getMessage(), "XQDY0074", expr.getLocation())
+                            .withXPathContext(context);
                     }
                     if (prefix.isEmpty()) {
                         uri = nodeKind == Type.ELEMENT ? expr.defaultNamespace : NamespaceUri.NULL;
                     } else {
                         uri = expr.nsContext.getURIForPrefix(prefix, true);
                         if (uri == null) {
-                            XPathException err1 = new XPathException("Undeclared prefix in new node name: " + prefix, "XQDY0074", expr.getLocation());
-                            err1.setXPathContext(context);
-                            throw err1;
+                            throw new XPathException("Undeclared prefix in new node name: " + prefix, "XQDY0074", expr.getLocation())
+                                .withXPathContext(context);
                         }
                     }
                 } else if (nameValue instanceof QNameValue) {
@@ -268,12 +263,11 @@ public class RenameExpression extends BasicUpdatingExpression {
 //            }
                     prefix = ((QNameValue) nameValue).getPrefix();
                 } else {
-                    XPathException err1 = new XPathException("Computed element name has incorrect type");
-                    err1.setErrorCode("XPTY0004");
-                    err1.setIsTypeError(true);
-                    err1.setXPathContext(context);
-                    err1.setLocation(expr.getLocation());
-                    throw err1;
+                    throw new XPathException("Computed element name has incorrect type")
+                            .withErrorCode("XPTY0004")
+                            .asTypeError()
+                            .withXPathContext(context)
+                            .withLocation(expr.getLocation());
                 }
 
                 if (uri.isEmpty()) {
@@ -287,12 +281,11 @@ public class RenameExpression extends BasicUpdatingExpression {
                 }
                 if (nodeKind == Type.PROCESSING_INSTRUCTION) {
                     if (prefix.length() > 0 || !uri.isEmpty()) {
-                        XPathException err1 = new XPathException("Processing instruction cannot be in a namespace");
-                        err1.setErrorCode("XUDY0025");
-                        err1.setIsTypeError(true);
-                        err1.setXPathContext(context);
-                        err1.setLocation(expr.getLocation());
-                        throw err1;
+                        throw new XPathException("Processing instruction cannot be in a namespace")
+                                .withErrorCode("XUDY0025")
+                                .asTypeError()
+                                .withXPathContext(context)
+                                .withLocation(expr.getLocation());
                     }
                 }
 
@@ -309,12 +302,11 @@ public class RenameExpression extends BasicUpdatingExpression {
                     NamespaceResolver nr = targetNode.getAllNamespaces();
                     NamespaceUri existingURI = nr.getURIForPrefix(prefix, true);
                     if (existingURI != null && !existingURI.isEmpty() && !existingURI.equals(uri)) {
-                        XPathException err1 = new XPathException("New name conflicts with existing namespace binding");
-                        err1.setErrorCode("XUDY0023");
-                        err1.setIsTypeError(true);
-                        err1.setXPathContext(context);
-                        err1.setLocation(expr.getLocation());
-                        throw err1;
+                        throw new XPathException("New name conflicts with existing namespace binding")
+                                .withErrorCode("XUDY0023")
+                                .asTypeError()
+                                .withXPathContext(context)
+                                .withLocation(expr.getLocation());
                     }
                 }
 
@@ -323,9 +315,7 @@ public class RenameExpression extends BasicUpdatingExpression {
                     action.setOriginator(expr);
                     ((PendingUpdateListImpl) pul).add(action);
                 } catch (XPathException e) {
-                    e.maybeSetLocation(expr.getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
+                    throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                 }
             };
         }

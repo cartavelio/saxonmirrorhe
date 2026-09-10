@@ -185,7 +185,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                         setArg(0, tc.staticTypeCheck(
                                 getArg(0), st, role, visitor));
                     } catch (XPathException err) {
-                        if ("XPTY0004".equals(err.getErrorCodeLocalPart()) &&
+                        if (err.hasErrorCode("XPTY0004") &&
                                 visitor.getStaticContext().getPackageData().isXSLT()) {
                             err.setErrorCode("XTDE1420");
                         }
@@ -216,7 +216,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                     setArg(i, tc.staticTypeCheck(
                             getArg(i), st, role, visitor));
                 } catch (XPathException err) {
-                    if ("XPTY0004".equals(err.getErrorCodeLocalPart()) &&
+                    if (err.hasErrorCode("XPTY0004") &&
                             visitor.getStaticContext().getPackageData().isXSLT()) {
                         err.setErrorCode("XTDE1420");
                     }
@@ -559,17 +559,16 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             } catch (InvocationTargetException err3) {
                 Throwable ex = err3.getTargetException();
                 if (ex instanceof XPathException) {
-                    ((XPathException) ex).maybeSetLocation(getLocation());
-                    throw (XPathException) ex;
+                    throw ((XPathException) ex).maybeWithLocation(getLocation());
                 } else {
                     if (context.getController().isTracing() ||
                             context.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)) {
                         err3.getTargetException().printStackTrace();
                     }
                     XPathException xe = new XPathException("Exception thrown by extension function {" + theMethod + "}: " +
-                                                                   err3.getTargetException(), ex);
-                    xe.setLocation(getLocation());
-                    xe.setErrorCodeQName(JavaExternalObjectType.classNameToQName(ex.getClass().getName()));
+                                                                   err3.getTargetException(), ex)
+                            .withLocation(getLocation())
+                            .withErrorCode(JavaExternalObjectType.classNameToQName(ex.getClass().getName()));
                     xe.setErrorObject(new ObjectValue<>(theClass));
                     throw xe;
                 }
@@ -599,8 +598,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                         throw new XPathException("First argument to instance method must not be an empty sequence", SaxonErrorCode.SXJE0001, getLocation());
                     }
                 } catch (XPathException err) {
-                    err.maybeSetLocation(getLocation());
-                    throw err;
+                    throw err.maybeWithLocation(getLocation());
                 }
             }
 
@@ -630,17 +628,16 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 xpe.maybeSetLocation(getLocation());
                 throw xpe;
             } catch (IllegalAccessException err1) {
-                throw new XPathException("Method access is illegal", getLocation(), err1);
+                throw new XPathException("Method access is illegal", err1).withLocation(getLocation());
             } catch (IllegalArgumentException err2) {
-                throw new XPathException("Argument is of wrong type", getLocation(), err2);
+                throw new XPathException("Argument is of wrong type", err2).withLocation(getLocation());
             } catch (NullPointerException err2) {
                 err2.printStackTrace();
-                throw new XPathException("Object is null", getLocation(), err2);
+                throw new XPathException("Object is null", err2).withLocation(getLocation());
             } catch (InvocationTargetException err3) {
                 Throwable ex = err3.getTargetException();
                 if (ex instanceof XPathException) {
-                    ((XPathException) ex).maybeSetLocation(getLocation());
-                    throw (XPathException) ex;
+                    throw ((XPathException) ex).maybeWithLocation(getLocation());
                 } else {
                     if (context.getController().isTracing() ||
                             context.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)) {
@@ -671,8 +668,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                     theInstance = getTargetInstance(argValues[0], context);
                     // this fails if the first argument is not of a suitable class
                 } catch (XPathException err) {
-                    err.maybeSetLocation(getLocation());
-                    throw err;
+                    throw err.maybeWithLocation(getLocation());
                 }
             }
 
@@ -756,9 +752,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 j++;
             }
         } catch (XPathException e) {
-            e.setErrorCode("XPTY0004");
-            e.maybeSetLocation(getLocation());
-            throw e;
+            throw e.withErrorCode("XPTY0004").maybeWithLocation(getLocation());
         }
     }
 
