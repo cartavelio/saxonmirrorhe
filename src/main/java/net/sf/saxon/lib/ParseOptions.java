@@ -258,6 +258,13 @@ public class ParseOptions {
     /**
      * Add a filter to the list of filters to be applied to the raw input
      *
+     * <p>User-supplied filters are applied to the input stream after
+     * applying any system-defined filters such as the whitespace stripper
+     * and the schema validator.</p>
+     * 
+     * <p>Example: <code>addFilter(receiver -> new MyFilter(receiver)</code>, where
+     * <code>MyFilter</code> extends {@link net.sf.saxon.event.ProxyReceiver}</p>
+     *
      * @param filterFactory the filterFactory to be added
      */
 

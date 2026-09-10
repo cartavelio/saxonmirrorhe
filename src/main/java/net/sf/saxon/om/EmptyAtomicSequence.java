@@ -22,6 +22,8 @@ import java.util.Iterator;
 
 public class EmptyAtomicSequence implements AtomicSequence {
 
+    // TODO: this class appears equivalent to AtomicArray.EMPTY_ATOMIC_ARRAY
+
     private EmptyAtomicSequence() {}
     private final static EmptyAtomicSequence INSTANCE = new EmptyAtomicSequence();
 
