@@ -31,7 +31,6 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.SourceLocator;
@@ -1355,96 +1354,7 @@ public class ExpressionTool {
         }
     }
 
-    /**
-     * Try to factor out dependencies on the context item, by rewriting an expression f(.) as
-     * let $dot := . return f($dot). This is not always possible, for example where f() is an extension
-     * function call that uses XPathContext as an implicit argument. However, doing this increases the
-     * chances of distributing a "where" condition in a FLWOR expression to the individual input sequences
-     * selected by the "for" clauses.
-     *
-     * @param exp             the expression from which references to "." should be factored out if possible
-     * @param contextItemType the static type of the context item
-     * @return either the expression, after binding "." to a local variable and replacing all references to it;
-     * or null, if no changes were made.
-     */
-
-    public static Expression tryToFactorOutDot(Expression exp, ItemType contextItemType) {
-        if (exp instanceof ContextItemExpression) {
-            return null;
-        } else if (exp instanceof LetExpression && ((LetExpression) exp).getSequence() instanceof ContextItemExpression) {
-            Expression action = ((LetExpression) exp).getAction();
-            boolean changed = factorOutDot(action, (LetExpression) exp);
-            if (changed) {
-                exp.resetLocalStaticProperties();
-            }
-            return exp;
-        } else if ((exp.getDependencies() &
-                            (StaticProperty.DEPENDS_ON_CONTEXT_ITEM | StaticProperty.DEPENDS_ON_CONTEXT_DOCUMENT)) != 0) {
-            LetExpression let = new LetExpression();
-            let.setVariableQName(
-                    new StructuredQName("saxon", NamespaceUri.SAXON, "dot" + exp.hashCode()));
-            let.setRequiredType(SequenceType.one(contextItemType));
-            let.setSequence(new ContextItemExpression());
-            Expression actionCopy = exp.copy(new RebindingMap());
-            let.setAction(actionCopy);
-            boolean changed = factorOutDot(actionCopy, let);
-            if (changed) {
-                return let;
-            } else {
-                return exp;
-            }
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Replace references to the context item with references to a variable
-     *
-     * @param exp      the expression in which the replacement is to take place
-     * @param variable the declaration of the variable
-     * @return true if replacement has taken place (at any level)
-     */
-
-    public static boolean factorOutDot(Expression exp, Binding variable) {
-        boolean changed = false;
-        if ((exp.getDependencies() &
-                     (StaticProperty.DEPENDS_ON_CONTEXT_ITEM | StaticProperty.DEPENDS_ON_CONTEXT_DOCUMENT)) != 0) {
-            for (Operand info : exp.operands()) {
-                if (info.hasSameFocus()) {
-                    Expression child = info.getChildExpression();
-                    if (child instanceof ContextItemExpression) {
-                        VariableReference ref = makeReference(variable);
-                        copyLocationInfo(child, ref);
-                        info.setChildExpression(ref);
-                        changed = true;
-                    } else if (child instanceof AxisExpression ||
-                            child instanceof RootExpression) {
-                        VariableReference ref = makeReference(variable);
-                        copyLocationInfo(child, ref);
-                        Expression path = ExpressionTool.makePathExpression(ref, child);
-                        info.setChildExpression(path);
-                        changed = true;
-                    } else {
-                        changed |= factorOutDot(child, variable);
-                    }
-                }
-            }
-        }
-        if (changed) {
-            exp.resetLocalStaticProperties();
-        }
-        return changed;
-    }
-
-    private static VariableReference makeReference(Binding variable) {
-        if (variable.isGlobal()) {
-            return new GlobalVariableReference((GlobalVariable) variable);
-        } else {
-            return new LocalVariableReference((LocalBinding) variable);
-        }
-    }
-
+    
     /**
      * Inline variable references.
      *
