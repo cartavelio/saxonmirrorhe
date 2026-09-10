@@ -223,6 +223,22 @@ public class ChildJNode extends JNode implements SiblingCountingNode {
     }
 
     /**
+     * Construct a character string that uniquely identifies this node.
+     * Note: a.isSameNode(b) if and only if generateId(a)==generateId(b)
+     *
+     * @param buffer a buffer which will be updated to hold a string
+     *               that uniquely identifies this node, across all documents.
+     * @since 8.7
+     * <p>Changed in Saxon 8.7 to generate the ID value in a client-supplied buffer</p>
+     */
+    @Override
+    public void generateId(StringBuilder buffer) {
+        getParent().generateId(buffer);
+        buffer.append("c").append(serialNr);
+    }
+
+
+    /**
      * Iterator over the children of this JNode
      */
 

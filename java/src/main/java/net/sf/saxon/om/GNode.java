@@ -8,6 +8,14 @@ import net.sf.saxon.tree.iter.PrependIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
+/**
+ * A generalized node: that is, an XNode or JNode. New in 4.0. The GNode class itself is abstract,
+ * as is the underlying XDM type: every GNode is either an XNode or a JNode.
+ *
+ * <p>This class contains default implementations of all the axes except parent, child,
+ * following-sibling, preceding-sibling, attribute, and namespace.</p>
+ */
+
 public interface GNode extends Item {
 
     int getNodeKind();
@@ -111,7 +119,6 @@ public interface GNode extends Item {
      * @return the required iterator
      */
     SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate);
-
 
     /**
      * Get an iterator over the following-sibling-or-self axis, starting at this node; the nodes will
@@ -237,6 +244,18 @@ public interface GNode extends Item {
      */
 
     int compareOrder(GNode other);
+
+    /**
+     * Construct a character string that uniquely identifies this node.
+     * Note: a.isSameNode(b) if and only if generateId(a)==generateId(b)
+     *
+     * @param buffer a buffer which will be updated to hold a string
+     *               that uniquely identifies this node, across all documents.
+     * @since 8.7
+     * <p>Changed in Saxon 8.7 to generate the ID value in a client-supplied buffer</p>
+     */
+
+    void generateId(StringBuilder buffer);
 
 }
 

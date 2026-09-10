@@ -16,6 +16,7 @@ import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.DocumentNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
@@ -82,7 +83,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("generate-id", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
         register("generate-id", 1, e -> e.populate( GenerateId_1::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, Type.XNODE_TYPE, OPT | INS, StringValue.EMPTY_STRING));
+                .arg(0, AnyGNodeType.getInstance(), OPT | INS, StringValue.EMPTY_STRING));
 
         register("has-children", 0, e -> e.populate( ContextItemAccessorFunction::new, BuiltInAtomicType.BOOLEAN,
                  ONE, CITEM | LATE));

@@ -482,18 +482,6 @@ public interface NodeInfo extends GNode, Location
     }
 
     /**
-     * Construct a character string that uniquely identifies this node.
-     * Note: a.isSameNode(b) if and only if generateId(a)==generateId(b)
-     *
-     * @param buffer a buffer which will be updated to hold a string
-     *               that uniquely identifies this node, across all documents.
-     * @since 8.7
-     *        <p>Changed in Saxon 8.7 to generate the ID value in a client-supplied buffer</p>
-     */
-
-    void generateId(StringBuilder buffer);
-
-    /**
      * Copy this node to a given Receiver.
      * <p>This method is primarily for internal use. It should not be considered a stable
      * part of the Saxon API.</p>

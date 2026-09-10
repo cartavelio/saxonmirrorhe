@@ -371,6 +371,13 @@ public final class SequenceType {
             AnyXNodeType.getInstance().zeroOrMore();
 
     /**
+     * A type that allows a single GNode
+     */
+
+    public static final SequenceType SINGLE_GNODE =
+            AnyGNodeType.getInstance().one();
+
+    /**
      * A type that allows a sequence of zero or more GNodes
      */
 

@@ -7,15 +7,12 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.StringEvaluator;
-import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.StringElaborator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -55,7 +52,7 @@ public class GenerateId_1 extends ScalarSystemFunction {
         return generateId((NodeInfo)arg);
     }
 
-    public static StringValue generateId(NodeInfo node) {
+    public static StringValue generateId(GNode node) {
         StringBuilder buffer = new StringBuilder(16);
         node.generateId(buffer);
         return new StringValue(buffer.toString());
@@ -83,7 +80,7 @@ public class GenerateId_1 extends ScalarSystemFunction {
             final ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 
             return context -> {
-                NodeInfo node = (NodeInfo) argEval.eval(context);
+                GNode node = (GNode) argEval.eval(context);
                 if (nullable && node == null) {
                     return EmptyUnicodeString.getInstance();
                 }
@@ -99,7 +96,7 @@ public class GenerateId_1 extends ScalarSystemFunction {
             final ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 
             return context -> {
-                NodeInfo node = (NodeInfo) argEval.eval(context);
+                GNode node = (GNode) argEval.eval(context);
                 if (nullable && node == null) {
                     return "";
                 }

@@ -10,6 +10,7 @@ package net.sf.saxon.functions.registry;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -432,10 +433,10 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("reverse", 1, e -> e.populate(Reverse::new, Type.ITEM_TYPE, STAR, AS_ARG0 | FILTER)
                 .arg(0, Type.ITEM_TYPE, STAR | NAV, EMPTY));
 
-        register("root", 0, e -> e.populate(ContextItemAccessorFunction::new, Type.XNODE_TYPE, ONE, CITEM | LATE));
+        register("root", 0, e -> e.populate(ContextItemAccessorFunction::new, AnyGNodeType.getInstance(), ONE, CITEM | LATE));
 
-        register("root", 1, e -> e.populate(Root_1::new, Type.XNODE_TYPE, OPT, CARD0)
-                .arg(0, Type.XNODE_TYPE, OPT | NAV, EMPTY));
+        register("root", 1, e -> e.populate(Root_1::new, AnyGNodeType.getInstance(), OPT, CARD0)
+                .arg(0, AnyGNodeType.getInstance(), OPT | NAV, EMPTY));
 
         register("round", 1, e -> e.populate(Round::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY));
