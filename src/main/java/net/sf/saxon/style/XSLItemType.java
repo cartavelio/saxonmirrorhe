@@ -49,6 +49,11 @@ public class XSLItemType extends StyleElement {
                 case "as":
                     typeAtt = value;
                     break;
+                case "visibility":
+                    if (!value.equals("private")) {
+                        compileErrorInAttribute("Not implemented", "XTSE0010", "visibility");
+                    }
+                    break;
                 default:
                     checkUnknownAttribute(attName);
                     break;
