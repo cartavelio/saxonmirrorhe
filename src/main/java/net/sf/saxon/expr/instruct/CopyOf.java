@@ -433,6 +433,20 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         if (getSelect().getItemType().isPlainType()) {
             return getSelect();
         }
+        if (getSelect() instanceof Block /* && visitor.isOptimizeForStreaming() */) {
+            // change copy-of(a, b, c) to (copy-of(a), copy-of(b), copy-of(c)) - bug 5958
+            Block b1 = (Block)getSelect();
+            Expression[] splitCopy = new Expression[b1.size()];
+            for (int i=0; i<splitCopy.length; i++) {
+                Expression exp = b1.getOperanda()[i].getChildExpression().copy(new RebindingMap());
+                if (exp.getItemType().isPlainType()) {
+                    splitCopy[i] = exp;
+                } else {
+                    splitCopy[i] = new CopyOf(exp, copyNamespaces, validation, schemaType, rejectDuplicateAttributes);
+                }
+            }
+            return new Block(splitCopy);
+        }
         return this;
     }
 
