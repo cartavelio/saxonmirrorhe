@@ -1431,7 +1431,12 @@ any version number.</p>
          to one platform or the other.</p>
       
       <p class="csonly">Source code for SaxonCS is not available. (The bulk of the C# code
-      is generated from Java using proprietary tools, so it would not be useful.)</p>
+         is generated from Java using proprietary tools, so it would not be useful.)</p>
+      
+      <p class="conly">For SaxonC 12.5 and earlier, the SaxonC-HE source code is provided in the release
+         download. From SaxonC 12.8, source code for SaxonC-HE is available as a download in the <a
+            href="https://github.com/Saxonica/Saxon-HE/releases" class="bodylink">Saxon-HE GitHub
+            repository</a>.</p>
 
 
       <h2 class="subtitle">User documentation</h2>
