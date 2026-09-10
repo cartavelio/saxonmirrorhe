@@ -618,7 +618,7 @@ def run_test_case(test_set_name, test_case_node: saxonc.PyXdmNode, xpath_proc: s
 
                     if environment.context_item is not None:
                         testxqc.set_context(xdm_item=environment.context_item)
-                    result = testxqc.run_query_to_value(query_text=exp)
+                    result = testxqc.run_query_to_value(query_text=exp, lang=spec.version)
                 else:
                     test_report.write_test_case_element(str(test_name), "notRun", None)
                     not_run += 1
