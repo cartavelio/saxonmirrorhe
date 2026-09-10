@@ -2340,20 +2340,6 @@
   </test-case>
 
   <test-case name="EXPath-file-children-001">
-    <description>List empty directory</description>
-    <created by="Christian Grün" on="2015-01-29"/>
-    <environment ref="EXPath-file"/>
-    <test> if (file:exists("sandpit/dir5")) then file:delete("sandpit/dir5", true()) else (),
-      file:create-dir("sandpit/dir5"), file:children("sandpit/dir5") </test>
-    <result>
-      <all-of>
-        <assert-empty/>
-        <assert>Q{http://expath.org/ns/file}exists("sandpit/dir5")</assert>
-      </all-of>
-    </result>
-  </test-case>
-
-  <test-case name="EXPath-file-children-001">
     <description>Return children of empty directory</description>
     <created by="Christian Grün" on="2015-01-29"/>
     <environment ref="EXPath-file"/>
