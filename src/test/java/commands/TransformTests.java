@@ -565,6 +565,52 @@ public class TransformTests {
         }
     }
 
+    @Test
+    public void testStripTypeAnnotations() {
+        String[] args = {
+                "-ext:off",
+                "-quit:off",
+                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-xsd:" + ConfigTest.DATA_DIR + "books11.xsd",
+                "-xsl:" + ConfigTest.DATA_DIR + "books-strip-types.xsl",
+                "-val:strict"
+        };
+        try {
+            VerifyingTransform vt = new VerifyingTransform();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(baos));   // redirect System.out
+            String strResult = vt.transform(args);
+            assertTrue(strResult.contains("tax-expanded=\"true\""), "defaults expanded");
+            assertTrue(strResult.contains("id-retained=\"true\""), "IDs retained");
+            assertTrue(strResult.contains("price-typed=\"false\""), "Type annotations stripped");
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testPreserveTypeAnnotations() {
+        String[] args = {
+                "-ext:off",
+                "-quit:off",
+                "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-xsd:" + ConfigTest.DATA_DIR + "books11.xsd",
+                "-xsl:" + ConfigTest.DATA_DIR + "books-preserve-types.xsl",
+                "-val:lax"
+        };
+        try {
+            VerifyingTransform vt = new VerifyingTransform();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(baos));   // redirect System.out
+            String strResult = vt.transform(args);
+            assertTrue(strResult.contains("tax-expanded=\"true\""));
+            assertTrue(strResult.contains("id-retained=\"true\""));
+            assertTrue(strResult.contains("price-typed=\"true\""));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
 
 }
 
