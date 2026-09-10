@@ -96,10 +96,10 @@
    
    
    
-   <exception test-set="array-partition"  run="false" report="n/a">
+   <!--<exception test-set="array-partition"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Spec unclear; depends on keyword arguments</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="array-slice"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
