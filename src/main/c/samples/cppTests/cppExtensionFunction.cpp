@@ -15,6 +15,13 @@
 
  using namespace std;
 
+ extern "C" int c_nativeCall(char * functionName) {
+   //fprintf(stdout, "We are in a c function\n");
+   fprintf(stdout, "We are in a c function name= %s\n", functionName);
+   fflush(stdout);
+   return 5;
+ }
+
 
 int main() {
 
@@ -28,6 +35,8 @@ int main() {
   } catch (SaxonApiException &e) {
       cerr << " Exception thrown=" << e.what() << endl;
     }
+
+    return 0;
 
     }
 

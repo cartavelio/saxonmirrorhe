@@ -7,6 +7,34 @@
 
 using namespace std;
 
+typedef XdmValue *(*pfnExample)(void **);
+
+extern "C" void * c_nativeCall(char * functionName, void * func, void ** arguments) {
+  //fprintf(stdout, "We are in a c function\n");
+  fprintf(stdout, "We are in a c function name= %s\n", functionName);
+
+    fprintf(stdout, "We are in a c function pointer= %p\n", func);
+    pfnExample func1 = pfnExample(func);
+
+  fflush(stdout);
+  return func1(arguments);
+}
+void * myFunc(void ** values) {
+
+    fprintf(stdout, "We are in the C++ myFunc function\n");
+    // loop through the values
+    fflush(stdout);
+    int64_t longValueRef = j_makeLongValue(SaxonProcessor::sxn_environ->thread, 5);
+    return (void *)values[0];
+   /*if(values == NULL) {
+        return NULL;
+    }
+
+    return (void *)(values[0]->getUnderlyingValue());*/
+}
+
+
+
 
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
@@ -27,6 +55,53 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
     cout << "String Value of result=" << messagei << endl;
     sresult->success++;
     operator delete((char *)messagei);
+    delete result;
+  } catch (SaxonApiException &e) {
+    cout << "Error Message = " << e.what() << endl;
+    sresult->failure++;
+    sresult->failureList.push_back("testXPathSingle");
+  }
+
+  xpath->clearParameters();
+  xpath->clearProperties();
+  delete input;
+}
+
+
+// Test case of a user defined extension function in XPathProcessor.
+
+void testUserExtensionFunction(SaxonProcessor *processor, XPathProcessor *xpath,
+                     sResultCount *sresult) {
+
+  cout << endl << "Test testUserExtensionFunction:" << endl;
+  XdmNode *input =
+      processor->parseXmlFromString("<out />");
+
+  processor->registerUserFunction("http://www.example.com", "myFunc", &myFunc, "{ \"myFunc\": {"
+                                                  "      \"as\": \"xs:integer?\","
+                                                  "      \"param\": ["
+                                                  "        \"xs:integer\""
+                                                  "      ],"
+                                                  "      \"arity\": [1]"
+                                                  "    }"
+                                                  "}");
+
+  xpath->setContextItem((XdmItem *)input);
+  try {
+          xpath->declareNamespace("dy", "http://www.example.com");
+    XdmItem *result = xpath->evaluateSingle("dy:myFunc(4)");
+
+    if(result != nullptr) {
+
+        const char *resultStr = result->getStringValue();
+        fprintf(stdout, "Value of result from function= %s\n", resultStr);
+        fflush(stdout);
+
+    }
+
+      fprintf(stdout, "Ran user defined function\n");
+      fflush(stdout);
+    sresult->success++;
     delete result;
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
@@ -534,6 +609,7 @@ int main() {
        << "Test: XPathProcessor with Saxon version=" << processor->version()
        << endl;
   testXPathSingle(processor, xpathProc, sresult);
+  testUserExtensionFunction(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
        << endl

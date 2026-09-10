@@ -25,11 +25,17 @@ char * dllPath =
 
 char *_getResourceDirectory() { return resources_dir; }
 
-int c_nativeCall() {
-  fprintf(stdout, "We are in a c function\n");
-  fflush(stdout);
-  return 5;
-}
+// XSLT
+//<xsl:value-of select="ns:foo($val, .)" />
+
+//user calls - maybe not needed
+//proc.registerUserFunction("http://namespace", "foo", (void*)function-pointer, "{return-type}", "{???}")
+
+// internal
+//Add to the set of available user functions in Java - Function-Library object
+//functionMap<String, void *>
+
+
 
 
 /*

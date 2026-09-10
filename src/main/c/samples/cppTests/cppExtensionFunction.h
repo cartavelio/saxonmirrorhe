@@ -26,6 +26,7 @@
 
 
 
+
 class cppExtensionFunction {
 public:
 //  static void cppNativeCall(char * funcName, XdmValue ** arguments,

@@ -58,6 +58,9 @@ void operator delete(void *ptr, std::size_t) noexcept {
 
 #define new new (__FILE__, __LINE__)
 
+
+
+
 void SaxonProcessor::getInfo() {
 
   std::cout << std::endl;
@@ -72,6 +75,9 @@ void SaxonProcessor::getInfo() {
 }
 
 #endif
+
+
+  // utility method  with input signature of the userFunction and the params pointer
 
 // jobject cpp;
 const char *failure;
@@ -351,6 +357,75 @@ SaxonProcessor::~SaxonProcessor() {
     versionStr.clear();
   }
   // exceptionClear();
+}
+
+void SaxonProcessor::registerUserFunction(const char * ns1, const char * functionName, void * (*func)(void **), const char * signature)
+{
+
+    UserFunctionDescriptor * userFunctionDescriptor1 = new UserFunctionDescriptor;
+    userFunctionDescriptor1->functionName = functionName;
+    userFunctionDescriptor1->func = func;
+    userFunctionDescriptor1->ns = ns1;
+//    userFunctionDescriptor1->returnType = returnType;
+    userFunctionDescriptor1->arguments = signature;
+    userFunctionDescriptor1->argumentTypes = nullptr;
+
+    //func(nullptr);
+
+    fprintf(stdout, "We are in a C++ registerUserFunction pointer= %p\n", func);
+    fprintf(stdout, "We are in a C++ registerUserFunction pointer= %p\n", (void *)func);
+
+
+    userFunctionRegister[functionName] =userFunctionDescriptor1;
+
+    XdmValue * signatureValue = parseJsonFromString(signature);
+
+    if(signatureValue == nullptr) {
+        throw new SaxonApiException("Failed to create function signature from JSON");
+        return;
+    }
+
+    allocFn alloc = operator new;
+
+
+    long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1, (char *)functionName,
+                                               (void *)signatureValue->getUnderlyingValue(), (void *) func, (void *) alloc);
+
+    if (status == SXN_EXCEPTION) {
+
+      throw SaxonApiException();
+    }
+
+    XdmValue * argValue = nullptr;
+    XdmValue * returnValue = nullptr;
+
+    XdmItem * item = signatureValue->getHead();
+    if(item->isMap()) {
+        XdmMap *xdmMap = (XdmMap *) item;
+        XdmValue *signatureMap = xdmMap->get(functionName);
+
+
+        int64_t paramValues = j_getArgumentTypesFromSignature(SaxonProcessor::sxn_environ->thread,
+                                                              (void *) signatureMap->getUnderlyingValue());
+
+        argValue = new XdmArray(paramValues);
+        userFunctionDescriptor1->argumentTypes = argValue;
+
+
+        int64_t returnIntValue = j_getReturnTypeFromSignature(SaxonProcessor::sxn_environ->thread,
+                                                              (void *) signatureMap->getUnderlyingValue());
+
+        if (returnIntValue == SXN_EXCEPTION) {
+
+            throw SaxonApiException();
+        } else {
+            returnValue = new XdmValue(returnIntValue, false);
+            userFunctionDescriptor1->returnType = returnValue;
+
+        }
+
+    }
+
 }
 
 bool SaxonProcessor::isSchemaAwareProcessor() {

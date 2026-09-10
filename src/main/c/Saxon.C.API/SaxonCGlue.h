@@ -133,7 +133,6 @@ extern const char *failure;
 
 char *_getResourceDirectory();
 
-int c_nativeCall();
 
 
 /**

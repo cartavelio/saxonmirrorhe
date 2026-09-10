@@ -195,7 +195,7 @@ const char *XdmNode::toString() {
   // if (nodeToString == nullptr) {
   allocFn fn = operator new;
   nodeToStringi = xdmNodeToString(SaxonProcessor::sxn_environ->thread,
-                                  (void *)fn, (void *)value);
+                                  (void *)fn, (void *)value); //pvoid(value)
   if (nodeToStringi == nullptr) {
     throw SaxonApiException();
   }

@@ -106,6 +106,20 @@ typedef enum eXdmType {
   XDM_ITEM = 7,
 } XDM_TYPE;
 
+struct UserFunctionDescriptor{
+  std::string ns;
+  std::string functionName;
+  void * (*func)(void **);
+  std::string returnTypeStr;
+  std::string arguments;
+  XdmValue * argumentTypes;
+  XdmValue * returnType;
+} ;
+
+    //extern "C" int c_nativeCall(char * functionName);
+
+
+
 
 
 //==========================================
@@ -643,6 +657,8 @@ public:
    */
   const char *version();
 
+  void registerUserFunction(const char * ns, const char * functionName, void * (*func)(void **), const char * signatureJSON);
+
   //! Add a native method.
   /**
    *
@@ -779,6 +795,11 @@ protected:
   // JNINativeMethod *nativeMethods; /*!< native methods variable used in
   // extension methods */ std::vector<JNINativeMethod> nativeMethodVect; /*!<
   // Vector of native methods defined by user */
+
+
+
+
+
   SaxonApiException
       *exception; /*!< SaxonApiException object to capture exceptions thrown
                      from the underlying Java code via JNI */
@@ -795,6 +816,8 @@ private:
   createParameterJArray(std::map<std::string, XdmValue *> parameters,
                         std::map<std::string, std::string> properties,
                         int additions = 0);
+
+  std::map<std::string, UserFunctionDescriptor *> userFunctionRegister;
 
   static int64_t
   createParameterJArray2(std::map<std::string, XdmValue *> parameters);
