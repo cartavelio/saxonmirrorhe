@@ -1488,6 +1488,7 @@ task mavenHeXqjSourcesJar(type: Jar, dependsOn: ["eejCompile"]) {
   archiveVersion = saxonVersion
   destinationDirectory = project.file("${buildDir}/maven")
   from ("${projectDir}/src/main/java") {
+    include "com/saxonica/xqj/**/*.java"
     include "javax/xml/xquery/**/*.java"
   }
   doLast {
