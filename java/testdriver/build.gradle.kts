@@ -39,7 +39,7 @@ fun registerJarTasksAndArtifacts(prefix: String, outputDir: Provider<Directory>,
     val archiveVersion = usefulParts.joinToString(".")
 
   val heJar = tasks.register<Jar>("${prefix}-he-jar") {
-    archiveFileName = "${jarNames["he"]}-test-${archiveVersion}.jar"
+    archiveFileName = "${jarNames["he"]}-${archiveVersion}-test.jar"
     destinationDirectory = outputDir.get().asFile
     dependsOn("compileJava")
     from(sourceSets["main"].output) {
@@ -49,7 +49,7 @@ fun registerJarTasksAndArtifacts(prefix: String, outputDir: Provider<Directory>,
   }
 
   val peJar = tasks.register<Jar>("${prefix}-pe-jar") {
-    archiveFileName = "${jarNames["pe"]}-test-${archiveVersion}.jar"
+    archiveFileName = "${jarNames["pe"]}-${archiveVersion}-test.jar"
     destinationDirectory = outputDir.get().asFile
     from(sourceSets["main"].output) {
       exclude("com/saxonica/testdriver/QT3TestDriverEE*")
@@ -63,7 +63,7 @@ fun registerJarTasksAndArtifacts(prefix: String, outputDir: Provider<Directory>,
   }
 
   val eeJar = tasks.register<Jar>("${prefix}-ee-jar") {
-    archiveFileName = "${jarNames["ee"]}-test-${archiveVersion}.jar"
+    archiveFileName = "${jarNames["ee"]}-${archiveVersion}-test.jar"
     destinationDirectory = outputDir.get().asFile
     from(sourceSets["main"].output) {
       exclude("previous-compilation-data.bin")
@@ -71,7 +71,7 @@ fun registerJarTasksAndArtifacts(prefix: String, outputDir: Provider<Directory>,
   }
 
   val peSourcesJar = tasks.register<Jar>("${prefix}-pe-sources-jar") {
-    archiveFileName = "${jarNames["pe"]}-test-${archiveVersion}-sources.jar"
+    archiveFileName = "${jarNames["pe"]}-${archiveVersion}-test-sources.jar"
     destinationDirectory = outputDir.get().asFile
     from(sourceSets["main"].java) {
       exclude("com/saxonica/testdriver/QT3TestDriverEE*")
@@ -84,7 +84,7 @@ fun registerJarTasksAndArtifacts(prefix: String, outputDir: Provider<Directory>,
   }
 
   val heSourcesJar = tasks.register<Jar>("${prefix}-he-sources-jar") {
-    archiveFileName = "${jarNames["he"]}-test-${archiveVersion}-sources.jar"
+    archiveFileName = "${jarNames["he"]}-${archiveVersion}-test-sources.jar"
     destinationDirectory = outputDir.get().asFile
     from(sourceSets["main"].java) {
       include("net/sf/saxon/testdriver/**")
@@ -92,7 +92,7 @@ fun registerJarTasksAndArtifacts(prefix: String, outputDir: Provider<Directory>,
   }
 
   val eeSourcesJar = tasks.register<Jar>("${prefix}-ee-sources-jar") {
-    archiveFileName = "${jarNames["ee"]}-test-${archiveVersion}-sources.jar"
+    archiveFileName = "${jarNames["ee"]}-${archiveVersion}-test-sources.jar"
     destinationDirectory = outputDir.get().asFile
     from(java.sourceSets["main"].java)
   }

@@ -211,11 +211,11 @@ sqlMavenJarArtifact.outgoing.artifact(mavenSqlJar) { builtBy(mavenSqlJar) }
 
 tasks.register<GatherReleaseArtifacts>("gather_release_artifacts") {
   artifacts.from(heReleaseZips)
-  artifacts.from(heReleaseMaven)
+  //artifacts.from(heReleaseMaven)
   artifacts.from(peReleaseZips)
-  artifacts.from(peReleaseMaven)
+  //artifacts.from(peReleaseMaven)
   artifacts.from(eeReleaseZips)
-  artifacts.from(eeReleaseMaven)
+  //artifacts.from(eeReleaseMaven)
 }
 
 val copySampleSources = tasks.register<Copy>("copy_java_sample_sources") {
