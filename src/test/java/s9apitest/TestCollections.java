@@ -9,6 +9,7 @@ import net.sf.saxon.lib.CollectionFinder;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceCollection;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.resource.AbstractResourceCollection;
 import net.sf.saxon.resource.DirectoryCollection;
@@ -17,13 +18,18 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.InputSource;
 
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.StringReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -786,9 +792,111 @@ public class TestCollections {
         } catch (SaxonApiException e) {
             fail(e.getMessage());
         }
-
-
     }
 
+    @Test
+    public void testCollectionDupDoc() {
+        try {
+            Processor p = new Processor(true);
+            Configuration config = p.getUnderlyingConfiguration();
 
+            config.setDefaultCollection("http://example.com/collection");
+
+            ByteArrayInputStream bais = new ByteArrayInputStream("<doc/>".getBytes(StandardCharsets.UTF_8));
+            InputSource source = new InputSource(bais);
+            source.setSystemId("http://example.com/doc.xml");
+
+            DocumentBuilder builder = p.newDocumentBuilder();
+            XdmNode doc = builder.build(new SAXSource(source));
+
+            CollectionFinder finder = new TestCollectionFinder(doc);
+            config.setCollectionFinder(finder);
+
+            XPathCompiler compiler = p.newXPathCompiler();
+            XPathExecutable exec = compiler.compile("count(collection())");
+            XPathSelector select = exec.load();
+            XdmValue result = select.evaluate();
+
+            XdmAtomicValue item = (XdmAtomicValue) result.itemAt(0);
+
+            Assertions.assertEquals(3L, item.getLongValue());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private static class TestCollectionFinder implements CollectionFinder {
+        final XdmNode doc;
+
+        TestCollectionFinder(XdmNode doc) {
+            this.doc = doc;
+        }
+
+        @Override
+        public ResourceCollection findCollection(XPathContext context, String collectionURI) throws XPathException {
+            return new TestResourceCollection(doc);
+        }
+    }
+
+    private static class TestResourceCollection implements ResourceCollection {
+        final List<XdmNode> collection;
+
+        TestResourceCollection(XdmNode doc) {
+            collection = new ArrayList<>();
+            collection.add(doc);
+            collection.add(doc);
+            collection.add(doc);
+        }
+
+        @Override
+        public String getCollectionURI() {
+            return "http://example.com/collection";
+        }
+
+        @Override
+        public Iterator<String> getResourceURIs(XPathContext context) throws XPathException {
+            ArrayList<String> uris = new ArrayList<>();
+            for (XdmNode node : collection) {
+                uris.add(node.getBaseURI().toString());
+            }
+            return uris.iterator();
+        }
+
+        @Override
+        public Iterator<? extends Resource> getResources(XPathContext context) throws XPathException {
+            ArrayList<Resource> resources = new ArrayList<>();
+            for (XdmNode node : collection) {
+                resources.add(new TestResource(node));
+            }
+            return resources.iterator();
+        }
+
+        @Override
+        public boolean isStable(XPathContext context) {
+            return true;
+        }
+    }
+
+    private static class TestResource implements Resource {
+        final XdmNode doc;
+
+        TestResource(XdmNode doc) {
+            this.doc = doc;
+        }
+
+        @Override
+        public String getResourceURI() {
+            return doc.getBaseURI().toString();
+        }
+
+        @Override
+        public Item getItem() throws XPathException {
+            return doc.getUnderlyingNode();
+        }
+
+        @Override
+        public String getContentType() {
+            return "application/xml";
+        }
+    }
 }
