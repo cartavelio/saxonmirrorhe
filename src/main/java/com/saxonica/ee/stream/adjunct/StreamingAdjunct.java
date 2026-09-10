@@ -26,6 +26,7 @@ import net.sf.saxon.value.Cardinality;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 
 /**
@@ -46,74 +47,75 @@ import java.util.Map;
  * copy, so it is only really suitable for the case where the input is a single atomic value.</p>
  */
 
+@SuppressWarnings("Convert2MethodRef")
 public class StreamingAdjunct {
 
-    private static final Map<String, Class<? extends StreamingAdjunct>> adjunctMap = emptyAdjunctMap();
+    private static final Map<String, Supplier<StreamingAdjunct>> adjunctMap = emptyAdjunctMap();
 
-    @CSharpReplaceBody(code="return new System.Collections.Generic.Dictionary<string, System.Type>();")
-    public static Map<String, Class<? extends StreamingAdjunct>> emptyAdjunctMap() {
+    @CSharpReplaceBody(code="return new System.Collections.Generic.Dictionary<string, Saxon.Ejava.util.function.Supplier<Saxon.Eej.ee.stream.adjunct.StreamingAdjunct>>();")
+    public static Map<String, Supplier<StreamingAdjunct>> emptyAdjunctMap() {
         // written this way to enable C# transpilation
         return new HashMap<>(50);
     }
 
-    private static void map(String s, Class<? extends StreamingAdjunct> a) {
+    private static void map(String s, Supplier<StreamingAdjunct> a) {
         adjunctMap.put(s, a);
     }
 
     static {
-        map("AdjacentTextNodeMerger", AdjacentTextNodeMergerAdjunct.class);
-        map("ApplyImports", ApplyImportsAdjunct.class);
-        map("ApplyTemplates", ApplyTemplatesAdjunct.class);
-        map("ArrayBlock", ArrayBlockAdjunct.class);
-        map("AtomicSequenceConverter", AtomicSequenceConverterAdjunct.class);
-        map("Atomizer", AtomizerAdjunct.class);
-        map("AxisExpression", AxisExpressionAdjunct.class);
-        map("Block", BlockAdjunct.class);
-        map("CallTemplate", CallTemplateAdjunct.class);
-        map("CardinalityChecker", CardinalityCheckerAdjunct.class);
-        map("Choose", ChooseAdjunct.class);
-        map("ConditionalBlock", ConditionalBlockAdjunct.class);
-        map("ContextItemExpr", ContextItemExprAdjunct.class);
-        map("Copy", CopyAdjunct.class);
-        map("CopyOf", CopyOfAdjunct.class);
-        map("CurrentGroup", CurrentGroupStreamer.class);
-        map("DocumentInstr", DocumentInstrAdjunct.class);
-        map("DocumentSorterAdjunct", DocumentSorterAdjunct.class);
-        map("ElementCreator", ElementCreatorAdjunct.class);
-        map("EmptyTextNodeRemover", EmptyTextNodeRemoverAdjunct.class);
-        map("FilterExpression", FilterExpressionAdjunct.class);
-        map("FirstItemExpression", FirstItemExpressionAdjunct.class);
-        map("ForEach", ForEachAdjunct.class);
-        map("ForEachGroup", ForEachGroupAdjunct.class);
-        map("ForExpression", ForExpressionAdjunct.class);
-        map("Fork", ForkAdjunct.class);
-        map("GeneralComparison", GeneralComparisonAdjunct.class);
-        map("InstanceOf", InstanceOfAdjunct.class);
-        map("IsLastExpr", IsLastExprAdjunct.class);
-        map("ItemChecker", ItemCheckerAdjunct.class);
-        map("Iterate", IterateAdjunct.class);
-        map("Literal", LiteralAdjunct.class);
-        map("MergeInstr", MergeInstrAdjunct.class);
-        map("NextIteration", NextIterationAdjunct.class);
-        map("NextMatch", NextMatchAdjunct.class);
-        map("OnEmpty", OnEmptyAdjunct.class);
-        map("OnNonEmpty", OnNonEmptyAdjunct.class);
-        map("RootExpression", RootExpressionAdjunct.class);
-        map("ResultDocument", ResultDocumentAdjunct.class);
-        map("SequenceInstr", SequenceInstrAdjunct.class);
-        map("SimpleNodeConstructor", SimpleNodeConstructorAdjunct.class);
-        map("SingletonAtomizer", SingletonAtomizerAdjunct.class);
-        map("SlashExpression", ForEachAdjunct.class);
-        map("SortExpression", SortExpressionAdjunct.class);
-        map("SubscriptExpression", SubscriptExpressionAdjunct.class);
-        map("SwitchExpression", SwitchAdjunct.class);
-        map("TailExpression", TailExpressionAdjunct.class);
-        map("TraceExpr", TraceExprAdjunct.class);
-        map("TryCatch", TryCatchAdjunct.class);
-        map("UseAttributeSet", UseAttributeSetAdjunct.class);
-        map("VariableReference", VariableReferenceAdjunct.class);
-        map("VennExpression", VennExpressionAdjunct.class);
-        map("WherePopulated", WherePopulatedAdjunct.class);
+        map("AdjacentTextNodeMerger", () -> new AdjacentTextNodeMergerAdjunct());
+        map("ApplyImports", () -> new ApplyImportsAdjunct());
+        map("ApplyTemplates", () -> new ApplyTemplatesAdjunct());
+        map("ArrayBlock", () -> new ArrayBlockAdjunct());
+        map("AtomicSequenceConverter", () -> new AtomicSequenceConverterAdjunct());
+        map("Atomizer", () -> new AtomizerAdjunct());
+        map("AxisExpression", () -> new AxisExpressionAdjunct());
+        map("Block", () -> new BlockAdjunct());
+        map("CallTemplate", () -> new CallTemplateAdjunct());
+        map("CardinalityChecker", () -> new CardinalityCheckerAdjunct());
+        map("Choose", () -> new ChooseAdjunct());
+        map("ConditionalBlock", () -> new ConditionalBlockAdjunct());
+        map("ContextItemExpr", () -> new ContextItemExprAdjunct());
+        map("Copy", () -> new CopyAdjunct());
+        map("CopyOf", () -> new CopyOfAdjunct());
+        map("CurrentGroup", () -> new CurrentGroupStreamer());
+        map("DocumentInstr", () -> new DocumentInstrAdjunct());
+        map("DocumentSorterAdjunct", () -> new DocumentSorterAdjunct());
+        map("ElementCreator", () -> new ElementCreatorAdjunct());
+        map("EmptyTextNodeRemover", () -> new EmptyTextNodeRemoverAdjunct());
+        map("FilterExpression", () -> new FilterExpressionAdjunct());
+        map("FirstItemExpression", () -> new FirstItemExpressionAdjunct());
+        map("ForEach", () -> new ForEachAdjunct());
+        map("ForEachGroup", () -> new ForEachGroupAdjunct());
+        map("ForExpression", () -> new ForExpressionAdjunct());
+        map("Fork", () -> new ForkAdjunct());
+        map("GeneralComparison", () -> new GeneralComparisonAdjunct());
+        map("InstanceOf", () -> new InstanceOfAdjunct());
+        map("IsLastExpr", () -> new IsLastExprAdjunct());
+        map("ItemChecker", () -> new ItemCheckerAdjunct());
+        map("Iterate", () -> new IterateAdjunct());
+        map("Literal", () -> new LiteralAdjunct());
+        map("MergeInstr", () -> new MergeInstrAdjunct());
+        map("NextIteration", () -> new NextIterationAdjunct());
+        map("NextMatch", () -> new NextMatchAdjunct());
+        map("OnEmpty", () -> new OnEmptyAdjunct());
+        map("OnNonEmpty", () -> new OnNonEmptyAdjunct());
+        map("RootExpression", () -> new RootExpressionAdjunct());
+        map("ResultDocument", () -> new ResultDocumentAdjunct());
+        map("SequenceInstr", () -> new SequenceInstrAdjunct());
+        map("SimpleNodeConstructor", () -> new SimpleNodeConstructorAdjunct());
+        map("SingletonAtomizer", () -> new SingletonAtomizerAdjunct());
+        map("SlashExpression", () -> new ForEachAdjunct());
+        map("SortExpression", () -> new SortExpressionAdjunct());
+        map("SubscriptExpression", () -> new SubscriptExpressionAdjunct());
+        map("SwitchExpression", () -> new SwitchAdjunct());
+        map("TailExpression", () -> new TailExpressionAdjunct());
+        map("TraceExpr", () -> new TraceExprAdjunct());
+        map("TryCatch", () -> new TryCatchAdjunct());
+        map("UseAttributeSet", () -> new UseAttributeSetAdjunct());
+        map("VariableReference", () -> new VariableReferenceAdjunct());
+        map("VennExpression", () -> new VennExpressionAdjunct());
+        map("WherePopulated", () -> new WherePopulatedAdjunct());
     }
 
     private Configuration config;
@@ -214,12 +216,12 @@ public class StreamingAdjunct {
         }
 
         if (exp.getStreamerName() != null) {
-            Class<? extends StreamingAdjunct> aClass = adjunctMap.get(exp.getStreamerName());
-            if (aClass == null) {
+            Supplier<StreamingAdjunct> supplier = adjunctMap.get(exp.getStreamerName());
+            if (supplier == null) {
                 throw new AssertionError("No streaming support for " + exp.getStreamerName());
             }
             try {
-                return aClass.newInstance();
+                return supplier.get();
             } catch (Exception e) {
                 throw new AssertionError(e);
             }
