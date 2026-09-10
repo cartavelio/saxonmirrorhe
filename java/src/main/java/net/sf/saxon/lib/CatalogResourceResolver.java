@@ -177,6 +177,7 @@ public class CatalogResourceResolver implements
             if (xmlResolver != null) {
                 org.xmlresolver.ResourceRequest xmlreq = xmlResolver.getRequest(systemId, baseURI,
                         ResolverConstants.EXTERNAL_ENTITY_NATURE, ResolverConstants.ANY_PURPOSE);
+                xmlreq.setPublicId(publicId);
                 ResourceResponse resp = xmlResolver.resolve(xmlreq);
                 if (resp.isResolved()) {
                     InputSource source = new InputSource(resp.getInputStream());
