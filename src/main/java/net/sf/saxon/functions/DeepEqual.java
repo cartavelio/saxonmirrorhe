@@ -18,8 +18,8 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.pattern.SameNameTest;
@@ -1076,12 +1076,12 @@ public class DeepEqual extends CollatingFunctionFixed {
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item optionsArg = arguments.length >= 3 ? arguments[2].head() : null;
-        MapItem options = new DictionaryMap();
+        MapItem options;
         if (optionsArg == null) {
-            options = options.addEntry(new StringValue("collation"),
-                                       new StringValue(getRetainedStaticContext().getDefaultCollationName()));
+            options = new SingleEntryMap(new StringValue("collation"),
+                                         new StringValue(getRetainedStaticContext().getDefaultCollationName()));
         } else if (optionsArg instanceof StringValue) {
-            options = options.addEntry(new StringValue("collation"), optionsArg);
+            options = new SingleEntryMap(new StringValue("collation"), optionsArg);
         } else {
             options = (MapItem) optionsArg;
         }

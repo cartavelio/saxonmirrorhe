@@ -4,7 +4,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
-import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.test.xdmfixtures.DslLambda;
@@ -24,7 +24,7 @@ public class OptionsParameterHelper {
      */
     public static Map<String, GroundedValue> defaultOptionParameters(OptionsParameter params) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
-        return params.processSuppliedOptions(new DictionaryMap(), ctxt);
+        return params.processSuppliedOptions(EmptyMap.getInstance(), ctxt);
     }
 
     /**

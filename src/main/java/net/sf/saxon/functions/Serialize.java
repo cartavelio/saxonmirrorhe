@@ -504,7 +504,7 @@ public class Serialize extends SystemFunction implements Callable {
                     AtomicValue k = kvp.key;
                     if (k instanceof QNameValue && ((QNameValue)k).getStructuredQName().hasURI(NamespaceUri.SAXON)) {
                         String s = ((QNameValue) k).getStructuredQName().getEQName();
-                        paramMap = paramMap.addEntry(new StringValue(s), kvp.value);
+                        paramMap = paramMap.put(new StringValue(s), kvp.value);
                     }
                 }
                 Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(paramMap, context);

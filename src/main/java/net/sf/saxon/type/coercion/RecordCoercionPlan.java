@@ -52,7 +52,7 @@ public final class RecordCoercionPlan extends CoercionPlan {
                                     request.config, fieldRoleSupplier, request.locator);
                             SequenceIterator convertedValue =
                                     fieldPlan.coerceSequence(kvp.value.iterate(), fieldType, subRequest);
-                            m2 = m2.addEntry(kvp.key, SequenceTool.toGroundedValue(convertedValue));
+                            m2 = m2.put(kvp.key, SequenceTool.toGroundedValue(convertedValue));
                         }
                     }
                 }

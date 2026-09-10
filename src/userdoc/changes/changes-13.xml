@@ -359,6 +359,7 @@
                 <code>fn:highest</code> and <code>fn:lowest</code>.</p></li>
             <li><p><code>saxon:is-NaN</code> is superseded by <code>fn:is-NaN</code>.</p></li>
             <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>.</p></li>
+            <li><p><code>saxon:analyze-uri</code> is superseded by <code>fn:parse-uri</code>.</p></li>
         </ul>
         
         <p>The <code>saxon:array</code> and <code>saxon:array-member</code> instructions are dropped

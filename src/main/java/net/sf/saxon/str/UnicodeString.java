@@ -349,6 +349,11 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
         return h;
     }
 
+    @Override
+    public long longHashCode() {
+        return StringTool.longHashCode(this);
+    }
+
     /**
      * Compare this string to another using codepoint comparison
      * @param other the other string

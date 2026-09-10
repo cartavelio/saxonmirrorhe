@@ -7,18 +7,14 @@
 
 package net.sf.saxon.ma.map;
 
-import net.sf.saxon.ma.json.JsonParser;
+import com.saxonica.functions.qt4.ma.OrderedStringMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.Instrumentation;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.MappedAtomicIterator;
-import net.sf.saxon.tree.jiter.ReverseListIterable;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -35,121 +31,121 @@ import java.util.*;
  * Bloom filter.
  */
 
-public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
+public class LazyStringMap extends StringMapItem implements Iterable<KeyValuePair> {
 
-    public static class Builder {
-
-        private List<UnicodeString> keys = new ArrayList<>();
-        private List<GroundedValue> values = new ArrayList<>();
-        private final JsonParser parser;
-        private final int flags;
-        public Builder(JsonParser parser, int flags) {
-            this.parser = parser;
-            this.flags = flags;
-        }
-
-        /**
-         * Add a key-value pair
-         *
-         * @param key   the key
-         * @param value the corresponding value
-         */
-
-        public void put(UnicodeString key, GroundedValue value) throws XPathException {
-            //Instrumentation.count("LazyStringMapBuilder.put()");
-            keys.add(key);
-            values.add(value);
-        }
-
-        /**
-         * Get the constructed map. This method must only be called once, because the
-         * lists of keys and values are used within the constructed map and are mutable.
-         *
-         * @return the constructed map
-         * @throws XPathException if duplicate keys were found, and not detected earlier
-         */
-
-        public MapItem getCompletedMap() throws XPathException {
-            if (keys.size() == 0) {
-                return EmptyMap.getInstance();
-            } else if (keys.size() == 1) {
-                return new SingleEntryMap(new StringValue(keys.get(0)),values.get(0));
-            }
-            // quick scan for possible duplicates using a bloom filter
-            boolean possibleDuplicates = false;
-            int filterSize = keys.size() < 50 ? 1024 : 65536;
-            int mask = filterSize - 1;
-            BitSet bloom = new BitSet(filterSize);
-            for (UnicodeString key : keys) {
-                long hash = StringTool.longHashCode(key);
-                int hash0 = (int)(hash >> 40 & mask);
-                int hash1 = (int)(hash >> 20 & mask);
-                int hash2 = (int)hash & mask;
-                if (bloom.get(hash0) && bloom.get(hash1) && bloom.get(hash2)) {
-                    Instrumentation.count("Bloom clash");
-                    possibleDuplicates = true;
-                    break;
-                }
-                bloom.set(hash0);
-                bloom.set(hash1);
-                bloom.set(hash2);
-            }
-            if (possibleDuplicates) {
-                // look for duplicates more thoroughly
-                boolean reverseOrder = (flags & JsonParser.DUPLICATES_LAST) != 0;
-
-                List<UnicodeString> retainedKeys = new ArrayList<>(keys.size());
-                List<GroundedValue> retainedValues = new ArrayList<>(keys.size());
-
-                Iterator<UnicodeString> keyIter =
-                        (reverseOrder ? reverse(keys) : keys).iterator();
-                Iterator<GroundedValue> valueIter =
-                        (reverseOrder ? reverse(values) : values).iterator();
-                Set<UnicodeString> keySet = new HashSet<>();
-
-                while (keyIter.hasNext() && valueIter.hasNext()) {
-                    UnicodeString key = keyIter.next();
-                    GroundedValue value = valueIter.next();
-                    boolean duplicate = !keySet.add(key);
-                    if (duplicate) {
-                        // Duplicate key found
-                        Instrumentation.count("Duplicate key");
-                        if ((flags & JsonParser.DUPLICATES_REJECTED) != 0) {
-                            Instrumentation.count("Duplicate rejected");
-                            throw new XPathException("Duplicate key value '" + key + "' in JSON object", "FOJS0003");
-                        } else {
-                            // ignore this entry
-                            Instrumentation.count("Duplicate ignored");
-                            continue;
-                        }
-                    } else {
-                        retainedKeys.add(key);
-                        retainedValues.add(value);
-                    }
-                }
-                if (reverseOrder) {
-                    Collections.reverse(retainedKeys);
-                    Collections.reverse(retainedValues);
-                }
-                keys = retainedKeys;
-                values = retainedValues;
-            }
-            if (keys.size() <= 20) {
-                Instrumentation.count("Shaped maps");
-                Shape shape = parser.obtainShape(keys);
-                return new ShapedMap(shape, values.toArray(values.toArray(new GroundedValue[0])));
-            }
-            Instrumentation.count("Lazy string maps");
-            return new LazyStringMap(keys, values);
-        }
-
-
-    }
-
-    @CSharpReplaceBody(code="return list.Reverse();")
-    private static <T> Iterable<T> reverse(List<T> list) {
-        return new ReverseListIterable<T>(list);
-    }
+//    public static class Builder {
+//
+//        private List<UnicodeString> keys = new ArrayList<>();
+//        private List<GroundedValue> values = new ArrayList<>();
+//        private final JsonParser parser;
+//        private final int flags;
+//        public Builder(JsonParser parser, int flags) {
+//            this.parser = parser;
+//            this.flags = flags;
+//        }
+//
+//        /**
+//         * Add a key-value pair
+//         *
+//         * @param key   the key
+//         * @param value the corresponding value
+//         */
+//
+//        public void put(UnicodeString key, GroundedValue value) throws XPathException {
+//            //Instrumentation.count("LazyStringMapBuilder.put()");
+//            keys.add(key);
+//            values.add(value);
+//        }
+//
+//        /**
+//         * Get the constructed map. This method must only be called once, because the
+//         * lists of keys and values are used within the constructed map and are mutable.
+//         *
+//         * @return the constructed map
+//         * @throws XPathException if duplicate keys were found, and not detected earlier
+//         */
+//
+//        public MapItem getCompletedMap() throws XPathException {
+//            if (keys.size() == 0) {
+//                return EmptyMap.getInstance();
+//            } else if (keys.size() == 1) {
+//                return new SingleEntryMap(new StringValue(keys.get(0)),values.get(0));
+//            }
+//            // quick scan for possible duplicates using a bloom filter
+//            boolean possibleDuplicates = false;
+//            int filterSize = keys.size() < 50 ? 1024 : 65536;
+//            int mask = filterSize - 1;
+//            BitSet bloom = new BitSet(filterSize);
+//            for (UnicodeString key : keys) {
+//                long hash = StringTool.longHashCode(key);
+//                int hash0 = (int)(hash >> 40 & mask);
+//                int hash1 = (int)(hash >> 20 & mask);
+//                int hash2 = (int)hash & mask;
+//                if (bloom.get(hash0) && bloom.get(hash1) && bloom.get(hash2)) {
+//                    Instrumentation.count("Bloom clash");
+//                    possibleDuplicates = true;
+//                    break;
+//                }
+//                bloom.set(hash0);
+//                bloom.set(hash1);
+//                bloom.set(hash2);
+//            }
+//            if (possibleDuplicates) {
+//                // look for duplicates more thoroughly
+//                boolean reverseOrder = (flags & JsonParser.DUPLICATES_LAST) != 0;
+//
+//                List<UnicodeString> retainedKeys = new ArrayList<>(keys.size());
+//                List<GroundedValue> retainedValues = new ArrayList<>(keys.size());
+//
+//                Iterator<UnicodeString> keyIter =
+//                        (reverseOrder ? reverse(keys) : keys).iterator();
+//                Iterator<GroundedValue> valueIter =
+//                        (reverseOrder ? reverse(values) : values).iterator();
+//                Set<UnicodeString> keySet = new HashSet<>();
+//
+//                while (keyIter.hasNext() && valueIter.hasNext()) {
+//                    UnicodeString key = keyIter.next();
+//                    GroundedValue value = valueIter.next();
+//                    boolean duplicate = !keySet.add(key);
+//                    if (duplicate) {
+//                        // Duplicate key found
+//                        Instrumentation.count("Duplicate key");
+//                        if ((flags & JsonParser.DUPLICATES_REJECTED) != 0) {
+//                            Instrumentation.count("Duplicate rejected");
+//                            throw new XPathException("Duplicate key value '" + key + "' in JSON object", "FOJS0003");
+//                        } else {
+//                            // ignore this entry
+//                            Instrumentation.count("Duplicate ignored");
+//                            continue;
+//                        }
+//                    } else {
+//                        retainedKeys.add(key);
+//                        retainedValues.add(value);
+//                    }
+//                }
+//                if (reverseOrder) {
+//                    Collections.reverse(retainedKeys);
+//                    Collections.reverse(retainedValues);
+//                }
+//                keys = retainedKeys;
+//                values = retainedValues;
+//            }
+//            if (keys.size() <= 20) {
+//                Instrumentation.count("Shaped maps");
+//                Shape shape = parser.obtainShape(keys);
+//                return new ShapedMap(shape, values.toArray(values.toArray(new GroundedValue[0])));
+//            }
+//            Instrumentation.count("Lazy string maps");
+//            return new LazyStringMap(keys, values);
+//        }
+//
+//
+//    }
+//
+//    @CSharpReplaceBody(code="return list.Reverse();")
+//    private static <T> Iterable<T> reverse(List<T> list) {
+//        return new ReverseListIterable<T>(list);
+//    }
 
     private final List<UnicodeString> keyList;
     private final List<GroundedValue> valueList;
@@ -158,7 +154,8 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
 
     /**
      * Create a lazy string map.
-     * @param keys the string-valued keys
+     * @param keys the string-valued keys. The caller warrants that there are no duplicate keys
+     *             in the list.
      * @param values the corresponding values
      */
 
@@ -328,9 +325,16 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      * @return the new map containing the additional entry
      */
     @Override
-    public MapItem addEntry(AtomicValue key, GroundedValue value) {
-        return toHashTrieMap().addEntry(key, value);
+    public MapItem put(AtomicValue key, GroundedValue value) {
+        return toGeneralMap().put(key, value);
     }
+
+    @Override
+    public MapItem putU(UnicodeString key, GroundedValue value) {
+        return put(new StringValue(key), value);
+    }
+
+
 
     /**
      * Remove an entry from the map
@@ -341,7 +345,12 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return toHashTrieMap().remove(key);
+        return toGeneralMap().remove(key);
+    }
+
+    @Override
+    public MapItem removeU(UnicodeString key) {
+        return remove(new StringValue(key));
     }
 
     /**
@@ -415,14 +424,15 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      * Convert to a HashTrieMap
      */
 
-    private HashTrieMap toHashTrieMap() {
+    private MapItem toGeneralMap() {
         //System.err.println("Dictionary rewrite!!!!");
         Instrumentation.count("Map rewrite");
-        MapBuilder target = HashTrieMap.getBuilder();
+        io.vavr.collection.LinkedHashMap<UnicodeString, GroundedValue> baseMap =
+                io.vavr.collection.LinkedHashMap.empty();
         for (int i = 0; i < keyList.size(); i++) {
-            target.put(new StringValue(keyList.get(i)), valueList.get(i));
+            baseMap = baseMap.put(keyList.get(i), valueList.get(i));
         }
-        return (HashTrieMap)target.getCompletedMap();
+        return new OrderedStringMap(baseMap);
     }
 }
 

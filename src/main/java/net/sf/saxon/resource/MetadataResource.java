@@ -10,10 +10,12 @@ package net.sf.saxon.resource;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.lib.Resource;
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapBuilder;
+import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.Twine8;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
@@ -45,24 +47,24 @@ public class MetadataResource implements Resource {
     }
 
     @Override
-    public Item getItem()  {
+    public Item getItem() throws XPathException {
 
         // Create a map for the result
-        MapBuilder map = DictionaryMap.getBuilder();
+        StringMapBuilder builder = new StringMapBuilder(10).unordered();
 
         // Add the custom properties of the resource
         for (Map.Entry<String, GroundedValue> entry : properties.entrySet()) {
-             map.put(entry.getKey(), entry.getValue());
+             builder.put(StringView.of(entry.getKey()), entry.getValue());
         }
 
         // Add the resourceURI of the resource as the "name" property
-        map.put("name", StringValue.makeStringValue(resourceURI));
+        builder.put(new Twine8("name"), StringValue.makeStringValue(resourceURI));
 
         // Add a fetch() function, which can be used to fetch the resource
         SimpleLazyFunction fetcherFunction = new SimpleLazyFunction(content::getItem, SequenceType.SINGLE_ITEM);
 
-        map.put("fetch", fetcherFunction);
-        return map.getCompletedMap();
+        builder.put(new Twine8("fetch"), fetcherFunction);
+        return builder.getCompletedMap();
     }
 }
 

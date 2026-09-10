@@ -17,8 +17,7 @@ import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapBuilder;
+import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -1072,9 +1071,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         private boolean compareValues(GroundedValue a, GroundedValue b,
                                       String collation, XPathContext context) throws XPathException {
-            MapBuilder optionsMap = DictionaryMap.getBuilder();
-            optionsMap.put("collation", new StringValue(collation));
-            DeepEqual.DeepEqualOptions options = new DeepEqual.DeepEqualOptions(optionsMap.getCompletedMap(), context, 40);
+            SingleEntryMap optionsMap = new SingleEntryMap(
+                    new StringValue("collation"), new StringValue(collation));
+            DeepEqual.DeepEqualOptions options = new DeepEqual.DeepEqualOptions(optionsMap, context, 40);
             return DeepEqual.deepEqual(a.iterate(), b.iterate(), context, options);
         }
 

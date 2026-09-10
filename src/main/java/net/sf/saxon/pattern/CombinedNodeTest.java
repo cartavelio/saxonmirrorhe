@@ -8,13 +8,14 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.expr.parser.OperatorSymbol;
-import net.sf.saxon.ma.map.MapBuilder;
+import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
@@ -223,17 +224,17 @@ public class CombinedNodeTest extends NodeTest {
     }
 
     /**
-     * Add the "parameters" of the type to a Dictionary containing the type information
+     * Add the "parameters" of the type to a dictionary containing the type information
      * in structured form
      */
 
-    public void addTypeDetails(MapBuilder map) {
+    public void addTypeDetails(StringMapBuilder map) {
         if (nodetest1 instanceof NameTest && operator == OperatorSymbol.INTERSECT) {
-            map.put("n", new StringValue(nodetest1.getMatchingNodeName().getEQName()));
+            map.put(new Twine8("n"), new StringValue(nodetest1.getMatchingNodeName().getEQName()));
             if (nodetest2 instanceof ContentTypeTest) {
                 SchemaType schemaType = ((ContentTypeTest) nodetest2).getSchemaType();
                 if (schemaType != Untyped.getInstance() && schemaType != BuiltInAtomicType.UNTYPED_ATOMIC) {
-                    map.put("c", new StringValue(schemaType.getEQName() +
+                    map.put(new Twine8("c"), new StringValue(schemaType.getEQName() +
                             (nodetest2.isNillable() ? "?" : "")));
 
                 }

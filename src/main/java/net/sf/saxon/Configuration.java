@@ -3280,18 +3280,6 @@ public class Configuration implements SourceResolver {
         }
     }
 
-    public MapBuilder makeMapBuilder(boolean ordered, boolean stringOnly) {
-        if (ordered) {
-            checkLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION, "ordered maps", -1);
-        }
-        // ordered maps not supported in HE
-        if (stringOnly) {
-            return DictionaryMap.getBuilder();
-        } else {
-            return HashTrieMap.getBuilder();
-        }
-    }
-
 
     /**
      * Get a new ExpressionPresenter capable of exporting a compiled stylesheet

@@ -119,8 +119,8 @@ public class SingleEntryMap extends MapItem {
      * @return the new map containing the additional entry
      */
     @Override
-    public MapItem addEntry(AtomicValue key, GroundedValue value) {
-        return toHashTrieMap().addEntry(key, value);
+    public MapItem put(AtomicValue key, GroundedValue value) {
+        return toHashTrieMap().put(key, value);
     }
 
     /**

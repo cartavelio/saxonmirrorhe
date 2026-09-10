@@ -102,7 +102,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmMap put(XdmAtomicValue key, XdmValue value) {
-        return new XdmMap(getUnderlyingValue().addEntry(key.getUnderlyingValue(), value.getUnderlyingValue()));
+        return new XdmMap(getUnderlyingValue().put(key.getUnderlyingValue(), value.getUnderlyingValue()));
     }
 
     /**

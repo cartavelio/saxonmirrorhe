@@ -30,4 +30,15 @@ public interface AtomicMatchKey {
 
     AtomicValue asAtomic();
 
+    /**
+     * Get a 64-bit hash code. This is needed to make bloom filtering effective on a large set of values.
+     * The default implementation simply duplicates the normal 32-bit hash code, which isn't very effective,
+     * but suffices for data types that aren't often used as map keys.
+     */
+
+    default long longHashCode() {
+        long hash = hashCode();
+        return hash<<32 | hash;
+    }
+
 }

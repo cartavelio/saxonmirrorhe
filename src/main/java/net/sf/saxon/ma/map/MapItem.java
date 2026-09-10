@@ -123,7 +123,7 @@ public abstract class MapItem implements FunctionItem {
      * @return the new map containing the additional entry
      */
 
-    abstract public MapItem addEntry(AtomicValue key, GroundedValue value);
+    abstract public MapItem put(AtomicValue key, GroundedValue value);
 
     /**
      * Remove an entry from the map

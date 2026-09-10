@@ -88,7 +88,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         if (args.length == 2) {
             MapItem suppliedOptions = (MapItem) args[1].head();
             if (suppliedOptions == null) {
-                suppliedOptions = new DictionaryMap();
+                suppliedOptions = EmptyMap.getInstance();
             }
             Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
             xqueryVersionOption = checkedOptions.get("xquery-version");
@@ -238,7 +238,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                     e.setIsGlobalError(false);  // to make it catchable
                     throw e.replacingErrorCode("XPTY0004", "FOQM0005"); // catches when external variables have wrong type
                 }
-                variablesMap = variablesMap.addEntry(qNameValue, value);
+                variablesMap = variablesMap.put(qNameValue, value);
             }
         }
         // Add functions to the result.
@@ -266,11 +266,11 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                 UserFunctionReference.BoundUserFunction buf =
                         new UserFunctionReference.BoundUserFunction(userFunction, userFunction.getArity(), null, agent, newController);
                 if (functionsMap.get(functionQName) != null) {
-                    newMap = ((MapItem) functionsMap.get(functionQName)).addEntry(new Int64Value(function.getNumberOfParameters()), buf);
+                    newMap = ((MapItem) functionsMap.get(functionQName)).put(new Int64Value(function.getNumberOfParameters()), buf);
                 } else {
                     newMap = new SingleEntryMap(Int64Value.makeIntegerValue(function.getNumberOfParameters()), buf);
                 }
-                functionsMap = functionsMap.addEntry(functionQName, newMap);
+                functionsMap = functionsMap.put(functionQName, newMap);
             }
         }
 

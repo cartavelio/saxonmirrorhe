@@ -370,7 +370,7 @@ public class FilterExpressionAM extends BinaryExpression
                         if (it instanceof NumericValue) {
                             if (((NumericValue) it).isWholeNumber()
                                     && ((NumericValue) it).longValue() == position) {
-                                result = result.addEntry(pair.key, pair.value);
+                                result = result.put(pair.key, pair.value);
                                 break;
                             }
                         } else {
@@ -378,7 +378,7 @@ public class FilterExpressionAM extends BinaryExpression
                         }
                     }
                 } else if (predicateValue.effectiveBooleanValue()) {
-                    result = result.addEntry(pair.key, pair.value);
+                    result = result.put(pair.key, pair.value);
                 }
             }
             return result;

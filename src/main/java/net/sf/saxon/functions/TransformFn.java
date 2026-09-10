@@ -902,7 +902,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
         if (result != null) {
             AtomicValue resultKey = new StringValue(principalResultKey);
-            resultMap = resultMap.addEntry(resultKey, result.materialize());
+            resultMap = resultMap.put(resultKey, result.materialize());
         }
         return resultMap;
 
@@ -1215,8 +1215,8 @@ public class TransformFn extends SystemFunction implements Callable {
         public MapItem populateResultMap(MapItem resultMap) {
             for (Map.Entry<String, GroundedValue> entry : results.entrySet()) {
                 String uri = entry.getKey();
-                resultMap = resultMap.addEntry(new StringValue(uri),
-                                               entry.getValue());
+                resultMap = resultMap.put(new StringValue(uri),
+                                          entry.getValue());
             }
             return resultMap;
         }
@@ -1284,8 +1284,8 @@ public class TransformFn extends SystemFunction implements Callable {
         public MapItem populateResultMap(MapItem resultMap) {
             for (Map.Entry<String, GroundedValue> entry : results.entrySet()) {
                 String uri = entry.getKey();
-                resultMap = resultMap.addEntry(new StringValue(uri),
-                                               entry.getValue());
+                resultMap = resultMap.put(new StringValue(uri),
+                                          entry.getValue());
             }
             return resultMap;
         }
@@ -1330,8 +1330,8 @@ public class TransformFn extends SystemFunction implements Callable {
         public MapItem populateResultMap(MapItem resultMap) {
             for (Map.Entry<String, GroundedValue> entry : results.entrySet()) {
                 String uri = entry.getKey();
-                resultMap = resultMap.addEntry(new StringValue(uri),
-                                               entry.getValue());
+                resultMap = resultMap.put(new StringValue(uri),
+                                          entry.getValue());
             }
             return resultMap;
         }

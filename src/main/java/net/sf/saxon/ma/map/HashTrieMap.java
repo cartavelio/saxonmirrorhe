@@ -131,7 +131,7 @@ public class HashTrieMap extends MapTypeMaintainer {
      */
 
     public static HashTrieMap singleton(AtomicValue key, GroundedValue value) {
-        return new HashTrieMap().addEntry(key, value);
+        return new HashTrieMap().put(key, value);
     }
 
     /**
@@ -156,7 +156,7 @@ public class HashTrieMap extends MapTypeMaintainer {
         }
         HashTrieMap m2 = new HashTrieMap();
         for (net.sf.saxon.ma.map.KeyValuePair pair : map.keyValuePairs()) {
-            m2 = m2.addEntry(pair.key, pair.value);
+            m2 = m2.put(pair.key, pair.value);
         }
         return m2;
     }
@@ -201,7 +201,7 @@ public class HashTrieMap extends MapTypeMaintainer {
      */
 
     @Override
-    public HashTrieMap addEntry(AtomicValue key, GroundedValue value) {
+    public HashTrieMap put(AtomicValue key, GroundedValue value) {
         AtomicMatchKey amk = makeKey(key);
 
         boolean isNew = imap.get(amk) == null;

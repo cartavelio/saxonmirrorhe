@@ -40,7 +40,7 @@ public class MapCreate extends SystemFunction {
                     if (baseMap.get(pair.key) != null) {
                         throw new XPathException("Duplicate key value (" + pair.key + ") in map", "XQDY0137");
                     } else {
-                        baseMap = baseMap.addEntry(pair.key, pair.value);
+                        baseMap = baseMap.put(pair.key, pair.value);
                     }
                 }
             }

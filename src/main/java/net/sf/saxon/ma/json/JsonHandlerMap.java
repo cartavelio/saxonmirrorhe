@@ -10,7 +10,7 @@ package net.sf.saxon.ma.json;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.LazyStringMap;
+import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -23,6 +23,7 @@ import net.sf.saxon.value.StringValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.function.BiFunction;
 
 /**
  * Event handler for the JSON parser which constructs a structure of maps and arrays
@@ -36,6 +37,7 @@ public class JsonHandlerMap extends JsonHandler {
     private GroundedValue nullRepresentation = EmptySequence.getInstance();
     private boolean retainOrder = false;
     private final int flags;
+    private BiFunction<GroundedValue, GroundedValue, GroundedValue> duplicatesCombiner = null;
 
     public JsonHandlerMap(XPathContext context, JsonParser parser, int flags) {
         setContext(context);
@@ -43,6 +45,11 @@ public class JsonHandlerMap extends JsonHandler {
         keys = new Stack<>();
         this.parser = parser;
         this.flags = flags;
+        if ((flags & JsonParser.DUPLICATES_FIRST) != 0) {
+            duplicatesCombiner = (a, b) -> a;
+        } else if ((flags & JsonParser.DUPLICATES_LAST) != 0) {
+            duplicatesCombiner = (a, b) -> b;
+        }
         escape = (flags & JsonParser.ESCAPE) != 0;
         retainOrder = (flags & JsonParser.ORDER_RETAINED) != 0;
         charChecker = context.getConfiguration().getValidCharacterChecker();
@@ -99,8 +106,8 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void startMap() {
-        //MapBuilder mapBuilder = getContext().getConfiguration().makeMapBuilder(retainOrder, true);
-        LazyStringMap.Builder mapBuilder = new LazyStringMap.Builder(parser, flags);
+        StringMapBuilder mapBuilder = new StringMapBuilder();
+        mapBuilder.setCombiner(duplicatesCombiner);
         stack.push(mapBuilder);
     }
 
@@ -109,8 +116,7 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void endMap() throws XPathException {
-        LazyStringMap.Builder map = (LazyStringMap.Builder) stack.pop();
-        //MapBuilder map = (MapBuilder)stack.pop();
+        StringMapBuilder map = (StringMapBuilder) stack.pop();
         if (stack.empty()) {
             stack.push(map.getCompletedMap()); // the end
         } else {
@@ -129,8 +135,7 @@ public class JsonHandlerMap extends JsonHandler {
             SimpleArrayItem array = (SimpleArrayItem) stack.peek();
             array.getMembers().add(val.materialize());
         } else {
-            LazyStringMap.Builder map = (LazyStringMap.Builder) stack.peek();
-            //MapBuilder map = (MapBuilder) stack.peek();
+            StringMapBuilder map = (StringMapBuilder) stack.peek();
             map.put(keys.pop(), val);
         }
     }

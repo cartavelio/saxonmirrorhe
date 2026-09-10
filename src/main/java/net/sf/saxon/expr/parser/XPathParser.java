@@ -2982,7 +2982,7 @@ public class XPathParser {
                     case "map":
                         nextToken();
                         expect(Token.LCURLY);
-                        return parseMapExpression();
+                        return parseMapConstructor();
                     case "array":
                         nextToken();
                         expect(Token.LCURLY);
@@ -3135,7 +3135,7 @@ public class XPathParser {
 
         } else if (token == Token.LCURLY) {
             if (isAllowXPath40Syntax()) {
-                return parseMapExpression();
+                return parseMapConstructor();
             } else {
                 grumble("Unexpected `{` after " + previousToken);
             }
@@ -4015,7 +4015,7 @@ public class XPathParser {
     }
 
     /**
-     * Parse a map expression. Syntax
+     * Parse a map constructor. Syntax
      * 3.0/3.1:  map { expr : expr (, expr : expr )*} }
      * 4.0:      { expr : expr (, expr : expr )*} }
      *
@@ -4024,7 +4024,7 @@ public class XPathParser {
      */
 
     /*@NotNull*/
-    protected Expression parseMapExpression() throws XPathException {
+    protected Expression parseMapConstructor() throws XPathException {
         checkMapExtensions();
 
         // have read the "map {" or bare "{"
@@ -4080,7 +4080,7 @@ public class XPathParser {
                 break;
             default:
 
-                    // Check for duplicates now, among key values that are statically known
+                // Check for duplicates now, among key values that are statically known
                 Set<AtomicMatchKey> matchKeys = new HashSet<>();
                 for (Expression keyExp : keys) {
                     if (keyExp instanceof Literal) {
@@ -4096,21 +4096,21 @@ public class XPathParser {
 
                 if (allLiteralKeys && allLiteralValues) {
                     if (allStringKeys) {
-                        MapBuilder mapBuilder = DictionaryMap.getBuilder(keys.size());
+                        StringMapBuilder mapBuilder = new StringMapBuilder(keys.size());
                         for (int i = 0; i < keys.size(); i++) {
-                            String key = ((StringLiteral) keys.get(i)).stringify();
+                            UnicodeString key = ((StringLiteral) keys.get(i)).getString();
                             GroundedValue val = ((Literal) values.get(i)).getGroundedValue();
                             mapBuilder.put(key, val);
                         }
                         result = Literal.makeLiteral(mapBuilder.getCompletedMap());
                     } else {
-                        MapBuilder map = HashTrieMap.getBuilder();
+                        GeneralMapBuilder builder = new GeneralMapBuilder();
                         for (int i = 0; i < keys.size(); i++) {
                             AtomicValue key = (AtomicValue) ((Literal) keys.get(i)).getGroundedValue();
                             GroundedValue val = ((Literal) values.get(i)).getGroundedValue();
-                            map.put(key, val);
+                            builder.put(key, val);
                         }
-                        result = Literal.makeLiteral(map.getCompletedMap());
+                        result = Literal.makeLiteral(builder.getCompletedMap());
                     }
                 } else {
                     Expression[] entriesArray = new Expression[keys.size()];

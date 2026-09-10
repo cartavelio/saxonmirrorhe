@@ -29,7 +29,7 @@ import java.util.Stack;
  * expression, avoiding the cost of a hash lookup.</p>
  */
 
-public class ShapedMap extends StringMap {
+public class ShapedMap extends StringMapItem {
 
     private static class ShapedMapPlan implements LookupPlan {
         Shape shape;
@@ -111,7 +111,7 @@ public class ShapedMap extends StringMap {
      * @param key the key
      * @return the relevant entry if present, or null if absent.
      */
-    @Override
+
     public GroundedValue get(String key) {
         return getU(StringView.of(key));
     }
@@ -137,7 +137,7 @@ public class ShapedMap extends StringMap {
      * @param key the key being tested
      * @return true if the key is present
      */
-    @Override
+
     public boolean contains(String key) {
         return getU(StringView.of(key)) != null;
     }
@@ -199,7 +199,7 @@ public class ShapedMap extends StringMap {
      * @return the new map containing the additional entry
      */
     @Override
-    public MapItem addEntry(AtomicValue key, GroundedValue value) {
+    public MapItem put(AtomicValue key, GroundedValue value) {
         if (key instanceof StringValue && size() < 20) {
             int slot = shape.getSlot(key.getUnicodeStringValue());
             if (slot >= 0) {
@@ -208,7 +208,17 @@ public class ShapedMap extends StringMap {
                 return new ShapedMap(shape, v2);
             }
         }
-        return HashTrieMap.copy(this).addEntry(key, value);
+        return HashTrieMap.copy(this).put(key, value);
+    }
+
+    @Override
+    public StringMapItem putU(UnicodeString key, GroundedValue value) {
+        throw new UnsupportedOperationException();   // TODO: implement me
+    }
+
+    @Override
+    public StringMapItem removeU(UnicodeString key) {
+        throw new UnsupportedOperationException();   // TODO: implement me
     }
 
     /**

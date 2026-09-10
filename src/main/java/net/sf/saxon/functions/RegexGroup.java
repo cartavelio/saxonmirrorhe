@@ -45,7 +45,7 @@ public class RegexGroup extends ContextAccessorFunction {
         int groups = ri.getNumberOfGroups();
         MapItem map = new HashTrieMap();
         for (int i=0; i<=groups; i++) {
-            map = map.addEntry(Int64Value.makeIntegerValue(i), new StringValue(ri.getRegexGroup(i)));
+            map = map.put(Int64Value.makeIntegerValue(i), new StringValue(ri.getRegexGroup(i)));
         }
         final StructuredQName mapGetName = new StructuredQName("map", NamespaceUri.MAP_FUNCTIONS, "get");
         BuiltInFunctionSet lib = MapFunctionSet.getInstance(40);

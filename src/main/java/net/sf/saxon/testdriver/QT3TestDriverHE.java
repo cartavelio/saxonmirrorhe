@@ -130,7 +130,7 @@ public class QT3TestDriverHE extends TestDriver {
     }
 
     public static boolean isSlow(String test) {
-        return false; //test.equals("RangeExpr-409d");
+        return test.equals("divide-decimals-018");
     }
 
 
