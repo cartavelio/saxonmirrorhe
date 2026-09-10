@@ -8,25 +8,28 @@
 
 	<aside>Saxon provides further extensions to the XPath expression syntax (these require Saxon-PE or higher), for details see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</aside>
 
-	<h3 class="subtitle">New features in XPath 3.0 and 3.1</h3>
+	<h3 class="subtitle">Changes since XPath 2.0</h3>
 
 	<p>There are summaries of <a class="bodylink" href="xpath30new">New features in XPath 3.0</a> (originally published as XPath 2.1) and <a class="bodylink" href="xpath31new">New features in XPath 3.1</a>, and information about the implementation in Saxon.</p>
 
-	<p>An important new feature in XPath 3.1 is the definition of maps and arrays. These features are available in all current Saxon editions, whether you are using XPath, XQuery, or XSLT. A major motivation for their introduction was to support the data structures that can be defined in JSON, but they have many other uses where more complex data structures need to be built. For more details see <a class="bodylink" href="xpath30maps">Maps in XPath</a> and <a class="bodylink" href="xpath31arrays">Arrays in XPath</a>.</p>
+	<p>An important new feature in XPath 3.1 was the definition of maps and arrays. These features are available in all current Saxon editions, whether you are using XPath, XQuery, or XSLT. A major motivation for their introduction was to support the data structures that can be defined in JSON, but they have many other uses where more complex data structures need to be built. For more details see <a class="bodylink" href="xpath30maps">Maps in XPath</a> and <a class="bodylink" href="xpath31arrays">Arrays in XPath</a>.</p>
 
 	<h3 class="subtitle">XPath basics</h3>
 
 	<p>In XPath 2.0 (and higher) all values are considered as sequences. A sequence consists of zero or more items; an item may be a generic node, an atomic item or (since 3.0) a function item. For more detail, see <a class="bodylink" href="/expressions/types">Types</a></p>
 
 	<p>An empty sequence is written as <code>()</code>; a singleton sequence may be written as <code>"a"</code> or <code>("a")</code>, and a general sequence is written as <code>("a", "b", "c")</code>.</p>
-
+	
 	<p>The node-sets of XPath 1.0 are replaced in XPath 2.0 by sequences of nodes. Path expressions will return node sequences whose nodes are in document order with no duplicates, but other kinds of expression may return sequences of nodes in any order, with duplicates permitted.</p>
 
 	<section id="types" title="Types" class="qt4">
 		<h1>Types</h1>
 		<?source https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types ?>
-		<p>There are two categories of type: schema types and item types.</p>
+		
+		<p>There are two main categories of type: schema types and item types.</p>
+		
 		<h2>Pre-defined types</h2>
+		
 		<table>
 			<thead>
 				<tr>
@@ -46,7 +49,7 @@
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>item()</code></p></td>
 					<td class="sub-types"><p><code>xs:boolean</code>, <code>xs:string</code>, <code>xs:decimal</code>, <code>xs:double</code>, <code>xs:float</code>, <code>xs:duration</code>, <code>xs:dateTime</code>, <code>xs:time</code>, <code>xs:date</code>, <code>xs:gMonth</code>, <code>xs:gYear</code>, <code>xs:gMonthDay</code>, <code>xs:gDay</code>, <code>xs:gMonth</code>, <code>xs:hexBinary</code>, <code>xs:base64Binary</code>, <code>xs:anyURI</code>, <code>xs:QName</code>, <code>xs:NOTATION</code></p></td>
-					<td class="comparison-family">&#x00A0;</td>
+					<td class="comparison-family"> </td>
 					<td class="notes"><p>Since XDM 3.0.</p></td>
 				</tr>
 				<tr>
@@ -54,52 +57,52 @@
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>String-like</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>array(*)</code></p></td>
 					<td class="description"><p>An array.</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>function(*)</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Function</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>attribute()</code></p></td>
 					<td class="description"><p>An XML attribute.</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>node()</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Attribute</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:base64Binary</code></p></td>
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Binary</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:boolean</code></p></td>
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Boolean</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:byte</code></p></td>
 					<td class="description"><p>A generalized atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:short</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Numeric</p></td>
 					<td class="notes"><p>See also <code>xs:numeric</code></p></td>
 				</tr>
@@ -108,16 +111,16 @@
 					<td class="description"><p>An XML comment.</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>node()</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Comment</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:date</code></p></td>
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Date</p></td>
 					<td class="notes"><p>Also a member of the date/time types.</p></td>
 				</tr>
@@ -135,7 +138,7 @@
 					<td class="description"><p>A generalized atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:dateTime</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>DateTime</p></td>
 					<td class="notes"><p>Also a member of the date/time types.</p></td>
 				</tr>
@@ -144,7 +147,7 @@
 					<td class="description"><p>A generalized atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:duration</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Duration</p></td>
 					<td class="notes"><p>Since XDM 3.0.</p><p>Also a member of the date/time types.</p></td>
 				</tr>
@@ -162,16 +165,16 @@
 					<td class="description"><p>A wrapper node that represents an XML document.</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>node()</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Document</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:double</code></p></td>
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Numeric</p></td>
 					<td class="notes"><p>See also <code>xs:numeric</code></p></td>
 				</tr>
@@ -189,17 +192,17 @@
 					<td class="description"><p>An XML element.</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>node()</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Element</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:ENTITIES</code></p></td>
 					<td class="description"><p>A built-in list type.</p></td>
 					<td class="category"><p>Schema type</p></td>
 					<td class="derived-from"><p><code>N/A</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
-					<td class="comparison-family">&#x00A0;</td>
+					<td class="sub-types"> </td>
+					<td class="comparison-family"> </td>
 					<td class="notes"><p>See <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xs-types">Types adopted from XML Schema</a></p></td>
 				</tr>
 				<tr>
@@ -207,17 +210,17 @@
 					<td class="description"><p>A generalized atomic type. Enumeration.</p></td>
 					<td class="category"><p>Schema type</p></td>
 					<td class="derived-from"><p>N/A</p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>N/A</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:error</code></p></td>
-					<td class="description"><p>A union type.  Also a generalized atomic type.</p></td>
+					<td class="description"><p>A union type. Also a generalized atomic type.</p></td>
 					<td class="category"><p>Schema type</p></td>
 					<td class="derived-from"><p><code>N/A</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
-					<td class="comparison-family">&#x00A0;</td>
+					<td class="sub-types"> </td>
+					<td class="comparison-family"> </td>
 					<td class="notes"><p>Not expected to have any instances. See <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xs-types">Types adopted from XML Schema</a></p></td>
 				</tr>
 				<tr>
@@ -225,7 +228,7 @@
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Numeric</p></td>
 					<td class="notes"><p>See also <code>xs:numeric</code></p></td>
 				</tr>
@@ -236,14 +239,17 @@
 					<td class="derived-from"><p><code>item()</code></p></td>
 					<td class="sub-types"><p>array(*), map(*)</p></td>
 					<td class="comparison-family"><p>Function</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes">
+						<?source https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items ?>
+						<p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items">XDM 4.0</a> introduces the concept of function identity, an abstract property that can be used to test whether two variables refer to the same function or to different functions.  This has an impact on <code>fn:deep-equal</code> and also when establishing whether the arguments and results of a function are <i>the same</i> when deciding whether the function is deterministic.</p>
+					</td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:gDay</code></p></td>
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>gDay</p></td>
 					<td class="notes"><p>Also a member of the date/time types.</p></td>
 				</tr>
@@ -252,7 +258,7 @@
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>gMonth</p></td>
 					<td class="notes"><p>Also a member of the date/time types.</p></td>
 				</tr>
@@ -261,7 +267,7 @@
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>gMonthDay</p></td>
 					<td class="notes"><p>Also a member of the date/time types.</p></td>
 				</tr>
@@ -270,7 +276,7 @@
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>gYear</p></td>
 					<td class="notes"><p>Also a member of the date/time types.</p></td>
 				</tr>
@@ -279,7 +285,7 @@
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>gYearMonth</p></td>
 					<td class="notes"><p>Also a member of the date/time types.</p></td>
 				</tr>
@@ -289,7 +295,7 @@
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>item()</code></p></td>
 					<td class="sub-types"><p><code>node()</code>, <code>jnode()</code></p></td>
-					<td class="comparison-family">&#x00A0;</td>
+					<td class="comparison-family"> </td>
 					<td class="notes"><p>Since 4.0.</p></td>
 				</tr>
 				<tr>
@@ -297,17 +303,17 @@
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Binary</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:IDREFS</code></p></td>
 					<td class="description"><p>A built-in list type.</p></td>
 					<td class="category"><p>Schema type</p></td>
 					<td class="derived-from"><p><code>N/A</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
-					<td class="comparison-family">&#x00A0;</td>
+					<td class="sub-types"> </td>
+					<td class="comparison-family"> </td>
 					<td class="notes"><p>See <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xs-types">Types adopted from XML Schema</a></p></td>
 				</tr>
 				<tr>
@@ -333,7 +339,7 @@
 					<td class="description"><p>A JSON node</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>gnode()</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>JNode</p></td>
 					<td class="notes"><p>Since 4.0.</p></td>
 				</tr>
@@ -351,7 +357,7 @@
 					<td class="description"><p>A map.</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>function(*)</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Function</p></td>
 					<td class="notes"><p>A <code>record</code> may be used to constrain the type of items that may be added to a map.</p></td>
 				</tr>
@@ -360,16 +366,16 @@
 					<td class="description"><p>An XML namespace node.</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>node()</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Namespace</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:negativeInteger</code></p></td>
 					<td class="description"><p>A generalized atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:nonPositiveInteger</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Numeric</p></td>
 					<td class="notes"><p>See also <code>xs:numeric</code></p></td>
 				</tr>
@@ -378,9 +384,9 @@
 					<td class="description"><p>A built-in list type.</p></td>
 					<td class="category"><p>Schema type</p></td>
 					<td class="derived-from"><p><code>N/A</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
-					<td class="comparison-family">&#x00A0;</td>
-					<td class="notes">&#x00A0;</td>
+					<td class="sub-types"> </td>
+					<td class="comparison-family"> </td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>node()</code></p></td>
@@ -388,7 +394,7 @@
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>gnode()</code></p></td>
 					<td class="sub-types"><p><code>document-node()</code>, <code>element()</code>, <code>attribute()</code>, <code>text()</code>, <code>comment()</code>, <code>processing-instruction()</code>, <code>namespace-node()</code></p></td>
-					<td class="comparison-family">&#x00A0;</td>
+					<td class="comparison-family"> </td>
 					<td class="notes"><p>While the concept of a node existed before 4.0, the term <b>XNode</b> was introduced in 4.0 to differentiate between XML nodes and JSON nodes (see <code>jnode()</code>).</p></td>
 				</tr>
 				<tr>
@@ -414,17 +420,17 @@
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Notation</p></td>
 					<td class="notes"><p>Also a member of the qualified name types, also referred to as a namespace-sensitive type.</p></td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:numeric</code></p></td>
-					<td class="description"><p>A union type whose members are: <code>xs:double</code>, <code>xs:float</code> and <code>xs:decimal</code>.  Also a generalized atomic type.</p></td>
+					<td class="description"><p>A union type whose members are: <code>xs:double</code>, <code>xs:float</code> and <code>xs:decimal</code>. Also a generalized atomic type.</p></td>
 					<td class="category"><p>Schema type</p></td>
 					<td class="derived-from"><p>N/A</p></td>
-					<td class="sub-types">&#x00A0;</td>
-					<td class="comparison-family">&#x00A0;</td>
+					<td class="sub-types"> </td>
+					<td class="comparison-family"> </td>
 					<td class="notes"><p>See <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xs-types">Types adopted from XML Schema</a></p></td>
 				</tr>
 				<tr>
@@ -432,7 +438,7 @@
 					<td class="description"><p>A generalized atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:nonNegativeInteger</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Numeric</p></td>
 					<td class="notes"><p>See also <code>xs:numeric</code></p></td>
 				</tr>
@@ -441,16 +447,16 @@
 					<td class="description"><p>A processing instruction (PI).</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>node()</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Processing-instruction</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:QName</code></p></td>
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>QName</p></td>
 					<td class="notes"><p>Also a member of the qualified name types, also referred to as a namespace-sensitive type.</p></td>
 				</tr>
@@ -459,34 +465,34 @@
 					<td class="description"><p>A <code>record</code> may be used to constrain the type of items that may be added to a map.</p></td>
 					<td class="category"><p>Schema type</p></td>
 					<td class="derived-from"><p>N/A</p></td>
-					<td class="sub-types">&#x00A0;</td>
-					<td class="comparison-family">&#x00A0;</td>
-					<td class="notes">&#x00A0;</td>
+					<td class="sub-types"> </td>
+					<td class="comparison-family"> </td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:string</code></p></td>
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>String-like</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>text()</code></p></td>
 					<td class="description"><p>Text in XML.</p></td>
 					<td class="category"><p>Item type</p></td>
 					<td class="derived-from"><p><code>node()</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Text</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:time</code></p></td>
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Time</p></td>
 					<td class="notes"><p>Also a member of the date/time types.</p></td>
 				</tr>
@@ -495,16 +501,16 @@
 					<td class="description"><p>A generalized atomic type.</p></td>
 					<td class="category"><p>Schema type</p></td>
 					<td class="derived-from"><p><code>N/A</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>N/A</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:unsignedLong</code></p></td>
 					<td class="description"><p>A generalized atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:positiveInteger</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Numeric</p></td>
 					<td class="notes"><p>See also <code>xs:numeric</code></p></td>
 				</tr>
@@ -513,31 +519,35 @@
 					<td class="description"><p>A primitive atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:anyAtomicType</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>String-like</p></td>
-					<td class="notes">&#x00A0;</td>
+					<td class="notes"> </td>
 				</tr>
 				<tr>
 					<td class="name"><p><code>xs:yearMonthDuration</code></p></td>
 					<td class="description"><p>A generalized atomic type.</p></td>
 					<td class="category"><p>Schema type, Item type</p></td>
 					<td class="derived-from"><p><code>xs:duration</code></p></td>
-					<td class="sub-types">&#x00A0;</td>
+					<td class="sub-types"> </td>
 					<td class="comparison-family"><p>Duration</p></td>
 					<td class="notes"><p>Since XDM 3.0.</p><p>Also a member of the date/time types.</p></td>
 				</tr>
 			</tbody>
 		</table>
 		
-		<p>A number of new types were added to the Schema category in 4.0 but these are more easily considered methods for constraining how other types are used:</p>
+		<p>XQuery and XPath Data Model 4.0 introduces new types in the Item category:</p>
+		<ul>
+			<li><p>Generic node (gnode())</p> - <i></i>represents a node in a tree, regardless of whether it's a JSON tree or an XML tree.</li>
+			<li><p>JSON node (jnode())</p> - <i>represents a node in a JSON tree, as opposed to an XML tree</i></li>
+		</ul>
+		<p>To complement the above changes, from 4.0 onwards, a node in an XML tree is known as an XNode (node()) but remains otherwise unchanged.</p>
+		
+		<p>New types were also added to the Schema category in 4.0 but these are more easily considered methods for constraining how other types are used:</p>
 		<ul>
 			<li><p><a class="bodylink" href="/expressions/types/choice-types">Choice item types</a></p></li>
 			<li><p><a class="bodylink" href="/expressions/types/choice-types">Record types</a></p></li>
 			<li><p><a class="bodylink" href="/expressions/types/choice-types">Enumeration types</a></p></li>
-		</ul>
-		
-		<p>None of these new types introduce new kinds of value; they only provide new ways of constraining the value space.</p>
-		
+		</ul>		
 		
 		<p>Since 4.0, atomic items that belong to the same comparison family are mutually comparable.</p>
 		
@@ -552,7 +562,7 @@
 		<nav>
 			<ul/>
 		</nav>
-
+		
 		<section id="choice-types" title="Choice types" class="qt4">
 			<h1>Choice item types</h1>
 			<?source https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-choice-item-types ?>
@@ -574,16 +584,15 @@
 			<p>Choice item types can also be used in XSLT match patterns, for example a template defined with <code>match="type(xs:date, xs:time)"</code> will match values of those types. Such a pattern is allocated a default priority designed to reflect the type hierarchy, so if U is a subtype of V, then the pattern corresponding to U will have a higher priority than the pattern corresponding to V. However, the algorithm does not ensure that ambiguous union patterns have the same priority, so ambiguities may go undetected.</p>
 
 			<p>The pattern <code>match="type(xs:date)"</code> works in the same way; it can be regarded as syntactic sugar for a choice type with only one member.</p>
-
+			
 			<p>Two additional Saxon extensions help to improve the usability of choice item types:</p>
-
 			<ul>
 				<li>A commonly used type can be referenced using a <b>type alias</b>, for example <code>as="type(my:date-or-time)"</code>. Type aliases are available in both XSLT and XQuery, and are described in <a class="bodylink" href="/expressions/type-system/type-aliases">Type aliases</a>. Type aliases go some way towards hiding the implementation details of the type, and allowing the implementation to be changed without affecting users of the function library; in addition they simply make the code more readable.</li>
-				<li>In XSLT only, elements that have an <code>as</code> attribute to define the type of a variable, function, or parameter, also have an optional <a class="bodylink code" href="/extensions/attributes/as">saxon:as</a> attribute which allows additional type information to be supplied using Saxon extension syntax. If both attributes are present, then the type specified in <code>saxon:as</code> must be a subtype of the type specified in the <code>as</code> attribute. Typical usage might be <code>&lt;xsl:param name="x" as="xs:anyAtomicType" saxon:as="union(xs:date, xs:time, xs:dateTime)"/></code>. This device allows union types to be used without compromising the portability of the stylesheet to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0 processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
+				<li>In XSLT only, elements that have an <code>as</code> attribute to define the type of a variable, function, or parameter, also have an optional <a class="bodylink code" href="/extensions/attributes/as">saxon:as</a> attribute which allows additional type information to be supplied using Saxon extension syntax. If both attributes are present, then the type specified in <code>saxon:as</code> must be a subtype of the type specified in the <code>as</code> attribute. Typical usage might be <code>&lt;xsl:param name="x" as="xs:anyAtomicType" saxon:as="union(xs:date, xs:time, xs:dateTime)"/&gt;</code>. This device allows union types to be used without compromising the portability of the stylesheet to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0 processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
 			</ul>
-
+			
 			<p>For example, the following code defines an XQuery function that formats a date, time, dateTime, or a string in the form of a date, time, or dateTime using the appropriate variant of the format-date/time function:</p>
-
+			
 			<pre><code class="language-xquery"><![CDATA[declare function local:format(
               $in as union(xs:dateTime, xs:date, xs:time, xs:string), 
               $fmt as xs:string) as xs:string {
@@ -595,87 +604,50 @@
    default return error()
    };    
 local:format("2016-10-07", $fmt)]]></code></pre>
+			
 		</section>
-
+		
 		<section id="record-types" title="Record types" class="qt4">
-
 			<h1>Record types</h1>
-
 			<aside>Previously referred to as "tuple types". Saxon continues to recognize the keyword <code>tuple</code> as a synonym of <code>record</code>.</aside>
-
 			<p>Record types do not introduce a new kind of XDM value; rather, they provide a new way of constraining the content of a map. For example, the record type <code>record(longitude as xs:double, latitude as xs:double)</code> matches a map if it has exactly two entries, with the keys "longitude" and "latitude" (as instances of <code>xs:string</code>), and associated values of type <code>xs:double</code>.</p>
-
-
 			<p>Wherever an item type can be used (for example, in the type signature of a function or variable, or in an <code>instance of</code> expression), Saxon allows a record type to appear. The syntax is:</p>
-
 			<samp> recordType ::= "record" "(" fieldDef ("," fieldDef)* ("," "*")? ")" fieldDef ::= fieldName "?"? ("as" fieldType)? fieldType ::= sequenceType | (".." occurrenceIndicator?)</samp>
-
 			<p>where <code>fieldName</code> is either an NCName or a string literal.</p>
-
 			<p>A "?" after a <code>fieldName</code> indicates that the field is optional.</p>
-
 			<p>A final ", *" at the end of the list of fields indicates that the record type is <i>extensible</i>: additional fields beyond those that are explicitly declared are permitted to appear in the map.</p>
-
 			<p>If the "as" clause is absent for any field, the assumed type is <code>item()*</code>.</p>
-
 			<p>The special field type ".." allows a record type to be recursive: it is a reference to the containing record type. See <i>Recursive record types</i> below. </p>
-
 			<p>For example:</p>
-
-			<pre><code class="language-xquery">record(ssn as xs:string, emp as element(employee))</code></pre>
-
-
+			<pre>
+            <code class="language-xquery">record(ssn as xs:string, emp as element(employee))</code>
+         </pre>
 			<p>or: </p>
-
-			<pre><code class="language-xquery">record('first name', 'middle initial', 'last name', *)</code></pre>
-
-
+			<pre>
+            <code class="language-xquery">record('first name', 'middle initial', 'last name', *)</code>
+         </pre>
 			<p>The instances of a record type are maps. A record type is essentially a way of defining a more precise type for maps. The first example will be satisfied by any map with two entries: an entry whose key is "ssn" and whose value is a string, and an entry whose key is "emp" and whose value is an <code>employee</code> element. The second example matches any map with entries having the keys "first name" and "middle initial" and "last name", regardless of the types of the values; the map may also contain additional entries, with any key and any value.</p>
-
 			<p>More formally, a value <code>M</code> is an instance of a record type <code>record(N1 as T1, N2 as T2, ...)</code> if and only if all the following conditions are true:</p>
-
 			<ol>
-				<li>
-					<p>
-						<code>M is a map</code>
-					</p>
-				</li>
-				<li>
-					<p>For every (<code>N</code>, <code>T</code>) pair in the record definition that is not declared optional (that is, there is no "?" after the field name), <code>map:contains(M, N)</code> returns true. </p>
-				</li>
-				<li>
-					<p>For every (<code>N</code>, <code>T</code>) pair in the record definition, if <code>map:contains(M, N)</code> returns true then <code>map:get(M, N) instance of T</code> also returns true.</p>
-				</li>
-				<li>
-					<p>If the record type is not extensible (that is, there is no final ", *" after the list of field names), then every key present in the map is a string equal to one of the field names appearing in the record definition, when compared using codepoint collation.</p>
+				<li><p><code>M is a map</code></p></li>
+				<li><p>For every (<code>N</code>, <code>T</code>) pair in the record definition that is not declared optional (that is, there is no "?" after the field name), <code>map:contains(M, N)</code> returns true. </p></li>
+				<li><p>For every (<code>N</code>, <code>T</code>) pair in the record definition, if <code>map:contains(M, N)</code> returns true then <code>map:get(M, N) instance of T</code> also returns true.</p></li>
+				<li><p>If the record type is not extensible (that is, there is no final ", *" after the list of field names), then every key present in the map is a string equal to one of the field names appearing in the record definition, when compared using codepoint collation.</p>
 				</li>
 			</ol>
-
 			<p>So for every field defined in the record definition, the map will typically contain an entry whose key matches the field name and whose value matches the corresponding type. The entry is allowed to be absent only if the type definition indicates that an empty sequence would be acceptable. Additional entries are allowed only if the type definition indicates that it is extensible.</p>
-
-
 			<p>Since a record is a map, fields can be accessed using the lookup syntax <code>$T?NNN</code> where <code>$T</code> is an expression that returns a record, and <code>NNN</code> is the name of the field. A separate 4.0 extension allows the field name to be written as a string in quotes if it is not an NCName, for example $T?"date of birth".</p>
-
 			<p>Using records makes stronger type checking possible. With a general-purpose map, any atomic item can be supplied as a key, and the <code>map:get()</code> function (or a dynamic call on the map as a function) returns an empty sequence if the entry is not present. With records, however, supplying a key value that is not a string, or that is not one of the known field names, results in a static type error if it can be detected at compile time. Furthermore, if <code>$T</code> is known to be a record type, then the type of an expression such as <code>$T?field</code> can be statically inferred, which again enables better error detection and better optimization.</p>
-
 			<aside>Although <code>$T?N</code> results in a static type error if <code>T</code> is a non-extensible record type that doesn't define field <code>N</code>, a run-time reference <code>$T("N")</code> works the same way as any other dynamic map lookup, returning an empty sequence.</aside>
-
 			<p>Record types are useful where maps are used to hold information with a regular structure; for example when a function accepts maps as input or returns maps as output. Declaring the argument or result type of a function as a record type often gives better information about the expected contents than when it is declared as a map.</p>
-
 			<p>Record types can be used as patterns, to match maps (regardless whether the value was originally declared as a record or not). This can be especially useful when processing JSON. For example, if a JSON document containing the object <code>{'long': 23.1234, 'lat':55.624}</code> is parsed using the <code>parse-json()</code> or <code>json-doc()</code> functions, then the resulting map can be processed using a template rule declared with <code>match="record(lat, long)"</code>.</p>
-
 			<aside>There is an algorithm to define a default priority for record patterns, but it is provisional. At this release, you should not rely on the default priority of template rules whose match pattern is a record type. It is safest to allocate explicit priorities if there is any ambiguity. The rules for default priority are likely to be refined in later releases.</aside>
-
 			<p>Record types fit into the type hierarchy as subtypes of maps. A record type T1 is a subtype of another record type T2 if every possible instance of T1 is a permitted instance of T2 (this takes into account whether either or both record types are extensible). Similarly, a record type T is a subtype of a map type M if every possible instance of T is a permitted instance of M. By extension, because maps are functions, records are also functions, and record types are thus subtypes of function types.</p>
-
 			<p>To make it easier to use record types without sacrificing portability, Saxon allows you to declare the type in both portable and Saxon-specific syntax, for example <code>&lt;xsl:param name="location" as="map(xs:string, xs:double)" saxon:as="record(x as xs:double, y as xs:double)"/&gt;</code>.</p>
-
 			<p>A map that contains additional entries beyond those defined in an extensible record type still conforms to the type (so if the expected type of a function argument is <code>record(a as xs:integer, b as xs:integer, *)</code>, then you can supply any map that contains these two fields, even if it also contains others). A consequence of making a record type extensible is that incorrect static references are less likely to result in a compile-time error.</p>
-
-
 			<p>The following XSLT example shows a couple of functions from a library designed to perform complex number arithmetic, where a complex number is defined as the type <code>record(r as xs:double, i as xs:double)</code>:</p>
-
-			<pre><code class="language-xml"><![CDATA[<xsl:function name="cx:complex" as="record(r as xs:double, i as xs:double)">
+			<pre>
+            <code class="language-xml"><![CDATA[<xsl:function name="cx:complex" as="record(r as xs:double, i as xs:double)">
   <xsl:param name="real" as="xs:double"/>
   <xsl:param name="imag" as="xs:double"/>
   <xsl:sequence select="map{'r':$real, 'i':$imag}"/>
@@ -685,11 +657,11 @@ local:format("2016-10-07", $fmt)]]></code></pre>
   <xsl:param name="x" as="record(r as xs:double, i as xs:double)"/>
   <xsl:param name="y" as="record(r as xs:double, i as xs:double)"/>
   <xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/>
-</xsl:function>]]></code></pre>
-
+</xsl:function>]]></code>
+         </pre>
 			<p>The same functions could be written in XQuery:</p>
-
-			<pre><code class="language-xquery"><![CDATA[declare function cx:complex ($real as xs:double, $imag as xs:double)
+			<pre>
+            <code class="language-xquery"><![CDATA[declare function cx:complex ($real as xs:double, $imag as xs:double)
                  as record(r as xs:double, i as xs:double) {
   map{'r':$real, 'i':$imag}
 };
@@ -698,80 +670,59 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                          $y as record(r as xs:double, i as xs:double))
                  as record(r as xs:double, i as xs:double) {
   cx:number($x?r + $y?r, $x?i + $y?i)
-};]]></code></pre>
-
+};]]></code>
+         </pre>
 			<p>Two additional extensions help to improve the usability of record types:</p>
-
 			<ul>
 				<li>A commonly used type can be referenced using a <b>type alias</b>, for example <code>as="type(cx:complex)"</code>. Type aliases are available in both XSLT and XQuery, and are described in <a class="bodylink" href="/v4extensions/new-types/type-aliases">Type aliases</a>. Type aliases go some way towards hiding the implementation details of the type, and allowing the implementation to be changed without affecting users of the function library; in addition they simply make the code more readable.</li>
-				<li>In XSLT only, elements that have an <code>as</code> attribute to define the type of a variable, function, or parameter, also have an optional <a class="bodylink code" href="/extensions/attributes/as">saxon:as</a> attribute which allows additional type information to be supplied using Saxon extension syntax. If both attributes are present, then the type specified in <code>saxon:as</code> must be a subtype of the type specified in the <code>as</code> attribute. Typical usage might be <code>&lt;xsl:param name="x" as="map(*)" saxon:as="record(r as xs:double, i as xs:double)"/></code>. This device allows record types to be used without compromising the portability of the stylesheet to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0 processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
+				<li>In XSLT only, elements that have an <code>as</code> attribute to define the type of a variable, function, or parameter, also have an optional <a class="bodylink code" href="/extensions/attributes/as">saxon:as</a> attribute which allows additional type information to be supplied using Saxon extension syntax. If both attributes are present, then the type specified in <code>saxon:as</code> must be a subtype of the type specified in the <code>as</code> attribute. Typical usage might be <code>&lt;xsl:param name="x" as="map(*)" saxon:as="record(r as xs:double, i as xs:double)"/&gt;</code>. This device allows record types to be used without compromising the portability of the stylesheet to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0 processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
 			</ul>
-
 			<h2>Recursive record types</h2>
-
 			<p>The syntax ".." allows a field of a record type to reference the containing record type, thus allowing recursive structures. For example a simple linked list can be declared using the type:</p>
-
-			<pre><code class="language-xquery">record(value, next as ..?)</code></pre>
-
+			<pre>
+            <code class="language-xquery">record(value, next as ..?)</code>
+         </pre>
 			<p>While a binary tree can be declared as:</p>
-
-			<pre><code class="language-xquery">record(left? as .., value, right? as ..)</code></pre>
-
+			<pre>
+            <code class="language-xquery">record(left? as .., value, right? as ..)</code>
+         </pre>
 			<p>It will only be possible to create a finite instance of a recursive record type if the self-reference is made optional, either by making the field itself optional (as in the second example), or by allowing it to take an empty sequence as its value (as in the first example).</p>
-
 			<aside>It is not possible to define recursive structures using type aliases, because a type alias name cannot be used within the definition of the type alias being declared.</aside>
-
 		</section>
-
 		<section id="enum-types" title="Enumeration types" class="qt4">
 			<h1>Enumeration types</h1>
-
 			<p>An enumeration type defines a set of permitted <code>xs:string</code> values. For example, an enumeration type might be defined as:</p>
-
 			<pre><code class="language-xquery">enum("red", "green", "blue")</code></pre>
-
 			<p>The values conforming to an enumeration type are strings: the expression <code>$S instance of enum(A, B, C)</code> is true if <code>$S</code> is an instance of <code>xs:string</code> (note: not <code>xs:untypedAtomic</code> or <code>xs:anyURI</code>) and is equal (under codepoint collation) to one of A, B, or C.</p>
-
 			<p>A typical use case is in a function signature. For example the function signature of <code>fn:normalize-unicode()</code> could be restated as:</p>
-
 			<pre><code class="language-xquery">function($s as xs:string, $form as enum("NFC", "NFD", "NFKC", "NFKD")) as xs:string</code></pre>
 		</section>
-
 		<section id="kindtests" title="KindTests and NodeTests" class="qt4">
 			<h1>KindTests and NodeTests</h1>
-
 			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
-
-			<p>The syntax for the <code>element()</code> and <code>attribute()</code>
-				<code>KindTests</code> is extended to allow constructs of the form</p>
-			<pre><code class="language-xquery">element(*:div)</code></pre>
+			<p>The syntax for the <code>element()</code> and <code>attribute()</code><code>KindTests</code> is extended to allow constructs of the form</p>
+			<pre>
+            <code class="language-xquery">element(*:div)</code>
+         </pre>
 			<p>or </p>
-			<pre><code class="language-xquery">attribute(myns:*, myns:someType)</code></pre>
+			<pre>
+            <code class="language-xquery">attribute(myns:*, myns:someType)</code>
+         </pre>
 			<p>More specifically, the grammar for <code>ElementNameOrWildCard</code> changes from <code>ElementName | "*"</code> to simply <code>NameTest</code>; and similarly <code>AttribNameOrWildCard</code> also expands simply to <code>NameTest</code>. This change is made largely for orthogonality reasons (there is no reason to have different rules for the two constructs) and also because it provides some useful extra functionality: for example in XSLT it is now possible to match all elements in a particular namespace having a particular type with a template rule that specifies <code>match="element(my:*, my:type)"</code>.</p>
-
 			<p>The default priority for an XSLT pattern in the form <code>element(X)</code> is always the same as the default priority for <code>X</code>, so for example the default priority of <code>element(my:*)</code> is -0.25. If a type is present, then we follow the principle that the default priority of <code>element(my:*, T)</code> is midway between the priorities of <code>element(*, T)</code> and <code>element(E, T)</code>: that is, 0.125.</p>
-
 			<p>From Saxon 12, NodeTests used in steps are extended to allow, for example, <code>ancestor::(section|appendix)</code>. This will select all ancestors named <code>section</code> or <code>appendix</code>. The meaning is similar to <code>ancestor::section|ancestor::appendix</code>, except when a numeric predicate is used: because <code>ancestor</code> is a reverse axis, <code>ancestor::(section|appendix)[1]</code> selects the innermost ancestor that satisfies the node test. As well as simple names, the options used within the parentheses can include kind tests (such as <code>comment()</code> and <code>text()</code>) and wild cards (such as <code>*:code</code> and <code>ns:*</code>). There must be an explicit axis, but <code>@</code> can be used as an abbreviation for <code>attribute::</code>. For example, <code>@(name, id)</code> selects the <code>name</code> and <code>id</code> axes.</p>
-
 			<p>In match patterns, union node tests work like union patterns, so <code>match="@(code, ns:*)"</code> is equivalent to having two separate template rules, matching the two node tests, with different default priority.</p>
 		</section>
-
 		<section id="type-aliases" title="Type aliases" class="qt4">
 			<h1>Type aliases</h1>
-
 			<p>TODO FIXME: these are now called named item types, and the syntax has changed in the current 4.0 specs...</p>
-
 			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 9.8; revised in 10 and 11.</aside>
-
 			<p>Wherever an <code>ItemType</code> may appear (for example in a function signature or variable declaration, or in <code>instance of</code> or <code>cast as</code> expressions), the syntax <code class="bold">type(alias)</code> is permitted, where <code>alias</code> is a name for an item type declared elsewhere. Type aliases are QNames, and prefixes are resolved in the usual way (using the default namespace for elements and types).</p>
-
 			<p>Type aliases are useful because they abstract away from the detail of how a type is implemented: for example <code>type(cx:complex)</code> is more meaningful than <code>record(r as xs:double, i as xs:double)</code>, and it creates more scope for changing the way types are represented as the software evolves. However, type aliases do not provide any real encapsulation or information hiding. Type aliases cannot be used within their own definition, and the definition of a type alias cannot be circular.</p>
-
 			<p>The mapping of type aliases to item types is an extension to the static context of an expression.</p>
-
 			<p>In XSLT, type aliases can be defined using the top-level declaration <a class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a>:</p>
-
-			<pre><code class="language-xml"><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>
+			<pre>
+            <code class="language-xml"><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>
 
 <xsl:function name="cx:complex" as="type(cx:complex)">
   <xsl:param name="r" as="xs:double"/>
@@ -784,731 +735,411 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
   <xsl:param name="y" as="type(cx:complex)"/>
   <xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/>
 </xsl:function>
-]]></code></pre>
-
+]]></code>
+         </pre>
 			<p>XSLT-defined type aliases are scoped to a package. The usual rules for import precedence apply.</p>
-
 			<aside>If you want to use the same type aliases in multiple packages, define them in a module of their own, and include that module in each package using <code>xsl:include</code>.</aside>
-
 			<p>Type aliases can be used in XSLT 4.0 match patterns (see <a class="bodylink" href="/xsl-elements/patterns/patterns-30">Patterns in XSLT 4.0</a>). For example:</p>
-
-			<pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></code></pre>
-
-			<pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
-
+			<pre>
+            <code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]"&gt;{?r}&lt;/xsl:template&gt;</code>
+         </pre>
+			<pre>
+            <code class="language-xml">&lt;xsl:template match="type(cx:complex)"&gt;{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template&gt;</code>
+         </pre>
 			<p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for <code>.[. instance of T]</code>.</p>
-
 			<p>In XQuery, type aliases can be declared in the query prolog. From Saxon 12.4, the syntax is <code>declare item-type QName as ItemType;</code>, for example: <code>declare item-type cx:complex as record(r as xs:double, i as xs:double);</code>. For Saxon 12.3 and earlier, the syntax was <code>declare type QName = ItemType;</code>, for example: <code>declare type cx:complex = record(r as xs:double, i as xs:double);</code>.</p>
-
 			<p>For further details see <a class="bodylink" href="/xsl-elements/item-type">xsl:item-type</a>.</p>
 		</section>
 	</section>
-
-
 	<h3 class="subtitle">XPath syntax</h3>
-
 	<p>The functions provided in the XPath function library are listed separately: see the <a class="bodylink" href="/functions">Function library</a> section. This section summarizes the following syntactic constructs and operators provided in XPath 2.0 and higher:</p>
-
 	<nav except="xpath30new xpath31new">
 		<ul/>
 	</nav>
-
-
 	<section id="literals" title="Constants">
 		<h1>Constants</h1>
 		<?source https://www.w3.org/TR/xpath-30/#id-literals?>
 		<p><strong>String literals</strong> are written as <code>"London"</code> or <code>'Paris'</code>. In each case you can use the opposite kind of quotation mark within the string: <code>'He said "Boo"'</code>, or <code>"That's rubbish"</code>. In a stylesheet XPath expressions always appear within XML attributes, so it is usual to use one kind of delimiter for the attribute and the other kind for the literal. Anything else can be written using XML character entities. String delimiters can be doubled within the string to represent the delimiter itself: for example <code>&lt;xsl:value-of select='"He said, ""Go!"""'/&gt;</code></p>
-
 		<p><strong>Numeric constants</strong> follow the Java rules for decimal literals: for example, <code>12</code> or <code>3.05</code>; a negative number can be written as (say) <code>-93.7</code>, though technically the minus sign is not part of the literal. (Also, note that you may need a space before the minus sign to avoid it being treated as a hyphen within a preceding name). The numeric literal is taken as a double precision floating point number if it uses scientific notation (e.g. <code>1.0e7</code>), as fixed point decimal if it includes a full stop, or as an integer otherwise. Decimal values (and integers) in Saxon have unlimited precision and range (they use the Java classes <code>BigInteger</code> and <code>BigDecimal</code> internally). Note that a value such as <code>3.5</code> was handled as a double-precision floating point number in XPath 1.0, but as a decimal number in XPath 2.0: this may affect the precision of arithmetic results.</p>
-
 		<p>There are no boolean constants as such: instead use the function calls <a class="bodylink code" href="/functions/fn/true">true()</a> and <a class="bodylink code" href="/functions/fn/false">false()</a>.</p>
-
 		<p>Constants of other data types can be written using constructors, which look like function calls but generally take a string literal as their argument. For example, <code>xs:float("10.7")</code> produces a single-precision floating point number. Saxon implements constructors for all of the built-in data types defined in XML Schema Part 2.</p>
-
 		<p>An example for <strong>date</strong> and <strong>dateTime</strong> values: you can write constants for these data types as <code>xs:date("2002-04-30")</code> or <code>xs:dateTime("1966-07-31T15:00:00Z")</code>.</p>
-
 		<p>The argument to a constructor can contain leading or trailing whitespace, as determined by the whitespace facet for the target data type.</p>
 	</section>
 	<section id="variables" title="Variable references">
 		<h1>Variable references</h1>
-
 		<p>The value of a variable (local or global variable, local or global parameter) may be referred to using the construct <code>$<i>name</i></code>, where <code><i>name</i></code> is the variable name.</p>
-
 		<p>The variable is always bound at the textual place where the expression containing it appears; for example a variable used within an <a class="bodylink code" href="/xsl-elements/attribute-set">xsl:attribute-set</a> must be in scope at the point where the attribute-set is defined, not the point where it is used.</p>
-
 		<p>A variable may be declared to be of a particular type, for example it may be constrained to be an integer, or a sequence of strings, or an attribute node. In a schema-aware environment, this may also be a reference to a user-defined type in a schema. If there is no type declared for the variable, it may take a value of any data type, and in general it is not possible to determine its data type statically.</p>
-
 		<p>It is an error to refer to a variable that has not been declared.</p>
-
 		<p>Starting with XPath 2.0, variables (known as range variables) may be declared within an XPath expression, not only using <a class="bodylink code" href="/xsl-elements/variable">xsl:variable</a> elements in an XSLT stylesheet. The expressions that declare variables are the <a class="bodylink" href="../for">for expressions</a>, and <a class="bodylink" href="../quantified">quantified expressions</a> (<code>some</code> and <code>every</code>). In XPath 3.0, variables can also be declared in a <a class="bodylink" href="../let">let expression</a>, as well as in the signature of an inline function.</p>
 	</section>
 	<section id="functioncalls" title="Function calls">
 		<h1>Function calls</h1>
-
 		<p>A function call in XPath 2.0 takes the form <code>F ( arg1, arg2, ...)</code>. In general, the function name is a QName. A library of core functions is defined in the XPath and XSLT specifications (in versions 2.0, 3.0, and 3.1). For details of these functions, including notes on their implementation in this Saxon release, see the <a class="bodylink" href="/functions">Function library</a>. Additional functions are available (in a special namespace) as Saxon extensions: these are also listed in the <a class="bodylink" href="/functions">Function library</a>, with some further information in the <a class="bodylink" href="/extensions">Extensions</a> section. Further functions may be implemented by the user, either as XSLT <i>stylesheet functions</i> (see <a class="bodylink code" href="/xsl-elements/function">xsl:function</a>), as XQuery functions, or as Java <i>extension functions</i> (see the <a class="bodylink" href="/extensibility">Extensibility mechanisms</a> section).</p>
-
 		<p>XPath 3.0 introduces dynamic function calls: <code>EXPR ( arg1, arg2, ...)</code> where <code>EXPR</code> is an expression that evaluates to a function item.</p>
 	</section>
 	<section id="axissteps" title="Axis steps">
 		<h1>Axis steps</h1>
-
-
 		<p>The basic primitive for accessing a source document is the <i>axis step</i>. Axis steps may be combined into path expressions using the path operators <code>/</code> and <code>//</code>, and they may be filtered using filter expressions in the same way as the result of any other expression.</p>
-
 		<p>An axis step has the basic form <code>axis :: node-test</code>, and selects nodes on a given axis that satisfy the node-test. The axes available are:</p>
 		<table>
 			<tr>
-				<td>
-					<p>ancestor</p>
-				</td>
-				<td>
-					<p>Selects ancestor nodes starting with the current node and ending with the document node</p>
-				</td>
+				<td><p>ancestor</p></td>
+				<td><p>Selects ancestor nodes starting with the current node and ending with the document node</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>ancestor-or-self</p>
-				</td>
-				<td>
-					<p>Selects the current node plus all ancestor nodes</p>
-				</td>
+				<td><p>ancestor-or-self</p></td>
+				<td><p>Selects the current node plus all ancestor nodes</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>attribute</p>
-				</td>
-				<td>
-					<p>Selects all attributes of the current node (if it is an element)</p>
-				</td>
+				<td><p>attribute</p></td>
+				<td><p>Selects all attributes of the current node (if it is an element)</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>child</p>
-				</td>
-				<td>
-					<p>Selects the children of the current node, in document order</p>
-				</td>
+				<td><p>child</p></td>
+				<td><p>Selects the children of the current node, in document order</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>descendant</p>
-				</td>
-				<td>
-					<p>Selects the children of the current node and their children, recursively (in document order)</p>
-				</td>
+				<td><p>descendant</p></td>
+				<td><p>Selects the children of the current node and their children, recursively (in document order)</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>descendant-or-self</p>
-				</td>
-				<td>
-					<p>Selects the current node plus all descendant nodes</p>
-				</td>
+				<td><p>descendant-or-self</p></td>
+				<td><p>Selects the current node plus all descendant nodes</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>following</p>
-				</td>
-				<td>
-					<p>Selects the nodes that follow the current node in document order, other than its descendants</p>
-				</td>
+				<td><p>following</p></td>
+				<td><p>Selects the nodes that follow the current node in document order, other than its descendants</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>following-sibling</p>
-				</td>
-				<td>
-					<p>Selects all subsequent child nodes of the same parent node</p>
-				</td>
+				<td><p>following-sibling</p></td>
+				<td><p>Selects all subsequent child nodes of the same parent node</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>namespace</p>
-				</td>
-				<td>
-					<p>Selects all the in-scope namespaces for an element (this axis is deprecated in the W3C XPath specification, but Saxon will continue to support it)</p>
-
-				</td>
+				<td><p>namespace</p></td>
+				<td><p>Selects all the in-scope namespaces for an element (this axis is deprecated in the W3C XPath specification, but Saxon will continue to support it)</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>parent</p>
-				</td>
-				<td>
-					<p>Selects the parent of the current node</p>
-				</td>
+				<td><p>parent</p></td>
+				<td><p>Selects the parent of the current node</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>preceding</p>
-				</td>
-				<td>
-					<p>Selects the nodes that precede the current node in document order, other than its ancestors</p>
-				</td>
+				<td><p>preceding</p></td>
+				<td><p>Selects the nodes that precede the current node in document order, other than its ancestors</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>preceding-sibling</p>
-				</td>
-				<td>
-					<p>Selects all preceding child nodes of the same parent node</p>
-				</td>
+				<td><p>preceding-sibling</p></td>
+				<td><p>Selects all preceding child nodes of the same parent node</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>self</p>
-				</td>
-				<td>
-					<p>Selects the current node</p>
-				</td>
+				<td><p>self</p></td>
+				<td><p>Selects the current node</p></td>
 			</tr>
 		</table>
-
 		<p>When the child axis is used, <code>child::</code> may be omitted, and when the attribute axis is used, <code>attribute::</code> may be abbreviated to <code>@</code>. The expression <code>parent::node()</code> may be shortened to <code>..</code></p>
-
-		<p>
-			<i>The expression <code>.</code> is no longer synonymous with <code>self::node()</code>, since it may now select items that are not nodes. If the context item is not a node, any use of a path expression will raise an error.</i>
-		</p>
-
+		<p><i>The expression <code>.</code> is no longer synonymous with <code>self::node()</code>, since it may now select items that are not nodes. If the context item is not a node, any use of a path expression will raise an error.</i></p>
 		<p>The node-test may be, for example:</p>
 		<ul>
 			<li>
 				<p>a node name</p>
 			</li>
 			<li>
-				<p>
-					<code>prefix:*</code> to select nodes in a given namespace</p>
+				<p><code>prefix:*</code> to select nodes in a given namespace</p>
 			</li>
 			<li>
-				<p>
-					<code>*:localname</code> to select nodes with a given local name, regardless of namespace</p>
+				<p><code>*:localname</code> to select nodes with a given local name, regardless of namespace</p>
 			</li>
 			<li>
-				<p>
-					<code>text()</code> to select text nodes</p>
+				<p><code>text()</code> to select text nodes</p>
 			</li>
 			<li>
-				<p>
-					<code>node()</code> to select any node</p>
+				<p><code>node()</code> to select any node</p>
 			</li>
 			<li>
-				<p>
-					<code>processing-instruction()</code> to select any processing instruction</p>
+				<p><code>processing-instruction()</code> to select any processing instruction</p>
 			</li>
 			<li>
-				<p>
-					<code>processing-instruction('literal')</code> to select processing instructions with the given name (target)</p>
+				<p><code>processing-instruction('literal')</code> to select processing instructions with the given name (target)</p>
 			</li>
 			<li>
-				<p>
-					<code>comment()</code> to select comment nodes</p>
+				<p><code>comment()</code> to select comment nodes</p>
 			</li>
 			<li>
-				<p>
-					<code>element()</code> or <code>element(*)</code> to select any element node</p>
+				<p><code>element()</code> or <code>element(*)</code> to select any element node</p>
 			</li>
 			<li>
-				<p>
-					<code>element(N)</code> to select any element node named <code>N</code></p>
+				<p><code>element(N)</code> to select any element node named <code>N</code></p>
 			</li>
 			<li>
-				<p>
-					<code>element(*, T)</code> to select any element node whose type annotation is <code>T</code>, or a subtype of <code>T</code></p>
+				<p><code>element(*, T)</code> to select any element node whose type annotation is <code>T</code>, or a subtype of <code>T</code></p>
 			</li>
 			<li>
-				<p>
-					<code>element(N, T)</code> to select any element node whose name is <code>N</code> and whose type annotation is <code>T</code>, or a subtype of <code>T</code></p>
+				<p><code>element(N, T)</code> to select any element node whose name is <code>N</code> and whose type annotation is <code>T</code>, or a subtype of <code>T</code></p>
 			</li>
 			<li>
-				<p>
-					<code>schema-element(N)</code> to select any element node whose name is <code>N</code>, or an element in the substitution group of <code>N</code>, that conforms to the schema-defined type for a global element declaration named <code>N</code> in an imported schema</p>
+				<p><code>schema-element(N)</code> to select any element node whose name is <code>N</code>, or an element in the substitution group of <code>N</code>, that conforms to the schema-defined type for a global element declaration named <code>N</code> in an imported schema</p>
 			</li>
 			<li>
-				<p>
-					<code>attribute</code> or <code>attribute(*)</code> to select any attribute node</p>
+				<p><code>attribute</code> or <code>attribute(*)</code> to select any attribute node</p>
 			</li>
 			<li>
-				<p>
-					<code>attribute(N)</code> to select any attribute node named <code>N</code></p>
+				<p><code>attribute(N)</code> to select any attribute node named <code>N</code></p>
 			</li>
 			<li>
-				<p>
-					<code>attribute(*, T)</code> to select any attribute node whose type annotation is <code>T</code>, or a subtype of <code>T</code></p>
+				<p><code>attribute(*, T)</code> to select any attribute node whose type annotation is <code>T</code>, or a subtype of <code>T</code></p>
 			</li>
 			<li>
-				<p>
-					<code>attribute(N, T)</code> to select any attribute node whose name is <code>N</code> and whose type annotation is <code>T</code>, or a subtype of <code>T</code></p>
+				<p><code>attribute(N, T)</code> to select any attribute node whose name is <code>N</code> and whose type annotation is <code>T</code>, or a subtype of <code>T</code></p>
 			</li>
 			<li>
-				<p>
-					<code>schema-attribute(N)</code> to select any attribute node whose name is <code>N</code>, that conforms to the schema-defined type for a global attribute declaration named <code>N</code> in an imported schema</p>
+				<p><code>schema-attribute(N)</code> to select any attribute node whose name is <code>N</code>, that conforms to the schema-defined type for a global attribute declaration named <code>N</code> in an imported schema</p>
 			</li>
 		</ul>
 	</section>
 	<section id="parentheses" title="Parentheses and operator precedence">
 		<h1>Parentheses and operator precedence</h1>
-
-
 		<p>In general an expression may be enclosed in parentheses without changing its meaning.</p>
-
 		<p>If parentheses are not used, operator precedence follows the sequence below, starting with the operators that bind most tightly. Within each group the operators are evaluated left-to-right.</p>
 		<table>
 			<tr>
-				<td>
-					<p>
-						<strong>Operator</strong>
-					</p>
-				</td>
-				<td>
-					<p>
-						<strong>Meaning</strong>
-					</p>
-				</td>
+				<td><p><strong>Operator</strong></p></td>
+				<td><p><strong>Meaning</strong></p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>unary <code>?</code></p>
-				</td>
-				<td>
-					<p>unary lookup operator</p>
-				</td>
+				<td><p>unary <code>?</code></p></td>
+				<td><p>unary lookup operator</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p><code>[]</code>, <code>()</code>, binary <code>?</code></p>
-				</td>
-				<td>
-					<p>predicate, function call, lookup operator</p>
-				</td>
+				<td><p><code>[]</code>, <code>()</code>, binary <code>?</code></p></td>
+				<td><p>predicate, function call, lookup operator</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p><code>/</code>, <code>//</code></p>
-				</td>
-				<td>
-					<p>path operator</p>
-				</td>
+				<td><p><code>/</code>, <code>//</code></p></td>
+				<td><p>path operator</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>!</code>
-					</p>
-				</td>
-				<td>
-					<p>simple mapping operator</p>
-				</td>
+				<td><p><code>!</code></p></td>
+				<td><p>simple mapping operator</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>unary <code>-</code>, unary <code>+</code></p>
-				</td>
-				<td>
-					<p>unary plus and minus</p>
-				</td>
+				<td><p>unary <code>-</code>, unary <code>+</code></p></td>
+				<td><p>unary plus and minus</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>=></code>
-					</p>
-				</td>
-				<td>
-					<p>arrow operator</p>
-				</td>
+				<td><p><code>=&gt;</code></p></td>
+				<td><p>arrow operator</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>cast as</code>
-					</p>
-				</td>
-				<td>
-					<p>dynamic type conversion</p>
-				</td>
+				<td><p><code>cast as</code></p></td>
+				<td><p>dynamic type conversion</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>castable as</code>
-					</p>
-				</td>
-				<td>
-					<p>type test</p>
-				</td>
+				<td><p><code>castable as</code></p></td>
+				<td><p>type test</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>treat as</code>
-					</p>
-				</td>
-				<td>
-					<p>static type conversion</p>
-				</td>
+				<td><p><code>treat as</code></p></td>
+				<td><p>static type conversion</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>instance of</code>
-					</p>
-				</td>
-				<td>
-					<p>type test</p>
-				</td>
+				<td><p><code>instance of</code></p></td>
+				<td><p>type test</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p><code>except</code>, <code>intersect</code></p>
-				</td>
-				<td>
-					<p>set difference and intersection</p>
-				</td>
+				<td><p><code>except</code>, <code>intersect</code></p></td>
+				<td><p>set difference and intersection</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p><code>|</code>, <code>union</code></p>
-				</td>
-				<td>
-					<p>union operation on sets</p>
-				</td>
+				<td><p><code>|</code>, <code>union</code></p></td>
+				<td><p>union operation on sets</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p><code>*</code>, <code>div</code>, <code>idiv</code>, <code>mod</code></p>
-				</td>
-				<td>
-					<p>multiply, divide, integer divide, modulo</p>
-				</td>
+				<td><p><code>*</code>, <code>div</code>, <code>idiv</code>, <code>mod</code></p></td>
+				<td><p>multiply, divide, integer divide, modulo</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p><code>+</code>, <code>-</code></p>
-				</td>
-				<td>
-					<p>plus, minus</p>
-				</td>
+				<td><p><code>+</code>, <code>-</code></p></td>
+				<td><p>plus, minus</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>to</code>
-					</p>
-				</td>
-				<td>
-					<p>range expression</p>
-				</td>
+				<td><p><code>to</code></p></td>
+				<td><p>range expression</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>||</code>
-					</p>
-				</td>
-				<td>
-					<p>string concatenation (XPath 3.0)</p>
-				</td>
+				<td><p><code>||</code></p></td>
+				<td><p>string concatenation (XPath 3.0)</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p><code>=</code>, <code>!=</code>, <code>is</code>, <code>&lt;</code>, <code>&lt;=;</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>eq</code>, <code>ne</code>, <code>lt</code>, <code>le</code>, <code>gt</code>, <code>ge</code></p>
-				</td>
-				<td>
-					<p>comparisons</p>
-				</td>
+				<td><p><code>=</code>, <code>!=</code>, <code>is</code>, <code>&lt;</code>, <code>&lt;=;</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>eq</code>, <code>ne</code>, <code>lt</code>, <code>le</code>, <code>gt</code>, <code>ge</code></p></td>
+				<td><p>comparisons</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>and</code>
-					</p>
-				</td>
-				<td>
-					<p>Boolean and</p>
-				</td>
+				<td><p><code>and</code></p></td>
+				<td><p>Boolean and</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>or</code>
-					</p>
-				</td>
-				<td>
-					<p>Boolean or</p>
-				</td>
+				<td><p><code>or</code></p></td>
+				<td><p>Boolean or</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>if</code>
-					</p>
-				</td>
-				<td>
-					<p>conditional expressions</p>
-				</td>
+				<td><p><code>if</code></p></td>
+				<td><p>conditional expressions</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p><code>some</code>, <code>every</code></p>
-				</td>
-				<td>
-					<p>quantified expressions</p>
-				</td>
+				<td><p><code>some</code>, <code>every</code></p></td>
+				<td><p>quantified expressions</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>let</code>
-					</p>
-				</td>
-				<td>
-					<p>variable declaration (XPath 3.0)</p>
-				</td>
+				<td><p><code>let</code></p></td>
+				<td><p>variable declaration (XPath 3.0)</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p>
-						<code>for</code>
-					</p>
-				</td>
-				<td>
-					<p>iteration (mapping) over a sequence</p>
-				</td>
+				<td><p><code>for</code></p></td>
+				<td><p>iteration (mapping) over a sequence</p></td>
 			</tr>
 			<tr>
-				<td>
-					<p><code>,</code> (comma)</p>
-				</td>
-				<td>
-					<p>Sequence concatenation</p>
-				</td>
+				<td><p><code>,</code> (comma)</p></td>
+				<td><p>Sequence concatenation</p></td>
 			</tr>
 		</table>
-
 		<p>The various operators are described, in roughly the above order, in the sections that follow.</p>
 	</section>
 	<section id="filter" title="Filter expressions">
 		<h1>Filter expressions</h1>
-
-
 		<p>The notation <code>E[P]</code> is used to select items from the sequence obtained by evaluating <code>E</code>. If the predicate <code>P</code> is numeric, the predicate selects an item if its position (counting from 1) is equal to <code>P</code>; otherwise, the <i>effective boolean value</i> of <code>P</code> determines whether an item is selected or not. The effective boolean value of a sequence is false if the sequence is empty, or if it contains a single item that is one of: the boolean value false, the zero-length string, or a numeric zero or NaN value. If the first item of the sequence is a node, or if the sequence is a singleton boolean, number or string other than those listed above, the effective boolean value is true. In other cases (for example, if the sequence contains two booleans or a date), evaluating the effective boolean value causes an error.</p>
-
 		<p>From XPath 2.0, <code>E</code> may be any sequence, it is not restricted to a node sequence. Within the predicate, the expression <code>.</code> (dot) refers to the context item, that is, the item currently being tested. The XPath 1.0 concept of context node has thus been generalized, for example <code>.</code> can refer to a string or a number.</p>
-
 		<p>Generally the order of items in the result preserves the order of items in <code>E</code>. As a special case, however, if <code>E</code> is a step using a reverse axis (e.g. preceding-sibling), the position of nodes for the purpose of evaluating the predicate is in reverse document order, but the result of the filter expression is in forwards document order.</p>
-
 		<p>In XPath 3.0, the postfix operators <code>[]</code> (filter) and <code>()</code> (function call) may be mixed and apply in left-to-right order. For example <code>$a[3](2)</code> selects the third item in a sequence (of function items), and calls it with the argument value 2; while <code>$a(2)[3]</code> calls the function item <code>$a</code> with argument value 2, and then selects the third item in the resulting sequence.</p>
 	</section>
 	<section id="path" title="Path expressions">
 		<h1>Path expressions</h1>
-
-
 		<p>A path expression is a sequence of steps separated by the <code>/</code> or <code>//</code> operator. For example, <code>../@desc</code> selects the <code>desc</code> attribute of the parent of the context node.</p>
-
 		<p>In XPath 2.0, path expressions were generalized so that any expression can be used as an operand of <code>/</code>, (both on the left and the right), so long as the value of the left-hand operand is a sequence of nodes. For example, it is possible to use a union expression (in parentheses) or a call to the <a class="bodylink code" href="/functions/fn/id">id()</a> or <a class="bodylink code" href="/functions/fn/key">key()</a> functions. The right-hand operand is evaluated once for each node in the sequence that results from evaluating the left-hand operand, with that node as the context item. In the result of the path expression, nodes are sorted in document order, and duplicates are eliminated.</p>
-
 		<p>In practice, it only makes sense to use expressions on the right of <code>/</code> if they depend on the context item. It is legal to write <code>$x/$y</code> provided both <code>$x</code> and <code>$y</code> are sequences of nodes, but the result is exactly the same as writing <code>./$y</code>.</p>
-
 		<p>Note that the expressions <code>./$X</code> or <code>$X/.</code> can be used to remove duplicates from <code>$X</code> and sort the results into document order. The same effect can be achieved by writing <code>$X|()</code>.</p>
-
 		<p>The operator <code>//</code> is an abbreviation for <code>/descendant-or-self::node()/</code>. An expression of the form <code>/E</code> is shorthand for <code>root(.)/E</code>, and the expression <code>/</code> on its own is shorthand for <code>root(.)</code>.</p>
-
 		<p>The expression on the left of the <code>/</code> operator must return a node or sequence of nodes. The expression on the right can return either a sequence of nodes or a sequence of atomic items (but not a mixture of the two). This allows constructs such as <code>$x/number()</code>, which returns the sequence obtained by converting each item in <code>$x</code> to a number.</p>
 	</section>
 	<section id="simplemapping" title="Simple mapping expressions">
 		<h1>Simple mapping expressions</h1>
-
-
 		<p>XPath 3.0 introduces the "simple mapping" operator <code>!</code>. The expression <code>A!B</code> evaluates expression <code>B</code> once for each item in the result of evaluating <code>A</code>, and concatenates the results. In the case where evaluating <code>A</code> returns a sequence of nodes, <code>A!B</code> has the same effect as <code>A/B</code> except that the result is not sorted into document order, and duplicates are not eliminated.</p>
-
 		<p>The semantics of the expression <code>A!B</code> are precisely equivalent to the XSLT construct <code>&lt;xsl:for-each select="A"&gt;&lt;xsl:sequence select="B"/&gt;&lt;/xsl:for-each&gt;</code>; in Saxon they generate the same internal code.</p>
 	</section>
 	<section id="cast" title="Cast as, Treat as">
 		<h1>Cast as, Treat as</h1>
-
-
 		<p>The expression <code>E cast as T</code> converts the value of expression <code>E</code> to type <code>T</code>. Whether <code>T</code> is a built-in type or a user-defined type, the effect is exactly the same as using the constructor function <code>T (E)</code>.</p>
-
 		<p>The expression <code>E treat as T</code> is designed for environments that perform static type checking. Saxon doesn't do static type checking, so this expression has very little use, except to document an assertion that the expression <code>E</code> is of a particular type. A run-time failure will be reported if the value of <code>E</code> is not of type <code>T</code>; no attempt is made to convert the value to this type.</p>
 	</section>
 	<section id="except" title="Set difference and intersection">
 		<h1>Set difference and intersection</h1>
-
-
 		<p>These operators were introduced in XPath 2.0.</p>
-
 		<p>The expression <code>E1 except E2</code> selects all nodes that are in <code>E1</code> unless they are also in <code>E2</code>. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>@* except @note</code> returns all attributes except the <code>note</code> attribute.</p>
-
 		<p>The expression <code>E1 intersect E2</code> selects all nodes that are in both <code>E1</code> and <code>E2</code>. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>preceding::fig intersect ancestor::chapter//fig</code> returns all preceding <code>fig</code> elements within the current chapter.</p>
 	</section>
 	<section id="union" title="Union">
 		<h1>Union</h1>
-
-
 		<p>The <code>|</code> operator was available in XPath 1.0; the keyword <code>union</code> was added in XPath 2.0 as a synonym, because it is familiar to SQL users.</p>
-
 		<p>The expression <code>E1 union E2</code> selects all nodes that are in either <code>E1</code> or <code>E2</code> or both. Both expressions must return sequences of nodes. The results are returned in document order. For example, <code>/book/(chapter | appendix)/section</code> returns all <code>section</code> elements within a <code>chapter</code> or <code>appendix</code> of the selected <code>book</code> element.</p>
 	</section>
 	<section id="arithmetic" title="Arithmetic expressions">
 		<h1>Arithmetic expressions</h1>
-
 		<h2 class="subtitle">Unary plus and minus</h2>
-
 		<p>The unary minus operator changes the sign of a number. For example <code>-1</code> is minus one, and <code>-0e0</code> is the double value negative zero.</p>
-
 		<p>Unary plus has very little effect: the value of <code>+1</code> is the same as the value of <code>1</code>. It does, however, provide a quick way of forcing untyped values to be numeric, for example you can write <code>&lt;xsl:sort select="+@price"/&gt;</code> to force a numeric sort, if you find <code>&lt;xsl:sort select="number(@price)"/&gt;</code> too verbose for your tastes.</p>
-
 		<h2 class="subtitle">Multiplication and division</h2>
-
 		<p>The operator <code>*</code> multiplies two numbers. If the operands are of different types, one of them is promoted to the type of the other (for example, an integer is promoted to a decimal, a decimal to a double). The result is the same type as the operands after promotion.</p>
-
 		<p>The operator <code>div</code> divides two numbers. Dividing two integers produces a double; in other cases the result is the same type as the operands, after promotion. In the case of decimal division, the precision is the sum of the precisions of the two operands, plus six.</p>
-
 		<p>The operator <code>idiv</code> performs integer division. For example, the result of <code>10 idiv 3</code> is <code>3</code>.</p>
-
 		<p>The <code>mod</code> operator returns the modulus (or remainder) after division. See the XPath 2.0 specification for details of the way that negative numbers are handled.</p>
-
 		<p>The operators <code>*</code> and <code>div</code> may also be used to multiply or divide a duration by a number. For example, <code>fn:dayTimeDuration('PT12H') * 4</code> returns the duration two days.</p>
-
 		<h2 class="subtitle">Addition and subtraction</h2>
-
 		<p>The operators <code>+</code> and <code>-</code> perform addition and subtraction of numbers, in the usual way. If the operands are of different types, one of them is promoted, and the result is the same type as the operands after promotion. For example, adding two integers produces an integer; adding an integer to a double produces a double.</p>
-
 		<p>Note that the <code>-</code> operator may need to be preceded by a space to prevent it being parsed as part of the preceding name.</p>
-
 		<p>XPath 2.0 also allows these operators to be used for adding durations to durations or to dates and times.</p>
 	</section>
 	<section id="range" title="Range expressions">
 		<h1>Range expressions</h1>
-
-
 		<p>The expression <code>E1 to E2</code> returns a sequence of integers. For example, <code>1 to 5</code> returns the sequence <code>1, 2, 3, 4, 5</code>. This is useful in <code>for</code> expressions, for example the first five nodes of a node sequence can be processed by writing <code>for $i in 1 to 5 return (//x)[$i]</code>.</p>
-
 		<p>If you prefer, you can write this as <code>(//x)[position() = 1 to 5]</code>. This works because comparison of a single integer (<code>position()</code>) to a sequence of integers (<code>1 to 5</code>) is true if the integer on the left is equal to any integer in the sequence.</p>
-
 		<p>Saxon does a good job of optimizing range expressions. For example given the expression <code>$x = (1 to 1000000)</code>, it won't actually compare <code>$x</code> with every integer in this range; rather, it tests that <code>$x</code> is a whole number and that it is greater than 0 and less than 1000001.</p>
-
-
 	</section>
 	<section id="comparisons" title="Comparisons">
 		<h1>Comparisons</h1>
-
-
-		<p>The simplest comparison operators are <code>eq</code>, <code>ne</code>, <code>lt</code>
-			<code>le</code>, <code>gt</code>, and <code>ge</code>. These compare two atomic items of the same type, for example two integers, two dates, or two strings. In the case of strings, the default collation is used (this can be set using the configuration property <a class="feature" href="DEFAULT_COLLATION"/>). If the operands are not atomic items, an error is raised.</p>
-
+		<p>The simplest comparison operators are <code>eq</code>, <code>ne</code>, <code>lt</code><code>le</code>, <code>gt</code>, and <code>ge</code>. These compare two atomic items of the same type, for example two integers, two dates, or two strings. In the case of strings, the default collation is used (this can be set using the configuration property <a class="feature" href="DEFAULT_COLLATION"/>). If the operands are not atomic items, an error is raised.</p>
 		<p>The operators <code>=</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, and <code>&gt;=</code> can compare arbitrary sequences. The result is true if any pair of items from the two sequences has the specified relationship, for example <code>$A = $B</code> is true if there is an item in <code>$A</code> that is equal to some item in <code>$B</code>. If an argument is a node, the effect depends on whether the source document has been validated against a schema. In Saxon-EE, with a validated source document, Saxon will use the typed value of the node in the comparison. Without schema validation, the type of the node is <code>untypedAtomic</code>, and the effect is that the value is converted to the type of the other operand.</p>
-
 		<p>The operator <code>is</code> tests whether the operands represent the same (identical) node. For example, <code>title[1] is *[@note][1]</code> is true if the first <code>title</code> child is the first child element that has a <code>note</code> attribute. If either operand is an empty sequence the result is an empty sequence (which will usually be treated as false).</p>
-
 		<p>The operators <code>&lt;&lt;</code> and <code>&gt;&gt;</code> test whether one node precedes or follows another in document order.</p>
 	</section>
 	<section id="instanceof" title="Instance of and Castable as">
 		<h1>Instance of and Castable as</h1>
-
-
 		<p>The expression <code>E instance of T</code> tests whether the value of expression <code>E</code> is an instance of type <code>T</code>, or of a subtype of <code>T</code>. For example, <code>$p instance of attribute()+</code> is true if the value of <code>$p</code> is a sequence of one or more attribute nodes. It returns false if the sequence is empty or if it contains an item that is not an attribute node. The detailed rules for defining types, and for matching values against a type, are given in the XPath specification.</p>
-
 		<p>Saxon also allows testing of the type annotation of an element or attribute node using tests of the form <code>element(*, T)</code>, <code>attribute(*, T)</code>. This is primarily useful with a schema-aware query or stylesheet, since the only way a node can acquire a type annotation (other than the special values <code>xs:untyped</code> and <code>xs:untypedAtomic</code>) is by validating a document against a schema.</p>
-
 		<p>The <code>instance of</code> operator tests whether a value is marked or labelled as an instance of the relevant type, not whether it is convertible to that type. For example, <code>5 instance of xs:positiveInteger</code> returns false, because the value <code>5</code> is labelled with the type <code>xs:integer</code>, not <code>xs:positiveInteger</code>.</p>
-
 		<p>The expression <code>E castable as T</code> tests whether the expression <code>E cast as T</code> would succeed. It is useful, for example, for testing whether a string contains a valid date before attempting to cast it to a date. So <code>5 castable as xs:positiveInteger</code> succeeds. The construct is useful because XPath provides no way of trapping the error if the cast is attempted and fails. (Note however that XQuery 3.0 and XSLT 3.0 both introduce a try/catch mechanism.)</p>
 	</section>
 	<section id="conditionals" title="Conditional expressions">
 		<h1>Conditional expressions</h1>
-
-
 		<p>XPath 2.0 introduced a conditional expression of the form <code>if ( E1 ) then E2 else E3</code>. For example, <code>if (@discount) then @discount else 0</code> returns the value of the <code>discount</code> attribute if it is present, or zero otherwise.</p>
-
 		<p>It's also worth noting the coding pattern <code>(@price, 5)[1]</code> which returns the value of <code>@price</code> if it exists, or 5 otherwise.</p>
 	</section>
 	<section id="quantified" title="Quantified expressions">
 		<h1>Quantified expressions</h1>
-
-
 		<p>The expression <code>some $x in E1 satisfies E2</code> returns true if there is an item in the sequence <code>E1</code> for which the <i>effective boolean value</i> of <code>E2</code> is true. Note that <code>E2</code> must use the range variable <code>$x</code> to refer to the item being tested; it does not become the context item. For example, <code>some $x in @* satisfies $x eq ""</code> is true if the context item is an element that has at least one zero-length attribute value.</p>
-
 		<p>Similarly, the expression <code>every $x in E1 satisfies E2</code> returns true if every item in the sequence given by <code>E1</code> satisfies the condition.</p>
 	</section>
 	<section id="for" title="For expressions">
 		<h1>For expressions</h1>
-
-
 		<p>The expression <code>for $x in E1 return E2</code> returns the sequence that results from evaluating <code>E2</code> once for every item in the sequence <code>E1</code>. Note that <code>E2</code> must use the range variable <code>$x</code> to refer to the item being tested; it does not become the context item. For example, <code>sum(for $v in order-item return $v/price * $v/quantity)</code> returns the total value of (price times quantity) for all the selected <code>order-item</code> elements.</p>
 	</section>
 	<section id="let" title="Let expressions">
 		<h1>Let expressions</h1>
-
 		<p>XPath 3.0 allows <code>let</code> expressions, previously available only in XQuery. For example the expression <code>let $x := . return //a[@status=$x]</code> binds the variable <code>$x</code> to the context item, and then evaluates the expression <code>//a[@status=$x]</code> which makes use of this variable.</p>
 	</section>
 	<section id="boolean" title="Boolean expressions: AND and OR">
 		<h1>Boolean expressions: AND and OR</h1>
-
-
 		<p>The expression <code>E1 and E2</code> returns true if the <i>effective boolean values</i> of <code>E1</code> and <code>E2</code> are both true.</p>
-
 		<p>The expression <code>E1 or E2</code> returns true if the <i>effective boolean values</i> of either or both of <code>E1</code> and <code>E2</code> are true.</p>
-
 		<p>The specification allows the operands to be evaluated in either order, but Saxon will normally evaluate them left-to-right, which means if you write something like <code>$a instance of xs:integer and $x = (1 to $a)</code>, then you won't get an error if <code>$a</code> is not an integer. But the specification doesn't guarantee this.</p>
 	</section>
 	<section id="sequence" title="Sequence expressions">
 		<h1>Sequence expressions</h1>
-
-
 		<p>The expression <code>E1 , E2</code> returns the sequence obtained by concatenating the sequences <code>E1</code> and <code>E2</code>.</p>
-
 		<p>For example, <code>$x = ("London", "Paris", "Tokyo")</code> returns true if the value of <code>$x</code> is one of the strings listed.</p>
-
 		<p>A sequence is often written in parentheses, as in the above example, but the parentheses are technically necessary only for operator precedence reasons.</p>
-
 		<p>The expression <code>()</code> denotes an empty sequence, which is often used to indicate absence of a value.</p>
 	</section>
 	<section id="xpath30new" title="New features in XPath 3.0">
 		<h1>New features in XPath 3.0</h1>
-
 		<aside>From Saxon 9.6, Saxon supports XPath 3.0 by default. Some features vary by Saxon edition: higher-order functions require Saxon-PE or higher, and schema-awareness requires Saxon-EE.</aside>
-
 		<p>Some of the new features in XPath 3.0 are as follows. For full details, see the W3C specifications, and for further Saxon implementation details see the <a class="bodylink" href="/conformance/xpath31">Conformance</a> section.</p>
-
 		<ol>
 			<li>
 				<p>The concatenation operator <code>||</code> is available (as in SQL). For example, <code>('$' || 12.5)</code> returns the string <code>$12.5</code>.</p>
 			</li>
-
 			<li>
 				<p>A new <a class="bodylink" href="../simplemapping">simple mapping operator</a> is available, <code>!</code>. This works rather like <code>/</code>, except there is no restriction that the left hand operand must be a node sequence, and there is no sorting of results into document order. For example, <code>(1 to 7)!(.*.)</code> returns the sequence <code>(1, 4, 9, 16, 25, 36, 49)</code>.</p>
 			</li>
-
 			<li>
 				<p>Local variables can be declared in a <a class="bodylink" href="../let">let expression</a>, for example <code>let $x := /*/@version return //e[@version = $x]</code>.</p>
 			</li>
-
 			<li>
 				<p>Inline function items can be declared, and used as arguments to higher-order functions. For example <code>map(//employee, function($e){$e/salary + $e/bonus})</code>. A <i>function item</i> is a third kind of item, alongside nodes and atomic items. The function represented by a function item <code>$f</code> can be invoked using a dynamic function call <code>$f(args)</code>. <i>Higher-order functions require Saxon-PE or higher.</i></p>
 			</li>
-
 			<li>
 				<p>Expanded QNames can be written in the notation <code>Q{uri}local</code>, allowing XPath expressions to be written that do not depend on an externally-supplied namespace context.</p>
 			</li>
 		</ol>
-
 		<p>A number of new functions are available, including <code>head</code>, <code>tail</code>, <code>for-each</code>, <code>filter</code>, <code>for-each-pair</code>, <code>pi</code>, <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>asin</code>, <code>acos</code>, <code>atan</code>, <code>sqrt</code>, <code>format-integer</code>, and others. For details see the <a class="bodylink" href="/functions">Functions library</a> section.</p>
-
-
 		<p>Maps and arrays are defined in XPath 3.1, and are available in Saxon whether you are using XPath, XSLT, or XQuery; for more details see <a class="bodylink" href="../xpath30maps">Maps in XPath</a> and <a class="bodylink" href="../xpath31arrays">Arrays in XPath</a>. </p>
-
 	</section>
 	<section id="xpath31new" title="New features in XPath 3.1">
 		<h1>New features in XPath 3.1</h1>
-
 		<aside>From Saxon 9.7, Saxon supports XPath 3.1 by default. Some features vary by Saxon edition: streaming and schema-awareness requires Saxon-EE. Higher-order functions required Saxon-PE in the past, but are available in Saxon-HE from 10.</aside>
-
 		<p>Some of the new features in XPath 3.1 are as follows. For full details, see the W3C specifications, and for further Saxon implementation details see the <a class="bodylink" href="/conformance/xpath31">Conformance</a> section.</p>
-
 		<ol>
 			<li>
-				<p>The arrow operator <code>=></code> is available to allow function chaining. The expression <code>substring-before(substring-after($in, '['), ']')</code> can now be replaced by the more legible <code>$in => substring-after('[') => substring-before(']')</code>.</p>
+				<p>The arrow operator <code>=&gt;</code> is available to allow function chaining. The expression <code>substring-before(substring-after($in, '['), ']')</code> can now be replaced by the more legible <code>$in =&gt; substring-after('[') =&gt; substring-before(']')</code>.</p>
 			</li>
 			<li>
 				<p>Maps are available (for more details see <a class="bodylink" href="../xpath30maps">Maps in XPath</a>). They provide a similar capability to "objects" in Javascript, or "associative arrays" in some other languages. But as befits a function language like XPath, they are immutable. A collection of functions is available to operate on maps (see the <a class="bodylink" href="/functions/map">Function library</a>), and in addition there is new syntax for a map constructor (of the form <code>map{ key : value, key : value }</code>) where both the keys and values are arbitrary expressions. There is a sequence type for maps <code>map(K, V)</code>, defining the types of the key and value parts. Maps are functions, so given a map <code>$M</code>, the entry for a key <code>$K</code> can be obtained as the result of the function call <code>$M($K)</code>. If the key to be accessed is known statically, and if it takes the form of an <code>NCName</code>, then a lookup expression of
@@ -1519,28 +1150,17 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 					members, each a single integer). A member of an array can be accessed using the syntax <code>$A(3)</code> or <code>$A?3</code>.</p>
 			</li>
 		</ol>
-
 		<p>A number of new functions are available, including <code>random-number-generator()</code>, <code>sort()</code>, <code>parse-ietf-date()</code>, and functions to read and write data in JSON format. For details see the <a class="bodylink" href="/functions">Functions library</a>.</p>
-
 	</section>
-
 	<section id="xpath30maps" title="Maps in XPath">
 		<h1>Maps in XPath</h1>
-
 		<aside>Since Saxon 9.7, maps are available in all Saxon editions.</aside>
-
 		<p>An important new feature in XPath 3.1 is the definition of maps. (This feature is in fact included in the XPath 3.0 implementation in Saxon, and thus was available as an advanced feature since Saxon 9.5, before the full implementation of XPath 3.1 in Saxon 9.7).</p>
-
 		<p>A map is a new kind of XDM item (alongside nodes and atomic values). In fact, a map is a kind of function: you can think of it as a function defined extensionally (by tabulating the value of the function for all possible arguments) rather than intensionally (by means of an algorithm).</p>
-
 		<p>A map is a set of entries. Each entry is a key-value pair. The <i>key</i> is always an atomic item. The <i>value</i> is any XDM value: a sequence of nodes, atomic item, functions, or maps.</p>
-
 		<p>Maps, like sequences, are immutable. When you add an entry to a map, you get a new map; the original is unchanged. Saxon provides an efficient implementation of maps that achieves this without copying the whole map every time an entry is added.</p>
-
 		<p>Also like sequences, maps do not have an intrinsic type of their own, but rather have a type that can be inferred from what they contain. A map conforms to the type <code>map(K, V)</code> if all the keys are of type <code>K</code> and all the values are of type <code>V</code>. For example if the keys are all strings, and the values are all <code>employee</code> elements, then the map conforms to the type <code>map(xs:string, element(employee))</code>.</p>
-
 		<p>There are several ways to create a map:</p>
-
 		<ul>
 			<li>
 				<p>If the number of entries is known, you can use the constructor syntax <code>map { key : value, key : value, ... }</code>. (A previous version of the spec used "<code>:=</code>" rather than <code>":"</code> as the separator, since Saxon 9.7 this alternative is no longer supported.) Here the keys and values can be any "simple expression" (an expression not containing a top-level comma). If the keys and values are all known statically, you might write: <code>map { "a" : 1, "e" : 2, "i" : 3, "o" : 4, "u" : 5 }</code>. You can use this construct anywhere an XPath expression can be used, for example in the <code>select</code> attribute of an <a class="bodylink code" href="/xsl-elements/variable">xsl:variable</a> element.</p>
@@ -1553,13 +1173,9 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				<p>A single-entry map can also be constructed using the function <code>map:entry($key, $value)</code>.</p>
 			</li>
 		</ul>
-
 		<p>It is also possible to create maps using the XSLT instructions <a class="bodylink code" href="/xsl-elements/map">xsl:map</a> and <a class="bodylink code" href="/xsl-elements/map-entry">xsl:map-entry</a>.</p>
-
 		<p>Given a map <code>$M</code>, the value corresponding to a given key <code>$K</code> can be found either by invoking the map as a function: <code>$M($K)</code>, or by calling <code>map:get($M, $K)</code>.</p>
-
 		<p>The summary of the full list of functions that operate on maps is as follows; for full details see the <a class="bodylink" href="/functions/map">Functions library</a>. The prefix <code>map</code> represents the namespace URI <code>http://www.w3.org/2005/xpath-functions/map</code>.</p>
-
 		<ul>
 			<li>
 				<p><code>map:merge($maps as map(*)) as map(*)</code>: takes a sequence of maps as input and combines them into a single map.</p>
@@ -1567,7 +1183,6 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			<li>
 				<p><code>map:size($map as map(*)) as xs:integer</code>: returns the number of entries (key/value pairs) in a map.</p>
 			</li>
-
 			<li>
 				<p><code>map:keys($map as map(*)) as xs:anyAtomicType*</code>: returns the keys that are present in a map, in unpredictable order.</p>
 			</li>
@@ -1593,15 +1208,10 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 	</section>
 	<section id="xpath31arrays" title="Arrays in XPath">
 		<h1>Arrays in XPath</h1>
-
 		<aside>Since Saxon 9.7, arrays are available in all Saxon editions.</aside>
-
 		<p>XPath 3.1 introduces arrays as a new data type. (Unlike maps, arrays are not defined for use in XSLT 3.0 unless XPath 3.1 is supported. But Saxon's XSLT 3.0 implementation always supports XPath 3.1.)</p>
-
 		<p>The main reason arrays were introduced was to allow JSON data structures to be represented faithfully. However there are many other ways you can take advantage of arrays.</p>
-
 		<p>Arrays differ from sequences in a number of ways:</p>
-
 		<ul>
 			<li>
 				<p>Arrays can be nested (an array can have other arrays as its members). In fact the members of an array can be arbitrary XDM values, including nodes, atomic items, sequences, functions, and maps. A member of an array can also be an empty sequence. </p>
@@ -1621,18 +1231,12 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			</li>
 			<li>
 				<p>Operators and functions designed to work on sequences, such as <code>count()</code>, for expressions, filter expressions, <code>head()</code>, <code>tail()</code>, <code>remove()</code>, <code>insert()</code> and so on, do not work as you might expect on arrays. They don't return an error, because an array is a sequence of length one, but they don't return the result you might have expected. Instead, there is a library of functions available to perform analogous operations on arrays.</p>
-
 				<p>However, operators designed to work on sequences of atomic items will also produce useful results when applied to arrays of atomic items. This is because atomizing an array produces the corresponding sequence. So, for example, <code>sum([1,2,3,4])</code> returns 10, as does <code>sum([[1,2], [3,4]])</code>.</p>
 			</li>
 		</ul>
-
-
 		<p>Arrays, like all other XDM values, are immutable. When you append or replace or remove a member entry in an array, you get a new array; the original is unchanged. From Saxon 9.9, the implementation uses a "persistent immutable" data structure under the covers, to ensure that making a small change to an array (such as replacing a single member) does not require copying the entire array.</p>
-
 		<p>As with sequences and maps, arrays do not have an intrinsic type of their own, but rather have a type that can be inferred from what they contain. An array conforms to the type <code>array(T)</code> if all of its members are of type <code>T</code>. For example if the members are all strings, then the array conforms to the type <code>array(xs:string)</code>.</p>
-
 		<p>There are several ways to create an array:</p>
-
 		<ul>
 			<li>
 				<p>If the number of members is known, you can use the constructor syntax <code>[ value, value, value ]</code>. Here the values can be any "simple expression" (an expression not containing a top-level comma). If the values are all known statically, you might write: <code>[1, 2, "a", "b"]</code>. You can use this construct anywhere an XPath expression can be used, for example in the <code>select</code> attribute of an <a class="bodylink code" href="/xsl-elements/variable">xsl:variable</a> element. The members do not need to be single items: for example <code>[(), 1, 2, 5 to 10]</code> constructs an array with four members, the members being sequences of length 0, 1, 1, and 6 respectively. The construct <code>[]</code> returns an empty array.</p>
@@ -1641,11 +1245,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				<p>If the number of members is unknown, but if you know that each member of the array will be a single item, you can use the construct <code>array{ value }</code> where <code>value</code> is any sequence. For example, <code>array{(), 1, 2, 5 to 10}</code> constructs an array with eight members, these being the single integers 1, 2, 5, 6, 7, 8, 9, and 10.</p>
 			</li>
 		</ul>
-
 		<p>There are no XSLT 3.0 instructions for creating arrays, analogous to the instructions <code>xsl:map</code> and <code>xsl:map-entry</code>. Saxon however fills the gap with the instructions <code>saxon:array</code> and <code>saxon:array-member</code>: see <a class="bodylink" href="/extensions/instructions">Extension instructions</a>.</p>
-
 		<p>The summary of the full list of functions that operate on arrays is as follows; for full details see the <a class="bodylink" href="/functions/array">Functions library</a>. The prefix <code>array</code> represents the namespace URI <code>http://www.w3.org/2005/xpath-functions/array</code>.</p>
-
 		<ul>
 			<li>
 				<p><code>array:append</code>: adds one new member to the end of an array. For example, <code>array:append([], 5)</code> returns <code>[5]</code>.</p>
@@ -1701,17 +1302,12 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			<li>
 				<p><code>array:tail</code>: removes the first member from an array. For example, <code>array:head([1 to 5, 1 to 10]</code> returns <code>[1 to 10]</code>.</p>
 			</li>
-
 		</ul>
-
 		<h2 class="subtitle">Arrays: technical implementation details</h2>
-
 		<p>Internally Saxon (from release 9.9) uses two implementations of arrays.</p>
-
 		<p>The first implementation, <code>SimpleArrayItem</code>, is backed by a Java <code>ArrayList&lt;Sequence&gt;</code>. An array constructor (either <code>[x,y,z]</code> or <code>array{a,b,c}</code>) will always deliver a <code>SimpleArrayItem</code>. This is economical on storage and has good performance for accessing specific items by index position, or for scanning the entire array. It is less well suited to incremental modification.</p>
 		<p>The other implementation, <code>PersistentArrayItem</code>, is backed by a persistent (immutable) list implemented as a tree structure. This makes it possible to add, replace, or remove entries in constant time without copying the entire array.</p>
 		<p>The result of operations such as <code>array:put()</code>, <code>array:insert-before()</code>, and <code>array:remove()</code> is always a <code>PersistentArrayItem</code>, even if the input is a <code>SimpleArrayItem</code>. Converting one to the other takes time proportional to the size of the array.</p>
 		<p>The result of <code>array:filter()</code>, <code>array:for-each()</code>, <code>array:for-each-pair()</code>, and <code>array:reverse()</code> is always a <code>SimpleArrayItem</code>, even if the input is a <code>PersistentArrayItem</code>. In cases where an array goes through a construction phase and is then used heavily for retrieval-only access, it might be worth forcing it back to a <code>SimpleArrayItem</code> at the end of the construction phase: this can be achieved by means of a call on <code>array:filter()</code> with a predicate that selects all members.</p>
-
 	</section>
 </article>
