@@ -1,6 +1,7 @@
 package com.saxonica.ee.stream.adjunct;
 
 import com.saxonica.ee.parallel.PushToPull;
+import com.saxonica.ee.parallel.Pusher;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.watch.StreamWatch;
 import com.saxonica.ee.stream.watch.WatchManager;
@@ -132,7 +133,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
             options.setApplicableAccumulators(ms.accumulators);
 
             final String href = uri.getStringValue();
-            PushToPull.Pusher pusher = new MergePusher(ms, pd, href, options);
+            Pusher pusher = new MergePusher(ms, pd, href, options);
 
             SequenceIterator iter = new PushToPull(pusher, c1).getIterator();
             XPathContext c2 = c1.newMinorContext();
@@ -145,7 +146,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
         return result;
     }
 
-    public static class MergePusher implements PushToPull.Pusher {
+    public static class MergePusher implements Pusher {
         private final MergeInstr.MergeSource ms;
         private final PackageData pd;
         private final String href;

@@ -3,7 +3,6 @@ package com.saxonica.ee.parallel;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.trans.Outcome;
 import net.sf.saxon.event.ComplexContentOutputter;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.expr.XPathContext;
@@ -39,20 +38,6 @@ public class PushToPull {
     public PushToPull(Pusher expression, XPathContext context) {
         this.expression = expression;
         this.context = context;
-    }
-
-    public interface Pusher {
-        /**
-         * Evaluate an instruction in push mode
-         *
-         * @param output  the destination for the result
-         * @param context the evaluation context
-         * @throws XPathException       in the event of a failure
-         * @throws QuitParsingException if there was an early exit, that is, if the instruction was evaluated
-         *                              without reading the input to completion
-         */
-
-        void push(Outputter output, XPathContext context) throws XPathException;
     }
 
     /**
