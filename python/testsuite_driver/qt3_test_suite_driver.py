@@ -369,6 +369,8 @@ def process_environment(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spe
             exit(0)'''
     else:
         print("Loading environment without name")
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+            print(str(env))
 
     '''set the base URI if specified'''
     base_uri = str(env.base_uri)
@@ -391,7 +393,6 @@ def process_environment(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spe
                     environment.xquery_proc.set_query_base_uri(uri)
                     environment.xpath_proc.set_base_uri(uri)
                     environment.base_uri = uri
-                    '''print("base-uri = " + uri)'''
 
     '''set any requested collations - TODO'''
 
@@ -445,11 +446,8 @@ def process_environment(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spe
 
                 parami_value = source_doc
             else:
-                old_base = xpc.base_uri
-                '''xpc.set_base_uri(env.base_uri)'''
                 select = param_node.get_attribute_value("select")
                 parami_value = xpc.evaluate(select)
-                '''xpc.set_base_uri(old_base)'''
 
             is_static = True if param_node.get_attribute_value('static') is not None else False
             environment.xpath_proc.declare_variable(var_name)
@@ -576,6 +574,9 @@ def load_source_documents(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, e
                 validation = "skip"
             streaming = source.get_attribute_value("streaming")
 
+            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                print("Loading source raw_uri = ", raw_uri)
+
             if not validate_sources and validation == "skip":
                 print('validation is skipped')
                 '''builder.set_schema_validator(None)
@@ -600,6 +601,9 @@ def load_source_documents(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, e
                     builder.set_base_uri(base_uri)
                     content = builder.parse_xml(xml_file_name=href)
                     environment.source_docs[href] = content
+                    if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                        print("loaded source doc with base_uri = ", base_uri)
+                        print("loaded source doc with href = ", href)
                 else:
                     '''print(source)'''
                     builder.set_base_uri(source.base_uri)
@@ -621,6 +625,7 @@ def load_source_documents(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, e
                     '''else:'''
 
             except saxonc.PySaxonApiError as ex:
+                print("Failed loading source raw_uri = ", raw_uri)
                 print("*** failed to build source document " + str(ex))
 
 
@@ -785,7 +790,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
     static_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
                                          True, False)
     '''
-    if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+    if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
         print(test_case_node.base_uri)
     '''print(test_case_node)'''
 
@@ -814,9 +819,14 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
                     testxpc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
                     testxpc.declare_namespace("map", "http://www.w3.org/2005/xpath-functions/map")
                     testxpc.set_base_uri(test_case_node.base_uri)
+                    print(testxpc.base_uri)
+                    testxpc.set_cwd(cwd_from_base_uri(testxpc.base_uri))
 
                     if len(environment.params) > 0:
                         for var_name in environment.params.keys():
+                            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                                print("Environment params uri=", var_name)
+                                print("Environment params value=", str(environment.params[var_name]))
                             testxpc.set_parameter(var_name, environment.params[var_name])
 
                     if environment.context_item is not None:
@@ -824,6 +834,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
                         result = testxpc.evaluate(exp)
                     else:
                         result = testxpc.evaluate(exp)
+
                     break
                 elif "XQ" == spec.short_spec_name:
                     testxqc = environment.xquery_proc
