@@ -100,8 +100,6 @@ namespace Saxon.Impl.Helpers {
             return false;
         }
 
-
-
         public Saxon.Hej.lib.StringCollator makeCollation(Saxon.Hej.Configuration config,
                     Saxon.Ejava.util.Properties props, string uri) {
             return DotNetCollationFactory.makeCollation(config, uri, props);
@@ -223,6 +221,17 @@ namespace Saxon.Impl.Helpers {
             if (firstAttempt != null) {
                 //Console.Error.WriteLine("First attempt at " + filename + " worked");
                 return firstAttempt;
+            }
+
+            if (OperatingSystem.IsWindows() && filename.Contains("/")) {
+                // On Windows, if the filename contains a "/", it won't find the file.
+                // the filename has to use "\" as the separator.
+                string bsfilename = filename.Replace("/", "\\");
+                firstAttempt = ass.GetManifestResourceStream(resourceLocation + bsfilename);
+                if (firstAttempt != null) {
+                    //Console.Error.WriteLine("First attempt at " + filename + " worked");
+                    return firstAttempt;
+                }
             }
             
             // The second attempt is needed if the embedded resources have a logical name containing a "." rather than a "/"
