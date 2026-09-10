@@ -2,11 +2,15 @@ package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.ConstantFunction;
 import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
+import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -81,15 +85,23 @@ public class SchemaTypeFn extends SystemFunction {
 
     public static MapItem makeSchemaRecord(SchemaType st) {
         DictionaryMap result = new DictionaryMap(10);
-        result.initialPut("is-atomic", BooleanValue.get(st.isSimpleType()));
+        result.initialPut("is-simple", BooleanValue.get(st.isSimpleType()));
         if (!st.isAnonymousType()) {
             result.initialPut("name", new QNameValue(st.getStructuredQName(), BuiltInAtomicType.QNAME));
         }
         SchemaType base = st.getBaseType();
+        if (base == null) {
+            if (st == BuiltInAtomicType.ANY_ATOMIC) {
+                base = AnySimpleType.getInstance();
+            }
+        }
         if (base != null) {
-            SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(base),
+            final SchemaType finalBase = base;
+            SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(finalBase),
                                                            SequenceType.one(schemaTypeRecord));
             result.initialPut("base-type", fn);
+        } else {
+            result.initialPut("base-type", new ConstantFunction(EmptySequence.getInstance(), SequenceType.EMPTY_SEQUENCE));
         }
         String variety = "*unknown*";
         if (st.isSimpleType()) {
@@ -152,8 +164,17 @@ public class SchemaTypeFn extends SystemFunction {
             }, new SpecificFunctionType(SequenceType.SINGLE_ITEM, SequenceType.SINGLE_BOOLEAN));
             result.initialPut("matches", matches);
         }
+
+        if (st.isSimpleType()) {
+            final FunctionItem constructor =
+                    ConstructorFunctionLibrary.makeConstructorFunction((SimpleType) st, ConversionRules.DEFAULT, null);
+            if (constructor != null) {
+                result.initialPut("constructor", constructor);
+            }
+        }
         return result;
     }
+
 
 
 }
