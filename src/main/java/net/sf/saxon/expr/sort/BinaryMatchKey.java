@@ -11,9 +11,20 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BinaryValue;
 import net.sf.saxon.value.HexBinaryValue;
 
+/**
+ * A match key used when comparing binary values using the "eq" operator. In 4.0 the rules
+ * for the "eq" operator have changed so a hexBinary and base64Binary value can compare
+ * equal, but the rules for fn:atomic-equal (used in map keys) still make them distinct,
+ * for backwards compatibility reasons. Therefore a binary value acts as its own match key
+ * for "eq" purposes, but is wrapped in a `BinaryMatchKey` for comparisons in maps.
+ */
+
+// TODO: it might be better to do this the other way around, since for maps, the match key has to be
+//   stored, while for "eq" comparisons it can be transient.
+
 public class BinaryMatchKey implements AtomicMatchKey {
 
-    private BinaryValue value;
+    private final BinaryValue value;
     public BinaryMatchKey(BinaryValue value) {
         this.value = value;
     }
