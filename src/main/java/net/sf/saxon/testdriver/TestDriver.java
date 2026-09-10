@@ -80,6 +80,7 @@ public abstract class TestDriver {
     protected boolean strict = false;
     protected String xxCompilerLocation;
     protected XsltExecutable xxCompiler;
+    protected Set<String> laxTests = new HashSet<String>();
 
     static Set<String> unsharedEnvironments = new HashSet<>();
     static {
@@ -448,9 +449,9 @@ public abstract class TestDriver {
             }
             System.err.println("Loading exceptions file " + exceptionsFile.getAbsolutePath());
             exceptionsDoc = exceptBuilder.build(exceptionsFile);
-            XdmSequenceIterator iter = exceptionsDoc.axisIterator(Axis.DESCENDANT, new QName("", "exception"));
+            XdmSequenceIterator<XdmNode> iter = exceptionsDoc.axisIterator(Axis.DESCENDANT, new QName("", "exception"));
             while (iter.hasNext()) {
-                XdmNode entry = (XdmNode) iter.next();
+                XdmNode entry = iter.next();
                 String testName = entry.getAttributeValue(testCase);
                 if (testName == null) {
                     testName = "$" + entry.getAttributeValue(testSet);
@@ -470,15 +471,18 @@ public abstract class TestDriver {
                         break;
                     }
                 }
+                if ("no".equals(entry.attribute("strict"))) {
+                    laxTests.add(testName);
+                }
                 if (appliesThisEdition) {
                     if (runVal.equals("false")) {
                         for (String tc : testName.trim().split("\\s+")) {
                             exceptionsMap.put(tc, entry);
                         }
                     } else {
-                        XdmSequenceIterator iter2 = entry.axisIterator(Axis.CHILD, new QName("optimization"));
+                        XdmSequenceIterator<XdmNode> iter2 = entry.axisIterator(Axis.CHILD, new QName("optimization"));
                         if (iter2.hasNext()) {
-                            XdmNode optim = (XdmNode) iter2.next();
+                            XdmNode optim = iter2.next();
                             optimizationAssertions.put(testName, optim.attribute("assert"));
                         }
                     }
