@@ -127,12 +127,15 @@ public class XPathEvaluator {
         ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, Optionality.OPTIONAL);
         cit.setParentless(staticContext.isContextItemParentless());
         exp = exp.typeCheck(visitor, cit);
+        exp.setRetainedStaticContext(rsc);
         if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
             exp = exp.optimize(visitor, cit);
+            exp.setRetainedStaticContext(rsc);
         }
         if (opt.isOptionSet(OptimizerOptions.LOOP_LIFTING)) {
             exp.setParentExpression(null);
             exp = LoopLifter.process(exp, visitor, cit);
+            exp.setRetainedStaticContext(rsc);
         }
         exp = postProcess(exp, visitor, cit);
         exp.setRetainedStaticContext(rsc);

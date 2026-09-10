@@ -165,6 +165,7 @@ public class XPathCompiler {
 
     public void useSchema(XsdSchema schema) {
         setSchemaAware(true);
+        env.setImportedSchema(schema.getUnderlyingSchema());
         env.getPackageData().setImportedSchema("", schema.getUnderlyingSchema());
     }
 

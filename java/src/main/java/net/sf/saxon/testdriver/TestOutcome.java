@@ -354,51 +354,52 @@ public class TestOutcome {
         String tag = assertion.getNodeName().getLocalName();
 
         switch (tag) {
-            case "assert-eq":
+            case "assert-eq" -> {
                 return assertEq(assertion, result, assertXpc);
-
-            case "assert-deep-eq":
+            }
+            case "assert-deep-eq" -> {
                 return assertDeepEq(assertion, result, assertXpc);
-
-            case "assert-permutation":
+            }
+            case "assert-permutation" -> {
                 return assertPermutation(assertion, result, assertXpc);
-
-            case "assert-xml":
+            }
+            case "assert-xml" -> {
                 return assertXml(assertion, result, assertXpc, catalogXpc, debug);
-
-            case "serialization-matches":
+            }
+            case "serialization-matches" -> {
                 return assertSerializationMatches(assertion, result, catalogXpc);
-
-            case "assert-serialization-error":
+            }
+            case "assert-serialization-error" -> {
                 return assertSerializationError(assertion, result, assertXpc);
-
-            case "assert-empty":
+            }
+            case "assert-empty" -> {
                 return assertEmpty(result.value);
-
-            case "assert-count":
+            }
+            case "assert-count" -> {
                 return assertCount(assertion, result);
-
-            case "assert":
+            }
+            case "assert" -> {
                 return assertXPath(assertion, result, assertXpc, debug);
-
-            case "assert-string-value":
+            }
+            case "assert-string-value" -> {
                 return assertStringValue(assertion, result, debug);
-
-            case "assert-serialization":
+            }
+            case "assert-serialization" -> {
                 return assertSerialization(assertion, result, catalogXpc, debug);
-
-            case "assert-type":
+            }
+            case "assert-type" -> {
                 return assertType(assertion, result, assertXpc);
-
-            case "assert-true":
+            }
+            case "assert-true" -> {
                 return assertTrue(result);
-
-            case "assert-false":
+            }
+            case "assert-false" -> {
                 return assertFalse(result);
-            case "assert-warning":
+            }
+            case "assert-warning" -> {
                 return assertWarning();
-
-            case "assert-message": {
+            }
+            case "assert-message" -> {
                 XdmNode subAssertion = (XdmNode) catalogXpc.evaluateSingle("*", assertion);
                 for (XdmNode message : xslMessages) {
                     if (message.getNodeKind() == XdmNodeKind.PROCESSING_INSTRUCTION && message.getNodeName().getLocalName().equals("trust") && message.getStringValue().equals("me")) {
@@ -412,7 +413,7 @@ public class TestOutcome {
                 return false;
 
             }
-            case "assert-result-document": {
+            case "assert-result-document" -> {
                 XdmNode subAssertion = (XdmNode) catalogXpc.evaluateSingle("*", assertion);
                 //URI uri = new File(driver.resultsDir + "/results/output.xml").toURI().resolve(assertion.attribute("uri"));
                 URI uri;
@@ -435,18 +436,18 @@ public class TestOutcome {
                 return ok;
 
             }
-            case "error":
+            case "error" -> {
                 return isException() && compareExpectedError(assertion);
-
-            case "all-of":
+            }
+            case "all-of" -> {
                 for (XdmNode child : assertion.children("*")) {
                     if (!testAssertion(child, outcome, result, assertXpc, catalogXpc, debug)) {
                         return false;
                     }
                 }
                 return true;
-
-            case "any-of":
+            }
+            case "any-of" -> {
                 boolean partialSuccess = false;
                 for (XdmItem child : catalogXpc.evaluate("*", assertion)) {
                     if (testAssertion((XdmNode) child, outcome, result, assertXpc, catalogXpc, debug)) {
@@ -458,8 +459,8 @@ public class TestOutcome {
                     }
                 }
                 return partialSuccess;
-
-            case "not": {
+            }
+            case "not" -> {
                 XdmNode subAssertion = (XdmNode) catalogXpc.evaluateSingle("*", assertion);
                 return !testAssertion(subAssertion, outcome, result, assertXpc, catalogXpc, debug);
             }
