@@ -175,7 +175,11 @@ public final class FloatValue extends NumericValue {
 
     @Override
     public int hashCode() {
-        if (value > Integer.MIN_VALUE && value < Integer.MAX_VALUE) {
+        if (isNaN()) {
+            return AtomicSortComparer.COLLATION_KEY_NaN.hashCode();
+        } else if (Float.isInfinite(value)) {
+            return Double.hashCode((double)value);
+        } else if (isWholeNumber() && value > Integer.MIN_VALUE && value < Integer.MAX_VALUE) {
             return (int) value;
         } else {
             return Double.valueOf(getDoubleValue()).hashCode();

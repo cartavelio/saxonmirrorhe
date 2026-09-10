@@ -337,35 +337,26 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     public int hashCode() {
-        return value.hashCode();
-//        BigDecimal round = value.setScale(0, RoundingMode.DOWN);
-//        long longVal;
-//        try {
-//            longVal = round.longValue();
-//        } catch (Exception e) {
-//            // This path is for C#, where converting BigDecimal to long gives an OverflowException if out of range
-//            longVal = Long.MAX_VALUE;
-//        }
-//        if (longVal > Integer.MIN_VALUE && longVal < Integer.MAX_VALUE) {
-//            return (int) longVal;
-//        } else {
-//            return Double.valueOf(getDoubleValue()).hashCode();
-//        }
+        BigDecimal round = value.stripTrailingZeros();
+        if (isWholeNumber()) {
+            long longVal;
+            try {
+                longVal = round.longValue();
+            } catch (Exception e) {
+                // This path is for C#, where converting BigDecimal to long gives an OverflowException if out of range
+                longVal = Long.MAX_VALUE;
+            }
+            if (longVal > Integer.MIN_VALUE && longVal < Integer.MAX_VALUE) {
+                return (int) longVal;
+            }
+        }
+        return Double.valueOf(getDoubleValue()).hashCode();
     }
 
     @Override
     public boolean effectiveBooleanValue() {
         return value.signum() != 0;
     }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-//    public CharSequence getStringValueCS() {
-//        return decimalToString(value, new StringBuilder(20));
-//    }
 
     /**
      * Get the canonical lexical representation as defined in XML Schema. This is not always the same
@@ -409,7 +400,7 @@ public final class BigDecimalValue extends DecimalValue {
         // Can't use BigDecimal#toPlainString() because it retains trailing zeroes to represent the scale
         int scale = value.scale();
         if (scale == 0) {
-            fsb.append(value.toString());
+            fsb.append(value);
             return fsb;
         } else if (scale < 0) {
             String s = value.abs().unscaledValue().toString();
@@ -422,9 +413,7 @@ public final class BigDecimalValue extends DecimalValue {
                 fsb.append('-');
             }
             fsb.append(s);
-            for (int i = 0; i < -scale; i++) {
-                fsb.append('0');
-            }
+            fsb.append("0".repeat(Math.max(0, -scale)));
             return fsb;
         } else {
             String s = value.abs().unscaledValue().toString();
@@ -439,12 +428,10 @@ public final class BigDecimalValue extends DecimalValue {
             }
             if (scale >= len) {
                 fsb.append("0.");
-                for (int i = len; i < scale; i++) {
-                    fsb.append('0');
-                }
+                fsb.append("0".repeat(scale - len));
                 fsb.append(s);
             } else {
-                fsb.append(s.substring(0, len - scale));
+                fsb.append(s, 0, len - scale);
                 fsb.append('.');
                 fsb.append(s.substring(len - scale));
             }
@@ -549,17 +536,14 @@ public final class BigDecimalValue extends DecimalValue {
             return this;
         }
 
-        switch (value.signum()) {
-            case -1:
-                return new BigDecimalValue(value.setScale(scale, RoundingMode.HALF_DOWN));
-            case 0:
-                return this;
-            case +1:
-                return new BigDecimalValue(value.setScale(scale, RoundingMode.HALF_UP));
-            default:
+        return switch (value.signum()) {
+            case -1 -> new BigDecimalValue(value.setScale(scale, RoundingMode.HALF_DOWN));
+            case 0 -> this;
+            case +1 -> new BigDecimalValue(value.setScale(scale, RoundingMode.HALF_UP));
+            default ->
                 // can't happen
-                return this;
-        }
+                    this;
+        };
 
     }
 

@@ -284,7 +284,8 @@ public abstract class NumericValue extends AtomicValue
      *                            interface)
      */
 
-    // This is the default implementation. Subclasses of number avoid the conversion to double
+    // This is the default implementation. This implements the 3.1 semantics whereby values are promoted
+    // to xs:double and compared as doubles. Subclasses of number avoid the conversion to double
     // when comparing with another number of the same type.
     @Override
     public int compareTo(/*@NotNull*/ XPathComparable other) {
