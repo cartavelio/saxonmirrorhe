@@ -29,6 +29,14 @@
     <reason>Saxon 13 implements transitive equality even in 3.1 mode</reason>
   </exception>
   
+  <exception test-set="fn-json-to-xml" 
+    test-case="json-to-xml-017
+               json-to-xml-037
+               json-to-xml-038" run="XQ" report="known restriction">
+    <created by="Michael Kay" on="2026-04-13"/>
+    <reason>Test driver limitation: schema-aware XPath using schema for fn namespace</reason>
+  </exception>
+  
   <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="n/a">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
@@ -55,7 +63,7 @@
   </exception>
   
   <exception test-set="prod-MapConstructor" test-case="MapConstructor-025" run="false" report="n/a">
-    <created by="Michael Kay" on="2019-03-11"/>
+    <created by="Michael Kay" on="2026-04-01"/>
     <reason>Saxon implements the tokenization rules in 4.0, so this questionable edge case fails</reason>
   </exception>
   

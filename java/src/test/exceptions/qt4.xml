@@ -141,7 +141,21 @@
       <reason>Not implemented: calling jnode($x) twice gives two distinct JNodes</reason>
    </exception>
    
- 
+   <exception test-set="app-spec-examples" test-case="
+                  fo-test-fn-resolve-QName-001
+                  fo-test-fn-resolve-QName-002" 
+     run="XQ" report="n/a">
+    <created by="Michael Kay" on="2026-04-13"/>
+    <reason>Examples require XQuery but are not tagged as such</reason>
+  </exception>
+   
+   <exception test-set="fn-json-to-xml" 
+    test-case="json-to-xml-017
+               json-to-xml-037
+               json-to-xml-038" run="XQ" report="known restriction">
+      <created by="Michael Kay" on="2026-04-13"/>
+      <reason>Test driver limitation: schema-aware XPath using schema for fn namespace</reason>
+    </exception>
    
    <exception test-set="fn-serialize" 
       test-case="serialize-xhtml-149" 

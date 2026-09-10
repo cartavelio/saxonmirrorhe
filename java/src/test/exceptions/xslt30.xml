@@ -66,7 +66,7 @@
   
   <exception test-case="docbook-001" run="false" edition="HE">
     <created by="Michael Kay" on="2023-02-02"/>
-    <reason>Stylesheet says "Can't make chunks with Saxonica's processor. Uses saxon:output which required PE.</reason>
+    <reason>Stylesheet says "Can't make chunks with Saxonica's processor". Uses saxon:output which required PE.</reason>
   </exception>
   
   <!--<exception test-case="function-available-1017" run="false" report="bug">
