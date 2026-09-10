@@ -184,7 +184,7 @@ public class XQueryParser extends XPathParser {
             FunctionLibrary userlib = exec.getFunctionLibrary();
             FunctionLibraryList lib = new FunctionLibraryList();
             lib.addFunctionLibrary(mainModule.getBuiltInFunctionSet());
-            lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
+            lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
             lib.addFunctionLibrary(new ConstructorFunctionLibrary(config));
             lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
             lib.addFunctionLibrary(mainModule.getGlobalFunctionLibrary());

@@ -1488,22 +1488,6 @@ public abstract class StyleElement extends ElementImpl {
         return (SimpleType) schemaType;
     }
 
-    /**
-     * Adapt an expression that returns an array to one that returns a representation of
-     * the array as a sequence of single-entry maps, as required for the proposed XSLT 4.0
-     * xsl:for-each/iterate instructions with an "array" attribute
-     * @param arrayExpr the expression in the array attribute
-     * @return a call on a function that converts the array to a sequence of single-entry maps
-     */
-    protected Expression arrayToSequence(Expression arrayExpr) {
-        try {
-            return ArrayFunctionSet.getInstance()
-                    .makeFunction("members", 1)
-                    .makeFunctionCall(arrayExpr);
-        } catch (XPathException e) {
-            throw new UncheckedXPathException(e);
-        }
-    }
 
     /**
      * Adapt an expression that returns a map to one that returns a representation of

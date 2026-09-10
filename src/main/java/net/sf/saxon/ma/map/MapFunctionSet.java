@@ -40,19 +40,27 @@ import java.util.Map;
 
 public class MapFunctionSet extends BuiltInFunctionSet {
 
-    public static MapFunctionSet THE_INSTANCE = new MapFunctionSet();
+    private final static MapFunctionSet instance31 = new MapFunctionSet(31);
+    private final static MapFunctionSet instance40 = new MapFunctionSet(40);
 
-    public MapFunctionSet() {
-        init();
+    private MapFunctionSet(int version) {
+        init(version);
     }
 
-    public static MapFunctionSet getInstance() {
-        return THE_INSTANCE;
+    /**
+     * Get the set of functions defined in the F&O spec in the "map" namespace
+     * @param version the XPath version (eg 31, 40). Currently any version less than 40
+     *                is treated as 31, and any version greater than 40 is treated as 40.
+     * @return the function library
+     */
+
+    public static MapFunctionSet getInstance(int version) {
+        return version >= 40 ? instance40 : instance31;
     }
 
 
 
-    private void init() {
+    private void init(int version) {
 
         register("merge", 1, e -> e.populate( MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null));
@@ -80,6 +88,25 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(mergeOptionDetails));
 
+        register("put", 3, e -> e.populate(MapPut::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
+                .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
+
+        register("contains", 2, e -> e.populate(MapContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
+
+        register("remove", 2, e -> e.populate(MapRemove::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR | ABS, null));
+
+        register("keys", 1, e -> e.populate(MapKeys::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+
+        register("size", 1, e -> e.populate(MapSize::new, BuiltInAtomicType.INTEGER, ONE, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+
         register("entry", 2, e -> e.populate( MapEntry::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
@@ -88,88 +115,76 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
-        register("get", 2, e -> e.populate( MapGet::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
-
-        SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
-                SequenceType.OPTIONAL_ATOMIC);
-
-        SpecificFunctionType mapBuildValueArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
-                SequenceType.ANY_SEQUENCE);
-
-        register("index", 2, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                // TODO: deprecate/drop this
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, mapBuildKeyArg, ONE, null));
-
-        Expression identityFunction;
-        try {
-            identityFunction = new FunctionLiteral(XPath40FunctionSet.getInstance().makeFunction("identity", 1));
-        } catch (XPathException e) {
-            throw new AssertionError(e);
-        }
-        FunctionItemType opFnType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
-                SequenceType.ANY_SEQUENCE);
-        Callable concatCallable = new CallableDelegate(
-                (cxt, args) -> SequenceExtent.from(new InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
-        CallableFunction concatSeq = new CallableFunction(2, concatCallable, opFnType);
-        register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, mapBuildKeyArg, ONE, null, identityFunction)
-                .arg(2, mapBuildValueArg, ONE, null, identityFunction)
-                .arg(3, opFnType, ONE, null, new FunctionLiteral(concatSeq)));
-        ;
-
-        register("put", 3, e -> e.populate( MapPut::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
-                .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
-
-        register("contains", 2, e -> e.populate( MapContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
-
-        register("remove", 2, e -> e.populate( MapRemove::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR | ABS, null));
-
-        register("keys", 1, e -> e.populate( MapKeys::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
-
-        register("size", 1, e -> e.populate( MapSize::new, BuiltInAtomicType.INTEGER, ONE, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
-
         ItemType actionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("for-each", 2, e -> e.populate( MapForEach::new, AnyItemType.getInstance(), STAR, 0)
+        register("for-each", 2, e -> e.populate(MapForEach::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, actionType, ONE | INS, null));
 
-        register("key-value-pairs", 1, e -> e.populate(MapKeyValuePairs::new, MapType.ANY_MAP_TYPE, STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
-        
-        register("entries", 1, e -> e.populate( MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
-
-        register("untyped-contains", 2, e -> e.populate( MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("get", 2, e -> e.populate( MapGet::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
-        SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
-                SequenceType.SINGLE_BOOLEAN
-        );
 
-        register("filter", 2, e -> e.populate(MapFilter::new, MapType.ANY_MAP_TYPE, STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, FILTER_TYPE, ONE | INS, null));
+        if (version >= 40) {
 
+            SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
+                    new SequenceType[]{SequenceType.SINGLE_ITEM},
+                    SequenceType.OPTIONAL_ATOMIC);
+
+            SpecificFunctionType mapBuildValueArg = new SpecificFunctionType(
+                    new SequenceType[]{SequenceType.SINGLE_ITEM},
+                    SequenceType.ANY_SEQUENCE);
+
+            register("index", 2, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                    // TODO: deprecate/drop this
+                    .arg(0, AnyItemType.getInstance(), STAR, null)
+                    .arg(1, mapBuildKeyArg, ONE, null));
+
+            Expression identityFunction;
+            try {
+                identityFunction = new FunctionLiteral(XPath40FunctionSet.getInstance().makeFunction("identity", 1));
+            } catch (XPathException e) {
+                throw new AssertionError(e);
+            }
+            FunctionItemType opFnType = new SpecificFunctionType(
+                    new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                    SequenceType.ANY_SEQUENCE);
+            Callable concatCallable = new CallableDelegate(
+                    (cxt, args) -> SequenceExtent.from(new InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
+            CallableFunction concatSeq = new CallableFunction(2, concatCallable, opFnType);
+            register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                    .arg(0, AnyItemType.getInstance(), STAR, null)
+                    .arg(1, mapBuildKeyArg, ONE, null, identityFunction)
+                    .arg(2, mapBuildValueArg, ONE, null, identityFunction)
+                    .arg(3, opFnType, ONE, null, new FunctionLiteral(concatSeq)));
+            ;
+
+
+
+
+            register("key-value-pairs", 1, e -> e.populate(MapKeyValuePairs::new, MapType.ANY_MAP_TYPE, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+
+            register("entries", 1, e -> e.populate(MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+
+            register("untyped-contains", 2, e -> e.populate(MapUntypedContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
+
+            SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
+                    new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
+                    SequenceType.SINGLE_BOOLEAN
+            );
+
+            register("filter", 2, e -> e.populate(MapFilter::new, MapType.ANY_MAP_TYPE, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                    .arg(1, FILTER_TYPE, ONE | INS, null));
+
+        }
 
     }
 
@@ -570,7 +585,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
                 boolean isFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
                 String keyType = ((StringValue) values.get(keyTypeKey)).getStringValue();
-                MapMerge mm2 = (MapMerge)MapFunctionSet.getInstance().makeFunction("merge", 1);
+                MapMerge mm2 = (MapMerge)instance31.makeFunction("merge", 1);
                 mm2.duplicates = duplicates;
                 mm2.duplicatesErrorCode = duplicatesErrorCode;
                 mm2.onDuplicates = onDuplicates;

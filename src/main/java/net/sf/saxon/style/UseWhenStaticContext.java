@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
+import net.sf.saxon.functions.registry.UseWhen30FunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamespaceResolver;
@@ -61,8 +62,8 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
         setXPathLanguageLevel(31);
 
         FunctionLibraryList lib = new FunctionLibraryList();
-        lib.addFunctionLibrary(config.getUseWhenFunctionSet());
-        lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList());
+        lib.addFunctionLibrary(UseWhen30FunctionSet.getInstance());
+        lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(31));
         lib.addFunctionLibrary(new ConstructorFunctionLibrary(getConfiguration()));
         lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         config.addExtensionBinders(lib);

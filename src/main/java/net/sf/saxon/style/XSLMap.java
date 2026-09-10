@@ -112,7 +112,7 @@ public class XSLMap extends StyleElement {
         Expression optionsExp;
 
         if (onDuplicates != null) {
-            optionsExp = MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(
+            optionsExp = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(
                     Literal.makeLiteral(new QNameValue("", NamespaceUri.SAXON, "on-duplicates")),
                     onDuplicates);
         } else {
@@ -123,7 +123,7 @@ public class XSLMap extends StyleElement {
             optionsExp = Literal.makeLiteral(options, select);
         }
 
-        Expression exp = MapFunctionSet.getInstance().makeFunction("merge", 2)
+        Expression exp = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
                 .makeFunctionCall(select, optionsExp);
         if (getConfiguration().getBooleanProperty(Feature.STRICT_STREAMABILITY)) {
             exp = new SequenceInstr(exp);

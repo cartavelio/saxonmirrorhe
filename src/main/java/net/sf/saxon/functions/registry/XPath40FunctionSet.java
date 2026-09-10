@@ -21,8 +21,7 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 /**
- * Function signatures (and pointers to implementations) of the functions defined in XPath 3.1 without the
- * Higher-Order-Functions feature
+ * Function signatures (and pointers to implementations) of the functions defined in XPath 4.0
  */
 
 public class XPath40FunctionSet extends BuiltInFunctionSet {

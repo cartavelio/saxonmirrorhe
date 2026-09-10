@@ -285,7 +285,7 @@ public class QueryModule implements StaticContext {
 
         functionLibraryList = new FunctionLibraryList();
         functionLibraryList.addFunctionLibrary(getBuiltInFunctionSet());
-        functionLibraryList.addFunctionLibrary(config.getBuiltInExtensionLibraryList());
+        functionLibraryList.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
         functionLibraryList.addFunctionLibrary(new ConstructorFunctionLibrary(config));
 
         localFunctionLibraryNr = functionLibraryList.addFunctionLibrary(
@@ -308,10 +308,8 @@ public class QueryModule implements StaticContext {
     public BuiltInFunctionSet getBuiltInFunctionSet() {
         if (isUpdating()) {
             return config.getXQueryUpdateFunctionSet();
-        } else if (languageLevel == 40) {
-            return config.getXPath40FunctionSet();
         } else {
-            return config.getXPath31FunctionSet();
+            return config.getXPathFunctionSet(languageLevel);
         }
     }
 

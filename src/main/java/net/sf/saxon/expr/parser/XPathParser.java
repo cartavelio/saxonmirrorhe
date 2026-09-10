@@ -3517,7 +3517,7 @@ public class XPathParser {
                             new SingleEntryMap((AtomicValue) ((Literal)key).getGroundedValue(),
                                              ((Literal)value).getGroundedValue()));
                 } else {
-                    entry = MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(key, value);
+                    entry = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, value);
                 }
                 entries.add(entry);
                 if (t.currentToken == Token.RCURLY) {
@@ -3545,7 +3545,7 @@ public class XPathParser {
                 HashTrieMap options = new HashTrieMap();
                 options.initialPut(new StringValue("duplicates"), new StringValue("reject"));
                 options.initialPut(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
-                result = MapFunctionSet.getInstance().makeFunction("merge", 2).makeFunctionCall(block, Literal.makeLiteral(options));
+                result = MapFunctionSet.getInstance(31).makeFunction("merge", 2).makeFunctionCall(block, Literal.makeLiteral(options));
                 break;
         }
         setLocation(result, offset);
@@ -3615,7 +3615,7 @@ public class XPathParser {
         t.lookAhead(); //manual lookahead after an RCURLY
         nextToken();
 
-        SystemFunction sf = ArrayFunctionSet.getInstance().makeFunction("_from-sequence", 1);
+        SystemFunction sf = ArrayFunctionSet.getInstance(40).makeFunction("_from-sequence", 1);
         Expression result = sf.makeFunctionCall(body);
         setLocation(result, offset);
         return result;
@@ -3826,10 +3826,10 @@ public class XPathParser {
         int i=0;
         for (Map.Entry<String, Expression> entry : keywordArgs.entrySet()) {
             StringLiteral key = new StringLiteral(entry.getKey());
-            block[i++] = MapFunctionSet.getInstance().makeFunction("entry", 2).makeFunctionCall(key, entry.getValue());
+            block[i++] = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, entry.getValue());
         }
         Block entries = new Block(block);
-        return MapFunctionSet.getInstance().makeFunction("merge", 1).makeFunctionCall(entries);
+        return MapFunctionSet.getInstance(31).makeFunction("merge", 1).makeFunctionCall(entries);
     }
 
     /*@NotNull*/
