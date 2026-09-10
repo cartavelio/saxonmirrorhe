@@ -7,7 +7,6 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.functions.FormatNumber;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.Location;
@@ -533,17 +532,6 @@ public abstract class IntegerValue extends DecimalValue {
 
     public abstract BigInteger asBigInteger();
 
-    /**
-     * Get a value whose equals() method follows the "same key" rules for comparing the keys of a map.
-     *
-     * @return a value with the property that the equals() and hashCode() methods follow the rules for comparing
-     * keys in maps.
-     */
-
-    @Override
-    public AtomicMatchKey asMapKey(int specVersion) {
-        return this;
-    }
 
     /**
      * Get the signum of an int

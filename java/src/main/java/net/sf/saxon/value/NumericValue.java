@@ -247,6 +247,23 @@ public abstract class NumericValue extends AtomicValue
         return specVersion >= 40 ? asMapKey(40) : this;
     }
 
+    /**
+     * Get a value whose {@code equals()} and {@code hashcode()} methods follows the "same key"
+     * rules for comparing the keys of a map. For numeric values, this is done as follows:
+     * <ul>
+     *     <li>For NaN, return {@code AtomicSortComparer.COLLATION_KEY_NaN;}</li>
+     *     <li>For +INF and -INF, call {@code java.lang.Double.hashcode()}</li>
+     *     <li>For any value that is numerically equal to some 32-bit signed integer, return
+     *         a {@link net.sf.saxon.ma.map.Int32MapKey}</li>
+     *     <li>For any other value, return a {@link net.sf.saxon.ma.map.BigDecimalMapKey}</li>
+     * </ul>
+     *
+     * @return a value with the property that the {@code equals()} and {@code hashcode()} methods follow the rules for comparing
+     * keys in maps.
+     */
+
+    public abstract AtomicMatchKey asMapKey(int specVersion);
+
     @Override
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
         if (specVersion < 40) {
@@ -331,6 +348,12 @@ public abstract class NumericValue extends AtomicValue
      * values outside that range, we convert to a double and take the hashCode of
      * the double. This method needs to have a compatible implementation in
      * each subclass.
+     *
+     * <p>Note that this method is not used (in general) when comparing keys in
+     * maps. When we build a map, we use {@link #asMapKey(int)} to generate
+     * a key for comparison purposes; in the case of numeric values this will
+     * in most cases be either a {@link net.sf.saxon.ma.map.Int32MapKey}
+     * or a {@link net.sf.saxon.ma.map.BigDecimalMapKey}.</p>
      *
      * @return the hash code of the numeric value
      */

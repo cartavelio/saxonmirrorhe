@@ -8,8 +8,10 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.Calculator;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.Round;
+import net.sf.saxon.ma.map.BigDecimalMapKey;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
@@ -124,7 +126,7 @@ public final class BigIntegerValue extends IntegerValue {
      */
 
     public int hashCode() {
-        if (value.compareTo(MIN_INT) >= 0 && value.compareTo(MAX_INT) <= 0) {
+        if (isWithinIntRange()) {
             return value.intValue();
         } else {
             return Double.valueOf(getDoubleValue()).hashCode();
@@ -164,6 +166,16 @@ public final class BigIntegerValue extends IntegerValue {
     }
 
     /**
+     * Test whether the value is within the range that can be held in a 32-bit signed integer
+     *
+     * @return true if the value is within range for a long
+     */
+
+    public boolean isWithinIntRange() {
+        return value.compareTo(MIN_INT) >= 0 && value.compareTo(MAX_INT) <= 0;
+    }
+
+    /**
      * Convert the value to a BigDecimal
      *
      * @return the resulting BigDecimal
@@ -182,6 +194,30 @@ public final class BigIntegerValue extends IntegerValue {
     @Override
     public boolean effectiveBooleanValue() {
         return value.compareTo(BigInteger.ZERO) != 0;
+    }
+
+    /**
+     * Get a value whose {@code equals()} and {@code hashcode()} methods follows the "same key"
+     * rules for comparing the keys of a map. For numeric values, this is done as follows:
+     * <ul>
+     *     <li>For NaN, return {@code AtomicSortComparer.COLLATION_KEY_NaN;}</li>
+     *     <li>For +INF and -INF, call {@code java.lang.Double.hashcode()}</li>
+     *     <li>For any value that is numerically equal to some 32-bit signed integer, return
+     *         a {@link net.sf.saxon.ma.map.Int32MapKey}</li>
+     *     <li>For any other value, return a {@link net.sf.saxon.ma.map.BigDecimalMapKey}</li>
+     * </ul>
+     *
+     * @return a value with the property that the {@code equals()} and {@code hashcode()} methods follow the rules for comparing
+     * keys in maps.
+     */
+
+    @Override
+    public AtomicMatchKey asMapKey(int specVersion) {
+        if (isWithinIntRange()) {
+            return new net.sf.saxon.ma.map.Int32MapKey(value.intValue());
+        } else {
+            return new BigDecimalMapKey(new BigDecimal(value));
+        }
     }
 
     /**

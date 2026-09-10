@@ -12,6 +12,7 @@ import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.Round;
+import net.sf.saxon.ma.map.BigDecimalMapKey;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -444,25 +445,30 @@ public final class FloatValue extends NumericValue {
     }
 
     /**
-     * Get a value whose equals() method follows the "same key" rules for comparing the keys of a map.
+     * Get a value whose {@code equals()} and {@code hashcode()} methods follows the "same key"
+     * rules for comparing the keys of a map. For numeric values, this is done as follows:
+     * <ul>
+     *     <li>For NaN, return {@code AtomicSortComparer.COLLATION_KEY_NaN;}</li>
+     *     <li>For +INF and -INF, call {@code java.lang.Double.hashcode()}</li>
+     *     <li>For any value that is numerically equal to some 32-bit signed integer, return
+     *         a {@link net.sf.saxon.ma.map.Int32MapKey}</li>
+     *     <li>For any other value, return a {@link net.sf.saxon.ma.map.BigDecimalMapKey}</li>
+     * </ul>
      *
-     * @return a value with the property that the equals() and hashCode() methods follow the rules for comparing
+     * @return a value with the property that the {@code equals()} and {@code hashcode()} methods follow the rules for comparing
      * keys in maps.
      */
 
     @Override
     public AtomicMatchKey asMapKey(int specVersion) {
-        if (isNaN()) {
+        if (Float.isNaN(value)) {
             return AtomicSortComparer.COLLATION_KEY_NaN;
-        } else if (Double.isInfinite(value)) {
-            return new DoubleValue(value);
+        } else if (Float.isInfinite(value)) {
+            return this;
+        } else if (Math.floor(value) == value && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+            return new net.sf.saxon.ma.map.Int32MapKey((int) value);
         } else {
-            try {
-                return new BigDecimalValue(value);
-            } catch (ValidationException e) {
-                // We have already ruled out the values that fail (NaN and INF)
-                throw new AssertionError(e);
-            }
+            return new BigDecimalMapKey(new BigDecimal(value));
         }
     }
 

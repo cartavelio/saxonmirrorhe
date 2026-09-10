@@ -8,8 +8,10 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.Calculator;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.Round;
+import net.sf.saxon.ma.map.BigDecimalMapKey;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -687,6 +689,30 @@ public final class Int64Value extends IntegerValue {
     @Override
     public BigInteger asBigInteger() {
         return BigInteger.valueOf(value);
+    }
+
+    /**
+     * Get a value whose {@code equals()} and {@code hashcode()} methods follows the "same key"
+     * rules for comparing the keys of a map. For numeric values, this is done as follows:
+     * <ul>
+     *     <li>For NaN, return {@code AtomicSortComparer.COLLATION_KEY_NaN;}</li>
+     *     <li>For +INF and -INF, call {@code java.lang.Double.hashcode()}</li>
+     *     <li>For any value that is numerically equal to some 32-bit signed integer, return
+     *         a {@link net.sf.saxon.ma.map.Int32MapKey}</li>
+     *     <li>For any other value, return a {@link net.sf.saxon.ma.map.BigDecimalMapKey}</li>
+     * </ul>
+     *
+     * @return a value with the property that the {@code equals()} and {@code hashcode()} methods follow the rules for comparing
+     * keys in maps.
+     */
+
+    @Override
+    public AtomicMatchKey asMapKey(int specVersion) {
+        if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+            return new net.sf.saxon.ma.map.Int32MapKey((int) value);
+        } else {
+            return new BigDecimalMapKey(new BigDecimal(value));
+        }
     }
 
 }
