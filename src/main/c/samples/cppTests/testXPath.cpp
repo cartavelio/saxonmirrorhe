@@ -4,6 +4,7 @@
 #include "../../Saxon.C.API/XdmNode.h"
 #include "../../Saxon.C.API/XdmValue.h"
 #include "../../Saxon.C.API/XdmMap.h"
+#include "../../Saxon.C.API/XdmArray.h"
 #include "CppTestUtils.h"
 #include <string>
 
@@ -524,7 +525,34 @@ void testEmptyXdmMap(sResultCount *sresult) {
     cout << "Error Message = " << message << endl;
 
     sresult->failure++;
-    sresult->failureList.push_back("testXPathOnFile2");
+    sresult->failureList.push_back("tesEmptyXdmMap");
+  }
+
+}
+
+
+void testXdmArray(SaxonProcessor *processor, sResultCount *sresult) {
+  cout << endl << " testXdmArray" << endl;
+  try {
+    int values[3] = {1,2,3};
+    XdmArray *a = processor->makeArray(values, 3);
+    XdmArray *b = new XdmArray(*a);
+    XdmAtomicValue item1 = (XdmAtomicValue *)b->get(1)->getHead();
+    long value1 = item1.getLongValue();
+
+    if(value1 == 2) {
+      sresult->success++;
+    } else {
+      sresult->failure++;
+      sresult->failureList.push_back("testXdmArray");
+    }
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testXdmArray");
   }
 
 }
@@ -652,6 +680,12 @@ int main() {
        << "============================================================="
        << endl
        << endl;
+
+  testXdmArray(processor, sresult);
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
 
   testUnprefixedElementMatchingPolicy(processor, xpathProc, sresult);
   cout << endl

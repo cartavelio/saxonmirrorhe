@@ -21,8 +21,10 @@ XdmValue::XdmValue(const XdmValue &other) {
   values_cap = other.values_cap;
   relinquished_values = new char[values_cap];
   memset(relinquished_values, 0, sizeof(*relinquished_values) * values_cap);
-  for (int i = 0; i < xdmSize; i++) {
-    addXdmItem(other.values[i]);
+  if (other.values) {
+  	for (int i = 0; i < xdmSize; i++) {
+    	addXdmItem(other.values[i]);
+  	}
   }
 }
 
