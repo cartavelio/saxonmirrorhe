@@ -871,7 +871,7 @@ public class SaxonCAPI {
 
         try {
 
-            if(builderRef == WordFactory.nullPointer() && proci == WordFactory.nullPointer()) {
+            if(builderRef == WordFactory.nullPointer()) {
 
                 builder = proci.newDocumentBuilder();
             }  else {
