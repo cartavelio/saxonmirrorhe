@@ -494,13 +494,13 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Returns the items in the input sequence that precede the first one that satisfies the supplied predicate.</p>
       
-      <h2>fn:items-starting-with($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
-      
-      <p>Returns the items in the input sequence starting with the first one that satisfies the supplied predicate.</p>
-      
-      <h2>fn:items-ending-with($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
+      <h2>fn:items-ending-where($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
       
       <p>Returns the items in the input sequence up to and including the first one that satisfies the supplied predicate.</p>
+      
+      <h2>fn:items-starting-where($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
+      
+      <p>Returns the items in the input sequence starting with the first one that satisfies the supplied predicate.</p>
            
       <h2>fn:lowest($sequence as item()*) as item()*</h2>
       
@@ -558,14 +558,14 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?value</code>.)</p>
       
+      <h2>array:foot(array(*)) as item()*</h2>
+      
+      <p>Returns the last member of an array.</p>
+      
       <h2>array:members(array(*)) as record(value)*</h2>
       
       <p>Accepts an array as input, and turns it into a sequence of parcels: the inverse of the <code>array:of()</code>
          function.</p>
-      
-      <h2>array:foot(array(*)) as item()*</h2>
-      
-      <p>Returns the last member of an array</p>
       
       <h2>array:of(record(value, *)*) as array(*)</h2>
       

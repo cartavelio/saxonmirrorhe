@@ -262,8 +262,8 @@
                corresponding to your chosen operating system (Windows, MacOS, or Linux) and CPU 
                architecture (for example Arm64, x64, or x86).</p>
                
-               <note><p>At the time of writing, SaxonCS has not been tested on .NET 7. You're welcome to try it;
-               please share your experiences. We'll try to fix any problems you report.</p></note>
+               <aside>At the time of writing, SaxonCS has not been tested on .NET 7. You're welcome to try it;
+               please share your experiences. We'll try to fix any problems you report.</aside>
 
             </li>
             <li>
@@ -384,7 +384,8 @@
                your application code.</p>
             <p>The SaxonCS product, available from Saxon 11, is a complete redesign. The previous
             .NET product was built using the IKVM technology, which confined it to .NET Framework 4.x.
-            SaxonCS is built by converting Java source code to C#, and runs on .NET 5, fitting
+            SaxonCS is built by converting Java source code to C#, and runs on .NET 5 (SaxonCS 11)
+            or .NET 6 (SaxonCS 12), fitting
             in with Microsoft's strategic direction. The API for the new product retains many of the
             classes and methods from the older product, but we have taken the opportunity to modernize
             the design (for example by using delegates rather than interfaces for callbacks), and it's therefore
@@ -1025,7 +1026,7 @@ any version number.</p>
          download.</p>
       <ul>
          <li>
-            <p>To run SaxonCS you need to install .NET 5. This is the only release on which the product
+            <p>To run SaxonCS 12 you need to install .NET 6. This is the only release on which the product
             has been validated; if you want to try it on other versions, please let us know your experience.</p>
          </li>
          <li>
