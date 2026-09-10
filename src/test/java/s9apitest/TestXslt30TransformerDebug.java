@@ -25,6 +25,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ComplexType;
+import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
@@ -99,7 +100,7 @@ public class TestXslt30TransformerDebug {
     public void testSimple() {
         // Create a Processor instance.
         try {
-            Processor processor = new Processor(false);
+            Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.TIMING, true);
             processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
 
@@ -112,7 +113,7 @@ public class TestXslt30TransformerDebug {
             long start = new Date().getTime();
 
             // Transform the source XML to System.out.
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 5; i++) {
                 // Load the source document
                 XdmNode input = processor.newDocumentBuilder().build(
                         new File(configTest.getDataDir() + "caffo/Input.xml"));
@@ -663,7 +664,7 @@ public class TestXslt30TransformerDebug {
         int fp = config.getNamePool().allocateFingerprint(
                 NamespaceUri.of(childName.getComponent(AccessorFn.Component.NAMESPACE).getStringValue()),
                 childName.getComponent(AccessorFn.Component.LOCALNAME).getStringValue());
-        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, null, true);
+        int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, true);
         return Cardinality.allowsZero(cardinality);
     }
 
@@ -818,20 +819,15 @@ public class TestXslt30TransformerDebug {
         try {
             Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, Boolean.TRUE);
-            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-
-            SchemaManager schemaManager = processor.getSchemaManager();
-            processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, true);
-            XsdSchema schema = schemaManager.load(
+            processor.getUnderlyingConfiguration().addSchemaSource(
                     new StreamSource(configTest.getDataDir() + "books.xsd"));
-
+            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
 
             Serializer serializer = processor.newSerializer();
             serializer.setOutputFile(new File(configTest.getTempDir() + "validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);
-            compiler.useSchema(schema);
 
             String xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                     "\n" +
@@ -855,6 +851,9 @@ public class TestXslt30TransformerDebug {
             transformer.applyTemplates(new StreamSource(new StringReader(xsl)), serializer);
         } catch (SaxonApiException e) {
             e.printStackTrace();
+            fail();
+        } catch (SchemaException se) {
+            se.printStackTrace();
             fail();
         }
     }
