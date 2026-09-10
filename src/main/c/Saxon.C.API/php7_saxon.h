@@ -433,8 +433,8 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XdmMap,  isEmpty);
     PHP_METHOD(XdmMap,  containsKey);
     PHP_METHOD(XdmMap,  keys);
-    PHP_METHOD(XdmMap,  asMap);
-    PHP_METHOD(XdmMap,  values);
+   // PHP_METHOD(XdmMap,  asMap);
+   // PHP_METHOD(XdmMap,  values);
 
 
 
@@ -447,7 +447,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XdmArray,  put);
     PHP_METHOD(XdmArray,  addMember);
     PHP_METHOD(XdmArray,  concat);
-    PHP_METHOD(XdmArray,  values);
+    //PHP_METHOD(XdmArray,  values);
     PHP_METHOD(XdmArray,  getArity);
     PHP_METHOD(XdmArray,  arrayLength);
 

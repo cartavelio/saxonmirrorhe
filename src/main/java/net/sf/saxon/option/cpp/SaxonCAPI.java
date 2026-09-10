@@ -11,10 +11,7 @@ package net.sf.saxon.option.cpp;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.AtomicArray;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -462,34 +459,42 @@ public class SaxonCAPI {
             }
 
         } else if (value instanceof Object[]) {
+
             Object[] arr = (Object[]) value;
             if (debug) {
                 System.err.println("DEBUG: Array of parameters found. arr len=" + arr.length);
 
             }
-            List<AtomicValue> valueList = new ArrayList<AtomicValue>();
+            if(arr.length== 0) {
+                return null;
+            }
+            List<Item> valueList = new ArrayList<Item>();
             for (int j = 0; j < arr.length; j++) {
                 Object itemi = arr[j];
                 if (itemi == null) {
-                    System.err.println("Error: Null item at " + j + "th position in array of XdmValues");
+                    if (debug) {
+                        System.err.println("Error: Null item at " + j + "th position in array of XdmValues");
+                    }
                     break;
                 }
                 if (debug) {
                     System.err.println("Java object:" + itemi);
                 }
                 if (itemi instanceof XdmValue) {
-                    valueList.add((AtomicValue) (((XdmValue) itemi).getUnderlyingValue()));
+                    valueList.add((Item) (((XdmValue) itemi).getUnderlyingValue()));
                 } else {
                     XdmValue valuex = getXdmValue(itemi);
                     if (valuex == null) {
-                        System.err.println("Error: Null item at " + j + "th position in array of XdmValues when converting");
+                        if (debug) {
+                            System.err.println("Error: Null item at " + j + "th position in array of XdmValues when converting");
+                        }
                         break;
                     }
-                    valueList.add((AtomicValue) (getXdmValue(itemi)).getUnderlyingValue());
+                    valueList.add((Item) (getXdmValue(itemi)).getUnderlyingValue());
                 }
             }
-            AtomicArray sequence = new AtomicArray(valueList);
-            valueForCpp = XdmValue.wrap(sequence);
+            GroundedValue gv = SequenceExtent.makeSequenceExtent(valueList);
+            valueForCpp = XdmValue.wrap(gv);
         } else {
             //fast track for primitive values
             valueForCpp = getXdmValue(value);

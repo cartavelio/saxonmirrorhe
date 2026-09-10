@@ -174,9 +174,8 @@ void XsltExecutable::setInitialMode(const char * modeName){
 
 
 void XsltExecutable::setParameter(const char *name, XdmValue *value) {
-std::cout<<"setParameter() called"<<std::endl;
     if (value != nullptr && name != nullptr) {
-    std::cout<<"setParameter() - XdmValue  name="<<name<<", value="<<value->getType()<<" valu="<<value->toString()<<std::endl;
+   // std::cout<<"setParameter() - XdmValue  name="<<name<<", value="<<value->getType()<<" valu="<<value->toString()<<std::endl;
         //value->incrementRefCount();
         int s = parameters.size();
         std::string skey = "param:" + std::string(name);
@@ -589,12 +588,12 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 
 XdmValue *XsltExecutable::applyTemplatesReturningValue() {
 
-    if (selection == nullptr) {
+   /* if (selection == nullptr) {
         std::cerr
                 << "Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile."
                 << std::endl;
         return nullptr;
-    }
+    }*/
 
 
     static jmethodID atsvmID = nullptr;

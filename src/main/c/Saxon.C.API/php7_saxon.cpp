@@ -433,15 +433,11 @@ PHP_METHOD(SaxonProcessor, isSchemaAware)
     zend_object* pobj = Z_OBJ_P(getThis()); 
     saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
     saxonProcessor = obj->saxonProcessor;
-std::cerr << "SaxonProcessor.isSchemaAware() PHP cp0"  << std::endl;
     if (saxonProcessor != nullptr) {
-std::cerr << "SaxonProcessor.isSchemaAware() PHP cp1"  << std::endl;
          if(saxonProcessor->isSchemaAwareProcessor()){
-std::cerr << "SaxonProcessor.isSchemaAware() PHP cp2"  << std::endl;
 		RETURN_TRUE;
  	}
     }
-std::cerr << "SaxonProcessor.isSchemaAware() PHP cp3"  << std::endl;
     RETURN_FALSE;
 }
 
@@ -2318,7 +2314,7 @@ PHP_METHOD(XdmFunctionItem, __toString)
     }
 
 
-PHP_METHOD(XdmFunctionValue,  getName)
+PHP_METHOD(XdmFunctionItem,  getName)
 {
     	 XdmFunctionItem *xdmFunctionItem;
          zend_object *oobj = Z_OBJ_P(getThis());
@@ -3293,8 +3289,8 @@ zend_function_entry xdmMap_methods[] = {
     PHP_ME(XdmMap,  isEmpty,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmMap,  containsKey,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmMap,  keys,      nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XdmMap,  asMap,      nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XdmMap,  values,      nullptr, ZEND_ACC_PUBLIC)
+    /*PHP_ME(XdmMap,  asMap,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XdmMap,  values,      nullptr, ZEND_ACC_PUBLIC)*/
     {nullptr, nullptr, nullptr}
 };
 
@@ -3307,7 +3303,7 @@ zend_function_entry xdmArray_methods[] = {
     PHP_ME(XdmArray,  put,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmArray,  addMember,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmArray,  concat,      nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XdmArray,  values,      nullptr, ZEND_ACC_PUBLIC)
+    //PHP_ME(XdmArray,  values,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmArray,  getArity,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmArray,  arrayLength,      nullptr, ZEND_ACC_PUBLIC)
     {nullptr, nullptr, nullptr}

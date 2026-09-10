@@ -361,9 +361,10 @@ function exampleXMLFilterChain2($saxonProc, $proc, $xmlFile, $xsl1File, $xsl2Fil
 
     $executable3 = $proc->compileFromFile($xsl3File);
     $executable3->setParameter('node', $xdmValue2);
+    $executable3->setInitialMatchSelection($xdmValue2);
     echo "After setParameter xdmVaue2 \n";
     $result = $executable3->applyTemplatesReturningValue();
-    echo "After result";
+    echo "After result ";
     if ($result != null) {
         echo 'Output:' . $result;
     } else {
@@ -403,7 +404,6 @@ function exampleError1($proc, $xmlFile, $xslFile)
             }
             echo $result;
             $proc->clearParameters();
-            $proc->clearProperties();
     }catch (Exception $ex)  {
         echo "Exception: ".$ex->getMessage();
         return;
@@ -591,6 +591,12 @@ function testPerformance()
      $version = $saxonProc->version();
      echo 'Saxon Processor version: '.$version;
      echo '<br/>';
+     if($saxonProc->isSchemaAware()) {
+        echo 'Processor is schema aware';
+     } else {
+        echo 'Processor is not schema aware';
+
+     }
  $proc = $saxonProc->newXslt30Processor();   
 echo '<br/>';
  //testCallFunction($saxonProc, $proc);

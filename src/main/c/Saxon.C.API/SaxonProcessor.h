@@ -99,11 +99,11 @@ class DocumentBuilder;
 class SaxonApiException;
 
 
-// The Saxon XSLT interface class
-
+//! A struct object to represent parameters.
+/*! Internal use only. This struct represents parameters to pass back the Java code. These two arrays acts as a map to represent the parameters. */
 typedef struct {
-    jobjectArray stringArray;
-    jobjectArray objectArray;
+    jobjectArray stringArray; /*!< Internal use only. Java array of String objects. */
+    jobjectArray objectArray; /*!< Internal use only. Java Array of objects. The underlying type can be different. */
 
 } JParameters;
 
@@ -112,8 +112,8 @@ typedef struct {
 //==========================================
 
 
-
-/*! An <code>SaxonProcessor</code> acts as a factory for generating XQuery, XPath, Schema and XSLT compilers
+//!An <code>SaxonProcessor</code> class acts as a factory for generating XQuery, XPath, Schema and XSLT compilers
+/*! The <code>SaxonProcessor</code> class not only generates XQuery, XPath, Schema and XSLT Processors, but is used to create Xdm objects from primitive types.
  */
 class SaxonProcessor {
 
@@ -180,7 +180,11 @@ public:
      */
     ~SaxonProcessor();
 
-
+    //! Get any error message thrown by the processor
+    /*!
+      * @return string value of the error message. JNI exceptions thrown by this
+      * processor are handled internally and can be retrived by this method.
+    */
     const char * getErrorMessage();
 
     /**
@@ -241,6 +245,13 @@ public:
      */
     XdmAtomicValue *makeStringValue(const char *str);
 
+    /*!
+     * Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
+     * of a zero-length string (and potentially other strings, in future)
+     *
+     * @param value the std:string
+     * @return the corresponding StringValue
+     */
     static XdmAtomicValue *makeStringValue2(std::string str);
 
     /*!
@@ -346,13 +357,28 @@ public:
    */
     XdmArray *makeArray(XdmValue ** values, int length);
 
-
+    /**
+        * Make an XdmMap whose argument is a map from the standard template library.
+        * @param dataMap  is std::map, which consists of keys as XdmAtomicValue and value is XdmValue.
+        * @return an XdmMap whose members are key, value pair given as (XdmAtomicValue, XdmValue)
+   */
     XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap);
 
+    /**
+        * Make an XdmMap whose argument is a map from the standard template library.
+        * @param dataMap  is std::map, which consists of keys as std::string and value is XdmValue. Keys are converted to XdmAtomicValue objects
+        * @return an XdmMap whose members are key, value pair given as (XdmAtomicValue, XdmValue)
+   */
     static XdmMap *makeMap2(std::map<std::string, XdmValue *> dataMap);
 
-
-    XdmMap *makeMap3(XdmAtomicValue **, XdmValue **, int len);
+    /**
+        * Make an XdmMap from an array of keys and values.
+        * @param keys. The keys are given as a pointer array of XdmAtomicValue
+        * @param values. The values are given as a pointer array of XdmValue
+        * @param len. The length of the arrays given as argument
+        * @return an XdmMap whose members are key, value pair given as (XdmAtomicValue, XdmValue)
+   */
+    XdmMap *makeMap3(XdmAtomicValue ** keys, XdmValue ** values, int len);
 
 
     /**
@@ -364,23 +390,35 @@ public:
     /**
      * Parse a lexical representation of the source document and return it as an XdmNode
      TODO - parser options need adding. Make validator part of the options.
+     @param validator
+     @return an XdmNode
     */
     XdmNode *parseXmlFromString(const char *source, SchemaValidator * validator = nullptr);
 
     /**
      * Parse a source document file and return it as an XdmNode.
-     TODO - parser options need adding
+     @param validator.
+     @return an XdmNode
     */
     XdmNode *parseXmlFromFile(const char *source, SchemaValidator * validator = nullptr);
 
     /**
      * Parse a source document available by URI and return it as an XdmNode.
-     TODO - parser options need adding
+     @param validator.
+     @return an XdmNode
     */
     XdmNode *parseXmlFromUri(const char *source, SchemaValidator * validator = nullptr);
 
+    /**
+     * Get the kind of node.
+     * @return the kind of node, for example ELEMENT or ATTRIBUTE
+     */
     int getNodeKind(jobject);
 
+    /**
+     * Test whether this processor is schema-aware
+     * @return true if this this processor is licensed for schema processing, false otherwise
+     */
     bool isSchemaAwareProcessor();
 
 
@@ -421,7 +459,7 @@ public:
     static SaxonApiException *checkForExceptionCPP(JNIEnv *env, jclass callingClass, jobject callingObject);
 
 
-    /*
+    /**
       * Clean up and destroy Java VM to release memory used. 
      */
     static void release();
@@ -434,12 +472,14 @@ public:
 
     /**
      * get the current working directory
+     * @return string value of the cwd
     */
     const char *getcwd();
 
 
     /**
      * get saxon resources directory
+     * @return string value of the resource directory
     */
    const char * getResourcesDirectory();
 
@@ -476,7 +516,7 @@ public:
      */
     const char *version();
 
-/*
+/**
      * Add a native method.
      * @param name of the native method
      * @param signature of the native method
@@ -494,7 +534,7 @@ public:
 
     }
 
-/*
+/**
      * Register several native methods for one class.
      * @param libName name of the library which contains the function(s). Loads the library
      * @param gMethods Register native methods. Default is nullptr, also nullptr allowed in
@@ -522,7 +562,7 @@ public:
         return false;
     }
 
-/*
+/**
  * Register several native methods for one class.
  * @return bool success of registered native method
  */
@@ -542,6 +582,11 @@ public:
         return true;
     }
 
+    /**
+     * Check for exception thrown and create
+     * @param cppClass
+     * @return The SaxonApiException with information about the exception thrown
+     */
     SaxonApiException *checkAndCreateException(jclass cppClass);
 
 
@@ -553,13 +598,15 @@ public:
 //	SchemaManager
 
     // static JNIEnv *env;
-    static int jvmCreatedCPP;
-    static sxnc_environment *sxn_environ;
+    static int jvmCreatedCPP; /*!< Flag to indicate jvm created - used in memory management */
+    static sxnc_environment *sxn_environ;/*!< Environment to captures the jni, JVM and handler to the cross compiled SaxonC library. */
     std::string cwd; /*!< current working directory */
     jobject proc; /*!< Java Processor object */
 
 
-
+/**
+ * Get info on objects allocated and still in memory
+ */
     static void getInfo();
 
     /*static JavaVM *jvm;*/
@@ -567,10 +614,10 @@ public:
 protected:
 
 
-    jclass xdmAtomicClass;
-    jclass versionClass;
-    jclass procClass;
-    jclass saxonCAPIClass;
+    jclass xdmAtomicClass; /*!< The XdmAtomicValue instance */
+    jclass versionClass; /*!< The Version instance */
+    jclass procClass; /*!< The SAxon Processor instance */
+    jclass saxonCAPIClass; /*!< The SaxonCAPI instance */
     std::string cwdV; /*!< current working directory */
     //std::string resources_dir; /*!< current Saxon resources directory */
     char *versionStr;
