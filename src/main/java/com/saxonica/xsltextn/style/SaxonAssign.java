@@ -98,13 +98,12 @@ public class SaxonAssign extends XSLGeneralVariable {
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-        //initializeBinding(exec, decl, instruction);
         if (sourceBinding.getSelectExpression() != null) {
             instruction.setSelectExpr(sourceBinding.getSelectExpression());
         } else {
             instruction.setSelectExpr(compileSequenceConstructor(exec, decl, false));
         }
-        return instruction;
+        return instruction.withLocation(saveLocation());
     }
 
 }
