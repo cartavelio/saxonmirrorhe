@@ -89,7 +89,7 @@ namespace TestRunner {
             needsPE.Add("feature/Saxon-PE");
             needsPE.Add("feature/dynamic_evaluation");
 
-            needsEE.Add("languages_for_numbering");
+            //needsEE.Add("languages_for_numbering");
             needsEE.Add("feature/streaming");
             needsEE.Add("feature/schema_aware");
             needsEE.Add("feature/Saxon-EE");
@@ -260,7 +260,7 @@ namespace TestRunner {
             return testName.StartsWith("regex-classes") ||
                    testName == "normalize-unicode-008" ||
                    testName == "catalog005"; // TODO: this one hangs, need to investigate
-                   ;
+            ;
         }
 
         internal void CopySchemaNamespace(Environment env, XPathCompiler testXpc) {
@@ -374,16 +374,14 @@ namespace TestRunner {
 
             // If a static error is expected, suppress JIT compilation so we catch it eagerly
             bool IsStaticError(XdmItem item) => item.GetStringValue().StartsWith("XTSE");
-            bool staticError = testCase.Select(
+            bool expectStaticError = testCase.Select(
                 Steps.Path("result", "//", "error", "@code").Where((Predicate<XdmItem>) IsStaticError)).Any();
-            if (staticError) {
+            if (expectStaticError) {
                 bool saved = env.xsltCompiler.JustInTimeCompilation;
                 env.xsltCompiler.JustInTimeCompilation = false;
                 env.resetActions.Add(env => env.xsltCompiler.JustInTimeCompilation = saved);
             }
 
-            
-            
 
             XsltExecutable sheet = env.xsltExecutable;
 
@@ -392,7 +390,12 @@ namespace TestRunner {
             if (stylesheet != null) {
                 env.processor.SetProperty(FeatureKeys.ALLOW_MULTITHREADING, "false");
                 XsltCompiler compiler = env.xsltCompiler;
-                compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
+                compiler.ErrorReporter = err => {
+                    if (!expectStaticError) {
+                        Console.Error.WriteLine("*** STATIC ERROR: " + err.Message);
+                    }
+                    outcome.ReportError(err.ErrorCode);
+                };
                 Uri hrefFile = res.ResolveUri(stylesheet.BaseUri, stylesheet.GetAttributeValue(new QName("file")));
                 Stream styleSource = new FileStream(hrefFile.AbsolutePath, FileMode.Open, FileAccess.Read);
                 compiler.BaseUri = hrefFile;
@@ -421,8 +424,7 @@ namespace TestRunner {
                     String fileName2 = pack.GetAttributeValue("file");
                     Uri fileUri = res.ResolveUri(pack.BaseUri, fileName2);
                     Stream styleSource2 = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
-
-                    XsltPackage xpack = compiler.CompilePackage(styleSource2);
+                    XsltPackage xpack = compiler.CompilePackage(styleSource2, fileUri);
                     xpack = exportImportPackage(testName, testSetName, outcome, compiler, xpack);
                     compiler.ImportPackage(xpack);
                     // Following needed for dynamic loading of packages using fn:transform()
@@ -431,7 +433,7 @@ namespace TestRunner {
 
 
                 try {
-                    sheet = exportImport(testName, testSetName, outcome, compiler, sheet, styleSource); 
+                    sheet = exportImport(testName, testSetName, outcome, compiler, sheet, styleSource);
                 }
                 catch (Exception err) {
                     Console.WriteLine(err.Message);
@@ -468,7 +470,8 @@ namespace TestRunner {
                 XsltCompiler compiler = env.xsltCompiler;
                 compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
                 compiler.ClearParameters();
-                SysCollGen.IEnumerable<XdmNode> paramEnumerable = testInput.Select(Child("param").Where(IsTrue("static")));
+                SysCollGen.IEnumerable<XdmNode> paramEnumerable =
+                    testInput.Select(Child("param").Where(IsTrue("static")));
 
                 foreach (XdmNode itemxx in paramEnumerable) {
                     String name = itemxx.GetAttributeValue("name");
@@ -490,8 +493,7 @@ namespace TestRunner {
                     Uri pfileUri = res.ResolveUri(testCase.BaseUri, pfileName);
                     Stream pstyleSource = new FileStream(pfileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
 
-
-                    XsltPackage xpack = compiler.CompilePackage(pstyleSource);
+                    XsltPackage xpack = compiler.CompilePackage(pstyleSource, pfileUri);
                     compiler.ImportPackage(xpack);
                 }
 
@@ -501,7 +503,7 @@ namespace TestRunner {
                 compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
                 compiler.BaseUri = fileUri;
                 try {
-                    XsltPackage xpack = compiler.CompilePackage(styleSource);
+                    XsltPackage xpack = compiler.CompilePackage(styleSource, fileUri);
                     sheet = xpack.Link();
                 }
                 catch (Exception err) {
@@ -584,19 +586,19 @@ namespace TestRunner {
                             GetNamedParameters(xpath, testInput, false, false);
                         SysCollGen.Dictionary<QName, XdmValue> caseStaticParams =
                             GetNamedParameters(xpath, testInput, true, false);
-                        SysCollGen.Dictionary<QName, XdmValue> globalParams = 
+                        SysCollGen.Dictionary<QName, XdmValue> globalParams =
                             new SysCollGen.Dictionary<QName, XdmValue>(env.params1);
 
                         foreach (SysCollGen.KeyValuePair<QName, XdmValue> entry in caseGlobalParams) {
                             globalParams.Add(entry.Key, entry.Value);
                         }
-                        
+
                         transformer.SetStylesheetParameters(globalParams);
 
                         if (contextItem != null) {
                             transformer.GlobalContextItem = contextItem;
                         }
-                        
+
                         transformer.BaseOutputURI = baseOutputURI;
 
                         transformer.MessageListener = msg => outcome.AddXslMessage(msg.Content);
@@ -607,17 +609,21 @@ namespace TestRunner {
 
                         Serializer serializer = env.processor.NewSerializer();
                         serializer.SetOutputWriter(sw);
-                        
+
                         XmlDestination dest = null;
                         if (resultAsTree && !resultSerialized) {
                             // If we want non-serialized, we need to accumulate any result documents as trees too
                             transformer.ResultDocumentHandler =
                                 new ResultDocumentHandler(env.processor, outcome, baseOutputURI, false);
                             dest = new XdmDestination();
+                        } else {
+                            transformer.ResultDocumentHandler =
+                                new ResultDocumentHandler(env.processor, outcome, baseOutputURI, true);
+                            if (resultSerialized) {
+                                dest = serializer;
+                            }
                         }
-                        else if (resultSerialized) {
-                            dest = serializer;
-                        }
+
 
                         Stream src = null;
                         Uri srcBaseUri = new Uri("http://uri");
@@ -637,11 +643,9 @@ namespace TestRunner {
                             srcNode = (XdmNode) (contextItem);
                         }
 
+                        SchemaValidator validator = null;
                         if (src != null && !"skip".Equals(env.streamedInputValidation)) {
-                            Processor processor = (Processor) sheet.Implementation.getUnderlyingCompiledStylesheet()
-                                .getConfiguration().getProcessor();
-                            SchemaValidator validatori = processor.SchemaManager.NewSchemaValidator();
-                            //validatori.SetDestination
+                            validator = env.processor.SchemaManager.NewSchemaValidator();
                         }
 
                         if (initialMode != null) {
@@ -670,8 +674,10 @@ namespace TestRunner {
 
                         if (initialMode != null || initialTemplate != null) {
                             XdmNode init = (XdmNode) (initialMode == null ? initialTemplate : initialMode);
-                            SysCollGen.Dictionary<QName, XdmValue> params1 = GetNamedParameters(xpath, init, false, false);
-                            SysCollGen.Dictionary<QName, XdmValue> tunnelledParams = GetNamedParameters(xpath, init, false, true);
+                            SysCollGen.Dictionary<QName, XdmValue> params1 =
+                                GetNamedParameters(xpath, init, false, false);
+                            SysCollGen.Dictionary<QName, XdmValue> tunnelledParams =
+                                GetNamedParameters(xpath, init, false, true);
                             if (xsltLanguageVersion.Equals("2.0")) {
                                 if (!(params1.Count == 0 && tunnelledParams.Count == 0)) {
                                     Console.WriteLine("*** Initial template parameters ignored for XSLT 2.0");
@@ -720,7 +726,11 @@ namespace TestRunner {
                                 }
                             }
                             else {
-                                if (src != null) {
+                                if (validator != null) {
+                                    validator.SetSource(src, srcBaseUri);
+                                    validator.SetDestination(transformer.AsDocumentDestination(dest));
+                                    validator.Run();
+                                } else if (src != null) {
                                     transformer.ApplyTemplates(src, srcBaseUri, dest);
                                 }
                                 else {
@@ -755,7 +765,8 @@ namespace TestRunner {
                             saveResultsToFile(s, resultsDir + "/results/" + testSetName + "/" + testName + ".out");
                             SysCollGen.Dictionary<Uri, TestOutcome.SingleResultDoc> xslResultDocuments =
                                 outcome.GetSecondaryResultDocuments();
-                            foreach (SysCollGen.KeyValuePair<Uri, TestOutcome.SingleResultDoc> entry in xslResultDocuments) {
+                            foreach (SysCollGen.KeyValuePair<Uri, TestOutcome.SingleResultDoc> entry in
+                                xslResultDocuments) {
                                 Uri key = entry.Key;
                                 String path = key.AbsolutePath;
                                 String serialization = outcome.Serialize(env.processor, entry.Value);
@@ -766,7 +777,7 @@ namespace TestRunner {
                     }
                     catch (Exception err) {
                         outcome.SetException(err);
-                    } 
+                    }
                 }
                 else {
                     try {
@@ -861,8 +872,15 @@ namespace TestRunner {
                     }
                 }
             }
+            
+            if (env.resetActions != null) {
+                foreach (var act in env.resetActions) {
+                    act.Invoke(env);
+                }
+                env.resetActions.Clear();
+            }
 
-            XdmNode assertion = (XdmNode) xpath.EvaluateSingle("result/*", testCase); 
+            XdmNode assertion = (XdmNode) xpath.EvaluateSingle("result/*", testCase);
             //testCase.Select(PathFromList(new List<>Child("result"), Child().Where(IsElement())));
             if (assertion == null) {
                 recordFailure(testSetName, testName);
@@ -874,6 +892,7 @@ namespace TestRunner {
             if (env.xsltCompiler.SchemaAware) {
                 assertionXPath.SchemaAware = true;
             }
+
             //assertionXPath.setLanguageVersion("3.0");
             CopySchemaNamespace(env, assertionXPath);
             bool success = outcome.TestAssertion(outcome, assertion, outcome.GetPrincipalResultDoc(), assertionXPath,
@@ -1048,46 +1067,32 @@ namespace TestRunner {
             }
 
             public XmlDestination HandleResultDocument(string href, Uri baseUri) {
-                // if (serialized) {
+                if (serialized) {
+                    StringWriter writer = new StringWriter();
+                    Serializer dest = proc.NewSerializer();
 
-                StringWriter writer = new StringWriter();
-                Serializer dest = proc.NewSerializer();
+                    XmlUrlResolver res = new XmlUrlResolver();
+                    Uri uri = res.ResolveUri(baseUri, href);
+                    dest.BaseUri = uri;
+                    dest.SetOutputWriter(writer);
 
-                XmlUrlResolver res = new XmlUrlResolver();
-                Uri uri = res.ResolveUri(baseUri, href);
-                dest.BaseUri = uri;
-                dest.SetOutputFile(uri.AbsolutePath);
+                    if (uri.Equals(baseOutputUri)) {
+                        dest.OnClose(() => outcome.SetPrincipalSerializedResult(writer.ToString()));
+                    }
+                    else {
+                        dest.OnClose(() => outcome.SetSecondaryResult(uri, null, writer.ToString(), proc));
+                    }
 
-                if (uri.Equals(baseOutputUri)) {
-                    outcome.SetPrincipalSerializedResult(writer.ToString());
+                    return dest;
                 }
                 else {
-                    outcome.SetSecondaryResult(uri, null, writer.ToString(), proc);
+                    XdmDestination dest = new XdmDestination();
+                    XmlUrlResolver res = new XmlUrlResolver();
+                    Uri uri = res.ResolveUri(baseUri, href);
+                    dest.BaseUri = uri;
+                    dest.OnClose(() => outcome.SetSecondaryResult(uri, dest.XdmNode, null, proc));
+                    return dest;
                 }
-
-                return dest;
-                /*   }
-                   else {
-
-                       XdmDestination dest = new XdmDestination();
-                       XmlUrlResolver res = new XmlUrlResolver();
-                       Uri uri = res.ResolveUri(baseUri, href);
-                       dest.BaseUri = uri;
-                    
-                    XdmValue doc = proc.NewXPathCompiler().Compile("doc('" + uri + "')").Load().EvaluateSingle();
-                    if (uri.Equals(baseOutputUri))
-                       {
-
-                           outcome.SetPrincipalResult(null);
-                       }
-                       else
-                       {
-                        
-                          outcome.SetSecondaryResult(uri, null ,null, proc);
-                       }
-                       return dest;
-
-                   }*/
             }
         }
 
@@ -1291,6 +1296,9 @@ namespace TestRunner {
 
                 case "ignore_doc_failure":
                     return inverse;
+                
+                case "languages_for_numbering":
+                    return value.Equals("en") || inverse;
 
                 case "combinations_for_numbering":
                     if (value.Equals("COPTIC EPACT DIGIT ONE") || value.Equals("SINHALA ARCHAIC DIGIT ONE") ||

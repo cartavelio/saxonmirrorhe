@@ -66,7 +66,7 @@ public class TestCanonicalSerializer {
             assertTrue(Arrays.equals(os1.toByteArray(), os2.toByteArray()));
             //assertTrue(Arrays.equals(os1.toByteArray(), os3));
         } catch (SaxonApiException | IOException e) {
-            fail(e.getMessage());
+            fail("Processing " + input + ": " + e.getMessage());
         }
     }
 

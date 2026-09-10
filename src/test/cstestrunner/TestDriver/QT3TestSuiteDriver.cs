@@ -195,49 +195,9 @@ namespace TestRunner {
                     return !inverse;
                 }
                 else if ("schemaImport".Equals(value) || "schemaValidation".Equals(value) ||
-                         "schemaAware".Equals(value)) {
+                         "schemaAware".Equals(value) || "schema-location-hint".Equals(value)) {
                     return makeSchemaAware(env, inverse);
-                    //if (!treeModel.isSchemaAware()) {//TODO
-                    //  return false; // cannot use the selected tree model for schema-aware tests
-                    //}
-                    // Need to reset these after use for this query??
-                    // if (env != null)
-                    // {
-                    //     if (inverse)
-                    //     {
-                    //         // force use of a non-schema-aware processor by creating a ProfessionalConfiguration
-                    //         /* ProfessionalConfiguration pConfig = new ProfessionalConfiguration();
-                    //          pConfig.setNamePool(env.processor.getUnderlyingConfiguration().getNamePool());
-                    //          final Processor savedProcessor = env.processor;
-                    //          final XPathCompiler savedXPathCompiler = env.xpathCompiler;
-                    //          final XQueryCompiler savedXQueryCompiler = env.xqueryCompiler;
-                    //          final XsltCompiler savedXsltCompiler = env.xsltCompiler;
-                    //          env.processor = new Processor(pConfig);
-                    //          env.xpathCompiler = env.processor.newXPathCompiler();
-                    //          env.xqueryCompiler = env.processor.newXQueryCompiler();
-                    //          env.xsltCompiler = env.processor.newXsltCompiler();
-                    //          env.xpathCompiler.setSchemaAware(false);
-                    //          env.xqueryCompiler.setSchemaAware(false);
-                    //          env.xsltCompiler.setSchemaAware(false);
-                    //          env.resetAction = new Environment.ResetAction() {
-                    //              public void reset(Environment env) {
-                    //                  env.processor = savedProcessor;
-                    //                  env.xpathCompiler = savedXPathCompiler;
-                    //                  env.xqueryCompiler = savedXQueryCompiler;
-                    //                  env.xsltCompiler = savedXsltCompiler;
-                    //              }
-                    //          }; */
-                    //     }
-                    //     else
-                    //     {
-                    //         env.xpathCompiler.SchemaAware = true;
-                    //         env.xqueryCompiler.SchemaAware = true;
-                    //         if (env.xsltCompiler != null) {
-                    //             env.xsltCompiler.SchemaAware = true;
-                    //         }
-                    //     }
-                    //}
-                    //     return true;
+ 
                 }
                 // else if ("xpath-1.0-compatibility".Equals(value))
                 // {
@@ -695,7 +655,11 @@ namespace TestRunner {
                     }
                 }
 
+                bool testIsSchemaAware = env.xpathCompiler.SchemaAware || env.xqueryCompiler.SchemaAware;
                 if (env.resetActions != null) {
+                    foreach (var act in env.resetActions) {
+                        act.Invoke(env);
+                    }
                     env.resetActions.Clear();
                 }
 
@@ -717,9 +681,7 @@ namespace TestRunner {
 
                 XPathCompiler assertXpc = env.processor.NewXPathCompiler();
                 assertXpc.XPathLanguageVersion = "3.1";
-                if (env.xpathCompiler.SchemaAware || env.xqueryCompiler.SchemaAware) {
-                    assertXpc.SchemaAware = true;
-                }
+                assertXpc.SchemaAware = testIsSchemaAware;
                 assertXpc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
                 assertXpc.DeclareNamespace("math", "http://www.w3.org/2005/xpath-functions/math");
@@ -938,7 +900,7 @@ namespace TestRunner {
         private void buildDependencyDictionary(Processor processor, Environment env) {
             XQueryCompiler xqCompiler = processor.NewXQueryCompiler();
             xqCompiler.XQueryLanguageVersion = "3.1";
-            xqCompiler.BaseUri = System.IO.Path.GetFullPath(testSuiteDir) + "/";
+            xqCompiler.BaseUri = new Uri("file://" + System.IO.Path.GetFullPath(testSuiteDir) + "/", UriKind.RelativeOrAbsolute);
             XdmValue result = xqCompiler.Compile(
                 "        declare namespace fots = \"http://www.w3.org/2010/09/qt-fots-catalog\";\n" +
                 "        let $testsets := doc('" + testSuiteDir +

@@ -7,10 +7,33 @@
     <reason>Collations</reason>
   </exception>
   
+  <exception test-case="base-uri-006" run="false" report=".NET limitation">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>URIs with single-character scheme names are handled incorrectly by the System.Uri class</reason>
+  </exception>
+  
+  <exception test-case="base-uri-052" run="false" report=".NET limitation">
+    <created by="Michael Kay" on="2021-06-02"/>
+    <reason>Requires XInclude support</reason>
+  </exception>
+  
   <exception test-case="choose-0107" run="false" report="not-implemented">
     <created by="Michael Kay" on="2021-06-02"/>
     <reason>Collations</reason>
   </exception>
+  
+  <exception test-case="current-output-uri-013 current-output-uri-015" run="false" report="Test driver limitation">
+    <created by="Michael Kay" on="2021-06-12"/>
+    <reason>'output file="#absent"' not recognised by test driver</reason>
+  </exception>
+  
+  <exception test-case="format-number-044" run="false" report="BigDecimal precision issue">
+    <created by="Michael Kay" on="2021-06-12"/>
+    <reason>https://github.com/Singulink/Singulink.Numerics.BigDecimal/issues/4. See also qt3test numberformat60
+      and https://www.w3.org/Bugs/Public/show_bug.cgi?id=14934</reason>
+  </exception>
+  
+
   
   <exception test-case="id-001
     id-015
@@ -41,17 +64,17 @@
   
   <exception test-case="package-017" run="false" report="disputed">
     <created by="Michael Kay" on="2015-11-02"/>
-    <reason>Bug 29233</reason>
+    <reason>W3C Bug 29233</reason>
   </exception>
   
   <exception test-case="package-018" run="false" report="disputed">
     <created by="Michael Kay" on="2015-11-02"/>
-    <reason>Bug 29233</reason>
+    <reason>W3C Bug 29233</reason>
   </exception>
   
   <exception test-case="package-908" run="false" report="disputed">
     <created by="Michael Kay" on="2015-11-02"/>
-    <reason>Bug 29234</reason>
+    <reason>W3C Bug 29234</reason>
   </exception>
 
   <exception test-case="regex-syntax-0986" run="false" report="tooBig">
@@ -63,16 +86,15 @@
     <created by="Michael Kay" on="2012-11-05"/>
     <reason>Slow running</reason>
   </exception>
-  
-  <!--<exception test-case="streamable-066" run="false" report="not-implemented">
-    <created by="Michael Kay" on="2021-06-02"/>
-    <reason>Multithreading</reason>
-  </exception>
-  -->
  
   <exception test-case="override-f-029" run="false" report="Not implemented">
     <created by="Michael Kay" on="2016-02-14"/>
     <reason>Saxon bug 2781</reason>
+  </exception>
+  
+  <exception test-case="type-functions-0304" run="false" report=".NET limitation">
+    <created by="Michael Kay" on="2021-06-11"/>
+    <reason>"a:_underscore_" is not recognised as a URI by the System.Uri class (it thinks it might be a filename...)</reason>
   </exception>
   
   <exception test-case="si-group-064" run="false" report="Not implemented">

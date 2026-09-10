@@ -148,14 +148,9 @@ namespace TestRunner {
         }
 
         public void SetSecondaryResult(Uri uri, XdmNode value, string serialization, Processor proc) {
-            SingleResultDoc result = null;
-            try {
-                result = xslResultDocuments[uri];
-            }
-            catch (Exception) {
-            }
+            bool found = xslResultDocuments.TryGetValue(uri, out SingleResultDoc result);
 
-            if (result == null) {
+            if (!found) {
                 result = new SingleResultDoc(value, serialization, proc);
                 this.xslResultDocuments.Add(uri, result);
             }
@@ -175,13 +170,19 @@ namespace TestRunner {
         }
 
         public SingleResultDoc GetSecondaryResult(Uri uri) {
-            SingleResultDoc doc = xslResultDocuments[uri];
-            Processor proc = doc.proc;
-            if (doc.serialization.Equals("")) {
-                doc.value = proc.NewXPathCompiler().Compile("doc('" + uri + "')").Load().EvaluateSingle();
+            if (xslResultDocuments.ContainsKey(uri)) {
+                return xslResultDocuments[uri];
             }
-
-            return doc;
+            else {
+                return null;
+            }
+            // SingleResultDoc doc = xslResultDocuments[uri];
+            // Processor proc = doc.proc;
+            // if (doc.serialization.Equals("")) {
+            //     doc.value = proc.NewXPathCompiler().Compile("doc('" + uri + "')").Load().EvaluateSingle();
+            // }
+            //
+            // return doc;
         }
 
         public void ReportError(QName code) {
@@ -763,11 +764,9 @@ namespace TestRunner {
 
                         int len = Math.Min(resultString.Length, comparand.Length);
                         for (int i = 0; i < len; i++) {
-                            if (resultString[1] != comparand[i]) {
+                            if (resultString[i] != comparand[i]) {
                                 driver.println("Results differ at index " + i +
-                                               "(\"" + resultString.Substring(i, (i + 10 > len ? len : i + 10)) +
-                                               "\") vs (\"" +
-                                               comparand.Substring(i, (i + 10 > len ? len : i + 10)) + "\")");
+                                               "(" + (int)resultString[i] + " vs " + (int)comparand[i] + ")");
                                 break;
                             }
                         }
@@ -888,7 +887,7 @@ namespace TestRunner {
                 //IList warnings = new ArrayList();
                 try {
                     ARegularExpression re = ARegularExpression.compile(regex, flagsAtt);
-                    if (re.containsMatch(StringView.of(getPrincipalSerializedResult()).tidy())) {
+                    if (re.containsMatch(StringView.of(result.serialization).tidy())) {
                         return true;
                     }
                     else {
