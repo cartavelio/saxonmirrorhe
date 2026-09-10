@@ -92,7 +92,7 @@ and JSON, or do custom conversions from one to the other.
 ## What's new in this version?
 
 SaxonCS-EE 13 includes support for many features in the XPath, XQuery, and XSLT
-4.0 specifications currently in development in the [QT4 Community Group](http://qt4cg.org/).
+4.0 specifications currently in development in the [QT4 Community Group](https://qt4cg.org/).
 
 There's a comprehensive list of changes in the 
 [documentation](https://www.saxonica.com/documentation13/).

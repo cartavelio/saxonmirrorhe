@@ -15,7 +15,7 @@
       The APIs support the current W3C Recommendations: XSLT 3.0, XQuery 3.1, XPath
       3.1 and Schema Validation 1.0/1.1. SaxonC-EE and SaxonC-PE also include support for many features in
       the XPath, XQuery, and XSLT 4.0 specifications currently in development in the <a
-         target="_blank" href="http://qt4cg.org/">QT4 Community Group</a>. See the main <a
+         target="_blank" href="https://qt4cg.org/">QT4 Community Group</a>. See the main <a
             target="_blank" href="https://www.saxonica.com/documentation13/index.html">Saxon 13 
             documentation</a> for full details.</p>
 
