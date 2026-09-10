@@ -128,9 +128,7 @@ public abstract class XSLChooseOrSwitch extends StyleElement {
                     compileError(e);
                 }
 
-                if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
-                    actions[w] = makeTraceInstruction((StyleElement) curr, actions[w]);
-                }
+                setInstructionLocation((StyleElement) curr, actions[w]);
                 w++;
             }
         }

@@ -189,7 +189,7 @@
          'charAt#1':          '%scope%[%args%]',
          'equalsIgnoreCase#1':'Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(%scope%, %args%)',
          'getChars#0':        'Saxon.Impl.Helpers.StringUtils.stringToCharArray(%scope%, %args%)',
-         'getBytes#1':        'Encoding.GetEncoding(%args%).GetBytes(%scope%)',
+         'getBytes#1':        'System.Text.Encoding.GetEncoding(%args%).GetBytes(%scope%)',
          'intern#0':          'System.String.Intern(%scope%)',
          'isEmpty#0':         '%scope%.Length==0',
          'length#0':          '%scope%.Length',

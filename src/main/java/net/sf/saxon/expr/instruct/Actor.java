@@ -39,6 +39,7 @@ public abstract class Actor implements ExpressionOwner, Location {
     protected Expression body;
     private String systemId;
     private int lineNumber;
+    private int columnNumber;
     private SlotManager stackFrameMap;
     private PackageData packageData;
     private Component declaringComponent;
@@ -210,6 +211,11 @@ public abstract class Actor implements ExpressionOwner, Location {
         this.lineNumber = lineNumber;
     }
 
+    public void setColumnNumber(int col) {
+        this.columnNumber = col;
+    }
+
+
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
@@ -230,7 +236,7 @@ public abstract class Actor implements ExpressionOwner, Location {
 
     @Override
     public int getColumnNumber() {
-        return -1;
+        return columnNumber;
     }
 
     /*@Nullable*/
