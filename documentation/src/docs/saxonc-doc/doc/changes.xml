@@ -217,6 +217,22 @@
                corresponding to the "is" operator in XPath. The overloaded <code>==</code> operator
                has also been added for <code>XdmNode</code> on C++, and corresponds to this
                <code>equals()</code> method.</li>
+            <li>The function <code>setConfigurationProperty</code> has been added to the C API to allow the setting of configuration
+            properties on the <code>sxnc_processor</code></li>
+            <li>The function <code>setCatalog</code> has been added to the C API to allow the setting of
+               catalog files on the <code>sxnc_processor</code></li>
+            <li>The <code>getcwd()</code> method has been added to the <code>XsltExecutable</code> class in the C++ and PHP APIs.
+            Also the <code>cwd</code> property has been added to the Python API to get the current working directory.</li>
+            <li>The <code>getcwd()</code> method has been added to the <code>XQueryProcessor</code> class in the C++ and PHP APIs.
+               Also the <code>cwd</code> property has been added to the Python API to get the current working directory.</li>
+            <li>The <code>getcwd()</code> method has been added to the <code>SchemaValidator</code> class in the C++ and PHP APIs.
+               Also the <code>cwd</code> property has been added to the Python API to get the current working directory.</li>
+            <li>The <code>getoutputFile()</code> method has been added to the <code>SchemaValidator</code> class in the C++ and PHP APIs.
+               Also, the equivalent method <code>get_output_file()</code> has been added to the PySchemaValidator Python API.</li>
+            <li>The <code>getJustInTimeCompilation()</code> method has been added to the <code>Xslt30Processor</code> class in the C++ and PHP APIs.
+               Also, the equivalent method <code>get_just_in_time_compilation()</code> has been added to the PyXslt30Processor Python API.</li>
+            <li>The following method have been added to the <code>XdmItem</code> in the PHP API:
+               <code>isMap</code>, <code>isArray</code>, <code>isFunctionItem</code>, <code>getArray</code>, <code>getMap</code> and <code>getFunctionItem</code>.</li>
          </ul>
       </category>
       
