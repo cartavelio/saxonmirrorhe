@@ -3987,6 +3987,7 @@ public class XQueryParser extends XPathParser {
             tryExpr = parseExpression();
         }
         TryCatch tryCatch = new TryCatch(tryExpr);
+        tryCatch.setRollbackOutput(true);
         setLocation(tryCatch, offset);
         readToken(Token.RCURLY);
         boolean foundOneCatch = false;
