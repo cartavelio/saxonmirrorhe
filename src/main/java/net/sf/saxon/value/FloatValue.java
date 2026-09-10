@@ -275,7 +275,6 @@ public final class FloatValue extends NumericValue {
      */
 
     @Override
-    @CSharpReplaceBody(code = "return new Saxon.Hej.value.FloatValue(Saxon.Impl.Helpers.Utils.roundFloat(value, scale));")
     public NumericValue round(int scale) {
         if (Float.isNaN(value)) {
             return this;

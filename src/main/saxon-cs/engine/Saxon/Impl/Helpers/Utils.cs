@@ -59,45 +59,45 @@ namespace Saxon.Impl.Helpers {
         }
 
 
-        public static double roundDouble(double value, int scale) {
-            if (System.Double.IsNaN(value) || System.Double.IsInfinity(value) || value == 0.0) {
-                return value;
-            }
-            if (scale == 0 && value < System.Int64.MaxValue) {
-                if (value > 0.0) {
-                    return System.Math.Round(value, System.MidpointRounding.AwayFromZero);
-                } else if (value >= -0.5) {
-                    return -0.0;
-                } else if (value > -100_000_000) {
-                    // add a sufficiently large displacement, then round away from zero, then subtract the displacement
-                    return System.Math.Round(value + 100_000_001, System.MidpointRounding.AwayFromZero) - 100_000_001;
-                }
-            }
-            // In other cases, do it by hand...   
-            double factor = System.Math.Pow(10, (scale+1));
-            double d = System.Math.Abs((value*factor));
-            if (System.Double.IsInfinity(d)) {
-                Singulink.Numerics.BigDecimal dec = Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(value);
-                return (double)dec;
-            }
-            double rem = (d%10);
-            if ((rem>=5)) {
-                d += (10-rem);
-            } else {
-                if ((rem<5)) {
-                    d -= rem;
-                }
-            }
-            d /= factor;
-            if ((value<0)) {
-                d = -(d);
-            }
-            return d;
-        }
+        // public static double roundDouble(double value, int scale) {
+        //     if (System.Double.IsNaN(value) || System.Double.IsInfinity(value) || value == 0.0) {
+        //         return value;
+        //     }
+        //     if (scale == 0 && value < System.Int64.MaxValue) {
+        //         if (value > 0.0) {
+        //             return System.Math.Round(value, System.MidpointRounding.AwayFromZero);
+        //         } else if (value >= -0.5) {
+        //             return -0.0;
+        //         } else if (value > -100_000_000) {
+        //             // add a sufficiently large displacement, then round away from zero, then subtract the displacement
+        //             return System.Math.Round(value + 100_000_001, System.MidpointRounding.AwayFromZero) - 100_000_001;
+        //         }
+        //     }
+        //     // In other cases, do it by hand...   
+        //     double factor = System.Math.Pow(10, (scale+1));
+        //     double d = System.Math.Abs((value*factor));
+        //     if (System.Double.IsInfinity(d)) {
+        //         Singulink.Numerics.BigDecimal dec = Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(value);
+        //         return (double)dec;
+        //     }
+        //     double rem = (d%10);
+        //     if ((rem>=5)) {
+        //         d += (10-rem);
+        //     } else {
+        //         if ((rem<5)) {
+        //             d -= rem;
+        //         }
+        //     }
+        //     d /= factor;
+        //     if ((value<0)) {
+        //         d = -(d);
+        //     }
+        //     return d;
+        // }
 
-        public static float roundFloat(float value, int scale) {
-            return (float) roundDouble(value, scale);
-        }
+        // public static float roundFloat(float value, int scale) {
+        //     return (float) roundDouble(value, scale);
+        // }
 
         /// <summary>
         /// Convert an array of 8 bytes containing an IEEE representation of a double, to a double
