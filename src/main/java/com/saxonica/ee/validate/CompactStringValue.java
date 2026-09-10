@@ -21,7 +21,7 @@ import java.util.Iterator;
  */
 public class CompactStringValue implements AtomicSequence {
 
-    char[] value;
+    private final char[] value;
 
     // Note: we could go further and store a UTF-8 byte array. The difficulty would be that getSchemaComparable()
     // would either (a) have to reconstruct the string, which would make for expensive comparisons, or (b) generate
@@ -31,6 +31,10 @@ public class CompactStringValue implements AtomicSequence {
 
     public CompactStringValue(UnicodeString content) {
         this.value = content.toString().toCharArray();
+    }
+
+    public CompactStringValue(String content) {
+        this.value = content.toCharArray();
     }
 
     @Override
@@ -119,6 +123,10 @@ public class CompactStringValue implements AtomicSequence {
     /*@NotNull*/
     public String toString() {
         return new String(value);
+    }
+
+    public char[] getChars() {
+        return value;
     }
 
 }
