@@ -177,7 +177,7 @@ abstract class DotNetBuild @Inject constructor(private val ex: ExecOperations): 
     val configuration = this.configuration.get()
 
     val cwd = project.layout.buildDirectory.dir("${arch.get()}/${target.get()}").get().asFile
-
+    println("-p:DefineConstants=${saxonCS.edition.get().uppercase()}")
     ex.exec {
       workingDir = cwd
       commandLine("${saxonBuild.dotnet.get()}",

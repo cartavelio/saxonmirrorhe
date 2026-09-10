@@ -23,9 +23,44 @@
       </ItemGroup>
       <ItemGroup>
         <Compile Include="..\..\generated\**"/>
-        <Compile Include="..\..\..\..\src\main\cs\**"/>
         <Compile Include="..\..\..\..\..\featurekeys\build\cs\**"/>
         <Compile Remove="..\..\..\..\**\.DS_Store"/>
+
+        <xsl:choose>
+          <xsl:when test="$edition != 'ee'">
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Api/**" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Callbacks/**" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Cmd/**" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Ejava/**" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Ejavax/**" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/DataModel/**" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Dom/**" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Helpers/**" />
+            <!--<Compile Include="..\src\main\cs\Saxon/Impl/Overrides/**" /> -->
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/DotNetLocalizerFactory.cs" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/FormatNumberSubPicture.cs" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/LocalNumberer.cs" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/LoggingWriter.cs" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/MappingEnumerator.cs" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ResourceLoader.cs" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ICULibrary.cs" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/Vavr.cs" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ZenoStringCodepoints.cs" />
+            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/XDoc/**" />
+
+            <!-- <Compile Remove="..\..\..\..\src\main\cs\Saxon\Api\XsdSchema.cs" /> -->
+            <Compile Remove="..\..\..\..\cs\Saxon\Impl\Helpers\UcaCollatorUsingCSharp.cs" />
+            <Compile Remove="..\..\..\..\cs\Saxon\Ejava\text\CollationKeyUsingCSharp.cs" />
+            <Compile Remove="..\..\..\..\src\main\cs\Saxon/Api/Support/XsdCompilerEE.cs" />
+            <Compile Remove="..\..\..\..\src\main\cs\Saxon/Api/Support/XsdSchemaEE.cs" />
+            <Compile Remove="..\..\..\..\src\main\cs\Saxon/Impl/Parallel" />
+            <Compile Remove="..\..\..\..\src\main\cs\Saxon/commands/*.cs" />
+          </xsl:when>
+          <xsl:otherwise>
+            <Compile Include="..\..\..\..\src\main\cs\**"/>
+          </xsl:otherwise>
+        </xsl:choose>
+
       </ItemGroup>
     </Project>
   </xsl:result-document>
@@ -111,8 +146,35 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
 
    <xsl:if test="$edition != 'ee'">
      <ItemGroup>
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Api/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Callbacks/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Cmd/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Ejava/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Ejavax/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/DataModel/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Dom/**" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Helpers/**" />
+       <!--<Compile Include="..\src\main\cs\Saxon/Impl/Overrides/**" /> -->
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/DotNetLocalizerFactory.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/FormatNumberSubPicture.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/LocalNumberer.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/LoggingWriter.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/MappingEnumerator.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ResourceLoader.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ICULibrary.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/Vavr.cs" />
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ZenoStringCodepoints.cs" />
+
+
+       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/XDoc/**" />
+
+
        <Compile Remove="..\..\..\..\cs\Saxon\Impl\Helpers\UcaCollatorUsingCSharp.cs" />
        <Compile Remove="..\..\..\..\cs\Saxon\Ejava\text\CollationKeyUsingCSharp.cs" />
+       <Compile Remove="..\..\..\..\src\main\cs\Saxon/Api/Support/XsdCompilerEE.cs" />
+       <Compile Remove="..\..\..\..\src\main\cs\Saxon/Api/Support/XsdSchemaEE.cs" />
+       <Compile Remove="..\..\..\..\src\main\cs\Saxon/Impl/Parallel" />
+       <Compile Remove="..\..\..\..\src\main\cs\Saxon/commands/*.cs" />
      </ItemGroup>
    </xsl:if>
   </Project>
