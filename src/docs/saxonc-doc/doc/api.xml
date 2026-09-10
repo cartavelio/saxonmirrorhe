@@ -711,191 +711,6 @@
          </table>
 
       </section>-->
-      
-      <section id="saxon_c_php_documentBuilder" title="Saxon\DocumentBuilder">
-         <h1>Saxon\DocumentBuilder</h1>
-         
-         <table>
-            <thead>
-               <tr>
-                  <td>Return</td>
-                  <td>Function name and description</td>
-               </tr>
-            </thead>
-            
-            <tr>
-               <td>
-                  <code>void</code>
-               </td>
-               <td>
-                  <span class="signature">setLineNumbering (bool $option)</span>
-                  <div class="fcomment">If the argument $option is true this enables line and column numbering for documents constructed using this DocumentBuilder. 
-                     This has the effect that the line and column number in the original source document is maintained in the constructed tree, 
-                     for each element node (and only for elements). The line and column number in question are generally the position at which the closing "&gt;" of the element start tag appears.
-                    By default, line and column numbers are not maintained.
-                     Errors relating to document parsing and validation will generally contain line numbers whether or not this option is set,
-                     because such errors are detected during document construction.
-                      Line numbering is not available for all kinds of source: for example, it is not available when loading from an existing DOM Document.
-                     
-                     
-                  </div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <code>bool</code>
-               </td>
-               <td>
-                  <span class="signature">isLineNumbering()</span>
-                  <div class="fcomment">Ask whether line and column numbering is enabled for 
-                     documents loaded using this DocumentBuilder. By default, line and column numbering is disabled.</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <code>void</code>
-               </td>
-               <td>
-                  <span class="signature">setSchemaValidator(SchemaValidator $validator)</span>
-                  <div class="fcomment">Set the schemaValidator to be used. This determines whether schema validation is applied to an input document 
-                     and whether type annotations in a supplied document are retained. If no schemaValidator is supplied, then schema validation does not take place.
-                     This option requires the schema-aware version of the Saxon product (Saxon-EE).
-                     Since a SchemaValidator is serially reusable but not thread-safe, using this method is not appropriate when the DocumentBuilder is shared between threads.                    
-                  </div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <a class="bodylink code" href="../saxon_c_php_schemavalidator">Saxon\SchemaValidator</a>
-               </td>
-               <td>
-                  <span class="signature">getSchemaValidator()</span>
-                  <div class="fcomment">Get the SchemaValidator used to validate documents loaded using this DocumentBuilder.</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <code>void</code>
-               </td>
-               <td>
-                  <span class="signature">setDTDValidation(bool $option)</span>
-                  <div class="fcomment">Set whether DTD validation should be applied to documents loaded using this DocumentBuilder.
-                     By default, no DTD validation takes place.                    
-                  </div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <code>bool</code>
-               </td>
-               <td>
-                  <span class="signature">isDTDValidation()</span>
-                  <div class="fcomment">Ask whether DTD validation is to be applied to documents loaded using this DocumentBuilder.</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <code>void</code>
-               </td>
-               <td>
-                  <span class="signature">setBaseUri(string $uri)</span>
-                  <div class="fcomment">Set the base URI of a document loaded using this DocumentBuilder.
-                     This is used for resolving any relative URIs appearing within the document, for example in references to DTDs and external entities.
-                     This information is required when the document is loaded from a source that does 
-                     not provide an intrinsic URI, notably when loading from a String. 
-                     The value is ignored when loading from a source that does have an intrinsic base URI.</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">getBaseUri()</span>
-                  <div class="fcomment">Get the base URI of documents loaded using this DocumentBuilder when no other URI is available.</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
-               </td>
-               <td>
-                  <span class="signature">parseXmlFromUri(string $source)</span>
-                  <div class="fcomment">Build a document from a supplied URI source</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
-               </td>
-               <td>
-                  <span class="signature">parseXmlFromString(string $content)</span>
-                  <div class="fcomment">Build a document from a lexical string representation, to create a tree representation of the document in memory.</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
-               </td>
-               <td>
-                  <span class="signature">parseXmlFromFile(string $filename)</span>
-                  <div class="fcomment">Build a document from a supplied XML file.</div>
-               </td>
-            </tr>
-
-            
-            <tr>
-               <td>
-                  <code>bool</code>
-               </td>
-               <td>
-                  <span class="signature">exceptionOccurred()</span>
-                  <div class="fcomment">Checks for pending exceptions.  Returns true when there is a pending exception; otherwise return false</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <code>void</code>
-               </td>
-               <td>
-                  <span class="signature">exceptionClear()</span>
-                  <div class="fcomment">Clear any exception thrown.</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">getErrorMessage()</span>
-                  <div class="fcomment">Get the error message if there an error thrown.</div>
-               </td>
-            </tr>
-            
-            <tr>
-               <td>
-                  <code>string</code>
-               </td>
-               <td>
-                  <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there an error thrown.</div>
-               </td>
-            </tr>
-            
-         </table>
-      </section>
 
 
       <section id="saxon_c_php_xslt30processor" title="Saxon\Xslt30Processor">
@@ -1108,7 +923,7 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there are any error.</div>
+                  <div class="fcomment">Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1602,7 +1417,7 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there are any error.</div>
+                  <div class="fcomment">Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -1790,7 +1605,7 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there are any error.</div>
+                  <div class="fcomment">Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -2018,7 +1833,7 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there are any error.</div>
+                  <div class="fcomment">Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -2027,7 +1842,7 @@
                </td>
                <td>
                   <span class="signature">getErrorMessage()</span>
-                  <div class="fcomment">Get the i'th error message if there is an error.</div>
+                  <div class="fcomment">Get the error message if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -2232,7 +2047,7 @@
                </td>
                <td>
                   <span class="signature">getErrorCode()</span>
-                  <div class="fcomment">Get the error code if there are any error.</div>
+                  <div class="fcomment">Get the error code if there is an error.</div>
                </td>
             </tr>
             <tr>
@@ -2258,6 +2073,192 @@
 
          </table>
 
+      </section>
+      
+      <section id="saxon_c_php_documentBuilder" title="Saxon\DocumentBuilder">
+         <h1>Saxon\DocumentBuilder</h1>
+         
+         <table>
+            <thead>
+               <tr>
+                  <td>Return</td>
+                  <td>Function name and description</td>
+               </tr>
+            </thead>
+            
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setLineNumbering (bool $option)</span>
+                  <div class="fcomment">If the argument $option is true this enables line and column numbering for documents constructed using this DocumentBuilder. 
+                     This has the effect that the line and column number in the original source document is maintained in the constructed tree, 
+                     for each element node (and only for elements). The line and column number in question are generally the position at which the closing "&gt;" of the element start tag appears.
+                     By default, line and column numbers are not maintained.
+                     Errors relating to document parsing and validation will generally contain line numbers whether or not this option is set,
+                     because such errors are detected during document construction.
+                     Line numbering is not available for all kinds of source: for example, it is not available when loading from an existing DOM Document.
+                     
+                     
+                  </div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>bool</code>
+               </td>
+               <td>
+                  <span class="signature">isLineNumbering()</span>
+                  <div class="fcomment">Ask whether line and column numbering is enabled for 
+                     documents loaded using this DocumentBuilder. By default, line and column numbering is disabled.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setSchemaValidator(SchemaValidator $validator)</span>
+                  <div class="fcomment">Set the SchemaValidator to be used. This determines whether schema validation is applied to an input document 
+                     and whether type annotations in a supplied document are retained. If no SchemaValidator is supplied, then schema validation does not take place.
+                     This option requires the schema-aware version of the Saxon product (Saxon-EE).
+                     Since a SchemaValidator is serially reusable but not thread-safe, using this method is not appropriate when the DocumentBuilder is shared between threads.                    
+                  </div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_schemavalidator">Saxon\SchemaValidator</a>
+               </td>
+               <td>
+                  <span class="signature">getSchemaValidator()</span>
+                  <div class="fcomment">Get the SchemaValidator used to validate documents loaded using this DocumentBuilder.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setDTDValidation(bool $option)</span>
+                  <div class="fcomment">Set whether DTD validation should be applied to documents loaded using this DocumentBuilder.
+                     By default, no DTD validation takes place.                    
+                  </div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>bool</code>
+               </td>
+               <td>
+                  <span class="signature">isDTDValidation()</span>
+                  <div class="fcomment">Ask whether DTD validation is to be applied to documents loaded using this DocumentBuilder.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setBaseUri(string $uri)</span>
+                  <div class="fcomment">Set the base URI of a document loaded using this DocumentBuilder.
+                     This is used for resolving any relative URIs appearing within the document, for example in references to DTDs and external entities.
+                     This information is required when the document is loaded from a source that does 
+                     not provide an intrinsic URI, notably when loading from a String. 
+                     The value is ignored when loading from a source that does have an intrinsic base URI.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getBaseUri()</span>
+                  <div class="fcomment">Get the base URI of documents loaded using this DocumentBuilder when no other URI is available.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
+               </td>
+               <td>
+                  <span class="signature">parseXmlFromUri(string $source)</span>
+                  <div class="fcomment">Build a document from a supplied URI source.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
+               </td>
+               <td>
+                  <span class="signature">parseXmlFromString(string $content)</span>
+                  <div class="fcomment">Build a document from a lexical string representation, to create a tree representation of the document in memory.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
+               </td>
+               <td>
+                  <span class="signature">parseXmlFromFile(string $filename)</span>
+                  <div class="fcomment">Build a document from a supplied XML file.</div>
+               </td>
+            </tr>
+            
+            
+            <tr>
+               <td>
+                  <code>bool</code>
+               </td>
+               <td>
+                  <span class="signature">exceptionOccurred()</span>
+                  <div class="fcomment">Checks for pending exceptions. Returns true when there is a
+                     pending exception; otherwise returns false.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">exceptionClear()</span>
+                  <div class="fcomment">Clear any exception thrown.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getErrorMessage()</span>
+                  <div class="fcomment">Get the error message if there is an error.</div>
+               </td>
+            </tr>
+            
+            <tr>
+               <td>
+                  <code>string</code>
+               </td>
+               <td>
+                  <span class="signature">getErrorCode()</span>
+                  <div class="fcomment">Get the error code if there is an error.</div>
+               </td>
+            </tr>
+            
+         </table>
       </section>
 
       <section id="saxon_c_php_xdmvalue" title="Saxon\XdmValue">

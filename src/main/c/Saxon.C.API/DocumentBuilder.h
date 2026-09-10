@@ -175,7 +175,7 @@ class DocumentBuilder {
     //! Clear any exception thrown
     void exceptionClear();
 
-     //! Get the error message if there an error has been reported by JNI
+     //! Get the error message if an error has been reported by JNI
     /**
      * A transformation may have a number of errors reported against it.
      * @return char* - The message of the exception
