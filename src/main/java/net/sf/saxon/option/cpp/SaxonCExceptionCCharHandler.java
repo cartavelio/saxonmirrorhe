@@ -7,7 +7,7 @@ import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.word.WordFactory;
 
-public class SaxonCExceptionCCharHandler extends CEntryPoint.ExceptionHandler {
+public class SaxonCExceptionCCharHandler implements CEntryPoint.ExceptionHandler {
 
     @Uninterruptible(reason = "exception handler")
     public static CCharPointer handle(Throwable e) {
