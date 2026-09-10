@@ -727,7 +727,7 @@ public final class Int64Value extends IntegerValue {
 
     /**
      * Test whether this value needs a long to hold it. Specifically, whether
-     * the absolute value is > 2^31.
+     * the absolute value is &gt; 2^31.
      * @return true if the value is too big to fit in a 32-bit int
      */
 
