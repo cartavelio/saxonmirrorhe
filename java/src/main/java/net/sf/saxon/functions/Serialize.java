@@ -93,42 +93,12 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption(sx("single-quotes"), SequenceType.SINGLE_BOOLEAN); //boolean
         op.addAllowedOption(sx("spec-version"), SequenceType.SINGLE_STRING);
         op.addAllowedOption(sx("supply-source-locator"), SequenceType.SINGLE_BOOLEAN); //boolean
+        op.addAllowedOption(sx("suppress-indentation"), listOfQNames); //boolean
         return op;
     }
     
     private static String sx(String s) {
         return "Q{" + NamespaceConstant.SAXON + "}" + s;
-    }
-
-    private final String[] paramNames = new String[]{
-        "allow-duplicate-names", "byte-order-mark", "cdata-section-elements", "canonical", "doctype-public", "doctype-system",
-        "encoding", "escape-solidus", "escape-uri-attributes", "html-version", "include-content-type", "indent", "item-separator",
-        "json-lines", "json-node-output-method", "media-type", "method", "normalization-form", "omit-xml-declaration", "standalone",
-        "suppress-indentation", "undeclare-prefixes", "use-character-maps", "version"
-    };
-
-    private boolean isParamName(String name) {
-        for (String s : paramNames) {
-            if (s.equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private final String[] paramNamesSaxon = new String[]{
-            "attribute-order", "canonical", "character-representation", "double-space", "indent-spaces", "line-length",
-            /*"next-in-chain",*/ "newline", "property-order", "recognize-binary", "require-well-formed", "spec-version", "single-quotes",
-            "supply-source-locator", "suppress-indentation"
-    };
-
-    private boolean isParamNameSaxon(String name) {
-        for (String s : paramNamesSaxon) {
-            if (s.equals(name)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private final static Map<String, SequenceType> requiredTypes = new HashMap<>(40);
