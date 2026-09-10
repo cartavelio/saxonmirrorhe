@@ -16,7 +16,7 @@ import static com.saxonica.ee.stream.feed.FilteringFeed.FilterResult.SKIP;
 
 
 /**
- * Generate streaming code for the saxon:items-starting-with function. The streamability rules
+ * Generate streaming code for the saxon:items-from function. The streamability rules
  * are the same as for the fn:filter function.
  */
 public class ItemsFromStreamer extends FilterFnStreamer {
@@ -24,7 +24,7 @@ public class ItemsFromStreamer extends FilterFnStreamer {
     /**
      * Make a filter for the event stream
      *
-     * @param context the XPath dyamic context
+     * @param context the XPath dynamic context
      * @param out the destination for the filtered events
      * @return a filter that can be added to the event stream
      * @throws XPathException

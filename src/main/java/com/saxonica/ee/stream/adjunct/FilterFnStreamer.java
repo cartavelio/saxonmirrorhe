@@ -93,7 +93,7 @@ public class FilterFnStreamer extends FilteringAdjunct {
     /**
      * Make a filter for the event stream
      *
-     * @param context the XPath dyamic context
+     * @param context the XPath dynamic context
      * @param out destination for the filtered output
      * @return a filter that can be added to the event stream
      * @throws net.sf.saxon.trans.XPathException

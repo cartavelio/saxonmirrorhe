@@ -24,7 +24,7 @@ public class ItemsAfterStreamer extends FilterFnStreamer {
     /**
      * Make a filter for the event stream
      *
-     * @param context the XPath dyamic context
+     * @param context the XPath dynamic context
      * @param out the destination for the filtered events
      * @return a filter that can be added to the event stream
      * @throws XPathException

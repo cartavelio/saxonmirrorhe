@@ -107,7 +107,7 @@ public class FilterExpressionAdjunct extends FilteringAdjunct {
     /**
      * Make a filter for the event stream
      *
-     * @param context the XPath dyamic context
+     * @param context the XPath dynamic context
      * @param out the next filter in the pipeline
      * @return a filter that can be added to the event stream
      */
