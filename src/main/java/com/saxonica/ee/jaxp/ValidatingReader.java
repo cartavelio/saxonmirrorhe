@@ -316,6 +316,16 @@ public class ValidatingReader implements XMLReader {
     }
 
     /**
+     * Get the Saxon Configuration object used by this Validating Reader (allowing it to be
+     * shared by another ValidatingReader)
+     * @return the Saxon Configuration object
+     */
+
+    public EnterpriseConfiguration getConfiguration() {
+        return config;
+    }
+
+    /**
      * Parse an XML document.
      * <p>The application can use this method to component the XML
      * reader to begin parsing an XML document from any valid input
